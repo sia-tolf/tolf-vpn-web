@@ -165,6 +165,14 @@
       cursor: default;
     }
 
+    .password-note {
+      margin: -2px 4px 0;
+      color: var(--secondary);
+      font-size: 14px;
+      line-height: 1.45;
+      text-align: center;
+    }
+
     .status-table {
       margin-top: 24px;
       border-top: 1px solid var(--border);
@@ -355,6 +363,14 @@
           >
             Change VPN Password
           </button>
+
+          <p
+            id="rotatePasswordNote"
+            class="password-note hidden"
+          >
+            Changing the VPN password creates a new configuration profile.
+            You’ll need to install the new profile on your Apple devices.
+          </p>
         </div>
 
         <div id="vpnMessage" class="message"></div>
@@ -403,6 +419,9 @@
 
     const rotatePasswordButton =
       document.getElementById("rotatePasswordButton");
+
+    const rotatePasswordNote =
+      document.getElementById("rotatePasswordNote");
 
     const vpnMessage =
       document.getElementById("vpnMessage");
@@ -639,6 +658,10 @@
         rotatePasswordButton.classList.remove(
           "hidden"
         );
+
+        rotatePasswordNote.classList.remove(
+          "hidden"
+        );
       } else {
         vpnStatus.textContent =
           "Not configured";
@@ -654,6 +677,10 @@
         );
 
         rotatePasswordButton.classList.add(
+          "hidden"
+        );
+
+        rotatePasswordNote.classList.add(
           "hidden"
         );
 
@@ -925,8 +952,9 @@
       async () => {
         const confirmed = window.confirm(
           "Change the VPN password?\n\n" +
-          "The current VPN profile will stop working after it reconnects. " +
-          "You will need to install the new profile."
+          "This creates a new configuration profile. " +
+          "The current profile will stop working after it reconnects. " +
+          "You’ll need to install the new profile on your Apple devices."
         );
 
         if (!confirmed) {
