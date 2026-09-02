@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
   <meta name="color-scheme" content="light dark">
 
   <title>TOLF VPN</title>
@@ -14,421 +17,412 @@
         BlinkMacSystemFont,
         "SF Pro Text",
         "SF Pro Display",
-        "Helvetica Neue",
-        Arial,
+        "Segoe UI",
         sans-serif;
+
       color-scheme: light dark;
+
+      --background: #f5f5f7;
+      --card: #ffffff;
+      --text: #1d1d1f;
+      --secondary: #6e6e73;
+      --border: #d2d2d7;
+      --button: #1d1d1f;
+      --button-text: #ffffff;
+      --success: #248a3d;
+      --error: #d70015;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --background: #000000;
+        --card: #1c1c1e;
+        --text: #f5f5f7;
+        --secondary: #98989d;
+        --border: #38383a;
+        --button: #f5f5f7;
+        --button-text: #1d1d1f;
+        --success: #30d158;
+        --error: #ff453a;
+      }
     }
 
     * {
       box-sizing: border-box;
     }
 
+    html,
     body {
       margin: 0;
-      min-height: 100vh;
-      background: #f5f5f7;
-      color: #1d1d1f;
-      font-family:
-        -apple-system,
-        BlinkMacSystemFont,
-        "SF Pro Text",
-        "SF Pro Display",
-        "Helvetica Neue",
-        Arial,
-        sans-serif;
+      min-height: 100%;
+      background: var(--background);
+      color: var(--text);
     }
 
-    main {
+    body {
       min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 32px 20px;
+      min-height: 100dvh;
     }
 
-    .panel {
+    button,
+    input {
+      font: inherit;
+    }
+
+    .page {
       width: 100%;
-      max-width: 560px;
-    }
-
-    .center {
-      text-align: center;
+      max-width: 760px;
+      margin: 0 auto;
+      padding:
+        max(42px, env(safe-area-inset-top))
+        24px
+        max(42px, env(safe-area-inset-bottom));
     }
 
     .brand {
-      margin-bottom: 28px;
-      font-size: 15px;
-      font-weight: 600;
-      letter-spacing: 0.02em;
+      margin-bottom: 36px;
     }
 
-    h1 {
+    .brand h1 {
       margin: 0;
-      font-size: 42px;
-      line-height: 1.05;
-      font-weight: 650;
-      letter-spacing: -0.035em;
+      font-size: 34px;
+      line-height: 1.12;
+      letter-spacing: -0.025em;
+      font-weight: 700;
     }
 
-    .subtitle {
-      margin: 18px auto 0;
-      max-width: 440px;
-      color: #6e6e73;
-      font-size: 18px;
+    .brand p {
+      margin: 10px 0 0;
+      color: var(--secondary);
+      font-size: 17px;
+      line-height: 1.45;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+    }
+
+    .card-content {
+      padding: 28px;
+    }
+
+    .card h2 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.2;
+      letter-spacing: -0.015em;
+      font-weight: 650;
+    }
+
+    .card-description {
+      margin: 9px 0 0;
+      color: var(--secondary);
+      font-size: 15px;
       line-height: 1.5;
     }
 
-    .action {
-      display: block;
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 26px;
+    }
+
+    button,
+    .button-link {
       width: 100%;
-      margin-top: 36px;
-      padding: 15px 20px;
+      min-height: 50px;
       border: 0;
       border-radius: 12px;
-      background: #1d1d1f;
-      color: #ffffff;
-      font: inherit;
+      padding: 13px 18px;
       font-size: 16px;
+      line-height: 1.3;
       font-weight: 600;
+      cursor: pointer;
       text-align: center;
       text-decoration: none;
-      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .primary {
+      background: var(--button);
+      color: var(--button-text);
     }
 
     .secondary {
-      margin-top: 12px;
       background: transparent;
-      color: #1d1d1f;
-      border: 1px solid #c7c7cc;
+      color: var(--text);
+      border: 1px solid var(--border);
     }
 
-    .action:disabled {
+    button:disabled {
       opacity: 0.55;
       cursor: default;
     }
 
-    .status {
-      min-height: 22px;
-      margin-top: 18px;
-      color: #86868b;
-      font-size: 13px;
-      line-height: 1.45;
-      text-align: center;
-    }
-
-    .dashboard {
-      display: none;
-    }
-
-    .dashboard-header {
-      margin-bottom: 24px;
-    }
-
-    .dashboard-header h1 {
-      font-size: 34px;
-    }
-
-    .dashboard-header .subtitle {
-      margin-left: 0;
-      margin-right: 0;
-    }
-
-    .card {
-      background: #ffffff;
-      border: 1px solid #d8d8dc;
-      border-radius: 20px;
-      overflow: hidden;
-    }
-
-    .card-header {
-      padding: 24px 26px;
-    }
-
-    .card-title {
-      margin: 0;
-      font-size: 22px;
-      font-weight: 650;
-      letter-spacing: -0.02em;
-    }
-
-    .card-subtitle {
-      margin: 8px 0 0;
-      color: #6e6e73;
-      font-size: 15px;
-      line-height: 1.45;
+    .status-table {
+      margin-top: 24px;
+      border-top: 1px solid var(--border);
     }
 
     .row {
       display: grid;
-      grid-template-columns: minmax(110px, 0.7fr) minmax(0, 1.3fr);
+      grid-template-columns: minmax(120px, 0.8fr) minmax(0, 1.4fr);
       gap: 20px;
-      padding: 15px 26px;
-      border-top: 1px solid #e5e5e7;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+      align-items: start;
+    }
+
+    .row-label {
+      color: var(--secondary);
       font-size: 15px;
       line-height: 1.4;
     }
 
-    .label {
-      color: #6e6e73;
-    }
-
-    .value {
+    .row-value {
+      min-width: 0;
       text-align: right;
-      font-weight: 500;
+      font-size: 15px;
+      line-height: 1.4;
       overflow-wrap: anywhere;
     }
 
-    .active {
-      font-weight: 650;
+    .status-active {
+      color: var(--success);
+      font-weight: 600;
     }
 
-    .vpn-actions {
-      display: none;
-      padding: 22px 26px 26px;
-      border-top: 1px solid #e5e5e7;
-    }
-
-    .vpn-actions .action {
-      margin-top: 0;
-    }
-
-    .vpn-message {
-      min-height: 18px;
-      margin: 12px 0 0;
-      color: #86868b;
-      font-size: 13px;
+    .message {
+      margin-top: 18px;
+      min-height: 22px;
+      color: var(--secondary);
+      font-size: 14px;
       line-height: 1.45;
-      text-align: center;
+    }
+
+    .message.error {
+      color: var(--error);
+    }
+
+    .message.success {
+      color: var(--success);
+    }
+
+    .hidden {
+      display: none !important;
     }
 
     @media (max-width: 520px) {
-      h1 {
-        font-size: 36px;
+      .page {
+        padding-left: 16px;
+        padding-right: 16px;
       }
 
-      .dashboard-header h1 {
+      .brand h1 {
         font-size: 30px;
+      }
+
+      .card-content {
+        padding: 22px;
       }
 
       .row {
         grid-template-columns: 1fr;
-        gap: 4px;
-        padding-left: 20px;
-        padding-right: 20px;
+        gap: 5px;
       }
 
-      .value {
+      .row-value {
         text-align: left;
-      }
-
-      .vpn-actions {
-        padding-left: 20px;
-        padding-right: 20px;
-      }
-    }
-
-    @media (prefers-color-scheme: dark) {
-      body {
-        background: #000000;
-        color: #f5f5f7;
-      }
-
-      .subtitle,
-      .status,
-      .card-subtitle,
-      .label,
-      .vpn-message {
-        color: #98989d;
-      }
-
-      .action {
-        background: #f5f5f7;
-        color: #1d1d1f;
-      }
-
-      .secondary {
-        background: transparent;
-        color: #f5f5f7;
-        border-color: #48484a;
-      }
-
-      .card {
-        background: #1c1c1e;
-        border-color: #38383a;
-      }
-
-      .row,
-      .vpn-actions {
-        border-color: #38383a;
       }
     }
   </style>
 </head>
 
 <body>
-  <main>
-    <section class="panel">
+  <main class="page">
+    <header class="brand">
+      <h1>TOLF VPN</h1>
+      <p>System VPN access for your devices.</p>
+    </header>
 
-      <div id="login-view" class="center">
-        <div class="brand">TOLF VPN</div>
+    <section id="loadingCard" class="card">
+      <div class="card-content">
+        <h2>Loading</h2>
+        <p class="card-description">
+          Checking your account.
+        </p>
+      </div>
+    </section>
 
-        <h1>System VPN access for your devices.</h1>
+    <section id="signedOutCard" class="card hidden">
+      <div class="card-content">
+        <h2>VPN access</h2>
 
-        <p class="subtitle">
+        <p class="card-description">
           Sign in to manage your VPN access and devices.
         </p>
 
-        <button id="sign-in" class="action" type="button">
-          Sign in with Passkey
-        </button>
+        <div class="actions">
+          <button
+            id="signInButton"
+            class="primary"
+            type="button"
+          >
+            Sign in with Passkey
+          </button>
 
-        <button id="create-account" class="action secondary" type="button">
-          Create account
-        </button>
-
-        <div id="status" class="status"></div>
-      </div>
-
-      <div id="dashboard" class="dashboard">
-        <div class="brand">TOLF VPN</div>
-
-        <div class="dashboard-header">
-          <h1>My VPN</h1>
-
-          <p class="subtitle">
-            Manage your TOLF VPN access and devices.
-          </p>
+          <button
+            id="createAccountButton"
+            class="secondary"
+            type="button"
+          >
+            Create account
+          </button>
         </div>
 
-        <section class="card">
-          <div class="card-header">
-            <h2 class="card-title">VPN Access</h2>
-
-            <p id="vpn-description" class="card-subtitle">
-              Checking VPN access…
-            </p>
-          </div>
-
-          <div class="row">
-            <div class="label">Status</div>
-            <div id="vpn-status" class="value">Checking…</div>
-          </div>
-
-          <div id="username-row" class="row" style="display: none;">
-            <div class="label">Username</div>
-            <div id="vpn-username" class="value"></div>
-          </div>
-
-          <div id="vpn-actions" class="vpn-actions">
-            <button id="create-vpn" class="action" type="button">
-              Create VPN Access
-            </button>
-
-            <a
-              id="install-profile"
-              class="action"
-              href="#"
-              style="display: none;"
-            >
-              Install on Apple Device
-            </a>
-
-            <div id="vpn-message" class="vpn-message"></div>
-          </div>
-        </section>
+        <div id="signedOutMessage" class="message"></div>
       </div>
+    </section>
 
+    <section id="vpnCard" class="card hidden">
+      <div class="card-content">
+        <h2>My VPN</h2>
+
+        <p class="card-description">
+          Manage your TOLF VPN access.
+        </p>
+
+        <div class="status-table">
+          <div class="row">
+            <div class="row-label">Status</div>
+            <div
+              id="vpnStatus"
+              class="row-value"
+            >
+              —
+            </div>
+          </div>
+
+          <div
+            id="usernameRow"
+            class="row hidden"
+          >
+            <div class="row-label">Username</div>
+            <div
+              id="vpnUsername"
+              class="row-value"
+            ></div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button
+            id="createVpnButton"
+            class="primary hidden"
+            type="button"
+          >
+            Create VPN Access
+          </button>
+
+          <button
+            id="generateProfileButton"
+            class="primary hidden"
+            type="button"
+          >
+            Generate Install Link
+          </button>
+
+          <a
+            id="installProfileButton"
+            class="button-link primary hidden"
+            href="#"
+            target="_blank"
+            rel="noopener"
+          >
+            Install on Apple Device
+          </a>
+        </div>
+
+        <div id="vpnMessage" class="message"></div>
+      </div>
     </section>
   </main>
 
   <script>
     const API = "https://api.tolf.is";
 
-    const loginView = document.getElementById("login-view");
-    const dashboard = document.getElementById("dashboard");
+    const loadingCard =
+      document.getElementById("loadingCard");
 
-    const signInButton = document.getElementById("sign-in");
-    const createButton = document.getElementById("create-account");
-    const status = document.getElementById("status");
+    const signedOutCard =
+      document.getElementById("signedOutCard");
 
-    const vpnDescription = document.getElementById("vpn-description");
-    const vpnStatus = document.getElementById("vpn-status");
-    const usernameRow = document.getElementById("username-row");
-    const vpnUsername = document.getElementById("vpn-username");
+    const vpnCard =
+      document.getElementById("vpnCard");
 
-    const vpnActions = document.getElementById("vpn-actions");
-    const createVpnButton = document.getElementById("create-vpn");
-    const installProfile = document.getElementById("install-profile");
-    const vpnMessage = document.getElementById("vpn-message");
+    const signInButton =
+      document.getElementById("signInButton");
 
-    function showDashboard(data) {
-      loginView.style.display = "none";
-      dashboard.style.display = "block";
+    const createAccountButton =
+      document.getElementById("createAccountButton");
 
-      renderVpn(data.vpn);
-    }
+    const signedOutMessage =
+      document.getElementById("signedOutMessage");
 
-    function showLogin() {
-      dashboard.style.display = "none";
-      loginView.style.display = "block";
-    }
+    const vpnStatus =
+      document.getElementById("vpnStatus");
 
-    function renderVpn(vpn, profileUrl = null) {
-      vpnStatus.classList.remove("active");
-      usernameRow.style.display = "none";
-      vpnActions.style.display = "block";
+    const usernameRow =
+      document.getElementById("usernameRow");
 
-      createVpnButton.style.display = "none";
-      installProfile.style.display = "none";
-      vpnMessage.textContent = "";
+    const vpnUsername =
+      document.getElementById("vpnUsername");
 
-      if (vpn && vpn.configured) {
-        vpnDescription.textContent =
-          "Your TOLF VPN access is active and ready to use.";
+    const createVpnButton =
+      document.getElementById("createVpnButton");
 
-        vpnStatus.textContent = "Active";
-        vpnStatus.classList.add("active");
+    const generateProfileButton =
+      document.getElementById("generateProfileButton");
 
-        vpnUsername.textContent = vpn.username || "";
-        usernameRow.style.display = "grid";
+    const installProfileButton =
+      document.getElementById("installProfileButton");
 
-        if (profileUrl) {
-          installProfile.href = profileUrl;
-          installProfile.style.display = "block";
+    const vpnMessage =
+      document.getElementById("vpnMessage");
 
-          vpnMessage.textContent =
-            "The installation link is temporary.";
-        }
-      } else {
-        vpnDescription.textContent =
-          "Your account is ready. Create VPN access to continue.";
 
-        vpnStatus.textContent = "Not configured";
+    function base64urlToBuffer(value) {
+      const padding =
+        "=".repeat((4 - value.length % 4) % 4);
 
-        createVpnButton.style.display = "block";
-      }
-    }
-
-    function base64urlToBytes(value) {
-      const padding = "=".repeat((4 - value.length % 4) % 4);
-
-      const base64 = (value + padding)
-        .replace(/-/g, "+")
-        .replace(/_/g, "/");
+      const base64 =
+        (value + padding)
+          .replace(/-/g, "+")
+          .replace(/_/g, "/");
 
       const binary = atob(base64);
-      const bytes = new Uint8Array(binary.length);
+
+      const bytes =
+        new Uint8Array(binary.length);
 
       for (let i = 0; i < binary.length; i++) {
         bytes[i] = binary.charCodeAt(i);
       }
 
-      return bytes;
+      return bytes.buffer;
     }
 
-    function bytesToBase64url(buffer) {
-      const bytes = new Uint8Array(buffer);
+
+    function bufferToBase64url(buffer) {
+      const bytes =
+        new Uint8Array(buffer);
+
       let binary = "";
 
       for (const byte of bytes) {
@@ -441,284 +435,473 @@
         .replace(/=+$/g, "");
     }
 
-    function prepareCreationOptions(options) {
-      options.challenge = base64urlToBytes(options.challenge);
-      options.user.id = base64urlToBytes(options.user.id);
 
-      if (options.excludeCredentials) {
-        options.excludeCredentials = options.excludeCredentials.map(
-          credential => ({
-            ...credential,
-            id: base64urlToBytes(credential.id)
-          })
-        );
-      }
-
-      return options;
-    }
-
-    function prepareRequestOptions(options) {
-      options.challenge = base64urlToBytes(options.challenge);
-
-      if (options.allowCredentials) {
-        options.allowCredentials = options.allowCredentials.map(
-          credential => ({
-            ...credential,
-            id: base64urlToBytes(credential.id)
-          })
-        );
-      }
-
-      return options;
-    }
-
-    function registrationCredentialToJSON(credential) {
-      const response = {
-        clientDataJSON: bytesToBase64url(
-          credential.response.clientDataJSON
-        ),
-        attestationObject: bytesToBase64url(
-          credential.response.attestationObject
-        )
-      };
-
-      if (typeof credential.response.getTransports === "function") {
-        response.transports = credential.response.getTransports();
-      }
-
-      return {
-        id: credential.id,
-        rawId: bytesToBase64url(credential.rawId),
-        type: credential.type,
-        authenticatorAttachment:
-          credential.authenticatorAttachment ?? null,
-        response,
-        clientExtensionResults:
-          credential.getClientExtensionResults()
-      };
-    }
-
-    function authenticationCredentialToJSON(credential) {
-      return {
-        id: credential.id,
-        rawId: bytesToBase64url(credential.rawId),
-        type: credential.type,
-        authenticatorAttachment:
-          credential.authenticatorAttachment ?? null,
-        response: {
-          clientDataJSON: bytesToBase64url(
-            credential.response.clientDataJSON
-          ),
-          authenticatorData: bytesToBase64url(
-            credential.response.authenticatorData
-          ),
-          signature: bytesToBase64url(
-            credential.response.signature
-          ),
-          userHandle: credential.response.userHandle
-            ? bytesToBase64url(credential.response.userHandle)
-            : null
-        },
-        clientExtensionResults:
-          credential.getClientExtensionResults()
-      };
-    }
-
-    function setBusy(busy) {
-      signInButton.disabled = busy;
-      createButton.disabled = busy;
-    }
-
-    async function getMe() {
-      const response = await fetch(
-        `${API}/me`,
-        {
-          method: "GET",
-          credentials: "include"
+    function prepareRegistrationOptions(options) {
+      const result = {
+        ...options,
+        challenge:
+          base64urlToBuffer(options.challenge),
+        user: {
+          ...options.user,
+          id:
+            base64urlToBuffer(options.user.id)
         }
-      );
+      };
+
+      if (Array.isArray(options.excludeCredentials)) {
+        result.excludeCredentials =
+          options.excludeCredentials.map(
+            credential => ({
+              ...credential,
+              id:
+                base64urlToBuffer(
+                  credential.id
+                )
+            })
+          );
+      }
+
+      return result;
+    }
+
+
+    function prepareAuthenticationOptions(options) {
+      const result = {
+        ...options,
+        challenge:
+          base64urlToBuffer(options.challenge)
+      };
+
+      if (Array.isArray(options.allowCredentials)) {
+        result.allowCredentials =
+          options.allowCredentials.map(
+            credential => ({
+              ...credential,
+              id:
+                base64urlToBuffer(
+                  credential.id
+                )
+            })
+          );
+      }
+
+      return result;
+    }
+
+
+    function serializeCredential(credential) {
+      const response = credential.response;
+
+      const serialized = {
+        id: credential.id,
+        rawId:
+          bufferToBase64url(credential.rawId),
+        type: credential.type,
+        authenticatorAttachment:
+          credential.authenticatorAttachment || null,
+        clientExtensionResults:
+          credential.getClientExtensionResults()
+      };
+
+      if (
+        typeof AuthenticatorAttestationResponse !==
+          "undefined" &&
+        response instanceof
+          AuthenticatorAttestationResponse
+      ) {
+        serialized.response = {
+          clientDataJSON:
+            bufferToBase64url(
+              response.clientDataJSON
+            ),
+          attestationObject:
+            bufferToBase64url(
+              response.attestationObject
+            ),
+          transports:
+            typeof response.getTransports ===
+              "function"
+              ? response.getTransports()
+              : []
+        };
+
+        return serialized;
+      }
+
+      serialized.response = {
+        clientDataJSON:
+          bufferToBase64url(
+            response.clientDataJSON
+          ),
+        authenticatorData:
+          bufferToBase64url(
+            response.authenticatorData
+          ),
+        signature:
+          bufferToBase64url(
+            response.signature
+          ),
+        userHandle:
+          response.userHandle
+            ? bufferToBase64url(
+                response.userHandle
+              )
+            : null
+      };
+
+      return serialized;
+    }
+
+
+    async function apiRequest(
+      path,
+      options = {}
+    ) {
+      const response =
+        await fetch(
+          API + path,
+          {
+            credentials: "include",
+            ...options,
+            headers: {
+              "Content-Type":
+                "application/json",
+              ...(options.headers || {})
+            }
+          }
+        );
+
+      let data = null;
+
+      try {
+        data = await response.json();
+      } catch {
+        data = null;
+      }
 
       if (!response.ok) {
-        return null;
+        const message =
+          data?.detail ||
+          "Request failed";
+
+        throw new Error(message);
       }
 
-      return response.json();
+      return data;
     }
 
-    async function checkSession() {
-      try {
-        const me = await getMe();
 
-        if (me && me.authenticated) {
-          showDashboard(me);
-        } else {
-          showLogin();
-        }
-      } catch (error) {
-        console.error(error);
-        showLogin();
-      }
+    function showSignedOut() {
+      loadingCard.classList.add("hidden");
+      vpnCard.classList.add("hidden");
+      signedOutCard.classList.remove("hidden");
     }
 
-    createVpnButton.addEventListener("click", async () => {
-      createVpnButton.disabled = true;
-      createVpnButton.textContent = "Creating VPN Access…";
-      vpnMessage.textContent = "Provisioning your VPN access…";
 
-      try {
-        const response = await fetch(
-          `${API}/vpn/create`,
-          {
-            method: "POST",
-            credentials: "include",
-            headers: {
-              "Content-Type": "application/json"
-            }
-          }
+    function showVpn(vpn) {
+      loadingCard.classList.add("hidden");
+      signedOutCard.classList.add("hidden");
+      vpnCard.classList.remove("hidden");
+
+      installProfileButton.classList.add("hidden");
+      installProfileButton.href = "#";
+
+      vpnMessage.textContent = "";
+      vpnMessage.className = "message";
+
+      if (vpn.configured) {
+        vpnStatus.textContent = "Active";
+        vpnStatus.className =
+          "row-value status-active";
+
+        vpnUsername.textContent =
+          vpn.username || "";
+
+        usernameRow.classList.remove("hidden");
+
+        createVpnButton.classList.add("hidden");
+
+        generateProfileButton.classList.remove(
+          "hidden"
+        );
+      } else {
+        vpnStatus.textContent =
+          "Not configured";
+
+        vpnStatus.className = "row-value";
+
+        vpnUsername.textContent = "";
+
+        usernameRow.classList.add("hidden");
+
+        generateProfileButton.classList.add(
+          "hidden"
         );
 
-        const data = await response.json().catch(() => null);
+        createVpnButton.classList.remove(
+          "hidden"
+        );
+      }
+    }
 
-        if (!response.ok) {
-          throw new Error(
-            data?.detail || "Unable to create VPN access."
+
+    async function loadAccount() {
+      try {
+        const data =
+          await apiRequest("/me", {
+            method: "GET"
+          });
+
+        showVpn(data.vpn);
+      } catch {
+        showSignedOut();
+      }
+    }
+
+
+    signInButton.addEventListener(
+      "click",
+      async () => {
+        signInButton.disabled = true;
+
+        signedOutMessage.textContent =
+          "Waiting for Passkey…";
+
+        signedOutMessage.className =
+          "message";
+
+        try {
+          const begin =
+            await apiRequest(
+              "/passkey/login/begin",
+              {
+                method: "POST",
+                body: "{}"
+              }
+            );
+
+          const credential =
+            await navigator.credentials.get({
+              publicKey:
+                prepareAuthenticationOptions(
+                  begin.options
+                )
+            });
+
+          if (!credential) {
+            throw new Error(
+              "Passkey was not provided"
+            );
+          }
+
+          await apiRequest(
+            "/passkey/login/finish",
+            {
+              method: "POST",
+              body: JSON.stringify({
+                challengeId:
+                  begin.challengeId,
+                credential:
+                  serializeCredential(
+                    credential
+                  )
+              })
+            }
           );
+
+          signedOutMessage.textContent = "";
+
+          await loadAccount();
+        } catch (error) {
+          signedOutMessage.textContent =
+            error.message;
+
+          signedOutMessage.className =
+            "message error";
+        } finally {
+          signInButton.disabled = false;
         }
+      }
+    );
 
-        renderVpn(data.vpn, data.profileUrl);
 
-      } catch (error) {
-        console.error(error);
+    createAccountButton.addEventListener(
+      "click",
+      async () => {
+        createAccountButton.disabled = true;
+
+        signedOutMessage.textContent =
+          "Creating Passkey…";
+
+        signedOutMessage.className =
+          "message";
+
+        try {
+          const begin =
+            await apiRequest(
+              "/passkey/register/begin",
+              {
+                method: "POST",
+                body: "{}"
+              }
+            );
+
+          const credential =
+            await navigator.credentials.create({
+              publicKey:
+                prepareRegistrationOptions(
+                  begin.options
+                )
+            });
+
+          if (!credential) {
+            throw new Error(
+              "Passkey was not created"
+            );
+          }
+
+          await apiRequest(
+            "/passkey/register/finish",
+            {
+              method: "POST",
+              body: JSON.stringify({
+                challengeId:
+                  begin.challengeId,
+                credential:
+                  serializeCredential(
+                    credential
+                  )
+              })
+            }
+          );
+
+          signedOutMessage.textContent =
+            "Account created. Sign in with your Passkey.";
+
+          signedOutMessage.className =
+            "message success";
+        } catch (error) {
+          signedOutMessage.textContent =
+            error.message;
+
+          signedOutMessage.className =
+            "message error";
+        } finally {
+          createAccountButton.disabled = false;
+        }
+      }
+    );
+
+
+    createVpnButton.addEventListener(
+      "click",
+      async () => {
+        createVpnButton.disabled = true;
 
         vpnMessage.textContent =
-          error?.message || "VPN provisioning failed.";
+          "Creating VPN access…";
 
-        createVpnButton.disabled = false;
-        createVpnButton.textContent = "Create VPN Access";
+        vpnMessage.className =
+          "message";
+
+        try {
+          const data =
+            await apiRequest(
+              "/vpn/create",
+              {
+                method: "POST",
+                body: "{}"
+              }
+            );
+
+          showVpn(data.vpn);
+
+          if (data.profileUrl) {
+            installProfileButton.href =
+              data.profileUrl;
+
+            installProfileButton.classList.remove(
+              "hidden"
+            );
+          }
+
+          vpnMessage.textContent =
+            "VPN access created.";
+
+          vpnMessage.className =
+            "message success";
+        } catch (error) {
+          vpnMessage.textContent =
+            error.message;
+
+          vpnMessage.className =
+            "message error";
+        } finally {
+          createVpnButton.disabled = false;
+        }
       }
-    });
+    );
 
-    signInButton.addEventListener("click", async () => {
-      setBusy(true);
-      status.textContent = "Preparing Passkey sign in…";
 
-      try {
-        const beginResponse = await fetch(
-          `${API}/passkey/login/begin`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            }
-          }
+    generateProfileButton.addEventListener(
+      "click",
+      async () => {
+        generateProfileButton.disabled = true;
+
+        installProfileButton.classList.add(
+          "hidden"
         );
 
-        if (!beginResponse.ok) {
-          throw new Error("Unable to start sign in.");
-        }
+        installProfileButton.href = "#";
 
-        const begin = await beginResponse.json();
+        vpnMessage.textContent =
+          "Generating install link…";
 
-        const credential = await navigator.credentials.get({
-          publicKey: prepareRequestOptions(begin.options)
-        });
+        vpnMessage.className =
+          "message";
 
-        const finishResponse = await fetch(
-          `${API}/passkey/login/finish`,
-          {
-            method: "POST",
-            credentials: "include",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              challengeId: begin.challengeId,
-              credential:
-                authenticationCredentialToJSON(credential)
-            })
+        try {
+          const data =
+            await apiRequest(
+              "/vpn/profile",
+              {
+                method: "POST",
+                body: "{}"
+              }
+            );
+
+          if (!data.profileUrl) {
+            throw new Error(
+              "Install link was not returned"
+            );
           }
-        );
 
-        if (!finishResponse.ok) {
-          throw new Error("Passkey sign in failed.");
+          installProfileButton.href =
+            data.profileUrl;
+
+          installProfileButton.classList.remove(
+            "hidden"
+          );
+
+          vpnMessage.textContent =
+            "Install link is ready.";
+
+          vpnMessage.className =
+            "message success";
+        } catch (error) {
+          vpnMessage.textContent =
+            error.message;
+
+          vpnMessage.className =
+            "message error";
+        } finally {
+          generateProfileButton.disabled = false;
         }
-
-        const me = await getMe();
-
-        if (!me) {
-          throw new Error("Unable to load account.");
-        }
-
-        showDashboard(me);
-
-      } catch (error) {
-        console.error(error);
-
-        status.textContent =
-          error?.message || "Sign in failed.";
-      } finally {
-        setBusy(false);
       }
-    });
+    );
 
-    createButton.addEventListener("click", async () => {
-      setBusy(true);
-      status.textContent = "Preparing Passkey…";
 
-      try {
-        const beginResponse = await fetch(
-          `${API}/passkey/register/begin`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            }
-          }
-        );
-
-        if (!beginResponse.ok) {
-          throw new Error("Unable to start account creation.");
-        }
-
-        const begin = await beginResponse.json();
-
-        const credential = await navigator.credentials.create({
-          publicKey: prepareCreationOptions(begin.options)
-        });
-
-        const finishResponse = await fetch(
-          `${API}/passkey/register/finish`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              challengeId: begin.challengeId,
-              credential:
-                registrationCredentialToJSON(credential)
-            })
-          }
-        );
-
-        if (!finishResponse.ok) {
-          throw new Error("Passkey verification failed.");
-        }
-
-        status.textContent =
-          "Account created. Sign in with your Passkey.";
-
-      } catch (error) {
-        console.error(error);
-
-        status.textContent =
-          error?.message || "Account creation failed.";
-      } finally {
-        setBusy(false);
-      }
-    });
-
-    checkSession();
+    loadAccount();
   </script>
 </body>
 </html>
