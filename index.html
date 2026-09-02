@@ -91,6 +91,13 @@
       cursor: pointer;
     }
 
+    .secondary {
+      margin-top: 12px;
+      background: transparent;
+      color: #1d1d1f;
+      border: 1px solid #c7c7cc;
+    }
+
     .action:disabled {
       opacity: 0.55;
       cursor: default;
@@ -98,7 +105,7 @@
 
     .status {
       min-height: 22px;
-      margin-top: 16px;
+      margin-top: 18px;
       color: #86868b;
       font-size: 13px;
       line-height: 1.45;
@@ -119,6 +126,12 @@
         background: #f5f5f7;
         color: #1d1d1f;
       }
+
+      .secondary {
+        background: transparent;
+        color: #f5f5f7;
+        border-color: #48484a;
+      }
     }
   </style>
 </head>
@@ -131,11 +144,15 @@
       <h1>System VPN access for your devices.</h1>
 
       <p class="subtitle">
-        Create your TOLF VPN account using a Passkey.
+        Sign in to manage your VPN access and devices.
       </p>
 
-      <button id="create-account" class="action" type="button">
-        Create account with Passkey
+      <button id="sign-in" class="action" type="button">
+        Sign in with Passkey
+      </button>
+
+      <button id="create-account" class="action secondary" type="button">
+        Create account
       </button>
 
       <div id="status" class="status"></div>
@@ -145,11 +162,13 @@
   <script>
     const API = "https://api.tolf.is";
 
-    const button = document.getElementById("create-account");
+    const signInButton = document.getElementById("sign-in");
+    const createButton = document.getElementById("create-account");
     const status = document.getElementById("status");
 
     function base64urlToBytes(value) {
       const padding = "=".repeat((4 - value.length % 4) % 4);
+
       const base64 = (value + padding)
         .replace(/-/g, "+")
         .replace(/_/g, "/");
@@ -194,7 +213,22 @@
       return options;
     }
 
-    function credentialToJSON(credential) {
+    function prepareRequestOptions(options) {
+      options.challenge = base64urlToBytes(options.challenge);
+
+      if (options.allowCredentials) {
+        options.allowCredentials = options.allowCredentials.map(
+          credential => ({
+            ...credential,
+            id: base64urlToBytes(credential.id)
+          })
+        );
+      }
+
+      return options;
+    }
+
+    function registrationCredentialToJSON(credential) {
       const response = {
         clientDataJSON: bytesToBase64url(
           credential.response.clientDataJSON
@@ -220,8 +254,113 @@
       };
     }
 
-    button.addEventListener("click", async () => {
-      button.disabled = true;
+    function authenticationCredentialToJSON(credential) {
+      return {
+        id: credential.id,
+        rawId: bytesToBase64url(credential.rawId),
+        type: credential.type,
+        authenticatorAttachment:
+          credential.authenticatorAttachment ?? null,
+        response: {
+          clientDataJSON: bytesToBase64url(
+            credential.response.clientDataJSON
+          ),
+          authenticatorData: bytesToBase64url(
+            credential.response.authenticatorData
+          ),
+          signature: bytesToBase64url(
+            credential.response.signature
+          ),
+          userHandle: credential.response.userHandle
+            ? bytesToBase64url(credential.response.userHandle)
+            : null
+        },
+        clientExtensionResults:
+          credential.getClientExtensionResults()
+      };
+    }
+
+    function setBusy(busy) {
+      signInButton.disabled = busy;
+      createButton.disabled = busy;
+    }
+
+    signInButton.addEventListener("click", async () => {
+      setBusy(true);
+      status.textContent = "Preparing Passkey sign in…";
+
+      try {
+        if (!window.PublicKeyCredential) {
+          throw new Error("Passkeys are not supported on this device.");
+        }
+
+        const beginResponse = await fetch(
+          `${API}/passkey/login/begin`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            }
+          }
+        );
+
+        if (!beginResponse.ok) {
+          throw new Error("Unable to start sign in.");
+        }
+
+        const begin = await beginResponse.json();
+        const publicKey = prepareRequestOptions(begin.options);
+
+        status.textContent = "Waiting for Passkey…";
+
+        const credential = await navigator.credentials.get({
+          publicKey
+        });
+
+        if (!credential) {
+          throw new Error("Passkey sign in was cancelled.");
+        }
+
+        status.textContent = "Verifying Passkey…";
+
+        const finishResponse = await fetch(
+          `${API}/passkey/login/finish`,
+          {
+            method: "POST",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              challengeId: begin.challengeId,
+              credential:
+                authenticationCredentialToJSON(credential)
+            })
+          }
+        );
+
+        if (!finishResponse.ok) {
+          const error = await finishResponse.json().catch(() => null);
+
+          throw new Error(
+            error?.detail || "Passkey sign in failed."
+          );
+        }
+
+        status.textContent = "Signed in successfully.";
+        signInButton.textContent = "Signed in";
+      } catch (error) {
+        console.error(error);
+
+        status.textContent =
+          error?.message || "Sign in failed.";
+      } finally {
+        setBusy(false);
+      }
+    });
+
+    createButton.addEventListener("click", async () => {
+      setBusy(true);
       status.textContent = "Preparing Passkey…";
 
       try {
@@ -244,7 +383,6 @@
         }
 
         const begin = await beginResponse.json();
-
         const publicKey = prepareCreationOptions(begin.options);
 
         status.textContent = "Waiting for Passkey…";
@@ -268,25 +406,28 @@
             },
             body: JSON.stringify({
               challengeId: begin.challengeId,
-              credential: credentialToJSON(credential)
+              credential:
+                registrationCredentialToJSON(credential)
             })
           }
         );
 
         if (!finishResponse.ok) {
           const error = await finishResponse.json().catch(() => null);
+
           throw new Error(
             error?.detail || "Passkey verification failed."
           );
         }
 
         status.textContent = "Account created successfully.";
-        button.textContent = "Passkey created";
       } catch (error) {
         console.error(error);
+
         status.textContent =
           error?.message || "Account creation failed.";
-        button.disabled = false;
+      } finally {
+        setBusy(false);
       }
     });
   </script>
