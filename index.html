@@ -49,7 +49,10 @@
 
     .panel {
       width: 100%;
-      max-width: 520px;
+      max-width: 560px;
+    }
+
+    .center {
       text-align: center;
     }
 
@@ -70,7 +73,7 @@
 
     .subtitle {
       margin: 18px auto 0;
-      max-width: 420px;
+      max-width: 440px;
       color: #6e6e73;
       font-size: 18px;
       line-height: 1.5;
@@ -109,6 +112,78 @@
       color: #86868b;
       font-size: 13px;
       line-height: 1.45;
+      text-align: center;
+    }
+
+    .dashboard {
+      display: none;
+    }
+
+    .dashboard-header {
+      margin-bottom: 24px;
+    }
+
+    .dashboard-header h1 {
+      font-size: 34px;
+    }
+
+    .card {
+      background: #ffffff;
+      border: 1px solid #d8d8dc;
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 24px 26px;
+    }
+
+    .card-title {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 650;
+      letter-spacing: -0.02em;
+    }
+
+    .card-subtitle {
+      margin: 8px 0 0;
+      color: #6e6e73;
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 15px 26px;
+      border-top: 1px solid #e5e5e7;
+      font-size: 15px;
+      line-height: 1.4;
+    }
+
+    .label {
+      color: #6e6e73;
+    }
+
+    .value {
+      text-align: right;
+      font-weight: 500;
+    }
+
+    @media (max-width: 520px) {
+      h1 {
+        font-size: 36px;
+      }
+
+      .dashboard-header h1 {
+        font-size: 30px;
+      }
+
+      .row {
+        padding-left: 20px;
+        padding-right: 20px;
+      }
     }
 
     @media (prefers-color-scheme: dark) {
@@ -118,7 +193,9 @@
       }
 
       .subtitle,
-      .status {
+      .status,
+      .card-subtitle,
+      .label {
         color: #98989d;
       }
 
@@ -132,6 +209,15 @@
         color: #f5f5f7;
         border-color: #48484a;
       }
+
+      .card {
+        background: #1c1c1e;
+        border-color: #38383a;
+      }
+
+      .row {
+        border-color: #38383a;
+      }
     }
   </style>
 </head>
@@ -139,32 +225,66 @@
 <body>
   <main>
     <section class="panel">
-      <div class="brand">TOLF VPN</div>
+      <div id="login-view" class="center">
+        <div class="brand">TOLF VPN</div>
 
-      <h1>System VPN access for your devices.</h1>
+        <h1>System VPN access for your devices.</h1>
 
-      <p class="subtitle">
-        Sign in to manage your VPN access and devices.
-      </p>
+        <p class="subtitle">
+          Sign in to manage your VPN access and devices.
+        </p>
 
-      <button id="sign-in" class="action" type="button">
-        Sign in with Passkey
-      </button>
+        <button id="sign-in" class="action" type="button">
+          Sign in with Passkey
+        </button>
 
-      <button id="create-account" class="action secondary" type="button">
-        Create account
-      </button>
+        <button id="create-account" class="action secondary" type="button">
+          Create account
+        </button>
 
-      <div id="status" class="status"></div>
+        <div id="status" class="status"></div>
+      </div>
+
+      <div id="dashboard" class="dashboard">
+        <div class="brand">TOLF VPN</div>
+
+        <div class="dashboard-header">
+          <h1>My VPN</h1>
+          <p class="subtitle">
+            Manage your TOLF VPN access and devices.
+          </p>
+        </div>
+
+        <section class="card">
+          <div class="card-header">
+            <h2 class="card-title">VPN Access</h2>
+            <p class="card-subtitle">
+              Your account is ready. VPN access has not been configured yet.
+            </p>
+          </div>
+
+          <div class="row">
+            <div class="label">Status</div>
+            <div class="value">Not configured</div>
+          </div>
+        </section>
+      </div>
     </section>
   </main>
 
   <script>
     const API = "https://api.tolf.is";
 
+    const loginView = document.getElementById("login-view");
+    const dashboard = document.getElementById("dashboard");
     const signInButton = document.getElementById("sign-in");
     const createButton = document.getElementById("create-account");
     const status = document.getElementById("status");
+
+    function showDashboard() {
+      loginView.style.display = "none";
+      dashboard.style.display = "block";
+    }
 
     function base64urlToBytes(value) {
       const padding = "=".repeat((4 - value.length % 4) % 4);
@@ -285,15 +405,29 @@
       createButton.disabled = busy;
     }
 
+    async function checkSession() {
+      try {
+        const response = await fetch(
+          `${API}/me`,
+          {
+            method: "GET",
+            credentials: "include"
+          }
+        );
+
+        if (response.ok) {
+          showDashboard();
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
     signInButton.addEventListener("click", async () => {
       setBusy(true);
       status.textContent = "Preparing Passkey sign in…";
 
       try {
-        if (!window.PublicKeyCredential) {
-          throw new Error("Passkeys are not supported on this device.");
-        }
-
         const beginResponse = await fetch(
           `${API}/passkey/login/begin`,
           {
@@ -309,19 +443,10 @@
         }
 
         const begin = await beginResponse.json();
-        const publicKey = prepareRequestOptions(begin.options);
-
-        status.textContent = "Waiting for Passkey…";
 
         const credential = await navigator.credentials.get({
-          publicKey
+          publicKey: prepareRequestOptions(begin.options)
         });
-
-        if (!credential) {
-          throw new Error("Passkey sign in was cancelled.");
-        }
-
-        status.textContent = "Verifying Passkey…";
 
         const finishResponse = await fetch(
           `${API}/passkey/login/finish`,
@@ -340,18 +465,12 @@
         );
 
         if (!finishResponse.ok) {
-          const error = await finishResponse.json().catch(() => null);
-
-          throw new Error(
-            error?.detail || "Passkey sign in failed."
-          );
+          throw new Error("Passkey sign in failed.");
         }
 
-        status.textContent = "Signed in successfully.";
-        signInButton.textContent = "Signed in";
+        showDashboard();
       } catch (error) {
         console.error(error);
-
         status.textContent =
           error?.message || "Sign in failed.";
       } finally {
@@ -364,10 +483,6 @@
       status.textContent = "Preparing Passkey…";
 
       try {
-        if (!window.PublicKeyCredential) {
-          throw new Error("Passkeys are not supported on this device.");
-        }
-
         const beginResponse = await fetch(
           `${API}/passkey/register/begin`,
           {
@@ -383,19 +498,10 @@
         }
 
         const begin = await beginResponse.json();
-        const publicKey = prepareCreationOptions(begin.options);
-
-        status.textContent = "Waiting for Passkey…";
 
         const credential = await navigator.credentials.create({
-          publicKey
+          publicKey: prepareCreationOptions(begin.options)
         });
-
-        if (!credential) {
-          throw new Error("Passkey creation was cancelled.");
-        }
-
-        status.textContent = "Verifying Passkey…";
 
         const finishResponse = await fetch(
           `${API}/passkey/register/finish`,
@@ -413,23 +519,21 @@
         );
 
         if (!finishResponse.ok) {
-          const error = await finishResponse.json().catch(() => null);
-
-          throw new Error(
-            error?.detail || "Passkey verification failed."
-          );
+          throw new Error("Passkey verification failed.");
         }
 
-        status.textContent = "Account created successfully.";
+        status.textContent =
+          "Account created. Sign in with your Passkey.";
       } catch (error) {
         console.error(error);
-
         status.textContent =
           error?.message || "Account creation failed.";
       } finally {
         setBusy(false);
       }
     });
+
+    checkSession();
   </script>
 </body>
 </html>
