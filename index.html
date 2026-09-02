@@ -347,6 +347,14 @@
           >
             Install on Apple Device
           </a>
+
+          <button
+            id="rotatePasswordButton"
+            class="secondary hidden"
+            type="button"
+          >
+            Change VPN Password
+          </button>
         </div>
 
         <div id="vpnMessage" class="message"></div>
@@ -392,6 +400,9 @@
 
     const installProfileButton =
       document.getElementById("installProfileButton");
+
+    const rotatePasswordButton =
+      document.getElementById("rotatePasswordButton");
 
     const vpnMessage =
       document.getElementById("vpnMessage");
@@ -624,6 +635,10 @@
         generateProfileButton.classList.remove(
           "hidden"
         );
+
+        rotatePasswordButton.classList.remove(
+          "hidden"
+        );
       } else {
         vpnStatus.textContent =
           "Not configured";
@@ -635,6 +650,10 @@
         usernameRow.classList.add("hidden");
 
         generateProfileButton.classList.add(
+          "hidden"
+        );
+
+        rotatePasswordButton.classList.add(
           "hidden"
         );
 
@@ -895,6 +914,76 @@
           vpnMessage.className =
             "message error";
         } finally {
+          generateProfileButton.disabled = false;
+        }
+      }
+    );
+
+
+    rotatePasswordButton.addEventListener(
+      "click",
+      async () => {
+        const confirmed = window.confirm(
+          "Change the VPN password?\n\n" +
+          "The current VPN profile will stop working after it reconnects. " +
+          "You will need to install the new profile."
+        );
+
+        if (!confirmed) {
+          return;
+        }
+
+        rotatePasswordButton.disabled = true;
+        generateProfileButton.disabled = true;
+
+        installProfileButton.classList.add(
+          "hidden"
+        );
+
+        installProfileButton.href = "#";
+
+        vpnMessage.textContent =
+          "Changing VPN password…";
+
+        vpnMessage.className =
+          "message";
+
+        try {
+          const data =
+            await apiRequest(
+              "/vpn/rotate",
+              {
+                method: "POST",
+                body: "{}"
+              }
+            );
+
+          if (!data.profileUrl) {
+            throw new Error(
+              "New profile was not returned"
+            );
+          }
+
+          installProfileButton.href =
+            data.profileUrl;
+
+          installProfileButton.classList.remove(
+            "hidden"
+          );
+
+          vpnMessage.textContent =
+            "VPN password changed. Install the new profile.";
+
+          vpnMessage.className =
+            "message success";
+        } catch (error) {
+          vpnMessage.textContent =
+            error.message;
+
+          vpnMessage.className =
+            "message error";
+        } finally {
+          rotatePasswordButton.disabled = false;
           generateProfileButton.disabled = false;
         }
       }
