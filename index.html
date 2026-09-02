@@ -31,6 +31,7 @@
       --button-text: #ffffff;
       --success: #248a3d;
       --error: #d70015;
+      --danger: #d70015;
     }
 
     @media (prefers-color-scheme: dark) {
@@ -44,6 +45,7 @@
         --button-text: #1d1d1f;
         --success: #30d158;
         --error: #ff453a;
+        --danger: #ff453a;
       }
     }
 
@@ -126,18 +128,24 @@
 
     .actions {
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
+      flex-wrap: wrap;
       gap: 12px;
       margin-top: 26px;
     }
 
+    .actions > button,
+    .actions > .button-link {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+
     button,
     .button-link {
-      width: 100%;
       min-height: 50px;
       border: 0;
       border-radius: 12px;
-      padding: 13px 18px;
+      padding: 13px 14px;
       font-size: 16px;
       line-height: 1.3;
       font-weight: 600;
@@ -160,13 +168,20 @@
       border: 1px solid var(--border);
     }
 
+    .danger {
+      background: transparent;
+      color: var(--danger);
+      border: 1px solid var(--danger);
+    }
+
     button:disabled {
       opacity: 0.55;
       cursor: default;
     }
 
     .password-note {
-      margin: -2px 4px 0;
+      flex: 0 0 100%;
+      margin: 0 4px;
       color: var(--secondary);
       font-size: 14px;
       line-height: 1.45;
@@ -224,6 +239,23 @@
 
     .hidden {
       display: none !important;
+    }
+
+    @media (max-width: 620px) {
+      .actions {
+        flex-direction: column;
+        flex-wrap: nowrap;
+      }
+
+      .actions > button,
+      .actions > .button-link {
+        width: 100%;
+        flex: none;
+      }
+
+      .password-note {
+        flex: none;
+      }
     }
 
     @media (max-width: 520px) {
@@ -358,7 +390,7 @@
 
           <button
             id="rotatePasswordButton"
-            class="secondary hidden"
+            class="danger hidden"
             type="button"
           >
             Change VPN Password
