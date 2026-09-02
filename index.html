@@ -189,6 +189,27 @@
       text-align: center;
     }
 
+    .delete-section {
+      margin-top: 24px;
+      padding-top: 22px;
+      border-top: 1px solid var(--border);
+    }
+
+    .delete-button {
+      width: 100%;
+      background: transparent;
+      color: var(--danger);
+      border: 1px solid var(--danger);
+    }
+
+    .delete-note {
+      margin: 10px 4px 0;
+      color: var(--secondary);
+      font-size: 14px;
+      line-height: 1.45;
+      text-align: center;
+    }
+
     .status-table {
       margin-top: 24px;
       border-top: 1px solid var(--border);
@@ -407,6 +428,24 @@
           </p>
         </div>
 
+        <div
+          id="deleteSection"
+          class="delete-section hidden"
+        >
+          <button
+            id="deleteVpnButton"
+            class="delete-button"
+            type="button"
+          >
+            Delete VPN Access
+          </button>
+
+          <p class="delete-note">
+            This removes your VPN access from TOLF VPN servers.
+            Your TOLF account and Passkey will remain active.
+          </p>
+        </div>
+
         <div id="vpnMessage" class="message"></div>
       </div>
     </section>
@@ -456,6 +495,12 @@
 
     const rotatePasswordNote =
       document.getElementById("rotatePasswordNote");
+
+    const deleteSection =
+      document.getElementById("deleteSection");
+
+    const deleteVpnButton =
+      document.getElementById("deleteVpnButton");
 
     const vpnMessage =
       document.getElementById("vpnMessage");
@@ -728,6 +773,10 @@
         rotatePasswordNote.classList.remove(
           "hidden"
         );
+
+        deleteSection.classList.remove(
+          "hidden"
+        );
       } else {
         vpnStatus.textContent =
           "Not configured";
@@ -747,6 +796,10 @@
         );
 
         rotatePasswordNote.classList.add(
+          "hidden"
+        );
+
+        deleteSection.classList.add(
           "hidden"
         );
 
@@ -1014,6 +1067,7 @@
 
         rotatePasswordButton.disabled = true;
         generateProfileButton.disabled = true;
+        deleteVpnButton.disabled = true;
 
         setInstallLink(null);
 
@@ -1053,6 +1107,65 @@
           vpnMessage.className =
             "message error";
         } finally {
+          rotatePasswordButton.disabled = false;
+          generateProfileButton.disabled = false;
+          deleteVpnButton.disabled = false;
+        }
+      }
+    );
+
+
+    deleteVpnButton.addEventListener(
+      "click",
+      async () => {
+        const confirmed = window.confirm(
+          "Delete VPN access?\n\n" +
+          "This removes your VPN credentials from TOLF VPN servers. " +
+          "Installed VPN profiles will stop working. " +
+          "Your TOLF account and Passkey will remain active."
+        );
+
+        if (!confirmed) {
+          return;
+        }
+
+        deleteVpnButton.disabled = true;
+        rotatePasswordButton.disabled = true;
+        generateProfileButton.disabled = true;
+
+        setInstallLink(null);
+
+        vpnMessage.textContent =
+          "Deleting VPN access…";
+
+        vpnMessage.className =
+          "message";
+
+        try {
+          const data =
+            await apiRequest(
+              "/vpn/delete",
+              {
+                method: "POST",
+                body: "{}"
+              }
+            );
+
+          showVpn(data.vpn);
+
+          vpnMessage.textContent =
+            "VPN access deleted. Your TOLF account and Passkey remain active.";
+
+          vpnMessage.className =
+            "message success";
+        } catch (error) {
+          vpnMessage.textContent =
+            error.message;
+
+          vpnMessage.className =
+            "message error";
+        } finally {
+          deleteVpnButton.disabled = false;
           rotatePasswordButton.disabled = false;
           generateProfileButton.disabled = false;
         }
