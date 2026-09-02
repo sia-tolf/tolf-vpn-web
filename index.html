@@ -160,6 +160,7 @@
     .primary {
       background: var(--button);
       color: var(--button-text);
+      border: 1px solid var(--button);
     }
 
     .secondary {
@@ -654,6 +655,39 @@
     }
 
 
+    function setInstallLink(profileUrl) {
+      if (profileUrl) {
+        installProfileButton.href = profileUrl;
+
+        installProfileButton.classList.remove(
+          "hidden"
+        );
+
+        generateProfileButton.classList.remove(
+          "primary"
+        );
+
+        generateProfileButton.classList.add(
+          "secondary"
+        );
+      } else {
+        installProfileButton.href = "#";
+
+        installProfileButton.classList.add(
+          "hidden"
+        );
+
+        generateProfileButton.classList.remove(
+          "secondary"
+        );
+
+        generateProfileButton.classList.add(
+          "primary"
+        );
+      }
+    }
+
+
     function showSignedOut() {
       loadingCard.classList.add("hidden");
       vpnCard.classList.add("hidden");
@@ -666,8 +700,7 @@
       signedOutCard.classList.add("hidden");
       vpnCard.classList.remove("hidden");
 
-      installProfileButton.classList.add("hidden");
-      installProfileButton.href = "#";
+      setInstallLink(null);
 
       vpnMessage.textContent = "";
       vpnMessage.className = "message";
@@ -895,14 +928,7 @@
 
           showVpn(data.vpn);
 
-          if (data.profileUrl) {
-            installProfileButton.href =
-              data.profileUrl;
-
-            installProfileButton.classList.remove(
-              "hidden"
-            );
-          }
+          setInstallLink(data.profileUrl);
 
           vpnMessage.textContent =
             "VPN access created.";
@@ -927,11 +953,7 @@
       async () => {
         generateProfileButton.disabled = true;
 
-        installProfileButton.classList.add(
-          "hidden"
-        );
-
-        installProfileButton.href = "#";
+        setInstallLink(null);
 
         vpnMessage.textContent =
           "Generating install link…";
@@ -955,12 +977,7 @@
             );
           }
 
-          installProfileButton.href =
-            data.profileUrl;
-
-          installProfileButton.classList.remove(
-            "hidden"
-          );
+          setInstallLink(data.profileUrl);
 
           vpnMessage.textContent =
             "Install link is ready.";
@@ -998,11 +1015,7 @@
         rotatePasswordButton.disabled = true;
         generateProfileButton.disabled = true;
 
-        installProfileButton.classList.add(
-          "hidden"
-        );
-
-        installProfileButton.href = "#";
+        setInstallLink(null);
 
         vpnMessage.textContent =
           "Changing VPN password…";
@@ -1026,12 +1039,7 @@
             );
           }
 
-          installProfileButton.href =
-            data.profileUrl;
-
-          installProfileButton.classList.remove(
-            "hidden"
-          );
+          setInstallLink(data.profileUrl);
 
           vpnMessage.textContent =
             "VPN password changed. Install the new profile.";
