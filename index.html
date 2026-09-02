@@ -127,6 +127,11 @@
       font-size: 34px;
     }
 
+    .dashboard-header .subtitle {
+      margin-left: 0;
+      margin-right: 0;
+    }
+
     .card {
       background: #ffffff;
       border: 1px solid #d8d8dc;
@@ -153,8 +158,8 @@
     }
 
     .row {
-      display: flex;
-      justify-content: space-between;
+      display: grid;
+      grid-template-columns: minmax(110px, 0.7fr) minmax(0, 1.3fr);
       gap: 20px;
       padding: 15px 26px;
       border-top: 1px solid #e5e5e7;
@@ -169,6 +174,11 @@
     .value {
       text-align: right;
       font-weight: 500;
+      overflow-wrap: anywhere;
+    }
+
+    .active {
+      font-weight: 650;
     }
 
     @media (max-width: 520px) {
@@ -181,8 +191,14 @@
       }
 
       .row {
+        grid-template-columns: 1fr;
+        gap: 4px;
         padding-left: 20px;
         padding-right: 20px;
+      }
+
+      .value {
+        text-align: left;
       }
     }
 
@@ -258,14 +274,20 @@
         <section class="card">
           <div class="card-header">
             <h2 class="card-title">VPN Access</h2>
-            <p class="card-subtitle">
-              Your account is ready. VPN access has not been configured yet.
+
+            <p id="vpn-description" class="card-subtitle">
+              Checking VPN access…
             </p>
           </div>
 
           <div class="row">
             <div class="label">Status</div>
-            <div class="value">Not configured</div>
+            <div id="vpn-status" class="value">Checking…</div>
+          </div>
+
+          <div id="username-row" class="row" style="display: none;">
+            <div class="label">Username</div>
+            <div id="vpn-username" class="value"></div>
           </div>
         </section>
       </div>
@@ -277,13 +299,48 @@
 
     const loginView = document.getElementById("login-view");
     const dashboard = document.getElementById("dashboard");
+
     const signInButton = document.getElementById("sign-in");
     const createButton = document.getElementById("create-account");
     const status = document.getElementById("status");
 
-    function showDashboard() {
+    const vpnDescription = document.getElementById("vpn-description");
+    const vpnStatus = document.getElementById("vpn-status");
+    const usernameRow = document.getElementById("username-row");
+    const vpnUsername = document.getElementById("vpn-username");
+
+    function showDashboard(data) {
       loginView.style.display = "none";
       dashboard.style.display = "block";
+
+      renderVpn(data.vpn);
+    }
+
+    function showLogin() {
+      dashboard.style.display = "none";
+      loginView.style.display = "block";
+    }
+
+    function renderVpn(vpn) {
+      if (vpn && vpn.configured) {
+        vpnDescription.textContent =
+          "Your TOLF VPN access is active and ready to use.";
+
+        vpnStatus.textContent = "Active";
+        vpnStatus.classList.add("active");
+
+        vpnUsername.textContent = vpn.username || "";
+        usernameRow.style.display = "grid";
+      } else {
+        vpnDescription.textContent =
+          "Your account is ready. VPN access has not been configured yet.";
+
+        vpnStatus.textContent = "Not configured";
+        vpnStatus.classList.remove("active");
+
+        vpnUsername.textContent = "";
+        usernameRow.style.display = "none";
+      }
     }
 
     function base64urlToBytes(value) {
@@ -405,21 +462,34 @@
       createButton.disabled = busy;
     }
 
+    async function getMe() {
+      const response = await fetch(
+        `${API}/me`,
+        {
+          method: "GET",
+          credentials: "include"
+        }
+      );
+
+      if (!response.ok) {
+        return null;
+      }
+
+      return response.json();
+    }
+
     async function checkSession() {
       try {
-        const response = await fetch(
-          `${API}/me`,
-          {
-            method: "GET",
-            credentials: "include"
-          }
-        );
+        const me = await getMe();
 
-        if (response.ok) {
-          showDashboard();
+        if (me && me.authenticated) {
+          showDashboard(me);
+        } else {
+          showLogin();
         }
       } catch (error) {
         console.error(error);
+        showLogin();
       }
     }
 
@@ -468,9 +538,16 @@
           throw new Error("Passkey sign in failed.");
         }
 
-        showDashboard();
+        const me = await getMe();
+
+        if (!me) {
+          throw new Error("Unable to load account.");
+        }
+
+        showDashboard(me);
       } catch (error) {
         console.error(error);
+
         status.textContent =
           error?.message || "Sign in failed.";
       } finally {
@@ -526,6 +603,7 @@
           "Account created. Sign in with your Passkey.";
       } catch (error) {
         console.error(error);
+
         status.textContent =
           error?.message || "Account creation failed.";
       } finally {
