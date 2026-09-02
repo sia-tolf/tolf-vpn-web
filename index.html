@@ -88,11 +88,16 @@
       font: inherit;
       font-size: 16px;
       font-weight: 600;
-      text-decoration: none;
       cursor: pointer;
     }
 
-    .note {
+    .action:disabled {
+      opacity: 0.55;
+      cursor: default;
+    }
+
+    .status {
+      min-height: 22px;
       margin-top: 16px;
       color: #86868b;
       font-size: 13px;
@@ -106,7 +111,7 @@
       }
 
       .subtitle,
-      .note {
+      .status {
         color: #98989d;
       }
 
@@ -126,17 +131,164 @@
       <h1>System VPN access for your devices.</h1>
 
       <p class="subtitle">
-        Sign in to manage your VPN access and install configuration profiles.
+        Create your TOLF VPN account using a Passkey.
       </p>
 
-      <button class="action" type="button">
-        Sign in or create account
+      <button id="create-account" class="action" type="button">
+        Create account with Passkey
       </button>
 
-      <p class="note">
-        Account access will use Passkey.
-      </p>
+      <div id="status" class="status"></div>
     </section>
   </main>
+
+  <script>
+    const API = "https://api.tolf.is";
+
+    const button = document.getElementById("create-account");
+    const status = document.getElementById("status");
+
+    function base64urlToBytes(value) {
+      const padding = "=".repeat((4 - value.length % 4) % 4);
+      const base64 = (value + padding)
+        .replace(/-/g, "+")
+        .replace(/_/g, "/");
+
+      const binary = atob(base64);
+      const bytes = new Uint8Array(binary.length);
+
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+
+      return bytes;
+    }
+
+    function bytesToBase64url(buffer) {
+      const bytes = new Uint8Array(buffer);
+      let binary = "";
+
+      for (const byte of bytes) {
+        binary += String.fromCharCode(byte);
+      }
+
+      return btoa(binary)
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_")
+        .replace(/=+$/g, "");
+    }
+
+    function prepareCreationOptions(options) {
+      options.challenge = base64urlToBytes(options.challenge);
+      options.user.id = base64urlToBytes(options.user.id);
+
+      if (options.excludeCredentials) {
+        options.excludeCredentials = options.excludeCredentials.map(
+          credential => ({
+            ...credential,
+            id: base64urlToBytes(credential.id)
+          })
+        );
+      }
+
+      return options;
+    }
+
+    function credentialToJSON(credential) {
+      const response = {
+        clientDataJSON: bytesToBase64url(
+          credential.response.clientDataJSON
+        ),
+        attestationObject: bytesToBase64url(
+          credential.response.attestationObject
+        )
+      };
+
+      if (typeof credential.response.getTransports === "function") {
+        response.transports = credential.response.getTransports();
+      }
+
+      return {
+        id: credential.id,
+        rawId: bytesToBase64url(credential.rawId),
+        type: credential.type,
+        authenticatorAttachment:
+          credential.authenticatorAttachment ?? null,
+        response,
+        clientExtensionResults:
+          credential.getClientExtensionResults()
+      };
+    }
+
+    button.addEventListener("click", async () => {
+      button.disabled = true;
+      status.textContent = "Preparing Passkey…";
+
+      try {
+        if (!window.PublicKeyCredential) {
+          throw new Error("Passkeys are not supported on this device.");
+        }
+
+        const beginResponse = await fetch(
+          `${API}/passkey/register/begin`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            }
+          }
+        );
+
+        if (!beginResponse.ok) {
+          throw new Error("Unable to start account creation.");
+        }
+
+        const begin = await beginResponse.json();
+
+        const publicKey = prepareCreationOptions(begin.options);
+
+        status.textContent = "Waiting for Passkey…";
+
+        const credential = await navigator.credentials.create({
+          publicKey
+        });
+
+        if (!credential) {
+          throw new Error("Passkey creation was cancelled.");
+        }
+
+        status.textContent = "Verifying Passkey…";
+
+        const finishResponse = await fetch(
+          `${API}/passkey/register/finish`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              challengeId: begin.challengeId,
+              credential: credentialToJSON(credential)
+            })
+          }
+        );
+
+        if (!finishResponse.ok) {
+          const error = await finishResponse.json().catch(() => null);
+          throw new Error(
+            error?.detail || "Passkey verification failed."
+          );
+        }
+
+        status.textContent = "Account created successfully.";
+        button.textContent = "Passkey created";
+      } catch (error) {
+        console.error(error);
+        status.textContent =
+          error?.message || "Account creation failed.";
+        button.disabled = false;
+      }
+    });
+  </script>
 </body>
 </html>
