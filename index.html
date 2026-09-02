@@ -91,6 +91,8 @@
       font: inherit;
       font-size: 16px;
       font-weight: 600;
+      text-align: center;
+      text-decoration: none;
       cursor: pointer;
     }
 
@@ -181,6 +183,25 @@
       font-weight: 650;
     }
 
+    .vpn-actions {
+      display: none;
+      padding: 22px 26px 26px;
+      border-top: 1px solid #e5e5e7;
+    }
+
+    .vpn-actions .action {
+      margin-top: 0;
+    }
+
+    .vpn-message {
+      min-height: 18px;
+      margin: 12px 0 0;
+      color: #86868b;
+      font-size: 13px;
+      line-height: 1.45;
+      text-align: center;
+    }
+
     @media (max-width: 520px) {
       h1 {
         font-size: 36px;
@@ -200,6 +221,11 @@
       .value {
         text-align: left;
       }
+
+      .vpn-actions {
+        padding-left: 20px;
+        padding-right: 20px;
+      }
     }
 
     @media (prefers-color-scheme: dark) {
@@ -211,7 +237,8 @@
       .subtitle,
       .status,
       .card-subtitle,
-      .label {
+      .label,
+      .vpn-message {
         color: #98989d;
       }
 
@@ -231,7 +258,8 @@
         border-color: #38383a;
       }
 
-      .row {
+      .row,
+      .vpn-actions {
         border-color: #38383a;
       }
     }
@@ -241,6 +269,7 @@
 <body>
   <main>
     <section class="panel">
+
       <div id="login-view" class="center">
         <div class="brand">TOLF VPN</div>
 
@@ -266,6 +295,7 @@
 
         <div class="dashboard-header">
           <h1>My VPN</h1>
+
           <p class="subtitle">
             Manage your TOLF VPN access and devices.
           </p>
@@ -289,8 +319,26 @@
             <div class="label">Username</div>
             <div id="vpn-username" class="value"></div>
           </div>
+
+          <div id="vpn-actions" class="vpn-actions">
+            <button id="create-vpn" class="action" type="button">
+              Create VPN Access
+            </button>
+
+            <a
+              id="install-profile"
+              class="action"
+              href="#"
+              style="display: none;"
+            >
+              Install on Apple Device
+            </a>
+
+            <div id="vpn-message" class="vpn-message"></div>
+          </div>
         </section>
       </div>
+
     </section>
   </main>
 
@@ -309,6 +357,11 @@
     const usernameRow = document.getElementById("username-row");
     const vpnUsername = document.getElementById("vpn-username");
 
+    const vpnActions = document.getElementById("vpn-actions");
+    const createVpnButton = document.getElementById("create-vpn");
+    const installProfile = document.getElementById("install-profile");
+    const vpnMessage = document.getElementById("vpn-message");
+
     function showDashboard(data) {
       loginView.style.display = "none";
       dashboard.style.display = "block";
@@ -321,7 +374,15 @@
       loginView.style.display = "block";
     }
 
-    function renderVpn(vpn) {
+    function renderVpn(vpn, profileUrl = null) {
+      vpnStatus.classList.remove("active");
+      usernameRow.style.display = "none";
+      vpnActions.style.display = "block";
+
+      createVpnButton.style.display = "none";
+      installProfile.style.display = "none";
+      vpnMessage.textContent = "";
+
       if (vpn && vpn.configured) {
         vpnDescription.textContent =
           "Your TOLF VPN access is active and ready to use.";
@@ -331,15 +392,21 @@
 
         vpnUsername.textContent = vpn.username || "";
         usernameRow.style.display = "grid";
+
+        if (profileUrl) {
+          installProfile.href = profileUrl;
+          installProfile.style.display = "block";
+
+          vpnMessage.textContent =
+            "The installation link is temporary.";
+        }
       } else {
         vpnDescription.textContent =
-          "Your account is ready. VPN access has not been configured yet.";
+          "Your account is ready. Create VPN access to continue.";
 
         vpnStatus.textContent = "Not configured";
-        vpnStatus.classList.remove("active");
 
-        vpnUsername.textContent = "";
-        usernameRow.style.display = "none";
+        createVpnButton.style.display = "block";
       }
     }
 
@@ -493,6 +560,44 @@
       }
     }
 
+    createVpnButton.addEventListener("click", async () => {
+      createVpnButton.disabled = true;
+      createVpnButton.textContent = "Creating VPN Access…";
+      vpnMessage.textContent = "Provisioning your VPN access…";
+
+      try {
+        const response = await fetch(
+          `${API}/vpn/create`,
+          {
+            method: "POST",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json"
+            }
+          }
+        );
+
+        const data = await response.json().catch(() => null);
+
+        if (!response.ok) {
+          throw new Error(
+            data?.detail || "Unable to create VPN access."
+          );
+        }
+
+        renderVpn(data.vpn, data.profileUrl);
+
+      } catch (error) {
+        console.error(error);
+
+        vpnMessage.textContent =
+          error?.message || "VPN provisioning failed.";
+
+        createVpnButton.disabled = false;
+        createVpnButton.textContent = "Create VPN Access";
+      }
+    });
+
     signInButton.addEventListener("click", async () => {
       setBusy(true);
       status.textContent = "Preparing Passkey sign in…";
@@ -545,6 +650,7 @@
         }
 
         showDashboard(me);
+
       } catch (error) {
         console.error(error);
 
@@ -601,6 +707,7 @@
 
         status.textContent =
           "Account created. Sign in with your Passkey.";
+
       } catch (error) {
         console.error(error);
 
