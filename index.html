@@ -352,6 +352,27 @@
       text-align: center;
     }
 
+    .account-delete-section {
+      margin-top: 24px;
+      padding-top: 22px;
+      border-top: 1px solid var(--border);
+    }
+
+    .account-delete-button {
+      width: 100%;
+      background: transparent;
+      color: var(--danger);
+      border: 1px solid var(--danger);
+    }
+
+    .account-delete-note {
+      margin: 10px 4px 0;
+      color: var(--secondary);
+      font-size: 14px;
+      line-height: 1.45;
+      text-align: center;
+    }
+
     .status-table {
       margin-top: 24px;
       border-top: 1px solid var(--border);
@@ -479,10 +500,16 @@
   <main class="page">
     <header class="brand">
       <h1>TOLF VPN</h1>
-      <p>System VPN access for your devices.</p>
+
+      <p>
+        System VPN access for your devices.
+      </p>
     </header>
 
-    <section id="loadingCard" class="card">
+    <section
+      id="loadingCard"
+      class="card"
+    >
       <div class="card-content">
         <h2>Loading</h2>
 
@@ -492,7 +519,10 @@
       </div>
     </section>
 
-    <section id="signedOutCard" class="card hidden">
+    <section
+      id="signedOutCard"
+      class="card hidden"
+    >
       <div class="card-content">
         <h2>VPN access</h2>
 
@@ -525,7 +555,10 @@
       </div>
     </section>
 
-    <section id="vpnCard" class="card hidden">
+    <section
+      id="vpnCard"
+      class="card hidden"
+    >
       <div class="card-content">
         <div class="card-topline">
           <h2>My VPN</h2>
@@ -544,12 +577,22 @@
               stroke-linejoin="round"
               aria-hidden="true"
             >
-              <path d="M10 17v1a2 2 0 0 0 2 2h5a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-5a2 2 0 0 0-2 2v1"/>
-              <path d="M14 12H4"/>
-              <path d="M7 9l-3 3 3 3"/>
+              <path
+                d="M10 17v1a2 2 0 0 0 2 2h5a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-5a2 2 0 0 0-2 2v1"
+              ></path>
+
+              <path
+                d="M14 12H4"
+              ></path>
+
+              <path
+                d="M7 9l-3 3 3 3"
+              ></path>
             </svg>
 
-            <span>Sign out</span>
+            <span>
+              Sign out
+            </span>
           </button>
         </div>
 
@@ -580,7 +623,9 @@
               >
 
               <label for="serverRiga">
-                <span>Riga, Latvia</span>
+                <span>
+                  Riga, Latvia
+                </span>
               </label>
             </div>
 
@@ -594,7 +639,9 @@
               >
 
               <label for="serverMoscow">
-                <span>Moscow, Russia</span>
+                <span>
+                  Moscow, Russia
+                </span>
 
                 <span class="server-coming-soon">
                   Coming Soon
@@ -612,7 +659,9 @@
               >
 
               <label for="serverUk">
-                <span>London, United Kingdom</span>
+                <span>
+                  London, United Kingdom
+                </span>
 
                 <span class="server-coming-soon">
                   Coming Soon
@@ -749,6 +798,25 @@
         </div>
 
         <div
+          id="accountDeleteSection"
+          class="account-delete-section"
+        >
+          <button
+            id="deleteAccountButton"
+            class="account-delete-button"
+            type="button"
+          >
+            Delete TOLF Account
+          </button>
+
+          <p class="account-delete-note">
+            Permanently deletes your TOLF account, Passkeys,
+            active sessions, and VPN access.
+            This cannot be undone.
+          </p>
+        </div>
+
+        <div
           id="vpnMessage"
           class="message"
         ></div>
@@ -757,49 +825,76 @@
   </main>
 
   <script>
-    const API = "https://api.tolf.is";
+    const API =
+      "https://api.tolf.is";
+
 
     const SERVERS = {
       riga: {
-        name: "Riga, Latvia",
-        host: "ikev2-riga.tolf.is"
+        name:
+          "Riga, Latvia",
+
+        host:
+          "ikev2-riga.tolf.is"
       },
 
       moscow: {
-        name: "Moscow, Russia",
-        host: ""
+        name:
+          "Moscow, Russia",
+
+        host:
+          ""
       },
 
       uk: {
-        name: "London, United Kingdom",
-        host: ""
+        name:
+          "London, United Kingdom",
+
+        host:
+          ""
       }
     };
 
 
     const loadingCard =
-      document.getElementById("loadingCard");
+      document.getElementById(
+        "loadingCard"
+      );
 
     const signedOutCard =
-      document.getElementById("signedOutCard");
+      document.getElementById(
+        "signedOutCard"
+      );
 
     const vpnCard =
-      document.getElementById("vpnCard");
+      document.getElementById(
+        "vpnCard"
+      );
 
     const signInButton =
-      document.getElementById("signInButton");
+      document.getElementById(
+        "signInButton"
+      );
 
     const createAccountButton =
-      document.getElementById("createAccountButton");
+      document.getElementById(
+        "createAccountButton"
+      );
 
     const signedOutMessage =
-      document.getElementById("signedOutMessage");
+      document.getElementById(
+        "signedOutMessage"
+      );
 
     const signOutButton =
-      document.getElementById("signOutButton");
+      document.getElementById(
+        "signOutButton"
+      );
 
     const serverSection =
-      document.getElementById("serverSection");
+      document.getElementById(
+        "serverSection"
+      );
 
     const selectedServerAddress =
       document.getElementById(
@@ -812,25 +907,39 @@
       );
 
     const vpnStatus =
-      document.getElementById("vpnStatus");
+      document.getElementById(
+        "vpnStatus"
+      );
 
     const serverRow =
-      document.getElementById("serverRow");
+      document.getElementById(
+        "serverRow"
+      );
 
     const vpnServerName =
-      document.getElementById("vpnServerName");
+      document.getElementById(
+        "vpnServerName"
+      );
 
     const vpnServerHost =
-      document.getElementById("vpnServerHost");
+      document.getElementById(
+        "vpnServerHost"
+      );
 
     const usernameRow =
-      document.getElementById("usernameRow");
+      document.getElementById(
+        "usernameRow"
+      );
 
     const vpnUsername =
-      document.getElementById("vpnUsername");
+      document.getElementById(
+        "vpnUsername"
+      );
 
     const createVpnButton =
-      document.getElementById("createVpnButton");
+      document.getElementById(
+        "createVpnButton"
+      );
 
     const generateProfileButton =
       document.getElementById(
@@ -853,13 +962,29 @@
       );
 
     const deleteSection =
-      document.getElementById("deleteSection");
+      document.getElementById(
+        "deleteSection"
+      );
 
     const deleteVpnButton =
-      document.getElementById("deleteVpnButton");
+      document.getElementById(
+        "deleteVpnButton"
+      );
+
+    const accountDeleteSection =
+      document.getElementById(
+        "accountDeleteSection"
+      );
+
+    const deleteAccountButton =
+      document.getElementById(
+        "deleteAccountButton"
+      );
 
     const vpnMessage =
-      document.getElementById("vpnMessage");
+      document.getElementById(
+        "vpnMessage"
+      );
 
 
     function getSelectedServerKey() {
@@ -900,7 +1025,9 @@
       vpnServerHost.textContent =
         server.host;
 
-      serverRow.classList.remove("hidden");
+      serverRow.classList.remove(
+        "hidden"
+      );
     }
 
 
@@ -927,7 +1054,9 @@
         atob(base64);
 
       const bytes =
-        new Uint8Array(binary.length);
+        new Uint8Array(
+          binary.length
+        );
 
       for (
         let i = 0;
@@ -1128,7 +1257,8 @@
         await fetch(
           API + path,
           {
-            credentials: "include",
+            credentials:
+              "include",
 
             ...options,
 
@@ -1231,8 +1361,11 @@
 
       setInstallLink(null);
 
-      vpnMessage.textContent = "";
-      vpnMessage.className = "message";
+      vpnMessage.textContent =
+        "";
+
+      vpnMessage.className =
+        "message";
 
       if (vpn.configured) {
         vpnStatus.textContent =
@@ -1332,11 +1465,14 @@
           await apiRequest(
             "/me",
             {
-              method: "GET"
+              method:
+                "GET"
             }
           );
 
-        showVpn(data.vpn);
+        showVpn(
+          data.vpn
+        );
       } catch {
         showSignedOut();
       }
@@ -1359,8 +1495,11 @@
           await apiRequest(
             "/logout",
             {
-              method: "POST",
-              body: "{}"
+              method:
+                "POST",
+
+              body:
+                "{}"
             }
           );
 
@@ -1402,8 +1541,11 @@
             await apiRequest(
               "/passkey/login/begin",
               {
-                method: "POST",
-                body: "{}"
+                method:
+                  "POST",
+
+                body:
+                  "{}"
               }
             );
 
@@ -1426,7 +1568,8 @@
           await apiRequest(
             "/passkey/login/finish",
             {
-              method: "POST",
+              method:
+                "POST",
 
               body:
                 JSON.stringify({
@@ -1476,8 +1619,11 @@
             await apiRequest(
               "/passkey/register/begin",
               {
-                method: "POST",
-                body: "{}"
+                method:
+                  "POST",
+
+                body:
+                  "{}"
               }
             );
 
@@ -1500,7 +1646,8 @@
           await apiRequest(
             "/passkey/register/finish",
             {
-              method: "POST",
+              method:
+                "POST",
 
               body:
                 JSON.stringify({
@@ -1554,7 +1701,8 @@
             await apiRequest(
               "/vpn/create",
               {
-                method: "POST",
+                method:
+                  "POST",
 
                 body:
                   JSON.stringify({
@@ -1613,8 +1761,11 @@
             await apiRequest(
               "/vpn/profile",
               {
-                method: "POST",
-                body: "{}"
+                method:
+                  "POST",
+
+                body:
+                  "{}"
               }
             );
 
@@ -1672,6 +1823,9 @@
         deleteVpnButton.disabled =
           true;
 
+        deleteAccountButton.disabled =
+          true;
+
         setInstallLink(null);
 
         vpnMessage.textContent =
@@ -1685,8 +1839,11 @@
             await apiRequest(
               "/vpn/rotate",
               {
-                method: "POST",
-                body: "{}"
+                method:
+                  "POST",
+
+                body:
+                  "{}"
               }
             );
 
@@ -1720,6 +1877,9 @@
 
           deleteVpnButton.disabled =
             false;
+
+          deleteAccountButton.disabled =
+            false;
         }
       }
     );
@@ -1749,6 +1909,9 @@
         generateProfileButton.disabled =
           true;
 
+        deleteAccountButton.disabled =
+          true;
+
         setInstallLink(null);
 
         vpnMessage.textContent =
@@ -1762,12 +1925,17 @@
             await apiRequest(
               "/vpn/delete",
               {
-                method: "POST",
-                body: "{}"
+                method:
+                  "POST",
+
+                body:
+                  "{}"
               }
             );
 
-          showVpn(data.vpn);
+          showVpn(
+            data.vpn
+          );
 
           vpnMessage.textContent =
             "VPN access deleted. Your TOLF account and Passkey remain active.";
@@ -1788,6 +1956,102 @@
             false;
 
           generateProfileButton.disabled =
+            false;
+
+          deleteAccountButton.disabled =
+            false;
+        }
+      }
+    );
+
+
+    deleteAccountButton.addEventListener(
+      "click",
+      async () => {
+        const confirmed =
+          window.confirm(
+            "Delete TOLF account?\n\n" +
+            "This permanently deletes your TOLF account, " +
+            "Passkeys, active sessions, and VPN access. " +
+            "Installed VPN profiles will stop working. " +
+            "This cannot be undone."
+          );
+
+        if (!confirmed) {
+          return;
+        }
+
+        deleteAccountButton.disabled =
+          true;
+
+        signOutButton.disabled =
+          true;
+
+        createVpnButton.disabled =
+          true;
+
+        generateProfileButton.disabled =
+          true;
+
+        rotatePasswordButton.disabled =
+          true;
+
+        deleteVpnButton.disabled =
+          true;
+
+        setInstallLink(null);
+
+        vpnMessage.textContent =
+          "Deleting TOLF account…";
+
+        vpnMessage.className =
+          "message";
+
+        try {
+          await apiRequest(
+            "/account/delete",
+            {
+              method:
+                "POST",
+
+              body:
+                JSON.stringify({
+                  confirm:
+                    "DELETE"
+                })
+            }
+          );
+
+          signedOutMessage.textContent =
+            "TOLF account deleted.";
+
+          signedOutMessage.className =
+            "message success";
+
+          showSignedOut();
+        } catch (error) {
+          vpnMessage.textContent =
+            error.message;
+
+          vpnMessage.className =
+            "message error";
+        } finally {
+          deleteAccountButton.disabled =
+            false;
+
+          signOutButton.disabled =
+            false;
+
+          createVpnButton.disabled =
+            false;
+
+          generateProfileButton.disabled =
+            false;
+
+          rotatePasswordButton.disabled =
+            false;
+
+          deleteVpnButton.disabled =
             false;
         }
       }
