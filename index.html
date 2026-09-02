@@ -369,6 +369,7 @@
             class="password-note hidden"
           >
             Changing the VPN password creates a new configuration profile.
+            The new VPN password is included in the new Mobile Config file.
             You’ll need to install the new profile on your Apple devices.
           </p>
         </div>
@@ -953,6 +954,7 @@
         const confirmed = window.confirm(
           "Change the VPN password?\n\n" +
           "This creates a new configuration profile. " +
+          "The new VPN password will be included in the new Mobile Config file. " +
           "The current profile will stop working after it reconnects. " +
           "You’ll need to install the new profile on your Apple devices."
         );
