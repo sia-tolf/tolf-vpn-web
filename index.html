@@ -34,6 +34,7 @@
       --danger: #d70015;
       --delete-background: #e85d75;
       --delete-border: #e85d75;
+      --segment-background: #f5f5f7;
     }
 
     @media (prefers-color-scheme: dark) {
@@ -50,6 +51,7 @@
         --danger: #ff453a;
         --delete-background: #d94f69;
         --delete-border: #d94f69;
+        --segment-background: #2c2c2e;
       }
     }
 
@@ -128,6 +130,102 @@
       color: var(--secondary);
       font-size: 15px;
       line-height: 1.5;
+    }
+
+    .server-section {
+      margin-top: 24px;
+    }
+
+    .server-heading {
+      margin: 0 0 10px;
+      color: var(--secondary);
+      font-size: 14px;
+      line-height: 1.4;
+      font-weight: 600;
+    }
+
+    .server-selector {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      padding: 5px;
+      background: var(--segment-background);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+    }
+
+    .server-option {
+      position: relative;
+      min-width: 0;
+    }
+
+    .server-option input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .server-option label {
+      min-height: 58px;
+      padding: 9px 8px;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      text-align: center;
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.2;
+      font-weight: 600;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .server-option input:checked + label {
+      background: var(--button);
+      color: var(--button-text);
+      border-color: var(--button);
+    }
+
+    .server-option input:focus-visible + label {
+      outline: 2px solid var(--text);
+      outline-offset: 2px;
+    }
+
+    .server-option input:disabled + label {
+      opacity: 0.38;
+      cursor: default;
+    }
+
+    .server-coming-soon {
+      font-size: 11px;
+      line-height: 1.2;
+      font-weight: 500;
+    }
+
+    .server-address {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      margin-top: 11px;
+      padding: 0 4px;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .server-address-label {
+      color: var(--secondary);
+    }
+
+    .server-address-value {
+      min-width: 0;
+      text-align: right;
+      overflow-wrap: anywhere;
+      font-weight: 500;
     }
 
     .actions {
@@ -242,6 +340,17 @@
       overflow-wrap: anywhere;
     }
 
+    .server-value-name {
+      display: block;
+    }
+
+    .server-value-host {
+      display: block;
+      margin-top: 3px;
+      color: var(--secondary);
+      font-size: 13px;
+    }
+
     .status-active {
       color: var(--success);
       font-weight: 600;
@@ -296,6 +405,22 @@
 
       .card-content {
         padding: 22px;
+      }
+
+      .server-option label {
+        min-height: 62px;
+        padding-left: 5px;
+        padding-right: 5px;
+        font-size: 14px;
+      }
+
+      .server-address {
+        flex-direction: column;
+        gap: 3px;
+      }
+
+      .server-address-value {
+        text-align: left;
       }
 
       .row {
@@ -364,6 +489,79 @@
           Manage your TOLF VPN access.
         </p>
 
+        <div
+          id="serverSection"
+          class="server-section hidden"
+        >
+          <p class="server-heading">
+            VPN Server
+          </p>
+
+          <div
+            class="server-selector"
+            role="radiogroup"
+            aria-label="VPN Server"
+          >
+            <div class="server-option">
+              <input
+                id="serverRiga"
+                type="radio"
+                name="vpnServer"
+                value="riga"
+                checked
+              >
+              <label for="serverRiga">
+                <span>Riga</span>
+              </label>
+            </div>
+
+            <div class="server-option">
+              <input
+                id="serverMoscow"
+                type="radio"
+                name="vpnServer"
+                value="moscow"
+                disabled
+              >
+              <label for="serverMoscow">
+                <span>Moscow</span>
+                <span class="server-coming-soon">
+                  Coming Soon
+                </span>
+              </label>
+            </div>
+
+            <div class="server-option">
+              <input
+                id="serverUk"
+                type="radio"
+                name="vpnServer"
+                value="uk"
+                disabled
+              >
+              <label for="serverUk">
+                <span>United Kingdom</span>
+                <span class="server-coming-soon">
+                  Coming Soon
+                </span>
+              </label>
+            </div>
+          </div>
+
+          <div class="server-address">
+            <span class="server-address-label">
+              Server address
+            </span>
+
+            <span
+              id="selectedServerAddress"
+              class="server-address-value"
+            >
+              ikev2-riga.tolf.is
+            </span>
+          </div>
+        </div>
+
         <div class="status-table">
           <div class="row">
             <div class="row-label">Status</div>
@@ -372,6 +570,24 @@
               class="row-value"
             >
               —
+            </div>
+          </div>
+
+          <div
+            id="serverRow"
+            class="row hidden"
+          >
+            <div class="row-label">Server</div>
+            <div class="row-value">
+              <span
+                id="vpnServerName"
+                class="server-value-name"
+              ></span>
+
+              <span
+                id="vpnServerHost"
+                class="server-value-host"
+              ></span>
             </div>
           </div>
 
@@ -458,6 +674,24 @@
   <script>
     const API = "https://api.tolf.is";
 
+    const SERVERS = {
+      riga: {
+        name: "Riga",
+        host: "ikev2-riga.tolf.is"
+      },
+
+      moscow: {
+        name: "Moscow",
+        host: ""
+      },
+
+      uk: {
+        name: "United Kingdom",
+        host: ""
+      }
+    };
+
+
     const loadingCard =
       document.getElementById("loadingCard");
 
@@ -476,8 +710,30 @@
     const signedOutMessage =
       document.getElementById("signedOutMessage");
 
+    const serverSection =
+      document.getElementById("serverSection");
+
+    const selectedServerAddress =
+      document.getElementById(
+        "selectedServerAddress"
+      );
+
+    const serverInputs =
+      document.querySelectorAll(
+        'input[name="vpnServer"]'
+      );
+
     const vpnStatus =
       document.getElementById("vpnStatus");
+
+    const serverRow =
+      document.getElementById("serverRow");
+
+    const vpnServerName =
+      document.getElementById("vpnServerName");
+
+    const vpnServerHost =
+      document.getElementById("vpnServerHost");
 
     const usernameRow =
       document.getElementById("usernameRow");
@@ -508,6 +764,56 @@
 
     const vpnMessage =
       document.getElementById("vpnMessage");
+
+
+    function getSelectedServerKey() {
+      const selected =
+        document.querySelector(
+          'input[name="vpnServer"]:checked'
+        );
+
+      return selected?.value || "riga";
+    }
+
+
+    function updateSelectedServerAddress() {
+      const serverKey =
+        getSelectedServerKey();
+
+      const server =
+        SERVERS[serverKey];
+
+      selectedServerAddress.textContent =
+        server?.host || "";
+    }
+
+
+    function showConfiguredServer(vpn) {
+      const serverKey =
+        vpn?.server &&
+        SERVERS[vpn.server]
+          ? vpn.server
+          : "riga";
+
+      const server =
+        SERVERS[serverKey];
+
+      vpnServerName.textContent =
+        server.name;
+
+      vpnServerHost.textContent =
+        server.host;
+
+      serverRow.classList.remove("hidden");
+    }
+
+
+    for (const input of serverInputs) {
+      input.addEventListener(
+        "change",
+        updateSelectedServerAddress
+      );
+    }
 
 
     function base64urlToBuffer(value) {
@@ -759,6 +1065,10 @@
         vpnStatus.className =
           "row-value status-active";
 
+        serverSection.classList.add("hidden");
+
+        showConfiguredServer(vpn);
+
         vpnUsername.textContent =
           vpn.username || "";
 
@@ -786,6 +1096,15 @@
           "Not configured";
 
         vpnStatus.className = "row-value";
+
+        serverRow.classList.add("hidden");
+
+        vpnServerName.textContent = "";
+        vpnServerHost.textContent = "";
+
+        serverSection.classList.remove("hidden");
+
+        updateSelectedServerAddress();
 
         vpnUsername.textContent = "";
 
@@ -974,16 +1293,25 @@
           "message";
 
         try {
+          const server =
+            getSelectedServerKey();
+
           const data =
             await apiRequest(
               "/vpn/create",
               {
                 method: "POST",
-                body: "{}"
+                body: JSON.stringify({
+                  server
+                })
               }
             );
 
-          showVpn(data.vpn);
+          showVpn({
+            ...data.vpn,
+            server:
+              data.vpn?.server || server
+          });
 
           setInstallLink(data.profileUrl);
 
