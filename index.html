@@ -34,6 +34,9 @@
       --danger: #d70015;
       --delete-background: #e85d75;
       --delete-border: #e85d75;
+      --account-delete-background: #c70015;
+      --account-delete-border: #c70015;
+      --account-delete-note: #b00012;
       --segment-background: #f5f5f7;
     }
 
@@ -51,6 +54,9 @@
         --danger: #ff453a;
         --delete-background: #d94f69;
         --delete-border: #d94f69;
+        --account-delete-background: #ff3b30;
+        --account-delete-border: #ff3b30;
+        --account-delete-note: #ff6961;
         --segment-background: #2c2c2e;
       }
     }
@@ -360,16 +366,18 @@
 
     .account-delete-button {
       width: 100%;
-      background: transparent;
-      color: var(--danger);
-      border: 1px solid var(--danger);
+      background: var(--account-delete-background);
+      color: #ffffff;
+      border: 1px solid var(--account-delete-border);
+      font-weight: 700;
     }
 
     .account-delete-note {
       margin: 10px 4px 0;
-      color: var(--secondary);
+      color: var(--account-delete-note);
       font-size: 14px;
       line-height: 1.45;
+      font-weight: 600;
       text-align: center;
     }
 
