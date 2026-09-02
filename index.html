@@ -358,6 +358,127 @@
       text-align: center;
     }
 
+    .passkeys-section {
+      margin-top: 24px;
+      padding-top: 22px;
+      border-top: 1px solid var(--border);
+    }
+
+    .passkeys-title {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.3;
+      font-weight: 650;
+    }
+
+    .passkeys-description {
+      margin: 6px 0 0;
+      color: var(--secondary);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .passkey-list {
+      margin-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .passkey-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .passkey-info {
+      min-width: 0;
+    }
+
+    .passkey-name {
+      font-size: 15px;
+      line-height: 1.4;
+      font-weight: 600;
+      overflow-wrap: anywhere;
+    }
+
+    .passkey-meta {
+      margin-top: 3px;
+      color: var(--secondary);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .passkey-remove-button {
+      flex: 0 0 auto;
+      min-height: 38px;
+      padding: 8px 12px;
+      background: transparent;
+      color: var(--danger);
+      border: 1px solid var(--danger);
+      border-radius: 10px;
+      font-size: 14px;
+      line-height: 1.3;
+      font-weight: 600;
+    }
+
+    .passkey-add-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .passkey-name-input {
+      flex: 1 1 auto;
+      min-width: 0;
+      min-height: 50px;
+      padding: 12px 14px;
+      background: var(--card);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      outline: none;
+      font-size: 16px;
+      line-height: 1.3;
+    }
+
+    .passkey-name-input::placeholder {
+      color: var(--secondary);
+    }
+
+    .passkey-name-input:focus {
+      border-color: var(--text);
+    }
+
+    .add-passkey-button {
+      flex: 0 0 auto;
+      white-space: nowrap;
+    }
+
+    .passkey-note {
+      margin: 10px 4px 0;
+      color: var(--secondary);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .passkey-message {
+      margin-top: 10px;
+      min-height: 20px;
+      color: var(--secondary);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .passkey-message.error {
+      color: var(--error);
+    }
+
+    .passkey-message.success {
+      color: var(--success);
+    }
+
     .account-delete-section {
       margin-top: 24px;
       padding-top: 22px;
@@ -460,6 +581,14 @@
       .password-note {
         flex: none;
       }
+
+      .passkey-add-row {
+        flex-direction: column;
+      }
+
+      .add-passkey-button {
+        width: 100%;
+      }
     }
 
     @media (max-width: 520px) {
@@ -499,6 +628,10 @@
 
       .row-value {
         text-align: left;
+      }
+
+      .passkey-item {
+        align-items: flex-start;
       }
     }
   </style>
@@ -806,6 +939,54 @@
         </div>
 
         <div
+          id="passkeysSection"
+          class="passkeys-section"
+        >
+          <h3 class="passkeys-title">
+            Passkeys
+          </h3>
+
+          <p class="passkeys-description">
+            Passkeys provide access to your TOLF account.
+            Add another Passkey before removing your current one.
+          </p>
+
+          <div
+            id="passkeyList"
+            class="passkey-list"
+          ></div>
+
+          <div class="passkey-add-row">
+            <input
+              id="passkeyNameInput"
+              class="passkey-name-input"
+              type="text"
+              maxlength="80"
+              autocomplete="off"
+              placeholder="Passkey name (optional)"
+              aria-label="Passkey name"
+            >
+
+            <button
+              id="addPasskeyButton"
+              class="primary add-passkey-button"
+              type="button"
+            >
+              Add Passkey
+            </button>
+          </div>
+
+          <p class="passkey-note">
+            The name is only stored by TOLF to help you identify this Passkey.
+          </p>
+
+          <div
+            id="passkeyMessage"
+            class="passkey-message"
+          ></div>
+        </div>
+
+        <div
           id="accountDeleteSection"
           class="account-delete-section"
         >
@@ -977,6 +1158,26 @@
     const deleteVpnButton =
       document.getElementById(
         "deleteVpnButton"
+      );
+
+    const passkeyList =
+      document.getElementById(
+        "passkeyList"
+      );
+
+    const passkeyNameInput =
+      document.getElementById(
+        "passkeyNameInput"
+      );
+
+    const addPasskeyButton =
+      document.getElementById(
+        "addPasskeyButton"
+      );
+
+    const passkeyMessage =
+      document.getElementById(
+        "passkeyMessage"
       );
 
     const accountDeleteSection =
@@ -1337,6 +1538,236 @@
     }
 
 
+    function formatPasskeyDate(value) {
+      if (!value) {
+        return "";
+      }
+
+      const date =
+        new Date(value);
+
+      if (
+        Number.isNaN(
+          date.getTime()
+        )
+      ) {
+        return "";
+      }
+
+      return new Intl.DateTimeFormat(
+        "en-GB",
+        {
+          day:
+            "numeric",
+
+          month:
+            "short",
+
+          year:
+            "numeric"
+        }
+      ).format(date);
+    }
+
+
+    function renderPasskeys(passkeys) {
+      passkeyList.textContent =
+        "";
+
+      const total =
+        passkeys.length;
+
+      passkeys.forEach(
+        (passkey, index) => {
+          const item =
+            document.createElement(
+              "div"
+            );
+
+          item.className =
+            "passkey-item";
+
+          const info =
+            document.createElement(
+              "div"
+            );
+
+          info.className =
+            "passkey-info";
+
+          const name =
+            document.createElement(
+              "div"
+            );
+
+          name.className =
+            "passkey-name";
+
+          name.textContent =
+            passkey.name ||
+            (
+              total === 1
+                ? "Passkey"
+                : `Passkey ${index + 1}`
+            );
+
+          const meta =
+            document.createElement(
+              "div"
+            );
+
+          meta.className =
+            "passkey-meta";
+
+          const created =
+            formatPasskeyDate(
+              passkey.createdAt
+            );
+
+          meta.textContent =
+            created
+              ? `Added ${created}`
+              : "Registered Passkey";
+
+          const removeButton =
+            document.createElement(
+              "button"
+            );
+
+          removeButton.type =
+            "button";
+
+          removeButton.className =
+            "passkey-remove-button";
+
+          removeButton.textContent =
+            "Remove";
+
+          if (total <= 1) {
+            removeButton.disabled =
+              true;
+
+            removeButton.title =
+              "Add another Passkey before removing this one.";
+          } else {
+            removeButton.addEventListener(
+              "click",
+              async () => {
+                const displayName =
+                  name.textContent;
+
+                const confirmed =
+                  window.confirm(
+                    "Remove Passkey?\n\n" +
+                    `Remove "${displayName}" from this TOLF account? ` +
+                    "That Passkey will no longer be able to sign in."
+                  );
+
+                if (!confirmed) {
+                  return;
+                }
+
+                removeButton.disabled =
+                  true;
+
+                addPasskeyButton.disabled =
+                  true;
+
+                passkeyMessage.textContent =
+                  "Removing Passkey…";
+
+                passkeyMessage.className =
+                  "passkey-message";
+
+                try {
+                  await apiRequest(
+                    "/passkeys/delete",
+                    {
+                      method:
+                        "POST",
+
+                      body:
+                        JSON.stringify({
+                          id:
+                            passkey.id
+                        })
+                    }
+                  );
+
+                  await loadPasskeys();
+
+                  passkeyMessage.textContent =
+                    "Passkey removed.";
+
+                  passkeyMessage.className =
+                    "passkey-message success";
+                } catch (error) {
+                  passkeyMessage.textContent =
+                    error.message;
+
+                  passkeyMessage.className =
+                    "passkey-message error";
+                } finally {
+                  addPasskeyButton.disabled =
+                    false;
+                }
+              }
+            );
+          }
+
+          info.appendChild(
+            name
+          );
+
+          info.appendChild(
+            meta
+          );
+
+          item.appendChild(
+            info
+          );
+
+          item.appendChild(
+            removeButton
+          );
+
+          passkeyList.appendChild(
+            item
+          );
+        }
+      );
+    }
+
+
+    async function loadPasskeys() {
+      try {
+        const data =
+          await apiRequest(
+            "/passkeys",
+            {
+              method:
+                "GET"
+            }
+          );
+
+        renderPasskeys(
+          Array.isArray(data.passkeys)
+            ? data.passkeys
+            : []
+        );
+      } catch (error) {
+        passkeyList.textContent =
+          "";
+
+        passkeyMessage.textContent =
+          error.message;
+
+        passkeyMessage.className =
+          "passkey-message error";
+      }
+    }
+
+
     function showSignedOut() {
       loadingCard
         .classList
@@ -1351,6 +1782,18 @@
         .remove("hidden");
 
       setInstallLink(null);
+
+      passkeyList.textContent =
+        "";
+
+      passkeyNameInput.value =
+        "";
+
+      passkeyMessage.textContent =
+        "";
+
+      passkeyMessage.className =
+        "passkey-message";
     }
 
 
@@ -1481,6 +1924,8 @@
         showVpn(
           data.vpn
         );
+
+        await loadPasskeys();
       } catch {
         showSignedOut();
       }
@@ -1683,6 +2128,103 @@
             "message error";
         } finally {
           createAccountButton.disabled =
+            false;
+        }
+      }
+    );
+
+
+    addPasskeyButton.addEventListener(
+      "click",
+      async () => {
+        addPasskeyButton.disabled =
+          true;
+
+        deleteAccountButton.disabled =
+          true;
+
+        passkeyMessage.textContent =
+          "Creating Passkey…";
+
+        passkeyMessage.className =
+          "passkey-message";
+
+        try {
+          const name =
+            passkeyNameInput.value
+              .trim();
+
+          const begin =
+            await apiRequest(
+              "/passkeys/add/begin",
+              {
+                method:
+                  "POST",
+
+                body:
+                  "{}"
+              }
+            );
+
+          const credential =
+            await navigator
+              .credentials
+              .create({
+                publicKey:
+                  prepareRegistrationOptions(
+                    begin.options
+                  )
+              });
+
+          if (!credential) {
+            throw new Error(
+              "Passkey was not created"
+            );
+          }
+
+          await apiRequest(
+            "/passkeys/add/finish",
+            {
+              method:
+                "POST",
+
+              body:
+                JSON.stringify({
+                  challengeId:
+                    begin.challengeId,
+
+                  credential:
+                    serializeCredential(
+                      credential
+                    ),
+
+                  name:
+                    name || null
+                })
+            }
+          );
+
+          passkeyNameInput.value =
+            "";
+
+          await loadPasskeys();
+
+          passkeyMessage.textContent =
+            "Passkey added.";
+
+          passkeyMessage.className =
+            "passkey-message success";
+        } catch (error) {
+          passkeyMessage.textContent =
+            error.message;
+
+          passkeyMessage.className =
+            "passkey-message error";
+        } finally {
+          addPasskeyButton.disabled =
+            false;
+
+          deleteAccountButton.disabled =
             false;
         }
       }
@@ -1995,6 +2537,9 @@
         signOutButton.disabled =
           true;
 
+        addPasskeyButton.disabled =
+          true;
+
         createVpnButton.disabled =
           true;
 
@@ -2048,6 +2593,9 @@
             false;
 
           signOutButton.disabled =
+            false;
+
+          addPasskeyButton.disabled =
             false;
 
           createVpnButton.disabled =
