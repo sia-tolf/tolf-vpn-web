@@ -32,6 +32,8 @@
       --success: #248a3d;
       --error: #d70015;
       --danger: #d70015;
+      --delete-background: #e85d75;
+      --delete-border: #e85d75;
     }
 
     @media (prefers-color-scheme: dark) {
@@ -46,6 +48,8 @@
         --success: #30d158;
         --error: #ff453a;
         --danger: #ff453a;
+        --delete-background: #d94f69;
+        --delete-border: #d94f69;
       }
     }
 
@@ -197,9 +201,9 @@
 
     .delete-button {
       width: 100%;
-      background: transparent;
-      color: var(--danger);
-      border: 1px solid var(--danger);
+      background: var(--delete-background);
+      color: #ffffff;
+      border: 1px solid var(--delete-border);
     }
 
     .delete-note {
