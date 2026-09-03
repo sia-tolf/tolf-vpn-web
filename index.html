@@ -22,6 +22,7 @@
   <script defer src="js/recovery.js"></script>
   <script defer src="js/account.js"></script>
   <script defer src="js/vpn.js"></script>
+  <script defer src="js/promo.js"></script>
   <script defer src="js/app.js"></script>
 </head>
 
@@ -158,7 +159,13 @@
 
           <div class="server-selector" role="radiogroup" aria-label="VPN Server">
             <div class="server-option">
-              <input id="serverRiga" type="radio" name="vpnServer" value="riga" checked>
+              <input
+                id="serverRiga"
+                type="radio"
+                name="vpnServer"
+                value="riga"
+                checked
+              >
 
               <label for="serverRiga">
                 <span data-i18n="rigaLatvia">Riga, Latvia</span>
@@ -166,28 +173,97 @@
             </div>
 
             <div class="server-option">
-              <input id="serverMoscow" type="radio" name="vpnServer" value="moscow" disabled>
+              <input
+                id="serverMoscow"
+                type="radio"
+                name="vpnServer"
+                value="moscow"
+                disabled
+              >
 
               <label for="serverMoscow">
                 <span data-i18n="moscowRussia">Moscow, Russia</span>
-                <span class="server-coming-soon" data-i18n="comingSoon">Coming Soon</span>
+
+                <span
+                  id="moscowAccessLabel"
+                  class="server-coming-soon"
+                  data-i18n="promoRequired"
+                >
+                  Promo code required
+                </span>
               </label>
             </div>
 
             <div class="server-option">
-              <input id="serverUk" type="radio" name="vpnServer" value="uk" disabled>
+              <input
+                id="serverUk"
+                type="radio"
+                name="vpnServer"
+                value="uk"
+                disabled
+              >
 
               <label for="serverUk">
                 <span data-i18n="londonUk">London, United Kingdom</span>
-                <span class="server-coming-soon" data-i18n="comingSoon">Coming Soon</span>
+
+                <span class="server-coming-soon" data-i18n="comingSoon">
+                  Coming Soon
+                </span>
               </label>
             </div>
           </div>
 
           <div class="server-address">
-            <span class="server-address-label" data-i18n="serverAddress">Server address</span>
-            <span id="selectedServerAddress" class="server-address-value">ikev2-riga.tolf.is</span>
+            <span class="server-address-label" data-i18n="serverAddress">
+              Server address
+            </span>
+
+            <span id="selectedServerAddress" class="server-address-value">
+              ikev2-riga.tolf.is
+            </span>
           </div>
+        </div>
+
+        <div class="promo-section">
+          <p
+            id="promoGranted"
+            class="section-description hidden"
+            data-i18n="moscowUnlocked"
+          >
+            Moscow access is unlocked for this account.
+          </p>
+
+          <div id="promoForm">
+            <p class="section-description" data-i18n="promoDescription">
+              Enter a promo code to unlock Moscow alongside Riga.
+            </p>
+
+            <div class="promo-actions">
+              <input
+                id="promoInput"
+                class="promo-input"
+                type="text"
+                minlength="6"
+                maxlength="6"
+                pattern="[A-Za-z0-9]{6}"
+                autocomplete="off"
+                autocapitalize="characters"
+                spellcheck="false"
+                aria-label="Promo code"
+              >
+
+              <button
+                id="redeemPromoButton"
+                class="secondary"
+                type="button"
+                data-i18n="applyPromo"
+              >
+                Apply code
+              </button>
+            </div>
+          </div>
+
+          <div id="promoMessage" class="promo-message" role="status"></div>
         </div>
 
         <div class="status-table">
