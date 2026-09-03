@@ -1,4 +1,16 @@
 I18N.ru = {
+  promoRateLimit: "Слишком много попыток. Повторите через 15 минут.",
+  invalidPromo: "Промокод недействителен или больше недоступен.",
+  promoAccepted: "Москва доступна. Выберите сервер для создания его профиля.",
+  checkingPromo: "Открываем доступ к Москве…",
+  enterPromo: "Введите промокод.",
+  moscowUnlocked: "Доступ к Москве открыт для этого аккаунта.",
+  promoDescription: "Введите промокод, чтобы открыть Москву дополнительно к Риге.",
+  retryPromo: "Повторить активацию",
+  applyPromo: "Применить",
+  promoRequired: "Нужен промокод",
+  promoCode: "Промокод",
+
   brandSubtitle: "Системный VPN-доступ для ваших устройств.",
   loadingTitle: "Загрузка",
   loadingDescription: "Проверяем ваш аккаунт.",
@@ -10,10 +22,12 @@ I18N.ru = {
   recoverDescription: "Введите Recovery Code. Если код действителен, вы сможете создать новый Passkey для этого аккаунта.",
   continueButton: "Продолжить",
   cancelButton: "Отмена",
+
   saveRecoveryCode: "Сохраните Recovery Code",
   recoveryCodeInitialWarning: "Этот код позволяет восстановить доступ, если вы потеряете все Passkey. TOLF не сможет показать этот код повторно.",
   copyRecoveryCode: "Скопировать Recovery Code",
   savedIt: "Я сохранил код",
+
   myVpn: "Мой VPN",
   signOut: "Выйти",
   manageVpnDescription: "Управление доступом TOLF VPN.",
@@ -28,13 +42,15 @@ I18N.ru = {
   username: "Имя пользователя",
   active: "Активен",
   notConfigured: "Не настроен",
+
   createVpnAccess: "Создать VPN-доступ",
   generateInstallLink: "Создать ссылку для установки",
   installAppleDevice: "Установить на устройство Apple",
   changeVpnPassword: "Сменить пароль VPN",
-  changePasswordNote: "При смене пароля VPN создаётся новый профиль конфигурации. Новый пароль VPN будет включён в новый файл Mobile Config. Новый профиль потребуется установить на устройства Apple.",
+  changePasswordNote: "Рига и Москва используют общий пароль VPN. После его смены создайте и установите новый профиль для каждого используемого сервера.",
   deleteVpnAccess: "Удалить VPN-доступ",
-  deleteVpnNote: "VPN-доступ будет удалён с серверов TOLF VPN. Ваш аккаунт TOLF и Passkey останутся активными.",
+  deleteVpnNote: "VPN-доступ будет удалён на обоих серверах. Аккаунт TOLF, Passkey и доступ, открытый промокодом, сохранятся.",
+
   passkeys: "Passkey",
   passkeysDescription: "Passkey обеспечивают доступ к вашему аккаунту TOLF. Перед удалением текущего Passkey добавьте другой.",
   addPasskey: "Добавить Passkey",
@@ -44,13 +60,16 @@ I18N.ru = {
   registeredPasskey: "Зарегистрированный Passkey",
   addedDate: "Добавлен {date}",
   addAnotherBeforeRemoving: "Перед удалением этого Passkey добавьте другой.",
+
   recovery: "Восстановление",
   recoveryDescription: "Recovery Code позволяет восстановить доступ к аккаунту TOLF, если вы потеряете все Passkey.",
   generateNewRecoveryCode: "Создать новый Recovery Code",
   saveNewRecoveryCode: "Сохраните новый Recovery Code",
   newRecoveryCodeWarning: "Этот код показывается только сейчас. Все предыдущие Recovery Code больше недействительны.",
+
   deleteTolfAccount: "Удалить аккаунт TOLF",
   deleteAccountNote: "Безвозвратно удаляет аккаунт TOLF, регистрации Passkey, активные сессии, Recovery Code и VPN-доступ. Это действие нельзя отменить.",
+
   signingOut: "Выходим…",
   waitingPasskey: "Ожидаем Passkey…",
   passkeyNotProvided: "Passkey не был предоставлен",
@@ -62,6 +81,7 @@ I18N.ru = {
   recoveryCodeCopyFailed: "Не удалось скопировать Recovery Code.",
   recoveryCodeSaved: "Recovery Code сохранён.",
   recoveryCodeSavedSignIn: "Recovery Code сохранён. Войдите с помощью Passkey.",
+
   generateRecoveryConfirmTitle: "Создать новый Recovery Code?",
   generateRecoveryConfirmBody: "Все предыдущие Recovery Code немедленно перестанут действовать.",
   generatingRecovery: "Создаём Recovery Code…",
@@ -72,26 +92,31 @@ I18N.ru = {
   recoveredPasskeyCreated: "{name} создан. Сохраните новый Recovery Code.",
   newPasskey: "Новый Passkey",
   newRecoveryCodeNotReturned: "Новый Recovery Code не был получен",
+
   passkeyAdded: "Passkey добавлен.",
   passkeyAddedNamed: "{name} добавлен.",
   removingPasskey: "Удаляем Passkey…",
   passkeyRemoved: "Passkey удалён.",
   removePasskeyConfirmTitle: "Удалить Passkey?",
   removePasskeyConfirmBody: "Удалить «{name}» из этого аккаунта TOLF? После этого данный Passkey больше не сможет использоваться для входа.",
+
   creatingVpn: "Создаём VPN-доступ…",
   vpnAccessCreated: "VPN-доступ создан.",
   generatingInstall: "Создаём ссылку для установки…",
   installLinkNotReturned: "Ссылка для установки не была получена",
   installLinkReady: "Ссылка для установки готова.",
+
   changeVpnConfirmTitle: "Сменить пароль VPN?",
-  changeVpnConfirmBody: "Будет создан новый профиль конфигурации. Новый пароль VPN будет включён в новый файл Mobile Config. Текущий профиль перестанет работать после следующего подключения. Новый профиль потребуется установить на устройства Apple.",
+  changeVpnConfirmBody: "Пароль VPN изменится для Риги и Москвы. Старые профили перестанут работать после переподключения. Создайте и установите новый профиль для каждого используемого сервера.",
   changingVpnPassword: "Меняем пароль VPN…",
   newProfileNotReturned: "Новый профиль не был получен",
-  vpnPasswordChanged: "Пароль VPN изменён. Установите новый профиль.",
+  vpnPasswordChanged: "Пароль VPN изменён. Установите новый профиль, затем создайте профиль второго сервера, если используете его.",
+
   deleteVpnConfirmTitle: "Удалить VPN-доступ?",
-  deleteVpnConfirmBody: "VPN-учётные данные будут удалены с серверов TOLF VPN. Установленные VPN-профили перестанут работать. Ваш аккаунт TOLF и Passkey останутся активными.",
+  deleteVpnConfirmBody: "VPN-учётные данные будут удалены на Риге и Москве. Установленные профили перестанут работать. Аккаунт, Passkey и право доступа к Москве сохранятся.",
   deletingVpn: "Удаляем VPN-доступ…",
   vpnDeleted: "VPN-доступ удалён. Ваш аккаунт TOLF и Passkey остаются активными.",
+
   deleteAccountConfirmTitle: "Удалить аккаунт TOLF?",
   deleteAccountConfirmBody: "Аккаунт TOLF, регистрации Passkey, активные сессии, Recovery Code и VPN-доступ будут безвозвратно удалены. Установленные VPN-профили перестанут работать. Это действие нельзя отменить.",
   deletingAccount: "Удаляем аккаунт TOLF…",
