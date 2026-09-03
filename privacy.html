@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="TOLF VPN privacy: registration without a name, email or phone number; technical account data, credentials and deletion.">
+  <title>Privacy — TOLF VPN</title>
+  <link rel="stylesheet" href="css/styles.css?v=graphite-1">
+  <link rel="stylesheet" href="css/info.css?v=privacy-1">
+</head>
+<body>
+  <main class="page">
+    <header class="brand">
+      <div class="brand-top">
+        <div class="brand-copy">
+          <h1>TOLF VPN</h1>
+          <p>
+            <span class="site-label" lang="en">Privacy and your data.</span>
+            <span class="site-label" lang="ru">Приватность и ваши данные.</span>
+          </p>
+        </div>
+        <div class="language-switcher" aria-label="Language">
+          <button id="privacyEnButton" class="language-button active" type="button" aria-pressed="true">English</button>
+          <button id="privacyRuButton" class="language-button" type="button" aria-pressed="false">Русский</button>
+        </div>
+      </div>
+      <nav class="site-nav">
+        <a href="index.html">
+          <span class="site-label" lang="en">My VPN</span>
+          <span class="site-label" lang="ru">Мой VPN</span>
+        </a>
+        <a href="help.html">
+          <span class="site-label" lang="en">Help &amp; FAQ</span>
+          <span class="site-label" lang="ru">Помощь и FAQ</span>
+        </a>
+      </nav>
+    </header>
+
+    <div class="card privacy-page">
+      <div class="card-content">
+        <article id="privacyEn" lang="en" aria-labelledby="privacyEnTitle">
+          <h2 id="privacyEnTitle">Privacy</h2>
+          <p class="privacy-lead">You do not need to provide your name, surname, phone number or email address to register with TOLF VPN.</p>
+          <p>You sign in with a Passkey. Your account receives a randomly generated identifier. This reduces the information required to register, but it does not mean the service processes no data.</p>
+
+          <section>
+            <h3>What the service stores</h3>
+            <dl>
+              <dt>Account and Passkeys</dt>
+              <dd>Your account identifier and creation date, registered Passkey identifiers and public keys, and technical information used to verify sign-ins.</dd>
+              <dt>Sign-in sessions</dt>
+              <dd>A hash of each session token, the associated account, and the session creation and expiry dates. These records let you stay signed in.</dd>
+              <dt>VPN access and profiles</dt>
+              <dd>Your VPN username, creation date and server access settings. VPN servers store the credentials needed for authentication. Generated installation profiles include the VPN username, password and connection settings.</dd>
+              <dt>Promo codes</dt>
+              <dd>Code redemptions, their dates and the server access they unlock are recorded. Attempts to apply a code are also recorded to limit guessing. Promo codes are stored as hashes.</dd>
+              <dt>Recovery</dt>
+              <dd>The account database stores a hash of your Recovery Code. The code itself is shown when it is issued; the service cannot show the existing code again.</dd>
+            </dl>
+          </section>
+
+          <section>
+            <h3>Passkeys and VPN passwords are different</h3>
+            <p>The private part of your Passkey is managed by your device or password manager. TOLF receives the public key and sign-in verification data, not the private key. <a href="https://developer.apple.com/passkeys/">Apple explains how Passkeys work.</a></p>
+            <p>The VPN password is a separate credential. It is available to the VPN provisioning system and is included in the Mobile Config file so your device can connect.</p>
+            <p>Installation files and their metadata are uploaded to Cloudflare R2 for download. Treat the installation link and the downloaded file as confidential: someone with the link may be able to download a profile containing your VPN credentials.</p>
+          </section>
+
+          <section>
+            <h3>What is stored in your browser</h3>
+            <p>The <code>tolf_session</code> cookie keeps you signed in for up to 30 days. Signing out ends that browser session. Your language choice is saved locally under <code>tolfLanguage</code>.</p>
+            <p>Clearing browser data does not delete your TOLF account or a VPN profile installed on your device.</p>
+          </section>
+
+          <section>
+            <h3>Network privacy and logs</h3>
+            <p>Providing the service requires processing network information, including IP addresses. VPN servers handle traffic and destination addresses; DNS resolvers handle the domain lookups sent to them. Hosting and delivery providers also participate in processing requests to the website and profile downloads.</p>
+            <p>We do not currently make a “no logs” claim. The absence of connection logs, DNS query logs and website request logs has not been verified.</p>
+            <p>A VPN does not make you unidentifiable to websites. Signing in to a website or using its cookies can still identify you, even when your outgoing IP address changes.</p>
+          </section>
+
+          <section>
+            <h3>What deletion does</h3>
+            <p><strong>Delete VPN Access</strong> removes the VPN credentials from both servers. Your TOLF account, Passkeys and access unlocked by a promo code remain, so you can create VPN access again.</p>
+            <p><strong>Delete TOLF Account</strong> also removes the active account records: Passkey registrations, sign-in sessions, the Recovery Code hash and server access rights.</p>
+            <p>A promo redemption record remains with its date, but without its account reference, so deleting an account does not restore the code’s usage allowance. Technical profile identifiers are also retained so replacement profiles can preserve their identity.</p>
+            <p>Account deletion does not guarantee immediate erasure of backups, previously issued profile files or infrastructure logs. Removing a profile from your device is a separate action.</p>
+          </section>
+
+          <p class="privacy-date">Updated: <time datetime="2026-09-03">3 September 2026</time>.</p>
+        </article>
+
+        <article id="privacyRu" lang="ru" aria-labelledby="privacyRuTitle" hidden>
+          <h2 id="privacyRuTitle">Приватность</h2>
+          <p class="privacy-lead">Для регистрации в TOLF VPN не нужны имя, фамилия, номер телефона или электронная почта.</p>
+          <p>Вы входите с помощью Passkey, а аккаунту автоматически присваивается случайный идентификатор. Это сокращает объём сведений, необходимых при регистрации, но не означает, что сервис вообще не обрабатывает данные.</p>
+
+          <section>
+            <h3>Какие сведения хранит сервис</h3>
+            <dl>
+              <dt>Аккаунт и Passkey</dt>
+              <dd>Идентификатор и дата создания аккаунта, идентификаторы и открытые ключи зарегистрированных Passkey, технические сведения для проверки входа.</dd>
+              <dt>Сессии входа</dt>
+              <dd>Хеш токена каждой сессии, связанный с ней аккаунт, даты создания и окончания сессии. Эти записи позволяют оставаться в кабинете после входа.</dd>
+              <dt>VPN-доступ и профили</dt>
+              <dd>VPN-логин, дата создания доступа и настройки доступа к серверам. VPN-серверы хранят учётные данные для подключения. В созданные установочные профили включаются VPN-логин, пароль и параметры соединения.</dd>
+              <dt>Промокоды</dt>
+              <dd>Фиксируются использование промокодов, даты активации и открываемые ими права на серверы. Попытки применения кода также учитываются для защиты от перебора. Промокоды хранятся в виде хешей.</dd>
+              <dt>Восстановление</dt>
+              <dd>В базе аккаунтов хранится хеш Recovery Code. Сам код показывается при его выпуске; повторно показать действующий код сервис не может.</dd>
+            </dl>
+          </section>
+
+          <section>
+            <h3>Passkey и пароль VPN — разные вещи</h3>
+            <p>Закрытой частью Passkey управляет ваше устройство или менеджер паролей. TOLF получает открытый ключ и данные проверки входа, а не закрытый ключ. <a href="https://developer.apple.com/passkeys/">Подробнее о Passkey у Apple.</a></p>
+            <p>Пароль VPN — отдельные учётные данные. Он доступен системе создания VPN-доступа и включается в файл Mobile Config, чтобы устройство могло подключиться.</p>
+            <p>Установочные файлы и сведения о них загружаются в Cloudflare R2 для скачивания. Храните ссылку установки и скачанный файл в секрете: получивший ссылку может скачать профиль с вашими VPN-учётными данными.</p>
+          </section>
+
+          <section>
+            <h3>Что сохраняется в браузере</h3>
+            <p>Cookie <code>tolf_session</code> позволяет оставаться в кабинете до 30 дней. Кнопка «Выйти» завершает эту сессию браузера. Выбранный язык сохраняется локально в параметре <code>tolfLanguage</code>.</p>
+            <p>Очистка данных браузера не удаляет аккаунт TOLF или VPN-профиль, установленный на устройстве.</p>
+          </section>
+
+          <section>
+            <h3>Приватность сетевого соединения и журналы</h3>
+            <p>Для работы сервиса обрабатываются сетевые сведения, в том числе IP-адреса. VPN-серверы передают трафик и обрабатывают адреса назначения, DNS-серверы — отправленные им запросы доменных имён. Провайдеры хостинга и доставки файлов также участвуют в обработке обращений к сайту и скачивании профилей.</p>
+            <p>Сейчас мы не заявляем, что сервис работает «без журналов». Отсутствие журналов соединений, DNS-запросов и обращений к сайту пока не подтверждено.</p>
+            <p>VPN не делает вас неузнаваемым для сайтов. Вход в аккаунт сайта и его cookies могут по-прежнему связывать посещения с вами, даже если выходной IP-адрес изменился.</p>
+          </section>
+
+          <section>
+            <h3>Что происходит при удалении</h3>
+            <p><strong>«Удалить VPN-доступ»</strong> удаляет VPN-учётные данные с обоих серверов. Аккаунт TOLF, Passkey и право, открытое промокодом, сохраняются: VPN-доступ можно создать заново.</p>
+            <p><strong>«Удалить аккаунт TOLF»</strong> также удаляет действующие записи аккаунта: регистрации Passkey, сессии входа, хеш Recovery Code и права на серверы.</p>
+            <p>Запись об использовании промокода и дата активации остаются без ссылки на аккаунт, чтобы удаление аккаунта не восстанавливало лимит кода. Технические идентификаторы профилей также сохраняются, чтобы при повторном выпуске профиль мог сохранять свою идентичность.</p>
+            <p>Удаление аккаунта не гарантирует немедленного удаления резервных копий, ранее выпущенных файлов профиля или журналов инфраструктуры. Удаление профиля с устройства выполняется отдельно.</p>
+          </section>
+
+          <p class="privacy-date">Обновлено: <time datetime="2026-09-03">3 сентября 2026 года</time>.</p>
+        </article>
+      </div>
+    </div>
+    <noscript>
+      <style>
+        #privacyRu[hidden] { display: block !important; margin-top: 40px; }
+        .language-switcher { display: none; }
+      </style>
+    </noscript>
+  </main>
+  <script>
+    (() => {
+      const en = document.getElementById("privacyEn");
+      const ru = document.getElementById("privacyRu");
+      const enButton = document.getElementById("privacyEnButton");
+      const ruButton = document.getElementById("privacyRuButton");
+
+      function setPrivacyLanguage(language) {
+        const russian = language === "ru";
+        document.documentElement.lang = russian ? "ru" : "en";
+        document.title = russian ? "Приватность — TOLF VPN" : "Privacy — TOLF VPN";
+        en.hidden = russian;
+        ru.hidden = !russian;
+        enButton.classList.toggle("active", !russian);
+        ruButton.classList.toggle("active", russian);
+        enButton.setAttribute("aria-pressed", String(!russian));
+        ruButton.setAttribute("aria-pressed", String(russian));
+        try {
+          localStorage.setItem("tolfLanguage", russian ? "ru" : "en");
+        } catch {}
+      }
+
+      let language;
+      try {
+        language = localStorage.getItem("tolfLanguage");
+      } catch {}
+
+      if (language !== "ru" && language !== "en") {
+        language = (navigator.language || "en").toLowerCase().startsWith("ru") ? "ru" : "en";
+      }
+
+      setPrivacyLanguage(language);
+      enButton.addEventListener("click", () => setPrivacyLanguage("en"));
+      ruButton.addEventListener("click", () => setPrivacyLanguage("ru"));
+    })();
+  </script>
+</body>
+</html>
