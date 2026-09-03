@@ -1,0 +1,2 @@
+setLanguage(currentLanguage);
+loadAccount();
