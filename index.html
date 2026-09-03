@@ -6,6 +6,7 @@
   <meta name="color-scheme" content="light dark">
   <title>TOLF VPN</title>
   <link rel="stylesheet" href="css/styles.css?v=graphite-1">
+  <link rel="stylesheet" href="css/info.css?v=privacy-1">
 
   <!-- Keep this order. Deferred scripts run after the HTML has been parsed. -->
   <script defer src="js/config.js?v=local-id-2"></script>
@@ -36,6 +37,16 @@
           <button id="languageRu" class="language-button" type="button">Русский</button>
         </div>
       </div>
+      <nav class="site-nav">
+        <a href="help.html">
+          <span class="site-label" lang="en">Help &amp; FAQ</span>
+          <span class="site-label" lang="ru">Помощь и FAQ</span>
+        </a>
+        <a href="privacy.html">
+          <span class="site-label" lang="en">Privacy</span>
+          <span class="site-label" lang="ru">Приватность</span>
+        </a>
+      </nav>
     </header>
 
     <section id="loadingCard" class="card">
@@ -216,8 +227,15 @@
       </div>
     </section>
 
-    <footer style="margin-top: 24px; text-align: center; font-size: 14px; line-height: 1.5;">
-      <a href="help.html" style="color: var(--secondary); text-underline-offset: 3px;">Help / Помощь</a>
+    <footer class="site-footer">
+      <a href="help.html">
+        <span class="site-label" lang="en">Help &amp; FAQ</span>
+        <span class="site-label" lang="ru">Помощь и FAQ</span>
+      </a>
+      <a href="privacy.html">
+        <span class="site-label" lang="en">Privacy</span>
+        <span class="site-label" lang="ru">Приватность</span>
+      </a>
     </footer>
   </main>
 </body>
