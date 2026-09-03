@@ -1,12 +1,34 @@
+function setVpnBusy(value) {
+  vpnBusy = value;
+
+  for (const button of [
+    createVpnButton,
+    generateProfileButton,
+    rotatePasswordButton,
+    deleteVpnButton,
+    deleteAccountButton,
+    signOutButton,
+    redeemPromoButton
+  ]) {
+    button.disabled = value;
+  }
+
+  updateServerAvailability();
+}
+
 createVpnButton.addEventListener("click", async () => {
-  createVpnButton.disabled = true;
+  if (vpnBusy) {
+    return;
+  }
+
+  const server = getSelectedServerKey();
+
+  setVpnBusy(true);
 
   vpnMessage.textContent = t("creatingVpn");
   vpnMessage.className = "message";
 
   try {
-    const server = getSelectedServerKey();
-
     const data = await apiRequest("/vpn/create", {
       method: "POST",
       body: JSON.stringify({ server })
@@ -25,13 +47,18 @@ createVpnButton.addEventListener("click", async () => {
     vpnMessage.textContent = error.message;
     vpnMessage.className = "message error";
   } finally {
-    createVpnButton.disabled = false;
+    setVpnBusy(false);
   }
 });
 
 generateProfileButton.addEventListener("click", async () => {
-  generateProfileButton.disabled = true;
+  if (vpnBusy) {
+    return;
+  }
 
+  const server = getSelectedServerKey();
+
+  setVpnBusy(true);
   setInstallLink(null);
 
   vpnMessage.textContent = t("generatingInstall");
@@ -40,7 +67,7 @@ generateProfileButton.addEventListener("click", async () => {
   try {
     const data = await apiRequest("/vpn/profile", {
       method: "POST",
-      body: "{}"
+      body: JSON.stringify({ server })
     });
 
     if (!data.profileUrl) {
@@ -55,23 +82,25 @@ generateProfileButton.addEventListener("click", async () => {
     vpnMessage.textContent = error.message;
     vpnMessage.className = "message error";
   } finally {
-    generateProfileButton.disabled = false;
+    setVpnBusy(false);
   }
 });
 
 rotatePasswordButton.addEventListener("click", async () => {
-  const confirmed = confirmLocalized(
+  if (vpnBusy) {
+    return;
+  }
+
+  if (!confirmLocalized(
     "changeVpnConfirmTitle",
     "changeVpnConfirmBody"
-  );
+  )) {
+    return;
+  }
 
-  if (!confirmed) return;
+  const server = getSelectedServerKey();
 
-  rotatePasswordButton.disabled = true;
-  generateProfileButton.disabled = true;
-  deleteVpnButton.disabled = true;
-  deleteAccountButton.disabled = true;
-
+  setVpnBusy(true);
   setInstallLink(null);
 
   vpnMessage.textContent = t("changingVpnPassword");
@@ -80,7 +109,7 @@ rotatePasswordButton.addEventListener("click", async () => {
   try {
     const data = await apiRequest("/vpn/rotate", {
       method: "POST",
-      body: "{}"
+      body: JSON.stringify({ server })
     });
 
     if (!data.profileUrl) {
@@ -95,26 +124,23 @@ rotatePasswordButton.addEventListener("click", async () => {
     vpnMessage.textContent = error.message;
     vpnMessage.className = "message error";
   } finally {
-    rotatePasswordButton.disabled = false;
-    generateProfileButton.disabled = false;
-    deleteVpnButton.disabled = false;
-    deleteAccountButton.disabled = false;
+    setVpnBusy(false);
   }
 });
 
 deleteVpnButton.addEventListener("click", async () => {
-  const confirmed = confirmLocalized(
+  if (vpnBusy) {
+    return;
+  }
+
+  if (!confirmLocalized(
     "deleteVpnConfirmTitle",
     "deleteVpnConfirmBody"
-  );
+  )) {
+    return;
+  }
 
-  if (!confirmed) return;
-
-  deleteVpnButton.disabled = true;
-  rotatePasswordButton.disabled = true;
-  generateProfileButton.disabled = true;
-  deleteAccountButton.disabled = true;
-
+  setVpnBusy(true);
   setInstallLink(null);
 
   vpnMessage.textContent = t("deletingVpn");
@@ -134,9 +160,6 @@ deleteVpnButton.addEventListener("click", async () => {
     vpnMessage.textContent = error.message;
     vpnMessage.className = "message error";
   } finally {
-    deleteVpnButton.disabled = false;
-    rotatePasswordButton.disabled = false;
-    generateProfileButton.disabled = false;
-    deleteAccountButton.disabled = false;
+    setVpnBusy(false);
   }
 });
