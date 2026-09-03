@@ -2,10 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1, viewport-fit=cover"
   >
+
   <meta name="color-scheme" content="light dark">
 
   <title>TOLF VPN</title>
@@ -32,11 +34,18 @@
       --success: #248a3d;
       --error: #d70015;
       --danger: #d70015;
+
+      --warning: #b26a00;
+      --warning-border: #c77b00;
+      --warning-background: rgba(199, 123, 0, 0.08);
+
       --delete-background: #e85d75;
       --delete-border: #e85d75;
+
       --account-delete-background: #c70015;
       --account-delete-border: #c70015;
       --account-delete-note: #b00012;
+
       --segment-background: #f5f5f7;
       --code-background: #f5f5f7;
     }
@@ -53,11 +62,18 @@
         --success: #30d158;
         --error: #ff453a;
         --danger: #ff453a;
+
+        --warning: #ffb340;
+        --warning-border: #ffb340;
+        --warning-background: rgba(255, 179, 64, 0.10);
+
         --delete-background: #d94f69;
         --delete-border: #d94f69;
+
         --account-delete-background: #ff3b30;
         --account-delete-border: #ff3b30;
         --account-delete-note: #ff6961;
+
         --segment-background: #2c2c2e;
         --code-background: #2c2c2e;
       }
@@ -89,6 +105,7 @@
       width: 100%;
       max-width: 760px;
       margin: 0 auto;
+
       padding:
         max(42px, env(safe-area-inset-top))
         24px
@@ -97,6 +114,17 @@
 
     .brand {
       margin-bottom: 36px;
+    }
+
+    .brand-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .brand-copy {
+      min-width: 0;
     }
 
     .brand h1 {
@@ -112,6 +140,42 @@
       color: var(--secondary);
       font-size: 17px;
       line-height: 1.45;
+    }
+
+    .language-switcher {
+      flex: 0 0 auto;
+
+      display: flex;
+      align-items: center;
+      gap: 4px;
+
+      padding: 4px;
+
+      background: var(--segment-background);
+      border: 1px solid var(--border);
+      border-radius: 11px;
+    }
+
+    .language-button {
+      min-height: 32px;
+      padding: 6px 10px;
+
+      background: transparent;
+      color: var(--secondary);
+
+      border: 0;
+      border-radius: 8px;
+
+      font-size: 13px;
+      line-height: 1.2;
+      font-weight: 600;
+
+      cursor: pointer;
+    }
+
+    .language-button.active {
+      background: var(--button);
+      color: var(--button-text);
     }
 
     .card {
@@ -143,17 +207,22 @@
     .sign-out-button {
       min-height: 38px;
       padding: 8px 14px;
+
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
+
       background: transparent;
       color: var(--text);
+
       border: 1px solid var(--border);
       border-radius: 10px;
+
       font-size: 14px;
       line-height: 1.3;
       font-weight: 600;
+
       cursor: pointer;
       white-space: nowrap;
     }
@@ -192,7 +261,9 @@
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 8px;
+
       padding: 5px;
+
       background: var(--segment-background);
       border: 1px solid var(--border);
       border-radius: 14px;
@@ -212,19 +283,26 @@
     .server-option label {
       min-height: 58px;
       padding: 9px 8px;
+
       border: 1px solid transparent;
       border-radius: 10px;
+
       cursor: pointer;
+
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       gap: 2px;
+
       text-align: center;
+
       color: var(--text);
+
       font-size: 15px;
       line-height: 1.2;
       font-weight: 600;
+
       user-select: none;
       -webkit-user-select: none;
     }
@@ -250,8 +328,10 @@
       display: flex;
       justify-content: space-between;
       gap: 20px;
+
       margin-top: 11px;
       padding: 0 4px;
+
       font-size: 15px;
       line-height: 1.4;
     }
@@ -272,6 +352,7 @@
       flex-direction: row;
       flex-wrap: wrap;
       gap: 12px;
+
       margin-top: 26px;
     }
 
@@ -284,15 +365,21 @@
     button,
     .button-link {
       min-height: 50px;
+
       border: 0;
       border-radius: 12px;
+
       padding: 13px 14px;
+
       font-size: 16px;
       line-height: 1.3;
       font-weight: 600;
+
       cursor: pointer;
+
       text-align: center;
       text-decoration: none;
+
       display: flex;
       align-items: center;
       justify-content: center;
@@ -310,6 +397,12 @@
       border: 1px solid var(--border);
     }
 
+    .warning {
+      background: var(--warning-background);
+      color: var(--warning);
+      border: 1px solid var(--warning-border);
+    }
+
     .danger {
       background: transparent;
       color: var(--danger);
@@ -323,8 +416,11 @@
 
     .password-note {
       flex: 0 0 100%;
+
       margin: 0 4px;
+
       color: var(--secondary);
+
       font-size: 14px;
       line-height: 1.45;
       text-align: center;
@@ -341,14 +437,18 @@
 
     .delete-button {
       width: 100%;
+
       background: var(--delete-background);
       color: #ffffff;
+
       border: 1px solid var(--delete-border);
     }
 
     .delete-note {
       margin: 10px 4px 0;
+
       color: var(--secondary);
+
       font-size: 14px;
       line-height: 1.45;
       text-align: center;
@@ -363,7 +463,9 @@
 
     .section-description {
       margin: 6px 0 0;
+
       color: var(--secondary);
+
       font-size: 14px;
       line-height: 1.45;
     }
@@ -378,7 +480,9 @@
       align-items: center;
       justify-content: space-between;
       gap: 18px;
+
       padding: 14px 0;
+
       border-bottom: 1px solid var(--border);
     }
 
@@ -395,19 +499,25 @@
 
     .passkey-meta {
       margin-top: 3px;
+
       color: var(--secondary);
+
       font-size: 13px;
       line-height: 1.4;
     }
 
     .passkey-remove-button {
       flex: 0 0 auto;
+
       min-height: 38px;
       padding: 8px 12px;
+
       background: transparent;
       color: var(--danger);
+
       border: 1px solid var(--danger);
       border-radius: 10px;
+
       font-size: 14px;
       line-height: 1.3;
       font-weight: 600;
@@ -423,7 +533,9 @@
 
     .passkey-note {
       margin: 10px 4px 0;
+
       color: var(--secondary);
+
       font-size: 13px;
       line-height: 1.45;
       text-align: center;
@@ -433,7 +545,9 @@
     .recovery-message {
       margin-top: 10px;
       min-height: 20px;
+
       color: var(--secondary);
+
       font-size: 14px;
       line-height: 1.45;
     }
@@ -459,13 +573,16 @@
     .recovery-code-box {
       margin-top: 16px;
       padding: 18px;
+
       background: var(--code-background);
+
       border: 1px solid var(--border);
       border-radius: 14px;
     }
 
     .recovery-code-heading {
       margin: 0;
+
       font-size: 15px;
       line-height: 1.4;
       font-weight: 650;
@@ -473,22 +590,28 @@
 
     .recovery-code {
       margin-top: 12px;
+
       font-family:
         "SFMono-Regular",
         Consolas,
         "Liberation Mono",
         monospace;
+
       font-size: 17px;
       line-height: 1.6;
       letter-spacing: 0.025em;
+
       overflow-wrap: anywhere;
+
       user-select: all;
       -webkit-user-select: all;
     }
 
     .recovery-code-warning {
       margin: 12px 0 0;
+
       color: var(--secondary);
+
       font-size: 13px;
       line-height: 1.45;
     }
@@ -513,20 +636,27 @@
     .recovery-input {
       width: 100%;
       min-height: 50px;
+
       margin-top: 16px;
       padding: 12px 14px;
+
       background: var(--card);
       color: var(--text);
+
       border: 1px solid var(--border);
       border-radius: 12px;
+
       outline: none;
+
       font-family:
         "SFMono-Regular",
         Consolas,
         "Liberation Mono",
         monospace;
+
       font-size: 15px;
       line-height: 1.4;
+
       text-transform: uppercase;
     }
 
@@ -551,15 +681,20 @@
 
     .account-delete-button {
       width: 100%;
+
       background: var(--account-delete-background);
       color: #ffffff;
+
       border: 1px solid var(--account-delete-border);
+
       font-weight: 700;
     }
 
     .account-delete-note {
       margin: 10px 4px 0;
+
       color: var(--account-delete-note);
+
       font-size: 14px;
       line-height: 1.45;
       font-weight: 600;
@@ -575,8 +710,11 @@
       display: grid;
       grid-template-columns: minmax(120px, 0.8fr) minmax(0, 1.4fr);
       gap: 20px;
+
       padding: 16px 0;
+
       border-bottom: 1px solid var(--border);
+
       align-items: start;
     }
 
@@ -588,9 +726,12 @@
 
     .row-value {
       min-width: 0;
+
       text-align: right;
+
       font-size: 15px;
       line-height: 1.4;
+
       overflow-wrap: anywhere;
     }
 
@@ -600,8 +741,11 @@
 
     .server-value-host {
       display: block;
+
       margin-top: 3px;
+
       color: var(--secondary);
+
       font-size: 15px;
     }
 
@@ -613,7 +757,9 @@
     .message {
       margin-top: 18px;
       min-height: 22px;
+
       color: var(--secondary);
+
       font-size: 14px;
       line-height: 1.45;
     }
@@ -631,6 +777,10 @@
     }
 
     @media (max-width: 620px) {
+      .brand-top {
+        gap: 14px;
+      }
+
       .actions {
         flex-direction: column;
         flex-wrap: nowrap;
@@ -660,6 +810,11 @@
 
       .brand h1 {
         font-size: 30px;
+      }
+
+      .language-button {
+        padding-left: 8px;
+        padding-right: 8px;
       }
 
       .card-content {
@@ -706,11 +861,38 @@
 <body>
   <main class="page">
     <header class="brand">
-      <h1>TOLF VPN</h1>
+      <div class="brand-top">
+        <div class="brand-copy">
+          <h1>
+            TOLF VPN
+          </h1>
 
-      <p>
-        System VPN access for your devices.
-      </p>
+          <p data-i18n="brandSubtitle">
+            System VPN access for your devices.
+          </p>
+        </div>
+
+        <div
+          class="language-switcher"
+          aria-label="Language"
+        >
+          <button
+            id="languageEn"
+            class="language-button"
+            type="button"
+          >
+            English
+          </button>
+
+          <button
+            id="languageRu"
+            class="language-button"
+            type="button"
+          >
+            Русский
+          </button>
+        </div>
+      </div>
     </header>
 
     <section
@@ -718,9 +900,14 @@
       class="card"
     >
       <div class="card-content">
-        <h2>Loading</h2>
+        <h2 data-i18n="loadingTitle">
+          Loading
+        </h2>
 
-        <p class="card-description">
+        <p
+          class="card-description"
+          data-i18n="loadingDescription"
+        >
           Checking your account.
         </p>
       </div>
@@ -731,9 +918,14 @@
       class="card hidden"
     >
       <div class="card-content">
-        <h2>VPN access</h2>
+        <h2 data-i18n="vpnAccessTitle">
+          VPN access
+        </h2>
 
-        <p class="card-description">
+        <p
+          class="card-description"
+          data-i18n="vpnAccessDescription"
+        >
           Sign in to manage your VPN access and devices.
         </p>
 
@@ -745,6 +937,7 @@
             id="signInButton"
             class="primary"
             type="button"
+            data-i18n="signInWithPasskey"
           >
             Sign in with Passkey
           </button>
@@ -753,14 +946,16 @@
             id="createAccountButton"
             class="secondary"
             type="button"
+            data-i18n="createNewAccount"
           >
             Create new account
           </button>
 
           <button
             id="showRecoverButton"
-            class="secondary"
+            class="warning"
             type="button"
+            data-i18n="recoverAccount"
           >
             Recover account
           </button>
@@ -770,11 +965,17 @@
           id="recoverPanel"
           class="recover-panel hidden"
         >
-          <h3 class="section-title">
+          <h3
+            class="section-title"
+            data-i18n="recoverAccount"
+          >
             Recover account
           </h3>
 
-          <p class="section-description">
+          <p
+            class="section-description"
+            data-i18n="recoverDescription"
+          >
             Enter your Recovery Code. If it is valid,
             you will create a new Passkey for this account.
           </p>
@@ -795,6 +996,7 @@
               id="recoverAccountButton"
               class="primary"
               type="button"
+              data-i18n="continueButton"
             >
               Continue
             </button>
@@ -803,6 +1005,7 @@
               id="cancelRecoverButton"
               class="secondary"
               type="button"
+              data-i18n="cancelButton"
             >
               Cancel
             </button>
@@ -813,7 +1016,10 @@
           id="signedOutRecoveryBox"
           class="recovery-code-box hidden"
         >
-          <p class="recovery-code-heading">
+          <p
+            class="recovery-code-heading"
+            data-i18n="saveRecoveryCode"
+          >
             Save your Recovery Code
           </p>
 
@@ -822,7 +1028,10 @@
             class="recovery-code"
           ></div>
 
-          <p class="recovery-code-warning">
+          <p
+            class="recovery-code-warning"
+            data-i18n="recoveryCodeInitialWarning"
+          >
             This code can restore access if you lose all Passkeys.
             TOLF cannot show this code again.
           </p>
@@ -832,6 +1041,7 @@
               id="copySignedOutRecoveryButton"
               class="primary"
               type="button"
+              data-i18n="copyRecoveryCode"
             >
               Copy Recovery Code
             </button>
@@ -840,6 +1050,7 @@
               id="savedSignedOutRecoveryButton"
               class="secondary"
               type="button"
+              data-i18n="savedIt"
             >
               I saved it
             </button>
@@ -859,7 +1070,9 @@
     >
       <div class="card-content">
         <div class="card-topline">
-          <h2>My VPN</h2>
+          <h2 data-i18n="myVpn">
+            My VPN
+          </h2>
 
           <button
             id="signOutButton"
@@ -880,16 +1093,20 @@
               ></path>
 
               <path d="M14 12H4"></path>
+
               <path d="M7 9l-3 3 3 3"></path>
             </svg>
 
-            <span>
+            <span data-i18n="signOut">
               Sign out
             </span>
           </button>
         </div>
 
-        <p class="card-description">
+        <p
+          class="card-description"
+          data-i18n="manageVpnDescription"
+        >
           Manage your TOLF VPN access.
         </p>
 
@@ -897,7 +1114,10 @@
           id="serverSection"
           class="server-section hidden"
         >
-          <p class="server-heading">
+          <p
+            class="server-heading"
+            data-i18n="vpnServer"
+          >
             VPN Server
           </p>
 
@@ -916,7 +1136,9 @@
               >
 
               <label for="serverRiga">
-                <span>Riga, Latvia</span>
+                <span data-i18n="rigaLatvia">
+                  Riga, Latvia
+                </span>
               </label>
             </div>
 
@@ -930,9 +1152,14 @@
               >
 
               <label for="serverMoscow">
-                <span>Moscow, Russia</span>
+                <span data-i18n="moscowRussia">
+                  Moscow, Russia
+                </span>
 
-                <span class="server-coming-soon">
+                <span
+                  class="server-coming-soon"
+                  data-i18n="comingSoon"
+                >
                   Coming Soon
                 </span>
               </label>
@@ -948,9 +1175,14 @@
               >
 
               <label for="serverUk">
-                <span>London, United Kingdom</span>
+                <span data-i18n="londonUk">
+                  London, United Kingdom
+                </span>
 
-                <span class="server-coming-soon">
+                <span
+                  class="server-coming-soon"
+                  data-i18n="comingSoon"
+                >
                   Coming Soon
                 </span>
               </label>
@@ -958,7 +1190,10 @@
           </div>
 
           <div class="server-address">
-            <span class="server-address-label">
+            <span
+              class="server-address-label"
+              data-i18n="serverAddress"
+            >
               Server address
             </span>
 
@@ -973,7 +1208,10 @@
 
         <div class="status-table">
           <div class="row">
-            <div class="row-label">
+            <div
+              class="row-label"
+              data-i18n="status"
+            >
               Status
             </div>
 
@@ -989,7 +1227,10 @@
             id="serverRow"
             class="row hidden"
           >
-            <div class="row-label">
+            <div
+              class="row-label"
+              data-i18n="server"
+            >
               Server
             </div>
 
@@ -1010,7 +1251,10 @@
             id="usernameRow"
             class="row hidden"
           >
-            <div class="row-label">
+            <div
+              class="row-label"
+              data-i18n="username"
+            >
               Username
             </div>
 
@@ -1026,6 +1270,7 @@
             id="createVpnButton"
             class="primary hidden"
             type="button"
+            data-i18n="createVpnAccess"
           >
             Create VPN Access
           </button>
@@ -1034,6 +1279,7 @@
             id="generateProfileButton"
             class="primary hidden"
             type="button"
+            data-i18n="generateInstallLink"
           >
             Generate Install Link
           </button>
@@ -1044,6 +1290,7 @@
             href="#"
             target="_blank"
             rel="noopener"
+            data-i18n="installAppleDevice"
           >
             Install on Apple Device
           </a>
@@ -1052,6 +1299,7 @@
             id="rotatePasswordButton"
             class="danger hidden"
             type="button"
+            data-i18n="changeVpnPassword"
           >
             Change VPN Password
           </button>
@@ -1059,6 +1307,7 @@
           <p
             id="rotatePasswordNote"
             class="password-note hidden"
+            data-i18n="changePasswordNote"
           >
             Changing the VPN password creates a new configuration profile.
             The new VPN password is included in the new Mobile Config file.
@@ -1074,11 +1323,15 @@
             id="deleteVpnButton"
             class="delete-button"
             type="button"
+            data-i18n="deleteVpnAccess"
           >
             Delete VPN Access
           </button>
 
-          <p class="delete-note">
+          <p
+            class="delete-note"
+            data-i18n="deleteVpnNote"
+          >
             This removes your VPN access from TOLF VPN servers.
             Your TOLF account and Passkeys will remain active.
           </p>
@@ -1088,11 +1341,17 @@
           id="passkeysSection"
           class="passkeys-section"
         >
-          <h3 class="section-title">
+          <h3
+            class="section-title"
+            data-i18n="passkeys"
+          >
             Passkeys
           </h3>
 
-          <p class="section-description">
+          <p
+            class="section-description"
+            data-i18n="passkeysDescription"
+          >
             Passkeys provide access to your TOLF account.
             Add another Passkey before removing your current one.
           </p>
@@ -1107,12 +1366,16 @@
               id="addPasskeyButton"
               class="primary add-passkey-button"
               type="button"
+              data-i18n="addPasskey"
             >
               Add Passkey
             </button>
           </div>
 
-          <p class="passkey-note">
+          <p
+            class="passkey-note"
+            data-i18n="passkeyNamesNote"
+          >
             Passkey names are assigned automatically by TOLF when they are created.
           </p>
 
@@ -1126,11 +1389,17 @@
           id="recoverySection"
           class="recovery-section"
         >
-          <h3 class="section-title">
+          <h3
+            class="section-title"
+            data-i18n="recovery"
+          >
             Recovery
           </h3>
 
-          <p class="section-description">
+          <p
+            class="section-description"
+            data-i18n="recoveryDescription"
+          >
             A Recovery Code can restore access to your TOLF account
             if you lose all Passkeys.
           </p>
@@ -1140,6 +1409,7 @@
               id="generateRecoveryButton"
               class="secondary"
               type="button"
+              data-i18n="generateNewRecoveryCode"
             >
               Generate New Recovery Code
             </button>
@@ -1149,7 +1419,10 @@
             id="accountRecoveryBox"
             class="recovery-code-box hidden"
           >
-            <p class="recovery-code-heading">
+            <p
+              class="recovery-code-heading"
+              data-i18n="saveNewRecoveryCode"
+            >
               Save your new Recovery Code
             </p>
 
@@ -1158,7 +1431,10 @@
               class="recovery-code"
             ></div>
 
-            <p class="recovery-code-warning">
+            <p
+              class="recovery-code-warning"
+              data-i18n="newRecoveryCodeWarning"
+            >
               This code is shown only now.
               Any previous Recovery Code is no longer valid.
             </p>
@@ -1168,6 +1444,7 @@
                 id="copyAccountRecoveryButton"
                 class="primary"
                 type="button"
+                data-i18n="copyRecoveryCode"
               >
                 Copy Recovery Code
               </button>
@@ -1176,6 +1453,7 @@
                 id="savedAccountRecoveryButton"
                 class="secondary"
                 type="button"
+                data-i18n="savedIt"
               >
                 I saved it
               </button>
@@ -1196,11 +1474,15 @@
             id="deleteAccountButton"
             class="account-delete-button"
             type="button"
+            data-i18n="deleteTolfAccount"
           >
             Delete TOLF Account
           </button>
 
-          <p class="account-delete-note">
+          <p
+            class="account-delete-note"
+            data-i18n="deleteAccountNote"
+          >
             Permanently deletes your TOLF account, Passkey registrations,
             active sessions, Recovery Code, and VPN access.
             This cannot be undone.
@@ -1220,31 +1502,639 @@
       "https://api.tolf.is";
 
 
-    const SERVERS = {
-      riga: {
-        name:
+    const I18N = {
+      en: {
+        brandSubtitle:
+          "System VPN access for your devices.",
+
+        loadingTitle:
+          "Loading",
+
+        loadingDescription:
+          "Checking your account.",
+
+        vpnAccessTitle:
+          "VPN access",
+
+        vpnAccessDescription:
+          "Sign in to manage your VPN access and devices.",
+
+        signInWithPasskey:
+          "Sign in with Passkey",
+
+        createNewAccount:
+          "Create new account",
+
+        recoverAccount:
+          "Recover account",
+
+        recoverDescription:
+          "Enter your Recovery Code. If it is valid, you will create a new Passkey for this account.",
+
+        continueButton:
+          "Continue",
+
+        cancelButton:
+          "Cancel",
+
+        saveRecoveryCode:
+          "Save your Recovery Code",
+
+        recoveryCodeInitialWarning:
+          "This code can restore access if you lose all Passkeys. TOLF cannot show this code again.",
+
+        copyRecoveryCode:
+          "Copy Recovery Code",
+
+        savedIt:
+          "I saved it",
+
+        myVpn:
+          "My VPN",
+
+        signOut:
+          "Sign out",
+
+        manageVpnDescription:
+          "Manage your TOLF VPN access.",
+
+        vpnServer:
+          "VPN Server",
+
+        rigaLatvia:
           "Riga, Latvia",
 
+        moscowRussia:
+          "Moscow, Russia",
+
+        londonUk:
+          "London, United Kingdom",
+
+        comingSoon:
+          "Coming Soon",
+
+        serverAddress:
+          "Server address",
+
+        status:
+          "Status",
+
+        server:
+          "Server",
+
+        username:
+          "Username",
+
+        active:
+          "Active",
+
+        notConfigured:
+          "Not configured",
+
+        createVpnAccess:
+          "Create VPN Access",
+
+        generateInstallLink:
+          "Generate Install Link",
+
+        installAppleDevice:
+          "Install on Apple Device",
+
+        changeVpnPassword:
+          "Change VPN Password",
+
+        changePasswordNote:
+          "Changing the VPN password creates a new configuration profile. The new VPN password is included in the new Mobile Config file. You’ll need to install the new profile on your Apple devices.",
+
+        deleteVpnAccess:
+          "Delete VPN Access",
+
+        deleteVpnNote:
+          "This removes your VPN access from TOLF VPN servers. Your TOLF account and Passkeys will remain active.",
+
+        passkeys:
+          "Passkeys",
+
+        passkeysDescription:
+          "Passkeys provide access to your TOLF account. Add another Passkey before removing your current one.",
+
+        addPasskey:
+          "Add Passkey",
+
+        passkeyNamesNote:
+          "Passkey names are assigned automatically by TOLF when they are created.",
+
+        remove:
+          "Remove",
+
+        passkeyFallback:
+          "Passkey",
+
+        registeredPasskey:
+          "Registered Passkey",
+
+        addedDate:
+          "Added {date}",
+
+        addAnotherBeforeRemoving:
+          "Add another Passkey before removing this one.",
+
+        recovery:
+          "Recovery",
+
+        recoveryDescription:
+          "A Recovery Code can restore access to your TOLF account if you lose all Passkeys.",
+
+        generateNewRecoveryCode:
+          "Generate New Recovery Code",
+
+        saveNewRecoveryCode:
+          "Save your new Recovery Code",
+
+        newRecoveryCodeWarning:
+          "This code is shown only now. Any previous Recovery Code is no longer valid.",
+
+        deleteTolfAccount:
+          "Delete TOLF Account",
+
+        deleteAccountNote:
+          "Permanently deletes your TOLF account, Passkey registrations, active sessions, Recovery Code, and VPN access. This cannot be undone.",
+
+        signingOut:
+          "Signing out…",
+
+        waitingPasskey:
+          "Waiting for Passkey…",
+
+        passkeyNotProvided:
+          "Passkey was not provided",
+
+        creatingPasskey:
+          "Creating Passkey…",
+
+        passkeyNotCreated:
+          "Passkey was not created",
+
+        accountCreatedSaveRecovery:
+          "Account created. Save your Recovery Code.",
+
+        recoveryCodeNotReturned:
+          "Recovery Code was not returned",
+
+        recoveryCodeCopied:
+          "Recovery Code copied.",
+
+        recoveryCodeCopyFailed:
+          "Could not copy Recovery Code.",
+
+        recoveryCodeSaved:
+          "Recovery Code saved.",
+
+        recoveryCodeSavedSignIn:
+          "Recovery Code saved. Sign in with your Passkey.",
+
+        generateRecoveryConfirmTitle:
+          "Generate a new Recovery Code?",
+
+        generateRecoveryConfirmBody:
+          "Any previous Recovery Code will immediately stop working.",
+
+        generatingRecovery:
+          "Generating Recovery Code…",
+
+        newRecoveryGenerated:
+          "New Recovery Code generated.",
+
+        enterRecoveryCode:
+          "Enter your Recovery Code.",
+
+        checkingRecovery:
+          "Checking Recovery Code…",
+
+        creatingNamedPasskey:
+          "Creating {name}…",
+
+        recoveredPasskeyCreated:
+          "{name} created. Save your new Recovery Code.",
+
+        newPasskey:
+          "New Passkey",
+
+        newRecoveryCodeNotReturned:
+          "New Recovery Code was not returned",
+
+        passkeyAdded:
+          "Passkey added.",
+
+        passkeyAddedNamed:
+          "{name} added.",
+
+        removingPasskey:
+          "Removing Passkey…",
+
+        passkeyRemoved:
+          "Passkey removed.",
+
+        removePasskeyConfirmTitle:
+          "Remove Passkey?",
+
+        removePasskeyConfirmBody:
+          "Remove “{name}” from this TOLF account? That Passkey will no longer be able to sign in.",
+
+        creatingVpn:
+          "Creating VPN access…",
+
+        vpnAccessCreated:
+          "VPN access created.",
+
+        generatingInstall:
+          "Generating install link…",
+
+        installLinkNotReturned:
+          "Install link was not returned",
+
+        installLinkReady:
+          "Install link is ready.",
+
+        changeVpnConfirmTitle:
+          "Change the VPN password?",
+
+        changeVpnConfirmBody:
+          "This creates a new configuration profile. The new VPN password will be included in the new Mobile Config file. The current profile will stop working after it reconnects. You’ll need to install the new profile on your Apple devices.",
+
+        changingVpnPassword:
+          "Changing VPN password…",
+
+        newProfileNotReturned:
+          "New profile was not returned",
+
+        vpnPasswordChanged:
+          "VPN password changed. Install the new profile.",
+
+        deleteVpnConfirmTitle:
+          "Delete VPN access?",
+
+        deleteVpnConfirmBody:
+          "This removes your VPN credentials from TOLF VPN servers. Installed VPN profiles will stop working. Your TOLF account and Passkeys will remain active.",
+
+        deletingVpn:
+          "Deleting VPN access…",
+
+        vpnDeleted:
+          "VPN access deleted. Your TOLF account and Passkeys remain active.",
+
+        deleteAccountConfirmTitle:
+          "Delete TOLF account?",
+
+        deleteAccountConfirmBody:
+          "This permanently deletes your TOLF account, Passkey registrations, active sessions, Recovery Code, and VPN access. Installed VPN profiles will stop working. This cannot be undone.",
+
+        deletingAccount:
+          "Deleting TOLF account…",
+
+        accountDeleted:
+          "TOLF account deleted."
+      },
+
+
+      ru: {
+        brandSubtitle:
+          "Системный VPN-доступ для ваших устройств.",
+
+        loadingTitle:
+          "Загрузка",
+
+        loadingDescription:
+          "Проверяем ваш аккаунт.",
+
+        vpnAccessTitle:
+          "Доступ к VPN",
+
+        vpnAccessDescription:
+          "Войдите, чтобы управлять VPN-доступом и устройствами.",
+
+        signInWithPasskey:
+          "Войти с Passkey",
+
+        createNewAccount:
+          "Создать новый аккаунт",
+
+        recoverAccount:
+          "Восстановить аккаунт",
+
+        recoverDescription:
+          "Введите Recovery Code. Если код действителен, вы сможете создать новый Passkey для этого аккаунта.",
+
+        continueButton:
+          "Продолжить",
+
+        cancelButton:
+          "Отмена",
+
+        saveRecoveryCode:
+          "Сохраните Recovery Code",
+
+        recoveryCodeInitialWarning:
+          "Этот код позволяет восстановить доступ, если вы потеряете все Passkey. TOLF не сможет показать этот код повторно.",
+
+        copyRecoveryCode:
+          "Скопировать Recovery Code",
+
+        savedIt:
+          "Я сохранил код",
+
+        myVpn:
+          "Мой VPN",
+
+        signOut:
+          "Выйти",
+
+        manageVpnDescription:
+          "Управление доступом TOLF VPN.",
+
+        vpnServer:
+          "VPN-сервер",
+
+        rigaLatvia:
+          "Рига, Латвия",
+
+        moscowRussia:
+          "Москва, Россия",
+
+        londonUk:
+          "Лондон, Великобритания",
+
+        comingSoon:
+          "Скоро",
+
+        serverAddress:
+          "Адрес сервера",
+
+        status:
+          "Статус",
+
+        server:
+          "Сервер",
+
+        username:
+          "Имя пользователя",
+
+        active:
+          "Активен",
+
+        notConfigured:
+          "Не настроен",
+
+        createVpnAccess:
+          "Создать VPN-доступ",
+
+        generateInstallLink:
+          "Создать ссылку для установки",
+
+        installAppleDevice:
+          "Установить на устройство Apple",
+
+        changeVpnPassword:
+          "Сменить пароль VPN",
+
+        changePasswordNote:
+          "При смене пароля VPN создаётся новый профиль конфигурации. Новый пароль VPN будет включён в новый файл Mobile Config. Новый профиль потребуется установить на устройства Apple.",
+
+        deleteVpnAccess:
+          "Удалить VPN-доступ",
+
+        deleteVpnNote:
+          "VPN-доступ будет удалён с серверов TOLF VPN. Ваш аккаунт TOLF и Passkey останутся активными.",
+
+        passkeys:
+          "Passkey",
+
+        passkeysDescription:
+          "Passkey обеспечивают доступ к вашему аккаунту TOLF. Перед удалением текущего Passkey добавьте другой.",
+
+        addPasskey:
+          "Добавить Passkey",
+
+        passkeyNamesNote:
+          "Имена Passkey назначаются TOLF автоматически при их создании.",
+
+        remove:
+          "Удалить",
+
+        passkeyFallback:
+          "Passkey",
+
+        registeredPasskey:
+          "Зарегистрированный Passkey",
+
+        addedDate:
+          "Добавлен {date}",
+
+        addAnotherBeforeRemoving:
+          "Перед удалением этого Passkey добавьте другой.",
+
+        recovery:
+          "Восстановление",
+
+        recoveryDescription:
+          "Recovery Code позволяет восстановить доступ к аккаунту TOLF, если вы потеряете все Passkey.",
+
+        generateNewRecoveryCode:
+          "Создать новый Recovery Code",
+
+        saveNewRecoveryCode:
+          "Сохраните новый Recovery Code",
+
+        newRecoveryCodeWarning:
+          "Этот код показывается только сейчас. Все предыдущие Recovery Code больше недействительны.",
+
+        deleteTolfAccount:
+          "Удалить аккаунт TOLF",
+
+        deleteAccountNote:
+          "Безвозвратно удаляет аккаунт TOLF, регистрации Passkey, активные сессии, Recovery Code и VPN-доступ. Это действие нельзя отменить.",
+
+        signingOut:
+          "Выходим…",
+
+        waitingPasskey:
+          "Ожидаем Passkey…",
+
+        passkeyNotProvided:
+          "Passkey не был предоставлен",
+
+        creatingPasskey:
+          "Создаём Passkey…",
+
+        passkeyNotCreated:
+          "Passkey не был создан",
+
+        accountCreatedSaveRecovery:
+          "Аккаунт создан. Сохраните Recovery Code.",
+
+        recoveryCodeNotReturned:
+          "Recovery Code не был получен",
+
+        recoveryCodeCopied:
+          "Recovery Code скопирован.",
+
+        recoveryCodeCopyFailed:
+          "Не удалось скопировать Recovery Code.",
+
+        recoveryCodeSaved:
+          "Recovery Code сохранён.",
+
+        recoveryCodeSavedSignIn:
+          "Recovery Code сохранён. Войдите с помощью Passkey.",
+
+        generateRecoveryConfirmTitle:
+          "Создать новый Recovery Code?",
+
+        generateRecoveryConfirmBody:
+          "Все предыдущие Recovery Code немедленно перестанут действовать.",
+
+        generatingRecovery:
+          "Создаём Recovery Code…",
+
+        newRecoveryGenerated:
+          "Новый Recovery Code создан.",
+
+        enterRecoveryCode:
+          "Введите Recovery Code.",
+
+        checkingRecovery:
+          "Проверяем Recovery Code…",
+
+        creatingNamedPasskey:
+          "Создаём {name}…",
+
+        recoveredPasskeyCreated:
+          "{name} создан. Сохраните новый Recovery Code.",
+
+        newPasskey:
+          "Новый Passkey",
+
+        newRecoveryCodeNotReturned:
+          "Новый Recovery Code не был получен",
+
+        passkeyAdded:
+          "Passkey добавлен.",
+
+        passkeyAddedNamed:
+          "{name} добавлен.",
+
+        removingPasskey:
+          "Удаляем Passkey…",
+
+        passkeyRemoved:
+          "Passkey удалён.",
+
+        removePasskeyConfirmTitle:
+          "Удалить Passkey?",
+
+        removePasskeyConfirmBody:
+          "Удалить «{name}» из этого аккаунта TOLF? После этого данный Passkey больше не сможет использоваться для входа.",
+
+        creatingVpn:
+          "Создаём VPN-доступ…",
+
+        vpnAccessCreated:
+          "VPN-доступ создан.",
+
+        generatingInstall:
+          "Создаём ссылку для установки…",
+
+        installLinkNotReturned:
+          "Ссылка для установки не была получена",
+
+        installLinkReady:
+          "Ссылка для установки готова.",
+
+        changeVpnConfirmTitle:
+          "Сменить пароль VPN?",
+
+        changeVpnConfirmBody:
+          "Будет создан новый профиль конфигурации. Новый пароль VPN будет включён в новый файл Mobile Config. Текущий профиль перестанет работать после следующего подключения. Новый профиль потребуется установить на устройства Apple.",
+
+        changingVpnPassword:
+          "Меняем пароль VPN…",
+
+        newProfileNotReturned:
+          "Новый профиль не был получен",
+
+        vpnPasswordChanged:
+          "Пароль VPN изменён. Установите новый профиль.",
+
+        deleteVpnConfirmTitle:
+          "Удалить VPN-доступ?",
+
+        deleteVpnConfirmBody:
+          "VPN-учётные данные будут удалены с серверов TOLF VPN. Установленные VPN-профили перестанут работать. Ваш аккаунт TOLF и Passkey останутся активными.",
+
+        deletingVpn:
+          "Удаляем VPN-доступ…",
+
+        vpnDeleted:
+          "VPN-доступ удалён. Ваш аккаунт TOLF и Passkey остаются активными.",
+
+        deleteAccountConfirmTitle:
+          "Удалить аккаунт TOLF?",
+
+        deleteAccountConfirmBody:
+          "Аккаунт TOLF, регистрации Passkey, активные сессии, Recovery Code и VPN-доступ будут безвозвратно удалены. Установленные VPN-профили перестанут работать. Это действие нельзя отменить.",
+
+        deletingAccount:
+          "Удаляем аккаунт TOLF…",
+
+        accountDeleted:
+          "Аккаунт TOLF удалён."
+      }
+    };
+
+
+    const SERVERS = {
+      riga: {
         host:
-          "ikev2-riga.tolf.is"
+          "ikev2-riga.tolf.is",
+
+        nameKey:
+          "rigaLatvia"
       },
 
       moscow: {
-        name:
-          "Moscow, Russia",
-
         host:
-          ""
+          "",
+
+        nameKey:
+          "moscowRussia"
       },
 
       uk: {
-        name:
-          "London, United Kingdom",
-
         host:
-          ""
+          "",
+
+        nameKey:
+          "londonUk"
       }
     };
+
+
+    let currentLanguage =
+      localStorage.getItem(
+        "tolfLanguage"
+      );
+
+    if (
+      currentLanguage !== "en" &&
+      currentLanguage !== "ru"
+    ) {
+      currentLanguage =
+        navigator.language
+          .toLowerCase()
+          .startsWith("ru")
+          ? "ru"
+          : "en";
+    }
 
 
     const loadingCard =
@@ -1260,6 +2150,16 @@
     const vpnCard =
       document.getElementById(
         "vpnCard"
+      );
+
+    const languageEn =
+      document.getElementById(
+        "languageEn"
+      );
+
+    const languageRu =
+      document.getElementById(
+        "languageRu"
       );
 
     const signInButton =
@@ -1468,6 +2368,128 @@
       );
 
 
+    let lastVpnState =
+      null;
+
+    let lastPasskeys =
+      [];
+
+
+    function t(
+      key,
+      replacements = {}
+    ) {
+      let value =
+        I18N[currentLanguage]?.[key] ??
+        I18N.en[key] ??
+        key;
+
+      for (
+        const [name, replacement]
+        of Object.entries(replacements)
+      ) {
+        value =
+          value.replaceAll(
+            `{${name}}`,
+            replacement
+          );
+      }
+
+      return value;
+    }
+
+
+    function setLanguage(
+      language
+    ) {
+      if (
+        language !== "en" &&
+        language !== "ru"
+      ) {
+        return;
+      }
+
+      currentLanguage =
+        language;
+
+      localStorage.setItem(
+        "tolfLanguage",
+        language
+      );
+
+      document.documentElement.lang =
+        language;
+
+      languageEn.classList.toggle(
+        "active",
+        language === "en"
+      );
+
+      languageRu.classList.toggle(
+        "active",
+        language === "ru"
+      );
+
+      document
+        .querySelectorAll(
+          "[data-i18n]"
+        )
+        .forEach(
+          element => {
+            const key =
+              element.dataset.i18n;
+
+            element.textContent =
+              t(key);
+          }
+        );
+
+      if (lastVpnState) {
+        renderVpnState(
+          lastVpnState
+        );
+      }
+
+      if (lastPasskeys.length) {
+        renderPasskeys(
+          lastPasskeys
+        );
+      }
+    }
+
+
+    languageEn.addEventListener(
+      "click",
+      () => {
+        setLanguage("en");
+      }
+    );
+
+
+    languageRu.addEventListener(
+      "click",
+      () => {
+        setLanguage("ru");
+      }
+    );
+
+
+    function confirmLocalized(
+      titleKey,
+      bodyKey,
+      replacements = {}
+    ) {
+      return window.confirm(
+        t(titleKey) +
+        "\n\n" +
+        t(
+          bodyKey,
+          replacements
+        )
+      );
+    }
+
+
     function getSelectedServerKey() {
       const selected =
         document.querySelector(
@@ -1490,7 +2512,9 @@
     }
 
 
-    function showConfiguredServer(vpn) {
+    function showConfiguredServer(
+      vpn
+    ) {
       const serverKey =
         vpn?.server &&
         SERVERS[vpn.server]
@@ -1501,7 +2525,7 @@
         SERVERS[serverKey];
 
       vpnServerName.textContent =
-        server.name;
+        t(server.nameKey);
 
       vpnServerHost.textContent =
         server.host;
@@ -1520,7 +2544,9 @@
     }
 
 
-    function base64urlToBuffer(value) {
+    function base64urlToBuffer(
+      value
+    ) {
       const padding =
         "=".repeat(
           (4 - value.length % 4) % 4
@@ -1552,15 +2578,22 @@
     }
 
 
-    function bufferToBase64url(buffer) {
+    function bufferToBase64url(
+      buffer
+    ) {
       const bytes =
-        new Uint8Array(buffer);
+        new Uint8Array(
+          buffer
+        );
 
-      let binary = "";
+      let binary =
+        "";
 
       for (const byte of bytes) {
         binary +=
-          String.fromCharCode(byte);
+          String.fromCharCode(
+            byte
+          );
       }
 
       return btoa(binary)
@@ -1752,13 +2785,15 @@
           }
         );
 
-      let data = null;
+      let data =
+        null;
 
       try {
         data =
           await response.json();
       } catch {
-        data = null;
+        data =
+          null;
       }
 
       if (!response.ok) {
@@ -1766,14 +2801,18 @@
           data?.detail ||
           "Request failed";
 
-        throw new Error(message);
+        throw new Error(
+          message
+        );
       }
 
       return data;
     }
 
 
-    async function copyText(value) {
+    async function copyText(
+      value
+    ) {
       if (
         navigator.clipboard &&
         typeof navigator.clipboard.writeText ===
@@ -1907,7 +2946,9 @@
     }
 
 
-    function formatPasskeyDate(value) {
+    function formatPasskeyDate(
+      value
+    ) {
       if (!value) {
         return "";
       }
@@ -1924,7 +2965,9 @@
       }
 
       return new Intl.DateTimeFormat(
-        "en-GB",
+        currentLanguage === "ru"
+          ? "ru-RU"
+          : "en-GB",
         {
           day:
             "numeric",
@@ -1939,7 +2982,12 @@
     }
 
 
-    function renderPasskeys(passkeys) {
+    function renderPasskeys(
+      passkeys
+    ) {
+      lastPasskeys =
+        passkeys;
+
       passkeyList.textContent =
         "";
 
@@ -1976,8 +3024,8 @@
             passkey.name ||
             (
               total === 1
-                ? "Passkey"
-                : `Passkey ${index + 1}`
+                ? t("passkeyFallback")
+                : `${t("passkeyFallback")} ${index + 1}`
             );
 
           const meta =
@@ -1995,8 +3043,16 @@
 
           meta.textContent =
             created
-              ? `Added ${created}`
-              : "Registered Passkey";
+              ? t(
+                  "addedDate",
+                  {
+                    date:
+                      created
+                  }
+                )
+              : t(
+                  "registeredPasskey"
+                );
 
           const removeButton =
             document.createElement(
@@ -2010,14 +3066,16 @@
             "passkey-remove-button";
 
           removeButton.textContent =
-            "Remove";
+            t("remove");
 
           if (total <= 1) {
             removeButton.disabled =
               true;
 
             removeButton.title =
-              "Add another Passkey before removing this one.";
+              t(
+                "addAnotherBeforeRemoving"
+              );
           } else {
             removeButton.addEventListener(
               "click",
@@ -2026,10 +3084,13 @@
                   name.textContent;
 
                 const confirmed =
-                  window.confirm(
-                    "Remove Passkey?\n\n" +
-                    `Remove "${displayName}" from this TOLF account? ` +
-                    "That Passkey will no longer be able to sign in."
+                  confirmLocalized(
+                    "removePasskeyConfirmTitle",
+                    "removePasskeyConfirmBody",
+                    {
+                      name:
+                        displayName
+                    }
                   );
 
                 if (!confirmed) {
@@ -2043,7 +3104,9 @@
                   true;
 
                 passkeyMessage.textContent =
-                  "Removing Passkey…";
+                  t(
+                    "removingPasskey"
+                  );
 
                 passkeyMessage.className =
                   "passkey-message";
@@ -2066,7 +3129,9 @@
                   await loadPasskeys();
 
                   passkeyMessage.textContent =
-                    "Passkey removed.";
+                    t(
+                      "passkeyRemoved"
+                    );
 
                   passkeyMessage.className =
                     "passkey-message success";
@@ -2120,7 +3185,9 @@
           );
 
         renderPasskeys(
-          Array.isArray(data.passkeys)
+          Array.isArray(
+            data.passkeys
+          )
             ? data.passkeys
             : []
         );
@@ -2150,10 +3217,15 @@
         .classList
         .remove("hidden");
 
-      setInstallLink(null);
+      setInstallLink(
+        null
+      );
 
       passkeyList.textContent =
         "";
+
+      lastPasskeys =
+        [];
 
       passkeyMessage.textContent =
         "";
@@ -2171,30 +3243,15 @@
     }
 
 
-    function showVpn(vpn) {
-      loadingCard
-        .classList
-        .add("hidden");
-
-      signedOutCard
-        .classList
-        .add("hidden");
-
-      vpnCard
-        .classList
-        .remove("hidden");
-
-      setInstallLink(null);
-
-      vpnMessage.textContent =
-        "";
-
-      vpnMessage.className =
-        "message";
+    function renderVpnState(
+      vpn
+    ) {
+      lastVpnState =
+        vpn;
 
       if (vpn.configured) {
         vpnStatus.textContent =
-          "Active";
+          t("active");
 
         vpnStatus.className =
           "row-value status-active";
@@ -2203,7 +3260,9 @@
           .classList
           .add("hidden");
 
-        showConfiguredServer(vpn);
+        showConfiguredServer(
+          vpn
+        );
 
         vpnUsername.textContent =
           vpn.username || "";
@@ -2233,7 +3292,7 @@
           .remove("hidden");
       } else {
         vpnStatus.textContent =
-          "Not configured";
+          t("notConfigured");
 
         vpnStatus.className =
           "row-value";
@@ -2281,6 +3340,37 @@
           .classList
           .remove("hidden");
       }
+    }
+
+
+    function showVpn(
+      vpn
+    ) {
+      loadingCard
+        .classList
+        .add("hidden");
+
+      signedOutCard
+        .classList
+        .add("hidden");
+
+      vpnCard
+        .classList
+        .remove("hidden");
+
+      setInstallLink(
+        null
+      );
+
+      vpnMessage.textContent =
+        "";
+
+      vpnMessage.className =
+        "message";
+
+      renderVpnState(
+        vpn
+      );
     }
 
 
@@ -2359,16 +3449,22 @@
         }
 
         try {
-          await copyText(code);
+          await copyText(
+            code
+          );
 
           signedOutMessage.textContent =
-            "Recovery Code copied.";
+            t(
+              "recoveryCodeCopied"
+            );
 
           signedOutMessage.className =
             "message success";
         } catch {
           signedOutMessage.textContent =
-            "Could not copy Recovery Code.";
+            t(
+              "recoveryCodeCopyFailed"
+            );
 
           signedOutMessage.className =
             "message error";
@@ -2383,7 +3479,9 @@
         hideSignedOutRecoveryCode();
 
         signedOutMessage.textContent =
-          "Recovery Code saved. Sign in with your Passkey.";
+          t(
+            "recoveryCodeSavedSignIn"
+          );
 
         signedOutMessage.className =
           "message success";
@@ -2402,16 +3500,22 @@
         }
 
         try {
-          await copyText(code);
+          await copyText(
+            code
+          );
 
           recoveryMessage.textContent =
-            "Recovery Code copied.";
+            t(
+              "recoveryCodeCopied"
+            );
 
           recoveryMessage.className =
             "recovery-message success";
         } catch {
           recoveryMessage.textContent =
-            "Could not copy Recovery Code.";
+            t(
+              "recoveryCodeCopyFailed"
+            );
 
           recoveryMessage.className =
             "recovery-message error";
@@ -2426,7 +3530,9 @@
         hideAccountRecoveryCode();
 
         recoveryMessage.textContent =
-          "Recovery Code saved.";
+          t(
+            "recoveryCodeSaved"
+          );
 
         recoveryMessage.className =
           "recovery-message success";
@@ -2438,9 +3544,9 @@
       "click",
       async () => {
         const confirmed =
-          window.confirm(
-            "Generate a new Recovery Code?\n\n" +
-            "Any previous Recovery Code will immediately stop working."
+          confirmLocalized(
+            "generateRecoveryConfirmTitle",
+            "generateRecoveryConfirmBody"
           );
 
         if (!confirmed) {
@@ -2456,7 +3562,9 @@
         hideAccountRecoveryCode();
 
         recoveryMessage.textContent =
-          "Generating Recovery Code…";
+          t(
+            "generatingRecovery"
+          );
 
         recoveryMessage.className =
           "recovery-message";
@@ -2476,7 +3584,9 @@
 
           if (!data.recoveryCode) {
             throw new Error(
-              "Recovery Code was not returned"
+              t(
+                "recoveryCodeNotReturned"
+              )
             );
           }
 
@@ -2485,7 +3595,9 @@
           );
 
           recoveryMessage.textContent =
-            "New Recovery Code generated.";
+            t(
+              "newRecoveryGenerated"
+            );
 
           recoveryMessage.className =
             "recovery-message success";
@@ -2516,7 +3628,9 @@
 
         if (!recoveryCode) {
           signedOutMessage.textContent =
-            "Enter your Recovery Code.";
+            t(
+              "enterRecoveryCode"
+            );
 
           signedOutMessage.className =
             "message error";
@@ -2531,7 +3645,9 @@
           true;
 
         signedOutMessage.textContent =
-          "Checking Recovery Code…";
+          t(
+            "checkingRecovery"
+          );
 
         signedOutMessage.className =
           "message";
@@ -2552,7 +3668,14 @@
             );
 
           signedOutMessage.textContent =
-            `Creating ${begin.passkeyName || "new Passkey"}…`;
+            t(
+              "creatingNamedPasskey",
+              {
+                name:
+                  begin.passkeyName ||
+                  t("newPasskey")
+              }
+            );
 
           const credential =
             await navigator
@@ -2566,7 +3689,9 @@
 
           if (!credential) {
             throw new Error(
-              "Passkey was not created"
+              t(
+                "passkeyNotCreated"
+              )
             );
           }
 
@@ -2592,7 +3717,9 @@
 
           if (!finish.recoveryCode) {
             throw new Error(
-              "New Recovery Code was not returned"
+              t(
+                "newRecoveryCodeNotReturned"
+              )
             );
           }
 
@@ -2604,7 +3731,14 @@
           );
 
           signedOutMessage.textContent =
-            `${finish.passkeyName || "New Passkey"} created. Save your new Recovery Code.`;
+            t(
+              "recoveredPasskeyCreated",
+              {
+                name:
+                  finish.passkeyName ||
+                  t("newPasskey")
+              }
+            );
 
           signedOutMessage.className =
             "message success";
@@ -2632,7 +3766,9 @@
           true;
 
         vpnMessage.textContent =
-          "Signing out…";
+          t(
+            "signingOut"
+          );
 
         vpnMessage.className =
           "message";
@@ -2677,7 +3813,9 @@
           true;
 
         signedOutMessage.textContent =
-          "Waiting for Passkey…";
+          t(
+            "waitingPasskey"
+          );
 
         signedOutMessage.className =
           "message";
@@ -2707,7 +3845,9 @@
 
           if (!credential) {
             throw new Error(
-              "Passkey was not provided"
+              t(
+                "passkeyNotProvided"
+              )
             );
           }
 
@@ -2761,7 +3901,9 @@
           true;
 
         signedOutMessage.textContent =
-          "Creating Passkey…";
+          t(
+            "creatingPasskey"
+          );
 
         signedOutMessage.className =
           "message";
@@ -2791,7 +3933,9 @@
 
           if (!credential) {
             throw new Error(
-              "Passkey was not created"
+              t(
+                "passkeyNotCreated"
+              )
             );
           }
 
@@ -2817,7 +3961,9 @@
 
           if (!finish.recoveryCode) {
             throw new Error(
-              "Recovery Code was not returned"
+              t(
+                "recoveryCodeNotReturned"
+              )
             );
           }
 
@@ -2826,7 +3972,9 @@
           );
 
           signedOutMessage.textContent =
-            "Account created. Save your Recovery Code.";
+            t(
+              "accountCreatedSaveRecovery"
+            );
 
           signedOutMessage.className =
             "message success";
@@ -2860,7 +4008,9 @@
           true;
 
         passkeyMessage.textContent =
-          "Creating Passkey…";
+          t(
+            "creatingPasskey"
+          );
 
         passkeyMessage.className =
           "passkey-message";
@@ -2890,7 +4040,9 @@
 
           if (!credential) {
             throw new Error(
-              "Passkey was not created"
+              t(
+                "passkeyNotCreated"
+              )
             );
           }
 
@@ -2918,8 +4070,16 @@
 
           passkeyMessage.textContent =
             finish.passkeyName
-              ? `${finish.passkeyName} added.`
-              : "Passkey added.";
+              ? t(
+                  "passkeyAddedNamed",
+                  {
+                    name:
+                      finish.passkeyName
+                  }
+                )
+              : t(
+                  "passkeyAdded"
+                );
 
           passkeyMessage.className =
             "passkey-message success";
@@ -2947,7 +4107,9 @@
           true;
 
         vpnMessage.textContent =
-          "Creating VPN access…";
+          t(
+            "creatingVpn"
+          );
 
         vpnMessage.className =
           "message";
@@ -2983,7 +4145,9 @@
           );
 
           vpnMessage.textContent =
-            "VPN access created.";
+            t(
+              "vpnAccessCreated"
+            );
 
           vpnMessage.className =
             "message success";
@@ -3007,10 +4171,14 @@
         generateProfileButton.disabled =
           true;
 
-        setInstallLink(null);
+        setInstallLink(
+          null
+        );
 
         vpnMessage.textContent =
-          "Generating install link…";
+          t(
+            "generatingInstall"
+          );
 
         vpnMessage.className =
           "message";
@@ -3030,7 +4198,9 @@
 
           if (!data.profileUrl) {
             throw new Error(
-              "Install link was not returned"
+              t(
+                "installLinkNotReturned"
+              )
             );
           }
 
@@ -3039,7 +4209,9 @@
           );
 
           vpnMessage.textContent =
-            "Install link is ready.";
+            t(
+              "installLinkReady"
+            );
 
           vpnMessage.className =
             "message success";
@@ -3061,12 +4233,9 @@
       "click",
       async () => {
         const confirmed =
-          window.confirm(
-            "Change the VPN password?\n\n" +
-            "This creates a new configuration profile. " +
-            "The new VPN password will be included in the new Mobile Config file. " +
-            "The current profile will stop working after it reconnects. " +
-            "You’ll need to install the new profile on your Apple devices."
+          confirmLocalized(
+            "changeVpnConfirmTitle",
+            "changeVpnConfirmBody"
           );
 
         if (!confirmed) {
@@ -3085,10 +4254,14 @@
         deleteAccountButton.disabled =
           true;
 
-        setInstallLink(null);
+        setInstallLink(
+          null
+        );
 
         vpnMessage.textContent =
-          "Changing VPN password…";
+          t(
+            "changingVpnPassword"
+          );
 
         vpnMessage.className =
           "message";
@@ -3108,7 +4281,9 @@
 
           if (!data.profileUrl) {
             throw new Error(
-              "New profile was not returned"
+              t(
+                "newProfileNotReturned"
+              )
             );
           }
 
@@ -3117,7 +4292,9 @@
           );
 
           vpnMessage.textContent =
-            "VPN password changed. Install the new profile.";
+            t(
+              "vpnPasswordChanged"
+            );
 
           vpnMessage.className =
             "message success";
@@ -3148,11 +4325,9 @@
       "click",
       async () => {
         const confirmed =
-          window.confirm(
-            "Delete VPN access?\n\n" +
-            "This removes your VPN credentials from TOLF VPN servers. " +
-            "Installed VPN profiles will stop working. " +
-            "Your TOLF account and Passkeys will remain active."
+          confirmLocalized(
+            "deleteVpnConfirmTitle",
+            "deleteVpnConfirmBody"
           );
 
         if (!confirmed) {
@@ -3171,10 +4346,14 @@
         deleteAccountButton.disabled =
           true;
 
-        setInstallLink(null);
+        setInstallLink(
+          null
+        );
 
         vpnMessage.textContent =
-          "Deleting VPN access…";
+          t(
+            "deletingVpn"
+          );
 
         vpnMessage.className =
           "message";
@@ -3197,7 +4376,9 @@
           );
 
           vpnMessage.textContent =
-            "VPN access deleted. Your TOLF account and Passkeys remain active.";
+            t(
+              "vpnDeleted"
+            );
 
           vpnMessage.className =
             "message success";
@@ -3228,12 +4409,9 @@
       "click",
       async () => {
         const confirmed =
-          window.confirm(
-            "Delete TOLF account?\n\n" +
-            "This permanently deletes your TOLF account, " +
-            "Passkey registrations, active sessions, Recovery Code, and VPN access. " +
-            "Installed VPN profiles will stop working. " +
-            "This cannot be undone."
+          confirmLocalized(
+            "deleteAccountConfirmTitle",
+            "deleteAccountConfirmBody"
           );
 
         if (!confirmed) {
@@ -3264,10 +4442,14 @@
         deleteVpnButton.disabled =
           true;
 
-        setInstallLink(null);
+        setInstallLink(
+          null
+        );
 
         vpnMessage.textContent =
-          "Deleting TOLF account…";
+          t(
+            "deletingAccount"
+          );
 
         vpnMessage.className =
           "message";
@@ -3288,7 +4470,9 @@
           );
 
           signedOutMessage.textContent =
-            "TOLF account deleted.";
+            t(
+              "accountDeleted"
+            );
 
           signedOutMessage.className =
             "message success";
@@ -3328,6 +4512,10 @@
       }
     );
 
+
+    setLanguage(
+      currentLanguage
+    );
 
     loadAccount();
   </script>
