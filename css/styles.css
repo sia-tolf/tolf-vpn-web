@@ -1,6 +1,7 @@
 :root {
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", sans-serif;
   color-scheme: light dark;
+
   --background: #f5f5f7;
   --card: #ffffff;
   --text: #1d1d1f;
@@ -11,14 +12,18 @@
   --success: #248a3d;
   --error: #d70015;
   --danger: #d70015;
+
   --warning: #b26a00;
   --warning-border: #c77b00;
   --warning-background: rgba(199, 123, 0, 0.08);
+
   --delete-background: #e85d75;
   --delete-border: #e85d75;
+
   --account-delete-background: #c70015;
   --account-delete-border: #c70015;
   --account-delete-note: #b00012;
+
   --segment-background: #f5f5f7;
   --code-background: #f5f5f7;
 }
@@ -35,14 +40,18 @@
     --success: #30d158;
     --error: #ff453a;
     --danger: #ff453a;
+
     --warning: #ffb340;
     --warning-border: #ffb340;
     --warning-background: rgba(255, 179, 64, 0.10);
+
     --delete-background: #d94f69;
     --delete-border: #d94f69;
+
     --account-delete-background: #ff3b30;
     --account-delete-border: #ff3b30;
     --account-delete-note: #ff6961;
+
     --segment-background: #2c2c2e;
     --code-background: #2c2c2e;
   }
@@ -74,7 +83,10 @@ input {
   width: 100%;
   max-width: 760px;
   margin: 0 auto;
-  padding: max(42px, env(safe-area-inset-top)) 24px max(42px, env(safe-area-inset-bottom));
+  padding:
+    max(42px, env(safe-area-inset-top))
+    24px
+    max(42px, env(safe-area-inset-bottom));
 }
 
 .brand {
@@ -650,6 +662,52 @@ button:disabled {
   display: none !important;
 }
 
+.promo-section {
+  margin-top: 18px;
+}
+
+.promo-actions {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.promo-input {
+  flex: 1 1 0;
+  width: 100%;
+  min-width: 0;
+  min-height: 50px;
+  padding: 12px 14px;
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  text-transform: uppercase;
+}
+
+.promo-input:focus {
+  outline-color: var(--text);
+}
+
+.promo-message {
+  color: var(--secondary);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.promo-message:not(:empty) {
+  margin-top: 10px;
+}
+
+.promo-message.error {
+  color: var(--error);
+}
+
+.promo-message.success {
+  color: var(--success);
+}
+
 @media (max-width: 620px) {
   .brand-top {
     gap: 14px;
@@ -677,6 +735,10 @@ button:disabled {
 }
 
 @media (max-width: 520px) {
+  .promo-actions {
+    flex-direction: column;
+  }
+
   .page {
     padding-left: 16px;
     padding-right: 16px;
