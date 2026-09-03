@@ -9,9 +9,12 @@ function t(key, replacements = {}) {
 }
 
 function setLanguage(language) {
-  if (language !== "en" && language !== "ru") return;
+  if (language !== "en" && language !== "ru") {
+    return;
+  }
 
   currentLanguage = language;
+
   localStorage.setItem("tolfLanguage", language);
   document.documentElement.lang = language;
 
@@ -22,13 +25,27 @@ function setLanguage(language) {
     element.textContent = t(element.dataset.i18n);
   });
 
-  if (lastVpnState) renderVpnState(lastVpnState);
-  if (lastPasskeys.length) renderPasskeys(lastPasskeys);
+  if (lastVpnState) {
+    renderVpnState(lastVpnState);
+  }
+
+  if (lastPasskeys.length) {
+    renderPasskeys(lastPasskeys);
+  }
+
+  renderPromoState();
 }
 
 function confirmLocalized(titleKey, bodyKey, replacements = {}) {
-  return window.confirm(t(titleKey) + "\n\n" + t(bodyKey, replacements));
+  return window.confirm(
+    t(titleKey) + "\n\n" + t(bodyKey, replacements)
+  );
 }
 
-languageEn.addEventListener("click", () => setLanguage("en"));
-languageRu.addEventListener("click", () => setLanguage("ru"));
+languageEn.addEventListener("click", () => {
+  setLanguage("en");
+});
+
+languageRu.addEventListener("click", () => {
+  setLanguage("ru");
+});
