@@ -6,8 +6,11 @@
   --text: #1d1d1f;
   --secondary: #6e6e73;
   --border: #d2d2d7;
-  --button: #1d1d1f;
+  --button: #414145;
   --button-text: #ffffff;
+  --language-active-background: #ffffff;
+  --language-active-text: #414145;
+  --language-active-border: #d2d2d7;
   --success: #248a3d;
   --error: #d70015;
   --danger: #d70015;
@@ -30,8 +33,11 @@
     --text: #f5f5f7;
     --secondary: #98989d;
     --border: #38383a;
-    --button: #f5f5f7;
-    --button-text: #1d1d1f;
+    --button: #414145;
+    --button-text: #ffffff;
+    --language-active-background: #414145;
+    --language-active-text: #ffffff;
+    --language-active-border: #636369;
     --success: #30d158;
     --error: #ff453a;
     --danger: #ff453a;
@@ -99,14 +105,18 @@ button, input { font: inherit; }
   padding: 6px 10px;
   background: transparent;
   color: var(--secondary);
-  border: 0;
+  border: 1px solid transparent;
   border-radius: 8px;
   font-size: 13px;
   line-height: 1.2;
   font-weight: 600;
   cursor: pointer;
 }
-.language-button.active { background: var(--button); color: var(--button-text); }
+.language-button.active {
+  background: var(--language-active-background);
+  color: var(--language-active-text);
+  border-color: var(--language-active-border);
+}
 .card {
   background: var(--card);
   border: 1px solid var(--border);
@@ -311,7 +321,7 @@ button:disabled { opacity: 0.55; cursor: default; }
 .passkey-message.error, .recovery-message.error { color: var(--error); }
 .passkey-message.success, .recovery-message.success { color: var(--success); }
 .recovery-actions { margin-top: 16px; }
-.recovery-button { width: 100%; }
+.recovery-actions button { width: 100%; }
 .recovery-code-box {
   margin-top: 16px;
   padding: 18px;
