@@ -162,7 +162,7 @@ button, input { font: inherit; }
 }
 .server-selector {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
   padding: 5px;
   background: var(--segment-background);
@@ -172,8 +172,9 @@ button, input { font: inherit; }
 .server-option { position: relative; min-width: 0; }
 .server-option input { position: absolute; opacity: 0; pointer-events: none; }
 .server-option label {
-  min-height: 58px;
-  padding: 9px 8px;
+  min-height: 88px;
+  height: 100%;
+  padding: 12px 6px;
   border: 1px solid transparent;
   border-radius: 10px;
   cursor: pointer;
@@ -181,7 +182,7 @@ button, input { font: inherit; }
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: 8px;
   text-align: center;
   color: var(--text);
   font-size: 15px;
@@ -196,6 +197,9 @@ button, input { font: inherit; }
   border-color: var(--button);
 }
 .server-option input:disabled + label { opacity: 0.38; cursor: default; }
+.server-option input:focus-visible + label { outline: 2px solid var(--text); outline-offset: 2px; }
+.server-flag { display: block; font-size: 37.5px; line-height: 1; }
+.server-city { display: block; white-space: nowrap; }
 .server-coming-soon { font-size: 11px; line-height: 1.2; font-weight: 500; }
 .server-address {
   display: flex;
@@ -307,7 +311,7 @@ button:disabled { opacity: 0.55; cursor: default; }
 .passkey-message.error, .recovery-message.error { color: var(--error); }
 .passkey-message.success, .recovery-message.success { color: var(--success); }
 .recovery-actions { margin-top: 16px; }
-.recovery-actions button { width: 100%; }
+.recovery-button { width: 100%; }
 .recovery-code-box {
   margin-top: 16px;
   padding: 18px;
@@ -382,20 +386,43 @@ button:disabled { opacity: 0.55; cursor: default; }
 .message.error { color: var(--error); }
 .message.success { color: var(--success); }
 .hidden { display: none !important; }
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
 
 .promo-section { margin-top: 18px; }
-.promo-actions { display: flex; align-items: stretch; gap: 10px; margin-top: 10px; }
+.promo-actions { display: flex; flex-direction: row; flex-wrap: nowrap; align-items: stretch; gap: 10px; margin-top: 10px; }
 .promo-input {
-  flex: 1 1 0;
-  width: 100%;
-  min-width: 0;
+  flex: 0 1 132px;
+  width: 132px;
+  min-width: 104px;
   min-height: 50px;
   padding: 12px 14px;
   background: var(--card);
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: 12px;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 16px;
+  letter-spacing: 0.08em;
+  text-align: center;
   text-transform: uppercase;
+}
+.promo-actions > button {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 180px;
+  padding-left: 12px;
+  padding-right: 12px;
+  font-size: 15px;
 }
 .promo-input:focus { outline-color: var(--text); }
 .promo-message { color: var(--secondary); font-size: 14px; line-height: 1.45; }
@@ -430,6 +457,11 @@ button:disabled { opacity: 0.55; cursor: default; }
 .local-id-routing { margin: 10px 0; font-size: 14px; line-height: 1.5; }
 .local-id-routing.error { color: var(--error); }
 
+@media (min-width: 621px) {
+  .server-option label { flex-direction: row; min-height: 64px; gap: 10px; }
+  .server-flag { font-size: 32.5px; }
+}
+
 @media (max-width: 620px) {
   .brand-top { gap: 14px; }
   .actions { flex-direction: column; flex-wrap: nowrap; }
@@ -438,12 +470,11 @@ button:disabled { opacity: 0.55; cursor: default; }
   .recovery-code-actions, .recover-actions { flex-direction: column; }
 }
 @media (max-width: 520px) {
-  .promo-actions { flex-direction: column; }
   .page { padding-left: 16px; padding-right: 16px; }
   .brand h1 { font-size: 30px; }
   .language-button { padding-left: 8px; padding-right: 8px; }
   .card-content { padding: 22px; }
-  .server-option label { min-height: 62px; padding-left: 5px; padding-right: 5px; font-size: 14px; }
+  .server-option label { padding-left: 4px; padding-right: 4px; font-size: 14px; }
   .server-address { flex-direction: column; gap: 3px; }
   .server-address-value { text-align: left; }
   .row { grid-template-columns: 1fr; gap: 5px; }
