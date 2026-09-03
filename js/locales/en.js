@@ -1,4 +1,18 @@
 I18N.en = {
+  additionalSettings: "Additional settings",
+  localId: "Local ID",
+  localIdDefaultRiga: "sr (default)",
+  localIdDefaultMoscow: "Empty (default)",
+  localIdEmpty: "empty",
+  routingMoscowDefault: "Empty — Russian destinations on the server’s lists use the Moscow exit; other Internet traffic uses Riga.",
+  localIdHelp: "Local ID controls how the VPN server routes traffic. Leave empty to use this server’s default mode.",
+  localIdChoices: "Available for this server: {values}.",
+  localIdUnsupported: "This Local ID is not available for this server. Use {values}.",
+  localIdInstallNote: "After changing Local ID, generate and install a new profile to apply the routing change.",
+  routingRigaSr: "sr — Russian destinations on the server’s lists use the Moscow exit; other Internet traffic uses Riga.",
+  routingMoscowSr: "sr — DNS and destinations on the server’s Riga lists use the Riga exit; other Internet traffic uses Moscow.",
+  routingRu: "ru — Internet traffic uses the Moscow exit.",
+  routingLv: "lv — Internet traffic uses the Riga exit.",
   promoRateLimit: "Too many attempts. Try again in 15 minutes.",
   invalidPromo: "Promo code is invalid or no longer available.",
   promoAccepted: "Moscow is unlocked. Select a server to generate its profile.",
@@ -10,7 +24,6 @@ I18N.en = {
   applyPromo: "Apply code",
   promoRequired: "Promo code required",
   promoCode: "Promo code",
-
   brandSubtitle: "System VPN access for your devices.",
   loadingTitle: "Loading",
   loadingDescription: "Checking your account.",
@@ -22,12 +35,10 @@ I18N.en = {
   recoverDescription: "Enter your Recovery Code. If it is valid, you will create a new Passkey for this account.",
   continueButton: "Continue",
   cancelButton: "Cancel",
-
   saveRecoveryCode: "Save your Recovery Code",
   recoveryCodeInitialWarning: "This code can restore access if you lose all Passkeys. TOLF cannot show this code again.",
   copyRecoveryCode: "Copy Recovery Code",
   savedIt: "I saved it",
-
   myVpn: "My VPN",
   signOut: "Sign out",
   manageVpnDescription: "Manage your TOLF VPN access.",
@@ -42,7 +53,6 @@ I18N.en = {
   username: "Username",
   active: "Active",
   notConfigured: "Not configured",
-
   createVpnAccess: "Create VPN Access",
   generateInstallLink: "Generate Install Link",
   installAppleDevice: "Install on Apple Device",
@@ -50,7 +60,6 @@ I18N.en = {
   changePasswordNote: "Riga and Moscow use the same VPN password. After changing it, generate and install a new profile for each server you use.",
   deleteVpnAccess: "Delete VPN Access",
   deleteVpnNote: "This removes VPN access on both servers. Your TOLF account, Passkeys and activated promo access remain.",
-
   passkeys: "Passkeys",
   passkeysDescription: "Passkeys provide access to your TOLF account. Add another Passkey before removing your current one.",
   addPasskey: "Add Passkey",
@@ -60,16 +69,13 @@ I18N.en = {
   registeredPasskey: "Registered Passkey",
   addedDate: "Added {date}",
   addAnotherBeforeRemoving: "Add another Passkey before removing this one.",
-
   recovery: "Recovery",
   recoveryDescription: "A Recovery Code can restore access to your TOLF account if you lose all Passkeys.",
   generateNewRecoveryCode: "Generate New Recovery Code",
   saveNewRecoveryCode: "Save your new Recovery Code",
   newRecoveryCodeWarning: "This code is shown only now. Any previous Recovery Code is no longer valid.",
-
   deleteTolfAccount: "Delete TOLF Account",
   deleteAccountNote: "Permanently deletes your TOLF account, Passkey registrations, active sessions, Recovery Code, and VPN access. This cannot be undone.",
-
   signingOut: "Signing out…",
   waitingPasskey: "Waiting for Passkey…",
   passkeyNotProvided: "Passkey was not provided",
@@ -81,7 +87,6 @@ I18N.en = {
   recoveryCodeCopyFailed: "Could not copy Recovery Code.",
   recoveryCodeSaved: "Recovery Code saved.",
   recoveryCodeSavedSignIn: "Recovery Code saved. Sign in with your Passkey.",
-
   generateRecoveryConfirmTitle: "Generate a new Recovery Code?",
   generateRecoveryConfirmBody: "Any previous Recovery Code will immediately stop working.",
   generatingRecovery: "Generating Recovery Code…",
@@ -92,31 +97,26 @@ I18N.en = {
   recoveredPasskeyCreated: "{name} created. Save your new Recovery Code.",
   newPasskey: "New Passkey",
   newRecoveryCodeNotReturned: "New Recovery Code was not returned",
-
   passkeyAdded: "Passkey added.",
   passkeyAddedNamed: "{name} added.",
   removingPasskey: "Removing Passkey…",
   passkeyRemoved: "Passkey removed.",
   removePasskeyConfirmTitle: "Remove Passkey?",
   removePasskeyConfirmBody: "Remove “{name}” from this TOLF account? That Passkey will no longer be able to sign in.",
-
   creatingVpn: "Creating VPN access…",
   vpnAccessCreated: "VPN access created.",
   generatingInstall: "Generating install link…",
   installLinkNotReturned: "Install link was not returned",
   installLinkReady: "Install link is ready.",
-
   changeVpnConfirmTitle: "Change the VPN password?",
   changeVpnConfirmBody: "This changes the VPN password for both Riga and Moscow. Existing profiles will stop working after reconnecting. Generate and install a new profile for each server you use.",
   changingVpnPassword: "Changing VPN password…",
   newProfileNotReturned: "New profile was not returned",
   vpnPasswordChanged: "VPN password changed. Install the new profile, then generate a new profile for the other server if you use it.",
-
   deleteVpnConfirmTitle: "Delete VPN access?",
   deleteVpnConfirmBody: "This deletes VPN credentials on Riga and Moscow. Installed profiles will stop working. Your account, Passkeys and Moscow permission remain.",
   deletingVpn: "Deleting VPN access…",
   vpnDeleted: "VPN access deleted. Your TOLF account and Passkeys remain active.",
-
   deleteAccountConfirmTitle: "Delete TOLF account?",
   deleteAccountConfirmBody: "This permanently deletes your TOLF account, Passkey registrations, active sessions, Recovery Code, and VPN access. Installed VPN profiles will stop working. This cannot be undone.",
   deletingAccount: "Deleting TOLF account…",
