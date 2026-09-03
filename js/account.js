@@ -4,7 +4,9 @@ async function loadAccount() {
       method: "GET"
     });
 
+    applyServerAccess(data);
     showVpn(data.vpn);
+
     await loadPasskeys();
   } catch {
     showSignedOut();
@@ -128,7 +130,9 @@ deleteAccountButton.addEventListener("click", async () => {
     "deleteAccountConfirmBody"
   );
 
-  if (!confirmed) return;
+  if (!confirmed) {
+    return;
+  }
 
   deleteAccountButton.disabled = true;
   signOutButton.disabled = true;
