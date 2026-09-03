@@ -5,18 +5,6 @@ function setVpnBusy(value) {
     button.disabled = value;
   }
   updateServerAvailability();
-
-
-VPN оставь выключенным. В GitHub открой `js/vpn.js` и полностью замени содержимое:
-
-```javascript
-function setVpnBusy(value) {
-  vpnBusy = value;
-  for (const button of [createVpnButton, generateProfileButton, rotatePasswordButton,
-    deleteVpnButton, deleteAccountButton, signOutButton, redeemPromoButton]) {
-    button.disabled = value;
-  }
-  updateServerAvailability();
   if (localIdInput) localIdInput.disabled = value;
 }
 
@@ -101,7 +89,9 @@ deleteVpnButton.addEventListener("click", async () => {
   vpnMessage.textContent = t("deletingVpn");
   vpnMessage.className = "message";
   try {
-    const data = await apiRequest("/vpn/delete", { method: "POST", body: "{}" });
+    const data = await apiRequest("/vpn/delete", {
+      method: "POST", body: "{}"
+    });
     showVpn(data.vpn);
     vpnMessage.textContent = t("vpnDeleted");
     vpnMessage.className = "message success";
