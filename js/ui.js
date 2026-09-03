@@ -3,7 +3,9 @@ function getSelectedServerKey() {
     'input[name="vpnServer"]:checked'
   );
 
-  return selected?.value || "riga";
+  return allowedServers.includes(selected?.value)
+    ? selected.value
+    : "riga";
 }
 
 function updateSelectedServerAddress() {
@@ -12,9 +14,7 @@ function updateSelectedServerAddress() {
 }
 
 function showConfiguredServer(vpn) {
-  const serverKey =
-    vpn?.server && SERVERS[vpn.server] ? vpn.server : "riga";
-
+  const serverKey = getSelectedServerKey();
   const server = SERVERS[serverKey];
 
   vpnServerName.textContent = t(server.nameKey);
@@ -23,7 +23,18 @@ function showConfiguredServer(vpn) {
 }
 
 for (const input of serverInputs) {
-  input.addEventListener("change", updateSelectedServerAddress);
+  input.addEventListener("change", () => {
+    setInstallLink(null);
+
+    vpnMessage.textContent = "";
+    vpnMessage.className = "message";
+
+    updateSelectedServerAddress();
+
+    if (lastVpnState) {
+      renderVpnState(lastVpnState);
+    }
+  });
 }
 
 function showSignedOutRecoveryCode(recoveryCode) {
@@ -53,11 +64,13 @@ function setInstallLink(profileUrl) {
   if (profileUrl) {
     installProfileButton.href = profileUrl;
     installProfileButton.classList.remove("hidden");
+
     generateProfileButton.classList.remove("primary");
     generateProfileButton.classList.add("secondary");
   } else {
     installProfileButton.href = "#";
     installProfileButton.classList.add("hidden");
+
     generateProfileButton.classList.remove("secondary");
     generateProfileButton.classList.add("primary");
   }
@@ -80,6 +93,17 @@ function showSignedOut() {
   recoveryMessage.className = "recovery-message";
 
   hideAccountRecoveryCode();
+
+  lastVpnState = null;
+
+  promoInput.value = "";
+  promoMessage.textContent = "";
+  promoMessage.className = "promo-message";
+
+  applyServerAccess({
+    allowedServers: ["riga"],
+    promoPending: false
+  });
 }
 
 function renderVpnState(vpn) {
@@ -89,7 +113,7 @@ function renderVpnState(vpn) {
     vpnStatus.textContent = t("active");
     vpnStatus.className = "row-value status-active";
 
-    serverSection.classList.add("hidden");
+    serverSection.classList.remove("hidden");
     showConfiguredServer(vpn);
 
     vpnUsername.textContent = vpn.username || "";
