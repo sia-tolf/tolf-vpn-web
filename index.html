@@ -22,7 +22,7 @@
   <script defer src="js/account.js?v=local-id-2"></script>
   <script defer src="js/vpn.js?v=local-id-3"></script>
   <script defer src="js/promo.js?v=entry-point-auto-1"></script>
-  <script defer src="js/location.js?v=entry-point-auto-4"></script>
+  <script defer src="js/location.js?v=entry-point-auto-5"></script>
   <script defer src="js/app.js?v=local-id-2"></script>
 </head>
 <body>
@@ -38,6 +38,7 @@
           <button id="languageRu" class="language-button" type="button">Русский</button>
         </div>
       </div>
+
       <nav class="site-nav">
         <a href="help.html">
           <span class="site-label" lang="en">Help &amp; FAQ</span>
@@ -153,6 +154,7 @@
             </div>
 
             <label class="local-id-label" for="localIdInput" data-i18n="localId">Local ID</label>
+
             <input
               id="localIdInput"
               class="local-id-input"
@@ -179,7 +181,19 @@
             <p class="section-description" data-i18n="promoDescription">If you have a promo code, enter it here.</p>
 
             <div class="promo-actions">
-              <input id="promoInput" class="promo-input" type="text" minlength="6" maxlength="6" pattern="[A-Za-z0-9]{6}" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Promo code">
+              <input
+                id="promoInput"
+                class="promo-input"
+                type="text"
+                minlength="6"
+                maxlength="6"
+                pattern="[A-Za-z0-9]{6}"
+                autocomplete="off"
+                autocapitalize="characters"
+                spellcheck="false"
+                aria-label="Promo code"
+              >
+
               <button id="redeemPromoButton" class="secondary" type="button" data-i18n="applyPromo">Apply</button>
             </div>
           </div>
@@ -212,7 +226,6 @@
           <button id="generateProfileButton" class="primary hidden" type="button" data-i18n="generateInstallLink">Generate Install Link</button>
           <a id="installProfileButton" class="button-link primary hidden" href="#" target="_self" data-i18n="installAppleDevice">Install on Apple Device</a>
           <button id="rotatePasswordButton" class="danger hidden" type="button" data-i18n="changeVpnPassword">Change VPN Password</button>
-
           <p id="rotatePasswordNote" class="password-note hidden" data-i18n="changePasswordNote">Changing the VPN password creates a new configuration profile. The new VPN password is included in the new Mobile Config file. You’ll need to install the new profile on your Apple devices.</p>
         </div>
 
@@ -224,7 +237,6 @@
         <div id="passkeysSection" class="passkeys-section">
           <h3 class="section-title" data-i18n="passkeys">Passkeys</h3>
           <p class="section-description" data-i18n="passkeysDescription">Passkeys provide access to your TOLF account. Add another Passkey before removing your current one.</p>
-
           <div id="passkeyList" class="passkey-list"></div>
 
           <div class="passkey-add-row">
