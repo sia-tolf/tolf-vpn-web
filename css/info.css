@@ -1,4 +1,5 @@
 /* Public navigation and privacy page. Uses the existing light/dark palette. */
+
 .site-nav {
   display: grid;
   grid-template-columns: repeat(2, 168px);
@@ -22,6 +23,75 @@
   font-weight: 600;
   text-align: center;
   text-decoration: none;
+}
+
+.header-actions-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 22px;
+}
+
+.header-actions-row .site-nav {
+  width: min(100%, 346px);
+  margin-top: 0;
+  grid-template-columns: repeat(
+    2,
+    minmax(0, 1fr)
+  );
+}
+
+.header-promo {
+  display: none;
+  margin: 0;
+}
+
+body:has(#vpnCard:not(.hidden))
+.header-actions-row {
+  display: grid;
+  grid-template-columns: repeat(
+    2,
+    minmax(0, 1fr)
+  );
+  gap: 10px;
+}
+
+body:has(#vpnCard:not(.hidden))
+.header-actions-row
+.site-nav {
+  width: auto;
+}
+
+body:has(#vpnCard:not(.hidden))
+.header-promo:not(:has(#promoForm.hidden)) {
+  display: block;
+}
+
+.header-promo .promo-actions {
+  display: grid;
+  grid-template-columns: repeat(
+    2,
+    minmax(0, 1fr)
+  );
+  gap: 10px;
+  margin: 0;
+}
+
+.header-promo .promo-input,
+.header-promo .promo-actions > button {
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  min-height: 44px;
+  height: 44px;
+  border-radius: 11px;
+  padding: 8px 10px;
+  font-size: 15px;
+}
+
+.header-promo
+.promo-message:not(:empty) {
+  margin: 8px 2px 0;
+  text-align: right;
 }
 
 .entry-point-note {
@@ -60,8 +130,10 @@
   text-underline-offset: 3px;
 }
 
-html:not([lang="ru"]) .site-label[lang="ru"],
-html[lang="ru"] .site-label[lang="en"] {
+html:not([lang="ru"])
+.site-label[lang="ru"],
+html[lang="ru"]
+.site-label[lang="en"] {
   display: none;
 }
 
@@ -134,12 +206,23 @@ html[lang="ru"] .site-label[lang="en"] {
 
 @media (max-width: 520px) {
   .site-nav {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(
+      2,
+      minmax(0, 1fr)
+    );
     justify-content: stretch;
   }
 
   .site-nav a {
     padding-left: 12px;
     padding-right: 12px;
+  }
+
+  .header-promo .promo-input,
+  .header-promo .promo-actions > button,
+  .header-actions-row .site-nav a {
+    padding-left: 5px;
+    padding-right: 5px;
+    font-size: 12px;
   }
 }
