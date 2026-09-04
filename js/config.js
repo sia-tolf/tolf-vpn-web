@@ -9,38 +9,22 @@ const SERVERS = {
 const I18N = {};
 
 const LOCAL_ID_OPTIONS = {
-  riga: {
-    sr: "routingRigaSr",
-    ru: "routingRu"
-  },
-  moscow: {
-    "": "routingMoscowDefault",
-    sr: "routingMoscowSr",
-    ru: "routingRu",
-    lv: "routingLv"
-  }
+  riga: { sr: "routingRigaSr", ru: "routingRu" },
+  moscow: { "": "routingMoscowDefault", sr: "routingMoscowSr", ru: "routingRu", lv: "routingLv" }
 };
 
-const LOCAL_ID_DEFAULTS = {
-  riga: "sr",
-  moscow: ""
-};
+const LOCAL_ID_DEFAULTS = { riga: "sr", moscow: "" };
 
-let localIdValues = {
-  riga: "",
-  moscow: ""
-};
+let localIdValues = { riga: "", moscow: "" };
 
 let currentLanguage = localStorage.getItem("tolfLanguage");
-
 if (currentLanguage !== "en" && currentLanguage !== "ru") {
-  currentLanguage = navigator.language.toLowerCase().startsWith("ru")
-    ? "ru"
-    : "en";
+  currentLanguage = navigator.language.toLowerCase().startsWith("ru") ? "ru" : "en";
 }
 
 let lastVpnState = null;
 let lastPasskeys = [];
 let allowedServers = ["riga"];
+let promoRedeemed = false;
 let promoPending = false;
 let vpnBusy = false;
