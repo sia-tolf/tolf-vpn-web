@@ -1,4 +1,52 @@
-/* Public navigation and privacy page. Uses the existing light/dark palette. */
+/* Public navigation, header controls and privacy page. */
+
+.header-switchers {
+  flex: 0 0 252px;
+  width: 252px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.header-switchers .language-switcher {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.platform-switcher {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  padding: 4px;
+  background: var(--segment-background);
+  border: 1px solid var(--border);
+  border-radius: 11px;
+}
+
+.platform-button {
+  min-height: 32px;
+  padding: 6px 10px;
+  background: transparent;
+  color: var(--secondary);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.2;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.platform-button.active {
+  background: var(--language-active-background);
+  color: var(--language-active-text);
+  border-color: var(--language-active-border);
+}
+
+.platform-button:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
 
 .site-nav {
   display: grid;
@@ -27,17 +75,18 @@
 
 .header-actions-row {
   display: flex;
-  justify-content: flex-end;
+  width: 100%;
   margin-top: 22px;
+  padding: 14px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
 }
 
 .header-actions-row .site-nav {
-  width: min(100%, 346px);
+  width: 100%;
   margin-top: 0;
-  grid-template-columns: repeat(
-    2,
-    minmax(0, 1fr)
-  );
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .header-promo {
@@ -45,19 +94,13 @@
   margin: 0;
 }
 
-body:has(#vpnCard:not(.hidden))
-.header-actions-row {
+body:has(#vpnCard:not(.hidden)) .header-actions-row {
   display: grid;
-  grid-template-columns: repeat(
-    2,
-    minmax(0, 1fr)
-  );
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
-body:has(#vpnCard:not(.hidden))
-.header-actions-row
-.site-nav {
+body:has(#vpnCard:not(.hidden)) .header-actions-row .site-nav {
   width: auto;
 }
 
@@ -68,10 +111,7 @@ body:has(#vpnCard:not(.hidden))
 
 .header-promo .promo-actions {
   display: grid;
-  grid-template-columns: repeat(
-    2,
-    minmax(0, 1fr)
-  );
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
   margin: 0;
 }
@@ -88,8 +128,7 @@ body:has(#vpnCard:not(.hidden))
   font-size: 15px;
 }
 
-.header-promo
-.promo-message:not(:empty) {
+.header-promo .promo-message:not(:empty) {
   margin: 8px 2px 0;
   text-align: right;
 }
@@ -130,11 +169,14 @@ body:has(#vpnCard:not(.hidden))
   text-underline-offset: 3px;
 }
 
-html:not([lang="ru"])
-.site-label[lang="ru"],
-html[lang="ru"]
-.site-label[lang="en"] {
+.site-label {
   display: none;
+}
+
+html[lang="en"] .site-label[lang="en"],
+html[lang="ru"] .site-label[lang="ru"],
+html[lang="lv"] .site-label[lang="lv"] {
+  display: inline;
 }
 
 .privacy-page [hidden] {
@@ -205,8 +247,17 @@ html[lang="ru"]
 }
 
 @media (max-width: 520px) {
-  body:has(#vpnCard:not(.hidden))
-  .header-actions-row {
+  .brand-top {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .header-switchers {
+    flex-basis: auto;
+    width: 100%;
+  }
+
+  body:has(#vpnCard:not(.hidden)) .header-actions-row {
     grid-template-columns: minmax(0, 1fr);
   }
 
@@ -215,16 +266,17 @@ html[lang="ru"]
   }
 
   .site-nav {
-    grid-template-columns: repeat(
-      2,
-      minmax(0, 1fr)
-    );
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     justify-content: stretch;
   }
 
   .site-nav a {
     padding-left: 12px;
     padding-right: 12px;
+  }
+
+  .header-actions-row {
+    padding: 12px;
   }
 
   .header-promo .promo-input,
