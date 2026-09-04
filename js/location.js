@@ -65,7 +65,15 @@ async function loadEntryPointRecommendation() {
     if (requestNumber !== recommendationRequestNumber) return;
     if (data.entryPoint !== "moscow" && data.entryPoint !== "riga") return;
 
+    const recommendationChanged =
+      recommendedEntryPoint !== null && recommendedEntryPoint !== data.entryPoint;
+
     recommendedEntryPoint = data.entryPoint;
+
+    if (recommendationChanged) {
+      entryPointChangedManually = false;
+    }
+
     renderEntryPointRecommendation();
     selectRecommendedEntryPoint();
   } catch {
@@ -89,9 +97,28 @@ if (typeof setTimeout === "function") {
   setTimeout(loadEntryPointRecommendation, 1500);
 }
 
+if (typeof setInterval === "function") {
+  setInterval(() => {
+    if (typeof document === "undefined" || document.visibilityState !== "hidden") {
+      loadEntryPointRecommendation();
+    }
+  }, 10000);
+}
+
 if (typeof window !== "undefined" && typeof window.addEventListener === "function") {
+  window.addEventListener("focus", loadEntryPointRecommendation);
+  window.addEventListener("online", loadEntryPointRecommendation);
+
   window.addEventListener("pageshow", event => {
-    if (event.persisted && !entryPointChangedManually) {
+    if (event.persisted) {
+      loadEntryPointRecommendation();
+    }
+  });
+}
+
+if (typeof document !== "undefined" && typeof document.addEventListener === "function") {
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState !== "hidden") {
       loadEntryPointRecommendation();
     }
   });
