@@ -126,7 +126,11 @@ function showSignedOut() {
   promoInput.value = "";
   promoMessage.textContent = "";
   promoMessage.className = "promo-message";
-  applyServerAccess({ allowedServers: ["riga"], promoPending: false });
+  applyServerAccess({
+    allowedServers: ["riga", "moscow"],
+    promoRedeemed: false,
+    promoPending: false
+  });
   localIdValues = { riga: "", moscow: "" };
   if (profileSettings) profileSettings.open = false;
   renderLocalIdSettings();
@@ -135,6 +139,7 @@ function showSignedOut() {
 function renderVpnState(vpn) {
   lastVpnState = vpn;
   updateSelectedServerAddress();
+
   if (vpn.configured) {
     vpnStatus.textContent = t("active");
     vpnStatus.className = "row-value status-active";
