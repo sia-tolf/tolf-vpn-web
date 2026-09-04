@@ -27,6 +27,7 @@
 .platform-button {
   min-height: 32px;
   padding: 6px 10px;
+  gap: 6px;
   background: transparent;
   color: var(--secondary);
   border: 1px solid transparent;
@@ -35,6 +36,13 @@
   line-height: 1.2;
   font-weight: 600;
   cursor: pointer;
+}
+
+.platform-icon {
+  flex: 0 0 15px;
+  width: 15px;
+  height: 15px;
+  fill: currentColor;
 }
 
 .platform-button.active {
