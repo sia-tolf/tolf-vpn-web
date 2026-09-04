@@ -1,31 +1,18 @@
 const LOCATION_API = "https://location.tolf.is";
 const entryPointNote = document.getElementById("entryPointNote");
-
 let recommendedEntryPoint = null;
-let entryPointRecommendationApplied = false;
+let entryPointChangedManually = false;
+let recommendationRequestNumber = 0;
 
 function selectRecommendedEntryPoint() {
-  if (entryPointRecommendationApplied) return;
-
-  if (
-    recommendedEntryPoint !== "moscow" &&
-    recommendedEntryPoint !== "riga"
-  ) {
-    return;
-  }
+  if (entryPointChangedManually) return;
+  if (recommendedEntryPoint !== "moscow" && recommendedEntryPoint !== "riga") return;
 
   const target = document.getElementById(
-    recommendedEntryPoint === "moscow"
-      ? "serverMoscow"
-      : "serverRiga"
+    recommendedEntryPoint === "moscow" ? "serverMoscow" : "serverRiga"
   );
-
   if (!target || target.disabled) return;
-
-  if (target.checked) {
-    entryPointRecommendationApplied = true;
-    return;
-  }
+  if (target.checked) return;
 
   for (const input of serverInputs) {
     input.checked = input === target;
@@ -35,23 +22,17 @@ function selectRecommendedEntryPoint() {
   vpnMessage.textContent = "";
   vpnMessage.className = "message";
   updateSelectedServerAddress();
-
-  if (lastVpnState) {
-    renderVpnState(lastVpnState);
-  }
-
-  entryPointRecommendationApplied = true;
+  if (lastVpnState) renderVpnState(lastVpnState);
 }
 
 function renderEntryPointRecommendation() {
   if (!entryPointNote) return;
 
-  const key =
-    recommendedEntryPoint === "moscow"
-      ? "entryPointRecommendationMoscow"
-      : recommendedEntryPoint === "riga"
-        ? "entryPointRecommendationRiga"
-        : null;
+  const key = recommendedEntryPoint === "moscow"
+    ? "entryPointRecommendationMoscow"
+    : recommendedEntryPoint === "riga"
+      ? "entryPointRecommendationRiga"
+      : null;
 
   if (!key) {
     entryPointNote.textContent = "";
@@ -65,46 +46,51 @@ function renderEntryPointRecommendation() {
 
 async function loadEntryPointRecommendation() {
   try {
+    const requestNumber = ++recommendationRequestNumber;
     const response = await fetch(
-      `${LOCATION_API}/recommendation`,
+      `${LOCATION_API}/recommendation?request=${Date.now()}-${requestNumber}`,
       {
         method: "GET",
         cache: "no-store",
         credentials: "omit",
-        headers: {
-          Accept: "application/json"
-        }
+        headers: { Accept: "application/json" }
       }
     );
 
     if (!response.ok) return;
 
     const data = await response.json();
-
-    if (
-      data.entryPoint !== "moscow" &&
-      data.entryPoint !== "riga"
-    ) {
-      return;
-    }
+    if (requestNumber !== recommendationRequestNumber) return;
+    if (data.entryPoint !== "moscow" && data.entryPoint !== "riga") return;
 
     recommendedEntryPoint = data.entryPoint;
     renderEntryPointRecommendation();
     selectRecommendedEntryPoint();
   } catch {
-    // The recommendation is optional.
-    // VPN controls remain available.
+    // The recommendation is optional. VPN controls remain available.
   }
 }
 
-languageEn.addEventListener(
-  "click",
-  renderEntryPointRecommendation
-);
-languageRu.addEventListener(
-  "click",
-  renderEntryPointRecommendation
-);
+for (const input of serverInputs) {
+  input.addEventListener("change", event => {
+    if (event.isTrusted) entryPointChangedManually = true;
+  });
+}
+
+languageEn.addEventListener("click", renderEntryPointRecommendation);
+languageRu.addEventListener("click", renderEntryPointRecommendation);
 
 renderEntryPointRecommendation();
 loadEntryPointRecommendation();
+
+if (typeof setTimeout === "function") {
+  setTimeout(loadEntryPointRecommendation, 1500);
+}
+
+if (typeof window !== "undefined" && typeof window.addEventListener === "function") {
+  window.addEventListener("pageshow", event => {
+    if (event.persisted && !entryPointChangedManually) {
+      loadEntryPointRecommendation();
+    }
+  });
+}
