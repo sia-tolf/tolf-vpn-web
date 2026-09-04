@@ -10,16 +10,40 @@ const I18N = {};
 
 const LOCAL_ID_OPTIONS = {
   riga: { sr: "routingRigaSr", ru: "routingRu" },
-  moscow: { "": "routingMoscowDefault", sr: "routingMoscowSr", ru: "routingRu", lv: "routingLv" }
+  moscow: {
+    "": "routingMoscowDefault",
+    sr: "routingMoscowSr",
+    ru: "routingRu",
+    lv: "routingLv"
+  }
 };
 
-const LOCAL_ID_DEFAULTS = { riga: "sr", moscow: "" };
+const LOCAL_ID_DEFAULTS = {
+  riga: "sr",
+  moscow: ""
+};
 
-let localIdValues = { riga: "", moscow: "" };
+let localIdValues = {
+  riga: "",
+  moscow: ""
+};
 
 let currentLanguage = localStorage.getItem("tolfLanguage");
-if (currentLanguage !== "en" && currentLanguage !== "ru") {
-  currentLanguage = navigator.language.toLowerCase().startsWith("ru") ? "ru" : "en";
+
+if (!["en", "ru", "lv"].includes(currentLanguage)) {
+  const browserLanguage = navigator.language.toLowerCase();
+
+  currentLanguage = browserLanguage.startsWith("ru")
+    ? "ru"
+    : browserLanguage.startsWith("lv")
+      ? "lv"
+      : "en";
+}
+
+let currentPlatform = localStorage.getItem("tolfPlatform");
+
+if (currentPlatform !== "ios" && currentPlatform !== "android") {
+  currentPlatform = "ios";
 }
 
 let lastVpnState = null;
