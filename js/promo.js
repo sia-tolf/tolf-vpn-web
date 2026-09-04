@@ -1,7 +1,6 @@
 function updateServerAvailability() {
   for (const input of serverInputs) {
     input.disabled = vpnBusy || !allowedServers.includes(input.value);
-
     if (input.checked && !allowedServers.includes(input.value)) {
       input.checked = false;
       document.getElementById("serverRiga").checked = true;
@@ -10,39 +9,31 @@ function updateServerAvailability() {
 }
 
 function renderPromoState() {
-  const unlocked = allowedServers.includes("moscow");
-
-  moscowAccessLabel.textContent = unlocked ? "" : t("promoRequired");
-  moscowAccessLabel.classList.toggle("hidden", unlocked);
-
-  promoForm.classList.toggle("hidden", unlocked);
-  promoGranted.classList.toggle("hidden", !unlocked);
-
+  moscowAccessLabel.textContent = "";
+  moscowAccessLabel.classList.add("hidden");
+  promoForm.classList.toggle("hidden", promoRedeemed);
+  promoGranted.classList.toggle("hidden", !promoRedeemed);
   promoInput.classList.toggle("hidden", promoPending);
   promoInput.setAttribute("aria-label", t("promoCode"));
-
   redeemPromoButton.textContent = t(
     promoPending ? "retryPromo" : "applyPromo"
   );
 }
 
 function applyServerAccess(data) {
-  allowedServers =
-    Array.isArray(data.allowedServers) &&
-    data.allowedServers.includes("moscow")
-      ? ["riga", "moscow"]
-      : ["riga"];
-
+  allowedServers = ["riga", "moscow"];
+  promoRedeemed = Boolean(data.promoRedeemed);
   promoPending = Boolean(data.promoPending);
-
   updateServerAvailability();
   renderPromoState();
+
+  if (typeof selectRecommendedEntryPoint === "function") {
+    selectRecommendedEntryPoint();
+  }
 }
 
 redeemPromoButton.addEventListener("click", async () => {
-  if (vpnBusy) {
-    return;
-  }
+  if (vpnBusy) return;
 
   const code = promoInput.value.trim();
 
@@ -54,7 +45,6 @@ redeemPromoButton.addEventListener("click", async () => {
   }
 
   setVpnBusy(true);
-
   promoMessage.textContent = t("checkingPromo");
   promoMessage.className = "promo-message";
 
@@ -65,19 +55,7 @@ redeemPromoButton.addEventListener("click", async () => {
     });
 
     applyServerAccess(data);
-
     promoInput.value = "";
-
-    document.getElementById("serverMoscow").checked = true;
-    document.getElementById("serverRiga").checked = false;
-
-    setInstallLink(null);
-    updateSelectedServerAddress();
-
-    if (lastVpnState) {
-      renderVpnState(lastVpnState);
-    }
-
     promoMessage.textContent = t("promoAccepted");
     promoMessage.className = "promo-message success";
   } catch (error) {
@@ -89,7 +67,6 @@ redeemPromoButton.addEventListener("click", async () => {
     promoMessage.textContent = messages[error.message]
       ? t(messages[error.message])
       : error.message;
-
     promoMessage.className = "promo-message error";
   } finally {
     setVpnBusy(false);
