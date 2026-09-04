@@ -54,7 +54,7 @@
               <dt>VPN access and profiles</dt>
               <dd>Your VPN username, creation date and server access settings. VPN servers store the credentials needed for authentication. Generated installation profiles include the VPN username, password and connection settings.</dd>
               <dt>Promo codes</dt>
-              <dd>Code redemptions, their dates and the server access they unlock are recorded. Attempts to apply a code are also recorded to limit guessing. Promo codes are stored as hashes.</dd>
+              <dd>Accepted codes and their redemption dates are recorded for the account. Attempts to apply a code are also recorded to limit guessing. Promo codes are stored as hashes. A promo code does not affect the availability of Riga or Moscow.</dd>
               <dt>Recovery</dt>
               <dd>The account database stores a hash of your Recovery Code. The code itself is shown when it is issued; the service cannot show the existing code again.</dd>
             </dl>
@@ -81,8 +81,8 @@
 
           <section>
             <h3>What deletion does</h3>
-            <p><strong>Delete VPN Access</strong> removes the VPN credentials from both servers. Your TOLF account, Passkeys and access unlocked by a promo code remain, so you can create VPN access again.</p>
-            <p><strong>Delete TOLF Account</strong> also removes the active account records: Passkey registrations, sign-in sessions, the Recovery Code hash and server access rights.</p>
+            <p><strong>Delete VPN Access</strong> removes the VPN credentials from both servers. Your TOLF account, Passkeys and accepted promo code remain, so you can create VPN access again.</p>
+            <p><strong>Delete TOLF Account</strong> also removes the active account records: Passkey registrations, sign-in sessions, the Recovery Code hash and VPN access.</p>
             <p>A promo redemption record remains with its date, but without its account reference, so deleting an account does not restore the code’s usage allowance. Technical profile identifiers are also retained so replacement profiles can preserve their identity.</p>
             <p>Account deletion does not guarantee immediate erasure of backups, previously issued profile files or infrastructure logs. Removing a profile from your device is a separate action.</p>
           </section>
@@ -105,7 +105,7 @@
               <dt>VPN-доступ и профили</dt>
               <dd>VPN-логин, дата создания доступа и настройки доступа к серверам. VPN-серверы хранят учётные данные для подключения. В созданные установочные профили включаются VPN-логин, пароль и параметры соединения.</dd>
               <dt>Промокоды</dt>
-              <dd>Фиксируются использование промокодов, даты активации и открываемые ими права на серверы. Попытки применения кода также учитываются для защиты от перебора. Промокоды хранятся в виде хешей.</dd>
+              <dd>Для аккаунта фиксируются принятые промокоды и даты их активации. Попытки применения кода также учитываются для защиты от перебора. Промокоды хранятся в виде хешей. Промокод не влияет на доступность Риги или Москвы.</dd>
               <dt>Восстановление</dt>
               <dd>В базе аккаунтов хранится хеш Recovery Code. Сам код показывается при его выпуске; повторно показать действующий код сервис не может.</dd>
             </dl>
@@ -132,8 +132,8 @@
 
           <section>
             <h3>Что происходит при удалении</h3>
-            <p><strong>«Удалить VPN-доступ»</strong> удаляет VPN-учётные данные с обоих серверов. Аккаунт TOLF, Passkey и право, открытое промокодом, сохраняются: VPN-доступ можно создать заново.</p>
-            <p><strong>«Удалить аккаунт TOLF»</strong> также удаляет действующие записи аккаунта: регистрации Passkey, сессии входа, хеш Recovery Code и права на серверы.</p>
+            <p><strong>«Удалить VPN-доступ»</strong> удаляет VPN-учётные данные с обоих серверов. Аккаунт TOLF, Passkey и принятый промокод сохраняются: VPN-доступ можно создать заново.</p>
+            <p><strong>«Удалить аккаунт TOLF»</strong> также удаляет действующие записи аккаунта: регистрации Passkey, сессии входа, хеш Recovery Code и VPN-доступ.</p>
             <p>Запись об использовании промокода и дата активации остаются без ссылки на аккаунт, чтобы удаление аккаунта не восстанавливало лимит кода. Технические идентификаторы профилей также сохраняются, чтобы при повторном выпуске профиль мог сохранять свою идентичность.</p>
             <p>Удаление аккаунта не гарантирует немедленного удаления резервных копий, ранее выпущенных файлов профиля или журналов инфраструктуры. Удаление профиля с устройства выполняется отдельно.</p>
           </section>
@@ -142,7 +142,6 @@
         </article>
       </div>
     </div>
-
     <noscript>
       <style>
         #privacyRu[hidden] { display: block !important; margin-top: 40px; }
@@ -150,14 +149,12 @@
       </style>
     </noscript>
   </main>
-
   <script>
     (() => {
       const en = document.getElementById("privacyEn");
       const ru = document.getElementById("privacyRu");
       const enButton = document.getElementById("privacyEnButton");
       const ruButton = document.getElementById("privacyRuButton");
-
       function setPrivacyLanguage(language) {
         const russian = language === "ru";
         document.documentElement.lang = russian ? "ru" : "en";
@@ -168,24 +165,13 @@
         ruButton.classList.toggle("active", russian);
         enButton.setAttribute("aria-pressed", String(!russian));
         ruButton.setAttribute("aria-pressed", String(russian));
-
-        try {
-          localStorage.setItem("tolfLanguage", russian ? "ru" : "en");
-        } catch {}
+        try { localStorage.setItem("tolfLanguage", russian ? "ru" : "en"); } catch {}
       }
-
       let language;
-
-      try {
-        language = localStorage.getItem("tolfLanguage");
-      } catch {}
-
+      try { language = localStorage.getItem("tolfLanguage"); } catch {}
       if (language !== "ru" && language !== "en") {
-        language = (navigator.language || "en").toLowerCase().startsWith("ru")
-          ? "ru"
-          : "en";
+        language = (navigator.language || "en").toLowerCase().startsWith("ru") ? "ru" : "en";
       }
-
       setPrivacyLanguage(language);
       enButton.addEventListener("click", () => setPrivacyLanguage("en"));
       ruButton.addEventListener("click", () => setPrivacyLanguage("ru"));
