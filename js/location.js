@@ -5,8 +5,10 @@ let entryPointChangedManually = false;
 let recommendationRequestNumber = 0;
 
 function selectRecommendedEntryPoint() {
-  if (entryPointChangedManually) return;
   if (recommendedEntryPoint !== "moscow" && recommendedEntryPoint !== "riga") return;
+
+  renderEntryPointRecommendation();
+  if (entryPointChangedManually) return;
 
   const target = document.getElementById(
     recommendedEntryPoint === "moscow" ? "serverMoscow" : "serverRiga"
@@ -36,12 +38,12 @@ function renderEntryPointRecommendation() {
 
   if (!key) {
     entryPointNote.textContent = "";
-    entryPointNote.classList.add("hidden");
+    entryPointNote.className = "entry-point-note hidden";
     return;
   }
 
   entryPointNote.textContent = t(key);
-  entryPointNote.classList.remove("hidden");
+  entryPointNote.className = "entry-point-note";
 }
 
 async function loadEntryPointRecommendation() {
