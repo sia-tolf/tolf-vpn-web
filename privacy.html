@@ -7,7 +7,7 @@
   <meta name="description" content="TOLF VPN privacy: registration without a name, email or phone number; technical account data, credentials and deletion.">
   <title>Privacy — TOLF VPN</title>
   <link rel="stylesheet" href="css/styles.css?v=graphite-1">
-  <link rel="stylesheet" href="css/info.css?v=privacy-1">
+  <link rel="stylesheet" href="css/info.css?v=entry-point-2">
 </head>
 <body>
   <main class="page">
@@ -76,6 +76,7 @@
           <section>
             <h3>Network privacy and logs</h3>
             <p>Providing the service requires processing network information, including IP addresses. VPN servers handle traffic and destination addresses; DNS resolvers handle the domain lookups sent to them. Hosting and delivery providers also participate in processing requests to the website and profile downloads.</p>
+            <p>To recommend a VPN entry point, Cloudflare derives the connection country from the IP address. The TOLF website receives only the resulting Riga or Moscow recommendation and does not record the IP address for this feature.</p>
           </section>
 
           <section>
@@ -86,7 +87,7 @@
             <p>Account deletion does not guarantee immediate erasure of backups, previously issued profile files or infrastructure logs. Removing a profile from your device is a separate action.</p>
           </section>
 
-          <p class="privacy-date">Updated: <time datetime="2026-09-03">3 September 2026</time>.</p>
+          <p class="privacy-date">Updated: <time datetime="2026-09-04">4 September 2026</time>.</p>
         </article>
 
         <article id="privacyRu" lang="ru" aria-labelledby="privacyRuTitle" hidden>
@@ -126,6 +127,7 @@
           <section>
             <h3>Приватность сетевого соединения и журналы</h3>
             <p>Для работы сервиса обрабатываются сетевые сведения, в том числе IP-адреса. VPN-серверы передают трафик и обрабатывают адреса назначения, DNS-серверы — отправленные им запросы доменных имён. Провайдеры хостинга и доставки файлов также участвуют в обработке обращений к сайту и скачивании профилей.</p>
+            <p>Чтобы рекомендовать точку входа в VPN, Cloudflare определяет страну подключения по IP-адресу. Сайт TOLF получает только готовую рекомендацию — Рига или Москва — и не записывает IP-адрес для этой функции.</p>
           </section>
 
           <section>
@@ -136,10 +138,11 @@
             <p>Удаление аккаунта не гарантирует немедленного удаления резервных копий, ранее выпущенных файлов профиля или журналов инфраструктуры. Удаление профиля с устройства выполняется отдельно.</p>
           </section>
 
-          <p class="privacy-date">Обновлено: <time datetime="2026-09-03">3 сентября 2026 года</time>.</p>
+          <p class="privacy-date">Обновлено: <time datetime="2026-09-04">4 сентября 2026 года</time>.</p>
         </article>
       </div>
     </div>
+
     <noscript>
       <style>
         #privacyRu[hidden] { display: block !important; margin-top: 40px; }
@@ -147,6 +150,7 @@
       </style>
     </noscript>
   </main>
+
   <script>
     (() => {
       const en = document.getElementById("privacyEn");
@@ -164,18 +168,22 @@
         ruButton.classList.toggle("active", russian);
         enButton.setAttribute("aria-pressed", String(!russian));
         ruButton.setAttribute("aria-pressed", String(russian));
+
         try {
           localStorage.setItem("tolfLanguage", russian ? "ru" : "en");
         } catch {}
       }
 
       let language;
+
       try {
         language = localStorage.getItem("tolfLanguage");
       } catch {}
 
       if (language !== "ru" && language !== "en") {
-        language = (navigator.language || "en").toLowerCase().startsWith("ru") ? "ru" : "en";
+        language = (navigator.language || "en").toLowerCase().startsWith("ru")
+          ? "ru"
+          : "en";
       }
 
       setPrivacyLanguage(language);
