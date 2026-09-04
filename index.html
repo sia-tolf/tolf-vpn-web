@@ -9,20 +9,20 @@
   <link rel="stylesheet" href="css/info.css?v=entry-point-2">
 
   <!-- Keep this order. Deferred scripts run after the HTML has been parsed. -->
-  <script defer src="js/config.js?v=local-id-2"></script>
-  <script defer src="js/locales/en.js?v=entry-point-2"></script>
-  <script defer src="js/locales/ru.js?v=entry-point-2"></script>
+  <script defer src="js/config.js?v=entry-point-auto-1"></script>
+  <script defer src="js/locales/en.js?v=entry-point-auto-1"></script>
+  <script defer src="js/locales/ru.js?v=entry-point-auto-1"></script>
   <script defer src="js/dom.js?v=local-id-2"></script>
   <script defer src="js/i18n.js?v=local-id-2"></script>
   <script defer src="js/webauthn.js?v=local-id-2"></script>
   <script defer src="js/api.js?v=local-id-2"></script>
-  <script defer src="js/ui.js?v=local-id-2"></script>
+  <script defer src="js/ui.js?v=entry-point-auto-1"></script>
   <script defer src="js/passkeys.js?v=local-id-2"></script>
   <script defer src="js/recovery.js?v=local-id-2"></script>
   <script defer src="js/account.js?v=local-id-2"></script>
   <script defer src="js/vpn.js?v=local-id-3"></script>
-  <script defer src="js/promo.js?v=local-id-2"></script>
-  <script defer src="js/location.js?v=entry-point-2"></script>
+  <script defer src="js/promo.js?v=entry-point-auto-1"></script>
+  <script defer src="js/location.js?v=entry-point-auto-1"></script>
   <script defer src="js/app.js?v=local-id-2"></script>
 </head>
 <body>
@@ -61,13 +61,11 @@
       <div class="card-content">
         <h2 data-i18n="vpnAccessTitle">VPN access</h2>
         <p class="card-description" data-i18n="vpnAccessDescription">Sign in to manage your VPN access and devices.</p>
-
         <div id="signedOutMainActions" class="actions">
           <button id="signInButton" class="primary" type="button" data-i18n="signInWithPasskey">Sign in with Passkey</button>
           <button id="createAccountButton" class="secondary" type="button" data-i18n="createNewAccount">Create new account</button>
           <button id="showRecoverButton" class="warning" type="button" data-i18n="recoverAccount">Recover account</button>
         </div>
-
         <div id="recoverPanel" class="recover-panel hidden">
           <h3 class="section-title" data-i18n="recoverAccount">Recover account</h3>
           <p class="section-description" data-i18n="recoverDescription">Enter your Recovery Code. If it is valid, you will create a new Passkey for this account.</p>
@@ -77,7 +75,6 @@
             <button id="cancelRecoverButton" class="secondary" type="button" data-i18n="cancelButton">Cancel</button>
           </div>
         </div>
-
         <div id="signedOutRecoveryBox" class="recovery-code-box hidden">
           <p class="recovery-code-heading" data-i18n="saveRecoveryCode">Save your Recovery Code</p>
           <div id="signedOutRecoveryCode" class="recovery-code"></div>
@@ -87,7 +84,6 @@
             <button id="savedSignedOutRecoveryButton" class="secondary" type="button" data-i18n="savedIt">I saved it</button>
           </div>
         </div>
-
         <div id="signedOutMessage" class="message"></div>
       </div>
     </section>
@@ -105,12 +101,10 @@
             <span data-i18n="signOut">Sign out</span>
           </button>
         </div>
-
         <p class="card-description" data-i18n="manageVpnDescription">Manage your TOLF VPN access.</p>
 
         <div id="serverSection" class="server-section hidden">
           <p id="entryPointHeading" class="server-heading" data-i18n="vpnServer">VPN Entry Point</p>
-
           <div class="server-selector" role="radiogroup" aria-labelledby="entryPointHeading">
             <div class="server-option">
               <input id="serverRiga" type="radio" name="vpnServer" value="riga" checked>
@@ -119,16 +113,14 @@
                 <span class="server-city" data-i18n="cityRiga">Riga</span>
               </label>
             </div>
-
             <div class="server-option">
-              <input id="serverMoscow" type="radio" name="vpnServer" value="moscow" disabled>
+              <input id="serverMoscow" type="radio" name="vpnServer" value="moscow">
               <label for="serverMoscow">
                 <span class="server-flag" aria-hidden="true">🇷🇺</span>
                 <span class="server-city" data-i18n="cityMoscow">Moscow</span>
-                <span id="moscowAccessLabel" class="visually-hidden" data-i18n="promoRequired">Promo code required</span>
+                <span id="moscowAccessLabel" class="visually-hidden" data-i18n="promoRequired">Promo code</span>
               </label>
             </div>
-
             <div class="server-option">
               <input id="serverUk" type="radio" name="vpnServer" value="uk" disabled>
               <label for="serverUk">
@@ -138,30 +130,18 @@
               </label>
             </div>
           </div>
-
           <p id="entryPointNote" class="entry-point-note hidden" role="status"></p>
 
           <details id="profileSettings" class="profile-settings">
             <summary data-i18n="additionalSettings">Additional settings</summary>
-
             <div class="server-address">
               <span class="server-address-label" data-i18n="serverAddress">Entry point address</span>
               <span id="selectedServerAddress" class="server-address-value">ikev2-riga.tolf.is</span>
             </div>
-
             <label class="local-id-label" for="localIdInput" data-i18n="localId">Local ID</label>
-            <input
-              id="localIdInput"
-              class="local-id-input"
-              type="text"
-              maxlength="32"
-              autocomplete="off"
-              autocapitalize="none"
-              spellcheck="false"
-              placeholder="sr (default)"
-              aria-describedby="localIdHelp localIdChoices localIdRoutingHint"
-            >
-
+            <input id="localIdInput" class="local-id-input" type="text" maxlength="32"
+              autocomplete="off" autocapitalize="none" spellcheck="false"
+              placeholder="sr (default)" aria-describedby="localIdHelp localIdChoices localIdRoutingHint">
             <p id="localIdHelp" class="section-description" data-i18n="localIdHelp">Local ID controls how the VPN server routes traffic. Leave empty to use this server’s default mode.</p>
             <p id="localIdChoices" class="section-description"></p>
             <p id="localIdRoutingHint" class="local-id-routing" role="status"></p>
@@ -171,15 +151,13 @@
 
         <div class="promo-section">
           <p id="promoGranted" class="hidden" aria-hidden="true"></p>
-
           <div id="promoForm">
-            <p class="section-description" data-i18n="promoDescription">Enter a promo code to unlock Moscow alongside Riga.</p>
+            <p class="section-description" data-i18n="promoDescription">If you have a promo code, enter it here.</p>
             <div class="promo-actions">
               <input id="promoInput" class="promo-input" type="text" minlength="6" maxlength="6" pattern="[A-Za-z0-9]{6}" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Promo code">
               <button id="redeemPromoButton" class="secondary" type="button" data-i18n="applyPromo">Apply</button>
             </div>
           </div>
-
           <div id="promoMessage" class="promo-message" role="status"></div>
         </div>
 
@@ -188,7 +166,6 @@
             <div class="row-label" data-i18n="status">Status</div>
             <div id="vpnStatus" class="row-value">—</div>
           </div>
-
           <div id="serverRow" class="row hidden">
             <div class="row-label" data-i18n="server">Server</div>
             <div class="row-value">
@@ -196,7 +173,6 @@
               <span id="vpnServerHost" class="server-value-host hidden" aria-hidden="true"></span>
             </div>
           </div>
-
           <div id="usernameRow" class="row hidden">
             <div class="row-label" data-i18n="username">Username</div>
             <div id="vpnUsername" class="row-value"></div>
@@ -220,11 +196,9 @@
           <h3 class="section-title" data-i18n="passkeys">Passkeys</h3>
           <p class="section-description" data-i18n="passkeysDescription">Passkeys provide access to your TOLF account. Add another Passkey before removing your current one.</p>
           <div id="passkeyList" class="passkey-list"></div>
-
           <div class="passkey-add-row">
             <button id="addPasskeyButton" class="primary add-passkey-button" type="button" data-i18n="addPasskey">Add Passkey</button>
           </div>
-
           <p class="passkey-note" data-i18n="passkeyNamesNote">Passkey names are assigned automatically by TOLF when they are created.</p>
           <div id="passkeyMessage" class="passkey-message"></div>
         </div>
@@ -232,22 +206,18 @@
         <div id="recoverySection" class="recovery-section">
           <h3 class="section-title" data-i18n="recovery">Recovery</h3>
           <p class="section-description" data-i18n="recoveryDescription">A Recovery Code can restore access to your TOLF account if you lose all Passkeys.</p>
-
           <div class="recovery-actions">
             <button id="generateRecoveryButton" class="secondary" type="button" data-i18n="generateNewRecoveryCode">Generate New Recovery Code</button>
           </div>
-
           <div id="accountRecoveryBox" class="recovery-code-box hidden">
             <p class="recovery-code-heading" data-i18n="saveNewRecoveryCode">Save your new Recovery Code</p>
             <div id="accountRecoveryCode" class="recovery-code"></div>
             <p class="recovery-code-warning" data-i18n="newRecoveryCodeWarning">This code is shown only now. Any previous Recovery Code is no longer valid.</p>
-
             <div class="recovery-code-actions">
               <button id="copyAccountRecoveryButton" class="primary" type="button" data-i18n="copyRecoveryCode">Copy Recovery Code</button>
               <button id="savedAccountRecoveryButton" class="secondary" type="button" data-i18n="savedIt">I saved it</button>
             </div>
           </div>
-
           <div id="recoveryMessage" class="recovery-message"></div>
         </div>
 
@@ -255,11 +225,9 @@
           <button id="deleteAccountButton" class="account-delete-button" type="button" data-i18n="deleteTolfAccount">Delete TOLF Account</button>
           <p class="account-delete-note" data-i18n="deleteAccountNote">Permanently deletes your TOLF account, Passkey registrations, active sessions, Recovery Code, and VPN access. This cannot be undone.</p>
         </div>
-
         <div id="vpnMessage" class="message"></div>
       </div>
     </section>
-
     <footer class="site-footer">
       <a href="help.html">
         <span class="site-label" lang="en">Help &amp; FAQ</span>
