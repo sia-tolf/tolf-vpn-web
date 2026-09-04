@@ -205,6 +205,15 @@ html[lang="ru"]
 }
 
 @media (max-width: 520px) {
+  body:has(#vpnCard:not(.hidden))
+  .header-actions-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .header-actions-row .site-nav {
+    width: 100%;
+  }
+
   .site-nav {
     grid-template-columns: repeat(
       2,
@@ -221,8 +230,8 @@ html[lang="ru"]
   .header-promo .promo-input,
   .header-promo .promo-actions > button,
   .header-actions-row .site-nav a {
-    padding-left: 5px;
-    padding-right: 5px;
-    font-size: 12px;
+    padding-left: 10px;
+    padding-right: 10px;
+    font-size: 14px;
   }
 }
