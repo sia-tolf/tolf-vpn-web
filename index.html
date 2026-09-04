@@ -6,12 +6,12 @@
   <meta name="color-scheme" content="light dark">
   <title>TOLF VPN</title>
   <link rel="stylesheet" href="css/styles.css?v=graphite-1">
-  <link rel="stylesheet" href="css/info.css?v=privacy-1">
+  <link rel="stylesheet" href="css/info.css?v=entry-point-1">
 
   <!-- Keep this order. Deferred scripts run after the HTML has been parsed. -->
   <script defer src="js/config.js?v=local-id-2"></script>
-  <script defer src="js/locales/en.js?v=server-flags-1"></script>
-  <script defer src="js/locales/ru.js?v=server-flags-1"></script>
+  <script defer src="js/locales/en.js?v=entry-point-1"></script>
+  <script defer src="js/locales/ru.js?v=entry-point-1"></script>
   <script defer src="js/dom.js?v=local-id-2"></script>
   <script defer src="js/i18n.js?v=local-id-2"></script>
   <script defer src="js/webauthn.js?v=local-id-2"></script>
@@ -103,8 +103,8 @@
         <p class="card-description" data-i18n="manageVpnDescription">Manage your TOLF VPN access.</p>
 
         <div id="serverSection" class="server-section hidden">
-          <p class="server-heading" data-i18n="vpnServer">VPN Server</p>
-          <div class="server-selector" role="radiogroup" aria-label="VPN Server">
+          <p id="entryPointHeading" class="server-heading" data-i18n="vpnServer">VPN Entry Point</p>
+          <div class="server-selector" role="radiogroup" aria-labelledby="entryPointHeading">
             <div class="server-option">
               <input id="serverRiga" type="radio" name="vpnServer" value="riga" checked>
               <label for="serverRiga">
@@ -129,6 +129,7 @@
               </label>
             </div>
           </div>
+          <p id="entryPointNote" class="entry-point-note" data-i18n="entryPointHint">The buttons above choose the VPN entry point, not the Internet exit server. Recommended entry point: Moscow when you are in Russia; Riga when you are in other countries.</p>
           <div class="server-address">
             <span class="server-address-label" data-i18n="serverAddress">Server address</span>
             <span id="selectedServerAddress" class="server-address-value">ikev2-riga.tolf.is</span>
@@ -148,7 +149,7 @@
         </div>
 
         <div class="promo-section">
-          <p id="promoGranted" class="section-description hidden" data-i18n="moscowUnlocked">Moscow access is unlocked for this account.</p>
+          <p id="promoGranted" class="hidden" aria-hidden="true"></p>
           <div id="promoForm">
             <p class="section-description" data-i18n="promoDescription">Enter a promo code to unlock Moscow alongside Riga.</p>
             <div class="promo-actions">
