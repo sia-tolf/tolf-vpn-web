@@ -52,8 +52,9 @@
           </nav>
 
           <section id="en-server">
-            <h2>Which server should I choose?</h2>
-            <p><strong>In Russia: start with Moscow.</strong> Your device connects to a Russian entry server; traffic that needs Riga travels over the link between our servers. Your device does not need a direct VPN connection to a foreign server. Moscow requires an activated promo code.</p>
+            <h2>Which entry point should I choose?</h2>
+            <p>The website automatically selects a recommended entry point from the country of your current connection. You can choose another entry point manually.</p>
+            <p><strong>In Russia: start with Moscow.</strong> Your device connects to a Russian entry server; traffic that needs Riga travels over the link between our servers. Your device does not need a direct VPN connection to a foreign server.</p>
             <p><strong>Outside Russia: start with Riga</strong>, or another available server outside Russia. Your device can reach the foreign entry server directly, while Russian destinations can use the Moscow exit.</p>
             <p>This recommendation follows our network layout. Connection quality depends on your provider and location; it does not guarantee a faster connection or availability on every network.</p>
             <p><strong>The entry server and the exit IP are different things.</strong> With the default settings, Russian destinations in the server’s lists use Moscow; other Internet traffic uses Riga. This works with either entry server. Leave Local ID empty in the website: Riga uses <code>sr</code>, and Moscow uses its empty default value.</p>
@@ -72,40 +73,23 @@
           <section id="en-glossary">
             <h2>Glossary</h2>
             <dl>
-              <dt>VPN</dt>
-              <dd>An encrypted connection between your device and a VPN server. Traffic routed through it reaches the Internet through the configured exit.</dd>
-              <dt>Account</dt>
-              <dd>Your TOLF identity: it links your Passkeys, recovery code and server permissions.</dd>
-              <dt>VPN access</dt>
-              <dd>Your server-side VPN credentials. Creating an account alone does not connect your device: create VPN access, install a profile and turn the VPN on.</dd>
-              <dt>Passkey</dt>
-              <dd>A digital key for signing in to the website, stored by your device or password manager. You approve its use with Face ID, Touch ID, a device passcode or your manager. It is separate from the VPN password.</dd>
-              <dt>Username</dt>
-              <dd>The automatically assigned VPN login, often starting with <code>user_</code>. It identifies your VPN connection; it is not your website sign-in method.</dd>
-              <dt>VPN password</dt>
-              <dd>The secret used with your VPN username. TOLF puts it in the profile automatically. Riga and Moscow share this password for your VPN access.</dd>
-              <dt>Device passcode</dt>
-              <dd>The code used to unlock your iPhone or iPad. A system request for this code during installation is separate from your VPN password.</dd>
-              <dt>Recovery / Recovery Code</dt>
-              <dd>Account recovery and its secret code. The code lets you register a new Passkey if you lose access to your existing ones. Save it securely; it is not a promo code.</dd>
-              <dt>Promo code</dt>
-              <dd>A six-character invitation code that unlocks Moscow for your account alongside Riga. It does not sign you in or replace your VPN password.</dd>
-              <dt>Profile / Mobile Config</dt>
-              <dd>A <code>.mobileconfig</code> file containing the server, routing identifier and VPN credentials for installation on an Apple device.</dd>
-              <dt>Install link</dt>
-              <dd>A temporary link to the profile page and download. It lasts 24 hours. Treat the link and downloaded profile as private: the profile contains VPN credentials.</dd>
-              <dt>Server / Remote ID</dt>
-              <dd>Server is the address your device connects to. Remote ID identifies the expected VPN server and is checked against its certificate. Both are filled in automatically.</dd>
-              <dt>Local ID</dt>
-              <dd>A connection identifier. In TOLF it selects a server routing mode. It is not your username, location or promo code.</dd>
-              <dt>Routing / exit IP</dt>
-              <dd>Routing chooses where traffic travels. The exit IP is the public address a destination sees for traffic leaving that route.</dd>
-              <dt>On Demand</dt>
-              <dd>A system option for automatic VPN connection according to profile rules. TOLF profiles expose this option with it off by default; its presence alone does not mean the VPN is always connected.</dd>
-              <dt>MOBIKE</dt>
-              <dd>A mechanism that can help an IKEv2 connection adapt when the device’s network address changes, for example when moving between Wi-Fi and mobile data.</dd>
-              <dt>DPD — Dead Peer Detection</dt>
-              <dd>A check that helps detect when the other end of the VPN connection is no longer responding.</dd>
+              <dt>VPN</dt><dd>An encrypted connection between your device and a VPN server. Traffic routed through it reaches the Internet through the configured exit.</dd>
+              <dt>Account</dt><dd>Your TOLF identity: it links your Passkeys, recovery code and VPN access settings.</dd>
+              <dt>VPN access</dt><dd>Your server-side VPN credentials. Creating an account alone does not connect your device: create VPN access, install a profile and turn the VPN on.</dd>
+              <dt>Passkey</dt><dd>A digital key for signing in to the website, stored by your device or password manager. You approve its use with Face ID, Touch ID, a device passcode or your manager. It is separate from the VPN password.</dd>
+              <dt>Username</dt><dd>The automatically assigned VPN login, often starting with <code>user_</code>. It identifies your VPN connection; it is not your website sign-in method.</dd>
+              <dt>VPN password</dt><dd>The secret used with your VPN username. TOLF puts it in the profile automatically. Riga and Moscow share this password for your VPN access.</dd>
+              <dt>Device passcode</dt><dd>The code used to unlock your iPhone or iPad. A system request for this code during installation is separate from your VPN password.</dd>
+              <dt>Recovery / Recovery Code</dt><dd>Account recovery and its secret code. The code lets you register a new Passkey if you lose access to your existing ones. Save it securely; it is not a promo code.</dd>
+              <dt>Promo code</dt><dd>An optional six-character invitation code recorded for your account when accepted. It does not affect the availability of Riga or Moscow, sign you in or replace your VPN password.</dd>
+              <dt>Profile / Mobile Config</dt><dd>A <code>.mobileconfig</code> file containing the server, routing identifier and VPN credentials for installation on an Apple device.</dd>
+              <dt>Install link</dt><dd>A temporary link to the profile page and download. It lasts 24 hours. Treat the link and downloaded profile as private: the profile contains VPN credentials.</dd>
+              <dt>Server / Remote ID</dt><dd>Server is the address your device connects to. Remote ID identifies the expected VPN server and is checked against its certificate. Both are filled in automatically.</dd>
+              <dt>Local ID</dt><dd>A connection identifier. In TOLF it selects a server routing mode. It is not your username, location or promo code.</dd>
+              <dt>Routing / exit IP</dt><dd>Routing chooses where traffic travels. The exit IP is the public address a destination sees for traffic leaving that route.</dd>
+              <dt>On Demand</dt><dd>A system option for automatic VPN connection according to profile rules. TOLF profiles expose this option with it off by default; its presence alone does not mean the VPN is always connected.</dd>
+              <dt>MOBIKE</dt><dd>A mechanism that can help an IKEv2 connection adapt when the device’s network address changes, for example when moving between Wi-Fi and mobile data.</dd>
+              <dt>DPD — Dead Peer Detection</dt><dd>A check that helps detect when the other end of the VPN connection is no longer responding.</dd>
             </dl>
           </section>
 
@@ -120,8 +104,8 @@
               <p>No. It means VPN access exists on the server. Check the connection state in your device’s VPN settings. You can close the website after connecting; signing out of the website does not turn the VPN off.</p>
             </details>
             <details>
-              <summary>Does selecting Moscow or Riga on the website switch my VPN?</summary>
-              <p>No. It chooses which profile to generate. To change the actual connection, install the appropriate profile and select it in your device’s VPN settings.</p>
+              <summary>Does automatic or manual selection of Moscow or Riga switch my VPN?</summary>
+              <p>No. The website automatically selects a recommended entry point, and you can change that choice manually. This only chooses which profile to generate. To change the actual connection, install the appropriate profile and select it in your device’s VPN settings.</p>
             </details>
             <details>
               <summary>Which Local ID values are available?</summary>
@@ -147,8 +131,8 @@
             </details>
             <details>
               <summary>What is the difference between deleting VPN access and deleting my account?</summary>
-              <p>Deleting VPN access removes VPN credentials on both servers, while preserving your account, Passkeys and promo entitlement. You can create VPN access again.</p>
-              <p>Deleting the account also removes its Passkey registrations, sessions, Recovery Code and server permissions. It cannot be undone. Removing a profile only from your device does not delete the account.</p>
+              <p>Deleting VPN access removes VPN credentials on both servers, while preserving your account, Passkeys and accepted promo code. You can create VPN access again.</p>
+              <p>Deleting the account also removes its Passkey registrations, sessions, Recovery Code and VPN access. It cannot be undone. Removing a profile only from your device does not delete the account.</p>
             </details>
             <details>
               <summary>Do I need a separate account for another device?</summary>
@@ -168,8 +152,9 @@
           </nav>
 
           <section id="ru-server">
-            <h2>Какой сервер выбрать?</h2>
-            <p><strong>В России рекомендуем начать с Москвы.</strong> Устройство подключается к российскому серверу, а трафик, которому нужна Рига, передаётся по соединению между нашими серверами. Устройству не требуется прямое VPN-соединение с зарубежным сервером. Для Москвы нужен активированный промокод.</p>
+            <h2>Какую точку входа выбрать?</h2>
+            <p>Сайт автоматически выбирает рекомендуемую точку входа по стране текущего подключения. При необходимости вы можете вручную выбрать другую точку входа.</p>
+            <p><strong>В России рекомендуем начать с Москвы.</strong> Устройство подключается к российскому серверу, а трафик, которому нужна Рига, передаётся по соединению между нашими серверами. Устройству не требуется прямое VPN-соединение с зарубежным сервером.</p>
             <p><strong>За пределами России рекомендуем начать с Риги</strong> или другого доступного сервера вне России. Устройство подключается напрямую к зарубежной точке входа, а российские направления могут использовать выход через Москву.</p>
             <p>Рекомендация основана на устройстве нашей сети. Качество связи зависит от оператора и вашего местоположения: это не гарантия более высокой скорости или работы в любой сети.</p>
             <p><strong>Сервер подключения и выходной IP — разные вещи.</strong> По умолчанию российские направления из списков сервера выходят через Москву, остальной интернет-трафик — через Ригу. Это работает при подключении к любому из двух серверов. Оставьте Local ID на сайте пустым: для Риги будет использован <code>sr</code>, для Москвы — пустое значение по умолчанию.</p>
@@ -188,40 +173,23 @@
           <section id="ru-glossary">
             <h2>Глоссарий</h2>
             <dl>
-              <dt>VPN</dt>
-              <dd>Зашифрованное соединение устройства с VPN-сервером. Направленный в него трафик выходит в интернет через настроенную точку выхода.</dd>
-              <dt>Аккаунт</dt>
-              <dd>Ваша учётная запись TOLF. Она объединяет Passkey, код восстановления и права доступа к серверам.</dd>
-              <dt>VPN-доступ</dt>
-              <dd>Ваши VPN-учётные данные на серверах. Одного аккаунта недостаточно для подключения: нужно создать VPN-доступ, установить профиль и включить VPN.</dd>
-              <dt>Passkey — ключ входа</dt>
-              <dd>Цифровой ключ для входа на сайт, который хранится на устройстве или в менеджере паролей. Использование подтверждается через Face ID, Touch ID, код устройства или менеджер. Это отдельный ключ, а не пароль VPN.</dd>
-              <dt>Username — имя пользователя</dt>
-              <dd>Автоматически назначенный VPN-логин, обычно начинающийся с <code>user_</code>. Он используется при VPN-подключении; для входа в кабинет используется Passkey.</dd>
-              <dt>Пароль VPN</dt>
-              <dd>Секрет для подключения вместе с VPN-логином. TOLF автоматически записывает его в профиль. Для вашего VPN-доступа Рига и Москва используют общий пароль.</dd>
-              <dt>Код устройства</dt>
-              <dd>Код разблокировки iPhone или iPad. Если система запрашивает его при установке профиля, это отдельный код, не пароль VPN.</dd>
-              <dt>Recovery / Recovery Code</dt>
-              <dd>Восстановление аккаунта и секретный код для него. Позволяет создать новый Passkey при потере доступа к прежним. Сохраните код в надёжном месте; это не промокод.</dd>
-              <dt>Промокод</dt>
-              <dd>Пригласительный код из шести символов. Открывает вашему аккаунту Москву дополнительно к Риге. Не заменяет Passkey или пароль VPN.</dd>
-              <dt>Профиль / Mobile Config</dt>
-              <dd>Файл <code>.mobileconfig</code> с адресом сервера, идентификатором маршрутизации и VPN-учётными данными для установки на устройство Apple.</dd>
-              <dt>Ссылка для установки</dt>
-              <dd>Временная ссылка на страницу параметров и загрузку профиля. Действует 24 часа. Ссылку и скачанный профиль храните конфиденциально: профиль содержит VPN-учётные данные.</dd>
-              <dt>Server / Remote ID</dt>
-              <dd>Server — адрес подключения. Remote ID — ожидаемый идентификатор VPN-сервера, который проверяется по его сертификату. Оба значения заполняются автоматически.</dd>
-              <dt>Local ID</dt>
-              <dd>Идентификатор подключения. В TOLF он выбирает режим маршрутизации на сервере. Это не ваш логин, местоположение или промокод.</dd>
-              <dt>Маршрутизация / выходной IP</dt>
-              <dd>Маршрутизация определяет путь трафика. Выходной IP — публичный адрес, который видит сайт для трафика, пришедшего по этому пути.</dd>
-              <dt>On Demand</dt>
-              <dd>Системная возможность автоматического подключения VPN по правилам профиля. В профилях TOLF опция доступна и по умолчанию выключена; наличие переключателя само по себе не означает постоянного подключения.</dd>
-              <dt>MOBIKE</dt>
-              <dd>Механизм, помогающий IKEv2-соединению приспособиться к смене сетевого адреса устройства, например при переходе между Wi-Fi и мобильной сетью.</dd>
-              <dt>DPD — Dead Peer Detection</dt>
-              <dd>Проверка, помогающая обнаружить, что другая сторона VPN-соединения перестала отвечать.</dd>
+              <dt>VPN</dt><dd>Зашифрованное соединение устройства с VPN-сервером. Направленный в него трафик выходит в интернет через настроенную точку выхода.</dd>
+              <dt>Аккаунт</dt><dd>Ваша учётная запись TOLF. Она объединяет Passkey, код восстановления и настройки VPN-доступа.</dd>
+              <dt>VPN-доступ</dt><dd>Ваши VPN-учётные данные на серверах. Одного аккаунта недостаточно для подключения: нужно создать VPN-доступ, установить профиль и включить VPN.</dd>
+              <dt>Passkey — ключ входа</dt><dd>Цифровой ключ для входа на сайт, который хранится на устройстве или в менеджере паролей. Использование подтверждается через Face ID, Touch ID, код устройства или менеджер. Это отдельный ключ, а не пароль VPN.</dd>
+              <dt>Username — имя пользователя</dt><dd>Автоматически назначенный VPN-логин, обычно начинающийся с <code>user_</code>. Он используется при VPN-подключении; для входа в кабинет используется Passkey.</dd>
+              <dt>Пароль VPN</dt><dd>Секрет для подключения вместе с VPN-логином. TOLF автоматически записывает его в профиль. Для вашего VPN-доступа Рига и Москва используют общий пароль.</dd>
+              <dt>Код устройства</dt><dd>Код разблокировки iPhone или iPad. Если система запрашивает его при установке профиля, это отдельный код, не пароль VPN.</dd>
+              <dt>Recovery / Recovery Code</dt><dd>Восстановление аккаунта и секретный код для него. Позволяет создать новый Passkey при потере доступа к прежним. Сохраните код в надёжном месте; это не промокод.</dd>
+              <dt>Промокод</dt><dd>Необязательный пригласительный код из шести символов. После принятия он записывается для аккаунта, но не влияет на доступность Риги или Москвы и не заменяет Passkey или пароль VPN.</dd>
+              <dt>Профиль / Mobile Config</dt><dd>Файл <code>.mobileconfig</code> с адресом сервера, идентификатором маршрутизации и VPN-учётными данными для установки на устройство Apple.</dd>
+              <dt>Ссылка для установки</dt><dd>Временная ссылка на страницу параметров и загрузку профиля. Действует 24 часа. Ссылку и скачанный профиль храните конфиденциально: профиль содержит VPN-учётные данные.</dd>
+              <dt>Server / Remote ID</dt><dd>Server — адрес подключения. Remote ID — ожидаемый идентификатор VPN-сервера, который проверяется по его сертификату. Оба значения заполняются автоматически.</dd>
+              <dt>Local ID</dt><dd>Идентификатор подключения. В TOLF он выбирает режим маршрутизации на сервере. Это не ваш логин, местоположение или промокод.</dd>
+              <dt>Маршрутизация / выходной IP</dt><dd>Маршрутизация определяет путь трафика. Выходной IP — публичный адрес, который видит сайт для трафика, пришедшего по этому пути.</dd>
+              <dt>On Demand</dt><dd>Системная возможность автоматического подключения VPN по правилам профиля. В профилях TOLF опция доступна и по умолчанию выключена; наличие переключателя само по себе не означает постоянного подключения.</dd>
+              <dt>MOBIKE</dt><dd>Механизм, помогающий IKEv2-соединению приспособиться к смене сетевого адреса устройства, например при переходе между Wi-Fi и мобильной сетью.</dd>
+              <dt>DPD — Dead Peer Detection</dt><dd>Проверка, помогающая обнаружить, что другая сторона VPN-соединения перестала отвечать.</dd>
             </dl>
           </section>
 
@@ -236,8 +204,8 @@
               <p>Нет. Это означает, что на сервере создан VPN-доступ. Состояние соединения проверяйте в настройках VPN устройства. После подключения сайт можно закрыть; выход из кабинета не отключает VPN.</p>
             </details>
             <details>
-              <summary>Выбор Москвы или Риги на сайте переключает VPN?</summary>
-              <p>Нет. Так вы выбираете, для какого сервера создать профиль. Для смены действующего подключения установите нужный профиль и выберите его в настройках VPN устройства.</p>
+              <summary>Автоматический или ручной выбор Москвы или Риги переключает VPN?</summary>
+              <p>Нет. Сайт автоматически выбирает рекомендуемую точку входа, а вы можете изменить выбор вручную. Это лишь определяет, для какой точки входа создать профиль. Для смены действующего подключения установите нужный профиль и выберите его в настройках VPN устройства.</p>
             </details>
             <details>
               <summary>Какие значения Local ID доступны?</summary>
@@ -263,8 +231,8 @@
             </details>
             <details>
               <summary>Чем удаление VPN-доступа отличается от удаления аккаунта?</summary>
-              <p>Удаление VPN-доступа убирает VPN-учётные данные на обоих серверах. Аккаунт, Passkey и право, открытое промокодом, сохраняются. VPN-доступ можно создать заново.</p>
-              <p>Удаление аккаунта также удаляет регистрации Passkey, сессии, Recovery Code и права на серверы. Отменить его нельзя. Удаление профиля только с устройства не удаляет аккаунт.</p>
+              <p>Удаление VPN-доступа убирает VPN-учётные данные на обоих серверах. Аккаунт, Passkey и принятый промокод сохраняются. VPN-доступ можно создать заново.</p>
+              <p>Удаление аккаунта также удаляет регистрации Passkey, сессии, Recovery Code и VPN-доступ. Отменить его нельзя. Удаление профиля только с устройства не удаляет аккаунт.</p>
             </details>
             <details>
               <summary>Для другого устройства нужен новый аккаунт?</summary>
@@ -276,12 +244,17 @@
         </article>
       </div>
     </div>
+
     <noscript>
       <style>
-        #helpRu[hidden] { display: block !important; margin-top: 40px; }
+        #helpRu[hidden] {
+          display: block !important;
+          margin-top: 40px;
+        }
       </style>
     </noscript>
   </main>
+
   <script>
     (() => {
       const en = document.getElementById("helpEn");
@@ -291,45 +264,81 @@
 
       function setHelpLanguage(language) {
         const russian = language === "ru";
+
         document.documentElement.lang = russian ? "ru" : "en";
-        document.title = russian ? "Помощь — TOLF VPN" : "Help — TOLF VPN";
+        document.title = russian
+          ? "Помощь — TOLF VPN"
+          : "Help — TOLF VPN";
+
         en.hidden = russian;
         ru.hidden = !russian;
+
         enButton.classList.toggle("active", !russian);
         ruButton.classList.toggle("active", russian);
         enButton.setAttribute("aria-pressed", String(!russian));
         ruButton.setAttribute("aria-pressed", String(russian));
-        document.getElementById("helpSubtitle").textContent = russian
-          ? "Помощь, глоссарий и ответы на вопросы."
-          : "Help, glossary and FAQ.";
-        document.getElementById("helpBack").textContent = russian
-          ? "Вернуться в «Мой VPN»"
-          : "Back to My VPN";
+
+        document.getElementById("helpSubtitle").textContent =
+          russian
+            ? "Помощь, глоссарий и ответы на вопросы."
+            : "Help, glossary and FAQ.";
+
+        document.getElementById("helpBack").textContent =
+          russian
+            ? "Вернуться в «Мой VPN»"
+            : "Back to My VPN";
 
         try {
-          localStorage.setItem("tolfLanguage", russian ? "ru" : "en");
+          localStorage.setItem(
+            "tolfLanguage",
+            russian ? "ru" : "en"
+          );
         } catch {}
 
         if (/^#(?:en|ru)-/.test(location.hash)) {
-          const hash = location.hash.replace(/^#(?:en|ru)-/, russian ? "#ru-" : "#en-");
-          if (hash !== location.hash) history.replaceState(null, "", hash);
+          const hash = location.hash.replace(
+            /^#(?:en|ru)-/,
+            russian ? "#ru-" : "#en-"
+          );
+
+          if (hash !== location.hash) {
+            history.replaceState(null, "", hash);
+          }
         }
       }
 
       let language;
+
       try {
         language = localStorage.getItem("tolfLanguage");
       } catch {}
 
       if (language !== "ru" && language !== "en") {
-        language = navigator.language.toLowerCase().startsWith("ru") ? "ru" : "en";
+        language = navigator.language
+          .toLowerCase()
+          .startsWith("ru")
+          ? "ru"
+          : "en";
       }
-      if (location.hash.startsWith("#ru-")) language = "ru";
-      if (location.hash.startsWith("#en-")) language = "en";
+
+      if (location.hash.startsWith("#ru-")) {
+        language = "ru";
+      }
+
+      if (location.hash.startsWith("#en-")) {
+        language = "en";
+      }
 
       setHelpLanguage(language);
-      enButton.addEventListener("click", () => setHelpLanguage("en"));
-      ruButton.addEventListener("click", () => setHelpLanguage("ru"));
+
+      enButton.addEventListener(
+        "click",
+        () => setHelpLanguage("en")
+      );
+      ruButton.addEventListener(
+        "click",
+        () => setHelpLanguage("ru")
+      );
     })();
   </script>
 </body>
