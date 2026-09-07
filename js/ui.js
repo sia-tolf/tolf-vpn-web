@@ -81,7 +81,8 @@ function getProfileSelection() {
   return {
     server,
     localId,
-    platform: currentPlatform
+    platform: currentPlatform,
+    language: currentLanguage
   };
 }
 
