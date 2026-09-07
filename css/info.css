@@ -7,11 +7,18 @@
   flex-direction: column;
   align-items: stretch;
   gap: 0;
+  background: var(--segment-background);
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  overflow: hidden;
 }
 
 .header-switchers .language-switcher {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  background: transparent;
+  border: 0;
+  border-radius: 0;
 }
 
 .platform-switcher {
@@ -19,9 +26,10 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 4px;
   padding: 4px;
-  background: var(--segment-background);
-  border: 1px solid var(--border);
-  border-radius: 11px;
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--border);
+  border-radius: 0;
 }
 
 .platform-button {
@@ -84,7 +92,7 @@
 .header-actions-row {
   display: flex;
   width: 100%;
-  margin-top: 22px;
+  margin-top: 16px;
   padding: 14px;
   background: var(--card);
   border: 1px solid var(--border);
