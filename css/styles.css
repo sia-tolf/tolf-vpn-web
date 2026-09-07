@@ -258,12 +258,11 @@ button:disabled { opacity: 0.55; cursor: default; }
   line-height: 1.45;
   text-align: center;
 }
-.delete-section {
-  margin-top: 24px;
+.account-page > .card + .card {
+  margin-top: 20px;
 }
 
-.passkeys-section,
-.recovery-section {
+.delete-section {
   margin-top: 24px;
   padding-top: 22px;
   border-top: 1px solid var(--border);

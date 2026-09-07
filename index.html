@@ -12,7 +12,7 @@
 
   <link
     rel="stylesheet"
-    href="css/styles.css?v=clusters-1"
+    href="css/styles.css?v=clusters-2"
   >
   <link
     rel="stylesheet"
@@ -322,8 +322,9 @@
       </div>
     </section>
 
-    <section id="vpnCard" class="card hidden">
-      <div class="card-content">
+    <section id="vpnCard" class="account-page hidden">
+      <div class="card">
+        <div class="card-content">
         <div class="card-topline">
           <h2 data-i18n="myVpn">My VPN</h2>
 
@@ -631,9 +632,17 @@
         </div>
 
         <div
-          id="passkeysSection"
-          class="passkeys-section"
-        >
+          id="vpnMessage"
+          class="message"
+        ></div>
+        </div>
+      </div>
+
+      <div
+        id="passkeysSection"
+        class="card passkeys-section"
+      >
+        <div class="card-content">
           <h3
             class="section-title"
             data-i18n="passkeys"
@@ -675,11 +684,13 @@
             class="passkey-message"
           ></div>
         </div>
+      </div>
 
-        <div
-          id="recoverySection"
-          class="recovery-section"
-        >
+      <div
+        id="recoverySection"
+        class="card recovery-section"
+      >
+        <div class="card-content">
           <h3
             class="section-title"
             data-i18n="recovery"
@@ -768,11 +779,6 @@
           </p>
         </div>
         </div>
-
-        <div
-          id="vpnMessage"
-          class="message"
-        ></div>
       </div>
     </section>
 
