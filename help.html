@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="color-scheme" content="light dark">
   <title>Help — TOLF VPN</title>
-  <link rel="stylesheet" href="css/styles.css?v=graphite-1">
+  <link rel="stylesheet" href="css/styles.css?v=layout-2">
   <style>
     .help-nav { display: flex; flex-wrap: wrap; gap: 10px 20px; margin: 24px 0; }
     .help-page a { color: var(--text); text-underline-offset: 3px; }
@@ -36,6 +36,7 @@
         <div class="language-switcher" aria-label="Language">
           <button id="helpEnButton" class="language-button active" type="button" aria-pressed="true">English</button>
           <button id="helpRuButton" class="language-button" type="button" aria-pressed="false">Русский</button>
+          <button id="helpLvButton" class="language-button" type="button" aria-pressed="false">Latviešu</button>
         </div>
       </div>
       <a id="helpBack" class="help-back" href="index.html">Back to My VPN</a>
@@ -242,103 +243,156 @@
 
           <p class="help-sources">Подробнее: <a href="https://support.apple.com/guide/iphone/use-passkeys-to-sign-in-to-websites-and-apps-iphf538ea8d0/ios">Passkey на устройствах Apple</a> и <a href="https://docs.strongswan.org/docs/latest/interop/appleIkev2Profile.html">профили IKEv2 для Apple</a>.</p>
         </article>
+
+        <article id="helpLv" lang="lv" hidden>
+          <nav class="help-nav" aria-label="Palīdzības sadaļas">
+            <a href="#lv-server">Servera izvēle</a>
+            <a href="#lv-benefits">Kāpēc TOLF VPN</a>
+            <a href="#lv-glossary">Terminu vārdnīca</a>
+            <a href="#lv-faq">BUJ</a>
+          </nav>
+
+          <section id="lv-server">
+            <h2>Kuru pieslēguma punktu izvēlēties?</h2>
+            <p>Vietne automātiski izvēlas ieteicamo pieslēguma punktu atbilstoši jūsu pašreizējā savienojuma valstij. Vajadzības gadījumā varat manuāli izvēlēties citu pieslēguma punktu.</p>
+            <p><strong>Krievijā sāciet ar Maskavu.</strong> Ierīce pieslēdzas Krievijas serverim, bet datplūsma, kurai nepieciešama Rīga, tiek pārsūtīta pa savienojumu starp mūsu serveriem. Ierīcei nav nepieciešams tiešs VPN savienojums ar ārvalstu serveri.</p>
+            <p><strong>Ārpus Krievijas sāciet ar Rīgu</strong> vai citu pieejamu serveri ārpus Krievijas. Ierīce var tieši sasniegt ārvalstu pieslēguma serveri, savukārt Krievijas galamērķi var izmantot izeju Maskavā.</p>
+            <p>Šis ieteikums ir balstīts uz mūsu tīkla uzbūvi. Savienojuma kvalitāte ir atkarīga no operatora un atrašanās vietas; tas negarantē lielāku ātrumu vai pieejamību jebkurā tīklā.</p>
+            <p><strong>Pieslēguma serveris un izejas IP adrese nav viens un tas pats.</strong> Ar noklusējuma iestatījumiem Krievijas galamērķi servera sarakstos izmanto Maskavu, bet pārējā interneta datplūsma — Rīgu. Tas darbojas ar jebkuru no abiem pieslēguma serveriem. Vietnē atstājiet Local ID tukšu: Rīgai tiks izmantots <code>sr</code>, bet Maskavai — tukšā noklusējuma vērtība.</p>
+          </section>
+
+          <section id="lv-benefits">
+            <h2>Kāpēc TOLF VPN?</h2>
+            <ul>
+              <li><strong>Iebūvēts Apple ierīcēs.</strong> Instalējiet konfigurācijas profilu un izmantojiet sistēmas IKEv2 VPN bez atsevišķas VPN lietotnes.</li>
+              <li><strong>Viens savienojums, divas izejas.</strong> Noklusējuma maršrutēšana var izmantot Krievijas IP adreses Krievijas galamērķiem un Rīgu pārējai datplūsmai, nepārslēdzot VPN katrai vietnei.</li>
+              <li><strong>Pierakstīšanās ar Passkey.</strong> Nav jāizdomā un jāatceras konta parole.</li>
+              <li><strong>Instalēšanai gatavi profili.</strong> Vietnē var pārvaldīt VPN piekļuvi, izveidot profilus un pieredzējuši lietotāji var izvēlēties Local ID.</li>
+            </ul>
+          </section>
+
+          <section id="lv-glossary">
+            <h2>Terminu vārdnīca</h2>
+            <dl>
+              <dt>VPN</dt><dd>Šifrēts savienojums starp jūsu ierīci un VPN serveri. Caur to maršrutētā datplūsma sasniedz internetu, izmantojot konfigurēto izeju.</dd>
+              <dt>Konts</dt><dd>Jūsu TOLF identitāte, kas apvieno Passkey, Recovery Code un VPN piekļuves iestatījumus.</dd>
+              <dt>VPN piekļuve</dt><dd>Jūsu VPN piekļuves dati serverī. Ar konta izveidi vien nepietiek: izveidojiet VPN piekļuvi, instalējiet profilu un ieslēdziet VPN.</dd>
+              <dt>Passkey</dt><dd>Digitāla atslēga, kas glabājas ierīcē vai paroļu pārvaldniekā un tiek izmantota, lai pierakstītos vietnē. Tās izmantošanu apstiprina ar Face ID, Touch ID, ierīces kodu vai paroļu pārvaldnieku. Tā nav VPN parole.</dd>
+              <dt>Username</dt><dd>Automātiski piešķirts VPN lietotājvārds, kas bieži sākas ar <code>user_</code>. Tas identificē VPN savienojumu un netiek izmantots, lai pierakstītos vietnē.</dd>
+              <dt>VPN parole</dt><dd>Slepena parole, ko izmanto kopā ar VPN lietotājvārdu. TOLF to automātiski ievieto profilā. Rīga un Maskava izmanto vienu un to pašu VPN paroli.</dd>
+              <dt>Ierīces kods</dt><dd>Kods, ar kuru atbloķē iPhone vai iPad. Sistēmas pieprasījums ievadīt šo kodu profila instalēšanas laikā nav VPN paroles pieprasījums.</dd>
+              <dt>Recovery / Recovery Code</dt><dd>Konta atkopšana un tās slepenais kods. Ar to var reģistrēt jaunu Passkey, ja vairs nav pieejamas iepriekšējās atslēgas. Glabājiet kodu drošā vietā; tas nav promo kods.</dd>
+              <dt>Promo kods</dt><dd>Neobligāts sešu rakstzīmju ielūguma kods, kas pēc pieņemšanas tiek reģistrēts kontā. Tas neietekmē Rīgas vai Maskavas pieejamību, nepieraksta jūs kontā un neaizstāj VPN paroli.</dd>
+              <dt>Profils / Mobile Config</dt><dd><code>.mobileconfig</code> fails ar servera adresi, maršrutēšanas identifikatoru un VPN piekļuves datiem instalēšanai Apple ierīcē.</dd>
+              <dt>Instalēšanas saite</dt><dd>Pagaidu saite uz profila lapu un lejupielādi. Tā ir derīga 24 stundas. Glabājiet saiti un lejupielādēto profilu konfidenciāli, jo profils satur VPN piekļuves datus.</dd>
+              <dt>Server / Remote ID</dt><dd>Server ir adrese, kurai ierīce pieslēdzas. Remote ID identificē paredzēto VPN serveri un tiek pārbaudīts pret tā sertifikātu. Abas vērtības tiek aizpildītas automātiski.</dd>
+              <dt>Local ID</dt><dd>Savienojuma identifikators. TOLF sistēmā tas izvēlas servera maršrutēšanas režīmu. Tas nav lietotājvārds, atrašanās vieta vai promo kods.</dd>
+              <dt>Maršrutēšana / izejas IP</dt><dd>Maršrutēšana nosaka datplūsmas ceļu. Izejas IP ir publiskā adrese, ko galamērķis redz datplūsmai, kura iziet pa izvēlēto maršrutu.</dd>
+              <dt>On Demand</dt><dd>Sistēmas opcija automātiskam VPN savienojumam saskaņā ar profila noteikumiem. TOLF profilos tā pēc noklusējuma ir izslēgta; tās esamība profilā nenozīmē, ka VPN vienmēr ir savienots.</dd>
+              <dt>MOBIKE</dt><dd>Mehānisms, kas palīdz IKEv2 savienojumam pielāgoties, kad mainās ierīces tīkla adrese, piemēram, pārejot no Wi‑Fi uz mobilajiem datiem.</dd>
+              <dt>DPD — Dead Peer Detection</dt><dd>Pārbaude, kas palīdz noteikt, vai VPN savienojuma otra puse vairs neatbild.</dd>
+            </dl>
+          </section>
+
+          <section id="lv-faq">
+            <h2>Bieži uzdotie jautājumi</h2>
+            <details>
+              <summary>Kā sākt lietošanu?</summary>
+              <p>Izveidojiet kontu ar Passkey un saglabājiet Recovery Code. Pierakstieties, izvēlieties serveri un izveidojiet VPN piekļuvi. Izveidojiet instalēšanas saiti, atveriet “Install on Apple Device”, lejupielādējiet Mobile Config un pabeidziet instalēšanu ierīces iestatījumos. Pēc tam izvēlieties instalēto VPN un pieslēdzieties.</p>
+            </details>
+            <details>
+              <summary>Vai “Active” nozīmē, ka ierīce ir pieslēgta?</summary>
+              <p>Nē. Tas nozīmē, ka serverī pastāv VPN piekļuve. Savienojuma stāvokli pārbaudiet ierīces VPN iestatījumos. Pēc pieslēgšanās vietni var aizvērt; izrakstīšanās no vietnes neizslēdz VPN.</p>
+            </details>
+            <details>
+              <summary>Vai automātiska vai manuāla Maskavas vai Rīgas izvēle pārslēdz VPN?</summary>
+              <p>Nē. Vietne automātiski izvēlas ieteicamo pieslēguma punktu, un šo izvēli var mainīt manuāli. Tas nosaka tikai izveidojamā profila serveri. Lai mainītu faktisko savienojumu, instalējiet vajadzīgo profilu un izvēlieties to ierīces VPN iestatījumos.</p>
+            </details>
+            <details>
+              <summary>Kādas Local ID vērtības ir pieejamas?</summary>
+              <p>Rīga: <code>sr</code> ir noklusējuma dalītā maršrutēšana; <code>ru</code> nosūta interneta datplūsmu caur Maskavu.</p>
+              <p>Maskava: tukša vērtība ir noklusējuma dalītā maršrutēšana; <code>ru</code> izmanto Maskavu interneta datplūsmai, bet <code>lv</code> — Rīgu. Maskavas skaidri norādītais <code>sr</code> ir cits režīms: DNS un galamērķi konfigurētajos Rīgas sarakstos izmanto Rīgu, bet pārējā interneta datplūsma — Maskavu.</p>
+              <p>Pēc Local ID maiņas izveidojiet un instalējiet jaunu profilu. Izmantojiet vietnes norādi izvēlētajam serverim.</p>
+            </details>
+            <details>
+              <summary>Kāpēc dažādas vietnes rāda dažādas valstis?</summary>
+              <p>Tā ir paredzēta noklusējuma dalītās maršrutēšanas darbība. Krievijas galamērķi tiek noteikti pēc servera IP adrešu un domēnu sarakstiem, tostarp <code>.ru</code>, <code>.su</code> un <code>.рф</code>. Rezultātu var ietekmēt vietnes palīgdomēni, DNS iestatījumi un IP ģeolokācijas datubāzes; domēna galotne pati par sevi nav garantija.</p>
+            </details>
+            <details>
+              <summary>Kas beidzas pēc 24 stundām?</summary>
+              <p>Beidzas instalēšanas saites derīgums, nevis konta vai jau instalēta VPN profila derīgums. Vajadzības gadījumā pierakstieties un izveidojiet jaunu saiti.</p>
+            </details>
+            <details>
+              <summary>Ko darīt, ja Passkey ir pazaudēta?</summary>
+              <p>Izmantojiet citu šī konta Passkey vai izvēlieties “Recover account” un ievadiet Recovery Code. Pabeidziet jaunas Passkey izveidi, saglabājiet tikko izsniegto Recovery Code un pierakstieties. Iepriekšējais atkopšanas kods vairs nedarbosies. Bez derīgas Passkey, Recovery Code vai jau atvērtas konta sesijas piekļuvi vietnē nevar atjaunot.</p>
+            </details>
+            <details>
+              <summary>Kas notiek, mainot VPN paroli?</summary>
+              <p>Parole tiek mainīta gan Rīgai, gan Maskavai. Izveidojiet un instalējiet jaunu profilu katram izmantotajam serverim un ierīcei. Vecie profili vairs nevarēs pieslēgties ar iepriekšējo paroli. Passkey un Recovery Code nemainās.</p>
+            </details>
+            <details>
+              <summary>Ar ko VPN piekļuves dzēšana atšķiras no konta dzēšanas?</summary>
+              <p>Dzēšot VPN piekļuvi, abos serveros tiek dzēsti VPN piekļuves dati, bet konts, Passkey un pieņemtais promo kods tiek saglabāts. VPN piekļuvi var izveidot no jauna.</p>
+              <p>Dzēšot kontu, tiek dzēstas arī Passkey reģistrācijas, sesijas, Recovery Code un VPN piekļuve. Šo darbību nevar atsaukt. Profila dzēšana tikai no ierīces neizdzēš kontu.</p>
+            </details>
+            <details>
+              <summary>Vai citai ierīcei nepieciešams jauns konts?</summary>
+              <p>Nē. Pierakstieties tajā pašā kontā, izmantojot šajā ierīcē pieejamu Passkey, pēc tam iegūstiet un instalējiet profilu. Passkey pieejamība dažādās ierīcēs ir atkarīga no paroļu pārvaldnieka un tā sinhronizācijas iestatījumiem.</p>
+            </details>
+          </section>
+
+          <p class="help-sources">Papildu informācija: <a href="https://support.apple.com/guide/iphone/use-passkeys-to-sign-in-to-websites-and-apps-iphf538ea8d0/ios">Apple Passkeys</a> un <a href="https://docs.strongswan.org/docs/latest/interop/appleIkev2Profile.html">Apple IKEv2 profili</a>.</p>
+        </article>
       </div>
     </div>
-
-    <noscript>
-      <style>
-        #helpRu[hidden] {
-          display: block !important;
-          margin-top: 40px;
-        }
-      </style>
-    </noscript>
+    <noscript><style>#helpRu[hidden], #helpLv[hidden] { display: block !important; margin-top: 40px; }</style></noscript>
   </main>
-
   <script>
     (() => {
       const en = document.getElementById("helpEn");
       const ru = document.getElementById("helpRu");
+      const lv = document.getElementById("helpLv");
       const enButton = document.getElementById("helpEnButton");
       const ruButton = document.getElementById("helpRuButton");
-
+      const lvButton = document.getElementById("helpLvButton");
       function setHelpLanguage(language) {
-        const russian = language === "ru";
-
-        document.documentElement.lang = russian ? "ru" : "en";
-        document.title = russian
-          ? "Помощь — TOLF VPN"
-          : "Help — TOLF VPN";
-
-        en.hidden = russian;
-        ru.hidden = !russian;
-
-        enButton.classList.toggle("active", !russian);
-        ruButton.classList.toggle("active", russian);
-        enButton.setAttribute("aria-pressed", String(!russian));
-        ruButton.setAttribute("aria-pressed", String(russian));
-
-        document.getElementById("helpSubtitle").textContent =
-          russian
-            ? "Помощь, глоссарий и ответы на вопросы."
-            : "Help, glossary and FAQ.";
-
-        document.getElementById("helpBack").textContent =
-          russian
-            ? "Вернуться в «Мой VPN»"
-            : "Back to My VPN";
-
-        try {
-          localStorage.setItem(
-            "tolfLanguage",
-            russian ? "ru" : "en"
-          );
-        } catch {}
-
-        if (/^#(?:en|ru)-/.test(location.hash)) {
-          const hash = location.hash.replace(
-            /^#(?:en|ru)-/,
-            russian ? "#ru-" : "#en-"
-          );
-
-          if (hash !== location.hash) {
-            history.replaceState(null, "", hash);
-          }
+        if (!["en", "ru", "lv"].includes(language)) return;
+        const copy = {
+          en: ["Help — TOLF VPN", "Help, glossary and FAQ.", "Back to My VPN"],
+          ru: ["Помощь — TOLF VPN", "Помощь, глоссарий и ответы на вопросы.", "Вернуться в «Мой VPN»"],
+          lv: ["Palīdzība — TOLF VPN", "Palīdzība, terminu vārdnīca un BUJ.", "Atpakaļ uz “Mans VPN”"]
+        };
+        document.documentElement.lang = language;
+        document.title = copy[language][0];
+        en.hidden = language !== "en";
+        ru.hidden = language !== "ru";
+        lv.hidden = language !== "lv";
+        [[enButton, "en"], [ruButton, "ru"], [lvButton, "lv"]].forEach(([button, code]) => {
+          const active = language === code;
+          button.classList.toggle("active", active);
+          button.setAttribute("aria-pressed", String(active));
+        });
+        document.getElementById("helpSubtitle").textContent = copy[language][1];
+        document.getElementById("helpBack").textContent = copy[language][2];
+        try { localStorage.setItem("tolfLanguage", language); } catch {}
+        if (/^#(?:en|ru|lv)-/.test(location.hash)) {
+          const hash = location.hash.replace(/^#(?:en|ru|lv)-/, `#${language}-`);
+          if (hash !== location.hash) history.replaceState(null, "", hash);
         }
       }
-
       let language;
-
-      try {
-        language = localStorage.getItem("tolfLanguage");
-      } catch {}
-
-      if (language !== "ru" && language !== "en") {
-        language = navigator.language
-          .toLowerCase()
-          .startsWith("ru")
-          ? "ru"
-          : "en";
+      try { language = localStorage.getItem("tolfLanguage"); } catch {}
+      if (!["en", "ru", "lv"].includes(language)) {
+        const browserLanguage = navigator.language.toLowerCase();
+        language = browserLanguage.startsWith("ru") ? "ru" : browserLanguage.startsWith("lv") ? "lv" : "en";
       }
-
-      if (location.hash.startsWith("#ru-")) {
-        language = "ru";
-      }
-
-      if (location.hash.startsWith("#en-")) {
-        language = "en";
-      }
-
+      if (location.hash.startsWith("#ru-")) language = "ru";
+      if (location.hash.startsWith("#en-")) language = "en";
+      if (location.hash.startsWith("#lv-")) language = "lv";
       setHelpLanguage(language);
-
-      enButton.addEventListener(
-        "click",
-        () => setHelpLanguage("en")
-      );
-      ruButton.addEventListener(
-        "click",
-        () => setHelpLanguage("ru")
-      );
+      enButton.addEventListener("click", () => setHelpLanguage("en"));
+      ruButton.addEventListener("click", () => setHelpLanguage("ru"));
+      lvButton.addEventListener("click", () => setHelpLanguage("lv"));
     })();
   </script>
 </body>

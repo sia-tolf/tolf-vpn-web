@@ -69,7 +69,7 @@ button, input { font: inherit; }
   margin: 0 auto;
   padding: max(42px, env(safe-area-inset-top)) 24px max(42px, env(safe-area-inset-bottom));
 }
-.brand { margin-bottom: 36px; }
+.brand { margin-bottom: 22px; }
 .brand-top {
   display: flex;
   align-items: flex-start;
@@ -480,7 +480,11 @@ button:disabled { opacity: 0.55; cursor: default; }
   .recovery-code-actions, .recover-actions { flex-direction: column; }
 }
 @media (max-width: 520px) {
-  .page { padding-left: 16px; padding-right: 16px; }
+  .page {
+    padding-top: max(12px, env(safe-area-inset-top));
+    padding-left: 16px;
+    padding-right: 16px;
+  }
   .brand h1 { font-size: 30px; }
   .language-button { padding-left: 8px; padding-right: 8px; }
   .card-content { padding: 22px; }
