@@ -82,7 +82,7 @@ I18N.ru = {
   addedDate: "Добавлен {date}",
   addAnotherBeforeRemoving: "Перед удалением этого Passkey добавьте другой.",
 
-  recovery: "Восстановление",
+  recovery: "Восстановление и аккаунт",
   recoveryDescription: "Recovery Code позволяет восстановить доступ к аккаунту TOLF, если вы потеряете все Passkey.",
   generateNewRecoveryCode: "Создать новый Recovery Code",
   saveNewRecoveryCode: "Сохраните новый Recovery Code",

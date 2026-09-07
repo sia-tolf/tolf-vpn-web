@@ -82,7 +82,7 @@ I18N.en = {
   addedDate: "Added {date}",
   addAnotherBeforeRemoving: "Add another Passkey before removing this one.",
 
-  recovery: "Recovery",
+  recovery: "Recovery & Account",
   recoveryDescription: "A Recovery Code can restore access to your TOLF account if you lose all Passkeys.",
   generateNewRecoveryCode: "Generate New Recovery Code",
   saveNewRecoveryCode: "Save your new Recovery Code",

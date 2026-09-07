@@ -82,7 +82,7 @@ I18N.lv = {
   addedDate: "Pievienots {date}",
   addAnotherBeforeRemoving: "Pirms šī Passkey dzēšanas pievienojiet citu.",
 
-  recovery: "Atkopšana",
+  recovery: "Atkopšana un konts",
   recoveryDescription: "Recovery Code ļauj atgūt piekļuvi TOLF kontam, ja zaudējat visus Passkey.",
   generateNewRecoveryCode: "Izveidot jaunu Recovery Code",
   saveNewRecoveryCode: "Saglabājiet jauno Recovery Code",
