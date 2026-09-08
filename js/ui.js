@@ -212,8 +212,14 @@ function renderVpnState(vpn) {
     serverSection.classList.remove("hidden");
     showConfiguredServer(vpn);
 
+    const username = vpn.username || "";
+
     vpnUsername.textContent =
-      vpn.username || "";
+      username.length > 18
+        ? `${username.slice(0, 9)}…${username.slice(-5)}`
+        : username;
+
+    vpnUsername.title = username;
 
     usernameRow.classList.remove("hidden");
     createVpnButton.classList.add("hidden");
@@ -232,6 +238,7 @@ function renderVpnState(vpn) {
     serverSection.classList.remove("hidden");
 
     vpnUsername.textContent = "";
+    vpnUsername.title = "";
     usernameRow.classList.add("hidden");
 
     generateProfileButton.classList.add("hidden");
