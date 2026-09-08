@@ -1,78 +1,60 @@
-const LATENCY_ENDPOINTS = {
-  riga: "https://ikev2-riga.tolf.is/ping",
-  moscow: "https://ikev2.tolf.is:8443/cgi-bin/ping"
-};
-
 const LATENCY_TARGETS = {
   riga: latencyRiga,
   moscow: latencyMoscow
 };
 
-function median(values) {
-  const sorted = [...values].sort((a, b) => a - b);
-  return sorted[Math.floor(sorted.length / 2)];
-}
+function renderLatency(target, value) {
+  if (!target) return;
 
-async function measureRequest(url) {
-  const marker = `${url}${url.includes("?") ? "&" : "?"}t=${Date.now()}-${Math.random()}`;
-
-  performance.clearResourceTimings();
-
-  const response = await fetch(marker, {
-    method: "GET",
-    mode: "cors",
-    cache: "no-store",
-    credentials: "omit"
-  });
-
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}`);
-  }
-
-  await response.text();
-
-  const entries = performance.getEntriesByName(marker);
-  const timing = entries[entries.length - 1];
-
-  if (
-    timing
-    && timing.requestStart > 0
-    && timing.responseStart > timing.requestStart
-  ) {
-    return timing.responseStart - timing.requestStart;
-  }
-
-  throw new Error("Resource Timing unavailable");
-}
-
-async function measureEntryPointLatency(serverKey) {
-  const endpoint = LATENCY_ENDPOINTS[serverKey];
-  const target = LATENCY_TARGETS[serverKey];
-
-  if (!endpoint || !target) return;
-
-  target.textContent = "Measuring…";
-
-  try {
-    const samples = [];
-
-    for (let i = 0; i < 5; i += 1) {
-      const ms = await measureRequest(endpoint);
-
-      if (i > 0) {
-        samples.push(ms);
-      }
-    }
-
-    target.textContent = `${Math.round(median(samples))} ms`;
-  } catch {
+  if (Number.isFinite(value) && value >= 0) {
+    target.textContent = `${Math.round(value)} ms`;
+  } else {
     target.textContent = "—";
   }
 }
 
 function measureEntryPointLatencies() {
-  void measureEntryPointLatency("riga");
-  void measureEntryPointLatency("moscow");
+  if (typeof Speedtest !== "function") {
+    renderLatency(LATENCY_TARGETS.riga, -1);
+    renderLatency(LATENCY_TARGETS.moscow, -1);
+    return;
+  }
+
+  LATENCY_TARGETS.riga.textContent = "Measuring…";
+  LATENCY_TARGETS.moscow.textContent = "Measuring…";
+
+  const riga = {
+    name: "Riga",
+    server: "https://ikev2-riga.tolf.is:8443/",
+    dlURL: "garbage.php",
+    ulURL: "empty.php",
+    pingURL: "empty.php",
+    getIpURL: "getIP.php"
+  };
+
+  const moscow = {
+    name: "Moscow",
+    server: "https://ikev2.tolf.is:8443/",
+    dlURL: "garbage.php",
+    ulURL: "empty.php",
+    pingURL: "empty.php",
+    getIpURL: "getIP.php"
+  };
+
+  try {
+    const speedtest = new Speedtest();
+
+    speedtest.addTestPoints([riga, moscow]);
+
+    speedtest.selectServer(() => {
+      renderLatency(LATENCY_TARGETS.riga, riga.pingT);
+      renderLatency(LATENCY_TARGETS.moscow, moscow.pingT);
+    });
+  } catch (error) {
+    console.error("Entry point latency test failed:", error);
+    renderLatency(LATENCY_TARGETS.riga, -1);
+    renderLatency(LATENCY_TARGETS.moscow, -1);
+  }
 }
 
 measureEntryPointLatencies();
