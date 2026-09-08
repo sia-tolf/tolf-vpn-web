@@ -778,3 +778,49 @@ button:disabled { opacity: 0.55; cursor: default; }
     font-variant-numeric: tabular-nums;
   }
 }
+
+
+/* VPN overview — final network layout */
+@media (min-width: 760px) {
+  .vpn-overview #usernameRow {
+    height: 72px;
+    min-height: 72px;
+    align-items: center;
+  }
+}
+
+.vpn-overview-speed {
+  grid-column: 1 / -1;
+}
+
+.vpn-overview-speed .speed-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  gap: 24px;
+  align-items: center;
+}
+
+.vpn-overview-speed .speed-value {
+  min-width: 90px;
+  white-space: nowrap;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (min-width: 760px) {
+  .vpn-overview-speed .speed-row {
+    height: 58px;
+    min-height: 58px;
+  }
+}
+
+@media (max-width: 759px) {
+  .vpn-overview-speed .speed-row {
+    grid-template-columns: minmax(0, 1fr) max-content;
+    gap: 16px;
+  }
+
+  .vpn-overview-speed .speed-value {
+    min-width: 82px;
+  }
+}

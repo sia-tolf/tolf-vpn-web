@@ -12,7 +12,7 @@
 
   <link
     rel="stylesheet"
-    href="css/styles.css?v=overview-11"
+    href="css/styles.css?v=overview-12"
   >
   <link
     rel="stylesheet"
@@ -615,24 +615,43 @@
                   class="row-value"
                 >—</div>
               </div>
+            </div>
+          </section>
 
-              <div class="row network-throughput-row">
+          <section
+            id="networkThroughputCard"
+            class="vpn-overview-card vpn-overview-speed"
+          >
+            <div class="vpn-overview-header">
+              <div
+                class="vpn-overview-title"
+                data-i18n="networkThroughput"
+              >Throughput</div>
+            </div>
+
+            <div class="status-table">
+              <div class="row speed-row">
                 <div
                   class="row-label"
-                  data-i18n="networkThroughput"
-                >Throughput</div>
+                  data-i18n="networkRigaToMoscow"
+                >Riga → Moscow</div>
 
-                <div class="row-value network-throughput-values">
-                  <div class="network-throughput-line">
-                    <span data-i18n="networkRigaToMoscow">Riga → Moscow</span>
-                    <span id="networkMetricRigaToMoscow">—</span>
-                  </div>
+                <div
+                  id="networkMetricRigaToMoscow"
+                  class="row-value speed-value"
+                >—</div>
+              </div>
 
-                  <div class="network-throughput-line">
-                    <span data-i18n="networkMoscowToRiga">Moscow → Riga</span>
-                    <span id="networkMetricMoscowToRiga">—</span>
-                  </div>
-                </div>
+              <div class="row speed-row">
+                <div
+                  class="row-label"
+                  data-i18n="networkMoscowToRiga"
+                >Moscow → Riga</div>
+
+                <div
+                  id="networkMetricMoscowToRiga"
+                  class="row-value speed-value"
+                >—</div>
               </div>
             </div>
           </section>
