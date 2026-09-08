@@ -750,3 +750,31 @@ button:disabled { opacity: 0.55; cursor: default; }
     margin-left: 0;
   }
 }
+
+@media (min-width: 760px) {
+  #usernameRow,
+  .network-throughput-row {
+    height: 100px;
+    min-height: 100px;
+  }
+}
+
+@media (min-width: 760px) {
+  .network-throughput-values {
+    grid-template-columns: minmax(0, 1fr) max-content;
+    column-gap: 14px;
+  }
+
+  .network-throughput-line > span:first-child {
+    min-width: 0;
+    white-space: nowrap;
+    font-size: 13px;
+  }
+
+  .network-throughput-line > span:last-child {
+    min-width: 76px;
+    white-space: nowrap;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+}
