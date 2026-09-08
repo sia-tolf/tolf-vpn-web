@@ -67,6 +67,8 @@ I18N.en = {
   networkMoscowToRiga: "Moscow → Riga",
   networkLastMeasured: "Last measured",
   active: "Active",
+  configured: "Configured",
+  networkThroughput: "Throughput",
   notConfigured: "Not configured",
 
   createVpnAccess: "Create VPN Access",

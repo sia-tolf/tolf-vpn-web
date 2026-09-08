@@ -67,6 +67,8 @@ I18N.ru = {
   networkMoscowToRiga: "Москва → Рига",
   networkLastMeasured: "Последнее измерение",
   active: "Активен",
+  configured: "Настроен",
+  networkThroughput: "Пропускная способность",
   notConfigured: "Не настроен",
 
   createVpnAccess: "Создать VPN-доступ",

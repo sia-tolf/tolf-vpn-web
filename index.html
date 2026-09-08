@@ -12,7 +12,7 @@
 
   <link
     rel="stylesheet"
-    href="css/styles.css?v=overview-6"
+    href="css/styles.css?v=overview-7"
   >
   <link
     rel="stylesheet"
@@ -21,16 +21,16 @@
 
   <!-- Keep this order. Deferred scripts run after the HTML has been parsed. -->
   <script defer src="js/config.js?v=platform-auto-1"></script>
-  <script defer src="js/locales/en.js?v=overview-2"></script>
-  <script defer src="js/locales/ru.js?v=overview-2"></script>
-  <script defer src="js/locales/lv.js?v=overview-2"></script>
+  <script defer src="js/locales/en.js?v=overview-3"></script>
+  <script defer src="js/locales/ru.js?v=overview-3"></script>
+  <script defer src="js/locales/lv.js?v=overview-3"></script>
   <script defer src="js/dom.js?v=platform-1"></script>
   <script defer src="js/network-metrics.js?v=overview-3"></script>
   <script defer src="js/platform.js?v=platform-1"></script>
   <script defer src="js/i18n.js?v=platform-1"></script>
   <script defer src="js/webauthn.js?v=local-id-2"></script>
   <script defer src="js/api.js?v=local-id-2"></script>
-  <script defer src="js/ui.js?v=overview-3"></script>
+  <script defer src="js/ui.js?v=overview-4"></script>
   <script defer src="js/passkeys.js?v=local-id-2"></script>
   <script defer src="js/recovery.js?v=local-id-2"></script>
   <script defer src="js/account.js?v=local-id-2"></script>
@@ -537,58 +537,54 @@
 
         <div class="vpn-overview">
           <section class="vpn-overview-card">
-            <div
-              class="vpn-overview-title"
-              data-i18n="vpnOverviewTitle"
-            >VPN</div>
+            <div class="vpn-overview-header">
+              <div
+                class="vpn-overview-title"
+                data-i18n="vpnOverviewTitle"
+              >VPN</div>
+
+              <div
+                id="vpnStatus"
+                class="vpn-overview-status"
+              >—</div>
+            </div>
 
             <div class="status-table">
-              <div class="row">
-            <div
-              class="row-label"
-              data-i18n="status"
-            >Status</div>
-            <div
-              id="vpnStatus"
-              class="row-value"
-            >—</div>
-          </div>
+              <div
+                id="serverRow"
+                class="row hidden"
+              >
+                <div
+                  class="row-label"
+                  data-i18n="server"
+                >Entry point</div>
 
-          <div
-            id="serverRow"
-            class="row hidden"
-          >
-            <div
-              class="row-label"
-              data-i18n="server"
-            >Server</div>
+                <div class="row-value">
+                  <span
+                    id="vpnServerName"
+                    class="server-value-name"
+                  ></span>
+                  <span
+                    id="vpnServerHost"
+                    class="server-value-host hidden"
+                    aria-hidden="true"
+                  ></span>
+                </div>
+              </div>
 
-            <div class="row-value">
-              <span
-                id="vpnServerName"
-                class="server-value-name"
-              ></span>
-              <span
-                id="vpnServerHost"
-                class="server-value-host hidden"
-                aria-hidden="true"
-              ></span>
-            </div>
-          </div>
-
-          <div
-            id="usernameRow"
-            class="row hidden"
-          >
-            <div
-              class="row-label"
-              data-i18n="username"
-            >Username</div>
-            <div
-              id="vpnUsername"
-              class="row-value"
-            ></div>
-          </div>
+              <div
+                id="usernameRow"
+                class="row hidden"
+              >
+                <div
+                  class="row-label"
+                  data-i18n="username"
+                >Username</div>
+                <div
+                  id="vpnUsername"
+                  class="row-value"
+                ></div>
+              </div>
             </div>
           </section>
 
@@ -601,6 +597,7 @@
                 class="vpn-overview-title"
                 data-i18n="networkMetricsTitle"
               >TOLF network</div>
+
               <div
                 id="networkMetricMeasuredAt"
                 class="vpn-overview-updated"
@@ -608,21 +605,35 @@
             </div>
 
             <div class="status-table">
-          <div class="row">
-            <div class="row-label" data-i18n="networkLatency">Network latency</div>
-            <div id="networkMetricLatency" class="row-value">—</div>
-          </div>
+              <div class="row">
+                <div
+                  class="row-label"
+                  data-i18n="networkLatency"
+                >Network latency</div>
+                <div
+                  id="networkMetricLatency"
+                  class="row-value"
+                >—</div>
+              </div>
 
-          <div class="row">
-            <div class="row-label" data-i18n="networkRigaToMoscow">Riga → Moscow</div>
-            <div id="networkMetricRigaToMoscow" class="row-value">—</div>
-          </div>
+              <div class="row network-throughput-row">
+                <div
+                  class="row-label"
+                  data-i18n="networkThroughput"
+                >Throughput</div>
 
-          <div class="row">
-            <div class="row-label" data-i18n="networkMoscowToRiga">Moscow → Riga</div>
-            <div id="networkMetricMoscowToRiga" class="row-value">—</div>
-          </div>
+                <div class="row-value network-throughput-values">
+                  <div class="network-throughput-line">
+                    <span data-i18n="networkRigaToMoscow">Riga → Moscow</span>
+                    <span id="networkMetricRigaToMoscow">—</span>
+                  </div>
 
+                  <div class="network-throughput-line">
+                    <span data-i18n="networkMoscowToRiga">Moscow → Riga</span>
+                    <span id="networkMetricMoscowToRiga">—</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </section>
         </div>

@@ -67,6 +67,8 @@ I18N.lv = {
   networkMoscowToRiga: "Maskava → Rīga",
   networkLastMeasured: "Pēdējais mērījums",
   active: "Aktīvs",
+  configured: "Konfigurēts",
+  networkThroughput: "Caurlaidība",
   notConfigured: "Nav konfigurēts",
 
   createVpnAccess: "Izveidot VPN piekļuvi",

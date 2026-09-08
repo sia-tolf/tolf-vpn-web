@@ -205,9 +205,9 @@ function renderVpnState(vpn) {
   updateSelectedServerAddress();
 
   if (vpn.configured) {
-    vpnStatus.textContent = t("active");
+    vpnStatus.textContent = t("configured");
     vpnStatus.className =
-      "row-value status-active";
+      "vpn-overview-status status-active";
 
     serverSection.classList.remove("hidden");
     showConfiguredServer(vpn);
@@ -229,7 +229,7 @@ function renderVpnState(vpn) {
     deleteSection.classList.remove("hidden");
   } else {
     vpnStatus.textContent = t("notConfigured");
-    vpnStatus.className = "row-value";
+    vpnStatus.className = "vpn-overview-status";
 
     serverRow.classList.add("hidden");
     vpnServerName.textContent = "";
