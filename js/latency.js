@@ -1,6 +1,6 @@
 const LATENCY_ENDPOINTS = {
   riga: "https://ikev2-riga.tolf.is/ping",
-  moscow: "https://install-ru.tolf.is/cgi-bin/ping"
+  moscow: "https://ikev2.tolf.is:8443/cgi-bin/ping"
 };
 
 const LATENCY_TARGETS = {
