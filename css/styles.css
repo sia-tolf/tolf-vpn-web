@@ -585,3 +585,15 @@ button:disabled { opacity: 0.55; cursor: default; }
     gap: 12px;
   }
 }
+
+@media (min-width: 760px) {
+  .vpn-overview .row {
+    min-height: 56px;
+    align-items: center;
+  }
+
+  .vpn-overview .row-label,
+  .vpn-overview .row-value {
+    line-height: 1.3;
+  }
+}
