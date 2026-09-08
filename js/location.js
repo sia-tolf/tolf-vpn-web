@@ -208,9 +208,11 @@ async function loadEntryPointRecommendation() {
 
     if (
       geographicEntryPointChanged
-      && typeof measureEntryPointLatencies === "function"
+      && typeof window !== "undefined"
     ) {
-      measureEntryPointLatencies();
+      window.dispatchEvent(
+        new Event("tolf:network-context-changed")
+      );
     }
   } catch {
     // Recommendation is optional.

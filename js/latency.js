@@ -65,3 +65,13 @@ function measureEntryPointLatencies() {
 }
 
 measureEntryPointLatencies();
+
+if (
+  typeof window !== "undefined"
+  && typeof window.addEventListener === "function"
+) {
+  window.addEventListener(
+    "tolf:network-context-changed",
+    measureEntryPointLatencies
+  );
+}
