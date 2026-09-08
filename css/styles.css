@@ -601,3 +601,14 @@ button:disabled { opacity: 0.55; cursor: default; }
 .vpn-overview {
   align-items: start;
 }
+
+@media (min-width: 760px) {
+  .vpn-overview .row {
+    height: 72px;
+    min-height: 72px;
+    box-sizing: border-box;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    align-items: center;
+  }
+}
