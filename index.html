@@ -25,6 +25,7 @@
   <script defer src="js/locales/ru.js?v=clusters-2"></script>
   <script defer src="js/locales/lv.js?v=clusters-2"></script>
   <script defer src="js/dom.js?v=platform-1"></script>
+  <script defer src="js/network-metrics.js?v=network-metrics-1"></script>
   <script defer src="js/platform.js?v=platform-1"></script>
   <script defer src="js/i18n.js?v=platform-1"></script>
   <script defer src="js/webauthn.js?v=local-id-2"></script>
@@ -580,6 +581,31 @@
               id="vpnUsername"
               class="row-value"
             ></div>
+          </div>
+        </div>
+
+        <div
+          id="networkMetrics"
+          class="status-table network-metrics hidden"
+        >
+          <div class="row">
+            <div class="row-label">TOLF network latency</div>
+            <div id="networkMetricLatency" class="row-value">—</div>
+          </div>
+
+          <div class="row">
+            <div class="row-label">Riga → Moscow</div>
+            <div id="networkMetricRigaToMoscow" class="row-value">—</div>
+          </div>
+
+          <div class="row">
+            <div class="row-label">Moscow → Riga</div>
+            <div id="networkMetricMoscowToRiga" class="row-value">—</div>
+          </div>
+
+          <div class="row">
+            <div class="row-label">Last measured</div>
+            <div id="networkMetricMeasuredAt" class="row-value">—</div>
           </div>
         </div>
 

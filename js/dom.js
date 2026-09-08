@@ -94,3 +94,13 @@ const localIdRoutingHint =
 
 const latencyRiga = document.getElementById("latencyRiga");
 const latencyMoscow = document.getElementById("latencyMoscow");
+
+const networkMetrics = document.getElementById("networkMetrics");
+const networkMetricLatency =
+  document.getElementById("networkMetricLatency");
+const networkMetricRigaToMoscow =
+  document.getElementById("networkMetricRigaToMoscow");
+const networkMetricMoscowToRiga =
+  document.getElementById("networkMetricMoscowToRiga");
+const networkMetricMeasuredAt =
+  document.getElementById("networkMetricMeasuredAt");
