@@ -12,7 +12,7 @@
 
   <link
     rel="stylesheet"
-    href="css/styles.css?v=overview-5"
+    href="css/styles.css?v=overview-6"
   >
   <link
     rel="stylesheet"
@@ -596,10 +596,16 @@
             id="networkMetrics"
             class="vpn-overview-card network-metrics hidden"
           >
-            <div
-              class="vpn-overview-title"
-              data-i18n="networkMetricsTitle"
-            >TOLF network</div>
+            <div class="vpn-overview-header">
+              <div
+                class="vpn-overview-title"
+                data-i18n="networkMetricsTitle"
+              >TOLF network</div>
+              <div
+                id="networkMetricMeasuredAt"
+                class="vpn-overview-updated"
+              >—</div>
+            </div>
 
             <div class="status-table">
           <div class="row">
@@ -617,10 +623,6 @@
             <div id="networkMetricMoscowToRiga" class="row-value">—</div>
           </div>
 
-              <div class="row">
-                <div class="row-label" data-i18n="networkLastMeasured">Last measured</div>
-                <div id="networkMetricMeasuredAt" class="row-value">—</div>
-              </div>
             </div>
           </section>
         </div>

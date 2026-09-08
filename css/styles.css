@@ -612,3 +612,24 @@ button:disabled { opacity: 0.55; cursor: default; }
     align-items: center;
   }
 }
+
+.vpn-overview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 16px 11px;
+  border-bottom: 1px solid var(--border);
+}
+
+.vpn-overview-header .vpn-overview-title {
+  padding: 0;
+  border-bottom: 0;
+}
+
+.vpn-overview-updated {
+  color: var(--secondary);
+  font-size: 12px;
+  line-height: 1.3;
+  white-space: nowrap;
+}
