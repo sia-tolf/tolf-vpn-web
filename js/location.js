@@ -1,29 +1,133 @@
 const LOCATION_API = API;
 const entryPointNote = document.getElementById("entryPointNote");
+
+const LATENCY_OVERRIDE_THRESHOLD_MS = 60;
+
+let geographicEntryPoint = null;
 let recommendedEntryPoint = null;
 let entryPointChangedManually = false;
 let recommendationRequestNumber = 0;
 
-function selectRecommendedEntryPoint() {
-  if (recommendedEntryPoint !== "moscow" && recommendedEntryPoint !== "riga") return;
+let measuredLatencies = {
+  riga: null,
+  moscow: null
+};
+
+function latencyAvailable(value) {
+  return Number.isFinite(value) && value >= 0;
+}
+
+function calculateRecommendedEntryPoint() {
+  if (
+    geographicEntryPoint !== "moscow"
+    && geographicEntryPoint !== "riga"
+  ) {
+    return null;
+  }
+
+  const riga = measuredLatencies.riga;
+  const moscow = measuredLatencies.moscow;
+
+  const rigaAvailable = latencyAvailable(riga);
+  const moscowAvailable = latencyAvailable(moscow);
+
+  if (geographicEntryPoint === "moscow") {
+    if (!moscowAvailable && rigaAvailable) {
+      return "riga";
+    }
+
+    if (
+      moscowAvailable
+      && rigaAvailable
+      && moscow >= riga + LATENCY_OVERRIDE_THRESHOLD_MS
+    ) {
+      return "riga";
+    }
+
+    return "moscow";
+  }
+
+  if (!rigaAvailable && moscowAvailable) {
+    return "moscow";
+  }
+
+  if (
+    rigaAvailable
+    && moscowAvailable
+    && riga >= moscow + LATENCY_OVERRIDE_THRESHOLD_MS
+  ) {
+    return "moscow";
+  }
+
+  return "riga";
+}
+
+function updateRecommendedEntryPoint() {
+  const nextRecommendation = calculateRecommendedEntryPoint();
+
+  if (
+    nextRecommendation !== "moscow"
+    && nextRecommendation !== "riga"
+  ) {
+    return;
+  }
+
+  recommendedEntryPoint = nextRecommendation;
 
   renderEntryPointRecommendation();
-  if (entryPointChangedManually) return;
+  selectRecommendedEntryPoint();
+}
+
+function setEntryPointLatencies(latencies) {
+  measuredLatencies = {
+    riga: latencyAvailable(latencies?.riga)
+      ? latencies.riga
+      : null,
+    moscow: latencyAvailable(latencies?.moscow)
+      ? latencies.moscow
+      : null
+  };
+
+  updateRecommendedEntryPoint();
+}
+
+function selectRecommendedEntryPoint() {
+  if (
+    recommendedEntryPoint !== "moscow"
+    && recommendedEntryPoint !== "riga"
+  ) {
+    return;
+  }
+
+  renderEntryPointRecommendation();
+
+  if (entryPointChangedManually) {
+    return;
+  }
 
   const target = document.getElementById(
-    recommendedEntryPoint === "moscow" ? "serverMoscow" : "serverRiga"
+    recommendedEntryPoint === "moscow"
+      ? "serverMoscow"
+      : "serverRiga"
   );
 
-  if (!target || target.disabled) return;
-  if (target.checked) return;
+  if (!target || target.disabled) {
+    return;
+  }
+
+  if (target.checked) {
+    return;
+  }
 
   for (const input of serverInputs) {
     input.checked = input === target;
   }
 
   setInstallLink(null);
+
   vpnMessage.textContent = "";
   vpnMessage.className = "message";
+
   updateSelectedServerAddress();
 
   if (lastVpnState) {
@@ -32,7 +136,9 @@ function selectRecommendedEntryPoint() {
 }
 
 function renderEntryPointRecommendation() {
-  if (!entryPointNote) return;
+  if (!entryPointNote) {
+    return;
+  }
 
   const key = recommendedEntryPoint === "moscow"
     ? "entryPointRecommendationMoscow"
@@ -66,11 +172,15 @@ async function loadEntryPointRecommendation() {
       }
     );
 
-    if (!response.ok) return;
+    if (!response.ok) {
+      return;
+    }
 
     const data = await response.json();
 
-    if (requestNumber !== recommendationRequestNumber) return;
+    if (requestNumber !== recommendationRequestNumber) {
+      return;
+    }
 
     if (
       data.entryPoint !== "moscow"
@@ -79,20 +189,12 @@ async function loadEntryPointRecommendation() {
       return;
     }
 
-    const recommendationChanged =
-      recommendedEntryPoint !== null
-      && recommendedEntryPoint !== data.entryPoint;
+    geographicEntryPoint = data.entryPoint;
 
-    recommendedEntryPoint = data.entryPoint;
-
-    if (recommendationChanged) {
-      entryPointChangedManually = false;
-    }
-
-    renderEntryPointRecommendation();
-    selectRecommendedEntryPoint();
+    updateRecommendedEntryPoint();
   } catch {
-    // The recommendation is optional. VPN controls remain available.
+    // Recommendation is optional.
+    // VPN controls remain available.
   }
 }
 

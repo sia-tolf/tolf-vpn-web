@@ -49,6 +49,13 @@ function measureEntryPointLatencies() {
     speedtest.selectServer(() => {
       renderLatency(LATENCY_TARGETS.riga, riga.pingT);
       renderLatency(LATENCY_TARGETS.moscow, moscow.pingT);
+
+      if (typeof setEntryPointLatencies === "function") {
+        setEntryPointLatencies({
+          riga: riga.pingT,
+          moscow: moscow.pingT
+        });
+      }
     });
   } catch (error) {
     console.error("Entry point latency test failed:", error);
