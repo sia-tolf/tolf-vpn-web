@@ -51,6 +51,7 @@ I18N.lv = {
   cityRiga: "Rīga",
   cityMoscow: "Maskava",
   cityLondon: "Londona",
+  cityNewYork: "Ņujorka",
   rigaLatvia: "Rīga, Latvija",
   moscowRussia: "Maskava, Krievija",
   londonUk: "Londona, Apvienotā Karaliste",

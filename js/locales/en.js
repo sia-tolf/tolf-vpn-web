@@ -51,6 +51,7 @@ I18N.en = {
   cityRiga: "Riga",
   cityMoscow: "Moscow",
   cityLondon: "London",
+  cityNewYork: "New York",
   rigaLatvia: "Riga, Latvia",
   moscowRussia: "Moscow, Russia",
   londonUk: "London, United Kingdom",

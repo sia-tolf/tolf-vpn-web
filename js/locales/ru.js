@@ -51,6 +51,7 @@ I18N.ru = {
   cityRiga: "Рига",
   cityMoscow: "Москва",
   cityLondon: "Лондон",
+  cityNewYork: "Нью-Йорк",
   rigaLatvia: "Рига, Латвия",
   moscowRussia: "Москва, Россия",
   londonUk: "Лондон, Великобритания",

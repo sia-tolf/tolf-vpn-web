@@ -9,23 +9,33 @@ function setVpnBusy(value) {
 }
 
 createVpnButton.addEventListener("click", async () => {
-  if (vpnBusy) return;
-  const selection = getProfileSelection();
-  if (!selection) return;
-  const { server } = selection;
-  setVpnBusy(true);
-  vpnMessage.textContent = t("creatingVpn");
-  vpnMessage.className = "message";
   try {
+    if (vpnBusy) return;
+
+    const selection = getProfileSelection();
+
+    if (!selection) {
+      throw new Error("Profile selection is invalid");
+    }
+
+    const { server } = selection;
+
+    setVpnBusy(true);
+    vpnMessage.textContent = t("creatingVpn");
+    vpnMessage.className = "message";
+
     const data = await apiRequest("/vpn/create", {
-      method: "POST", body: JSON.stringify(selection)
+      method: "POST",
+      body: JSON.stringify(selection)
     });
+
     showVpn({ ...data.vpn, server: data.vpn?.server || server });
     setInstallLink(data.profileUrl);
+
     vpnMessage.textContent = t("vpnAccessCreated");
     vpnMessage.className = "message success";
   } catch (error) {
-    vpnMessage.textContent = error.message;
+    vpnMessage.textContent = error?.message || "Request failed";
     vpnMessage.className = "message error";
   } finally {
     setVpnBusy(false);

@@ -506,3 +506,32 @@ button:disabled { opacity: 0.55; cursor: default; }
   .passkey-item { align-items: flex-start; flex-direction: column; }
   .passkey-remove-button { width: 100%; }
 }
+
+.server-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.server-latency {
+  display: block;
+  color: var(--secondary);
+  font-size: 12px;
+  line-height: 1.2;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.server-option input:checked + label .server-latency {
+  color: inherit;
+  opacity: 0.72;
+}
+
+@media (min-width: 621px) {
+  .server-copy {
+    align-items: flex-start;
+    text-align: left;
+  }
+}

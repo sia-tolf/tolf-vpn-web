@@ -91,3 +91,6 @@ const localIdInput = document.getElementById("localIdInput");
 const localIdChoices = document.getElementById("localIdChoices");
 const localIdRoutingHint =
   document.getElementById("localIdRoutingHint");
+
+const latencyRiga = document.getElementById("latencyRiga");
+const latencyMoscow = document.getElementById("latencyMoscow");
