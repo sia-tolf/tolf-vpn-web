@@ -43,7 +43,9 @@ if (!["en", "ru", "lv"].includes(currentLanguage)) {
 let currentPlatform = localStorage.getItem("tolfPlatform");
 
 if (currentPlatform !== "ios" && currentPlatform !== "android") {
-  currentPlatform = "ios";
+  currentPlatform = /Android/i.test(navigator.userAgent)
+    ? "android"
+    : "ios";
 }
 
 let lastVpnState = null;
