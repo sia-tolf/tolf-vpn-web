@@ -68,7 +68,7 @@ I18N.ru = {
   networkLastMeasured: "Последнее измерение",
   active: "Активен",
   configured: "Настроен",
-  networkThroughput: "Пропускная способность",
+  networkThroughput: "Скорость сети",
   notConfigured: "Не настроен",
 
   createVpnAccess: "Создать VPN-доступ",

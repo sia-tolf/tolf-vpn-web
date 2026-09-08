@@ -625,6 +625,27 @@ button:disabled { opacity: 0.55; cursor: default; }
   white-space: nowrap;
 }
 
+.network-throughput-row .row-label {
+  align-self: center;
+}
+
+.network-throughput-values {
+  width: 100%;
+}
+
+.network-throughput-line {
+  align-items: baseline;
+}
+
+.network-throughput-line > span:first-child {
+  min-width: 0;
+}
+
+.network-throughput-line > span:last-child {
+  margin-left: auto;
+  text-align: right;
+}
+
 @media (min-width: 760px) {
   .vpn-overview {
     grid-template-columns: repeat(2, minmax(0, 1fr));
