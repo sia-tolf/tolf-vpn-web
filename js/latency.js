@@ -8,10 +8,17 @@ const LATENCY_TARGETS = {
   moscow: latencyMoscow
 };
 
-async function measureRequest(url) {
-  const started = performance.now();
+function median(values) {
+  const sorted = [...values].sort((a, b) => a - b);
+  return sorted[Math.floor(sorted.length / 2)];
+}
 
-  const response = await fetch(url, {
+async function measureRequest(url) {
+  const marker = `${url}${url.includes("?") ? "&" : "?"}t=${Date.now()}-${Math.random()}`;
+
+  performance.clearResourceTimings();
+
+  const response = await fetch(marker, {
     method: "GET",
     mode: "cors",
     cache: "no-store",
@@ -24,12 +31,18 @@ async function measureRequest(url) {
 
   await response.text();
 
-  return performance.now() - started;
-}
+  const entries = performance.getEntriesByName(marker);
+  const timing = entries[entries.length - 1];
 
-function median(values) {
-  const sorted = [...values].sort((a, b) => a - b);
-  return sorted[Math.floor(sorted.length / 2)];
+  if (
+    timing
+    && timing.requestStart > 0
+    && timing.responseStart > timing.requestStart
+  ) {
+    return timing.responseStart - timing.requestStart;
+  }
+
+  throw new Error("Resource Timing unavailable");
 }
 
 async function measureEntryPointLatency(serverKey) {
@@ -43,7 +56,7 @@ async function measureEntryPointLatency(serverKey) {
   try {
     const samples = [];
 
-    for (let i = 0; i < 4; i += 1) {
+    for (let i = 0; i < 5; i += 1) {
       const ms = await measureRequest(endpoint);
 
       if (i > 0) {
