@@ -535,8 +535,15 @@
           </details>
         </div>
 
-        <div class="status-table">
-          <div class="row">
+        <div class="vpn-overview">
+          <section class="vpn-overview-card">
+            <div
+              class="vpn-overview-title"
+              data-i18n="vpnOverviewTitle"
+            >VPN</div>
+
+            <div class="status-table">
+              <div class="row">
             <div
               class="row-label"
               data-i18n="status"
@@ -582,31 +589,40 @@
               class="row-value"
             ></div>
           </div>
-        </div>
+            </div>
+          </section>
 
-        <div
-          id="networkMetrics"
-          class="status-table network-metrics hidden"
-        >
+          <section
+            id="networkMetrics"
+            class="vpn-overview-card network-metrics hidden"
+          >
+            <div
+              class="vpn-overview-title"
+              data-i18n="networkMetricsTitle"
+            >TOLF network</div>
+
+            <div class="status-table">
           <div class="row">
-            <div class="row-label">TOLF network latency</div>
+            <div class="row-label" data-i18n="networkLatency">Network latency</div>
             <div id="networkMetricLatency" class="row-value">—</div>
           </div>
 
           <div class="row">
-            <div class="row-label">Riga → Moscow</div>
+            <div class="row-label" data-i18n="networkRigaToMoscow">Riga → Moscow</div>
             <div id="networkMetricRigaToMoscow" class="row-value">—</div>
           </div>
 
           <div class="row">
-            <div class="row-label">Moscow → Riga</div>
+            <div class="row-label" data-i18n="networkMoscowToRiga">Moscow → Riga</div>
             <div id="networkMetricMoscowToRiga" class="row-value">—</div>
           </div>
 
-          <div class="row">
-            <div class="row-label">Last measured</div>
-            <div id="networkMetricMeasuredAt" class="row-value">—</div>
-          </div>
+              <div class="row">
+                <div class="row-label" data-i18n="networkLastMeasured">Last measured</div>
+                <div id="networkMetricMeasuredAt" class="row-value">—</div>
+              </div>
+            </div>
+          </section>
         </div>
 
         <div class="actions">
