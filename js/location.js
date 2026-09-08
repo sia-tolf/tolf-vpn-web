@@ -189,9 +189,29 @@ async function loadEntryPointRecommendation() {
       return;
     }
 
+    const previousGeographicEntryPoint = geographicEntryPoint;
+
     geographicEntryPoint = data.entryPoint;
 
+    const geographicEntryPointChanged =
+      previousGeographicEntryPoint !== null
+      && previousGeographicEntryPoint !== geographicEntryPoint;
+
+    if (geographicEntryPointChanged) {
+      measuredLatencies = {
+        riga: null,
+        moscow: null
+      };
+    }
+
     updateRecommendedEntryPoint();
+
+    if (
+      geographicEntryPointChanged
+      && typeof measureEntryPointLatencies === "function"
+    ) {
+      measureEntryPointLatencies();
+    }
   } catch {
     // Recommendation is optional.
     // VPN controls remain available.
