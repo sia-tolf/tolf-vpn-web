@@ -671,3 +671,35 @@ button:disabled { opacity: 0.55; cursor: default; }
     padding-bottom: 10px;
   }
 }
+
+.network-throughput-row {
+  align-items: start !important;
+}
+
+.network-throughput-row .row-label {
+  align-self: start;
+}
+
+.network-throughput-values {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 12px;
+  row-gap: 6px;
+  width: 100%;
+  align-items: baseline;
+}
+
+.network-throughput-line {
+  display: contents;
+}
+
+.network-throughput-line > span:first-child {
+  white-space: nowrap;
+  color: var(--secondary);
+}
+
+.network-throughput-line > span:last-child {
+  white-space: nowrap;
+  text-align: right;
+  color: var(--text);
+}
