@@ -703,3 +703,50 @@ button:disabled { opacity: 0.55; cursor: default; }
   text-align: right;
   color: var(--text);
 }
+
+/* Network throughput: label on first line, directions below */
+@media (min-width: 760px) {
+  #usernameRow,
+  .network-throughput-row {
+    height: 88px;
+    min-height: 88px;
+  }
+
+  #usernameRow {
+    align-items: start;
+  }
+
+  .network-throughput-row {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 5px !important;
+    align-content: start;
+    align-items: start !important;
+  }
+
+  .network-throughput-row .row-label {
+    align-self: start;
+  }
+
+  .network-throughput-values {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 16px;
+    row-gap: 3px;
+    width: 100%;
+  }
+
+  .network-throughput-line {
+    display: contents;
+  }
+
+  .network-throughput-line > span:first-child {
+    white-space: nowrap;
+  }
+
+  .network-throughput-line > span:last-child {
+    white-space: nowrap;
+    text-align: right;
+    margin-left: 0;
+  }
+}
