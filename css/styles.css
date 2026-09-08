@@ -824,3 +824,35 @@ button:disabled { opacity: 0.55; cursor: default; }
     min-width: 82px;
   }
 }
+
+
+/* Manual connection test row */
+@media (min-width: 760px) {
+  .network-metrics .row {
+    height: 72px;
+    min-height: 72px;
+  }
+
+  .network-test-row {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center;
+  }
+}
+
+.network-test-button {
+  min-width: 138px;
+  height: 40px;
+  padding: 0 22px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.network-test-button:active {
+  opacity: 0.65;
+}
