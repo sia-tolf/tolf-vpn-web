@@ -150,6 +150,6 @@ I18N.en = {
   deleteAccountConfirmTitle: "Delete TOLF account?",
   deleteAccountConfirmBody: "This permanently deletes your TOLF account, Passkey registrations, active sessions, Recovery Code, and VPN access. Installed VPN profiles will stop working. This cannot be undone.",
   deletingAccount: "Deleting TOLF account…",
-  accountDeleted: "TOLF account deleted."
+  accountDeleted: "TOLF account deleted.",
   measureConnection: "Measure connection",
 };

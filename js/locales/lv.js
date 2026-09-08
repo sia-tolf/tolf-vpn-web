@@ -150,6 +150,6 @@ I18N.lv = {
   deleteAccountConfirmTitle: "Dzēst TOLF kontu?",
   deleteAccountConfirmBody: "TOLF konts, Passkey reģistrācijas, aktīvās sesijas, Recovery Code un VPN piekļuve tiks neatgriezeniski dzēsti. Instalētie VPN profili vairs nedarbosies. Šo darbību nevar atsaukt.",
   deletingAccount: "Dzēšam TOLF kontu…",
-  accountDeleted: "TOLF konts dzēsts."
+  accountDeleted: "TOLF konts dzēsts.",
   measureConnection: "Izmērīt savienojumu",
 };

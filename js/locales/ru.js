@@ -150,6 +150,6 @@ I18N.ru = {
   deleteAccountConfirmTitle: "Удалить аккаунт TOLF?",
   deleteAccountConfirmBody: "Аккаунт TOLF, регистрации Passkey, активные сессии, Recovery Code и VPN-доступ будут безвозвратно удалены. Установленные VPN-профили перестанут работать. Это действие нельзя отменить.",
   deletingAccount: "Удаляем аккаунт TOLF…",
-  accountDeleted: "Аккаунт TOLF удалён."
+  accountDeleted: "Аккаунт TOLF удалён.",
   measureConnection: "Замерить соединение",
 };
