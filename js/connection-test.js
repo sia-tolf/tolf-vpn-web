@@ -148,11 +148,12 @@ function startConnectionTest() {
 
     speedtest.setParameter("test_order", "P_D_U");
     speedtest.setParameter("count_ping", 10);
-    speedtest.setParameter("time_dl_max", 8);
-    speedtest.setParameter("time_ul_max", 8);
-    speedtest.setParameter("time_auto", true);
-    speedtest.setParameter("xhr_dlMultistream", 4);
-    speedtest.setParameter("xhr_ulMultistream", 2);
+    speedtest.setParameter("time_dl_max", 15);
+    speedtest.setParameter("time_ul_max", 15);
+    speedtest.setParameter("time_auto", false);
+    speedtest.setParameter("xhr_dlMultistream", 8);
+    speedtest.setParameter("xhr_ulMultistream", 4);
+    speedtest.setParameter("xhr_ul_blob_megabytes", 4);
     speedtest.setParameter("telemetry_level", 0);
 
     speedtest.setSelectedServer({

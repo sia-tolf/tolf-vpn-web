@@ -12,7 +12,7 @@
 
   <link
     rel="stylesheet"
-    href="css/styles.css?v=compact-tables-1"
+    href="css/styles.css?v=compact-tables-2"
   >
   <link
     rel="stylesheet"
@@ -40,7 +40,7 @@
   <script defer src="js/location.js?v=entry-point-auto-8"></script>
   <script defer src="js/librespeed.js?v=1"></script>
   <script defer src="js/latency.js?v=connection-test-1"></script>
-  <script defer src="js/connection-test.js?v=connection-test-1"></script>
+  <script defer src="js/connection-test.js?v=connection-test-2"></script>
   <script defer src="js/app.js?v=local-id-2"></script>
 </head>
 
@@ -785,6 +785,25 @@
               </div>
 
             </div>
+
+            <div class="network-test-row">
+              <button
+                id="connectionTestButton"
+                class="network-test-button"
+                type="button"
+              >
+                <svg
+                  class="network-test-icon"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path d="M5.6 18.4a8 8 0 1 1 12.8 0"/>
+                  <path d="M12 12l4.2-3.2"/>
+                  <circle cx="12" cy="12" r="1.2"/>
+                </svg>
+                <span data-i18n="measureConnection">Measure connection</span>
+              </button>
+            </div>
           </section>
 
           <section
@@ -823,24 +842,6 @@
               </div>
             </div>
 
-            <div class="network-test-row">
-              <button
-                id="connectionTestButton"
-                class="network-test-button"
-                type="button"
-              >
-                <svg
-                  class="network-test-icon"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
-                  <path d="M5.6 18.4a8 8 0 1 1 12.8 0"/>
-                  <path d="M12 12l4.2-3.2"/>
-                  <circle cx="12" cy="12" r="1.2"/>
-                </svg>
-                <span data-i18n="measureConnection">Measure connection</span>
-              </button>
-            </div>
           </section>
 
           <section

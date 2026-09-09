@@ -1256,7 +1256,7 @@ button:disabled { opacity: 0.55; cursor: default; }
   padding: 7px 8px;
 }
 
-.connection-test-card .network-test-row {
+.network-metrics .network-test-row {
   height: 56px;
   min-height: 56px;
   box-sizing: border-box;
