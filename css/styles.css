@@ -144,6 +144,9 @@ button, input { font: inherit; }
   gap: 18px;
 }
 .sign-out-button {
+  width: 25%;
+  flex: 0 0 25%;
+  margin-right: -14px;
   min-height: 38px;
   padding: 8px 14px;
   display: inline-flex;
@@ -319,7 +322,9 @@ button:disabled { opacity: 0.55; cursor: default; }
 .passkey-name { font-size: 15px; line-height: 1.4; font-weight: 600; overflow-wrap: anywhere; }
 .passkey-meta { margin-top: 3px; color: var(--secondary); font-size: 13px; line-height: 1.4; }
 .passkey-remove-button {
-  flex: 0 0 auto;
+  width: 25%;
+  flex: 0 0 25%;
+  margin-right: -14px;
   min-height: 38px;
   padding: 8px 12px;
   background: transparent;
@@ -417,6 +422,7 @@ button:disabled { opacity: 0.55; cursor: default; }
 }
 .row-label { color: var(--secondary); font-size: 15px; line-height: 1.4; }
 .row-value { min-width: 0; text-align: right; font-size: 15px; line-height: 1.4; overflow-wrap: anywhere; }
+#networkMetricLatency { font-weight: 600; }
 .server-value-name { display: block; }
 .server-value-host { display: block; margin-top: 3px; color: var(--secondary); font-size: 15px; }
 .status-active { color: var(--success); font-weight: 600; }
@@ -716,7 +722,13 @@ button:disabled { opacity: 0.55; cursor: default; }
   .row { grid-template-columns: 1fr; gap: 5px; }
   .row-value { text-align: left; }
   .passkey-item { align-items: flex-start; flex-direction: column; }
-  .passkey-remove-button { width: 100%; }
+  .sign-out-button,
+  .passkey-remove-button {
+    width: calc(50% + 5px);
+    flex-basis: calc(50% + 5px);
+    margin-right: -10px;
+  }
+  .passkey-remove-button { align-self: flex-end; }
   .settings-grid { grid-template-columns: 1fr; gap: 6px; }
   .settings-grid > label:not(:first-child) { margin-top: 6px; }
   .on-demand-rule { grid-template-columns: minmax(0, 1fr) 34px; }
