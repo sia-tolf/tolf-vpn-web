@@ -6,6 +6,7 @@
   <meta name="color-scheme" content="light dark">
   <title>Help — TOLF VPN</title>
   <link rel="stylesheet" href="css/styles.css?v=layout-3">
+  <link rel="stylesheet" href="css/info.css?v=layout-3">
   <style>
     .help-nav { display: flex; flex-wrap: wrap; gap: 10px 20px; margin: 24px 0; }
     .help-page a { color: var(--text); text-underline-offset: 3px; }
@@ -20,7 +21,6 @@
     .help-page details { padding: 14px 0; border-bottom: 1px solid var(--border); }
     .help-page summary { cursor: pointer; font-size: 16px; line-height: 1.5; font-weight: 600; }
     .help-page code { font-size: .95em; overflow-wrap: anywhere; }
-    .help-back { display: inline-block; margin-top: 20px; }
     .help-page [hidden] { display: none !important; }
     .help-sources { margin-top: 28px; color: var(--secondary); }
   </style>
@@ -39,7 +39,18 @@
           <button id="helpLvButton" class="language-button" type="button" aria-pressed="false">Latviešu</button>
         </div>
       </div>
-      <a id="helpBack" class="help-back" href="index.html">Back to My VPN</a>
+      <nav class="site-nav">
+        <a href="index.html">
+          <span class="site-label" lang="en">My VPN</span>
+          <span class="site-label" lang="ru">Мой VPN</span>
+          <span class="site-label" lang="lv">Mans VPN</span>
+        </a>
+        <a href="privacy.html">
+          <span class="site-label" lang="en">Privacy</span>
+          <span class="site-label" lang="ru">Приватность</span>
+          <span class="site-label" lang="lv">Privātums</span>
+        </a>
+      </nav>
     </header>
 
     <div class="card">
@@ -358,9 +369,9 @@
       function setHelpLanguage(language) {
         if (!["en", "ru", "lv"].includes(language)) return;
         const copy = {
-          en: ["Help — TOLF VPN", "Help, glossary and FAQ.", "Back to My VPN"],
-          ru: ["Помощь — TOLF VPN", "Помощь, глоссарий и ответы на вопросы.", "Вернуться в «Мой VPN»"],
-          lv: ["Palīdzība — TOLF VPN", "Palīdzība, terminu vārdnīca un BUJ.", "Atpakaļ uz “Mans VPN”"]
+          en: ["Help — TOLF VPN", "Help, glossary and FAQ."],
+          ru: ["Помощь — TOLF VPN", "Помощь, глоссарий и ответы на вопросы."],
+          lv: ["Palīdzība — TOLF VPN", "Palīdzība, terminu vārdnīca un BUJ."]
         };
         document.documentElement.lang = language;
         document.title = copy[language][0];
@@ -373,7 +384,6 @@
           button.setAttribute("aria-pressed", String(active));
         });
         document.getElementById("helpSubtitle").textContent = copy[language][1];
-        document.getElementById("helpBack").textContent = copy[language][2];
         try { localStorage.setItem("tolfLanguage", language); } catch {}
         if (/^#(?:en|ru|lv)-/.test(location.hash)) {
           const hash = location.hash.replace(/^#(?:en|ru|lv)-/, `#${language}-`);
