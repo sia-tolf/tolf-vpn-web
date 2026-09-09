@@ -18,21 +18,25 @@
           <p>
             <span class="site-label" lang="en">Privacy and your data.</span>
             <span class="site-label" lang="ru">Приватность и ваши данные.</span>
+            <span class="site-label" lang="lv">Privātums un jūsu dati.</span>
           </p>
         </div>
         <div class="language-switcher" aria-label="Language">
           <button id="privacyEnButton" class="language-button active" type="button" aria-pressed="true">English</button>
           <button id="privacyRuButton" class="language-button" type="button" aria-pressed="false">Русский</button>
+          <button id="privacyLvButton" class="language-button" type="button" aria-pressed="false">Latviešu</button>
         </div>
       </div>
       <nav class="site-nav">
         <a href="index.html">
           <span class="site-label" lang="en">My VPN</span>
           <span class="site-label" lang="ru">Мой VPN</span>
+          <span class="site-label" lang="lv">Mans VPN</span>
         </a>
         <a href="help.html">
           <span class="site-label" lang="en">Help &amp; FAQ</span>
           <span class="site-label" lang="ru">Помощь и FAQ</span>
+          <span class="site-label" lang="lv">Palīdzība un BUJ</span>
         </a>
       </nav>
     </header>
@@ -140,41 +144,105 @@
 
           <p class="privacy-date">Обновлено: <time datetime="2026-09-04">4 сентября 2026 года</time>.</p>
         </article>
+
+        <article id="privacyLv" lang="lv" aria-labelledby="privacyLvTitle" hidden>
+          <h2 id="privacyLvTitle">Privātums</h2>
+          <p class="privacy-lead">Lai reģistrētos TOLF VPN, nav jānorāda vārds, uzvārds, tālruņa numurs vai e-pasta adrese.</p>
+          <p>Jūs pierakstāties ar Passkey, un kontam automātiski tiek piešķirts nejauši ģenerēts identifikators. Tas samazina reģistrācijai nepieciešamo datu apjomu, taču nenozīmē, ka pakalpojums vispār neapstrādā datus.</p>
+
+          <section>
+            <h3>Kādus datus pakalpojums glabā</h3>
+            <dl>
+              <dt>Konts un Passkey</dt>
+              <dd>Konta identifikatoru un izveides datumu, reģistrēto Passkey identifikatorus un publiskās atslēgas, kā arī tehnisko informāciju, kas nepieciešama pierakstīšanās pārbaudei.</dd>
+              <dt>Pierakstīšanās sesijas</dt>
+              <dd>Katras sesijas marķiera jaucējvērtību, ar to saistīto kontu, kā arī sesijas izveides un beigu datumus. Šie ieraksti ļauj saglabāt pierakstīšanos.</dd>
+              <dt>VPN piekļuve un profili</dt>
+              <dd>Jūsu VPN lietotājvārdu, piekļuves izveides datumu un serveru piekļuves iestatījumus. VPN serveri glabā autentifikācijai nepieciešamos akreditācijas datus. Izveidotajos instalācijas profilos ir iekļauts VPN lietotājvārds, parole un savienojuma iestatījumi.</dd>
+              <dt>Reklāmas kodi</dt>
+              <dd>Kontam tiek reģistrēti pieņemtie kodi un to izmantošanas datumi. Lai ierobežotu kodu minēšanu, tiek reģistrēti arī koda ievadīšanas mēģinājumi. Reklāmas kodi tiek glabāti kā jaucējvērtības. Reklāmas kods neietekmē Rīgas vai Maskavas pieejamību.</dd>
+              <dt>Atkopšana</dt>
+              <dd>Kontu datubāzē tiek glabāta jūsu Recovery Code jaucējvērtība. Pats kods tiek parādīts tā izdošanas brīdī; pakalpojums nevar atkārtoti parādīt jau izdotu kodu.</dd>
+            </dl>
+          </section>
+
+          <section>
+            <h3>Passkey un VPN parole ir atšķirīgas lietas</h3>
+            <p>Passkey privāto daļu pārvalda jūsu ierīce vai paroļu pārvaldnieks. TOLF saņem publisko atslēgu un pierakstīšanās pārbaudes datus, nevis privāto atslēgu. <a href="https://developer.apple.com/passkeys/">Apple skaidrojums par Passkey darbību.</a></p>
+            <p>VPN parole ir atsevišķi akreditācijas dati. Tā ir pieejama VPN piekļuves nodrošināšanas sistēmai un tiek iekļauta Mobile Config failā, lai ierīce varētu izveidot savienojumu.</p>
+            <p>Instalācijas faili un to metadati lejupielādei tiek augšupielādēti Cloudflare R2. Glabājiet instalācijas saiti un lejupielādēto failu drošībā: persona, kurai ir šī saite, var lejupielādēt profilu ar jūsu VPN akreditācijas datiem.</p>
+          </section>
+
+          <section>
+            <h3>Kas tiek saglabāts pārlūkprogrammā</h3>
+            <p>Sīkfails <code>tolf_session</code> ļauj saglabāt pierakstīšanos līdz 30 dienām. Izrakstoties šī pārlūkprogrammas sesija tiek pārtraukta. Izvēlētā valoda tiek lokāli saglabāta parametrā <code>tolfLanguage</code>.</p>
+            <p>Pārlūkprogrammas datu dzēšana neizdzēš jūsu TOLF kontu vai ierīcē instalēto VPN profilu.</p>
+          </section>
+
+          <section>
+            <h3>Tīkla privātums un žurnāli</h3>
+            <p>Pakalpojuma nodrošināšanai ir jāapstrādā tīkla informācija, tostarp IP adreses. VPN serveri apstrādā datplūsmu un galamērķu adreses, savukārt DNS atrisinātāji — tiem nosūtītos domēna vārdu pieprasījumus. Arī mitināšanas un satura piegādes pakalpojumu sniedzēji piedalās tīmekļvietnes pieprasījumu un profilu lejupielāžu apstrādē.</p>
+            <p>Lai ieteiktu VPN ieejas punktu, Cloudflare pēc IP adreses nosaka savienojuma valsti. TOLF tīmekļvietne saņem tikai gatavu ieteikumu — Rīga vai Maskava — un šai funkcijai IP adresi nereģistrē.</p>
+          </section>
+
+          <section>
+            <h3>Kas notiek dzēšanas laikā</h3>
+            <p><strong>“Dzēst VPN piekļuvi”</strong> dzēš VPN akreditācijas datus no abiem serveriem. Jūsu TOLF konts, Passkey un pieņemtais reklāmas kods tiek saglabāti, tāpēc VPN piekļuvi var izveidot no jauna.</p>
+            <p><strong>“Dzēst TOLF kontu”</strong> dzēš arī aktīvos konta ierakstus: Passkey reģistrācijas, pierakstīšanās sesijas, Recovery Code jaucējvērtību un VPN piekļuvi.</p>
+            <p>Reklāmas koda izmantošanas ieraksts un datums tiek saglabāti bez saites uz kontu, lai konta dzēšana neatjaunotu koda izmantošanas limitu. Tiek saglabāti arī profilu tehniskie identifikatori, lai aizstājējprofili varētu saglabāt savu identitāti.</p>
+            <p>Konta dzēšana negarantē tūlītēju rezerves kopiju, iepriekš izdotu profilu failu vai infrastruktūras žurnālu dzēšanu. Profils no ierīces jādzēš atsevišķi.</p>
+          </section>
+
+          <p class="privacy-date">Atjaunināts: <time datetime="2026-09-04">2026. gada 4. septembrī</time>.</p>
+        </article>
       </div>
     </div>
     <noscript>
       <style>
-        #privacyRu[hidden] { display: block !important; margin-top: 40px; }
+        #privacyRu[hidden], #privacyLv[hidden] { display: block !important; margin-top: 40px; }
         .language-switcher { display: none; }
       </style>
     </noscript>
   </main>
   <script>
     (() => {
-      const en = document.getElementById("privacyEn");
-      const ru = document.getElementById("privacyRu");
-      const enButton = document.getElementById("privacyEnButton");
-      const ruButton = document.getElementById("privacyRuButton");
+      const articles = {
+        en: document.getElementById("privacyEn"),
+        ru: document.getElementById("privacyRu"),
+        lv: document.getElementById("privacyLv"),
+      };
+      const buttons = {
+        en: document.getElementById("privacyEnButton"),
+        ru: document.getElementById("privacyRuButton"),
+        lv: document.getElementById("privacyLvButton"),
+      };
+      const titles = {
+        en: "Privacy — TOLF VPN",
+        ru: "Приватность — TOLF VPN",
+        lv: "Privātums — TOLF VPN",
+      };
       function setPrivacyLanguage(language) {
-        const russian = language === "ru";
-        document.documentElement.lang = russian ? "ru" : "en";
-        document.title = russian ? "Приватность — TOLF VPN" : "Privacy — TOLF VPN";
-        en.hidden = russian;
-        ru.hidden = !russian;
-        enButton.classList.toggle("active", !russian);
-        ruButton.classList.toggle("active", russian);
-        enButton.setAttribute("aria-pressed", String(!russian));
-        ruButton.setAttribute("aria-pressed", String(russian));
-        try { localStorage.setItem("tolfLanguage", russian ? "ru" : "en"); } catch {}
+        const selected = ["en", "ru", "lv"].includes(language) ? language : "en";
+        document.documentElement.lang = selected;
+        document.title = titles[selected];
+        Object.keys(articles).forEach((code) => {
+          const active = code === selected;
+          articles[code].hidden = !active;
+          buttons[code].classList.toggle("active", active);
+          buttons[code].setAttribute("aria-pressed", String(active));
+        });
+        try { localStorage.setItem("tolfLanguage", selected); } catch {}
       }
       let language;
       try { language = localStorage.getItem("tolfLanguage"); } catch {}
-      if (language !== "ru" && language !== "en") {
-        language = (navigator.language || "en").toLowerCase().startsWith("ru") ? "ru" : "en";
+      if (!["en", "ru", "lv"].includes(language)) {
+        const browserLanguage = (navigator.language || "en").toLowerCase();
+        language = browserLanguage.startsWith("ru") ? "ru" : browserLanguage.startsWith("lv") ? "lv" : "en";
       }
       setPrivacyLanguage(language);
-      enButton.addEventListener("click", () => setPrivacyLanguage("en"));
-      ruButton.addEventListener("click", () => setPrivacyLanguage("ru"));
+      Object.keys(buttons).forEach((code) => {
+        buttons[code].addEventListener("click", () => setPrivacyLanguage(code));
+      });
     })();
   </script>
 </body>
