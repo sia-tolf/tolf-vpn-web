@@ -107,8 +107,8 @@ I18N.en = {
   openAndroidProfile: "Open in strongSwan",
   saveAppleProfile: "Save .mobileconfig",
   saveAndroidProfile: "Save .sswan",
-  changeVpnPassword: "Change VPN Password",
-  changePasswordNote: "Riga and Moscow use the same VPN password. After changing it, generate and install a new profile for each server you use.",
+  changeVpnPassword: "Change TOLF VPN Access Password",
+  changePasswordNote: "This password is used by Riga and Moscow profiles on all your devices. After changing it, old profiles will stop connecting — create and install new ones.",
   deleteVpnAccess: "Delete VPN Access",
   deleteVpnNote: "This removes VPN access on both servers. Your TOLF account, Passkeys and accepted promo code remain.",
 

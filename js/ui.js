@@ -176,16 +176,15 @@ function setInstallLink(profileUrl) {
     installProfileButton.href = profileUrl;
     saveProfileButton.href = profileDownloadUrl(profileUrl);
     profileDeliveryActions.classList.remove("hidden");
-
-    generateProfileButton.classList.remove("primary");
-    generateProfileButton.classList.add("secondary");
+    generateProfileButton.classList.add("hidden");
   } else {
     installProfileButton.href = "#";
     saveProfileButton.href = "#";
     profileDeliveryActions.classList.add("hidden");
 
-    generateProfileButton.classList.remove("secondary");
-    generateProfileButton.classList.add("primary");
+    if (lastVpnState?.configured) {
+      generateProfileButton.classList.remove("hidden");
+    }
   }
 }
 

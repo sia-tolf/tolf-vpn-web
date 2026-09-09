@@ -25,7 +25,7 @@ async function loadNetworkMetrics() {
 
     networkMetricLatency.textContent =
       Number.isFinite(data.rtt_ms)
-        ? `${Math.round(data.rtt_ms)} ms`
+        ? `${data.rtt_ms.toFixed(1)} ms`
         : "—";
 
     networkMetricRigaToMoscow.textContent =

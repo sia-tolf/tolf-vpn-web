@@ -107,8 +107,8 @@ I18N.lv = {
   openAndroidProfile: "Atvērt strongSwan",
   saveAppleProfile: "Saglabāt .mobileconfig",
   saveAndroidProfile: "Saglabāt .sswan",
-  changeVpnPassword: "Mainīt VPN paroli",
-  changePasswordNote: "Rīga un Maskava izmanto vienu VPN paroli. Pēc paroles maiņas izveidojiet un instalējiet jaunu profilu katram izmantotajam serverim.",
+  changeVpnPassword: "Mainīt TOLF VPN piekļuves paroli",
+  changePasswordNote: "Šo paroli izmanto Rīgas un Maskavas profili visās jūsu ierīcēs. Pēc paroles maiņas vecie profili vairs nevarēs izveidot savienojumu — izveidojiet un instalējiet jaunus.",
   deleteVpnAccess: "Dzēst VPN piekļuvi",
   deleteVpnNote: "VPN piekļuve tiks dzēsta abos serveros. TOLF konts, Passkey un pieņemtais reklāmas kods tiks saglabāti.",
 
