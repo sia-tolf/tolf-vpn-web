@@ -670,7 +670,7 @@ button:disabled { opacity: 0.55; cursor: default; }
 .profile-settings :disabled { opacity: 0.55; cursor: default; }
 
 @media (min-width: 621px) {
-  .server-option label { flex-direction: row; min-height: 64px; gap: 10px; }
+  .server-option label { flex-direction: row; min-height: 60px; gap: 10px; }
   .server-flag { font-size: 32.5px; }
 }
 
@@ -1185,7 +1185,6 @@ button:disabled { opacity: 0.55; cursor: default; }
 .connection-test-results {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  border-bottom: 1px solid var(--border);
 }
 
 .connection-test-result {
