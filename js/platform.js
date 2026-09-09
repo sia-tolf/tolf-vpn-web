@@ -22,6 +22,14 @@ function renderPlatform() {
     installProfileButton.textContent =
       t(installProfileButton.dataset.i18n);
   }
+
+  if (onDemandSection) {
+    onDemandSection.classList.toggle("hidden", !isIos);
+  }
+
+  if (onDemandAndroidNote) {
+    onDemandAndroidNote.classList.toggle("hidden", isIos);
+  }
 }
 
 function setPlatform(platform) {

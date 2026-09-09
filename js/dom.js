@@ -91,9 +91,42 @@ const localIdInput = document.getElementById("localIdInput");
 const localIdChoices = document.getElementById("localIdChoices");
 const localIdRoutingHint =
   document.getElementById("localIdRoutingHint");
+const dnsMode = document.getElementById("dnsMode");
+const dnsCustomGroup = document.getElementById("dnsCustomGroup");
+const dnsServersInput = document.getElementById("dnsServersInput");
+const dnsValidation = document.getElementById("dnsValidation");
+
+const onDemandSection = document.getElementById("onDemandSection");
+const onDemandAndroidNote =
+  document.getElementById("onDemandAndroidNote");
+const onDemandEnabled = document.getElementById("onDemandEnabled");
+const onDemandOptions = document.getElementById("onDemandOptions");
+const alwaysOn = document.getElementById("alwaysOn");
+const alwaysOnHint = document.getElementById("alwaysOnHint");
+const manualOnDemandRules =
+  document.getElementById("manualOnDemandRules");
+const wifiAction = document.getElementById("wifiAction");
+const cellularAction = document.getElementById("cellularAction");
+const ethernetAction = document.getElementById("ethernetAction");
+const onDemandRules = document.getElementById("onDemandRules");
+const addOnDemandRule = document.getElementById("addOnDemandRule");
 
 const latencyRiga = document.getElementById("latencyRiga");
 const latencyMoscow = document.getElementById("latencyMoscow");
+
+const connectionTestCard = document.getElementById("connectionTestCard");
+const connectionTestTitle = document.getElementById("connectionTestTitle");
+const connectionTestStatus = document.getElementById("connectionTestStatus");
+const connectionTestLatency =
+  document.getElementById("connectionTestLatency");
+const connectionTestJitter =
+  document.getElementById("connectionTestJitter");
+const connectionTestDownload =
+  document.getElementById("connectionTestDownload");
+const connectionTestUpload =
+  document.getElementById("connectionTestUpload");
+const connectionTestButton =
+  document.getElementById("connectionTestButton");
 
 const networkMetrics = document.getElementById("networkMetrics");
 const networkMetricLatency =

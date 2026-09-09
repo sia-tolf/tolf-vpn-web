@@ -50,6 +50,14 @@ function setLanguage(language) {
   renderPromoState();
   renderLocalIdSettings();
   renderPlatform();
+
+  if (typeof renderProfileSettings === "function") {
+    renderProfileSettings();
+  }
+
+  if (typeof renderConnectionTestTarget === "function") {
+    renderConnectionTestTarget();
+  }
 }
 
 function confirmLocalized(

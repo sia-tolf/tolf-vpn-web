@@ -28,6 +28,12 @@ let localIdValues = {
   moscow: ""
 };
 
+const ON_DEMAND_ACTIONS = [
+  "Connect",
+  "Disconnect",
+  "Ignore"
+];
+
 let currentLanguage = localStorage.getItem("tolfLanguage");
 
 if (!["en", "ru", "lv"].includes(currentLanguage)) {

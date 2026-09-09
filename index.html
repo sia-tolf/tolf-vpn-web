@@ -12,7 +12,7 @@
 
   <link
     rel="stylesheet"
-    href="css/styles.css?v=overview-compact-1"
+    href="css/styles.css?v=vpn-settings-1"
   >
   <link
     rel="stylesheet"
@@ -24,21 +24,23 @@
   <script defer src="js/locales/en.js?v=network-test-3"></script>
   <script defer src="js/locales/ru.js?v=network-test-3"></script>
   <script defer src="js/locales/lv.js?v=network-test-3"></script>
-  <script defer src="js/dom.js?v=platform-1"></script>
+  <script defer src="js/dom.js?v=vpn-settings-1"></script>
   <script defer src="js/network-metrics.js?v=overview-3"></script>
   <script defer src="js/platform.js?v=platform-1"></script>
   <script defer src="js/i18n.js?v=platform-1"></script>
   <script defer src="js/webauthn.js?v=local-id-2"></script>
   <script defer src="js/api.js?v=local-id-2"></script>
-  <script defer src="js/ui.js?v=overview-4"></script>
+  <script defer src="js/ui.js?v=vpn-settings-1"></script>
   <script defer src="js/passkeys.js?v=local-id-2"></script>
   <script defer src="js/recovery.js?v=local-id-2"></script>
   <script defer src="js/account.js?v=local-id-2"></script>
-  <script defer src="js/vpn.js?v=local-id-3"></script>
+  <script defer src="js/profile-settings.js?v=vpn-settings-1"></script>
+  <script defer src="js/vpn.js?v=vpn-settings-1"></script>
   <script defer src="js/promo.js?v=header-promo-1"></script>
   <script defer src="js/location.js?v=entry-point-auto-8"></script>
   <script defer src="js/librespeed.js?v=1"></script>
-  <script defer src="js/latency.js?v=entry-latency-3"></script>
+  <script defer src="js/latency.js?v=connection-test-1"></script>
+  <script defer src="js/connection-test.js?v=connection-test-1"></script>
   <script defer src="js/app.js?v=local-id-2"></script>
 </head>
 
@@ -470,8 +472,8 @@
             id="profileSettings"
             class="profile-settings"
           >
-            <summary data-i18n="additionalSettings">
-              Additional settings
+            <summary data-i18n="vpnSettings">
+              VPN Settings
             </summary>
 
             <div class="server-address">
@@ -531,6 +533,172 @@
             >
               After changing Local ID, generate and install
               a new profile to apply the routing change.
+            </p>
+
+            <div class="settings-divider"></div>
+
+            <label
+              class="settings-label"
+              for="dnsMode"
+              data-i18n="dns"
+            >DNS</label>
+
+            <select
+              id="dnsMode"
+              class="settings-select"
+              aria-describedby="dnsHelp dnsValidation"
+            >
+              <option value="automatic" data-i18n="dnsAutomatic">
+                Automatic (server default)
+              </option>
+              <option value="custom" data-i18n="dnsCustom">
+                Custom DNS servers
+              </option>
+            </select>
+
+            <p
+              id="dnsHelp"
+              class="section-description"
+              data-i18n="dnsHelp"
+            >
+              Automatic uses the DNS servers supplied by the
+              selected VPN entry point.
+            </p>
+
+            <div id="dnsCustomGroup" class="settings-subgroup hidden">
+              <label
+                class="settings-label"
+                for="dnsServersInput"
+                data-i18n="dnsServerAddresses"
+              >DNS server addresses</label>
+
+              <textarea
+                id="dnsServersInput"
+                class="settings-input settings-textarea"
+                rows="2"
+                maxlength="255"
+                autocomplete="off"
+                autocapitalize="none"
+                spellcheck="false"
+                data-i18n-placeholder="dnsServersPlaceholder"
+                placeholder="9.9.9.9, 149.112.112.112"
+                aria-describedby="dnsCustomHelp dnsValidation"
+              ></textarea>
+
+              <p
+                id="dnsCustomHelp"
+                class="section-description"
+                data-i18n="dnsCustomHelp"
+              >
+                Enter IPv4 or IPv6 addresses separated by
+                commas or spaces.
+              </p>
+
+              <p
+                id="dnsValidation"
+                class="settings-validation"
+                role="status"
+              ></p>
+            </div>
+
+            <div class="settings-divider"></div>
+
+            <div id="onDemandSection">
+              <div class="settings-title-row">
+                <span class="settings-title" data-i18n="onDemand">
+                  On Demand
+                </span>
+                <span class="platform-note" data-i18n="appleOnly">
+                  Apple only
+                </span>
+              </div>
+
+              <label class="settings-switch-row" for="onDemandEnabled">
+                <span data-i18n="enableOnDemand">Enable On Demand</span>
+                <input
+                  id="onDemandEnabled"
+                  class="ios-switch"
+                  type="checkbox"
+                >
+              </label>
+
+              <div id="onDemandOptions" class="hidden">
+                <label class="settings-switch-row" for="alwaysOn">
+                  <span data-i18n="alwaysOn">Always On</span>
+                  <input
+                    id="alwaysOn"
+                    class="ios-switch"
+                    type="checkbox"
+                  >
+                </label>
+
+                <p
+                  id="alwaysOnHint"
+                  class="section-description hidden"
+                  data-i18n="alwaysOnHint"
+                >
+                  Connect automatically on all networks.
+                </p>
+
+                <div id="manualOnDemandRules">
+                  <div class="settings-subtitle" data-i18n="defaultActions">
+                    Default Actions
+                  </div>
+
+                  <div class="settings-grid">
+                    <label for="wifiAction" data-i18n="wifi">Wi-Fi</label>
+                    <select id="wifiAction" class="settings-select">
+                      <option value="Connect" data-i18n="onDemandConnect">Connect</option>
+                      <option value="Disconnect" data-i18n="onDemandDisconnect">Disconnect</option>
+                      <option value="Ignore" data-i18n="onDemandIgnore">Ignore</option>
+                    </select>
+
+                    <label for="cellularAction" data-i18n="cellular">Cellular</label>
+                    <select id="cellularAction" class="settings-select">
+                      <option value="Connect" data-i18n="onDemandConnect">Connect</option>
+                      <option value="Disconnect" data-i18n="onDemandDisconnect">Disconnect</option>
+                      <option value="Ignore" data-i18n="onDemandIgnore">Ignore</option>
+                    </select>
+
+                    <label for="ethernetAction" data-i18n="ethernet">Ethernet</label>
+                    <select id="ethernetAction" class="settings-select">
+                      <option value="Connect" data-i18n="onDemandConnect">Connect</option>
+                      <option value="Disconnect" data-i18n="onDemandDisconnect">Disconnect</option>
+                      <option value="Ignore" data-i18n="onDemandIgnore">Ignore</option>
+                    </select>
+                  </div>
+
+                  <div class="settings-subtitle" data-i18n="additionalRules">
+                    Additional Rules
+                  </div>
+
+                  <div id="onDemandRules" class="on-demand-rules">
+                    <button
+                      id="addOnDemandRule"
+                      class="add-on-demand-rule"
+                      type="button"
+                      data-i18n="addRule"
+                    >+ Add Rule</button>
+                  </div>
+
+                  <p
+                    class="section-description"
+                    data-i18n="additionalRulesHint"
+                  >
+                    Wi-Fi network rules are checked before
+                    the default actions.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <p
+              id="onDemandAndroidNote"
+              class="section-description hidden"
+              data-i18n="androidAlwaysOnNote"
+            >
+              On Android, Always-on VPN is configured
+              separately in system settings.
             </p>
           </details>
         </div>
@@ -616,24 +784,62 @@
                 >—</div>
               </div>
 
-              <div class="row network-test-row">
-                <button
-                  id="connectionTestButton"
-                  class="network-test-button"
-                  type="button"
-                >
-                  <svg
-                    class="network-test-icon"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                  >
-                    <path d="M5.6 18.4a8 8 0 1 1 12.8 0"/>
-                    <path d="M12 12l4.2-3.2"/>
-                    <circle cx="12" cy="12" r="1.2"/>
-                  </svg>
-                  <span data-i18n="measureConnection">Measure connection</span>
-                </button>
+            </div>
+          </section>
+
+          <section
+            id="connectionTestCard"
+            class="vpn-overview-card connection-test-card"
+          >
+            <div class="vpn-overview-header">
+              <div
+                id="connectionTestTitle"
+                class="vpn-overview-title"
+              >Connection to Riga</div>
+
+              <div
+                id="connectionTestStatus"
+                class="vpn-overview-updated"
+                data-i18n="connectionTestReady"
+              >Ready</div>
+            </div>
+
+            <div class="connection-test-results">
+              <div class="connection-test-result">
+                <span data-i18n="connectionLatency">Latency</span>
+                <strong id="connectionTestLatency">—</strong>
               </div>
+              <div class="connection-test-result">
+                <span data-i18n="connectionJitter">Jitter</span>
+                <strong id="connectionTestJitter">—</strong>
+              </div>
+              <div class="connection-test-result">
+                <span data-i18n="connectionDownload">Download</span>
+                <strong id="connectionTestDownload">—</strong>
+              </div>
+              <div class="connection-test-result">
+                <span data-i18n="connectionUpload">Upload</span>
+                <strong id="connectionTestUpload">—</strong>
+              </div>
+            </div>
+
+            <div class="network-test-row">
+              <button
+                id="connectionTestButton"
+                class="network-test-button"
+                type="button"
+              >
+                <svg
+                  class="network-test-icon"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path d="M5.6 18.4a8 8 0 1 1 12.8 0"/>
+                  <path d="M12 12l4.2-3.2"/>
+                  <circle cx="12" cy="12" r="1.2"/>
+                </svg>
+                <span data-i18n="measureConnection">Measure connection</span>
+              </button>
             </div>
           </section>
 

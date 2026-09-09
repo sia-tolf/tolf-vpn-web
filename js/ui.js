@@ -11,6 +11,10 @@ function updateSelectedServerAddress() {
   const server = SERVERS[getSelectedServerKey()];
   selectedServerAddress.textContent = server?.host || "";
   renderLocalIdSettings();
+
+  if (typeof renderConnectionTestTarget === "function") {
+    renderConnectionTestTarget();
+  }
 }
 
 function getSelectedLocalId() {
@@ -78,11 +82,20 @@ function getProfileSelection() {
     return null;
   }
 
+  const settings = typeof getProfileSettingsSelection === "function"
+    ? getProfileSettingsSelection()
+    : {};
+
+  if (!settings) {
+    return null;
+  }
+
   return {
     server,
     localId,
     platform: currentPlatform,
-    language: currentLanguage
+    language: currentLanguage,
+    ...settings
   };
 }
 
@@ -195,6 +208,10 @@ function showSignedOut() {
 
   if (profileSettings) {
     profileSettings.open = false;
+  }
+
+  if (typeof resetProfileSettings === "function") {
+    resetProfileSettings();
   }
 
   renderLocalIdSettings();

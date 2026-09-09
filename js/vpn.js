@@ -6,6 +6,9 @@ function setVpnBusy(value) {
   }
   updateServerAvailability();
   if (localIdInput) localIdInput.disabled = value;
+  if (typeof setProfileSettingsBusy === "function") {
+    setProfileSettingsBusy(value);
+  }
 }
 
 createVpnButton.addEventListener("click", async () => {
