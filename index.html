@@ -12,7 +12,7 @@
 
   <link
     rel="stylesheet"
-    href="css/styles.css?v=compact-tables-2"
+    href="css/styles.css?v=connection-layout-1"
   >
   <link
     rel="stylesheet"
@@ -704,7 +704,8 @@
         </div>
 
         <div class="vpn-overview">
-          <section class="vpn-overview-card">
+          <div class="vpn-overview-top">
+            <section class="vpn-overview-card">
             <div class="vpn-overview-header">
               <div
                 class="vpn-overview-title"
@@ -754,57 +755,60 @@
                 ></div>
               </div>
             </div>
-          </section>
+            </section>
 
-          <section
-            id="networkMetrics"
-            class="vpn-overview-card network-metrics hidden"
-          >
-            <div class="vpn-overview-header">
-              <div
-                class="vpn-overview-title"
-                data-i18n="networkMetricsTitle"
-              >TOLF network</div>
-
-              <div
-                id="networkMetricMeasuredAt"
-                class="vpn-overview-updated"
-              >—</div>
-            </div>
-
-            <div class="status-table">
-              <div class="row">
-                <div
-                  class="row-label"
-                  data-i18n="networkLatency"
-                >Network latency</div>
-                <div
-                  id="networkMetricLatency"
-                  class="row-value"
-                >—</div>
-              </div>
-
-            </div>
-
-            <div class="network-test-row">
-              <button
-                id="connectionTestButton"
-                class="network-test-button"
-                type="button"
+            <div class="vpn-overview-side">
+              <section
+                id="networkMetrics"
+                class="vpn-overview-card network-metrics hidden"
               >
-                <svg
-                  class="network-test-icon"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
+                <div class="vpn-overview-header">
+                  <div
+                    class="vpn-overview-title"
+                    data-i18n="networkMetricsTitle"
+                  >TOLF network</div>
+
+                  <div
+                    id="networkMetricMeasuredAt"
+                    class="vpn-overview-updated"
+                  >—</div>
+                </div>
+
+                <div class="status-table">
+                  <div class="row">
+                    <div
+                      class="row-label"
+                      data-i18n="networkLatency"
+                    >Network latency</div>
+                    <div
+                      id="networkMetricLatency"
+                      class="row-value"
+                    >—</div>
+                  </div>
+
+                </div>
+              </section>
+
+              <div class="connection-test-action">
+                <button
+                  id="connectionTestButton"
+                  class="network-test-button"
+                  type="button"
                 >
-                  <path d="M5.6 18.4a8 8 0 1 1 12.8 0"/>
-                  <path d="M12 12l4.2-3.2"/>
-                  <circle cx="12" cy="12" r="1.2"/>
-                </svg>
-                <span data-i18n="measureConnection">Measure connection</span>
-              </button>
+                  <svg
+                    class="network-test-icon"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path d="M5.6 18.4a8 8 0 1 1 12.8 0"/>
+                    <path d="M12 12l4.2-3.2"/>
+                    <circle cx="12" cy="12" r="1.2"/>
+                  </svg>
+                  <span data-i18n="measureConnection">Measure connection</span>
+                </button>
+              </div>
             </div>
-          </section>
+          </div>
 
           <section
             id="connectionTestCard"
