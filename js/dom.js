@@ -49,8 +49,8 @@ const generateProfileButton =
   document.getElementById("generateProfileButton");
 const installProfileButton =
   document.getElementById("installProfileButton");
-const saveProfileButton =
-  document.getElementById("saveProfileButton");
+const shareProfileButton =
+  document.getElementById("shareProfileButton");
 const profileDeliveryActions =
   document.getElementById("profileDeliveryActions");
 const rotatePasswordButton =

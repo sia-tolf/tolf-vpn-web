@@ -15,13 +15,9 @@ function renderPlatform() {
     ? "installAppleProfile"
     : "openAndroidProfile";
 
-  saveProfileButton.dataset.i18n = isIos
-    ? "saveAppleProfile"
-    : "saveAndroidProfile";
-
-  saveProfileButton.download = isIos
-    ? "TOLF-VPN.mobileconfig"
-    : "TOLF-VPN.sswan";
+  shareProfileButton.dataset.i18n = isIos
+    ? "shareAppleProfile"
+    : "shareAndroidProfile";
 
   if (typeof t === "function") {
     generateProfileButton.textContent =
@@ -30,8 +26,8 @@ function renderPlatform() {
     installProfileButton.textContent =
       t(installProfileButton.dataset.i18n);
 
-    saveProfileButton.textContent =
-      t(saveProfileButton.dataset.i18n);
+    shareProfileButton.textContent =
+      t(shareProfileButton.dataset.i18n);
   }
 
   if (onDemandSection) {

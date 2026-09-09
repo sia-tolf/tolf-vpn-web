@@ -69,6 +69,29 @@ generateProfileButton.addEventListener("click", async () => {
   }
 });
 
+shareProfileButton.addEventListener("click", async () => {
+  const profileUrl = shareProfileButton.dataset.profileUrl;
+  if (!profileUrl) return;
+
+  try {
+    if (typeof navigator.share === "function") {
+      await navigator.share({
+        title: "TOLF VPN",
+        url: profileUrl
+      });
+      return;
+    }
+
+    await navigator.clipboard.writeText(profileUrl);
+    vpnMessage.textContent = t("profileLinkCopied");
+    vpnMessage.className = "message success";
+  } catch (error) {
+    if (error?.name === "AbortError") return;
+    vpnMessage.textContent = t("profileShareFailed");
+    vpnMessage.className = "message error";
+  }
+});
+
 rotatePasswordButton.addEventListener("click", async () => {
   if (vpnBusy) return;
   const selection = getProfileSelection();

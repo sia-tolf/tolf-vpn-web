@@ -12,7 +12,7 @@
 
   <link
     rel="stylesheet"
-    href="css/styles.css?v=green-actions-1"
+    href="css/styles.css?v=share-profile-1"
   >
   <link
     rel="stylesheet"
@@ -21,21 +21,21 @@
 
   <!-- Keep this order. Deferred scripts run after the HTML has been parsed. -->
   <script defer src="js/config.js?v=platform-auto-1"></script>
-  <script defer src="js/locales/en.js?v=green-actions-1"></script>
-  <script defer src="js/locales/ru.js?v=green-actions-1"></script>
-  <script defer src="js/locales/lv.js?v=green-actions-1"></script>
-  <script defer src="js/dom.js?v=profile-actions-1"></script>
+  <script defer src="js/locales/en.js?v=share-profile-1"></script>
+  <script defer src="js/locales/ru.js?v=share-profile-1"></script>
+  <script defer src="js/locales/lv.js?v=share-profile-1"></script>
+  <script defer src="js/dom.js?v=share-profile-1"></script>
   <script defer src="js/network-metrics.js?v=latency-decimal-1"></script>
-  <script defer src="js/platform.js?v=profile-actions-1"></script>
+  <script defer src="js/platform.js?v=share-profile-1"></script>
   <script defer src="js/i18n.js?v=platform-1"></script>
   <script defer src="js/webauthn.js?v=local-id-2"></script>
   <script defer src="js/api.js?v=local-id-2"></script>
-  <script defer src="js/ui.js?v=green-actions-1"></script>
+  <script defer src="js/ui.js?v=share-profile-1"></script>
   <script defer src="js/passkeys.js?v=local-id-2"></script>
   <script defer src="js/recovery.js?v=local-id-2"></script>
   <script defer src="js/account.js?v=local-id-2"></script>
   <script defer src="js/profile-settings.js?v=profile-options-1"></script>
-  <script defer src="js/vpn.js?v=vpn-settings-1"></script>
+  <script defer src="js/vpn.js?v=share-profile-1"></script>
   <script defer src="js/promo.js?v=header-promo-1"></script>
   <script defer src="js/location.js?v=entry-point-auto-8"></script>
   <script defer src="js/librespeed.js?v=1"></script>
@@ -921,13 +921,12 @@
               data-i18n="installAppleProfile"
             >Install Profile</a>
 
-            <a
-              id="saveProfileButton"
+            <button
+              id="shareProfileButton"
               class="button-link constructive"
-              href="#"
-              download="TOLF-VPN.mobileconfig"
-              data-i18n="saveAppleProfile"
-            >Save .mobileconfig</a>
+              type="button"
+              data-i18n="shareAppleProfile"
+            >Share .mobileconfig</button>
           </div>
 
           <p

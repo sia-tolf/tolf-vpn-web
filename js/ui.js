@@ -174,12 +174,12 @@ function profileDownloadUrl(profileUrl) {
 function setInstallLink(profileUrl) {
   if (profileUrl) {
     installProfileButton.href = profileUrl;
-    saveProfileButton.href = profileDownloadUrl(profileUrl);
+    shareProfileButton.dataset.profileUrl = profileDownloadUrl(profileUrl);
     profileDeliveryActions.classList.remove("hidden");
     generateProfileButton.classList.add("hidden");
   } else {
     installProfileButton.href = "#";
-    saveProfileButton.href = "#";
+    delete shareProfileButton.dataset.profileUrl;
     profileDeliveryActions.classList.add("hidden");
 
     if (lastVpnState?.configured) {
