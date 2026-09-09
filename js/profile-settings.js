@@ -223,11 +223,10 @@ function getProfileSettingsSelection() {
   if (!onDemand) return null;
 
   return {
-    dns: {
-      mode: dnsMode?.value === "custom" ? "custom" : "automatic",
-      servers
-    },
-    onDemand
+    dnsMode: dnsMode?.value === "custom" ? "custom" : "tolf",
+    dnsServers: servers,
+    onDemandEnabled: onDemand.enabled,
+    onDemandRules: onDemand.rules
   };
 }
 
