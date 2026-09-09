@@ -1236,3 +1236,29 @@ button:disabled { opacity: 0.55; cursor: default; }
   .connection-test-result:nth-child(2) { border-right: 0; }
   .connection-test-result:nth-child(-n + 2) { border-bottom: 1px solid var(--border); }
 }
+
+/* Uniform compact rows in all VPN overview tables */
+.vpn-overview .row,
+.vpn-overview #usernameRow,
+.vpn-overview .network-metrics .row,
+.vpn-overview-speed .speed-row {
+  height: 56px;
+  min-height: 56px;
+  padding: 8px 16px;
+  align-items: center;
+}
+
+.connection-test-result {
+  height: 56px;
+  min-height: 56px;
+  box-sizing: border-box;
+  gap: 4px;
+  padding: 7px 8px;
+}
+
+.connection-test-card .network-test-row {
+  height: 56px;
+  min-height: 56px;
+  box-sizing: border-box;
+  padding: 8px 16px;
+}
