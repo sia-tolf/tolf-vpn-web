@@ -1304,3 +1304,29 @@ button:disabled { opacity: 0.55; cursor: default; }
     gap: 10px;
   }
 }
+
+@media (max-width: 520px) {
+  .server-option label {
+    height: 80px;
+    min-height: 80px;
+    padding: 6px 4px;
+    gap: 3px;
+  }
+
+  .server-flag {
+    font-size: 29px;
+  }
+
+  .server-city {
+    font-size: 14px;
+  }
+
+  .vpn-overview .row,
+  .vpn-overview #usernameRow,
+  .vpn-overview .network-metrics .row,
+  .vpn-overview-speed .speed-row,
+  .connection-test-result {
+    height: 64px;
+    min-height: 64px;
+  }
+}
