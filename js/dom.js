@@ -49,6 +49,10 @@ const generateProfileButton =
   document.getElementById("generateProfileButton");
 const installProfileButton =
   document.getElementById("installProfileButton");
+const saveProfileButton =
+  document.getElementById("saveProfileButton");
+const profileDeliveryActions =
+  document.getElementById("profileDeliveryActions");
 const rotatePasswordButton =
   document.getElementById("rotatePasswordButton");
 const rotatePasswordNote =

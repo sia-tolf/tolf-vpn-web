@@ -12,7 +12,7 @@
 
   <link
     rel="stylesheet"
-    href="css/styles.css?v=mobile-rhythm-1"
+    href="css/styles.css?v=profile-actions-1"
   >
   <link
     rel="stylesheet"
@@ -21,16 +21,16 @@
 
   <!-- Keep this order. Deferred scripts run after the HTML has been parsed. -->
   <script defer src="js/config.js?v=platform-auto-1"></script>
-  <script defer src="js/locales/en.js?v=network-test-3"></script>
-  <script defer src="js/locales/ru.js?v=network-test-3"></script>
-  <script defer src="js/locales/lv.js?v=network-test-3"></script>
-  <script defer src="js/dom.js?v=vpn-settings-1"></script>
+  <script defer src="js/locales/en.js?v=profile-actions-1"></script>
+  <script defer src="js/locales/ru.js?v=profile-actions-1"></script>
+  <script defer src="js/locales/lv.js?v=profile-actions-1"></script>
+  <script defer src="js/dom.js?v=profile-actions-1"></script>
   <script defer src="js/network-metrics.js?v=overview-3"></script>
-  <script defer src="js/platform.js?v=platform-1"></script>
+  <script defer src="js/platform.js?v=profile-actions-1"></script>
   <script defer src="js/i18n.js?v=platform-1"></script>
   <script defer src="js/webauthn.js?v=local-id-2"></script>
   <script defer src="js/api.js?v=local-id-2"></script>
-  <script defer src="js/ui.js?v=vpn-settings-1"></script>
+  <script defer src="js/ui.js?v=profile-actions-1"></script>
   <script defer src="js/passkeys.js?v=local-id-2"></script>
   <script defer src="js/recovery.js?v=local-id-2"></script>
   <script defer src="js/account.js?v=local-id-2"></script>
@@ -899,16 +899,8 @@
             id="generateProfileButton"
             class="primary hidden"
             type="button"
-            data-i18n="generateInstallLink"
-          >Generate Install Link</button>
-
-          <a
-            id="installProfileButton"
-            class="button-link primary hidden"
-            href="#"
-            target="_self"
-            data-i18n="installAppleDevice"
-          >Install on Apple Device</a>
+            data-i18n="generateAppleProfile"
+          >Create Profile</button>
 
           <button
             id="rotatePasswordButton"
@@ -916,6 +908,27 @@
             type="button"
             data-i18n="changeVpnPassword"
           >Change VPN Password</button>
+
+          <div
+            id="profileDeliveryActions"
+            class="profile-delivery-actions hidden"
+          >
+            <a
+              id="installProfileButton"
+              class="button-link primary"
+              href="#"
+              target="_self"
+              data-i18n="installAppleProfile"
+            >Install Profile</a>
+
+            <a
+              id="saveProfileButton"
+              class="button-link secondary"
+              href="#"
+              download="TOLF-VPN.mobileconfig"
+              data-i18n="saveAppleProfile"
+            >Save .mobileconfig</a>
+          </div>
 
           <p
             id="rotatePasswordNote"

@@ -156,16 +156,33 @@ function hideAccountRecoveryCode() {
   accountRecoveryBox.classList.add("hidden");
 }
 
+function profileDownloadUrl(profileUrl) {
+  try {
+    const url = new URL(profileUrl, window.location.href);
+    const directFile = /\.(?:mobileconfig|sswan)$/i.test(url.pathname);
+
+    if (!directFile && !url.pathname.endsWith("/download")) {
+      url.pathname = `${url.pathname.replace(/\/$/, "")}/download`;
+    }
+
+    return url.toString();
+  } catch {
+    return profileUrl;
+  }
+}
+
 function setInstallLink(profileUrl) {
   if (profileUrl) {
     installProfileButton.href = profileUrl;
-    installProfileButton.classList.remove("hidden");
+    saveProfileButton.href = profileDownloadUrl(profileUrl);
+    profileDeliveryActions.classList.remove("hidden");
 
     generateProfileButton.classList.remove("primary");
     generateProfileButton.classList.add("secondary");
   } else {
     installProfileButton.href = "#";
-    installProfileButton.classList.add("hidden");
+    saveProfileButton.href = "#";
+    profileDeliveryActions.classList.add("hidden");
 
     generateProfileButton.classList.remove("secondary");
     generateProfileButton.classList.add("primary");

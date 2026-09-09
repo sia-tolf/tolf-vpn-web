@@ -8,12 +8,20 @@ function renderPlatform() {
   platformAndroid.setAttribute("aria-pressed", String(!isIos));
 
   generateProfileButton.dataset.i18n = isIos
-    ? "generateInstallLink"
+    ? "generateAppleProfile"
     : "generateStrongSwanProfile";
 
   installProfileButton.dataset.i18n = isIos
-    ? "installAppleDevice"
-    : "installAndroidDevice";
+    ? "installAppleProfile"
+    : "openAndroidProfile";
+
+  saveProfileButton.dataset.i18n = isIos
+    ? "saveAppleProfile"
+    : "saveAndroidProfile";
+
+  saveProfileButton.download = isIos
+    ? "TOLF-VPN.mobileconfig"
+    : "TOLF-VPN.sswan";
 
   if (typeof t === "function") {
     generateProfileButton.textContent =
@@ -21,6 +29,9 @@ function renderPlatform() {
 
     installProfileButton.textContent =
       t(installProfileButton.dataset.i18n);
+
+    saveProfileButton.textContent =
+      t(saveProfileButton.dataset.i18n);
   }
 
   if (onDemandSection) {

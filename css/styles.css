@@ -230,6 +230,12 @@ button, input { font: inherit; }
   margin-top: 26px;
 }
 .actions > button, .actions > .button-link { flex: 1 1 0; min-width: 0; }
+.profile-delivery-actions {
+  flex: 0 0 100%;
+  display: flex;
+  gap: 12px;
+}
+.profile-delivery-actions > .button-link { flex: 1 1 0; min-width: 0; }
 button, .button-link {
   min-height: 50px;
   border: 0;
@@ -678,6 +684,8 @@ button:disabled { opacity: 0.55; cursor: default; }
   .brand-top { gap: 14px; }
   .actions { flex-direction: column; flex-wrap: nowrap; }
   .actions > button, .actions > .button-link { width: 100%; flex: none; }
+  .profile-delivery-actions { flex-direction: column; width: 100%; }
+  .profile-delivery-actions > .button-link { width: 100%; flex: none; }
   .password-note { flex: none; }
   .recovery-code-actions, .recover-actions { flex-direction: column; }
 }
