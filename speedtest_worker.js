@@ -272,6 +272,7 @@ function clearRequests() {
 				xhr[i].onprogress = null;
 				xhr[i].onload = null;
 				xhr[i].onerror = null;
+				xhr[i].ontimeout = null;
 			} catch (e) {}
 			try {
 				xhr[i].upload.onprogress = null;
@@ -351,6 +352,10 @@ function dlTest(done) {
 					prevLoaded = event.loaded;
 				}.bind(this);
 				xhr[i].onload = function() {
+					if (x.status < 200 || x.status >= 300) {
+						failed = true;
+						return;
+					}
 					// the large file has been loaded entirely, start again
 					tverb("dl stream finished " + i);
 					try {
@@ -374,6 +379,8 @@ function dlTest(done) {
 					else xhr[i].responseType = "arraybuffer";
 				} catch (e) {}
 				xhr[i].open("GET", settings.url_dl + url_sep(settings.url_dl) + (settings.mpot ? "cors=true&" : "") + "r=" + Math.random() + "&ckSize=" + settings.garbagePhp_chunkSize, true); // random string to prevent caching
+				xhr[i].timeout = 30000;
+				xhr[i].ontimeout = xhr[i].onerror;
 				xhr[i].send();
 			}.bind(this),
 			1 + delay
@@ -411,7 +418,7 @@ function dlTest(done) {
 				dlStatus = ((speed * 8 * settings.overheadCompensationFactor) / (settings.useMebibits ? 1048576 : 1000000)).toFixed(2); // speed is multiplied by 8 to go from bytes to bits, overhead compensation is applied, then everything is divided by 1048576 or 1000000 to go to megabits/mebibits
 				if ((t + bonusT) / 1000.0 > settings.time_dl_max || failed) {
 					// test is over, stop streams and timer
-					if (failed || isNaN(dlStatus)) dlStatus = "Fail";
+					if (failed || totLoaded <= 0 || isNaN(dlStatus)) dlStatus = "Fail";
 					clearRequests();
 					clearInterval(interval);
 					dlProgress = 1;
@@ -474,18 +481,24 @@ function ulTest(done) {
 						}
 					}
 					if (ie11workaround) {
-						// IE11 workarond: xhr.upload does not work properly, therefore we send a bunch of small 256k requests and use the onload event as progress. This is not precise, especially on fast connections
-						xhr[i].onload = xhr[i].onerror = function() {
-							tverb("ul stream progress event (ie11wa)");
-							totLoaded += reqsmall.size;
+						// Count only complete requests acknowledged with HTTP success.
+						// Use the configured payload, not a fixed 256 KiB Safari payload.
+						xhr[i].onerror = xhr[i].ontimeout = function() {
+							failed = true;
+						};
+						xhr[i].onload = function() {
+							if (testState !== 3) return;
+							if (x.status < 200 || x.status >= 300) {
+								failed = true;
+								return;
+							}
+							totLoaded += req.size;
 							testStream(i, 0);
 						};
 						xhr[i].open("POST", settings.url_ul + url_sep(settings.url_ul) + (settings.mpot ? "cors=true&" : "") + "r=" + Math.random(), true); // random string to prevent caching
-						try {
-							xhr[i].setRequestHeader("Content-Encoding", "identity"); // disable compression (some browsers may refuse it, but data is incompressible anyway)
-						} catch (e) {}
+						xhr[i].timeout = 30000;
 						//No Content-Type header in MPOT branch because it triggers bugs in some browsers
-						xhr[i].send(reqsmall);
+						xhr[i].send(req);
 					} else {
 						// REGULAR version, no workaround
 						xhr[i].upload.onprogress = function(event) {
@@ -540,7 +553,7 @@ function ulTest(done) {
 				if (t < 200) return;
 				if (!graceTimeDone) {
 					if (t > 1000 * settings.time_ulGraceTime) {
-						if (totLoaded > 0) {
+						if (totLoaded > 0 && settings.time_ulGraceTime > 0) {
 							// if the connection is so slow that we didn't get a single chunk yet, do not reset
 							startT = new Date().getTime();
 							bonusT = 0;
@@ -559,7 +572,7 @@ function ulTest(done) {
 					ulStatus = ((speed * 8 * settings.overheadCompensationFactor) / (settings.useMebibits ? 1048576 : 1000000)).toFixed(2); // speed is multiplied by 8 to go from bytes to bits, overhead compensation is applied, then everything is divided by 1048576 or 1000000 to go to megabits/mebibits
 					if ((t + bonusT) / 1000.0 > settings.time_ul_max || failed) {
 						// test is over, stop streams and timer
-						if (failed || isNaN(ulStatus)) ulStatus = "Fail";
+						if (failed || totLoaded <= 0 || isNaN(ulStatus)) ulStatus = "Fail";
 						clearRequests();
 						clearInterval(interval);
 						ulProgress = 1;
@@ -603,6 +616,10 @@ function pingTest(done) {
 		prevT = new Date().getTime();
 		xhr[0] = new XMLHttpRequest();
 		xhr[0].onload = function() {
+			if (xhr[0].status < 200 || xhr[0].status >= 300) {
+				xhr[0].onerror();
+				return;
+			}
 			// pong
 			tverb("pong");
 			if (i === 0) {
@@ -674,6 +691,8 @@ function pingTest(done) {
 		}.bind(this);
 		// send xhr
 		xhr[0].open("GET", settings.url_ping + url_sep(settings.url_ping) + (settings.mpot ? "cors=true&" : "") + "r=" + Math.random(), true); // random string to prevent caching
+		xhr[0].timeout = 5000;
+		xhr[0].ontimeout = xhr[0].onerror;
 		xhr[0].send();
 	}.bind(this);
 	doPing(); // start first ping

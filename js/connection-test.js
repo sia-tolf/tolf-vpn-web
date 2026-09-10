@@ -11,6 +11,7 @@ const CONNECTION_TEST_SERVERS = {
 
 let activeConnectionTest = null;
 let activeConnectionTestServer = null;
+let connectionTestWatchdog = null;
 
 function connectionMetric(value, unit, decimals = 1) {
   const number = Number.parseFloat(value);
@@ -96,11 +97,15 @@ function connectionTestHasResult() {
     connectionTestLatency,
     connectionTestDownload,
     connectionTestUpload
-  ].some(target => target?.textContent !== "—");
+  ].every(target => target && Number.isFinite(Number.parseFloat(target.textContent)));
 }
 
 function finishConnectionTest(aborted) {
   const completed = !aborted && connectionTestHasResult();
+  if (activeConnectionTest) {
+    clearInterval(activeConnectionTest.updater);
+    activeConnectionTest.worker?.terminate();
+  }
 
   if (connectionTestStatus) {
     connectionTestStatus.textContent = t(
@@ -112,7 +117,7 @@ function finishConnectionTest(aborted) {
   }
 
   activeConnectionTest = null;
-  activeConnectionTestServer = null;
+  clearTimeout(connectionTestWatchdog);
   setConnectionTestRunning(false);
   renderConnectionTestTarget();
 }
@@ -151,10 +156,16 @@ function startConnectionTest() {
     speedtest.setParameter("time_dl_max", 15);
     speedtest.setParameter("time_ul_max", 15);
     speedtest.setParameter("time_auto", false);
+    // Do not include a pre-warmup request in a later accounting window.
+    speedtest.setParameter("time_ulGraceTime", 0);
     speedtest.setParameter("xhr_dlMultistream", 8);
     speedtest.setParameter("xhr_ulMultistream", 4);
     speedtest.setParameter("xhr_ul_blob_megabytes", 4);
     speedtest.setParameter("telemetry_level", 0);
+    speedtest.setParameter("overheadCompensationFactor", 1);
+    speedtest.setParameter("xhr_ignoreErrors", 0);
+    // Use response-confirmed uploads on every browser, including Safari.
+    speedtest.setParameter("forceIE11Workaround", true);
 
     speedtest.setSelectedServer({
       name: t(target.nameKey),
@@ -168,6 +179,12 @@ function startConnectionTest() {
     speedtest.onupdate = updateConnectionTestResults;
     speedtest.onend = finishConnectionTest;
     speedtest.start();
+    connectionTestWatchdog = setTimeout(() => {
+      if (activeConnectionTest !== speedtest) return;
+      speedtest.abort();
+      resetConnectionTestResults();
+      finishConnectionTest(true);
+    }, 90000);
   } catch (error) {
     console.error("Connection test failed:", error);
     finishConnectionTest(true);
@@ -179,6 +196,7 @@ connectionTestButton?.addEventListener("click", startConnectionTest);
 for (const input of serverInputs) {
   input.addEventListener("change", () => {
     if (!activeConnectionTest) {
+      activeConnectionTestServer = null;
       resetConnectionTestResults();
       renderConnectionTestTarget();
     }
