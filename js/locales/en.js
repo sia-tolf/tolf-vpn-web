@@ -97,7 +97,7 @@ I18N.en = {
   networkLastMeasured: "Last measured",
   active: "Active",
   configured: "Configured",
-  networkThroughput: "Throughput",
+  networkThroughput: "TOLF network speed and latency",
   notConfigured: "Not configured",
 
   createVpnAccess: "Create VPN Access",

@@ -97,7 +97,7 @@ I18N.lv = {
   networkLastMeasured: "Pēdējais mērījums",
   active: "Aktīvs",
   configured: "Konfigurēts",
-  networkThroughput: "Caurlaidība",
+  networkThroughput: "TOLF tīkla ātrums un aizture",
   notConfigured: "Nav konfigurēts",
 
   createVpnAccess: "Izveidot VPN piekļuvi",

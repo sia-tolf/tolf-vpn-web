@@ -97,7 +97,7 @@ I18N.ru = {
   networkLastMeasured: "Последнее измерение",
   active: "Активен",
   configured: "Настроен",
-  networkThroughput: "Скорость сети",
+  networkThroughput: "Скорость сети TOLF и задержка",
   notConfigured: "Не настроен",
 
   createVpnAccess: "Создать VPN-доступ",

@@ -12,7 +12,7 @@
 
   <link
     rel="stylesheet"
-    href="css/styles.css?v=utility-actions-1"
+    href="css/styles.css?v=network-cluster-1"
   >
   <link
     rel="stylesheet"
@@ -21,9 +21,9 @@
 
   <!-- Keep this order. Deferred scripts run after the HTML has been parsed. -->
   <script defer src="js/config.js?v=platform-auto-1"></script>
-  <script defer src="js/locales/en.js?v=share-profile-1"></script>
-  <script defer src="js/locales/ru.js?v=share-profile-1"></script>
-  <script defer src="js/locales/lv.js?v=share-profile-1"></script>
+  <script defer src="js/locales/en.js?v=network-cluster-1"></script>
+  <script defer src="js/locales/ru.js?v=network-cluster-1"></script>
+  <script defer src="js/locales/lv.js?v=network-cluster-1"></script>
   <script defer src="js/dom.js?v=share-profile-1"></script>
   <script defer src="js/network-metrics.js?v=latency-decimal-1"></script>
   <script defer src="js/platform.js?v=share-profile-1"></script>
@@ -757,57 +757,6 @@
             </div>
             </section>
 
-            <div class="vpn-overview-side">
-              <section
-                id="networkMetrics"
-                class="vpn-overview-card network-metrics hidden"
-              >
-                <div class="vpn-overview-header">
-                  <div
-                    class="vpn-overview-title"
-                    data-i18n="networkMetricsTitle"
-                  >TOLF network</div>
-
-                  <div
-                    id="networkMetricMeasuredAt"
-                    class="vpn-overview-updated"
-                  >—</div>
-                </div>
-
-                <div class="status-table">
-                  <div class="row">
-                    <div
-                      class="row-label"
-                      data-i18n="networkLatency"
-                    >Network latency</div>
-                    <div
-                      id="networkMetricLatency"
-                      class="row-value"
-                    >—</div>
-                  </div>
-
-                </div>
-              </section>
-
-              <div class="connection-test-action">
-                <button
-                  id="connectionTestButton"
-                  class="network-test-button constructive"
-                  type="button"
-                >
-                  <svg
-                    class="network-test-icon"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                  >
-                    <path d="M5.6 18.4a8 8 0 1 1 12.8 0"/>
-                    <path d="M12 12l4.2-3.2"/>
-                    <circle cx="12" cy="12" r="1.2"/>
-                  </svg>
-                  <span data-i18n="measureConnection">Measure connection</span>
-                </button>
-              </div>
-            </div>
           </div>
 
           <section
@@ -856,10 +805,29 @@
               <div
                 class="vpn-overview-title"
                 data-i18n="networkThroughput"
-              >Throughput</div>
+              >TOLF network speed and latency</div>
+
+              <div
+                id="networkMetricMeasuredAt"
+                class="vpn-overview-updated"
+              >—</div>
             </div>
 
             <div class="status-table">
+              <div
+                id="networkMetrics"
+                class="row speed-row network-metrics hidden"
+              >
+                <div
+                  class="row-label"
+                  data-i18n="networkLatency"
+                >Network latency</div>
+                <div
+                  id="networkMetricLatency"
+                  class="row-value speed-value"
+                >—</div>
+              </div>
+
               <div class="row speed-row">
                 <div
                   class="row-label"
@@ -883,6 +851,25 @@
                   class="row-value speed-value"
                 >—</div>
               </div>
+            </div>
+
+            <div class="connection-test-action">
+              <button
+                id="connectionTestButton"
+                class="network-test-button constructive"
+                type="button"
+              >
+                <svg
+                  class="network-test-icon"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path d="M5.6 18.4a8 8 0 1 1 12.8 0"/>
+                  <path d="M12 12l4.2-3.2"/>
+                  <circle cx="12" cy="12" r="1.2"/>
+                </svg>
+                <span data-i18n="measureConnection">Measure connection</span>
+              </button>
             </div>
           </section>
         </div>
