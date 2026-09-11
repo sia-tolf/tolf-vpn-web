@@ -1,4 +1,6 @@
 I18N.en = {
+  windowsAddHeading: "Add a new computer",
+  windowsDevicesHeading: "Added computers",
   windowsNameRequired: "Enter a computer name.",
   windowsCopy: "Copy personal link",
   windowsBackIos: "← Back to iOS",

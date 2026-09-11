@@ -21,9 +21,9 @@
 
   <!-- Keep this order. Deferred scripts run after the HTML has been parsed. -->
   <script defer src="js/config.js?v=windows-1"></script>
-  <script defer src="js/locales/en.js?v=windows-validation-1"></script>
-  <script defer src="js/locales/ru.js?v=windows-validation-1"></script>
-  <script defer src="js/locales/lv.js?v=windows-validation-1"></script>
+  <script defer src="js/locales/en.js?v=windows-sections-1"></script>
+  <script defer src="js/locales/ru.js?v=windows-sections-1"></script>
+  <script defer src="js/locales/lv.js?v=windows-sections-1"></script>
   <script defer src="js/dom.js?v=share-profile-1"></script>
   <script defer src="js/network-metrics.js?v=latency-decimal-1"></script>
   <script defer src="js/platform.js?v=windows-back-1"></script>
@@ -41,7 +41,7 @@
   <script defer src="js/librespeed.js?v=1"></script>
   <script defer src="js/latency.js?v=connection-test-1"></script>
   <script defer src="js/connection-test.js?v=connection-test-3"></script>
-  <script defer src="js/windows.js?v=windows-validation-1"></script>
+  <script defer src="js/windows.js?v=windows-sections-1"></script>
   <script defer src="js/app.js?v=windows-1"></script>
 </head>
 
@@ -370,6 +370,7 @@
           <h3 id="windowsTitle" data-i18n="windowsTitle">Windows devices</h3>
           <p class="card-description" data-i18n="windowsDescription">Prepare a separate VPN connection for your Windows computer.</p>
           <p class="card-description" data-i18n="windowsRoute">Entry through Riga. Russian destinations through Moscow, other traffic through Riga. DNS is assigned by the server.</p>
+          <h3 data-i18n="windowsAddHeading">Add a new computer</h3>
           <form id="windowsCreateForm" class="windows-create-form">
             <label for="windowsDeviceName" data-i18n="windowsName">Computer name</label>
             <input id="windowsDeviceName" type="text" maxlength="64" required autocomplete="off">
@@ -384,7 +385,8 @@
             <button id="windowsCopyButton" type="button" data-i18n="windowsCopy">Copy personal link</button>
             <button id="windowsShareButton" class="constructive" type="button" data-i18n="windowsShare">Share setup link</button>
           </div>
-          <div id="windowsDeviceList"></div>
+          <h3 id="windowsDevicesHeading" class="hidden" data-i18n="windowsDevicesHeading">Added computers</h3>
+          <div id="windowsDeviceList" aria-labelledby="windowsDevicesHeading"></div>
         </section>
         <div id="legacyVpnPanel">
         <div

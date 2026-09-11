@@ -32,6 +32,7 @@ function renderWindowsDevices() {
   if (windowsName.validity && windowsName.validity.customError) {
     windowsName.setCustomValidity(t('windowsNameRequired'));
   }
+  document.getElementById("windowsDevicesHeading").classList.toggle("hidden", windowsDevices.length === 0);
   windowsList.replaceChildren();
   for (const device of windowsDevices) {
     const card = document.createElement('section');
