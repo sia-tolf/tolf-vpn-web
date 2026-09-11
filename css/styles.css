@@ -1374,4 +1374,3 @@ button:disabled { opacity: 0.55; cursor: default; }
 .windows-device { padding: 16px; margin-top: 16px; }
 .windows-device h4 { margin: 0; font-size: 16px; font-weight: 600; overflow-wrap: anywhere; }
 .windows-device-username { color: var(--secondary); font-size: 14px; overflow-wrap: anywhere; }
-.platform-switcher { flex-wrap: wrap; }

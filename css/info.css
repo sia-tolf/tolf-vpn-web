@@ -303,3 +303,30 @@ html[lang="lv"] .site-label[lang="lv"] {
     font-size: 14px;
   }
 }
+
+/* Equal language/platform segments, with room for the Windows label. */
+.header-switchers.three-platform-switchers {
+  flex-basis: 300px;
+  width: 300px;
+}
+.three-platform-switchers .platform-switcher:has(#platformWindows:not(.hidden)) {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.three-platform-switchers .platform-button {
+  min-width: 0;
+  padding: 6px 4px;
+  gap: 4px;
+  white-space: nowrap;
+}
+@media (min-width: 760px) {
+  .header-switchers.three-platform-switchers {
+    flex-basis: 336px;
+    width: 336px;
+  }
+}
+@media (max-width: 520px) {
+  .header-switchers.three-platform-switchers {
+    flex-basis: auto;
+    width: 100%;
+  }
+}
