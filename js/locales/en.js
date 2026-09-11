@@ -1,4 +1,5 @@
 I18N.en = {
+  windowsNameRequired: "Enter a computer name.",
   windowsCopy: "Copy personal link",
   windowsBackIos: "← Back to iOS",
   windowsBackAndroid: "← Back to Android",

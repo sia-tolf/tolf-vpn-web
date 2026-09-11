@@ -29,6 +29,9 @@ function setWindowsLink(url) {
 }
 
 function renderWindowsDevices() {
+  if (windowsName.validity && windowsName.validity.customError) {
+    windowsName.setCustomValidity(t('windowsNameRequired'));
+  }
   windowsList.replaceChildren();
   for (const device of windowsDevices) {
     const card = document.createElement('section');
@@ -103,10 +106,19 @@ async function windowsAction(action) {
   }
 }
 
+windowsName.addEventListener('invalid', () => {
+  if (!windowsName.value.trim()) windowsName.setCustomValidity(t('windowsNameRequired'));
+});
+windowsName.addEventListener('input', () => windowsName.setCustomValidity(''));
+
 windowsForm.addEventListener('submit', event => {
   event.preventDefault();
   const name = windowsName.value.trim();
-  if (!name) { windowsName.focus(); return; }
+  if (!name) {
+    windowsName.setCustomValidity(t('windowsNameRequired'));
+    windowsName.reportValidity();
+    return;
+  }
   if (!windowsRequestId) windowsRequestId = crypto.randomUUID();
   windowsAction(async () => {
     const data = await apiRequest('/windows/devices', {

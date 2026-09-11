@@ -1,4 +1,5 @@
 I18N.ru = {
+  windowsNameRequired: "Введите название компьютера.",
   windowsCopy: "Скопировать персональную ссылку",
   windowsBackIos: "← Вернуться к iOS",
   windowsBackAndroid: "← Вернуться к Android",

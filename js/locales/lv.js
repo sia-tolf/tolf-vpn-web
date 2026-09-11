@@ -1,4 +1,5 @@
 I18N.lv = {
+  windowsNameRequired: "Ievadiet datora nosaukumu.",
   windowsCopy: "Kopēt personīgo saiti",
   windowsBackIos: "← Atpakaļ uz iOS",
   windowsBackAndroid: "← Atpakaļ uz Android",
