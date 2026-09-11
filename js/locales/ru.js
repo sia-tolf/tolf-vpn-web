@@ -1,4 +1,6 @@
 I18N.ru = {
+  windowsBackIos: "← Вернуться к iOS",
+  windowsBackAndroid: "← Вернуться к Android",
   additionalSettings: "Дополнительные настройки",
   vpnSettings: "Настройки VPN",
   localId: "Local ID",

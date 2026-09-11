@@ -1,4 +1,11 @@
+let previousMobilePlatform = currentPlatform === "android" ? "android" : "ios";
+
 function renderPlatform() {
+  const backButton = document.getElementById("windowsBackButton");
+  if (typeof t === "function") {
+    backButton.textContent = t(previousMobilePlatform === "android" ? "windowsBackAndroid" : "windowsBackIos");
+  }
+  backButton.disabled = vpnBusy;
   const isIos = currentPlatform === "ios";
   const isWindows = currentPlatform === "windows";
   const winButton = document.getElementById("platformWindows");
@@ -53,6 +60,7 @@ function setPlatform(platform) {
 
   const changed = currentPlatform !== platform;
 
+  if (platform !== "windows") previousMobilePlatform = platform;
   currentPlatform = platform;
   localStorage.setItem("tolfPlatform", platform);
 
@@ -77,5 +85,7 @@ platformAndroid.addEventListener(
 );
 
 document.getElementById("platformWindows").addEventListener("click", () => setPlatform("windows"));
+
+document.getElementById("windowsBackButton").addEventListener("click", () => setPlatform(previousMobilePlatform));
 
 setPlatform(currentPlatform);

@@ -1,4 +1,6 @@
 I18N.en = {
+  windowsBackIos: "← Back to iOS",
+  windowsBackAndroid: "← Back to Android",
   additionalSettings: "Additional settings",
   vpnSettings: "VPN Settings",
   localId: "Local ID",

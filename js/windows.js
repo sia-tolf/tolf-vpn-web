@@ -64,6 +64,7 @@ function renderWindowsDevices() {
   }
   document.getElementById('windowsCreateButton').disabled = vpnBusy || !windowsReady;
   windowsName.disabled = vpnBusy;
+  document.getElementById("windowsBackButton").disabled = vpnBusy;
 }
 
 async function loadWindowsDevices() {

@@ -1,4 +1,6 @@
 I18N.lv = {
+  windowsBackIos: "← Atpakaļ uz iOS",
+  windowsBackAndroid: "← Atpakaļ uz Android",
   additionalSettings: "Papildu iestatījumi",
   vpnSettings: "VPN iestatījumi",
   localId: "Local ID",

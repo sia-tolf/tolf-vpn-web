@@ -1374,3 +1374,7 @@ button:disabled { opacity: 0.55; cursor: default; }
 .windows-device { padding: 16px; margin-top: 16px; }
 .windows-device h4 { margin: 0; font-size: 16px; font-weight: 600; overflow-wrap: anywhere; }
 .windows-device-username { color: var(--secondary); font-size: 14px; overflow-wrap: anywhere; }
+
+.windows-create-actions { display: flex; align-items: center; gap: 16px; }
+.windows-create-actions #windowsCreateButton { flex: 1; min-width: 0; }
+.windows-create-actions .windows-back-button { flex: 0 0 auto; width: auto; padding: 10px 0; border: 0; background: transparent; box-shadow: none; color: var(--secondary); font-size: 13px; font-weight: 500; }
