@@ -1358,3 +1358,8 @@ button:disabled { opacity: 0.55; cursor: default; }
     min-height: 64px;
   }
 }
+
+#networkMetricRigaToMoscow,
+#networkMetricMoscowToRiga {
+  font-weight: 700;
+}
