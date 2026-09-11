@@ -1384,3 +1384,10 @@ button:disabled { opacity: 0.55; cursor: default; }
 .windows-device-delivery .windows-copy-button { appearance: none; background: var(--card); color: var(--text); border: 1px solid var(--border); border-radius: 12px; }
 .windows-device-open { grid-column: 1 / -1; }
 .windows-device > .message:empty { display: none; }
+
+.windows-device > summary { cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 16px; font-size: 16px; font-weight: 600; overflow-wrap: anywhere; }
+.windows-device > summary::-webkit-details-marker { display: none; }
+.windows-device > summary::after { content: '›'; flex: 0 0 auto; color: var(--secondary); font-size: 22px; font-weight: 400; }
+.windows-device[open] > summary::after { transform: rotate(90deg); }
+.windows-device > summary:focus-visible { outline: 2px solid var(--text); outline-offset: 4px; border-radius: 4px; }
+.windows-device-body > .message:empty { display: none; }

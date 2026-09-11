@@ -1,4 +1,5 @@
 let windowsDevices = [];
+let expandedWindowsDevice = null;
 let windowsEpoch = 0;
 let windowsRequestId = null;
 const windowsProfileLinks = new Map();
@@ -11,6 +12,7 @@ const windowsName = document.getElementById('windowsDeviceName');
 function clearWindowsDevices() {
   windowsEpoch++;
   windowsDevices = [];
+  expandedWindowsDevice = null;
   windowsRequestId = null;
   windowsName.value = '';
   windowsMessage.textContent = '';
@@ -62,9 +64,23 @@ function renderWindowsDevices() {
   document.getElementById("windowsDevicesHeading").classList.toggle("hidden", windowsDevices.length === 0);
   windowsList.replaceChildren();
   for (const device of windowsDevices) {
-    const card = document.createElement('section');
+    const card = document.createElement('details');
     card.className = 'windows-device vpn-overview-card';
-    const name = document.createElement('h4'); name.textContent = device.name;
+    card.name = 'windows-computers';
+    card.open = expandedWindowsDevice === device.id;
+    const name = document.createElement('summary'); name.textContent = device.name;
+    const body = document.createElement('div'); body.className = 'windows-device-body';
+    card.addEventListener('toggle', () => {
+      if (!card.isConnected) return;
+      if (card.open) {
+        expandedWindowsDevice = device.id;
+        for (const other of windowsList.children) {
+          if (other !== card) other.open = false;
+        }
+      } else if (expandedWindowsDevice === device.id) {
+        expandedWindowsDevice = null;
+      }
+    });
     const user = document.createElement('p');
     user.textContent = device.username || t('windowsPreparing');
     user.className = 'windows-device-username';
@@ -94,8 +110,9 @@ function renderWindowsDevices() {
         windowsMessage.textContent = t('windowsDeleted');
       });
     });
-    actions.append(download, remove); card.append(name, user, actions);
-    appendWindowsDelivery(card, device);
+    actions.append(download, remove); body.append(user, actions);
+    appendWindowsDelivery(body, device);
+    card.append(name, body);
     windowsList.append(card);
   }
   document.getElementById('windowsCreateButton').disabled = vpnBusy || !windowsReady;
@@ -111,6 +128,7 @@ async function loadWindowsDevices() {
     if (epoch !== windowsEpoch) return;
     windowsDevices = data.devices;
     const activeIds = new Set(windowsDevices.map(device => device.id));
+    if (!activeIds.has(expandedWindowsDevice)) expandedWindowsDevice = null;
     for (const id of windowsProfileLinks.keys()) {
       if (!activeIds.has(id)) windowsProfileLinks.delete(id);
     }
@@ -162,6 +180,7 @@ windowsForm.addEventListener('submit', event => {
     });
     if (epoch !== windowsEpoch) return;
     windowsProfileLinks.set(data.device.id, data.profileUrl);
+    expandedWindowsDevice = data.device.id;
     windowsRequestId = null; windowsName.value = '';
     windowsMessage.textContent = '';
   });
