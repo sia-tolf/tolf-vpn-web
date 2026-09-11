@@ -1360,10 +1360,10 @@ button:disabled { opacity: 0.55; cursor: default; }
 
 #networkMetricRigaToMoscow,
 #networkMetricMoscowToRiga {
-  font-weight: 700;
+  font-weight: 600;
 }
 
 #vpnServerName,
 #vpnUsername {
-  font-weight: 700;
+  font-weight: 600;
 }
