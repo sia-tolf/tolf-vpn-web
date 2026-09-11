@@ -1,4 +1,5 @@
 I18N.en = {
+  windowsCopy: "Copy personal link",
   windowsBackIos: "← Back to iOS",
   windowsBackAndroid: "← Back to Android",
   additionalSettings: "Additional settings",
@@ -205,7 +206,7 @@ Object.assign(I18N.en, {
   "windowsName": "Computer name",
   "windowsAdd": "Add Windows device",
   "windowsOpen": "Open Windows setup",
-  "windowsShare": "Share setup link",
+  "windowsShare": "Send to computer",
   "windowsPreparing": "Preparing access",
   "windowsReissue": "Create setup link",
   "windowsContinue": "Continue setup",

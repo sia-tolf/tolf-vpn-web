@@ -18,6 +18,7 @@ from fastapi import HTTPException, Request
 from fastapi.responses import HTMLResponse, Response
 
 VERSION = '1.0'
+INSTALLER = Path(__file__).with_name('TOLF-Setup.exe')
 CTX = None
 TOKEN = re.compile(r'[A-Za-z0-9_-]{32}')
 HEADERS = {'Cache-Control': 'private, no-store, max-age=0',
@@ -180,7 +181,7 @@ def install(app, context):
 
     @app.get('/windows/capabilities')
     def capabilities():
-        return {'version': VERSION, 'servers': ['riga'], 'routing': 'sr'}
+        return {'version': VERSION, 'servers': ['riga'], 'routing': 'sr', 'installerVersion': '1.1.0'}
 
     @app.get('/windows/devices')
     def devices(request: Request):
@@ -247,18 +248,61 @@ def install(app, context):
                     raise
         return {'status': 'ok'}
 
+    @app.post('/windows/p/{token}/settings')
+    def settings(token: str):
+        metadata, content = load(token)
+        with zipfile.ZipFile(io.BytesIO(content)) as archive:
+            config = json.loads(archive.read('connection.json'))
+        if config.get('deviceId') != metadata['deviceId'] or config.get('username') != metadata['username']:
+            raise HTTPException(500, 'Invalid Windows settings')
+        return Response(json.dumps(config), media_type='application/json', headers=HEADERS)
+
     @app.get('/windows/p/{token}/download')
     def download(token: str):
-        _, content = load(token)
-        return Response(content, media_type='application/zip', headers={**HEADERS,
-            'Content-Disposition': 'attachment; filename="TOLF-Windows-Riga.zip"'})
+        load(token)
+        if not INSTALLER.is_file():
+            raise HTTPException(503, 'Windows installer unavailable')
+        return Response(INSTALLER.read_bytes(), media_type='application/octet-stream', headers={**HEADERS,
+            'Content-Disposition': f'attachment; filename="TOLF-Setup-{token}.exe"'})
 
     @app.get('/windows/p/{token}')
     def page(token: str):
         metadata, _ = load(token)
         lang = metadata['language']
         labels = TEXT[lang]
+        copy = {
+            'en': ['Send to computer', 'Copy personal link', 'Personal setup link', 'Open this link on your Windows computer to set up TOLF VPN.', 'Install for Windows', 'Open the downloaded file and select “Set up and connect”.', 'Link copied', 'Copy the link from the field below.', 'Keep this personal link private.'],
+            'ru': ['Отправить на компьютер', 'Скопировать ссылку', 'Персональная ссылка настройки', 'Откройте эту ссылку на компьютере Windows, чтобы настроить TOLF VPN.', 'Установить для Windows', 'Откройте скачанный файл и нажмите «Настроить и подключиться».', 'Ссылка скопирована', 'Скопируйте ссылку из поля ниже.', 'Не передавайте персональную ссылку посторонним.'],
+            'lv': ['Nosūtīt uz datoru', 'Kopēt saiti', 'Personīgā iestatīšanas saite', 'Atveriet šo saiti Windows datorā, lai iestatītu TOLF VPN.', 'Instalēt Windows', 'Atveriet lejupielādēto failu un izvēlieties “Iestatīt un savienot”.', 'Saite nokopēta', 'Kopējiet saiti no zemāk redzamā lauka.', 'Nekopīgojiet personīgo saiti ar svešiniekiem.']
+        }[lang]
         escape = html.escape
-        body = f'''<!doctype html><html lang="{lang}"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>TOLF — {escape(labels[0])}</title><style>:root{{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color-scheme:light dark}}body{{max-width:620px;margin:40px auto;padding:20px;line-height:1.6}}a{{color:inherit}}.download{{display:block;text-align:center;border:1px solid #888;border-radius:12px;padding:14px;font-weight:600}}small{{opacity:.7}}</style><a href="https://vpn.tolf.is/">{escape(labels[4])}</a><h1>{escape(labels[0])}</h1><p>{escape(metadata['name'])}</p><p>{escape(labels[2])}</p><p>{escape(labels[6])}</p><a class="download" href="/windows/p/{token}/download">{escape(labels[1])}</a><p>{escape(labels[3])}</p><small>{escape(labels[5])}: {escape(metadata['expiresAt'])}</small></html>'''
+        url = 'https://api.tolf.is/windows/p/' + token
+        expiry = datetime.fromisoformat(metadata['expiresAt']).strftime('%d.%m.%Y, %H:%M UTC')
+        nonce = secrets.token_urlsafe(18)
+        body = f'''<!doctype html><html lang="{lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>TOLF — {escape(labels[0])}</title>
+<style>:root{{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color-scheme:light dark}}*{{box-sizing:border-box}}body{{max-width:660px;margin:32px auto;padding:24px;line-height:1.5}}a{{color:inherit}}h1{{font-size:28px}}.actions{{display:grid;gap:12px;margin:24px 0}}button,.download{{display:block;width:100%;text-align:center;border:1px solid #888;border-radius:12px;padding:14px;font:inherit;font-weight:600;text-decoration:none;background:transparent;color:inherit;cursor:pointer}}.primary{{background:#333;color:white;border-color:#333}}input{{width:100%;font:inherit;padding:12px;border:1px solid #aaa;border-radius:10px;background:transparent;color:inherit}}small,.note{{opacity:.7}}[hidden]{{display:none!important}}label{{display:block;margin:12px 0 6px}}</style></head><body><main><a href="https://vpn.tolf.is/">{escape(labels[4])}</a><h1>{escape(labels[0])}</h1><p>{escape(metadata['name'])}</p>
+<p id="mobile-help">{escape(copy[3])}</p><p id="windows-help" hidden>{escape(copy[5])}</p><p>{escape(labels[6])}</p>
+<div class="actions"><a id="download" class="download primary" href="/windows/p/{token}/download" hidden>{escape(copy[4])}</a><button id="send" class="primary" type="button">{escape(copy[0])}</button><button id="copy" type="button">{escape(copy[1])}</button></div>
+<label for="personal-link">{escape(copy[2])}</label><input id="personal-link" readonly value="{escape(url)}" spellcheck="false" autocomplete="off"><p id="status" role="status" aria-live="polite"></p><p class="note">{escape(copy[8])}</p><small>{escape(labels[5])}: {escape(expiry)}</small></main>
+<script nonce="{nonce}">
+const url = document.getElementById('personal-link').value;
+const status = document.getElementById('status');
+const messages = {json.dumps(copy, ensure_ascii=True)};
+const win = /Windows NT/i.test(navigator.userAgent);
+document.getElementById('download').hidden = !win;
+document.getElementById('windows-help').hidden = !win;
+document.getElementById('mobile-help').hidden = win;
+if (win) document.getElementById('send').classList.remove('primary');
+async function copyLink() {{
+ try {{ if (!navigator.clipboard) throw new Error(); await navigator.clipboard.writeText(url); status.textContent = messages[6]; }}
+ catch {{ const field=document.getElementById('personal-link'); field.focus(); field.select(); status.textContent=messages[7]; }}
+}}
+document.getElementById('copy').addEventListener('click',copyLink);
+document.getElementById('send').addEventListener('click',async()=>{{
+ if (!navigator.share) {{ await copyLink(); return; }}
+ try {{ await navigator.share({{title:'TOLF VPN — Windows',url}}); }}
+ catch(e) {{ if(e.name!=='AbortError') await copyLink(); }}
+}});
+</script></body></html>'''
         return HTMLResponse(body, headers={**HEADERS, 'X-Frame-Options': 'DENY',
-            'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"})
+            'Content-Security-Policy': f"default-src 'none'; style-src 'unsafe-inline'; script-src 'nonce-{nonce}'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"})

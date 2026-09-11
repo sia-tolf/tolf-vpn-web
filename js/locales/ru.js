@@ -1,4 +1,5 @@
 I18N.ru = {
+  windowsCopy: "Скопировать персональную ссылку",
   windowsBackIos: "← Вернуться к iOS",
   windowsBackAndroid: "← Вернуться к Android",
   additionalSettings: "Дополнительные настройки",
@@ -205,7 +206,7 @@ Object.assign(I18N.ru, {
   "windowsName": "Название компьютера",
   "windowsAdd": "Добавить устройство Windows",
   "windowsOpen": "Открыть настройку Windows",
-  "windowsShare": "Поделиться ссылкой",
+  "windowsShare": "Отправить на компьютер",
   "windowsPreparing": "Подготовка доступа",
   "windowsReissue": "Создать ссылку настройки",
   "windowsContinue": "Продолжить настройку",

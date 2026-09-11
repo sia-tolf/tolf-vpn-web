@@ -22,6 +22,7 @@ function clearWindowsDevices() {
 function setWindowsLink(url) {
   windowsProfileUrl = url;
   const link = document.getElementById('windowsInstallLink');
+  link.classList.toggle("hidden", !/Windows NT/i.test(navigator.userAgent || ""));
   if (url) link.href = url;
   else link.removeAttribute('href');
   windowsDelivery.classList.toggle('hidden', !url);
@@ -115,6 +116,12 @@ windowsForm.addEventListener('submit', event => {
     windowsRequestId = null; windowsName.value = '';
     windowsMessage.textContent = t('windowsReady');
   });
+});
+
+document.getElementById('windowsCopyButton').addEventListener('click', async () => {
+  if (!windowsProfileUrl) return;
+  try { await copyText(windowsProfileUrl); windowsMessage.textContent = t('profileLinkCopied'); }
+  catch { windowsMessage.textContent = t('profileShareFailed'); }
 });
 
 document.getElementById('windowsShareButton').addEventListener('click', async () => {

@@ -7,9 +7,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]/"setup/windows"))
 import tolf_windows as w
 
 
-def test_lifecycle():
+def test_lifecycle(monkeypatch):
  with tempfile.TemporaryDirectory() as tmp:
   root=Path(tmp); directory=root/'profiles'; directory.mkdir()
+  installer=root/'TOLF-Setup.exe';installer.write_bytes(b'MZ_TEST_EXECUTABLE_NO_CREDENTIALS');monkeypatch.setattr(w,'INSTALLER',installer)
   remote={}; calls=[]
   def provision(action, device_id, server='riga', local_id=None):
    calls.append((action,device_id))
@@ -41,15 +42,23 @@ def test_lifecycle():
     assert c.post(f'/windows/devices/{device}/{action}',headers=hb,json={}).status_code==404
    page=c.get(url);assert page.status_code==200 and '&lt;PC&gt;' in page.text and 'TEST_ONLY' not in page.text
    download=c.get(url+'/download');assert download.status_code==200
-   with zipfile.ZipFile(io.BytesIO(download.content)) as z:
-    settings=json.loads(z.read('connection.json'));assert settings['username']==data['device']['username']
-    assert 'TEST_ONLY' not in z.read('Install-TOLF.ps1').decode('utf-8-sig')
-    assert 'TEST_ONLY' not in z.read('Install-TOLF.cmd').decode()
+   assert download.content==installer.read_bytes()
+   assert '.exe' in download.headers['content-disposition']
+   assert b'TEST_ONLY' not in download.content
+   response=c.post(url+'/settings');assert response.status_code==200
+   assert response.json()['username']==data['device']['username']
+   assert 'no-store' in response.headers['cache-control']
+   assert c.get(url+'/settings').status_code==405
+   assert 'ZIP' not in page.text and 'Install-TOLF.cmd' not in page.text
+   assert 'id="download"' in page.text and ' hidden>' in page.text
+   assert 'id="personal-link"' in page.text and 'navigator.share' in page.text
    dbbytes=Path(ctx['DB']).read_bytes(); assert b'TEST_ONLY' not in dbbytes
    # Reissue keeps credentials and owner. Expired packages are rejected.
    assert c.post(f'/windows/devices/{device}/profile',headers=h,json={'language':'lv'}).status_code==200
    token=url.rsplit('/',1)[1];path=directory/(token+'.json');meta=json.loads(path.read_text());meta['expiresAt']='2000-01-01T00:00:00+00:00';path.write_text(json.dumps(meta))
    assert c.get(url).status_code==410
+   assert c.post(url+'/settings').status_code==410
+   assert c.get(url+'/download').status_code==410
    assert c.post(f'/windows/devices/{device}/delete',headers=h).status_code==200
    assert c.post(f'/windows/devices/{device}/delete',headers=h).status_code==200
    assert c.post('/windows/devices',headers=h,json=payload).status_code==410

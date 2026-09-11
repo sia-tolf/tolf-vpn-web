@@ -21,9 +21,9 @@
 
   <!-- Keep this order. Deferred scripts run after the HTML has been parsed. -->
   <script defer src="js/config.js?v=windows-1"></script>
-  <script defer src="js/locales/en.js?v=windows-back-1"></script>
-  <script defer src="js/locales/ru.js?v=windows-back-1"></script>
-  <script defer src="js/locales/lv.js?v=windows-back-1"></script>
+  <script defer src="js/locales/en.js?v=windows-setup-2"></script>
+  <script defer src="js/locales/ru.js?v=windows-setup-2"></script>
+  <script defer src="js/locales/lv.js?v=windows-setup-2"></script>
   <script defer src="js/dom.js?v=share-profile-1"></script>
   <script defer src="js/network-metrics.js?v=latency-decimal-1"></script>
   <script defer src="js/platform.js?v=windows-back-1"></script>
@@ -41,7 +41,7 @@
   <script defer src="js/librespeed.js?v=1"></script>
   <script defer src="js/latency.js?v=connection-test-1"></script>
   <script defer src="js/connection-test.js?v=connection-test-3"></script>
-  <script defer src="js/windows.js?v=windows-back-1"></script>
+  <script defer src="js/windows.js?v=windows-setup-2"></script>
   <script defer src="js/app.js?v=windows-1"></script>
 </head>
 
@@ -381,6 +381,7 @@
           <p id="windowsMessage" class="message" role="status" aria-live="polite"></p>
           <div id="windowsDelivery" class="profile-delivery-actions hidden">
             <a id="windowsInstallLink" class="button-link primary" target="_blank" rel="noopener noreferrer" data-i18n="windowsOpen">Open Windows setup</a>
+            <button id="windowsCopyButton" type="button" data-i18n="windowsCopy">Copy personal link</button>
             <button id="windowsShareButton" class="constructive" type="button" data-i18n="windowsShare">Share setup link</button>
           </div>
           <div id="windowsDeviceList"></div>

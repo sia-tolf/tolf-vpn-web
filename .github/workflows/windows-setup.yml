@@ -1,0 +1,30 @@
+name: Windows setup build
+on:
+  push:
+    branches: [main]
+    paths: ['setup/windows/**', '.github/workflows/windows-setup.yml', 'tests/windows/**']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install fastapi httpx pytest
+      - run: python -m pytest tests/windows -q
+      - name: Build GUI installer
+        shell: powershell
+        run: ./setup/windows/build-desktop.ps1
+      - name: Build London updater
+        run: python setup/windows/build-update.py
+      - name: Publish unsigned test build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: pwsh
+        run: |
+          $tag = "windows-setup-$env:GITHUB_SHA"
+          gh release create $tag setup/windows/dist/TOLF-Setup.exe setup/windows/dist/update-windows-gui.py setup/windows/dist/SHA256SUMS --prerelease --target $env:GITHUB_SHA --title "TOLF Windows setup 1.1 test build" --notes "Unsigned test build. Native VPN configuration and connection require verification on Windows. Source and build workflow are in this commit."

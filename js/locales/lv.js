@@ -1,4 +1,5 @@
 I18N.lv = {
+  windowsCopy: "Kopēt personīgo saiti",
   windowsBackIos: "← Atpakaļ uz iOS",
   windowsBackAndroid: "← Atpakaļ uz Android",
   additionalSettings: "Papildu iestatījumi",
@@ -205,7 +206,7 @@ Object.assign(I18N.lv, {
   "windowsName": "Datora nosaukums",
   "windowsAdd": "Pievienot Windows ierīci",
   "windowsOpen": "Atvērt Windows iestatīšanu",
-  "windowsShare": "Kopīgot iestatīšanas saiti",
+  "windowsShare": "Nosūtīt uz datoru",
   "windowsPreparing": "Piekļuve tiek sagatavota",
   "windowsReissue": "Izveidot iestatīšanas saiti",
   "windowsContinue": "Turpināt iestatīšanu",

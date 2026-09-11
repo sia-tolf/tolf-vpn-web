@@ -39,3 +39,25 @@ References:
 - https://docs.strongswan.org/docs/latest/interop/windowsClients.html
 - https://learn.microsoft.com/en-us/powershell/module/vpnclient/set-vpnconnectionipsecconfiguration
 - https://learn.microsoft.com/en-us/windows/win32/api/ras/nf-ras-rassetcredentialsw
+
+## GUI setup 1.1 (test build)
+
+`desktop/TolfSetup.cs` is a .NET Framework Windows Forms application, compiled on
+Windows by `build-desktop.ps1`. It receives the personal link from the download
+filename or a pasted link, POSTs to the fixed HTTPS API, and configures native
+IKEv2 through its embedded PowerShell resource. Credentials travel over stdin,
+not command-line arguments or temporary files. No browser security settings,
+certificate validation, or machine-wide execution policy are disabled.
+After configuration it invokes rasdial with only the saved connection name.
+
+The executable is shared across users; the token in the filename expires with
+the personal link. Renaming the file requires pasting the original link. The
+signed-in device creation and Apple/Android API remain unchanged. Older ZIP
+packages remain internal to the API so previously issued links keep working;
+they are no longer offered as downloads. Server-side storage retention remains
+48 hours, download links 24 hours. Links can be reused during that period.
+
+The workflow publishes an **unsigned prerelease**, plus a self-contained London
+updater with backups, a v1 source-hash guard and health-check rollback. Production
+code signing and real Windows VPN connection testing remain required. Neither
+compilation nor API tests prove native Windows EAP/DNS behavior.
