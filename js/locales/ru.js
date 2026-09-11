@@ -2,7 +2,7 @@ I18N.ru = {
   windowsAddHeading: "Добавить новый компьютер",
   windowsDevicesHeading: "Добавленные компьютеры",
   windowsNameRequired: "Введите название компьютера.",
-  windowsCopy: "Скопировать персональную ссылку",
+  windowsCopy: "Скопировать ссылку",
   windowsBackIos: "← Вернуться к iOS",
   windowsBackAndroid: "← Вернуться к Android",
   additionalSettings: "Дополнительные настройки",

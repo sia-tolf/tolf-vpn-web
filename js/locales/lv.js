@@ -2,7 +2,7 @@ I18N.lv = {
   windowsAddHeading: "Pievienot jaunu datoru",
   windowsDevicesHeading: "Pievienotie datori",
   windowsNameRequired: "Ievadiet datora nosaukumu.",
-  windowsCopy: "Kopēt personīgo saiti",
+  windowsCopy: "Kopēt saiti",
   windowsBackIos: "← Atpakaļ uz iOS",
   windowsBackAndroid: "← Atpakaļ uz Android",
   additionalSettings: "Papildu iestatījumi",

@@ -1378,3 +1378,9 @@ button:disabled { opacity: 0.55; cursor: default; }
 .windows-create-actions { display: flex; align-items: center; gap: 16px; }
 .windows-create-actions #windowsCreateButton { flex: 1; min-width: 0; }
 .windows-create-actions .windows-back-button { flex: 0 0 auto; width: auto; padding: 10px 0; border: 0; background: transparent; box-shadow: none; color: var(--secondary); font-size: 13px; font-weight: 500; }
+
+.windows-device-delivery { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; width: 100%; margin-top: 12px; }
+.windows-device-delivery > button { width: 100%; min-width: 0; height: auto; min-height: 48px; padding: 12px; font-weight: 600; overflow-wrap: anywhere; }
+.windows-device-delivery .windows-copy-button { appearance: none; background: var(--card); color: var(--text); border: 1px solid var(--border); border-radius: 12px; }
+.windows-device-open { grid-column: 1 / -1; }
+.windows-device > .message:empty { display: none; }
