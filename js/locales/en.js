@@ -110,9 +110,9 @@ I18N.en = {
   profileLinkCopied: "Profile link copied.",
   profileShareFailed: "Could not share the profile.",
   changeVpnPassword: "Change TOLF VPN Access Password",
-  changePasswordNote: "This password is used by Riga and Moscow profiles on all your devices. After changing it, old profiles will stop connecting — create and install new ones.",
+  changePasswordNote: "This password is shared by your Apple and Android profiles for Riga and Moscow. After changing it, generate and install new profiles. Windows devices have separate passwords.",
   deleteVpnAccess: "Delete VPN Access",
-  deleteVpnNote: "This removes VPN access on both servers. Your TOLF account, Passkeys and accepted promo code remain.",
+  deleteVpnNote: "This removes Apple and Android VPN access on both servers. Windows devices and your TOLF account remain.",
 
   passkeys: "Passkeys",
   passkeysDescription: "Passkeys provide access to your TOLF account. Add another Passkey before removing your current one.",
@@ -170,13 +170,13 @@ I18N.en = {
   installLinkReady: "Install link is ready.",
 
   changeVpnConfirmTitle: "Change the VPN password?",
-  changeVpnConfirmBody: "This changes the VPN password for both Riga and Moscow. Existing profiles will stop working after reconnecting. Generate and install a new profile for each server you use.",
+  changeVpnConfirmBody: "Change the password for Apple and Android profiles on Riga and Moscow? Existing profiles will stop working after reconnecting. Windows passwords will not change.",
   changingVpnPassword: "Changing VPN password…",
   newProfileNotReturned: "New profile was not returned",
   vpnPasswordChanged: "VPN password changed. Install the new profile, then generate a new profile for the other server if you use it.",
 
   deleteVpnConfirmTitle: "Delete VPN access?",
-  deleteVpnConfirmBody: "This deletes VPN credentials on Riga and Moscow. Installed profiles will stop working. Your account, Passkeys and accepted promo code remain.",
+  deleteVpnConfirmBody: "Delete Apple and Android VPN credentials on Riga and Moscow? Your Windows devices, account and Passkeys remain.",
   deletingVpn: "Deleting VPN access…",
   vpnDeleted: "VPN access deleted. Your TOLF account and Passkeys remain active.",
 
@@ -195,3 +195,21 @@ I18N.en = {
   connectionTestComplete: "Complete",
   connectionTestFailed: "Test failed",
 };
+
+Object.assign(I18N.en, {
+  "windowsTitle": "Windows devices",
+  "windowsDescription": "Prepare a separate VPN connection for your Windows computer. Your Apple and Android access stays independent.",
+  "windowsRoute": "Entry through Riga. Russian destinations through Moscow, other traffic through Riga. DNS is assigned by the VPN server.",
+  "windowsName": "Computer name",
+  "windowsAdd": "Add Windows device",
+  "windowsOpen": "Open Windows setup",
+  "windowsShare": "Share setup link",
+  "windowsPreparing": "Preparing access",
+  "windowsReissue": "Create setup link",
+  "windowsContinue": "Continue setup",
+  "windowsDelete": "Delete device",
+  "windowsDeleteConfirm": "Delete VPN access for “{name}”? Other devices will keep working.",
+  "windowsDeleted": "Windows device deleted",
+  "windowsWorking": "Preparing Windows setup…",
+  "windowsReady": "Windows setup is ready. Open the link on your computer or share it."
+});

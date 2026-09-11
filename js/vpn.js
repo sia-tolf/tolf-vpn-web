@@ -1,5 +1,6 @@
 function setVpnBusy(value) {
   vpnBusy = value;
+  for (const id of ["platformIos", "platformAndroid", "platformWindows"]) document.getElementById(id).disabled = value;
   for (const button of [createVpnButton, generateProfileButton, rotatePasswordButton,
     deleteVpnButton, deleteAccountButton, signOutButton, redeemPromoButton]) {
     button.disabled = value;

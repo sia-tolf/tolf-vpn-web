@@ -110,9 +110,9 @@ I18N.ru = {
   profileLinkCopied: "Ссылка на профиль скопирована.",
   profileShareFailed: "Не удалось поделиться профилем.",
   changeVpnPassword: "Сменить пароль доступа к TOLF VPN",
-  changePasswordNote: "Этот пароль используется профилями Риги и Москвы на всех ваших устройствах. После смены старые профили перестанут подключаться — создайте и установите новые.",
+  changePasswordNote: "Этот пароль общий для профилей Apple и Android на Риге и Москве. После смены создайте и установите новые профили. У устройств Windows отдельные пароли.",
   deleteVpnAccess: "Удалить VPN-доступ",
-  deleteVpnNote: "VPN-доступ будет удалён на обоих серверах. Аккаунт TOLF, Passkey и принятый промокод сохранятся.",
+  deleteVpnNote: "Доступ Apple и Android будет удалён на обоих серверах. Устройства Windows и аккаунт TOLF сохранятся.",
 
   passkeys: "Passkey",
   passkeysDescription: "Passkey обеспечивают доступ к вашему аккаунту TOLF. Перед удалением текущего Passkey добавьте другой.",
@@ -170,13 +170,13 @@ I18N.ru = {
   installLinkReady: "Ссылка для установки готова.",
 
   changeVpnConfirmTitle: "Сменить пароль VPN?",
-  changeVpnConfirmBody: "Пароль VPN изменится для Риги и Москвы. Старые профили перестанут работать после переподключения. Создайте и установите новый профиль для каждого используемого сервера.",
+  changeVpnConfirmBody: "Изменить пароль профилей Apple и Android для Риги и Москвы? Старые профили перестанут работать после переподключения. Пароли Windows не изменятся.",
   changingVpnPassword: "Меняем пароль VPN…",
   newProfileNotReturned: "Новый профиль не был получен",
   vpnPasswordChanged: "Пароль VPN изменён. Установите новый профиль, затем создайте профиль второго сервера, если используете его.",
 
   deleteVpnConfirmTitle: "Удалить VPN-доступ?",
-  deleteVpnConfirmBody: "VPN-учётные данные будут удалены на Риге и Москве. Установленные профили перестанут работать. Аккаунт, Passkey и принятый промокод сохранятся.",
+  deleteVpnConfirmBody: "Удалить VPN-реквизиты Apple и Android на Риге и Москве? Устройства Windows, аккаунт и Passkey сохранятся.",
   deletingVpn: "Удаляем VPN-доступ…",
   vpnDeleted: "VPN-доступ удалён. Ваш аккаунт TOLF и Passkey остаются активными.",
 
@@ -195,3 +195,21 @@ I18N.ru = {
   connectionTestComplete: "Завершено",
   connectionTestFailed: "Ошибка замера",
 };
+
+Object.assign(I18N.ru, {
+  "windowsTitle": "Устройства Windows",
+  "windowsDescription": "Подготовьте отдельное VPN-подключение для Windows-компьютера. Доступ Apple и Android остаётся независимым.",
+  "windowsRoute": "Вход через Ригу: российские направления через Москву, остальные через Ригу. DNS назначает VPN-сервер.",
+  "windowsName": "Название компьютера",
+  "windowsAdd": "Добавить устройство Windows",
+  "windowsOpen": "Открыть настройку Windows",
+  "windowsShare": "Поделиться ссылкой",
+  "windowsPreparing": "Подготовка доступа",
+  "windowsReissue": "Создать ссылку настройки",
+  "windowsContinue": "Продолжить настройку",
+  "windowsDelete": "Удалить устройство",
+  "windowsDeleteConfirm": "Удалить VPN-доступ для «{name}»? Другие устройства продолжат работать.",
+  "windowsDeleted": "Устройство Windows удалено",
+  "windowsWorking": "Подготавливаем Windows-подключение…",
+  "windowsReady": "Настройка Windows готова. Откройте ссылку на компьютере или отправьте её."
+});

@@ -1367,3 +1367,11 @@ button:disabled { opacity: 0.55; cursor: default; }
 #vpnUsername {
   font-weight: 600;
 }
+
+.windows-create-form { display: grid; gap: 12px; margin: 20px 0; }
+.windows-create-form label { color: var(--secondary); font-size: 15px; }
+.windows-create-form input { box-sizing: border-box; width: 100%; min-width: 0; padding: 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--card); color: var(--text); font: inherit; }
+.windows-device { padding: 16px; margin-top: 16px; }
+.windows-device h4 { margin: 0; font-size: 16px; font-weight: 600; overflow-wrap: anywhere; }
+.windows-device-username { color: var(--secondary); font-size: 14px; overflow-wrap: anywhere; }
+.platform-switcher { flex-wrap: wrap; }

@@ -48,10 +48,10 @@ if (!["en", "ru", "lv"].includes(currentLanguage)) {
 
 let currentPlatform = localStorage.getItem("tolfPlatform");
 
-if (currentPlatform !== "ios" && currentPlatform !== "android") {
+if (!["ios", "android", "windows"].includes(currentPlatform)) {
   currentPlatform = /Android/i.test(navigator.userAgent)
     ? "android"
-    : "ios";
+    : /Windows NT/i.test(navigator.userAgent) ? "windows" : "ios";
 }
 
 let lastVpnState = null;

@@ -110,9 +110,9 @@ I18N.lv = {
   profileLinkCopied: "Profila saite nokopēta.",
   profileShareFailed: "Profilu neizdevās kopīgot.",
   changeVpnPassword: "Mainīt TOLF VPN piekļuves paroli",
-  changePasswordNote: "Šo paroli izmanto Rīgas un Maskavas profili visās jūsu ierīcēs. Pēc paroles maiņas vecie profili vairs nevarēs izveidot savienojumu — izveidojiet un instalējiet jaunus.",
+  changePasswordNote: "Šī parole ir kopīga Apple un Android profiliem Rīgā un Maskavā. Pēc maiņas izveidojiet un instalējiet jaunus profilus. Windows ierīcēm ir atsevišķas paroles.",
   deleteVpnAccess: "Dzēst VPN piekļuvi",
-  deleteVpnNote: "VPN piekļuve tiks dzēsta abos serveros. TOLF konts, Passkey un pieņemtais reklāmas kods tiks saglabāti.",
+  deleteVpnNote: "Apple un Android piekļuve tiks dzēsta abos serveros. Windows ierīces un TOLF konts tiks saglabāti.",
 
   passkeys: "Passkey",
   passkeysDescription: "Passkey nodrošina piekļuvi jūsu TOLF kontam. Pirms pašreizējā Passkey dzēšanas pievienojiet citu.",
@@ -170,13 +170,13 @@ I18N.lv = {
   installLinkReady: "Instalēšanas saite ir gatava.",
 
   changeVpnConfirmTitle: "Mainīt VPN paroli?",
-  changeVpnConfirmBody: "VPN parole tiks mainīta gan Rīgai, gan Maskavai. Pēc atkārtotas savienošanās vecie profili vairs nedarbosies. Izveidojiet un instalējiet jaunu profilu katram izmantotajam serverim.",
+  changeVpnConfirmBody: "Mainīt Apple un Android profilu paroli Rīgai un Maskavai? Vecie profili pēc atkārtotas savienošanās vairs nedarbosies. Windows paroles netiks mainītas.",
   changingVpnPassword: "Mainām VPN paroli…",
   newProfileNotReturned: "Jaunais profils netika saņemts",
   vpnPasswordChanged: "VPN parole mainīta. Instalējiet jauno profilu un pēc tam izveidojiet otra servera profilu, ja to izmantojat.",
 
   deleteVpnConfirmTitle: "Dzēst VPN piekļuvi?",
-  deleteVpnConfirmBody: "VPN piekļuves dati tiks dzēsti Rīgā un Maskavā. Instalētie profili vairs nedarbosies. Konts, Passkey un pieņemtais reklāmas kods tiks saglabāti.",
+  deleteVpnConfirmBody: "Dzēst Apple un Android VPN piekļuves datus Rīgā un Maskavā? Windows ierīces, konts un Passkey tiks saglabāti.",
   deletingVpn: "Dzēšam VPN piekļuvi…",
   vpnDeleted: "VPN piekļuve dzēsta. Jūsu TOLF konts un Passkey paliek aktīvi.",
 
@@ -195,3 +195,21 @@ I18N.lv = {
   connectionTestComplete: "Pabeigts",
   connectionTestFailed: "Mērījums neizdevās",
 };
+
+Object.assign(I18N.lv, {
+  "windowsTitle": "Windows ierīces",
+  "windowsDescription": "Sagatavojiet atsevišķu VPN savienojumu Windows datoram. Apple un Android piekļuve paliek neatkarīga.",
+  "windowsRoute": "Ieeja caur Rīgu: Krievijas adreses caur Maskavu, pārējā datplūsma caur Rīgu. DNS piešķir VPN serveris.",
+  "windowsName": "Datora nosaukums",
+  "windowsAdd": "Pievienot Windows ierīci",
+  "windowsOpen": "Atvērt Windows iestatīšanu",
+  "windowsShare": "Kopīgot iestatīšanas saiti",
+  "windowsPreparing": "Piekļuve tiek sagatavota",
+  "windowsReissue": "Izveidot iestatīšanas saiti",
+  "windowsContinue": "Turpināt iestatīšanu",
+  "windowsDelete": "Dzēst ierīci",
+  "windowsDeleteConfirm": "Dzēst ierīces “{name}” VPN piekļuvi? Pārējās ierīces turpinās darboties.",
+  "windowsDeleted": "Windows ierīce izdzēsta",
+  "windowsWorking": "Tiek sagatavots Windows savienojums…",
+  "windowsReady": "Windows iestatījumi ir gatavi. Atveriet saiti datorā vai kopīgojiet to."
+});

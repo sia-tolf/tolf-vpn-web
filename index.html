@@ -12,7 +12,7 @@
 
   <link
     rel="stylesheet"
-    href="css/styles.css?v=network-cluster-5"
+    href="css/styles.css?v=windows-1"
   >
   <link
     rel="stylesheet"
@@ -20,28 +20,29 @@
   >
 
   <!-- Keep this order. Deferred scripts run after the HTML has been parsed. -->
-  <script defer src="js/config.js?v=platform-auto-1"></script>
-  <script defer src="js/locales/en.js?v=network-cluster-6"></script>
-  <script defer src="js/locales/ru.js?v=network-cluster-6"></script>
-  <script defer src="js/locales/lv.js?v=network-cluster-6"></script>
+  <script defer src="js/config.js?v=windows-1"></script>
+  <script defer src="js/locales/en.js?v=windows-1"></script>
+  <script defer src="js/locales/ru.js?v=windows-1"></script>
+  <script defer src="js/locales/lv.js?v=windows-1"></script>
   <script defer src="js/dom.js?v=share-profile-1"></script>
   <script defer src="js/network-metrics.js?v=latency-decimal-1"></script>
-  <script defer src="js/platform.js?v=share-profile-1"></script>
-  <script defer src="js/i18n.js?v=platform-1"></script>
+  <script defer src="js/platform.js?v=windows-1"></script>
+  <script defer src="js/i18n.js?v=windows-1"></script>
   <script defer src="js/webauthn.js?v=local-id-2"></script>
   <script defer src="js/api.js?v=local-id-2"></script>
-  <script defer src="js/ui.js?v=share-profile-1"></script>
+  <script defer src="js/ui.js?v=windows-1"></script>
   <script defer src="js/passkeys.js?v=local-id-2"></script>
   <script defer src="js/recovery.js?v=local-id-2"></script>
   <script defer src="js/account.js?v=local-id-2"></script>
   <script defer src="js/profile-settings.js?v=profile-options-1"></script>
-  <script defer src="js/vpn.js?v=share-profile-1"></script>
+  <script defer src="js/vpn.js?v=windows-1"></script>
   <script defer src="js/promo.js?v=header-promo-1"></script>
   <script defer src="js/location.js?v=entry-point-auto-8"></script>
   <script defer src="js/librespeed.js?v=1"></script>
   <script defer src="js/latency.js?v=connection-test-1"></script>
   <script defer src="js/connection-test.js?v=connection-test-3"></script>
-  <script defer src="js/app.js?v=local-id-2"></script>
+  <script defer src="js/windows.js?v=windows-1"></script>
+  <script defer src="js/app.js?v=windows-1"></script>
 </head>
 
 <body>
@@ -116,6 +117,7 @@
               </svg>
               <span>Android</span>
             </button>
+            <button id="platformWindows" class="platform-button hidden" type="button" aria-pressed="false"><svg class="platform-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 3h9v8H2zM13 3h9v8h-9zM2 13h9v8H2zM13 13h9v8h-9z"/></svg><span>Windows</span></button>
           </div>
         </div>
       </div>
@@ -364,6 +366,23 @@
           Manage your TOLF VPN access.
         </p>
 
+        <section id="windowsPanel" class="hidden" aria-labelledby="windowsTitle">
+          <h3 id="windowsTitle" data-i18n="windowsTitle">Windows devices</h3>
+          <p class="card-description" data-i18n="windowsDescription">Prepare a separate VPN connection for your Windows computer.</p>
+          <p class="card-description" data-i18n="windowsRoute">Entry through Riga. Russian destinations through Moscow, other traffic through Riga. DNS is assigned by the server.</p>
+          <form id="windowsCreateForm" class="windows-create-form">
+            <label for="windowsDeviceName" data-i18n="windowsName">Computer name</label>
+            <input id="windowsDeviceName" type="text" maxlength="64" required autocomplete="off">
+            <button id="windowsCreateButton" class="primary" type="submit" data-i18n="windowsAdd">Add Windows device</button>
+          </form>
+          <p id="windowsMessage" class="message" role="status" aria-live="polite"></p>
+          <div id="windowsDelivery" class="profile-delivery-actions hidden">
+            <a id="windowsInstallLink" class="button-link primary" target="_blank" rel="noopener noreferrer" data-i18n="windowsOpen">Open Windows setup</a>
+            <button id="windowsShareButton" class="constructive" type="button" data-i18n="windowsShare">Share setup link</button>
+          </div>
+          <div id="windowsDeviceList"></div>
+        </section>
+        <div id="legacyVpnPanel">
         <div
           id="serverSection"
           class="server-section hidden"
@@ -950,6 +969,8 @@
             servers. Your TOLF account and Passkeys will
             remain active.
           </p>
+        </div>
+
         </div>
 
         <div

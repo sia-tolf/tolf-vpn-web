@@ -72,6 +72,7 @@ function renderLocalIdSettings() {
 }
 
 function getProfileSelection() {
+  if (currentPlatform === "windows") return null;
   const server = getSelectedServerKey();
   const localId = getSelectedLocalId();
 
@@ -189,6 +190,7 @@ function setInstallLink(profileUrl) {
 }
 
 function showSignedOut() {
+  if (typeof clearWindowsDevices === "function") clearWindowsDevices();
   loadingCard.classList.add("hidden");
   vpnCard.classList.add("hidden");
   signedOutCard.classList.remove("hidden");
@@ -293,4 +295,6 @@ function showVpn(vpn) {
   vpnMessage.className = "message";
 
   renderVpnState(vpn);
+  renderPlatform();
+  if (currentPlatform === "windows" && typeof loadWindowsDevices === "function") loadWindowsDevices();
 }

@@ -1,11 +1,18 @@
 function renderPlatform() {
   const isIos = currentPlatform === "ios";
+  const isWindows = currentPlatform === "windows";
+  const winButton = document.getElementById("platformWindows");
+  winButton.classList.toggle("active", isWindows);
+  winButton.setAttribute("aria-pressed", String(isWindows));
+  document.getElementById("windowsPanel").classList.toggle("hidden", !isWindows);
+  document.getElementById("legacyVpnPanel").classList.toggle("hidden", isWindows);
+  if (typeof renderWindowsDevices === "function") renderWindowsDevices();
 
   platformIos.classList.toggle("active", isIos);
-  platformAndroid.classList.toggle("active", !isIos);
+  platformAndroid.classList.toggle("active", currentPlatform === "android");
 
   platformIos.setAttribute("aria-pressed", String(isIos));
-  platformAndroid.setAttribute("aria-pressed", String(!isIos));
+  platformAndroid.setAttribute("aria-pressed", String(currentPlatform === "android"));
 
   generateProfileButton.dataset.i18n = isIos
     ? "generateAppleProfile"
@@ -40,7 +47,7 @@ function renderPlatform() {
 }
 
 function setPlatform(platform) {
-  if (platform !== "ios" && platform !== "android") {
+  if (vpnBusy || !["ios", "android", "windows"].includes(platform)) {
     return;
   }
 
@@ -50,6 +57,7 @@ function setPlatform(platform) {
   localStorage.setItem("tolfPlatform", platform);
 
   renderPlatform();
+  if (changed && platform === "windows" && typeof loadWindowsDevices === "function") loadWindowsDevices();
 
   if (changed && typeof setInstallLink === "function") {
     setInstallLink(null);
@@ -67,5 +75,7 @@ platformAndroid.addEventListener(
   "click",
   () => setPlatform("android")
 );
+
+document.getElementById("platformWindows").addEventListener("click", () => setPlatform("windows"));
 
 setPlatform(currentPlatform);
