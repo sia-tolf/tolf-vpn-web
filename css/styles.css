@@ -1400,3 +1400,16 @@ button:disabled { opacity: 0.55; cursor: default; }
 
 #invitationCard, #existingVpnCard { margin-bottom: 16px; }
 #invitationText { line-height: 1.5; overflow-wrap: anywhere; }
+
+.passkey-label-field { margin: 18px 0; text-align: left; }
+.passkey-label-field label { display: block; font-weight: 600; margin-bottom: 8px; }
+.passkey-label-field input { width: 100%; box-sizing: border-box; }
+.passkey-label-field p { font-size: 0.875rem; margin: 8px 0; }
+.passkey-label-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+.passkey-rename-form { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.passkey-rename-form input { width: 100%; min-width: 0; }
+.passkey-name { overflow-wrap: anywhere; }
+.passkey-info { min-width: 0; }
+@media (max-width: 600px) {
+  .passkey-label-actions { width: 100%; }
+}

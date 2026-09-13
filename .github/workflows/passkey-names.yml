@@ -1,0 +1,28 @@
+name: Passkey names
+on:
+  push:
+    paths:
+      - 'setup/passkey-names/**'
+      - 'tests/passkey-names/**'
+      - 'js/passkeys.js'
+      - '.github/workflows/passkey-names.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: pip install fastapi httpx
+      - run: python3 -m unittest discover -s tests/passkey-names -v
+      - run: npm install --no-save playwright
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/passkey-names/frontend.cjs
+      - run: sha256sum setup/passkey-names/update-passkey-names-v1.py

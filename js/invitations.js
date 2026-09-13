@@ -77,6 +77,8 @@ existingVpnForm.addEventListener("submit", async event => {
 
 function renderInvitation() {
   renderExistingVpn();
+  const nameInput = document.getElementById("registerPasskeyName");
+  if (nameInput && !nameInput.dataset.edited) nameInput.value = invitationUsername || "";
   const linkingSignIn = Boolean(vpnInvitation && !invitationAccount);
   document.getElementById("inviteSetupHelp").classList.toggle("hidden", !linkingSignIn);
   createAccountButton.textContent = t(linkingSignIn ? "inviteCreatePasskey" : "createNewAccount");
@@ -149,3 +151,5 @@ invitationButton.addEventListener("click", async () => {
     renderInvitation();
   }
 });
+
+document.getElementById("registerPasskeyName").addEventListener("input", (event) => { event.target.dataset.edited = "1"; });

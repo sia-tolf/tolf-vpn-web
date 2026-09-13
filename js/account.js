@@ -86,9 +86,10 @@ createAccountButton.addEventListener("click", async () => {
   signedOutMessage.className = "message";
 
   try {
+    const passkeyName = await checkedPasskeyName("registerPasskeyName");
     const begin = await apiRequest("/passkey/register/begin", {
       method: "POST",
-      body: "{}"
+      body: JSON.stringify({ passkeyName })
     });
 
     const credential = await navigator.credentials.create({

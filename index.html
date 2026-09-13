@@ -12,7 +12,7 @@
 
   <link
     rel="stylesheet"
-    href="css/styles.css?v=website-signin-1"
+    href="css/styles.css?v=passkey-names-1"
   >
   <link
     rel="stylesheet"
@@ -21,9 +21,9 @@
 
   <!-- Keep this order. Deferred scripts run after the HTML has been parsed. -->
   <script defer src="js/config.js?v=windows-1"></script>
-  <script defer src="js/locales/en.js?v=website-signin-1"></script>
-  <script defer src="js/locales/ru.js?v=website-signin-1"></script>
-  <script defer src="js/locales/lv.js?v=website-signin-1"></script>
+  <script defer src="js/locales/en.js?v=passkey-names-1"></script>
+  <script defer src="js/locales/ru.js?v=passkey-names-1"></script>
+  <script defer src="js/locales/lv.js?v=passkey-names-1"></script>
   <script defer src="js/dom.js?v=share-profile-1"></script>
   <script defer src="js/network-metrics.js?v=latency-decimal-1"></script>
   <script defer src="js/platform.js?v=windows-back-1"></script>
@@ -31,9 +31,9 @@
   <script defer src="js/webauthn.js?v=local-id-2"></script>
   <script defer src="js/api.js?v=local-id-2"></script>
   <script defer src="js/ui.js?v=website-signin-1"></script>
-  <script defer src="js/passkeys.js?v=local-id-2"></script>
+  <script defer src="js/passkeys.js?v=passkey-names-1"></script>
   <script defer src="js/recovery.js?v=local-id-2"></script>
-  <script defer src="js/account.js?v=website-signin-1"></script>
+  <script defer src="js/account.js?v=passkey-names-1"></script>
   <script defer src="js/profile-settings.js?v=profile-options-1"></script>
   <script defer src="js/vpn.js?v=windows-1"></script>
   <script defer src="js/promo.js?v=header-promo-1"></script>
@@ -42,7 +42,7 @@
   <script defer src="js/latency.js?v=connection-test-1"></script>
   <script defer src="js/connection-test.js?v=connection-test-3"></script>
   <script defer src="js/windows.js?v=windows-accordion-1"></script>
-  <script defer src="js/invitations.js?v=website-signin-1"></script>
+  <script defer src="js/invitations.js?v=passkey-names-1"></script>
   <script defer src="js/app.js?v=windows-1"></script>
 </head>
 
@@ -241,6 +241,7 @@
           Sign in to manage your VPN access and devices.
         </p>
 
+<div class="passkey-label-field"><label for="registerPasskeyName" data-i18n="passkeySignInName">Passkey name</label><input id="registerPasskeyName" class="settings-input" type="text" maxlength="80" autocomplete="off"><p data-i18n="passkeyLabelHelp">Choose a name you will recognize when signing in.</p></div>
         <div
           id="signedOutMainActions"
           class="actions"
@@ -1036,7 +1037,8 @@
             class="passkey-list"
           ></div>
 
-          <div class="passkey-add-row">
+          <div class="passkey-label-field"><label for="addPasskeyName" data-i18n="passkeyAdditionalName">Passkey name</label><input id="addPasskeyName" class="settings-input" type="text" maxlength="80" autocomplete="off"><p data-i18n="passkeyLabelHelp">Choose a name you will recognize when signing in.</p></div>
+<div class="passkey-add-row">
             <button
               id="addPasskeyButton"
               class="primary add-passkey-button"
