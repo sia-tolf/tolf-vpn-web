@@ -34,6 +34,13 @@ jobs:
         run: |
           & ./setup/windows/dist/native-tests.exe
           if ($LASTEXITCODE -ne 0) { throw 'Native integration tests failed' }
+      - name: Diagnose native provider schema on failure
+        if: failure()
+        shell: powershell
+        run: |
+          Get-ChildItem "$env:WINDIR/System32/WindowsPowerShell/v1.0/Modules/VpnClient/*IPsec*.cdxml" | ForEach-Object { Get-Content $_.FullName }
+          $c = Get-CimClass -Namespace 'root/Microsoft/Windows/RemoteAccess/Client' -ClassName PS_VpnConnectionIPsecConfiguration
+          $c.CimClassMethods['SetByCustomPolicy'].Parameters | Format-List *
       - name: Build London updater
         run: python setup/windows/build-update.py
       - name: Publish unsigned test build

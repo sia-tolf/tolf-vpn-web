@@ -72,7 +72,7 @@ class Wmi {
  ComPtr<IWbemServices> svc;
 public:
  Wmi(){ComPtr<IWbemLocator>loc;Hr(CoCreateInstance(CLSID_WbemLocator,nullptr,CLSCTX_INPROC_SERVER,IID_PPV_ARGS(&loc)),L"WINDOWS_COMPONENTS");Hr(loc->ConnectServer(Bstr(L"ROOT\\Microsoft\\Windows\\RemoteAccess\\Client"),nullptr,nullptr,nullptr,WBEM_FLAG_CONNECT_USE_MAX_WAIT,nullptr,nullptr,&svc),L"WINDOWS_COMPONENTS");Hr(CoSetProxyBlanket(svc.Get(),RPC_C_AUTHN_WINNT,RPC_C_AUTHZ_NONE,nullptr,RPC_C_AUTHN_LEVEL_CALL,RPC_C_IMP_LEVEL_IMPERSONATE,nullptr,EOAC_NONE),L"WINDOWS_COMPONENTS");}
- ComPtr<IWbemClassObject> input(const wchar_t*cls,const wchar_t*method){ComPtr<IWbemClassObject>obj,signature,in;Hr(svc->GetObject(Bstr(cls),0,nullptr,&obj,nullptr),L"WINDOWS_COMPONENTS");Hr(obj->GetMethod(method,0,&signature,nullptr),L"WINDOWS_COMPONENTS");Hr(signature->SpawnInstance(0,&in),L"WINDOWS_COMPONENTS");return in;}
+ ComPtr<IWbemClassObject> input(const wchar_t*cls,const wchar_t*method){ComPtr<IWbemClassObject>obj,signature,in;Hr(svc->GetObject(Bstr(cls),WBEM_FLAG_USE_AMENDED_QUALIFIERS,nullptr,&obj,nullptr),L"WINDOWS_COMPONENTS");Hr(obj->GetMethod(method,0,&signature,nullptr),L"WINDOWS_COMPONENTS");Hr(signature->SpawnInstance(0,&in),L"WINDOWS_COMPONENTS");return in;}
  static void text(IWbemClassObject*o,const wchar_t*k,const wchar_t*v){Var x;x.vt=VT_BSTR;x.bstrVal=SysAllocString(v);Hr(o->Put(k,0,&x,0),L"VPN_CONFIGURATION");}
  static void boolean(IWbemClassObject*o,const wchar_t*k,bool b){Var x;x.vt=VT_BOOL;x.boolVal=b?VARIANT_TRUE:VARIANT_FALSE;Hr(o->Put(k,0,&x,0),L"VPN_CONFIGURATION");}
  static void number(IWbemClassObject*o,const wchar_t*k,DWORD n){Var x;x.vt=VT_I4;x.lVal=(LONG)n;Hr(o->Put(k,0,&x,0),L"VPN_CONFIGURATION");}
