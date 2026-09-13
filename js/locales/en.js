@@ -3,7 +3,7 @@ I18N.en = {
   lastPasskeyProtected: "You cannot delete the only Passkey: it is needed to sign in. To replace it, add another Passkey first. This account is protected from deletion on the website. Contact the administrator to remove all access.",
   inviteRetryAction: "Retry linking",
   passkeySignInName: "Name for website sign-in",
-  passkeyAdditionalName: "New Passkey name",
+  passkeyAdditionalName: "Additional Passkey name",
   passkeyLabelHelp: "For example: Alexander — personal, Office or Irina — iPad. TOLF will be added to the name.",
   passkeyRename: "Website label",
   passkeySaveName: "Save",

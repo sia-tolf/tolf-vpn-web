@@ -3,7 +3,7 @@ I18N.ru = {
   lastPasskeyProtected: "Нельзя удалить единственный Passkey: он нужен для входа на сайт. Чтобы заменить его, сначала добавьте другой Passkey. Этот аккаунт защищён от удаления через сайт. Для удаления всего доступа обратитесь к администратору.",
   inviteRetryAction: "Повторить привязку",
   passkeySignInName: "Название для входа на сайт",
-  passkeyAdditionalName: "Название нового Passkey",
+  passkeyAdditionalName: "Название дополнительного Passkey",
   passkeyLabelHelp: "Например: Александр — личный, Офис или Ирина — iPad. К названию добавится TOLF.",
   passkeyRename: "Название на сайте",
   passkeySaveName: "Сохранить",

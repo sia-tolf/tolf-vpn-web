@@ -3,7 +3,7 @@ I18N.lv = {
   lastPasskeyProtected: "Vienīgo Passkey nevar izdzēst: tā ir vajadzīga ieejai vietnē. Lai to aizstātu, vispirms pievienojiet citu Passkey. Šis konts ir aizsargāts pret dzēšanu vietnē. Lai dzēstu visu piekļuvi, sazinieties ar administratoru.",
   inviteRetryAction: "Mēģināt piesaistīt vēlreiz",
   passkeySignInName: "Nosaukums ieejai vietnē",
-  passkeyAdditionalName: "Jaunās Passkey nosaukums",
+  passkeyAdditionalName: "Papildu Passkey nosaukums",
   passkeyLabelHelp: "Piemēram: Aleksandrs — personīgais, Birojs vai Irina — iPad. Nosaukumam tiks pievienots TOLF.",
   passkeyRename: "Nosaukums vietnē",
   passkeySaveName: "Saglabāt",
