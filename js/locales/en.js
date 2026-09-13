@@ -1,4 +1,18 @@
 I18N.en = {
+  inviteTitle: "Existing VPN access",
+  inviteSignIn: "Sign in or register below to link your existing VPN access. Your login, password and installed profiles will be preserved.",
+  inviteAccept: "Link VPN access",
+  inviteDismiss: "Dismiss invitation",
+  inviteReady: "Link your existing VPN access to this account. Your login, password and installed profiles will be preserved.",
+  inviteConflict: "This account already has VPN access, or the invited user is already linked. Contact the administrator; existing access has not been replaced.",
+  inviteWorking: "Linking…",
+  inviteSuccess: "VPN user {username} is linked. You can create profiles with the existing login and password.",
+  inviteInvalid: "This invitation is invalid, used or expired. Ask the administrator for a new one.",
+  inviteRetry: "Linking could not be confirmed. Retry using the same invitation.",
+  inviteProtected: "This VPN user is protected from deletion. Contact the administrator to delete the account.",
+  invitePending: "Finish the pending link by reopening the original invitation and retrying.",
+  inviteUnavailable: "The existing VPN record could not be found or read. Contact the administrator.",
+
   windowsAddHeading: "Add a new computer",
   windowsDevicesHeading: "Added computers",
   windowsNameRequired: "Enter a computer name.",

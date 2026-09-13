@@ -1,0 +1,28 @@
+name: Existing VPN invitations
+on:
+  push:
+    paths:
+      - 'setup/invitations/**'
+      - 'tests/invitations/**'
+      - 'js/invitations.js'
+      - '.github/workflows/invitations.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: pip install fastapi httpx
+      - run: sudo env PATH="$PATH" python3 -m unittest discover -s tests/invitations -v
+      - run: npm install --no-save playwright
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/invitations/frontend.cjs
+      - run: python3 setup/invitations/build.py && git diff --exit-code -- setup/invitations/install-invitations-v1.py setup/invitations/install-invitations-v1.py.sha256

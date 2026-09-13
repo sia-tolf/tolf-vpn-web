@@ -190,6 +190,7 @@ function setInstallLink(profileUrl) {
 }
 
 function showSignedOut() {
+  if (typeof updateInvitationAccount === "function") updateInvitationAccount(null);
   if (typeof clearWindowsDevices === "function") clearWindowsDevices();
   loadingCard.classList.add("hidden");
   vpnCard.classList.add("hidden");

@@ -1,4 +1,18 @@
 I18N.lv = {
+  inviteTitle: "Esošā VPN piekļuve",
+  inviteSignIn: "Piesakieties vai reģistrējieties zemāk, lai piesaistītu esošo VPN piekļuvi. Lietotājvārds, parole un instalētie profili tiks saglabāti.",
+  inviteAccept: "Piesaistīt VPN piekļuvi",
+  inviteDismiss: "Aizvērt uzaicinājumu",
+  inviteReady: "Piesaistiet šim kontam esošo VPN piekļuvi. Lietotājvārds, parole un instalētie profili tiks saglabāti.",
+  inviteConflict: "Šim kontam jau ir VPN piekļuve vai uzaicinātais lietotājs jau ir piesaistīts. Sazinieties ar administratoru; esošā piekļuve nav aizstāta.",
+  inviteWorking: "Piesaista…",
+  inviteSuccess: "VPN lietotājs {username} ir piesaistīts. Varat veidot profilus ar esošo lietotājvārdu un paroli.",
+  inviteInvalid: "Uzaicinājums nav derīgs, ir izmantots vai tā termiņš ir beidzies. Lūdziet administratoram jaunu uzaicinājumu.",
+  inviteRetry: "Neizdevās apstiprināt piesaisti. Mēģiniet vēlreiz ar to pašu uzaicinājumu.",
+  inviteProtected: "Šis VPN lietotājs ir aizsargāts pret dzēšanu. Lai dzēstu kontu, sazinieties ar administratoru.",
+  invitePending: "Pabeidziet iesākto piesaisti: atveriet sākotnējo uzaicinājumu un mēģiniet vēlreiz.",
+  inviteUnavailable: "Esošo VPN ierakstu neizdevās atrast vai nolasīt. Sazinieties ar administratoru.",
+
   windowsAddHeading: "Pievienot jaunu datoru",
   windowsDevicesHeading: "Pievienotie datori",
   windowsNameRequired: "Ievadiet datora nosaukumu.",

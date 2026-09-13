@@ -8,6 +8,7 @@ async function loadAccount() {
     showVpn(data.vpn);
 
     await loadPasskeys();
+    await updateInvitationAccount(data);
   } catch {
     showSignedOut();
   }

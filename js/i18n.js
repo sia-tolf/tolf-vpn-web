@@ -47,6 +47,7 @@ function setLanguage(language) {
     renderPasskeys(lastPasskeys);
   }
 
+  if (typeof renderInvitation === "function") renderInvitation();
   renderPromoState();
   renderLocalIdSettings();
   renderPlatform();
