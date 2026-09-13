@@ -1486,3 +1486,16 @@ button:disabled { opacity: 0.55; cursor: default; }
     flex-basis: 100%;
   }
 }
+
+/* The site switches to stacked cards below 760px. Match that same breakpoint. */
+@media (max-width: 759px) {
+  .passkey-item .passkey-label-actions {
+    width: 100% !important;
+    max-width: none !important;
+    margin-left: 0 !important;
+  }
+  .passkey-item .passkey-label-actions > .passkey-remove-button {
+    width: 100% !important;
+    flex: 1 1 100% !important;
+  }
+}

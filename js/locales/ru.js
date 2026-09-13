@@ -160,7 +160,7 @@ I18N.ru = {
   shareAndroidProfile: "Поделиться .sswan",
   profileLinkCopied: "Ссылка на профиль скопирована.",
   profileShareFailed: "Не удалось поделиться профилем.",
-  changeVpnPassword: "Сменить пароль доступа к TOLF VPN",
+  changeVpnPassword: "Сменить пароль VPN-доступа",
   changePasswordNote: "Этот пароль общий для профилей Apple и Android на Риге и Москве. После смены создайте и установите новые профили. У устройств Windows отдельные пароли.",
   deleteVpnAccess: "Удалить VPN-доступ",
   deleteVpnNote: "Доступ Apple и Android будет удалён на обоих серверах. Устройства Windows и аккаунт TOLF сохранятся.",
