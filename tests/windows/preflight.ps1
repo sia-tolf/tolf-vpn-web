@@ -29,3 +29,5 @@ function Get-VpnConnection { }
     if (($case -eq 'ok' -and $code -ne 0) -or ($case -ne 'ok' -and $code -eq 0)) { throw "$case unexpected exit: $code" }
     Write-Output "PASS $case"
 }
+# The last child intentionally fails; do not propagate that expected exit to CI.
+exit 0
