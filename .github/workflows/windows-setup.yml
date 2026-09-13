@@ -32,6 +32,7 @@ jobs:
       - name: Test native Windows VPN configuration
         shell: powershell
         run: |
+          ./tests/windows/native-policy.ps1
           & ./setup/windows/dist/native-tests.exe
           if ($LASTEXITCODE -ne 0) { throw 'Native integration tests failed' }
       - name: Diagnose native provider schema on failure

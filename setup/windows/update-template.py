@@ -21,7 +21,7 @@ def main():
     root=Path('/opt/tolf-api'); module=root/'tolf_windows.py'
     if os.geteuid()!=0 or not module.is_file(): raise RuntimeError('Run on London EDISUK, where Windows API v1 is installed')
     current=module.read_bytes()
-    if hashlib.sha256(current).hexdigest() not in EXPECTED: raise RuntimeError('Existing Windows module differs from verified v1.0/v1.1/v1.2; nothing changed')
+    if hashlib.sha256(current.replace(b'\r\n', b'\n')).hexdigest() not in EXPECTED: raise RuntimeError('Existing Windows module differs from verified v1.0/v1.1/v1.2; nothing changed')
     payloads={name:zlib.decompress(base64.b64decode(value)) for name,value in PAYLOADS.items()}
     for name,data in payloads.items():
         if hashlib.sha256(data).hexdigest()!=HASHES[name]: raise RuntimeError('Payload checksum mismatch')
