@@ -40,35 +40,49 @@ References:
 - https://learn.microsoft.com/en-us/powershell/module/vpnclient/set-vpnconnectionipsecconfiguration
 - https://learn.microsoft.com/en-us/windows/win32/api/ras/nf-ras-rassetcredentialsw
 
-## GUI setup 1.2 (test build)
+## Native setup 2.0 (test build)
 
-Before requesting credentials or changing VPN settings, the installer checks
-.NET Framework 4.8+, Windows 10/11, Windows PowerShell 5.1, the VpnClient cmdlets,
-RAS system files, and that RasMan, IKEEXT and PolicyAgent are not disabled.
-It also checks CIM/read access and dynamic compilation in a separate process
-with a 30-second timeout. Failure messages are localized in English, Russian
-and Latvian. PowerShell 7, Python, Node.js and Visual C++ runtimes are not required.
-These checks do not install dependencies or change machine policies/services.
-If the .NET CLR is entirely missing, Windows must handle startup failure before
-the managed application can display its own checks. Windows CI compiles the EXE
-and tests successful preflight plus OS, service and module failure paths.
+The downloadable EXE is native C++17, built with MSVC `/MT` for Windows 10/11
+x64 (Windows 10 version 1607 or newer). It requires no .NET Framework,
+PowerShell process, Python, Node.js or separately installed Visual C++ runtime.
+The C++ runtime is linked into the executable. Only built-in Windows DLLs are
+imported. PowerShell and MSVC are used on the build runner, not the user's PC.
 
-`desktop/TolfSetup.cs` is a .NET Framework Windows Forms application, compiled on
-Windows by `build-desktop.ps1`. It receives the personal link from the download
-filename or a pasted link, POSTs to the fixed HTTPS API, and configures native
-IKEv2 through its embedded PowerShell resource. Credentials travel over stdin,
-not command-line arguments or temporary files. No browser security settings,
-certificate validation, or machine-wide execution policy are disabled.
-After configuration it invokes rasdial with only the saved connection name.
+WinHTTP retrieves settings from the fixed HTTPS API with TLS certificate checks,
+redirects disabled, a bounded response, and timeouts. A strict flat JSON parser
+validates the endpoint, device UUID and matching username. Personal tokens are
+accepted only from the exact API link or the established download filename.
+Credentials never appear in command lines, logs or temporary files.
 
-The executable is shared across users; the token in the filename expires with
-the personal link. Renaming the file requires pasting the original link. The
-signed-in device creation and Apple/Android API remain unchanged. Older ZIP
-packages remain internal to the API so previously issued links keep working;
-they are no longer offered as downloads. Server-side storage retention remains
-48 hours, download links 24 hours. Links can be reused during that period.
+Native COM calls the inbox Windows VPN WMI provider directly. `PS_VpnConnection`
+creates a per-user IKEv2 EAP-MSCHAPv2 profile, with Windows full tunneling and
+server-side `sr` routing. `PS_VpnConnectionIPsecConfiguration.SetByCustomPolicy`
+sets AES256/SHA256/DH14, SHA256128/AES256 ESP and no PFS. RAS stores credentials;
+`RasDialDlgW` supplies Windows' connection progress and Cancel button. The
+connection remains available in Windows Settings after the installer closes.
+No new background agent, service, root certificate or firewall rule is installed.
 
-The workflow publishes an **unsigned prerelease**, plus a self-contained London
-updater with backups, a v1 source-hash guard and health-check rollback. Production
-code signing and real Windows VPN connection testing remain required. Neither
-compilation nor API tests prove native Windows EAP/DNS behavior.
+Preflight checks the native VPN provider and required services before fetching
+credentials. Reruns reuse the matching entry, reject conflicting entries, and
+remove a newly created entry when configuration fails. Existing matching entries
+are retained on failure; policy/credential updates are not a full transaction.
+The UI supports English, Russian and Latvian and runs as the current user.
+
+Windows CI builds and checks DLL dependencies; its native integration executable
+validates links/JSON, creates a temporary profile with dummy credentials, sets
+IPsec policy, repeats setup, rejects conflicts and tests rollback, then removes
+the temporary connection. Tests do not dial a real VPN or use customer credentials.
+The build is unsigned. Real Windows 10/11 client connection, DNS, routing and UI
+checks remain required before a production release.
+
+The release also contains a London updater with verified payload hashes, backups,
+a known-source guard for 1.0/1.1/1.2 and health-check rollback. The live API's
+installerVersion changes only after that updater is executed on London. Previous
+personal links remain valid until expiry; retained ZIP internals support existing
+API storage and are not the downloadable native EXE.
+
+Native interfaces are documented by Microsoft:
+- https://learn.microsoft.com/en-us/previous-versions/windows/desktop/vpnclientpsprov/add-ps-vpnconnection
+- https://learn.microsoft.com/en-us/previous-versions/windows/desktop/vpnclientpsprov/setbycustompolicy-ps-vpnconnectionipsecconfiguration
+- https://learn.microsoft.com/en-us/windows/win32/api/ras/nf-ras-rassetcredentialsw
+- https://learn.microsoft.com/en-us/windows/win32/api/rasdlg/nf-rasdlg-rasdialdlgw

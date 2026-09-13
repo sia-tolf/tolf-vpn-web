@@ -1,17 +1,12 @@
 $ErrorActionPreference = 'Stop'
-$root = $PSScriptRoot
-$out = Join-Path $root 'dist'
-New-Item -ItemType Directory -Force $out | Out-Null
-$tokens=$null; $parseErrors=$null
-[System.Management.Automation.Language.Parser]::ParseFile((Join-Path $root 'desktop/Configure.ps1'),[ref]$tokens,[ref]$parseErrors) | Out-Null
-if ($parseErrors.Count) { throw ($parseErrors | Out-String) }
-$csc = Join-Path $env:WINDIR 'Microsoft.NET/Framework64/v4.0.30319/csc.exe'
-$source = Join-Path $root 'desktop\TolfSetup.cs'
-$resource = Join-Path $root 'desktop\Configure.ps1'
-$preflight = Join-Path $root 'desktop\Preflight.ps1'
-[System.Management.Automation.Language.Parser]::ParseFile($preflight,[ref]$tokens,[ref]$parseErrors) | Out-Null
-if ($parseErrors.Count) { throw ($parseErrors | Out-String) }
-$binary = Join-Path $out 'TOLF-Setup.exe'
-& $csc /nologo /target:winexe /platform:anycpu /optimize+ /reference:System.dll /reference:System.Core.dll /reference:System.Drawing.dll /reference:System.Windows.Forms.dll /reference:System.Web.Extensions.dll "/resource:$resource,Configure.ps1" "/resource:$preflight,Preflight.ps1" "/out:$binary" $source
-if ($LASTEXITCODE -ne 0) { throw 'Installer compilation failed' }
-Get-FileHash "$out/TOLF-Setup.exe" -Algorithm SHA256
+$vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio/Installer/vswhere.exe'
+$vs = & $vswhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+if (-not $vs) { throw 'MSVC build tools required on build machine' }
+$dev = Join-Path $vs 'Common7/Tools/VsDevCmd.bat'
+$build = Join-Path $PSScriptRoot 'native/build.cmd'
+& cmd.exe /d /s /c "`"`"$dev`" -arch=x64 -host_arch=x64 && `"$build`"`""
+if ($LASTEXITCODE -ne 0) { throw 'Native installer compilation failed' }
+$deps = Get-Content (Join-Path $PSScriptRoot 'dist/dependencies.txt') -Raw
+Write-Output $deps
+if ($deps -match '(?i)mscoree|vcruntime|msvcp|ucrtbase|api-ms-win-crt') { throw 'Unexpected external runtime dependency' }
+Get-FileHash (Join-Path $PSScriptRoot 'dist/TOLF-Setup.exe') -Algorithm SHA256

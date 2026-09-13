@@ -29,9 +29,11 @@ jobs:
       - name: Build GUI installer
         shell: powershell
         run: ./setup/windows/build-desktop.ps1
-      - name: Test Windows prerequisite checks
+      - name: Test native Windows VPN configuration
         shell: powershell
-        run: ./tests/windows/preflight.ps1
+        run: |
+          & ./setup/windows/dist/native-tests.exe
+          if ($LASTEXITCODE -ne 0) { throw 'Native integration tests failed' }
       - name: Build London updater
         run: python setup/windows/build-update.py
       - name: Publish unsigned test build
@@ -40,4 +42,4 @@ jobs:
         shell: pwsh
         run: |
           $tag = "windows-setup-$env:GITHUB_SHA"
-          gh release create $tag setup/windows/dist/TOLF-Setup.exe setup/windows/dist/update-windows-gui.py setup/windows/dist/SHA256SUMS --prerelease --target $env:GITHUB_SHA --title "TOLF Windows setup 1.2 test build" --notes "Prerequisite checks run before credentials are retrieved or VPN settings change. Unsigned test build; real Windows VPN connection testing remains required."
+          gh release create $tag setup/windows/dist/TOLF-Setup.exe setup/windows/dist/update-windows-gui.py setup/windows/dist/SHA256SUMS --prerelease --target $env:GITHUB_SHA --title "TOLF Windows setup 2.0 native test build" --notes "Native C++ installer using built-in Windows APIs. No .NET, PowerShell or external Visual C++ runtime needed. Unsigned test build; real Windows VPN connection testing remains required."
