@@ -5,6 +5,7 @@ let invitationBusy = false;
 let invitationProtected = false;
 let invitationMessageKey = "";
 let invitationUsername = "";
+let invitationAttempt = "";
 const invitationKey = "tolfExistingVpnInvitation";
 const invitationFragment = new URLSearchParams(location.hash.slice(1));
 const incomingInvitation = invitationFragment.get("invite");
@@ -61,7 +62,7 @@ existingVpnForm.addEventListener("submit", async event => {
     invitationMessageKey = "";
     try { sessionStorage.setItem(invitationKey,vpnInvitation); } catch {}
     document.getElementById("existingVpnUsername").value = "";
-    renderInvitation();
+    await updateInvitationAccount(invitationAccount);
     invitationCard.scrollIntoView({block:"center"});
   } catch (error) {
     const keys = {invalid_credentials:"existingVpnInvalid", admin_invitation_required:"existingVpnAdmin",
@@ -93,9 +94,9 @@ function renderInvitation() {
     ? (!invitationAccount ? (invitationUsername ? "existingVpnVerifiedSignIn" : "inviteSignIn") : conflict ? "inviteConflict" : (invitationUsername ? "existingVpnVerifiedReady" : "inviteReady"))
     : "inviteProtected");
   invitationText.textContent = t(key, {username: invitationUsername});
-  invitationButton.classList.toggle("hidden", !vpnInvitation || !invitationAccount || conflict);
+  invitationButton.classList.toggle("hidden", !vpnInvitation || !invitationAccount || conflict || !invitationMessageKey || invitationBusy);
   invitationButton.disabled = invitationBusy;
-  invitationButton.textContent = t(invitationBusy ? "inviteWorking" : "inviteAccept");
+  invitationButton.textContent = t(invitationBusy ? "inviteWorking" : "inviteRetryAction");
   invitationDismiss.classList.toggle("hidden", !vpnInvitation);
   invitationDismiss.disabled = invitationBusy;
   // Server enforces this protection too, before deleting any Windows devices.
@@ -115,18 +116,28 @@ async function updateInvitationAccount(data) {
     } catch { /* Backend deployment can follow the website deployment. */ }
   }
   renderInvitation();
+  if (data && vpnInvitation && !data.vpn?.configured && !invitationBusy) {
+    const attempt = vpnInvitation + ":" + String(data.userId || data.id || "");
+    if (invitationAttempt !== attempt) {
+      invitationAttempt = attempt;
+      await claimVerifiedInvitation();
+    }
+  }
 }
 
 invitationDismiss.addEventListener("click", () => {
   vpnInvitation = "";
+  invitationUsername = "";
+  invitationAttempt = "";
   invitationMessageKey = "";
   try { sessionStorage.removeItem(invitationKey); } catch {}
   renderInvitation();
 });
 
-invitationButton.addEventListener("click", async () => {
-  if (invitationBusy || !vpnInvitation || !invitationAccount) return;
+async function claimVerifiedInvitation() {
+  if (invitationBusy || !vpnInvitation || !invitationAccount || invitationAccount.vpn?.configured) return;
   invitationBusy = true;
+  invitationMessageKey = "inviteWorking";
   renderInvitation();
   try {
     const result = await apiRequest("/vpn/invitations/claim", {
@@ -150,6 +161,8 @@ invitationButton.addEventListener("click", async () => {
     invitationBusy = false;
     renderInvitation();
   }
-});
+}
+
+invitationButton.addEventListener("click", claimVerifiedInvitation);
 
 document.getElementById("registerPasskeyName").addEventListener("input", (event) => { event.target.dataset.edited = "1"; });
