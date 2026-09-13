@@ -78,6 +78,7 @@ existingVpnForm.addEventListener("submit", async event => {
 function renderInvitation() {
   renderExistingVpn();
   const linkingSignIn = Boolean(vpnInvitation && !invitationAccount);
+  document.getElementById("inviteSetupHelp").classList.toggle("hidden", !linkingSignIn);
   createAccountButton.textContent = t(linkingSignIn ? "inviteCreatePasskey" : "createNewAccount");
   signInButton.textContent = t(linkingSignIn ? "inviteExistingPasskey" : "signInWithPasskey");
   createAccountButton.classList.toggle("primary", linkingSignIn);
