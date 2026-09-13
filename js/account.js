@@ -6,6 +6,11 @@ async function loadAccount() {
 
     applyServerAccess(data);
     showVpn(data.vpn);
+    const additionalName = document.getElementById("addPasskeyName");
+    if (additionalName.dataset.account !== String(data.vpn?.username || "")) {
+      additionalName.value = data.vpn?.username || "";
+      additionalName.dataset.account = String(data.vpn?.username || "");
+    }
 
     await loadPasskeys();
     await updateInvitationAccount(data);

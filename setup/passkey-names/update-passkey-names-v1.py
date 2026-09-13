@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """Install meaningful Passkey labels on the London API only."""
 import ast
+import fcntl
+import json
+import urllib.request
 import os
 from pathlib import Path
 import shutil
@@ -43,6 +46,8 @@ def patch(source):
 def main():
     if sys.argv[1:] != ["london"] or os.geteuid() != 0:
         raise SystemExit("Run as root: python3 update-passkey-names-v1.py london")
+    lock = open("/var/lock/tolf-passkey-names-install.lock", "a")
+    fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
     root = Path("/opt/tolf-api")
     main_file = root / "main.py"
     replacement = patch(main_file.read_text())
@@ -74,8 +79,17 @@ def main():
             write(target, content)
         subprocess.run(["systemctl", "restart", "tolf-api.service"], check=True, timeout=40)
         import time
-        time.sleep(2)
-        subprocess.run(["systemctl", "is-active", "--quiet", "tolf-api.service"], check=True)
+        for attempt in range(10):
+            try:
+                with urllib.request.urlopen("https://api.tolf.is/passkeys/naming", timeout=5) as response:
+                    if json.load(response).get("version") != 1:
+                        raise RuntimeError("Passkey naming endpoint unavailable")
+                subprocess.run(["systemctl", "is-active", "--quiet", "tolf-api.service"], check=True)
+                break
+            except Exception:
+                if attempt == 9:
+                    raise
+                time.sleep(1)
     except Exception:
         for target in targets:
             if existed[target]:
