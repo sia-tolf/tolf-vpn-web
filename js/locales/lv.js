@@ -1,6 +1,8 @@
 I18N.lv = {
+  inviteExistingPasskey: "Pieteikties ar esošu Passkey",
+  inviteCreatePasskey: "Izveidot kontu un Passkey",
   existingVpnVerifiedReady: "Piesaistīt lietotāja {username} VPN piekļuvi šim kontam? Esošais lietotājvārds, parole un instalētie profili tiks saglabāti.",
-  existingVpnVerifiedSignIn: "VPN piekļuve lietotājam {username} ir pārbaudīta. Piesakieties vai reģistrējieties zemāk un apstipriniet piesaisti 15 minūšu laikā.",
+  existingVpnVerifiedSignIn: "VPN piekļuve lietotājam {username} ir pārbaudīta. Ja vietnes konta vēl nav, izvēlieties “Izveidot kontu un Passkey” — ierīce piedāvās saglabāt pieteikšanās atslēgu. Ja konts jau ir, izvēlieties “Pieteikties ar esošu Passkey”. Pēc pieteikšanās apstipriniet piesaisti. Pārbaude ir derīga 15 minūtes.",
   existingVpnOpen: "Man jau ir VPN piekļuve",
   existingVpnHelp: "Ievadiet esošo VPN lietotājvārdu un paroli. Pēc pārbaudes piesakieties ar Passkey vai reģistrējieties un apstipriniet piesaisti. Instalētie VPN profili turpinās darboties.",
   existingVpnUsername: "VPN lietotājvārds",
@@ -15,9 +17,9 @@ I18N.lv = {
   existingVpnUnavailable: "Pārbaude pašlaik nav pieejama. Mēģiniet vēlāk.",
 
   inviteTitle: "Esošā VPN piekļuve",
-  inviteSignIn: "Piesakieties vai reģistrējieties zemāk, lai piesaistītu esošo VPN piekļuvi. Lietotājvārds, parole un instalētie profili tiks saglabāti.",
+  inviteSignIn: "Lai piesaistītu VPN piekļuvi, nepieciešams vietnes konts. Izvēlieties “Izveidot kontu un Passkey”, ja konta vēl nav, vai “Pieteikties ar esošu Passkey”, ja jau esat reģistrējies. Pēc tam apstipriniet piesaisti. Esošais VPN lietotājvārds, parole un profili tiks saglabāti.",
   inviteAccept: "Piesaistīt VPN piekļuvi",
-  inviteDismiss: "Aizvērt uzaicinājumu",
+  inviteDismiss: "Atcelt piesaisti",
   inviteReady: "Piesaistiet šim kontam esošo VPN piekļuvi. Lietotājvārds, parole un instalētie profili tiks saglabāti.",
   inviteConflict: "Šim kontam jau ir VPN piekļuve vai uzaicinātais lietotājs jau ir piesaistīts. Sazinieties ar administratoru; esošā piekļuve nav aizstāta.",
   inviteWorking: "Piesaista…",

@@ -77,6 +77,13 @@ existingVpnForm.addEventListener("submit", async event => {
 
 function renderInvitation() {
   renderExistingVpn();
+  const linkingSignIn = Boolean(vpnInvitation && !invitationAccount);
+  createAccountButton.textContent = t(linkingSignIn ? "inviteCreatePasskey" : "createNewAccount");
+  signInButton.textContent = t(linkingSignIn ? "inviteExistingPasskey" : "signInWithPasskey");
+  createAccountButton.classList.toggle("primary", linkingSignIn);
+  createAccountButton.classList.toggle("secondary", !linkingSignIn);
+  signInButton.classList.toggle("primary", !linkingSignIn);
+  signInButton.classList.toggle("secondary", linkingSignIn);
   invitationCard.classList.toggle("hidden", !vpnInvitation && !invitationMessageKey && !invitationProtected);
   const conflict = Boolean(invitationAccount?.vpn?.configured);
   const key = invitationMessageKey || (vpnInvitation

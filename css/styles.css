@@ -1397,3 +1397,6 @@ button:disabled { opacity: 0.55; cursor: default; }
 .existing-vpn-form input { width: 100%; min-width: 0; box-sizing: border-box; }
 .existing-vpn-form button { margin-top: 6px; width: 100%; }
 #existingVpnDetails summary { cursor: pointer; }
+
+#invitationCard, #existingVpnCard { margin-bottom: 16px; }
+#invitationText { line-height: 1.5; overflow-wrap: anywhere; }

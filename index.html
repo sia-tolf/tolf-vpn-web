@@ -12,7 +12,7 @@
 
   <link
     rel="stylesheet"
-    href="css/styles.css?v=invitations-2"
+    href="css/styles.css?v=linking-steps-1"
   >
   <link
     rel="stylesheet"
@@ -21,19 +21,19 @@
 
   <!-- Keep this order. Deferred scripts run after the HTML has been parsed. -->
   <script defer src="js/config.js?v=windows-1"></script>
-  <script defer src="js/locales/en.js?v=invitations-2"></script>
-  <script defer src="js/locales/ru.js?v=invitations-2"></script>
-  <script defer src="js/locales/lv.js?v=invitations-2"></script>
+  <script defer src="js/locales/en.js?v=linking-steps-1"></script>
+  <script defer src="js/locales/ru.js?v=linking-steps-1"></script>
+  <script defer src="js/locales/lv.js?v=linking-steps-1"></script>
   <script defer src="js/dom.js?v=share-profile-1"></script>
   <script defer src="js/network-metrics.js?v=latency-decimal-1"></script>
   <script defer src="js/platform.js?v=windows-back-1"></script>
-  <script defer src="js/i18n.js?v=invitations-2"></script>
+  <script defer src="js/i18n.js?v=linking-steps-1"></script>
   <script defer src="js/webauthn.js?v=local-id-2"></script>
   <script defer src="js/api.js?v=local-id-2"></script>
-  <script defer src="js/ui.js?v=invitations-2"></script>
+  <script defer src="js/ui.js?v=linking-steps-1"></script>
   <script defer src="js/passkeys.js?v=local-id-2"></script>
   <script defer src="js/recovery.js?v=local-id-2"></script>
-  <script defer src="js/account.js?v=invitations-2"></script>
+  <script defer src="js/account.js?v=linking-steps-1"></script>
   <script defer src="js/profile-settings.js?v=profile-options-1"></script>
   <script defer src="js/vpn.js?v=windows-1"></script>
   <script defer src="js/promo.js?v=header-promo-1"></script>
@@ -42,7 +42,7 @@
   <script defer src="js/latency.js?v=connection-test-1"></script>
   <script defer src="js/connection-test.js?v=connection-test-3"></script>
   <script defer src="js/windows.js?v=windows-accordion-1"></script>
-  <script defer src="js/invitations.js?v=invitations-2"></script>
+  <script defer src="js/invitations.js?v=linking-steps-1"></script>
   <script defer src="js/app.js?v=windows-1"></script>
 </head>
 
@@ -218,11 +218,13 @@
     </section>
 
     <section id="invitationCard" class="card hidden" aria-labelledby="invitationTitle">
+      <div class="card-content">
       <h2 id="invitationTitle" data-i18n="inviteTitle">Existing VPN access</h2>
       <p id="invitationText" role="status" aria-live="polite"></p>
       <div class="recovery-actions">
         <button id="invitationButton" class="primary hidden" type="button" data-i18n="inviteAccept">Link VPN access</button>
-        <button id="invitationDismiss" class="secondary hidden" type="button" data-i18n="inviteDismiss">Dismiss invitation</button>
+        <button id="invitationDismiss" class="secondary hidden" type="button" data-i18n="inviteDismiss">Cancel linking</button>
+      </div>
       </div>
     </section>
 

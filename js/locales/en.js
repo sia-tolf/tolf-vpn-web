@@ -1,6 +1,8 @@
 I18N.en = {
+  inviteExistingPasskey: "Sign in with an existing Passkey",
+  inviteCreatePasskey: "Create account and Passkey",
   existingVpnVerifiedReady: "Link VPN access for {username} to this account? The existing login, password and installed profiles will be preserved.",
-  existingVpnVerifiedSignIn: "VPN access for {username} is verified. Sign in or register below, then confirm linking within 15 minutes.",
+  existingVpnVerifiedSignIn: "VPN access for {username} is verified. If you are new to this site, choose “Create account and Passkey” — your device will offer to save a sign-in key. If you already have an account, choose “Sign in with an existing Passkey”. Confirm linking after signing in. Verification lasts 15 minutes.",
   existingVpnOpen: "I already have VPN access",
   existingVpnHelp: "Enter your existing VPN login and password. After verification, sign in with a Passkey or register and confirm the link. Installed VPN profiles will keep working.",
   existingVpnUsername: "VPN login",
@@ -15,9 +17,9 @@ I18N.en = {
   existingVpnUnavailable: "Verification is temporarily unavailable. Try again later.",
 
   inviteTitle: "Existing VPN access",
-  inviteSignIn: "Sign in or register below to link your existing VPN access. Your login, password and installed profiles will be preserved.",
+  inviteSignIn: "You need a website account to link this VPN access. Choose “Create account and Passkey” if you are new, or “Sign in with an existing Passkey” if already registered. Then confirm linking. Your existing VPN login, password and profiles will be preserved.",
   inviteAccept: "Link VPN access",
-  inviteDismiss: "Dismiss invitation",
+  inviteDismiss: "Cancel linking",
   inviteReady: "Link your existing VPN access to this account. Your login, password and installed profiles will be preserved.",
   inviteConflict: "This account already has VPN access, or the invited user is already linked. Contact the administrator; existing access has not been replaced.",
   inviteWorking: "Linking…",
