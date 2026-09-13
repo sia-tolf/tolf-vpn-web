@@ -1,4 +1,6 @@
 I18N.en = {
+  lastPasskeyExplanation: "You cannot delete the only Passkey: it is needed to sign in. To replace it, add another Passkey first. To remove all access, use “Delete TOLF Account”. This deletes the account and all associated VPN access.",
+  lastPasskeyProtected: "You cannot delete the only Passkey: it is needed to sign in. To replace it, add another Passkey first. This account is protected from deletion on the website. Contact the administrator to remove all access.",
   inviteRetryAction: "Retry linking",
   passkeySignInName: "Name for website sign-in",
   passkeyAdditionalName: "New Passkey name",

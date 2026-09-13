@@ -51,8 +51,10 @@ function renderPasskeys(passkeys) {
     removeButton.textContent = t("remove");
 
     if (total <= 1) {
-      removeButton.disabled = true;
-      removeButton.title = t("addAnotherBeforeRemoving");
+      removeButton.addEventListener("click", () => {
+        const protectedAccount = typeof invitationProtected !== "undefined" && invitationProtected;
+        window.alert(t(protectedAccount ? "lastPasskeyProtected" : "lastPasskeyExplanation"));
+      });
     } else {
       removeButton.addEventListener("click", async () => {
         const confirmed = confirmLocalized(
