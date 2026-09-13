@@ -1463,3 +1463,5 @@ button:disabled { opacity: 0.55; cursor: default; }
 @media (max-width: 600px) {
   .passkey-label-actions { width: 100%; }
 }
+
+.passkey-label-actions { width: min(160px, 100%); grid-template-columns: minmax(0, 1fr); margin-left: auto; }

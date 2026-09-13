@@ -93,51 +93,7 @@ function renderPasskeys(passkeys) {
     item.appendChild(info);
     const actions = document.createElement("div");
     actions.className = "passkey-label-actions";
-    const rename = document.createElement("button");
-    rename.type = "button";
-    rename.className = "secondary";
-    rename.textContent = t("passkeyRename");
-    rename.addEventListener("click", () => {
-      if (info.querySelector("form")) return;
-      const form = document.createElement("form");
-      form.className = "passkey-rename-form";
-      const input = document.createElement("input");
-      input.className = "settings-input";
-      input.maxLength = 80;
-      input.required = true;
-      input.value = (passkey.name || "").replace(/^TOLF · /, "");
-      input.setAttribute("aria-label", t("passkeySignInName"));
-      const save = document.createElement("button");
-      save.type = "submit";
-      save.className = "secondary";
-      save.textContent = t("passkeySaveName");
-      const cancel = document.createElement("button");
-      cancel.type = "button";
-      cancel.className = "secondary";
-      cancel.textContent = t("passkeyCancelName");
-      cancel.addEventListener("click", () => { form.remove(); rename.focus(); });
-      form.append(input, save, cancel);
-      form.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        save.disabled = true;
-        try {
-          await requirePasskeyNaming();
-          await apiRequest("/passkeys/rename", {
-            method: "POST", body: JSON.stringify({id: passkey.id, passkeyName: input.value})
-          });
-          await loadPasskeys();
-          passkeyMessage.textContent = t("passkeyNameSaved");
-          passkeyMessage.className = "passkey-message success";
-        } catch (error) {
-          passkeyMessage.textContent = error.message;
-          passkeyMessage.className = "passkey-message error";
-        } finally { save.disabled = false; }
-      });
-      info.appendChild(form);
-      input.focus();
-      input.select();
-    });
-    actions.append(rename, removeButton);
+    actions.appendChild(removeButton);
     item.appendChild(actions);
     passkeyList.appendChild(item);
   });
@@ -189,6 +145,7 @@ addPasskeyButton.addEventListener("click", async () => {
       })
     });
 
+    document.getElementById("addPasskeyName").value = "";
     await loadPasskeys();
 
     passkeyMessage.textContent = finish.passkeyName

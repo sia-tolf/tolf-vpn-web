@@ -9,7 +9,7 @@ I18N.en = {
   passkeyNameSaved: "Website label updated. Rename the entry in your password manager separately.",
   passkeyNameRequired: "Enter a meaningful name of 1–80 characters.",
   passkeyNamingUnavailable: "Passkey naming is not enabled on the server yet. Retry after the API update.",
-  passkeyNamesNote: "A new Passkey name is sent to your password manager during creation. Renaming here changes only the website label. It does not change your VPN username or rename an existing entry in Apple Passwords or 1Password.",
+  passkeyNamesNote: "Choose a name when creating a new Passkey to distinguish keys in the website list. It does not change your VPN username.",
   inviteSetupHelp: "Set up Passkey sign-in. After sign-in, your verified VPN access will be linked automatically; the VPN username, password and profiles stay unchanged.",
   inviteExistingPasskey: "Sign in with Passkey",
   inviteCreatePasskey: "Set up website sign-in",

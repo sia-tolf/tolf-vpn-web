@@ -9,7 +9,7 @@ I18N.lv = {
   passkeyNameSaved: "Nosaukums vietnē mainīts. Paroļu pārvaldniekā tas jāmaina atsevišķi.",
   passkeyNameRequired: "Ievadiet saprotamu nosaukumu no 1 līdz 80 rakstzīmēm.",
   passkeyNamingUnavailable: "Passkey nosaukumi serverī vēl nav iespējoti. Mēģiniet pēc API atjaunināšanas.",
-  passkeyNamesNote: "Jaunās Passkey nosaukums izveides laikā tiek nosūtīts paroļu pārvaldniekam. Pārdēvēšana šeit maina tikai nosaukumu vietnē. Tā nemaina VPN lietotājvārdu vai jau saglabāto ierakstu Apple Passwords vai 1Password.",
+  passkeyNamesNote: "Izveidojot jaunu Passkey, izvēlieties nosaukumu, lai atšķirtu atslēgas vietnes sarakstā. Tas nemaina VPN lietotājvārdu.",
   inviteSetupHelp: "Iestatiet ieeju ar Passkey. Pēc ieiešanas pārbaudītā VPN piekļuve tiks piesaistīta automātiski; VPN lietotājvārds, parole un profili saglabāsies.",
   inviteExistingPasskey: "Pieteikties ar Passkey",
   inviteCreatePasskey: "Iestatīt piekļuvi vietnei",
