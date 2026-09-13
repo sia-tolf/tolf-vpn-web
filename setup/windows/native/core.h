@@ -77,7 +77,18 @@ public:
  static void boolean(IWbemClassObject*o,const wchar_t*k,bool b){Var x;x.vt=VT_BOOL;x.boolVal=b?VARIANT_TRUE:VARIANT_FALSE;Hr(o->Put(k,0,&x,0),L"VPN_CONFIGURATION");}
  static void number(IWbemClassObject*o,const wchar_t*k,DWORD n){Var x;x.vt=VT_I4;x.lVal=(LONG)n;Hr(o->Put(k,0,&x,0),L"VPN_CONFIGURATION");}
  static void strings(IWbemClassObject*o,const wchar_t*k,const wchar_t*v){Var x;x.vt=VT_ARRAY|VT_BSTR;x.parray=SafeArrayCreateVector(VT_BSTR,0,1);if(!x.parray)throw std::bad_alloc();LONG ix=0;Bstr b(v);Hr(SafeArrayPutElement(x.parray,&ix,b.p),L"VPN_CONFIGURATION");Hr(o->Put(k,0,&x,0),L"VPN_CONFIGURATION");}
- void call(const wchar_t*cls,const wchar_t*method,IWbemClassObject*in){ComPtr<IWbemCallResult>pending;Hr(svc->ExecMethod(Bstr(cls),Bstr(method),WBEM_FLAG_RETURN_IMMEDIATELY,nullptr,in,nullptr,&pending),L"VPN_CONFIGURATION");ComPtr<IWbemClassObject>out;Hr(pending->GetResultObject(60000,&out),L"VPN_CONFIGURATION");if(!out)throw Failure{L"VPN_CONFIGURATION",ERROR_TIMEOUT};Var result;Hr(out->Get(L"ReturnValue",0,&result,nullptr,nullptr),L"VPN_CONFIGURATION");if((result.vt!=VT_I4&&result.vt!=VT_UI4)||result.ulVal!=0)throw Failure{L"VPN_CONFIGURATION",result.ulVal};}
+ void call(const wchar_t*cls,const wchar_t*method,IWbemClassObject*in){
+  ComPtr<IWbemCallResult>pending; ComPtr<IWbemClassObject>out;
+  Hr(svc->ExecMethod(Bstr(cls),Bstr(method),WBEM_FLAG_RETURN_IMMEDIATELY,nullptr,in,&out,&pending),method);
+  LONG status=0; HRESULT wait=pending->GetCallStatus(60000,&status);
+  if(wait==WBEM_S_TIMEDOUT)throw Failure{method,ERROR_TIMEOUT};
+  Hr(wait,method);Hr(status,method);
+  if(!out)Hr(pending->GetResultObject(5000,&out),method);
+  if(!out)throw Failure{method,ERROR_INVALID_DATA};
+  Var result;Hr(out->Get(L"ReturnValue",0,&result,nullptr,nullptr),method);
+  if((result.vt!=VT_I4&&result.vt!=VT_UI4)||result.ulVal!=0)throw Failure{method,result.ulVal};
+ }
+
  // Numeric provider enums verified against Windows VpnClient CDXML in CI.
  void policy(const std::wstring&name,bool apply){auto in=input(L"PS_VpnConnectionIPsecConfiguration",L"SetByCustomPolicy");text(in.Get(),L"ConnectionName",name.c_str());boolean(in.Get(),L"AllUserConnection",false);boolean(in.Get(),L"Force",true);boolean(in.Get(),L"PassThru",false);number(in.Get(),L"AuthenticationTransformConstants",2);number(in.Get(),L"CipherTransformConstants",5);number(in.Get(),L"EncryptionMethod",4);number(in.Get(),L"IntegrityCheckMethod",2);number(in.Get(),L"DHGroup",3);number(in.Get(),L"PfsGroup",0);if(apply)call(L"PS_VpnConnectionIPsecConfiguration",L"SetByCustomPolicy",in.Get());}
  void add(const std::wstring&name,const Settings&c){auto in=input(L"PS_VpnConnection",L"Add");text(in.Get(),L"Name",name.c_str());text(in.Get(),L"ServerAddress",c.server.c_str());text(in.Get(),L"TunnelType",L"Ikev2");text(in.Get(),L"EncryptionLevel",L"Required");strings(in.Get(),L"AuthenticationMethod",L"Eap");boolean(in.Get(),L"AllUserConnection",false);boolean(in.Get(),L"RememberCredential",true);boolean(in.Get(),L"SplitTunneling",false);boolean(in.Get(),L"UseWinlogonCredential",false);boolean(in.Get(),L"Force",true);boolean(in.Get(),L"PassThru",false);
