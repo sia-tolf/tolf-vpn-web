@@ -3,7 +3,7 @@ I18N.ru = {
   passkeySignInName: "Название для входа на сайт",
   passkeyAdditionalName: "Название нового Passkey",
   passkeyLabelHelp: "Например: Александр — личный, Офис или Ирина — iPad. К названию добавится TOLF.",
-  passkeyRename: "Переименовать",
+  passkeyRename: "Название на сайте",
   passkeySaveName: "Сохранить",
   passkeyCancelName: "Отмена",
   passkeyNameSaved: "Подпись на сайте изменена. Название в менеджере паролей изменяется отдельно.",

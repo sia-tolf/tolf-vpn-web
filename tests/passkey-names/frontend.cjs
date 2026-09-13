@@ -27,7 +27,7 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
  await page.evaluate(()=>{invitationUsername="manual";document.getElementById("registerPasskeyName").dataset.edited="";renderInvitation();});
  assert.equal(await page.locator('#registerPasskeyName').inputValue(),"manual");
  await page.evaluate(()=>{document.getElementById("passkeyList").closest("section").classList.remove("hidden");renderPasskeys([{id:"YQ",name:"TOLF Passkey #1"}]);});
- await page.getByRole('button',{name:'Переименовать',exact:true}).click();
+ await page.getByRole('button',{name:'Название на сайте',exact:true}).click();
  await page.locator('.passkey-rename-form input').fill("Офис");
  await page.locator('.passkey-rename-form button[type=submit]').click();
  await page.waitForFunction(()=>document.querySelector(".passkey-name").textContent==="TOLF · Офис");

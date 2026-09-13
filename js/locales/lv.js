@@ -3,7 +3,7 @@ I18N.lv = {
   passkeySignInName: "Nosaukums ieejai vietnē",
   passkeyAdditionalName: "Jaunās Passkey nosaukums",
   passkeyLabelHelp: "Piemēram: Aleksandrs — personīgais, Birojs vai Irina — iPad. Nosaukumam tiks pievienots TOLF.",
-  passkeyRename: "Pārdēvēt",
+  passkeyRename: "Nosaukums vietnē",
   passkeySaveName: "Saglabāt",
   passkeyCancelName: "Atcelt",
   passkeyNameSaved: "Nosaukums vietnē mainīts. Paroļu pārvaldniekā tas jāmaina atsevišķi.",

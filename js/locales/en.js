@@ -3,7 +3,7 @@ I18N.en = {
   passkeySignInName: "Name for website sign-in",
   passkeyAdditionalName: "New Passkey name",
   passkeyLabelHelp: "For example: Alexander — personal, Office or Irina — iPad. TOLF will be added to the name.",
-  passkeyRename: "Rename",
+  passkeyRename: "Website label",
   passkeySaveName: "Save",
   passkeyCancelName: "Cancel",
   passkeyNameSaved: "Website label updated. Rename the entry in your password manager separately.",
