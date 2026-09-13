@@ -250,10 +250,7 @@ function renderVpnState(vpn) {
 
     const username = vpn.username || "";
 
-    vpnUsername.textContent =
-      username.length > 18
-        ? `${username.slice(0, 9)}…${username.slice(-5)}`
-        : username;
+    vpnUsername.textContent = username;
 
     vpnUsername.title = username;
 
