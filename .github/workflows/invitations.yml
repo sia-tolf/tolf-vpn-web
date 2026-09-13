@@ -26,3 +26,4 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: node tests/invitations/frontend.cjs
       - run: python3 setup/invitations/build.py && git diff --exit-code -- setup/invitations/update-invitations-v2.py setup/invitations/update-invitations-v2.py.sha256
+      - run: sha256sum setup/invitations/fix-registry-adoption.py
