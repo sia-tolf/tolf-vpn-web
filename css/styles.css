@@ -1413,3 +1413,21 @@ button:disabled { opacity: 0.55; cursor: default; }
 @media (max-width: 600px) {
   .passkey-label-actions { width: 100%; }
 }
+
+.invitation-actions {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  margin-top: 16px;
+}
+.invitation-actions > button {
+  flex: 1 1 0;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+#invitationDismiss {
+  background: #ffffff;
+  color: #d70015;
+  border: 1px solid #d70015;
+}
