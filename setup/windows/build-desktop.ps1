@@ -4,7 +4,9 @@ $vs = & $vswhere -latest -products '*' -requires Microsoft.VisualStudio.Componen
 if (-not $vs) { throw 'MSVC build tools required on build machine' }
 $dev = Join-Path $vs 'Common7/Tools/VsDevCmd.bat'
 $build = Join-Path $PSScriptRoot 'native/build.cmd'
-& cmd.exe /d /s /c "`"`"$dev`" -arch=x64 -host_arch=x64 && `"$build`"`""
+$env:TOLF_VS_DEV = $dev
+$env:TOLF_NATIVE_BUILD = $build
+& cmd.exe /d /c 'call "%TOLF_VS_DEV%" -arch=x64 -host_arch=x64 && call "%TOLF_NATIVE_BUILD%"'
 if ($LASTEXITCODE -ne 0) { throw 'Native installer compilation failed' }
 $deps = Get-Content (Join-Path $PSScriptRoot 'dist/dependencies.txt') -Raw
 Write-Output $deps
