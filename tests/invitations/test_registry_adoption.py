@@ -55,19 +55,20 @@ class RegistryTests(unittest.TestCase):
         self.assertEqual(fix.patch(changed),changed)
         compile(changed,"patched","exec")
     def test_riga_expired_claim_retry(self):
-        import ast, hashlib, re, time
+        import ast, hashlib, hmac, re, time
         source=fix.patch_riga(Path("setup/invitations/tolf_invite_riga.py").read_text())
         tree=ast.parse(source)
         node=next(n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name=="claim")
         class Rejected(Exception): pass
         ns={"account_id":lambda x:None,"TOKEN":re.compile("[a-z]{43}"),"hashlib":hashlib,"time":time,
-            "credential_exists":lambda x:None,"PROTECTED":set(),"Rejected":Rejected}
+            "credential_exists":lambda x:None,"PROTECTED":set(),"Rejected":Rejected,
+            "hmac":hmac,"proof_digest":lambda u,p:p,"password_proof":lambda u:"proof"}
         exec(compile(ast.Module(body=[node],type_ignores=[]),"claim","exec"),ns)
         con=sqlite3.connect(":memory:")
         self.addCleanup(con.close)
         con.executescript("CREATE TABLE invitations(digest,username,expires,claimed_by,revoked,proof); CREATE TABLE bindings(account,username,created);")
         token="a"*43
-        con.execute("INSERT INTO invitations VALUES(?,?,?,?,?,?)",(hashlib.sha256(token.encode()).hexdigest(),"manual",0,"account",0,None))
+        con.execute("INSERT INTO invitations VALUES(?,?,?,?,?,?)",(hashlib.sha256(token.encode()).hexdigest(),"manual",0,"account",0,"proof"))
         con.execute("INSERT INTO bindings VALUES('account','manual',0)")
         self.assertEqual(ns["claim"](con,"account",token)["username"],"manual")
         with self.assertRaises(Rejected): ns["claim"](con,"other",token)
