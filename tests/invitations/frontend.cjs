@@ -38,7 +38,7 @@ const root=path.resolve(__dirname,'../..');
  assert.equal(await page.locator('#invitationButton').isVisible(),false);
  await page.waitForFunction(()=>document.getElementById('invitationText').textContent.includes('user0'));
  assert.equal(await page.locator('#deleteVpnButton').isVisible(),false);
- assert.equal(await page.locator('#deleteAccountButton').isVisible(),false);
+ assert.equal(await page.locator('#deleteAccountButton').isVisible(),true);
  for(const lang of ['ru','lv','en']) {
   await page.evaluate(lang=>setLanguage(lang),lang);
   assert.equal(await page.locator('#invitationText').textContent().then(x=>x.includes('user0')),true);
