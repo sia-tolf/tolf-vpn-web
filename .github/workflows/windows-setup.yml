@@ -29,6 +29,9 @@ jobs:
       - name: Build GUI installer
         shell: powershell
         run: ./setup/windows/build-desktop.ps1
+      - name: Test Windows prerequisite checks
+        shell: powershell
+        run: ./tests/windows/preflight.ps1
       - name: Build London updater
         run: python setup/windows/build-update.py
       - name: Publish unsigned test build
@@ -37,4 +40,4 @@ jobs:
         shell: pwsh
         run: |
           $tag = "windows-setup-$env:GITHUB_SHA"
-          gh release create $tag setup/windows/dist/TOLF-Setup.exe setup/windows/dist/update-windows-gui.py setup/windows/dist/SHA256SUMS --prerelease --target $env:GITHUB_SHA --title "TOLF Windows setup 1.1 test build" --notes "Unsigned test build. Native VPN configuration and connection require verification on Windows. Source and build workflow are in this commit."
+          gh release create $tag setup/windows/dist/TOLF-Setup.exe setup/windows/dist/update-windows-gui.py setup/windows/dist/SHA256SUMS --prerelease --target $env:GITHUB_SHA --title "TOLF Windows setup 1.2 test build" --notes "Prerequisite checks run before credentials are retrieved or VPN settings change. Unsigned test build; real Windows VPN connection testing remains required."

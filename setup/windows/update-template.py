@@ -4,7 +4,7 @@ import base64, fcntl, hashlib, json, os, shutil, subprocess, tempfile, time, url
 from pathlib import Path
 PAYLOADS = {}  # Replaced by build-update.py
 HASHES = {}
-EXPECTED = 'a512aea770fa961d42d84cc5eef610d3af3ec2bcecadf8a70dbd3700d8c56959'
+EXPECTED = {'a512aea770fa961d42d84cc5eef610d3af3ec2bcecadf8a70dbd3700d8c56959', '2047e0cfbeb063aa41c062ae3668f2ff2a07edb2e775e7aed7034a2c2090b5e3'}
 
 def write(path, data, info):
     fd, temp = tempfile.mkstemp(dir=path.parent, prefix='.tolf-update-')
@@ -21,7 +21,7 @@ def main():
     root=Path('/opt/tolf-api'); module=root/'tolf_windows.py'
     if os.geteuid()!=0 or not module.is_file(): raise RuntimeError('Run on London EDISUK, where Windows API v1 is installed')
     current=module.read_bytes()
-    if hashlib.sha256(current).hexdigest()!=EXPECTED: raise RuntimeError('Existing Windows module differs from expected v1; nothing changed')
+    if hashlib.sha256(current).hexdigest() not in EXPECTED: raise RuntimeError('Existing Windows module differs from verified v1.0/v1.1; nothing changed')
     payloads={name:zlib.decompress(base64.b64decode(value)) for name,value in PAYLOADS.items()}
     for name,data in payloads.items():
         if hashlib.sha256(data).hexdigest()!=HASHES[name]: raise RuntimeError('Payload checksum mismatch')
@@ -39,7 +39,7 @@ def main():
         for i in range(12):
             try:
                 with urllib.request.urlopen('https://api.tolf.is/windows/capabilities',timeout=5) as response: data=json.load(response)
-                if data.get('installerVersion')=='1.1.0':
+                if data.get('installerVersion')=='1.2.0':
                     print('OK: Windows GUI installer and mobile sharing enabled. Test build is unsigned.'); return
             except Exception: pass
             time.sleep(2)

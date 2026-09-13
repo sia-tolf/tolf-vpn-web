@@ -12,7 +12,7 @@ using System.Collections.Generic;
 using System.Reflection;
 [assembly: AssemblyTitle("TOLF VPN Setup")]
 [assembly: AssemblyCompany("TOLF")]
-[assembly: AssemblyVersion("1.1.0.0")]
+[assembly: AssemblyVersion("1.2.0.0")]
 class TolfSetup : Form {
     TextBox link = new TextBox();
     Label status = new Label();
@@ -28,7 +28,7 @@ class TolfSetup : Form {
     }
     public TolfSetup() {
         language = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
-        Text = "TOLF VPN"; ClientSize = new Size(540,310); MinimumSize = Size;
+        Text = "TOLF VPN"; ClientSize = new Size(540,380); MinimumSize = Size;
         StartPosition = FormStartPosition.CenterScreen;
         Font = new Font("Segoe UI", 10); BackColor = Color.White;
         AutoScaleMode = AutoScaleMode.Dpi;
@@ -43,7 +43,7 @@ class TolfSetup : Form {
         install.Text = L("Set up and connect", "Настроить и подключиться", "Iestatīt un savienot");
         install.SetBounds(24,153,492,44); install.Anchor=AnchorStyles.Top|AnchorStyles.Left|AnchorStyles.Right;
         install.Click += async (s,e) => await Setup(); Controls.Add(install);
-        status.SetBounds(24,211,492,80); status.Anchor=AnchorStyles.Top|AnchorStyles.Left|AnchorStyles.Right; Controls.Add(status);
+        status.SetBounds(24,211,492,145); status.Anchor=AnchorStyles.Top|AnchorStyles.Left|AnchorStyles.Right; Controls.Add(status);
         AcceptButton = install;
         FormClosing += (s,e) => { if(busy) e.Cancel=true; };
     }
@@ -56,6 +56,9 @@ class TolfSetup : Form {
         busy=true; install.Enabled=false; link.Enabled=false;
         status.Text=L("Setting up the connection…", "Настраиваем соединение…", "Savienojuma iestatīšana…");
         try {
+            status.Text=L("Checking Windows components…", "Проверяем компоненты Windows…", "Pārbauda Windows komponentus…");
+            await Task.Run(() => Preflight());
+            status.Text=L("Setting up the connection…", "Настраиваем соединение…", "Savienojuma iestatīšana…");
             string name = await Task.Run(() => Configure());
             status.Text=L("Connecting…", "Подключаемся…", "Savienojas…");
             int code=await Task.Run(() => RunDial(name));
@@ -68,10 +71,47 @@ class TolfSetup : Form {
             status.Text=L("Could not retrieve settings. Check your Internet connection or create a new setup link on the TOLF website.","Не удалось получить настройки. Проверьте интернет или создайте новую ссылку на сайте TOLF.","Neizdevās saņemt iestatījumus. Pārbaudiet internetu vai izveidojiet jaunu saiti TOLF vietnē.");
         } catch(Exception ex) {
             // No server payloads, credentials or personal links in error messages.
-            status.Text=L("Setup failed. Error: ","Настройка не завершена. Ошибка: ","Iestatīšana neizdevās. Kļūda: ")+(ex is SetupException ? ex.Message : ex.GetType().Name);
+            status.Text=FailureMessage(ex is SetupException ? ex.Message : "WINDOWS_CONFIGURATION");
         } finally { busy=false; install.Enabled=true; link.Enabled=true; }
     }
     void InvalidLink(){status.Text=L("Paste the personal link from the TOLF website.","Вставьте персональную ссылку с сайта TOLF.","Ielīmējiet personīgo saiti no TOLF vietnes.");}
+    string FailureMessage(string code) {
+        switch(code) {
+        case "POWERSHELL_VERSION": return L("Windows PowerShell 5.1 is required. Restore Windows components and try again.","Нужен Windows PowerShell 5.1. Восстановите компоненты Windows и повторите настройку.","Nepieciešams Windows PowerShell 5.1. Atjaunojiet Windows komponentus un mēģiniet vēlreiz.");
+        case "FRAMEWORK": return L("Install .NET Framework 4.8 or later from Microsoft.","Установите .NET Framework 4.8 или новее с сайта Microsoft.","Instalējiet .NET Framework 4.8 vai jaunāku versiju no Microsoft.");
+        case "WINDOWS_VERSION": return L("This installer requires Windows 10 or Windows 11.","Этот установщик рассчитан на Windows 10 и Windows 11.","Šim instalētājam nepieciešama Windows 10 vai Windows 11.");
+        case "VPN_MODULE": return L("The Windows VpnClient module is unavailable. Restore the Windows VPN components.","Недоступен модуль Windows VpnClient. Восстановите системные компоненты VPN.","Windows VpnClient modulis nav pieejams. Atjaunojiet Windows VPN komponentus.");
+        case "VPN_SERVICE": return L("A required VPN service is missing or disabled (RasMan, IKEEXT or PolicyAgent). Ask the Windows administrator to restore it.","Нужная служба VPN отсутствует или отключена (RasMan, IKEEXT или PolicyAgent). Обратитесь к администратору Windows для её восстановления.","Nepieciešamais VPN pakalpojums nav pieejams vai ir atspējots (RasMan, IKEEXT vai PolicyAgent). Sazinieties ar Windows administratoru.");
+        case "SYSTEM_FILES": return L("Windows VPN system files are missing. Restore Windows components.","Отсутствуют системные файлы VPN. Восстановите компоненты Windows.","Trūkst Windows VPN sistēmas failu. Atjaunojiet Windows komponentus.");
+        case "POLICY": return L("Windows policy restricts script execution. Ask your administrator to allow TOLF setup.","Политика Windows ограничивает выполнение сценариев. Попросите администратора разрешить установку TOLF.","Windows politika ierobežo skriptu izpildi. Lūdziet administratoram atļaut TOLF iestatīšanu.");
+        case "PREFLIGHT_ACCESS": return L("Windows component checks failed. Ask your administrator to check access to PowerShell, VpnClient and CIM. VPN settings were not changed.","Не удалось проверить компоненты Windows. Администратору нужно проверить доступ к PowerShell, VpnClient и CIM. Настройки VPN не изменены.","Neizdevās pārbaudīt Windows komponentus. Administratoram jāpārbauda piekļuve PowerShell, VpnClient un CIM. VPN iestatījumi nav mainīti.");
+        default: return L("Setup failed. Diagnostic code: ","Настройка не завершена. Диагностический код: ","Iestatīšana neizdevās. Diagnostikas kods: ")+code;
+        }
+    }
+    void Preflight() {
+        using (var key=Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full")) {
+            if(key==null || Convert.ToInt32(key.GetValue("Release",0))<528040) throw new SetupException("FRAMEWORK");
+        }
+        string system=Environment.GetFolderPath(Environment.SpecialFolder.System);
+        string powershell=Path.Combine(system,@"WindowsPowerShell\v1.0\powershell.exe");
+        if(!File.Exists(powershell)) throw new SetupException("POWERSHELL_VERSION");
+        foreach(string file in new[]{"rasdial.exe","rasapi32.dll"})
+            if(!File.Exists(Path.Combine(system,file))) throw new SetupException("SYSTEM_FILES");
+        string script;
+        using(var reader=new StreamReader(Assembly.GetExecutingAssembly().GetManifestResourceStream("Preflight.ps1"))) script=reader.ReadToEnd();
+        var start=new ProcessStartInfo(powershell,"-NoLogo -NoProfile -NonInteractive -EncodedCommand "+Convert.ToBase64String(Encoding.Unicode.GetBytes(script)));
+        start.UseShellExecute=false; start.CreateNoWindow=true; start.RedirectStandardOutput=true; start.RedirectStandardError=true;
+        try {
+            using(var process=Process.Start(start)) {
+                var output=process.StandardOutput.ReadToEndAsync(); var error=process.StandardError.ReadToEndAsync();
+                if(!process.WaitForExit(30000)) { process.Kill(); throw new SetupException("PREFLIGHT_ACCESS"); }
+                Task.WaitAll(output,error);
+                var match=Regex.Match(output.Result,@"TOLF_ERROR:([A-Z0-9_]+)");
+                if(match.Success) throw new SetupException(match.Groups[1].Value);
+                if(process.ExitCode!=0 || !output.Result.Contains("TOLF_PREFLIGHT_OK")) throw new SetupException("PREFLIGHT_ACCESS");
+            }
+        } catch(System.ComponentModel.Win32Exception) { throw new SetupException("PREFLIGHT_ACCESS"); }
+    }
     string Configure() {
         ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
         var request=(HttpWebRequest)WebRequest.Create("https://api.tolf.is/windows/p/"+token+"/settings");

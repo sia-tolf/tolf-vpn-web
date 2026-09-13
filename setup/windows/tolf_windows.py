@@ -181,7 +181,7 @@ def install(app, context):
 
     @app.get('/windows/capabilities')
     def capabilities():
-        return {'version': VERSION, 'servers': ['riga'], 'routing': 'sr', 'installerVersion': '1.1.0'}
+        return {'version': VERSION, 'servers': ['riga'], 'routing': 'sr', 'installerVersion': '1.2.0'}
 
     @app.get('/windows/devices')
     def devices(request: Request):

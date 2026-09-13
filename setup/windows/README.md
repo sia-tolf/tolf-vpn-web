@@ -40,7 +40,18 @@ References:
 - https://learn.microsoft.com/en-us/powershell/module/vpnclient/set-vpnconnectionipsecconfiguration
 - https://learn.microsoft.com/en-us/windows/win32/api/ras/nf-ras-rassetcredentialsw
 
-## GUI setup 1.1 (test build)
+## GUI setup 1.2 (test build)
+
+Before requesting credentials or changing VPN settings, the installer checks
+.NET Framework 4.8+, Windows 10/11, Windows PowerShell 5.1, the VpnClient cmdlets,
+RAS system files, and that RasMan, IKEEXT and PolicyAgent are not disabled.
+It also checks CIM/read access and dynamic compilation in a separate process
+with a 30-second timeout. Failure messages are localized in English, Russian
+and Latvian. PowerShell 7, Python, Node.js and Visual C++ runtimes are not required.
+These checks do not install dependencies or change machine policies/services.
+If the .NET CLR is entirely missing, Windows must handle startup failure before
+the managed application can display its own checks. Windows CI compiles the EXE
+and tests successful preflight plus OS, service and module failure paths.
 
 `desktop/TolfSetup.cs` is a .NET Framework Windows Forms application, compiled on
 Windows by `build-desktop.ps1`. It receives the personal link from the download
