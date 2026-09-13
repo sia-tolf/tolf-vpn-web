@@ -1475,3 +1475,14 @@ button:disabled { opacity: 0.55; cursor: default; }
   padding: 8px 10px;
   font-size: 15px;
 }
+
+@media (max-width: 600px) {
+  .passkey-label-actions {
+    width: 100%;
+    margin-left: 0;
+  }
+  .passkey-label-actions > .passkey-remove-button {
+    width: 100%;
+    flex-basis: 100%;
+  }
+}
