@@ -1465,3 +1465,13 @@ button:disabled { opacity: 0.55; cursor: default; }
 }
 
 .passkey-label-actions { width: min(160px, 100%); grid-template-columns: minmax(0, 1fr); margin-left: auto; }
+
+/* Match the compact Apply button in the header. */
+.passkey-label-actions { width: min(168px, 100%); }
+.passkey-label-actions > .passkey-remove-button {
+  height: 44px;
+  min-height: 44px;
+  border-radius: 11px;
+  padding: 8px 10px;
+  font-size: 15px;
+}
