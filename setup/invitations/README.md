@@ -1,4 +1,48 @@
-# Existing VPN user invitations
+# Existing VPN access: password verification and administrator invitations
+
+Version 2 adds a self-service form on vpn.tolf.is: **I already have VPN access**.
+The user verifies their existing VPN login/password, signs in or registers a Passkey,
+and explicitly confirms linking. No URL needs to be generated or sent. Protected
+users `user0` and `user0_ipad` still require the administrator invitation below;
+knowing their passwords never enables self-service linking.
+
+## Upgrade from the installed v1
+
+Download the pinned `update-invitations-v2.py`, verify its published SHA-256, then run
+`python3 /root/update-invitations-v2.py riga` on Riga first and
+`python3 /root/update-invitations-v2.py london` on London. The update checks the
+installed v1 module checksums and wrapper anchors, backs up changed files, and
+restores them on installation failure. The London capabilities endpoint must
+report version 2. Existing v1 invitations and bindings remain valid. For a fresh
+installation use the packaged v1 installer first, then this update.
+
+## Password verification
+
+Passwords travel in the HTTPS POST body and the SSH process's standard input;
+they are never included in the command line or URL. The form clears its password
+field immediately and stores only a temporary proof token in session storage.
+The API does not store or log passwords and returns `Cache-Control: no-store`.
+
+Riga compares the password against the existing credential using a constant-time
+comparison. Verification does not change credentials, profiles, routes or binding.
+The root-only registry stores the token hash plus a keyed HMAC credential proof;
+`proof.key` must be included in registry backups. A password change invalidates
+unclaimed proofs. Proofs expire after 15 minutes, and another website account
+cannot reuse a consumed proof. Claiming still requires the website session and
+correct Origin. Generated website logins cannot be adopted this way.
+
+Persistent limits: London allows 10 attempts per ASGI client address and 200 total
+per 15 minutes; Riga independently allows 10 per VPN username and 200 total.
+Forwarded headers are not parsed by this module; actual client attribution uses the
+existing ASGI proxy configuration. If the ASGI server sees only a proxy's address,
+the per-address limit will be shared. Both limits survive service restarts.
+
+If the remote binding succeeded but its response was lost, retry the saved proof.
+If that proof is lost or expires, sign into the **same** website account and verify
+the password again. Only an authenticated owner with a pending local claim can
+request a recovery proof for an already bound VPN user. A client-supplied account
+identifier is never used. Other accounts are directed to Passkey login/recovery.
+Protected users continue to use their administrator invitation for retries.
 
 The administrator issues a one-use invitation for an existing manual EAP user on
 Riga. The recipient registers a Passkey or signs in at vpn.tolf.is, then explicitly
@@ -82,7 +126,7 @@ node tests/invitations/frontend.cjs
 ```
 
 Python tests need FastAPI and HTTPX. Browser tests need Playwright Chromium.
-Tests cover authentication/origin, expiry, one-use/concurrent claims, retries after
+Tests cover password verification, protected-user rejection, persistent rate limits, proof invalidation on password change, recovery ownership, authentication/origin, expiry, one-use/concurrent claims, retries after
 a lost response, preservation of credentials, protected deletion, installer guards,
 and the narrow-screen invitation flow in English, Russian and Latvian. Real Passkey
 registration and SSH/sudo behavior must also be checked after server installation.

@@ -12,7 +12,7 @@
 
   <link
     rel="stylesheet"
-    href="css/styles.css?v=windows-accordion-1"
+    href="css/styles.css?v=invitations-2"
   >
   <link
     rel="stylesheet"
@@ -21,19 +21,19 @@
 
   <!-- Keep this order. Deferred scripts run after the HTML has been parsed. -->
   <script defer src="js/config.js?v=windows-1"></script>
-  <script defer src="js/locales/en.js?v=invitations-1"></script>
-  <script defer src="js/locales/ru.js?v=invitations-1"></script>
-  <script defer src="js/locales/lv.js?v=invitations-1"></script>
+  <script defer src="js/locales/en.js?v=invitations-2"></script>
+  <script defer src="js/locales/ru.js?v=invitations-2"></script>
+  <script defer src="js/locales/lv.js?v=invitations-2"></script>
   <script defer src="js/dom.js?v=share-profile-1"></script>
   <script defer src="js/network-metrics.js?v=latency-decimal-1"></script>
   <script defer src="js/platform.js?v=windows-back-1"></script>
-  <script defer src="js/i18n.js?v=invitations-1"></script>
+  <script defer src="js/i18n.js?v=invitations-2"></script>
   <script defer src="js/webauthn.js?v=local-id-2"></script>
   <script defer src="js/api.js?v=local-id-2"></script>
-  <script defer src="js/ui.js?v=invitations-1"></script>
+  <script defer src="js/ui.js?v=invitations-2"></script>
   <script defer src="js/passkeys.js?v=local-id-2"></script>
   <script defer src="js/recovery.js?v=local-id-2"></script>
-  <script defer src="js/account.js?v=invitations-1"></script>
+  <script defer src="js/account.js?v=invitations-2"></script>
   <script defer src="js/profile-settings.js?v=profile-options-1"></script>
   <script defer src="js/vpn.js?v=windows-1"></script>
   <script defer src="js/promo.js?v=header-promo-1"></script>
@@ -42,7 +42,7 @@
   <script defer src="js/latency.js?v=connection-test-1"></script>
   <script defer src="js/connection-test.js?v=connection-test-3"></script>
   <script defer src="js/windows.js?v=windows-accordion-1"></script>
-  <script defer src="js/invitations.js?v=invitations-1"></script>
+  <script defer src="js/invitations.js?v=invitations-2"></script>
   <script defer src="js/app.js?v=windows-1"></script>
 </head>
 
@@ -197,6 +197,23 @@
           class="card-description"
           data-i18n="loadingDescription"
         >Checking your account.</p>
+      </div>
+    </section>
+
+    <section id="existingVpnCard" class="card hidden">
+      <div class="card-content">
+        <details id="existingVpnDetails">
+          <summary data-i18n="existingVpnOpen">I already have VPN access</summary>
+          <p class="card-description" data-i18n="existingVpnHelp">Enter your existing VPN login and password. Then sign in or register to link your access.</p>
+          <form id="existingVpnForm" class="existing-vpn-form">
+            <label for="existingVpnUsername" data-i18n="existingVpnUsername">VPN login</label>
+            <input id="existingVpnUsername" class="settings-input" type="text" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="128" required>
+            <label for="existingVpnPassword" data-i18n="existingVpnPassword">VPN password</label>
+            <input id="existingVpnPassword" class="settings-input" name="password" type="password" autocomplete="current-password" maxlength="256" required>
+            <button id="existingVpnSubmit" class="secondary" type="submit" data-i18n="existingVpnVerify">Verify VPN access</button>
+          </form>
+          <p id="existingVpnMessage" class="message" role="status" aria-live="polite"></p>
+        </details>
       </div>
     </section>
 

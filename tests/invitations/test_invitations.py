@@ -161,6 +161,93 @@ class Invitations(unittest.TestCase):
         self.assertLess(changed.index('tolf_invitations.before_account_delete'),changed.index('tolf_windows.delete_all'))
         with self.assertRaises(RuntimeError): installer.london_source(changed)
 
+    def test_password_verification_preserves_credentials_and_uses_short_proof(self):
+        before=(self.riga.CREDS/'user-manual.conf').read_bytes()
+        verified=self.riga.verify_existing(self.con,{'username':'manual','password':'unchanged-test-secret'})
+        self.assertEqual(verified['expiresIn'],900)
+        result=self.riga.claim(self.con,self.account,verified['token'])
+        self.assertEqual(result['username'],'manual')
+        self.assertFalse(result['protected'])
+        self.assertEqual(before,(self.riga.CREDS/'user-manual.conf').read_bytes())
+        self.assertNotIn(b'unchanged-test-secret',(self.riga.ROOT/'bindings.db').read_bytes())
+
+    def test_protected_users_require_admin_invitation_even_with_correct_password(self):
+        self.user('user0_ipad')
+        for username in ('user0','user0_ipad'):
+            with self.assertRaisesRegex(self.riga.Rejected,'admin_invitation_required'):
+                self.riga.verify_existing(self.con,{'username':username,'password':'unchanged-test-secret'})
+        # Existing administrative invitation flow remains functional.
+        self.assertTrue(self.riga.claim(self.con,self.account,self.invite())['protected'])
+
+    def test_wrong_password_unknown_user_and_rate_limit(self):
+        for username in ('manual','missing'):
+            with self.assertRaisesRegex(self.riga.Rejected,'invalid_credentials'):
+                self.riga.verify_existing(self.con,{'username':username,'password':'wrong'})
+        for _ in range(9):
+            with self.assertRaisesRegex(self.riga.Rejected,'invalid_credentials'):
+                self.riga.verify_existing(self.con,{'username':'manual','password':'wrong'})
+        with self.assertRaisesRegex(self.riga.Rejected,'too_many_attempts'):
+            self.riga.verify_existing(self.con,{'username':'manual','password':'unchanged-test-secret'})
+
+    def test_password_change_invalidates_unclaimed_proof(self):
+        verified=self.riga.verify_existing(self.con,{'username':'manual','password':'unchanged-test-secret'})
+        file=self.riga.CREDS/'user-manual.conf'
+        file.write_text(file.read_text().replace('unchanged-test-secret','new-test-secret'))
+        with self.assertRaisesRegex(self.riga.Rejected,'invalid_invitation'):
+            self.riga.claim(self.con,self.account,verified['token'])
+        self.assertEqual(self.con.execute('SELECT count(*) FROM bindings').fetchone()[0],0)
+
+    def test_api_password_only_on_stdin_and_limits_survive_requests(self):
+        self.api()
+        self.api_module.CTX.update(RIGA_KNOWN_HOSTS='/test/hosts',RIGA_KEY='/test/key',RIGA_USER='test',RIGA_HOST='example')
+        def remote(command,**kwargs):
+            self.assertEqual(command[-1],'verify-existing')
+            self.assertNotIn('unchanged-test-secret',' '.join(command))
+            payload=json.loads(kwargs['input'])
+            with self.riga.database() as con:
+                try:
+                    value=self.riga.verify_existing(con,payload); code=0
+                except self.riga.Rejected as exc:
+                    value={'status':'error','code':str(exc)}; code=1
+            return types.SimpleNamespace(stdout=json.dumps(value),returncode=code)
+        with patch.object(self.api_module.subprocess,'run',remote):
+            headers={'origin':'https://vpn.tolf.is'}
+            body={'username':'manual','password':'unchanged-test-secret'}
+            response=self.client.post('/vpn/invitations/verify',json=body,headers=headers)
+            self.assertEqual(response.status_code,200,response.text)
+            self.assertNotIn('password',response.json())
+            self.assertEqual(self.client.post('/vpn/invitations/claim',json={'token':response.json()['token']},headers=self.headers).status_code,200)
+            for _ in range(9):
+                self.client.post('/vpn/invitations/verify',json={'username':'missing','password':'bad'},headers=headers)
+            self.assertEqual(self.client.post('/vpn/invitations/verify',json=body,headers=headers).status_code,429)
+
+    def test_recovery_requires_authenticated_owner_and_fresh_password(self):
+        self.api()
+        verified=self.riga.verify_existing(self.con,{'username':'manual','password':'unchanged-test-secret'})
+        def lost(uid,token):
+            self.claim_remote(uid,token)
+            raise HTTPException(502,'lost response')
+        self.api_module.remote_claim=lost
+        self.assertEqual(self.client.post('/vpn/invitations/claim',json={'token':verified['token']},headers=self.headers).status_code,502)
+        for payload in ({'username':'manual','password':'unchanged-test-secret'},
+                        {'username':'manual','password':'unchanged-test-secret','retryAccount':str(uuid.uuid4())}):
+            with self.assertRaisesRegex(self.riga.Rejected,'already_linked'):
+                self.riga.verify_existing(self.con,payload)
+        fresh=self.riga.verify_existing(self.con,{'username':'manual','password':'unchanged-test-secret','retryAccount':self.account})
+        with self.assertRaises(self.riga.Rejected): self.riga.claim(self.con,str(uuid.uuid4()),fresh['token'])
+        self.api_module.remote_claim=self.claim_remote
+        self.assertEqual(self.client.post('/vpn/invitations/claim',json={'token':fresh['token']},headers=self.headers).status_code,200)
+        self.api_module.require_ready(self.account)
+
+    def test_upgrade_preserves_guards_and_ssh_stdin(self):
+        old=module('install'); upgrade=module('update')
+        root,wrapper=old.riga_sources((FIX/'provision-root.sh').read_text(),(FIX/'provision-ssh.sh').read_text())
+        root,wrapper=upgrade.riga_sources(root,wrapper)
+        self.assertIn('user0:delete',root)
+        self.assertIn('verify-existing',wrapper)
+        for text in (root,wrapper): subprocess.run(['bash','-n'],input=text,text=True,check=True)
+        with self.assertRaises(RuntimeError): upgrade.riga_sources(root,wrapper)
+
     def test_patched_provisioner_reads_manual_password_and_blocks_delete(self):
         installer=module('install')
         root,wrapper=installer.riga_sources((FIX/'provision-root.sh').read_text(),(FIX/'provision-ssh.sh').read_text())

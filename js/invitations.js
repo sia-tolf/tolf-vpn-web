@@ -23,11 +23,64 @@ const invitationText = document.getElementById("invitationText");
 const invitationButton = document.getElementById("invitationButton");
 const invitationDismiss = document.getElementById("invitationDismiss");
 
+let existingVpnChecked = false;
+let existingVpnSupported = false;
+let existingVpnChecking = false;
+let existingVpnMessageKey = "";
+const existingVpnCard = document.getElementById("existingVpnCard");
+const existingVpnForm = document.getElementById("existingVpnForm");
+const existingVpnPassword = document.getElementById("existingVpnPassword");
+
+function renderExistingVpn() {
+  existingVpnCard.classList.toggle("hidden", !existingVpnChecked || Boolean(invitationAccount?.vpn?.configured) || Boolean(vpnInvitation));
+  document.getElementById("existingVpnSubmit").disabled = existingVpnChecking || !existingVpnSupported;
+  document.getElementById("existingVpnSubmit").textContent = t(existingVpnChecking ? "existingVpnChecking" : "existingVpnVerify");
+  document.getElementById("existingVpnMessage").textContent = t(existingVpnMessageKey || (!existingVpnSupported ? "existingVpnUnavailable" : "existingVpnPrivate"));
+}
+
+apiRequest("/vpn/invitations/capabilities", {method:"GET"}).then(data => {
+  existingVpnSupported = data.passwordLinking === true;
+  renderExistingVpn();
+}).catch(() => renderExistingVpn());
+
+existingVpnForm.addEventListener("submit", async event => {
+  event.preventDefault();
+  if (existingVpnChecking || !existingVpnSupported || vpnInvitation) return;
+  const username = document.getElementById("existingVpnUsername").value.trim();
+  let password = existingVpnPassword.value;
+  existingVpnPassword.value = "";
+  existingVpnChecking = true;
+  existingVpnMessageKey = "";
+  renderExistingVpn();
+  try {
+    const result = await apiRequest("/vpn/invitations/verify", {
+      method:"POST", body:JSON.stringify({username,password})
+    });
+    vpnInvitation = result.token;
+    invitationUsername = result.username;
+    invitationMessageKey = "";
+    try { sessionStorage.setItem(invitationKey,vpnInvitation); } catch {}
+    document.getElementById("existingVpnUsername").value = "";
+    renderInvitation();
+    invitationCard.scrollIntoView({block:"center"});
+  } catch (error) {
+    const keys = {invalid_credentials:"existingVpnInvalid", admin_invitation_required:"existingVpnAdmin",
+      too_many_attempts:"existingVpnLimited", already_linked:"existingVpnLinked"};
+    existingVpnMessageKey = keys[error.message] || "existingVpnUnavailable";
+  } finally {
+    password = "";
+    existingVpnPassword.value = "";
+    existingVpnChecking = false;
+    renderExistingVpn();
+  }
+});
+
 function renderInvitation() {
+  renderExistingVpn();
   invitationCard.classList.toggle("hidden", !vpnInvitation && !invitationMessageKey && !invitationProtected);
   const conflict = Boolean(invitationAccount?.vpn?.configured);
   const key = invitationMessageKey || (vpnInvitation
-    ? (!invitationAccount ? "inviteSignIn" : conflict ? "inviteConflict" : "inviteReady")
+    ? (!invitationAccount ? (invitationUsername ? "existingVpnVerifiedSignIn" : "inviteSignIn") : conflict ? "inviteConflict" : (invitationUsername ? "existingVpnVerifiedReady" : "inviteReady"))
     : "inviteProtected");
   invitationText.textContent = t(key, {username: invitationUsername});
   invitationButton.classList.toggle("hidden", !vpnInvitation || !invitationAccount || conflict);
@@ -41,6 +94,7 @@ function renderInvitation() {
 }
 
 async function updateInvitationAccount(data) {
+  existingVpnChecked = true;
   invitationAccount = data;
   invitationProtected = false;
   if (data) {
@@ -78,7 +132,8 @@ invitationButton.addEventListener("click", async () => {
       invalid_invitation:"inviteInvalid", invitation_expired:"inviteInvalid",
       invitation_used:"inviteInvalid", account_has_vpn:"inviteConflict",
       already_linked:"inviteConflict", user_not_found:"inviteUnavailable",
-      unsupported_credential_file:"inviteUnavailable"
+      unsupported_credential_file:"inviteUnavailable", admin_invitation_required:"existingVpnAdmin",
+      pending_invitation:"invitePending"
     };
     invitationMessageKey = errors[error.message] || "inviteRetry";
   } finally {
