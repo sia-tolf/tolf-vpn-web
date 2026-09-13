@@ -101,7 +101,7 @@ function renderInvitation() {
   invitationDismiss.disabled = invitationBusy;
   // Server enforces this protection too, before deleting any Windows devices.
   deleteVpnButton.classList.toggle("hidden", invitationProtected);
-  deleteAccountButton.classList.toggle("hidden", invitationProtected);
+  deleteAccountButton.classList.remove("hidden");
 }
 
 async function updateInvitationAccount(data) {

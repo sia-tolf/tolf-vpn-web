@@ -1,6 +1,7 @@
 I18N.lv = {
   lastPasskeyExplanation: "Vienīgo Passkey nevar izdzēst: tā ir vajadzīga ieejai vietnē. Lai to aizstātu, vispirms pievienojiet citu Passkey. Lai dzēstu visu piekļuvi, izmantojiet pogu “Dzēst TOLF kontu”. Tiks dzēsts konts un visa ar to saistītā VPN piekļuve.",
   lastPasskeyProtected: "Vienīgo Passkey nevar izdzēst: tā ir vajadzīga ieejai vietnē. Lai to aizstātu, vispirms pievienojiet citu Passkey. Šis konts ir aizsargāts pret dzēšanu vietnē. Lai dzēstu visu piekļuvi, sazinieties ar administratoru.",
+  protectedAccountDelete: "Šis administratīvais konts ir aizsargāts pret dzēšanu vietnē. Lai dzēstu visu piekļuvi, sazinieties ar administratoru.",
   inviteRetryAction: "Mēģināt piesaistīt vēlreiz",
   passkeySignInName: "Nosaukums ieejai vietnē",
   passkeyAdditionalName: "Papildu Passkey nosaukums",

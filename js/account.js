@@ -128,6 +128,11 @@ createAccountButton.addEventListener("click", async () => {
 });
 
 deleteAccountButton.addEventListener("click", async () => {
+  if (typeof invitationProtected !== "undefined" && invitationProtected) {
+    window.alert(t("protectedAccountDelete"));
+    return;
+  }
+
   const confirmed = confirmLocalized(
     "deleteAccountConfirmTitle",
     "deleteAccountConfirmBody"
