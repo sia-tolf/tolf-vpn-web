@@ -29,4 +29,4 @@ jobs:
         if: always()
         with:
           name: admin-preview
-          path: /tmp/tolf-admin-preview.png
+          path: /tmp/tolf-admin*.png

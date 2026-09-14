@@ -49,8 +49,8 @@ def test_auth_inventory_and_revocation(database):
     with TestClient(app) as c:
         assert c.get('/admin/capabilities').json()['disconnect'] is False
         assert c.get('/admin/me').status_code==401
-        assert c.get('/admin/me',headers=h).json()=={'isAdmin':False,'number':1}
-        for endpoint in ('users','users/'+two,'registry','audit'):
+        assert c.get('/admin/me',headers=h).json()=={'isAdmin':False,'number':1,'features':{'sessions':True}}
+        for endpoint in ('users','users/'+two,'registry','audit','sessions'):
             assert c.get('/admin/'+endpoint).status_code==401
             assert c.get('/admin/'+endpoint,headers=h).status_code==403
         a.root_grant(path,1);a.root_grant(path,1)
@@ -70,7 +70,7 @@ def test_auth_inventory_and_revocation(database):
         assert detail.json()['passkeyNames']==['iPad 2']
         assert len(c.get('/admin/registry',headers=h).json()['records'])==3
         assert len(c.get('/admin/audit',headers=h).json()['events'])==1
-        for endpoint in ('users','users/'+two,'registry','audit'):
+        for endpoint in ('users','users/'+two,'registry','audit','sessions'):
             result=c.get('/admin/'+endpoint,headers=h)
             assert 'SECRET_' not in result.text
             assert c.get('/admin/'+endpoint,headers=other).status_code==403
@@ -99,3 +99,71 @@ def test_installer_preserves_existing_source():
     assert result.replace('\n'+installer.MARKER+'\nimport tolf_admin\ntolf_admin.install(app, globals())\n\n','')==source
     assert installer.patch(result)==result
     with pytest.raises(RuntimeError):installer.patch('app = object()')
+
+
+def test_live_sessions_access_mapping_and_partial_failure(database, monkeypatch):
+    path,one,two=database
+    app=FastAPI()
+    def auth(request):
+        user=request.headers.get('x-test-user')
+        if not user:raise HTTPException(401,'not authenticated')
+        return user
+    a.install(app,{'DB':path,'authenticated_user_id':auth})
+    calls=[]
+    def query(node):
+        calls.append(node)
+        if node=='riga':return {'node':node,'status':'error','error':'node_unavailable'}
+        return {'node':node,'status':'ok','observedAt':'2026-09-14T14:44:07+00:00','sessions':[
+            {'identity':'user_2'}, {'identity':'user_device'}, {'identity':'manual'}, {'identity':'192.168.1.1'}]}
+    monkeypatch.setattr(a,'query_node',query)
+    with TestClient(app) as c:
+        assert c.get('/admin/sessions').status_code==401
+        assert c.get('/admin/sessions',headers={'x-test-user':two}).status_code==403
+        assert calls==[]
+        a.root_grant(path,1)
+        result=c.get('/admin/sessions',headers={'x-test-user':one})
+        assert result.status_code==200 and 'no-store' in result.headers['cache-control']
+        riga,moscow=result.json()['nodes']
+        assert riga['status']=='error' and 'sessions' not in riga
+        assert moscow['sessions'][0]['account']=={'accountId':two,'number':2}
+        assert moscow['sessions'][1]['account']=={'accountId':two,'number':2}
+        assert moscow['sessions'][2]['account']=={'accountId':None,'number':3}
+        assert moscow['sessions'][3]['account'] is None
+        assert a.SESSION_POLL.acquire(blocking=False)
+        try:assert c.get('/admin/sessions',headers={'x-test-user':one}).status_code==429
+        finally:a.SESSION_POLL.release()
+        def revoke_query(node):
+            if node=='riga':a.root_revoke(path,1)
+            return {'node':node,'status':'ok','sessions':[]}
+        monkeypatch.setattr(a,'query_node',revoke_query)
+        assert c.get('/admin/sessions',headers={'x-test-user':one}).status_code==403
+
+
+def test_node_transport_validation(monkeypatch):
+    import json
+    a.CTX={'RIGA_KNOWN_HOSTS':'known','RIGA_KEY':'key','RIGA_USER':'tolfprov','RIGA_HOST':'riga'}
+    body={'status':'ok','version':'1.0.0','node':'moscow','observedAt':'2026-09-14T14:44:07+00:00','sessions':[]}
+    class Reply:
+        returncode=0
+        @property
+        def stdout(self):return json.dumps(body)
+    commands=[]
+    def run(command,**kwargs):
+        commands.append(command)
+        return Reply()
+    monkeypatch.setattr(a.subprocess,'run',run)
+    assert a.query_node('moscow')['sessions']==[]
+    assert commands[-1][-1]=='admin-sessions moscow'
+    assert 'StrictHostKeyChecking=yes' in commands[-1]
+    body['sessions']=[dict(id=5441,establishedSeconds=518,bytesIn=1,bytesOut=2,identity='user_1',identitySource='remote-id',virtualAddresses=[],password='DO_NOT_RETURN')]
+    result=a.query_node('moscow')
+    assert result['status']=='ok' and 'password' not in result['sessions'][0]
+    body['sessions'][0]['id']=True
+    assert a.query_node('moscow')['status']=='error'
+    body['sessions']=[];body['node']='riga'
+    assert a.query_node('moscow')['status']=='error'
+    with pytest.raises(ValueError):a.query_node('moscow;id')
+    def timeout(*args,**kwargs):raise a.subprocess.TimeoutExpired('ssh',40)
+    monkeypatch.setattr(a.subprocess,'run',timeout)
+    value=a.query_node('moscow')
+    assert value['status']=='error' and 'sessions' not in value

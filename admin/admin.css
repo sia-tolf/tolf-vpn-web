@@ -32,3 +32,8 @@
 .admin-device p { margin: 6px 0; }
 .admin-shell footer { text-align: center; margin: 36px 0 0; color: var(--secondary); font-size: 13px; }
 @media(max-width:640px) { .admin-shell { padding: 20px 16px; } .admin-toolbar { align-items: stretch; } .admin-table td,.admin-table th { padding: 12px; } }
+
+.admin-node { margin: 20px 0 28px; }
+.admin-node h2 { font-size: 22px; margin-bottom: 8px; }
+.admin-node-error { color: var(--error); }
+.admin-node td button { display: block; margin-top: 10px; }

@@ -93,8 +93,8 @@ def install():
         for _ in range(12):
             try:
                 with urllib.request.urlopen('https://api.tolf.is/admin/capabilities',timeout=5) as r:status=json.load(r)
-                if status.get('version')=='1.0.0' and status.get('inventory') is True:
-                    print('OK: TOLF admin inventory API enabled. VPN sessions and credentials were not changed.',flush=True)
+                if status.get('version')=='1.1.0' and status.get('sessions') is True and status.get('inventory') is True:
+                    print('OK: TOLF admin 1.1 API with live session inventory enabled. VPN sessions and credentials were not changed.',flush=True)
                     return
             except Exception:pass
             time.sleep(1)

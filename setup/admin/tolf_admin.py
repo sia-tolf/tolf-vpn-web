@@ -2,10 +2,14 @@
 import json
 import sqlite3
 import uuid
+import subprocess
+import threading
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 from datetime import datetime, timezone
 
-VERSION = '1.0.0'
+VERSION = '1.1.0'
+SESSION_POLL = threading.BoundedSemaphore(1)
 HEADERS = {'Cache-Control': 'private, no-store, max-age=0', 'X-Content-Type-Options': 'nosniff'}
 CTX = {}
 
@@ -86,6 +90,79 @@ def user_record(con, row):
             'protected': bool(con.execute('SELECT 1 FROM vpn_imports WHERE user_id=? AND protected=1', (user_id,)).fetchone())}
 
 
+def query_node(node):
+    # Node names are fixed by the caller; no browser input enters SSH commands.
+    if node not in ('riga', 'moscow'):
+        raise ValueError('invalid node')
+    stamp = datetime.now(timezone.utc).isoformat()
+    failed = {'node': node, 'status': 'error', 'attemptedAt': stamp, 'error': 'node_unavailable'}
+    try:
+        command = ['/usr/bin/ssh', '-T', '-o', 'BatchMode=yes', '-o', 'IdentitiesOnly=yes',
+                   '-o', 'ConnectTimeout=10', '-o', 'StrictHostKeyChecking=yes',
+                   '-o', 'UserKnownHostsFile='+str(CTX['RIGA_KNOWN_HOSTS']),
+                   '-i', str(CTX['RIGA_KEY']), str(CTX['RIGA_USER'])+'@'+str(CTX['RIGA_HOST']),
+                   'admin-sessions '+node]
+        result = subprocess.run(command, capture_output=True, text=True, timeout=40, check=False)
+        if result.returncode or len(result.stdout) > 8 * 1024 * 1024:
+            return failed
+        value = json.loads(result.stdout)
+        if not isinstance(value, dict) or value.get('status') != 'ok' or value.get('node') != node or value.get('version') != '1.0.0':
+            return failed
+        observed = value.get('observedAt')
+        parsed = datetime.fromisoformat(observed)
+        if parsed.utcoffset() is None:
+            return failed
+        source = value.get('sessions')
+        if not isinstance(source, list) or len(source) > 10000:
+            return failed
+        sessions = []
+        ids = set()
+        for row in source:
+            if not isinstance(row, dict):
+                return failed
+            clean = {}
+            for key in ('id', 'establishedSeconds', 'bytesIn', 'bytesOut'):
+                v = row.get(key)
+                if key == 'establishedSeconds' and v is None:
+                    clean[key] = None
+                    continue
+                if type(v) is not int or v < 0:
+                    return failed
+                clean[key] = v
+            if clean['id'] in ids:
+                return failed
+            ids.add(clean['id'])
+            for key in ('connection', 'state', 'identity', 'identitySource', 'remoteHost'):
+                v = row.get(key)
+                if v is not None and (not isinstance(v, str) or len(v) > 1024):
+                    return failed
+                clean[key] = v
+            if clean['identitySource'] not in ('remote-id', 'remote-eap-id'):
+                return failed
+            vips = row.get('virtualAddresses')
+            if not isinstance(vips, list) or len(vips) > 32 or any(not isinstance(v, str) or len(v) > 128 for v in vips):
+                return failed
+            clean['virtualAddresses'] = vips
+            sessions.append(clean)
+        return {'node': node, 'status': 'ok', 'observedAt': observed, 'sessions': sessions}
+    except (KeyError, ValueError, TypeError, OSError, subprocess.TimeoutExpired):
+        return failed
+
+
+def map_session(con, session):
+    username = session.get('identity')
+    if not username:
+        return None
+    rows = con.execute("SELECT account_id,number FROM managed_users WHERE vpn_username=? AND deleted_at IS NULL", (username,)).fetchall()
+    rows += con.execute("SELECT w.user_id,m.number FROM windows_devices w JOIN users u ON u.id=w.user_id LEFT JOIN managed_users m ON m.account_id=w.user_id AND m.deleted_at IS NULL WHERE w.username=? AND w.state!='deleted'", (username,)).fetchall()
+    matches = {(row[0], row[1]) for row in rows}
+    # Display-only registry match; never authorization for a mutation.
+    if len(matches) != 1:
+        return None
+    account_id, number = matches.pop()
+    return {'accountId': account_id, 'number': number}
+
+
 def install(app, context):
     global CTX, HTTPException, JSONResponse
     from fastapi import HTTPException, Request
@@ -95,7 +172,7 @@ def install(app, context):
 
     @app.get('/admin/capabilities')
     def capabilities():
-        return response({'version': VERSION, 'inventory': True, 'sessions': False, 'disconnect': False, 'suspend': False})
+        return response({'version': VERSION, 'inventory': True, 'sessions': True, 'disconnect': False, 'suspend': False})
 
     @app.get('/admin/me')
     def me(request: Request):
@@ -103,7 +180,26 @@ def install(app, context):
         with db() as con:
             number = con.execute('SELECT MIN(number) FROM managed_users WHERE account_id=? AND deleted_at IS NULL', (user_id,)).fetchone()[0]
             allowed = bool(con.execute('SELECT 1 FROM admin_roles WHERE user_id=?', (user_id,)).fetchone())
-        return response({'isAdmin': allowed, 'number': number})
+        return response({'isAdmin': allowed, 'number': number, 'features': {'sessions': True}})
+
+    @app.get('/admin/sessions')
+    def sessions(request: Request):
+        require_admin(request)
+        if not SESSION_POLL.acquire(blocking=False):
+            raise HTTPException(429, 'session_poll_in_progress')
+        try:
+            with ThreadPoolExecutor(max_workers=2) as pool:
+                results = list(pool.map(query_node, ('riga', 'moscow')))
+            # Recheck after the remote wait, so a revoked role cannot receive a late response.
+            require_admin(request)
+            with db() as con:
+                for result in results:
+                    if result['status'] == 'ok':
+                        for session in result['sessions']:
+                            session['account'] = map_session(con, session)
+            return response({'nodes': results, 'source': 'vpn_nodes'})
+        finally:
+            SESSION_POLL.release()
 
     @app.get('/admin/users')
     def users(request: Request, q: str = '', offset: int = 0, limit: int = 50):
