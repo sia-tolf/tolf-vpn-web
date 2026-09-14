@@ -1,8 +1,8 @@
 #include <windows.h>
 101 ICON "dist/tolf.ico"
 1 VERSIONINFO
-FILEVERSION 2,4,0,0
-PRODUCTVERSION 2,4,0,0
+FILEVERSION 2,4,1,0
+PRODUCTVERSION 2,4,1,0
 FILEOS VOS_NT_WINDOWS32
 FILETYPE VFT_APP
 BEGIN
@@ -12,9 +12,9 @@ BEGIN
   BEGIN
    VALUE "CompanyName", "TOLF"
    VALUE "FileDescription", "TOLF native Windows VPN setup"
-   VALUE "FileVersion", "2.4.0"
+   VALUE "FileVersion", "2.4.1"
    VALUE "ProductName", "TOLF VPN"
-   VALUE "ProductVersion", "2.4.0"
+   VALUE "ProductVersion", "2.4.1"
   END
  END
  BLOCK "VarFileInfo"

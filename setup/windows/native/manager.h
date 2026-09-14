@@ -87,7 +87,7 @@ static void Start(bool saving) {
     bool disconnect=lastActive;working=true;SetWindowTextW(message,L"");Refresh();
     try{std::thread([profile,exclusions,saving,disconnect]{auto r=std::make_unique<Result>();
         try{Com com;if(saving){Wmi w;Settings c;c.id=profile.id;c.server=profile.server;ConfigureRoutes(w,c,profile.name,exclusions,-1,true);r->saved=true;}
-            else if(disconnect)DisconnectProfile(profile.name);else DialProfile(profile.name);
+            else if(disconnect)DisconnectProfile(profile.name);else DialProfile(profile.name,wnd);
         }catch(const Failure& f){wchar_t system[1024]={};RasGetErrorStringW(f.code,system,1024);r->error=Error(f);if(f.stage==L"CONNECT"||f.stage==L"DISCONNECT")r->error=std::to_wstring(f.code)+L": "+system;}
         catch(...){r->error=L(L"Operation failed.",L"Операция не выполнена.",L"Darbība neizdevās.");}
         if(!PostMessageW(wnd,Finished,0,reinterpret_cast<LPARAM>(r.get())))return;r.release();
@@ -169,14 +169,14 @@ static LRESULT CALLBACK Proc(HWND h,UINT msg,WPARAM w,LPARAM l) {
     }return DefWindowProcW(h,msg,w,l);
 }
 inline int Run(HINSTANCE instance,bool widget,bool hidden) {
-    HANDLE mutex=CreateMutexW(nullptr,FALSE,L"Local\\TOLF-VPN-Control-2.4");if(!mutex)return 1;
+    HANDLE mutex=CreateMutexW(nullptr,FALSE,L"Local\\TOLF-VPN-Control-2.4.1");if(!mutex)return 1;
     if(GetLastError()==ERROR_ALREADY_EXISTS){HWND old=FindWindowW(L"TolfVpnController",nullptr);if(old){if(!hidden){AllowSetForegroundWindow(ASFW_ANY);PostMessageW(old,Activate,widget?1:0,0);}else PostMessageW(old,WM_TIMER,1,0);}CloseHandle(mutex);return 0;}
     compact=widget;HRESULT init=CoInitializeEx(nullptr,COINIT_APARTMENTTHREADED);if(FAILED(init)){CloseHandle(mutex);return 1;}
     WSADATA ws={};int wsa=WSAStartup(MAKEWORD(2,2),&ws);if(wsa){CoUninitialize();CloseHandle(mutex);return 1;}
     HRESULT sec=CoInitializeSecurity(nullptr,-1,nullptr,nullptr,RPC_C_AUTHN_LEVEL_DEFAULT,RPC_C_IMP_LEVEL_IMPERSONATE,nullptr,EOAC_NONE,nullptr);
     if(FAILED(sec)&&sec!=RPC_E_TOO_LATE){WSACleanup();CoUninitialize();CloseHandle(mutex);return 1;}
     WNDCLASSW cls={};cls.hInstance=instance;cls.lpfnWndProc=Proc;cls.lpszClassName=L"TolfVpnController";cls.hCursor=LoadCursorW(nullptr,IDC_ARROW);RegisterClassW(&cls);
-    HWND h=nullptr;try{h=CreateWindowExW(0,cls.lpszClassName,L"TOLF VPN 2.4",WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX,CW_USEDEFAULT,CW_USEDEFAULT,540,640,nullptr,nullptr,instance,nullptr);}catch(const Failure& f){MessageBoxW(nullptr,Error(f).c_str(),L"TOLF VPN",MB_OK|MB_ICONERROR);}catch(...){MessageBoxW(nullptr,L(L"Could not open TOLF settings.",L"Не удалось открыть настройки TOLF.",L"Neizdevās atvērt TOLF iestatījumus."),L"TOLF VPN",MB_OK|MB_ICONERROR);}
+    HWND h=nullptr;try{h=CreateWindowExW(0,cls.lpszClassName,L"TOLF VPN 2.4.1",WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX,CW_USEDEFAULT,CW_USEDEFAULT,540,640,nullptr,nullptr,instance,nullptr);}catch(const Failure& f){MessageBoxW(nullptr,Error(f).c_str(),L"TOLF VPN",MB_OK|MB_ICONERROR);}catch(...){MessageBoxW(nullptr,L(L"Could not open TOLF settings.",L"Не удалось открыть настройки TOLF.",L"Neizdevās atvērt TOLF iestatījumus."),L"TOLF VPN",MB_OK|MB_ICONERROR);}
     if(h){if(!hidden||!trayPresent)ShowWindow(h,SW_SHOW);MSG msg;while(GetMessageW(&msg,nullptr,0,0)>0){if(!IsDialogMessageW(h,&msg)){TranslateMessage(&msg);DispatchMessageW(&msg);}}}
     WSACleanup();CoUninitialize();CloseHandle(mutex);return h?0:1;
 }

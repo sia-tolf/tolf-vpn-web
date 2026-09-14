@@ -9,7 +9,7 @@ inline std::wstring KnownPath(REFKNOWNFOLDERID id) {
     PWSTR value=nullptr; Hr(SHGetKnownFolderPath(id,KF_FLAG_CREATE,nullptr,&value),L"SHORTCUT");
     std::wstring result=value; CoTaskMemFree(value); return result;
 }
-inline std::wstring ControllerPath() { return KnownPath(FOLDERID_LocalAppData)+L"\\TOLF\\VPN\\2.4.0\\TOLF-VPN.exe"; }
+inline std::wstring ControllerPath() { return KnownPath(FOLDERID_LocalAppData)+L"\\TOLF\\VPN\\2.4.1\\TOLF-VPN.exe"; }
 inline void Shortcut(const std::wstring& path,const std::wstring& exe,const wchar_t* args) {
     ComPtr<IShellLinkW> link; Hr(CoCreateInstance(CLSID_ShellLink,nullptr,CLSCTX_INPROC_SERVER,IID_PPV_ARGS(&link)),L"SHORTCUT");
     Hr(link->SetPath(exe.c_str()),L"SHORTCUT"); Hr(link->SetArguments(args),L"SHORTCUT");
@@ -89,19 +89,37 @@ inline std::wstring ConnectionDns(const std::wstring& name) {
     }
     return result;
 }
-// Native RAS with saved Windows credentials. No shell, domain prompt or token files.
-inline void DialProfile(const std::wstring& name) {
+// EAP can require Windows UI even when ordinary RAS credentials are saved.
+struct SavedEapIdentity {
+    LPRASEAPUSERIDENTITYW value=nullptr;
+    bool needsInteraction=false;
+    SavedEapIdentity(const std::wstring& pb,const std::wstring& name) {
+        DWORD e=RasGetEapUserIdentityW(pb.c_str(),name.c_str(),RASEAPF_NonInteractive,nullptr,&value);
+        needsInteraction=e==ERROR_INTERACTIVE_MODE;
+        if(e&&e!=ERROR_INVALID_FUNCTION_FOR_ENTRY&&!needsInteraction){
+            if(value){RasFreeEapUserIdentityW(value);value=nullptr;}
+            throw Failure{L"EAP_IDENTITY",e};
+        }
+    }
+    ~SavedEapIdentity(){if(value)RasFreeEapUserIdentityW(value);}
+    SavedEapIdentity(const SavedEapIdentity&)=delete;
+};
+inline void DialWithWindows(std::wstring pb,std::wstring name,HWND owner) {
+    RASDIALDLG dialog={};dialog.dwSize=sizeof(dialog);dialog.hwndOwner=owner;
+    if(!RasDialDlgW(pb.data(),name.data(),nullptr,&dialog))
+        throw Failure{L"CONNECT",dialog.dwError?dialog.dwError:ERROR_CANCELLED};
+    if(!Connected(pb,name))throw Failure{L"CONNECT",ERROR_NOT_CONNECTED};
+}
+inline void DialProfile(const std::wstring& name,HWND owner=nullptr) {
     if(ProfileConnection(name))throw Failure{L"VPN_CONFIGURATION",ERROR_BUSY};
     auto pb=Phonebook();RASDIALPARAMSW params={};params.dwSize=sizeof(params);wcscpy_s(params.szEntryName,name.c_str());
     struct Wipe { RASDIALPARAMSW& p; ~Wipe(){SecureZeroMemory(&p,sizeof(p));} }wipe{params};
     BOOL password=FALSE;DWORD e=RasGetEntryDialParamsW(pb.c_str(),&params,&password);
-    if(e)throw Failure{L"CREDENTIALS",e};if(!password)throw Failure{L"CREDENTIALS",ERROR_NO_SUCH_LOGON_SESSION};
-    LPRASEAPUSERIDENTITYW identity=nullptr;
-    e=RasGetEapUserIdentityW(pb.c_str(),name.c_str(),RASEAPF_NonInteractive,nullptr,&identity);
-    struct FreeIdentity{LPRASEAPUSERIDENTITYW& p;~FreeIdentity(){if(p)RasFreeEapUserIdentityW(p);}}free{identity};
-    if(e&&e!=ERROR_INVALID_FUNCTION_FOR_ENTRY)throw Failure{L"CREDENTIALS",e};
+    if(e)throw Failure{L"CREDENTIALS",e};
+    SavedEapIdentity identity(pb,name);
+    if(identity.needsInteraction||!password){DialWithWindows(pb,name,owner);return;}
     RASDIALEXTENSIONS ext={};ext.dwSize=sizeof(ext);
-    if(identity){wcscpy_s(params.szUserName,identity->szUserName);ext.RasEapInfo.dwSizeofEapInfo=identity->dwSizeofEapInfo;ext.RasEapInfo.pbEapInfo=identity->pbEapInfo;}
+    if(identity.value){wcscpy_s(params.szUserName,identity.value->szUserName);ext.RasEapInfo.dwSizeofEapInfo=identity.value->dwSizeofEapInfo;ext.RasEapInfo.pbEapInfo=identity.value->pbEapInfo;}
     HRASCONN handle=nullptr;e=RasDialW(&ext,pb.c_str(),&params,0,nullptr,&handle);
     RASCONNSTATUSW state={};state.dwSize=sizeof(state);
     if(!e)e=RasGetConnectStatusW(handle,&state);

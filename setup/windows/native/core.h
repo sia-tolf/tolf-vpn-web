@@ -54,7 +54,7 @@ inline void ParseSettings(const std::wstring& text, Settings& c){
 }
 struct Http {HINTERNET h;explicit Http(HINTERNET v):h(v){Win(h!=nullptr,L"NETWORK");}~Http(){WinHttpCloseHandle(h);}operator HINTERNET()const{return h;}};
 inline void Fetch(const std::wstring& token,Settings& c){
- Http session(WinHttpOpen(L"TOLF-Setup/2.4",WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY,WINHTTP_NO_PROXY_NAME,WINHTTP_NO_PROXY_BYPASS,0));
+ Http session(WinHttpOpen(L"TOLF-Setup/2.4.1",WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY,WINHTTP_NO_PROXY_NAME,WINHTTP_NO_PROXY_BYPASS,0));
  Win(WinHttpSetTimeouts(session,15000,15000,15000,15000),L"NETWORK");
  DWORD tls=WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2;Win(WinHttpSetOption(session,WINHTTP_OPTION_SECURE_PROTOCOLS,&tls,sizeof(tls)),L"NETWORK");
  Http host(WinHttpConnect(session,L"api.tolf.is",INTERNET_DEFAULT_HTTPS_PORT,0));

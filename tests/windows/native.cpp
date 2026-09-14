@@ -15,6 +15,9 @@ int wmain(){std::wstring name;bool owned=false;try{
  GUID id;Hr(CoCreateGuid(&id),L"TEST_GUID");wchar_t guid[40];StringFromGUID2(id,guid,40);name=L"TOLF CI "+std::wstring(guid);auto pb=Phonebook();Check(!Existing(pb,name,c));
  Configure(w,c,name);owned=true;Check(Existing(pb,name,c));std::puts("PASS native IKEv2 creation, IPsec policy and credential save");
  Configure(w,c,name);std::puts("PASS repeat setup without duplicate entry");
+ {SavedEapIdentity identity(pb,name);Check(identity.needsInteraction||identity.value!=nullptr);
+ std::puts(identity.needsInteraction?"PASS fresh EAP credentials require Windows UI without failing with 703":"PASS cached EAP identity available");}
+
  auto entryBefore=RouteEntry(pb,name);DWORD options2=reinterpret_cast<RASENTRYW*>(entryBefore.data())->dwfOptions2;
  auto checkFlags=[&](bool full){auto buffer=RouteEntry(pb,name);auto entry=reinterpret_cast<RASENTRYW*>(buffer.data());Check(bool(entry->dwfOptions & RASEO_RemoteDefaultGateway)==full);Check(entry->dwfOptions2==options2);};
  auto exclusions=CheckedNetworks(L"192.168.200.0/24\r\n10.90.0.0/16");

@@ -61,5 +61,5 @@ jobs:
         shell: pwsh
         run: |
           $tag = "windows-setup-$env:GITHUB_SHA"
-          gh release create $tag setup/windows/dist/TOLF-Setup.exe setup/windows/dist/update-windows-gui.py setup/windows/dist/SHA256SUMS setup/windows/dist/settings-preview.png setup/windows/dist/widget-preview.png --prerelease --target $env:GITHUB_SHA --title "TOLF Windows setup 2.4 native test build" --notes "Native C++ installer using built-in Windows APIs. No .NET, PowerShell or external Visual C++ runtime needed. Unsigned test build; real Windows VPN connection testing remains required."
+          gh release create $tag setup/windows/dist/TOLF-Setup.exe setup/windows/dist/update-windows-gui.py setup/windows/dist/SHA256SUMS setup/windows/dist/settings-preview.png setup/windows/dist/widget-preview.png --prerelease --target $env:GITHUB_SHA --title "TOLF Windows setup 2.4.1 native test build" --notes "Native C++ installer using built-in Windows APIs. No .NET, PowerShell or external Visual C++ runtime needed. Unsigned test build; real Windows VPN connection testing remains required."
 
