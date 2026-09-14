@@ -6,12 +6,16 @@ const root=path.resolve(__dirname,'../..');
  try{
  const page=await browser.newPage({viewport:{width:1100,height:900}});
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- const id='12345678-1234-1234-1234-123456789abc';let role=true,moscowError=false,disconnected=false,disconnectPosts=0;
+ const id='12345678-1234-1234-1234-123456789abc';let role=true,moscowError=false,disconnected=false,disconnectPosts=0,accessState='active',accessPosts=0;
  await page.route('https://api.tolf.is/admin/**',r=>{
    const url=new URL(r.request().url());let body;
    if(r.request().method()==='OPTIONS')return r.fulfill({status:204,headers:{'Access-Control-Allow-Origin':'https://vpn.tolf.is','Access-Control-Allow-Credentials':'true','Access-Control-Allow-Headers':'content-type','Access-Control-Allow-Methods':'POST'}});
-   if(url.pathname.endsWith('/me'))body={isAdmin:role,number:1,features:{sessions:true,testDisconnect:true}};
+   if(url.pathname.endsWith('/me'))body={isAdmin:role,number:1,features:{sessions:true,testDisconnect:true,testAccess:true}};
    else if(!role)return r.fulfill({status:403,contentType:'application/json',body:'{}'});
+   else if(url.pathname==='/admin/test-access'){
+    if(r.request().method()==='POST'){accessPosts++;accessState=JSON.parse(r.request().postData()).action==='suspend'?'suspended':'active';}
+    body={status:'ok',accountNumber:26,state:accessState,revision:accessState==='active'?'a'.repeat(32):'b'.repeat(32)};
+   }
    else if(url.pathname==='/admin/disconnect/prepare')body={ticket:'A'.repeat(43),accountNumber:26,node:'moscow',id:5448};
    else if(url.pathname==='/admin/disconnect'){disconnectPosts++;disconnected=true;body={status:'ok',reconnected:false};}
    else if(url.pathname==='/admin/sessions')body={nodes:[{node:'riga',status:'ok',observedAt:'2026-09-14T14:44:07Z',sessions:[]},moscowError?{node:'moscow',status:'error'}:{node:'moscow',status:'ok',observedAt:'2026-09-14T14:44:07Z',sessions:[{id:5441,identity:'user_windows',account:{accountId:id,number:1},remoteHost:'192.0.2.1',virtualAddresses:['10.10.10.104'],establishedSeconds:518,bytesIn:1024,bytesOut:2048,state:'ESTABLISHED'},...disconnected?[]:[{id:5448,identity:'user_0888048cac6e44d28aed9857aa31e9ed',account:{accountId:'0888048c-ac6e-44d2-8aed-9857aa31e9ed',number:26},remoteHost:'192.0.2.26',virtualAddresses:['10.10.10.105'],establishedSeconds:518,bytesIn:1024,bytesOut:2048,state:'ESTABLISHED'}]]}]};
@@ -48,6 +52,19 @@ const root=path.resolve(__dirname,'../..');
  await page.getByText('Сеанс Test отключён.',{exact:true}).waitFor();
  assert.equal(disconnectPosts,1);
  assert.equal(await page.getByRole('button',{name:'Отключить Test',exact:true}).count(),0);
+ await page.getByRole('button',{name:'Приостановить доступ',exact:true}).waitFor();
+ page.once('dialog',dialog=>dialog.dismiss());
+ await page.getByRole('button',{name:'Приостановить доступ',exact:true}).click();
+ assert.equal(accessPosts,0);
+ page.once('dialog',dialog=>dialog.accept());
+ await page.getByRole('button',{name:'Приостановить доступ',exact:true}).click();
+ await page.getByText('Приостановлен на Риге и Москве',{exact:true}).waitFor();
+ assert.equal(accessPosts,1);
+ await page.screenshot({path:'/tmp/tolf-admin-test-access.png',fullPage:true});
+ page.once('dialog',dialog=>dialog.accept());
+ await page.getByRole('button',{name:'Возобновить доступ',exact:true}).click();
+ await page.getByText('Разрешён на Риге и Москве',{exact:true}).waitFor();
+ assert.equal(accessPosts,2);
  moscowError=true;
  await page.getByRole('button',{name:'Обновить',exact:true}).click();
  await page.locator('[data-node=moscow]').getByText('Не удалось опросить узел. Количество сеансов неизвестно.',{exact:true}).waitFor();

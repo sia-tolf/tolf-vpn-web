@@ -36,6 +36,39 @@ async function disconnectTest(nodeName,id,button){
  }finally{controlBusy=false;button.disabled=false;}
 }
 
+Object.assign(copy.ru,{accessTitle:'Доступ Test №26',accessActive:'Разрешён на Риге и Москве',accessSuspended:'Приостановлен на Риге и Москве',accessSuspending:'Приостановка не завершена',accessResuming:'Возобновление не завершено',accessUnavailable:'Не удалось проверить состояние доступа.',suspendAccess:'Приостановить доступ',resumeAccess:'Возобновить доступ',finishSuspend:'Завершить приостановку',confirmSuspend:'Приостановить доступ Test №26 на Риге и Москве? Его VPN отключится, повторное подключение будет запрещено до возобновления доступа.',confirmResume:'Возобновить доступ Test №26 на Риге и Москве? Пароль и профиль останутся прежними.',accessDone:'Изменение доступа выполнено.',accessUnknown:'Операция не подтверждена. Обновите состояние перед следующим действием.',accessStale:'Состояние уже изменилось. Проверьте обновлённые данные.',accessNote:'Действие относится только к Test №26. Аккаунт, пароль и профиль сохраняются.'});
+Object.assign(copy.en,{accessTitle:'Test #26 access',accessActive:'Enabled on Riga and Moscow',accessSuspended:'Suspended on Riga and Moscow',accessSuspending:'Suspension incomplete',accessResuming:'Resumption incomplete',accessUnavailable:'Could not check access status.',suspendAccess:'Suspend access',resumeAccess:'Resume access',finishSuspend:'Complete suspension',confirmSuspend:'Suspend Test #26 on Riga and Moscow? Its VPN will disconnect and reconnection will be denied until access is resumed.',confirmResume:'Resume Test #26 on Riga and Moscow? The password and profile will stay the same.',accessDone:'Access change completed.',accessUnknown:'The operation was not confirmed. Refresh the status before taking another action.',accessStale:'The state has already changed. Review the updated status.',accessNote:'Only Test #26 is affected. The account, password and profile are preserved.'});
+Object.assign(copy.lv,{accessTitle:'Test #26 piekļuve',accessActive:'Atļauta Rīgā un Maskavā',accessSuspended:'Apturēta Rīgā un Maskavā',accessSuspending:'Apturēšana nav pabeigta',accessResuming:'Atjaunošana nav pabeigta',accessUnavailable:'Neizdevās pārbaudīt piekļuves stāvokli.',suspendAccess:'Apturēt piekļuvi',resumeAccess:'Atjaunot piekļuvi',finishSuspend:'Pabeigt apturēšanu',confirmSuspend:'Apturēt Test #26 piekļuvi Rīgā un Maskavā? VPN tiks atvienots, un atkārtots savienojums būs liegts līdz piekļuves atjaunošanai.',confirmResume:'Atjaunot Test #26 piekļuvi Rīgā un Maskavā? Parole un profils paliks nemainīgi.',accessDone:'Piekļuves izmaiņas pabeigtas.',accessUnknown:'Darbība nav apstiprināta. Pirms nākamās darbības atjauniniet stāvokli.',accessStale:'Stāvoklis jau ir mainījies. Pārskatiet atjauninātos datus.',accessNote:'Darbība attiecas tikai uz Test #26. Konts, parole un profils tiek saglabāti.'});
+for(const locale of ['ru','en','lv'])for(const action of ['suspend','resume']){
+ const names={ru:{suspend:'Приостановка доступа',resume:'Возобновление доступа',requested:'запрошено',ok:'выполнено',unknown:'результат неизвестен',stale:'состояние изменилось'},en:{suspend:'Access suspension',resume:'Access resumption',requested:'requested',ok:'completed',unknown:'outcome unknown',stale:'state changed'},lv:{suspend:'Piekļuves apturēšana',resume:'Piekļuves atjaunošana',requested:'pieprasīta',ok:'pabeigta',unknown:'rezultāts nav zināms',stale:'stāvoklis mainījies'}}[locale];
+ for(const outcome of ['requested','ok','unknown','stale'])copy[locale]['access.'+action+'.'+outcome]=names[action]+' — '+names[outcome];
+}
+let testAccess=false;
+async function accessPanel(target){
+ const own=epoch;
+ const section=node('section',undefined,'admin-access');section.append(node('h2',t('accessTitle')));
+ const status=node('p',t('loading')),actions=node('div',undefined,'admin-access-actions');section.append(status,actions,node('p',t('accessNote'),'admin-muted'));target.append(section);
+ try{
+  const state=await api('test-access');if(own!==epoch||!allowed)return;
+  if(state.status!=='ok'){status.textContent=t('accessUnavailable');return;}
+  status.textContent=t({active:'accessActive',suspended:'accessSuspended',suspending:'accessSuspending',resuming:'accessResuming'}[state.state]||'accessUnavailable');
+  for(const action of state.state==='active'?['suspend']:state.state==='suspended'?['resume']:['suspend','resume']){
+   const button=node('button',t(action==='resume'?'resumeAccess':state.state==='active'?'suspendAccess':'finishSuspend'),action==='suspend'?'admin-access-suspend':'secondary');button.type='button';
+   button.addEventListener('click',async()=>{
+    if(controlBusy||own!==epoch||!allowed)return;
+    if(!window.confirm(t(action==='suspend'?'confirmSuspend':'confirmResume')))return;
+    controlBusy=true;actions.querySelectorAll('button').forEach(b=>b.disabled=true);status.textContent=t('loading');
+    try{
+     const result=await postControl('test-access',{action,revision:state.revision});
+     if(own!==epoch||!allowed)return;
+     await load();if(allowed)$('status').textContent=t(result.status==='ok'?'accessDone':result.status==='stale'?'accessStale':'accessUnknown');
+    }catch(e){if(own===epoch&&allowed){if(e.status===401||e.status===403)fail(e);else status.textContent=t('accessUnknown');}}
+    finally{controlBusy=false;}
+   });actions.append(button);
+  }
+ }catch(e){if(own===epoch&&allowed){if(e.status===401||e.status===403)fail(e);else status.textContent=t('accessUnavailable');}}
+}
+
 const $ = id => document.getElementById(id);
 let lang;
 try { lang=localStorage.getItem('tolfLanguage'); } catch {}
@@ -59,6 +92,7 @@ function showAudit(data){const body=table(['when','actor','action','target']);fo
 function duration(value){if(value==null)return '—';const n=Math.floor(value);return Math.floor(n/3600)+':'+String(Math.floor(n/60)%60).padStart(2,'0')+':'+String(n%60).padStart(2,'0');}
 function bytes(value){const units=['B','KiB','MiB','GiB','TiB'];let n=value,i=0;while(n>=1024&&i<units.length-1){n/=1024;i++;}return n.toLocaleString(lang,{maximumFractionDigits:i?1:0})+' '+units[i];}
 function showSessions(data){
+ if(testAccess)accessPanel($('results'));
  for(const result of data.nodes){
   const section=node('section',undefined,'admin-node');section.dataset.node=result.node;
   section.append(node('h2',t(result.node)));$('results').append(section);
@@ -85,7 +119,7 @@ async function load(){if(!allowed)return;const own=++epoch;detailEpoch++;$('deta
  try{const query=new URLSearchParams({offset:String(offset),limit:'50'});if(tab==='users')query.set('q',$('search').value.trim());const data=await api(tab+(['audit','sessions'].includes(tab)?'':'?'+query));if(own!==epoch||!allowed)return;$('status').textContent='';if(tab==='sessions'){showSessions(data);return;}total=tab==='audit'?data.events.length:data.total;if(!total){$('results').append(node('p',t('empty')));return;}if(tab==='users')showUsers(data);else if(tab==='registry')showRegistry(data);else showAudit(data);$('pageLabel').textContent=tab==='audit'?t('total')+': '+total:(offset+1)+'–'+Math.min(offset+50,total)+' '+t('of')+' '+total;$('pagination').hidden=false;$('previous').hidden=tab==='audit';$('next').hidden=tab==='audit';$('previous').disabled=offset===0;$('next').disabled=offset+50>=total;
  }catch(e){if(own===epoch)fail(e);}}
 async function detail(id){const own=++detailEpoch;$('detail').hidden=true;$('detailContent').replaceChildren();try{const u=await api('users/'+encodeURIComponent(id));if(own!==detailEpoch||!allowed)return;$('detailTitle').textContent=t('account')+' '+(u.number==null?u.id:'#'+u.number);const content=$('detailContent');content.append(node('p',t('accountId')+': '+u.id,'admin-id'),node('p',t('names')+': '+(u.passkeyNames.filter(Boolean).join(', ')||t('none'))),node('h3',t('devices')));if(!u.devices.length)content.append(node('p',t('none')));for(const d of u.devices){const box=node('div',undefined,'admin-device');box.append(node('strong',d.name),node('p',t(d.server)+' · '+(d.username||'—')),node('p',t('deviceState')+': '+t(d.state),'admin-muted'));content.append(box);}$('detail').hidden=false;$('detail').scrollIntoView({block:'nearest'});}catch(e){if(own===detailEpoch)fail(e);}}
-async function start(){const own=++epoch;try{const me=await api('me');if(own!==epoch)return;if(!me.isAdmin){gate(t('denied')+(me.number==null?'':' '+t('accountNumber')+': '+me.number+'.'));return;}allowed=true;testControl=me.features?.testDisconnect===true;const hasSessions=me.features?.sessions===true;$('sessionsTab').hidden=!hasSessions;if(tab==='sessions'&&!hasSessions)tab='users';$('gate').hidden=true;$('workspace').hidden=false;await load();}catch(e){if(own!==epoch)return;gate(e.status===401?t('auth'):e.status===404||e.status===503?t('unavailable'):t('error'));}}
+async function start(){const own=++epoch;try{const me=await api('me');if(own!==epoch)return;if(!me.isAdmin){gate(t('denied')+(me.number==null?'':' '+t('accountNumber')+': '+me.number+'.'));return;}allowed=true;testAccess=me.features?.testAccess===true;testControl=me.features?.testDisconnect===true;const hasSessions=me.features?.sessions===true;$('sessionsTab').hidden=!hasSessions;if(tab==='sessions'&&!hasSessions)tab='users';$('gate').hidden=true;$('workspace').hidden=false;await load();}catch(e){if(own!==epoch)return;gate(e.status===401?t('auth'):e.status===404||e.status===503?t('unavailable'):t('error'));}}
 document.querySelectorAll('[data-lang]').forEach(el=>el.addEventListener('click',()=>{lang=el.dataset.lang;try{localStorage.setItem('tolfLanguage',lang);}catch{}language();clearData();start();}));
 document.querySelectorAll('[data-tab]').forEach(el=>el.addEventListener('click',()=>{tab=el.dataset.tab;offset=0;load();}));
 $('searchForm').addEventListener('submit',e=>{e.preventDefault();offset=0;load();});$('refresh').addEventListener('click',()=>{clearData();start();});$('previous').addEventListener('click',()=>{offset=Math.max(0,offset-50);load();});$('next').addEventListener('click',()=>{offset+=50;load();});$('closeDetail').addEventListener('click',()=>{detailEpoch++;$('detail').hidden=true;$('detailContent').replaceChildren();});

@@ -41,3 +41,5 @@
 .admin-table button.admin-disconnect{color:#bd2436;background:#fff;border:1px solid #bd2436;margin-top:8px;}
 .admin-table button.admin-disconnect:hover{background:#fff5f6;}
 .admin-table button.admin-disconnect:disabled{opacity:.55;}
+
+.admin-access{padding:20px;border:1px solid #d5d5da;border-radius:16px;background:#fff;margin:20px 0}.admin-access-actions{display:flex;gap:12px;flex-wrap:wrap}.admin-access button.admin-access-suspend{color:#bd2436;background:#fff;border:1px solid #bd2436}.admin-access h2{margin-top:0}

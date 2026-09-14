@@ -11,7 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 from datetime import datetime, timezone
 
-VERSION = '1.2.0'
+VERSION = '1.3.0'
 SESSION_POLL = threading.BoundedSemaphore(1)
 HEADERS = {'Cache-Control': 'private, no-store, max-age=0', 'X-Content-Type-Options': 'nosniff'}
 CTX = {}
@@ -236,9 +236,36 @@ def validate_selection(item):
 
 
 def control_audit(con, actor, action, node, sid):
-    target = 'Test #26 / ' + node + ' / IKE #' + sid
+    target = 'Test #26 / ' + node + ((' / IKE #' + sid) if sid != '—' else '')
     con.execute('INSERT INTO admin_audit(actor,action,target,created_at) VALUES (?,?,?,?)',
                 (actor, action, target, datetime.now(timezone.utc).isoformat()))
+
+
+def access_call(action, revision=None):
+    if action not in ('status', 'suspend', 'resume') or (action != 'status' and (not isinstance(revision, str) or not re.fullmatch('[0-9a-f]{32}', revision))):
+        raise ValueError('invalid_access_command')
+    remote = 'admin-test-access ' + action + ((' '+revision) if action != 'status' else '')
+    command = ['/usr/bin/ssh', '-T', '-o', 'BatchMode=yes', '-o', 'IdentitiesOnly=yes',
+               '-o', 'ConnectTimeout=10', '-o', 'StrictHostKeyChecking=yes',
+               '-o', 'UserKnownHostsFile='+str(CTX['RIGA_KNOWN_HOSTS']),
+               '-i', str(CTX['RIGA_KEY']), str(CTX['RIGA_USER'])+'@'+str(CTX['RIGA_HOST']), remote]
+    try:
+        r = subprocess.run(command, capture_output=True, text=True, timeout=180 if action != 'status' else 40, check=False)
+        if len(r.stdout) > 8192:
+            return {'status': 'unknown'}
+        result = json.loads(r.stdout)
+        if not isinstance(result, dict):
+            return {'status': 'unknown'}
+        if result.get('error') == 'stale_revision':
+            return {'status': 'stale'}
+        if r.returncode or result.get('status') != 'ok' or result.get('accountNumber') != 26:
+            return {'status': 'unknown'}
+        state, rev = result.get('state'), result.get('revision')
+        if state not in ('active', 'suspended', 'suspending', 'resuming') or not isinstance(rev, str) or not re.fullmatch('[0-9a-f]{32}', rev):
+            return {'status': 'unknown'}
+        return {'status': 'ok', 'state': state, 'revision': rev, 'accountNumber': 26}
+    except (ValueError, TypeError, OSError, subprocess.TimeoutExpired):
+        return {'status': 'unknown'}
 
 
 def install(app, context):
@@ -250,7 +277,7 @@ def install(app, context):
 
     @app.get('/admin/capabilities')
     def capabilities():
-        return response({'version': VERSION, 'inventory': True, 'sessions': True, 'disconnect': False, 'testDisconnect': True, 'suspend': False})
+        return response({'version': VERSION, 'inventory': True, 'sessions': True, 'disconnect': False, 'testDisconnect': True, 'testAccess': True, 'suspend': False})
 
     @app.get('/admin/me')
     def me(request: Request):
@@ -258,7 +285,7 @@ def install(app, context):
         with db() as con:
             number = con.execute('SELECT MIN(number) FROM managed_users WHERE account_id=? AND deleted_at IS NULL', (user_id,)).fetchone()[0]
             allowed = bool(con.execute('SELECT 1 FROM admin_roles WHERE user_id=?', (user_id,)).fetchone())
-        return response({'isAdmin': allowed, 'number': number, 'features': {'sessions': True, 'testDisconnect': True}})
+        return response({'isAdmin': allowed, 'number': number, 'features': {'sessions': True, 'testDisconnect': True, 'testAccess': True}})
 
     @app.get('/admin/sessions')
     def sessions(request: Request):
@@ -333,6 +360,38 @@ def install(app, context):
             with db() as con:
                 con.execute("UPDATE admin_disconnect_tickets SET state='finished',result=? WHERE ticket=?", (json.dumps(result), ticket))
                 control_audit(con, actor, 'session.disconnect.' + result['status'], row['node'], selection['uniqueid'])
+            require_admin(request)
+            return response(result)
+        finally:
+            CONTROL_LOCK.release()
+
+    @app.get('/admin/test-access')
+    def test_access_status(request: Request):
+        require_admin(request)
+        if not CONTROL_LOCK.acquire(blocking=False):
+            raise HTTPException(429, 'control_busy')
+        try:
+            result = access_call('status')
+            require_admin(request)
+            return response(result)
+        finally:
+            CONTROL_LOCK.release()
+
+    @app.post('/admin/test-access')
+    def test_access_change(request: Request, body: dict):
+        actor = control_actor(request)  # exact #26 mapping, no protected or own account
+        action, revision = body.get('action'), body.get('revision')
+        if set(body) != {'action', 'revision'} or action not in ('suspend', 'resume') or not isinstance(revision, str) or not re.fullmatch('[0-9a-f]{32}', revision):
+            raise HTTPException(400, 'invalid_access_command')
+        if not CONTROL_LOCK.acquire(blocking=False):
+            raise HTTPException(429, 'control_busy')
+        try:
+            with db() as con:
+                control_audit(con, actor, 'access.'+action+'.requested', 'riga+moscow', '—')
+            control_actor(request)
+            result = access_call(action, revision)
+            with db() as con:
+                control_audit(con, actor, 'access.'+action+'.'+result['status'], 'riga+moscow', '—')
             require_admin(request)
             return response(result)
         finally:

@@ -49,7 +49,7 @@ def test_auth_inventory_and_revocation(database):
     with TestClient(app) as c:
         assert c.get('/admin/capabilities').json()['disconnect'] is False
         assert c.get('/admin/me').status_code==401
-        assert c.get('/admin/me',headers=h).json()=={'isAdmin':False,'number':1,'features':{'sessions':True,'testDisconnect':True}}
+        assert c.get('/admin/me',headers=h).json()=={'isAdmin':False,'number':1,'features':{'sessions':True,'testDisconnect':True,'testAccess':True}}
         for endpoint in ('users','users/'+two,'registry','audit','sessions'):
             assert c.get('/admin/'+endpoint).status_code==401
             assert c.get('/admin/'+endpoint,headers=h).status_code==403
@@ -272,3 +272,36 @@ def test_control_wire_command_and_unknown(monkeypatch):
     def timeout(*args,**kwargs):raise a.subprocess.TimeoutExpired('ssh',40)
     monkeypatch.setattr(a.subprocess,'run',timeout)
     assert a.control_call('moscow',selection)=={'status':'unknown'}
+
+
+def test_access_auth_validation_and_audit(control_client,monkeypatch):
+    c,h,calls,path,one,two,selection=control_client
+    attempts=[]
+    def access(action,revision=None):
+        attempts.append((action,revision))
+        return {'status':'ok','state':'suspended' if action=='suspend' else 'active','revision':'b'*32,'accountNumber':26}
+    monkeypatch.setattr(a,'access_call',access)
+    assert c.get('/admin/test-access').status_code==401
+    assert c.get('/admin/test-access',headers={'x-test-user':two}).status_code==403
+    for headers in ({'x-test-user':one},{**h,'origin':'https://evil.example'},{**h,'x-test-user':two}):
+        assert c.post('/admin/test-access',json={'action':'suspend','revision':'a'*32},headers=headers).status_code==403
+    assert not attempts
+    for body in ({'action':'delete','revision':'a'*32},{'action':'resume','revision':'bad'},{'action':'suspend','revision':'a'*32,'account':11}):
+        assert c.post('/admin/test-access',json=body,headers=h).status_code==400
+    assert not attempts
+    assert c.get('/admin/test-access',headers=h).json()['state']=='active'
+    assert c.post('/admin/test-access',json={'action':'suspend','revision':'a'*32},headers=h).json()['state']=='suspended'
+    assert c.post('/admin/test-access',json={'action':'resume','revision':'b'*32},headers=h).json()['state']=='active'
+    assert attempts==[('status',None),('suspend','a'*32),('resume','b'*32)]
+    audit=c.get('/admin/audit',headers=h).json()['events']
+    assert audit[0]['action']=='access.resume.ok'
+    assert audit[2]['action']=='access.suspend.ok'
+    assert audit[0]['target']=='Test #26 / riga+moscow'
+
+
+def test_access_partial_response_and_revocation(control_client,monkeypatch):
+    c,h,calls,path,one,two,selection=control_client
+    monkeypatch.setattr(a,'access_call',lambda *args:{'status':'unknown'})
+    assert c.post('/admin/test-access',json={'action':'suspend','revision':'a'*32},headers=h).json()=={'status':'unknown'}
+    a.root_revoke(path,1)
+    assert c.post('/admin/test-access',json={'action':'resume','revision':'b'*32},headers=h).status_code==403
