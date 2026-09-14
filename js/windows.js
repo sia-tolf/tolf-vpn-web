@@ -4,6 +4,23 @@ let windowsEpoch = 0;
 let windowsRequestId = null;
 const windowsProfileLinks = new Map();
 let windowsReady = false;
+let windowsPasswordManagement = false;
+const windowsPasswords = new Map();
+let windowsPasswordEpoch = 0;
+function forgetWindowsPasswords() {
+  windowsPasswordEpoch++;
+  for (const item of windowsPasswords.values()) clearTimeout(item.timer);
+  windowsPasswords.clear();
+}
+function rememberWindowsPassword(id, value) {
+  forgetWindowsPasswords();
+  windowsPasswords.set(id, {value, timer: setTimeout(() => {
+    forgetWindowsPasswords(); renderWindowsDevices();
+  }, 60000)});
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { forgetWindowsPasswords(); renderWindowsDevices(); }
+});
 let windowsServers = new Set(['riga']);
 let windowsAdding = false;
 const windowsList = document.getElementById('windowsDeviceList');
@@ -14,6 +31,7 @@ const windowsServer = document.getElementById('windowsDeviceServer');
 
 function clearWindowsDevices() {
   windowsEpoch++;
+  forgetWindowsPasswords();
   windowsDevices = [];
   expandedWindowsDevice = null;
   windowsRequestId = null;
@@ -51,6 +69,64 @@ function appendWindowsDelivery(card, device, actions) {
   card.append(feedback);
 }
 
+function appendWindowsPassword(body, device) {
+  if (!windowsPasswordManagement || device.state !== 'active') return;
+  const section = document.createElement('section');
+  section.className = 'windows-password';
+  const title = document.createElement('h4'); title.textContent = t('windowsPasswordTitle');
+  const actions = document.createElement('div'); actions.className = 'windows-device-links';
+  const reveal = document.createElement('button'); reveal.type = 'button';
+  const visible = windowsPasswords.has(device.id);
+  reveal.textContent = t(visible ? 'windowsPasswordHide' : 'windowsPasswordShow');
+  reveal.disabled = vpnBusy;
+  reveal.addEventListener('click', () => {
+    if (visible) { forgetWindowsPasswords(); renderWindowsDevices(); return; }
+    forgetWindowsPasswords();
+    const passwordEpoch = windowsPasswordEpoch;
+    windowsAction(async epoch => {
+      const data = await apiRequest(`/windows/devices/${encodeURIComponent(device.id)}/password`, {method:'POST',body:'{}'});
+      if (epoch !== windowsEpoch || passwordEpoch !== windowsPasswordEpoch || document.hidden) return;
+      rememberWindowsPassword(device.id, data.password);
+      windowsMessage.textContent = '';
+    });
+  });
+  const rotate = document.createElement('button'); rotate.type = 'button'; rotate.className = 'danger';
+  rotate.textContent = t('windowsPasswordRotate'); rotate.disabled = vpnBusy;
+  rotate.addEventListener('click', () => {
+    if (!window.confirm(t('windowsPasswordConfirm', {name:device.name}))) return;
+    forgetWindowsPasswords(); windowsProfileLinks.delete(device.id);
+    const passwordEpoch = windowsPasswordEpoch;
+    const requestId = crypto.randomUUID();
+    windowsAction(async epoch => {
+      let data;
+      try {
+        data = await apiRequest(`/windows/devices/${encodeURIComponent(device.id)}/password/rotate`, {method:'POST',body:JSON.stringify({requestId})});
+      } catch (error) { throw new Error(t('windowsPasswordUncertain')); }
+      if (epoch !== windowsEpoch) return;
+      if (passwordEpoch === windowsPasswordEpoch && !document.hidden) rememberWindowsPassword(device.id, data.password);
+      windowsMessage.textContent = t('windowsPasswordChanged');
+    });
+  });
+  actions.append(reveal, rotate); section.append(title, actions);
+  if (visible) {
+    const row = document.createElement('div'); row.className = 'windows-password-row';
+    const field = document.createElement('input'); field.className = 'windows-password-value';
+    field.type = 'text'; field.readOnly = true; field.autocomplete = 'off'; field.spellcheck = false;
+    field.setAttribute('aria-label', t('windowsPasswordTitle'));
+    field.value = windowsPasswords.get(device.id).value;
+    const copy = document.createElement('button'); copy.type = 'button'; copy.textContent = t('windowsPasswordCopy');
+    copy.disabled = vpnBusy;
+    copy.addEventListener('click', async () => {
+      const item = windowsPasswords.get(device.id); if (!item) return;
+      try { await copyText(item.value); windowsMessage.textContent = t('windowsPasswordCopied'); }
+      catch { field.focus(); field.select(); windowsMessage.textContent = t('windowsPasswordCopyManual'); }
+    });
+    row.append(field, copy); section.append(row);
+  }
+  const hint = document.createElement('p'); hint.className = 'hint'; hint.textContent = t('windowsPasswordHelp');
+  section.append(hint); body.append(section);
+}
+
 function renderWindowsDevices() {
   if (windowsName.validity && windowsName.validity.customError) {
     windowsName.setCustomValidity(t('windowsNameRequired'));
@@ -67,12 +143,21 @@ function renderWindowsDevices() {
     card.addEventListener('toggle', () => {
       if (!card.isConnected) return;
       if (card.open) {
+        if (expandedWindowsDevice !== device.id) {
+          forgetWindowsPasswords();
+          windowsList.querySelectorAll('.windows-password-value').forEach(field => { field.value = ''; });
+        }
+        const changed = expandedWindowsDevice !== device.id;
         expandedWindowsDevice = device.id;
+        if (changed) { renderWindowsDevices(); return; }
         for (const other of windowsList.children) {
           if (other !== card) other.open = false;
         }
       } else if (expandedWindowsDevice === device.id) {
+        forgetWindowsPasswords();
+        body.querySelectorAll('.windows-password-value').forEach(field => { field.value = ''; });
         expandedWindowsDevice = null;
+        renderWindowsDevices();
       }
     });
     const user = document.createElement('p');
@@ -101,11 +186,13 @@ function renderWindowsDevices() {
         windowsRequestId = null;
         if (epoch !== windowsEpoch) return;
         windowsProfileLinks.delete(device.id);
+        forgetWindowsPasswords();
         windowsMessage.textContent = t('windowsDeleted');
       });
     });
     actions.append(download); body.append(user, actions);
     appendWindowsDelivery(body, device, actions);
+    appendWindowsPassword(body, device);
     body.append(remove);
     card.append(name, body);
     windowsList.append(card);
@@ -215,6 +302,7 @@ windowsForm.addEventListener('submit', event => {
   try {
     const capabilities = await apiRequest('/windows/capabilities', {method:'GET',cache:'no-store'});
     if (capabilities.version !== '1.0' || !capabilities.servers.includes('riga')) throw new Error('Windows unavailable');
+    windowsPasswordManagement = capabilities.passwordManagement === true;
     windowsServers = new Set(capabilities.servers.filter(server => ['riga', 'moscow'].includes(server)));
     windowsReady = true;
     document.getElementById('platformWindows').classList.remove('hidden');
