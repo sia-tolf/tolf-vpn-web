@@ -30,7 +30,7 @@ try {
  $window = [IntPtr]::Zero
  for ($i=0; $i -lt 150; $i++) {
   Start-Sleep -Milliseconds 200
-  $window = [NativeUi]::FindWindow('TolfVpnController',$null)
+  $window = [NativeUi]::FindWindow('TolfVpnController','TOLF VPN 2.3')
   if ($window -ne [IntPtr]::Zero -and [NativeUi]::GetDlgItem($window,205) -ne [IntPtr]::Zero) { break }
  }
  if ($window -eq [IntPtr]::Zero -or $process.HasExited) { [NativeUi]::Dump($process.Id); $process.Refresh(); Write-Output "Exited=$($process.HasExited) ExitCode=$($process.ExitCode)"; throw 'Controller did not start' }
