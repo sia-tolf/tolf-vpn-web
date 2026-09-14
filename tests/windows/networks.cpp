@@ -4,7 +4,6 @@
 static void partition(const std::wstring& input){
  auto excluded=ParseNetworks(input);auto routes=TunnelPrefixes(excluded);
  if(excluded.empty()){assert(routes.empty());return;}
- assert(routes.back()==L"::/0");routes.pop_back();
  std::vector<Network4> all=excluded;
  for(const auto& prefix:routes){auto network=ParseNetworks(prefix);assert(network.size()==1);all.push_back(network[0]);}
  std::sort(all.begin(),all.end(),[](auto a,auto b){return a.first<b.first;});

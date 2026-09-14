@@ -81,8 +81,6 @@ inline std::vector<std::wstring> TunnelPrefixes(const std::vector<Network4>& exc
     uint64_t cursor = 0;
     for (auto n : excluded) { RangePrefixes(cursor, n.first, result); cursor = n.end; }
     RangePrefixes(cursor, uint64_t(1) << 32, result);
-    // Keep IPv6 directed at the VPN; an IPv4 exclusion must not enable IPv6 bypass.
-    result.push_back(L"::/0");
     if (result.size() > 512) throw std::invalid_argument("too many routes");
     return result;
 }

@@ -15,11 +15,13 @@ int wmain(){std::wstring name;bool owned=false;try{
  GUID id;Hr(CoCreateGuid(&id),L"TEST_GUID");wchar_t guid[40];StringFromGUID2(id,guid,40);name=L"TOLF CI "+std::wstring(guid);auto pb=Phonebook();Check(!Existing(pb,name,c));
  Configure(w,c,name);owned=true;Check(Existing(pb,name,c));std::puts("PASS native IKEv2 creation, IPsec policy and credential save");
  Configure(w,c,name);std::puts("PASS repeat setup without duplicate entry");
+ auto entryBefore=RouteEntry(pb,name);DWORD options2=reinterpret_cast<RASENTRYW*>(entryBefore.data())->dwfOptions2;
+ auto checkFlags=[&](bool full){auto buffer=RouteEntry(pb,name);auto entry=reinterpret_cast<RASENTRYW*>(buffer.data());Check(bool(entry->dwfOptions & RASEO_RemoteDefaultGateway)==full);Check(entry->dwfOptions2==options2);};
  auto exclusions=CheckedNetworks(L"192.168.200.0/24\r\n10.90.0.0/16");
- ConfigureRoutes(w,c,name,exclusions);Check(SavedNetworks(c.id)==NetworkText(exclusions));
+ ConfigureRoutes(w,c,name,exclusions);checkFlags(false);Check(SavedNetworks(c.id)==NetworkText(exclusions));
  ConfigureRoutes(w,c,name,exclusions);std::puts("PASS saved per-user exclusions and repeat configuration");
- bool routeRollback=false;try{ConfigureRoutes(w,c,name,CheckedNetworks(L"172.20.0.0/16"),0);}catch(const Failure&f){routeRollback=f.stage==L"TEST_ROUTE_ROLLBACK";}Check(routeRollback);Check(SavedNetworks(c.id)==NetworkText(exclusions));
- ConfigureRoutes(w,c,name,{});Check(SavedNetworks(c.id).empty());
+ bool routeRollback=false;try{ConfigureRoutes(w,c,name,CheckedNetworks(L"172.20.0.0/16"),0);}catch(const Failure&f){routeRollback=f.stage==L"TEST_ROUTE_ROLLBACK";}Check(routeRollback);checkFlags(false);Check(SavedNetworks(c.id)==NetworkText(exclusions));
+ ConfigureRoutes(w,c,name,{});checkFlags(true);Check(SavedNetworks(c.id).empty());
  ConfigureRoutes(w,c,name,{});std::puts("PASS route rollback and return to full tunnel");
  RegDeleteTreeW(HKEY_CURRENT_USER,RoutesKey(c.id).c_str());
  Settings wrong;wrong.server=L"unexpected.example";bool conflict=false;try{Existing(pb,name,wrong);}catch(const Failure&f){conflict=f.stage==L"NAME_CONFLICT";}Check(conflict);std::puts("PASS conflicting entry rejection");

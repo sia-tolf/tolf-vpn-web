@@ -88,12 +88,6 @@ public:
 
  // Numeric provider enums verified against Windows VpnClient CDXML in CI.
  void policy(const std::wstring&name,bool apply){auto in=input(L"PS_VpnConnectionIPsecConfiguration",L"SetByCustomPolicy");text(in.Get(),L"ConnectionName",name.c_str());boolean(in.Get(),L"AllUserConnection",false);boolean(in.Get(),L"Force",true);boolean(in.Get(),L"PassThru",true);number(in.Get(),L"AuthenticationTransformConstants",2);number(in.Get(),L"CipherTransformConstants",5);number(in.Get(),L"EncryptionMethod",4);number(in.Get(),L"IntegrityCheckMethod",2);number(in.Get(),L"DHGroup",3);number(in.Get(),L"PfsGroup",0);if(apply)call(L"PS_VpnConnectionIPsecConfiguration",L"SetByCustomPolicy",in.Get());}
- void split(const std::wstring& name, bool enabled) {
-  auto in=input(L"PS_VpnConnection",L"Set");
-  text(in.Get(),L"Name",name.c_str());boolean(in.Get(),L"AllUserConnection",false);
-  boolean(in.Get(),L"SplitTunneling",enabled);boolean(in.Get(),L"PassThru",true);
-  boolean(in.Get(),L"Force",true);call(L"PS_VpnConnection",L"Set",in.Get());
- }
  void route(const std::wstring& name,const std::wstring& prefix,bool add) {
   const auto method=add?L"Add":L"Remove";
   auto in=input(L"PS_VpnConnectionRoute",method);

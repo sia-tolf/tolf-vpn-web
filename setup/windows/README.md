@@ -101,9 +101,10 @@ and normalizes duplicate/overlapping networks. IPv6 exclusions are not supported
 A connected/connecting profile must be disconnected before its routes can change.
 Nothing auto-populates an RDP subnet or infers a subnet from a partial IP address.
 
-For a nonempty exclusion list, native WMI sets the per-user profile to split
-routing and adds the complement of the excluded IPv4 networks through
-`PS_VpnConnectionRoute`. It also adds `::/0` to retain the VPN IPv6 route intent.
+For a nonempty exclusion list, native RAS sets only the IPv4 default-gateway
+option to split routing and WMI adds the complement of the excluded IPv4 networks
+through `PS_VpnConnectionRoute`. Independent IPv6 profile settings are preserved;
+this feature does not add IPv6 tunneling to a profile that did not already use it.
 Windows activates these profile routes on connection and removes them on
 disconnection, including connections made after the installer exits. No global
 physical-interface route, scheduled task or background service is installed.

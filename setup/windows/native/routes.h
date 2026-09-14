@@ -30,6 +30,23 @@ inline std::vector<Network4> CheckedNetworks(const std::wstring& text) {
     catch (const std::invalid_argument&) { throw Failure{L"NETWORK_LIST", ERROR_INVALID_DATA}; }
 }
 
+// Change only IPv4 default routing; retain the profile's independent IPv6 options.
+inline std::vector<BYTE> RouteEntry(const std::wstring& pb,const std::wstring& name) {
+    DWORD size=sizeof(RASENTRYW);std::vector<BYTE> buffer(size);
+    auto entry=reinterpret_cast<RASENTRYW*>(buffer.data());entry->dwSize=sizeof(RASENTRYW);
+    DWORD error=RasGetEntryPropertiesW(pb.c_str(),name.c_str(),entry,&size,nullptr,nullptr);
+    if(error==ERROR_BUFFER_TOO_SMALL){buffer.resize(size);entry=reinterpret_cast<RASENTRYW*>(buffer.data());entry->dwSize=sizeof(RASENTRYW);error=RasGetEntryPropertiesW(pb.c_str(),name.c_str(),entry,&size,nullptr,nullptr);}
+    if(error)throw Failure{L"VPN_CONFIGURATION",error};
+    return buffer;
+}
+inline void SplitIPv4(const std::wstring& pb,const std::wstring& name,bool split) {
+    auto buffer=RouteEntry(pb,name);auto entry=reinterpret_cast<RASENTRYW*>(buffer.data());
+    if(split)entry->dwfOptions &= ~RASEO_RemoteDefaultGateway;
+    else entry->dwfOptions |= RASEO_RemoteDefaultGateway;
+    DWORD error=RasSetEntryPropertiesW(pb.c_str(),name.c_str(),entry,DWORD(buffer.size()),nullptr,0);
+    if(error)throw Failure{L"VPN_CONFIGURATION",error};
+}
+
 // Configure only a disconnected profile. Windows owns route activation/deactivation;
 // no physical-interface routes or global defaults are written by this installer.
 inline void ConfigureRoutes(Wmi& w, const Settings& c, const std::wstring& name,
@@ -41,12 +58,8 @@ inline void ConfigureRoutes(Wmi& w, const Settings& c, const std::wstring& name,
     auto oldRoutes = TunnelPrefixes(previous), newRoutes = TunnelPrefixes(excluded);
     std::vector<std::wstring> removed, added;
     // Refuse changing unmanaged split-tunnel profiles: their existing routing is unknown.
-    DWORD size=sizeof(RASENTRYW); std::vector<BYTE> buffer(size);
     if (existed) {
-        auto entry=reinterpret_cast<RASENTRYW*>(buffer.data());entry->dwSize=sizeof(RASENTRYW);
-        DWORD error=RasGetEntryPropertiesW(pb.c_str(),name.c_str(),entry,&size,nullptr,nullptr);
-        if(error==ERROR_BUFFER_TOO_SMALL){buffer.resize(size);entry=reinterpret_cast<RASENTRYW*>(buffer.data());entry->dwSize=sizeof(RASENTRYW);error=RasGetEntryPropertiesW(pb.c_str(),name.c_str(),entry,&size,nullptr,nullptr);}
-        if(error)throw Failure{L"VPN_CONFIGURATION",error};
+        auto buffer=RouteEntry(pb,name);auto entry=reinterpret_cast<RASENTRYW*>(buffer.data());
         bool full=(entry->dwfOptions & RASEO_RemoteDefaultGateway)!=0;
         if(full != previous.empty())throw Failure{L"ROUTE_CONFLICT",ERROR_INVALID_DATA};
     }
@@ -60,7 +73,7 @@ inline void ConfigureRoutes(Wmi& w, const Settings& c, const std::wstring& name,
         for(const auto& route:newRoutes) if(std::find(oldRoutes.begin(),oldRoutes.end(),route)==oldRoutes.end()) {
             w.route(name,route,true);added.push_back(route);checkpoint();
         }
-        splitAttempted=true;w.split(name,!excluded.empty());checkpoint();
+        splitAttempted=true;SplitIPv4(pb,name,!excluded.empty());checkpoint();
         SaveNetworks(c.id,NetworkText(excluded));
     } catch (...) {
         auto original=std::current_exception();bool restored=true;
@@ -69,7 +82,7 @@ inline void ConfigureRoutes(Wmi& w, const Settings& c, const std::wstring& name,
         } else if(existed && configured) {
             for(auto i=added.rbegin();i!=added.rend();++i)try{w.route(name,*i,false);}catch(...){restored=false;}
             for(const auto& route:removed)try{w.route(name,route,true);}catch(...){restored=false;}
-            if(splitAttempted)try{w.split(name,!previous.empty());}catch(...){restored=false;}
+            if(splitAttempted)try{SplitIPv4(pb,name,!previous.empty());}catch(...){restored=false;}
         }
         if(!restored)throw Failure{L"ROUTE_ROLLBACK",ERROR_GEN_FAILURE};
         std::rethrow_exception(original);

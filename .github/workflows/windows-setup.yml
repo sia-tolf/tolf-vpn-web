@@ -50,13 +50,6 @@ jobs:
               $c.CimClassMethods[$method].Parameters | Format-List *
             }
           }
-          $name = 'TOLF Route Diagnostics'
-          try {
-            Add-VpnConnection -Name $name -ServerAddress 'ikev2-riga.tolf.is' -TunnelType Ikev2 -AuthenticationMethod Eap -Force
-            Add-VpnConnectionRoute -ConnectionName $name -DestinationPrefix '0.0.0.0/5' -RouteMetric 1 -PassThru
-            Add-VpnConnectionRoute -ConnectionName $name -DestinationPrefix '::/0' -RouteMetric 1 -PassThru
-          } finally { Remove-VpnConnection -Name $name -Force -ErrorAction SilentlyContinue }
-
       - name: Build London updater
         run: python setup/windows/build-update.py
       - name: Publish unsigned test build
