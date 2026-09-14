@@ -75,7 +75,7 @@ function appendWindowsPassword(body, device) {
   section.className = 'windows-password';
   const title = document.createElement('h4'); title.textContent = t('windowsPasswordTitle');
   const actions = document.createElement('div'); actions.className = 'windows-device-links';
-  const reveal = document.createElement('button'); reveal.type = 'button';
+  const reveal = document.createElement('button'); reveal.type = 'button'; reveal.className = 'secondary';
   const visible = windowsPasswords.has(device.id);
   reveal.textContent = t(visible ? 'windowsPasswordHide' : 'windowsPasswordShow');
   reveal.disabled = vpnBusy;
@@ -114,7 +114,7 @@ function appendWindowsPassword(body, device) {
     field.type = 'text'; field.readOnly = true; field.autocomplete = 'off'; field.spellcheck = false;
     field.setAttribute('aria-label', t('windowsPasswordTitle'));
     field.value = windowsPasswords.get(device.id).value;
-    const copy = document.createElement('button'); copy.type = 'button'; copy.textContent = t('windowsPasswordCopy');
+    const copy = document.createElement('button'); copy.type = 'button'; copy.className = 'constructive'; copy.textContent = t('windowsPasswordCopy');
     copy.disabled = vpnBusy;
     copy.addEventListener('click', async () => {
       const item = windowsPasswords.get(device.id); if (!item) return;
