@@ -42,6 +42,21 @@ jobs:
           Get-ChildItem "$env:WINDIR/System32/WindowsPowerShell/v1.0/Modules/VpnClient/*IPsec*.cdxml" | ForEach-Object { Get-Content $_.FullName }
           $c = Get-CimClass -Namespace 'root/Microsoft/Windows/RemoteAccess/Client' -ClassName PS_VpnConnectionIPsecConfiguration
           $c.CimClassMethods['SetByCustomPolicy'].Parameters | Format-List *
+          Get-ChildItem "$env:WINDIR/System32/WindowsPowerShell/v1.0/Modules/VpnClient/*Route*.cdxml" | ForEach-Object { Get-Content $_.FullName }
+          foreach ($class in @('PS_VpnConnectionRoute','PS_VpnConnection')) {
+            $c = Get-CimClass -Namespace 'root/Microsoft/Windows/RemoteAccess/Client' -ClassName $class
+            foreach ($method in @('Add','Remove','Set')) {
+              Write-Output "$class.$method"
+              $c.CimClassMethods[$method].Parameters | Format-List *
+            }
+          }
+          $name = 'TOLF Route Diagnostics'
+          try {
+            Add-VpnConnection -Name $name -ServerAddress 'ikev2-riga.tolf.is' -TunnelType Ikev2 -AuthenticationMethod Eap -Force
+            Add-VpnConnectionRoute -ConnectionName $name -DestinationPrefix '0.0.0.0/5' -RouteMetric 1 -PassThru
+            Add-VpnConnectionRoute -ConnectionName $name -DestinationPrefix '::/0' -RouteMetric 1 -PassThru
+          } finally { Remove-VpnConnection -Name $name -Force -ErrorAction SilentlyContinue }
+
       - name: Build London updater
         run: python setup/windows/build-update.py
       - name: Publish unsigned test build
