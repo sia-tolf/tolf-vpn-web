@@ -86,3 +86,49 @@ Native interfaces are documented by Microsoft:
 - https://learn.microsoft.com/en-us/previous-versions/windows/desktop/vpnclientpsprov/setbycustompolicy-ps-vpnconnectionipsecconfiguration
 - https://learn.microsoft.com/en-us/windows/win32/api/ras/nf-ras-rassetcredentialsw
 - https://learn.microsoft.com/en-us/windows/win32/api/rasdlg/nf-rasdlg-rasdialdlgw
+
+
+## Native setup 2.1 — optional IPv4 exclusions
+
+The first step loads the device configuration and its saved local preferences.
+The user can then enter up to 32 IPv4 CIDR networks, one per line (commas and
+semicolons also work). The empty default preserves the existing full tunnel.
+The installer validates prefixes, rejects host bits and exclusion of all IPv4,
+and normalizes duplicate/overlapping networks. IPv6 exclusions are not supported.
+
+“Save without connecting” configures a disconnected profile without dialing it.
+“Save and connect” performs the same save and then opens the Windows dial dialog.
+A connected/connecting profile must be disconnected before its routes can change.
+Nothing auto-populates an RDP subnet or infers a subnet from a partial IP address.
+
+For a nonempty exclusion list, native WMI sets the per-user profile to split
+routing and adds the complement of the excluded IPv4 networks through
+`PS_VpnConnectionRoute`. It also adds `::/0` to retain the VPN IPv6 route intent.
+Windows activates these profile routes on connection and removes them on
+disconnection, including connections made after the installer exits. No global
+physical-interface route, scheduled task or background service is installed.
+Excluded destinations follow the computer's existing routing table; ordinary
+longest-prefix route selection still applies, including existing local routes.
+The installer does not configure server routes or remote gateways. An RDP return
+path may use a different source network from the VM's destination subnet, so an
+exclusion list by itself cannot guarantee RDP reachability.
+
+The canonical list is stored for the current Windows user under
+`HKCU\Software\TOLF\VPN\<device UUID>\ExcludedIPv4`. It is reloaded when the user
+opens a valid setup link for the same device. Clearing and saving the list removes
+the managed profile routes and restores full tunneling. Failed route changes are
+rolled back; rollback failure is surfaced and connection is not started. These
+are process-level rollback guarantees, not recovery from a power failure midway
+through a change. VPN credentials and policy retain the 2.0 update behavior.
+
+Tests cover strict CIDR parsing, IPv4 partition coverage, boundary addresses,
+normalization, real Windows provider route creation/removal, repeated setup,
+failed updates and removal of a newly created profile after a route failure.
+Tests do not dial a VPN. End-to-end RDP and live connection testing remain separate.
+
+The London updater accepts the verified previous native module and performs a
+backup and health check. Publishing the repository does not update the EXE served
+by London: execute the release's updater there, then download the new installer.
+
+- https://learn.microsoft.com/en-us/previous-versions/windows/desktop/vpnclientpsprov/add-ps-vpnconnectionroute
+- https://learn.microsoft.com/en-us/previous-versions/windows/desktop/vpnclientpsprov/remove-ps-vpnconnectionroute

@@ -181,7 +181,7 @@ def install(app, context):
 
     @app.get('/windows/capabilities')
     def capabilities():
-        return {'version': VERSION, 'servers': ['riga'], 'routing': 'sr', 'installerVersion': '2.0.0'}
+        return {'version': VERSION, 'servers': ['riga'], 'routing': 'sr', 'installerVersion': '2.1.0'}
 
     @app.get('/windows/devices')
     def devices(request: Request):
@@ -271,9 +271,9 @@ def install(app, context):
         lang = metadata['language']
         labels = TEXT[lang]
         copy = {
-            'en': ['Send to computer', 'Copy personal link', 'Personal setup link', 'Open this link on your Windows computer to set up TOLF VPN.', 'Install for Windows', 'Open the downloaded file and select “Set up and connect”.', 'Link copied', 'Copy the link from the field below.', 'Keep this personal link private.'],
-            'ru': ['Отправить на компьютер', 'Скопировать ссылку', 'Персональная ссылка настройки', 'Откройте эту ссылку на компьютере Windows, чтобы настроить TOLF VPN.', 'Установить для Windows', 'Откройте скачанный файл и нажмите «Настроить и подключиться».', 'Ссылка скопирована', 'Скопируйте ссылку из поля ниже.', 'Не передавайте персональную ссылку посторонним.'],
-            'lv': ['Nosūtīt uz datoru', 'Kopēt saiti', 'Personīgā iestatīšanas saite', 'Atveriet šo saiti Windows datorā, lai iestatītu TOLF VPN.', 'Instalēt Windows', 'Atveriet lejupielādēto failu un izvēlieties “Iestatīt un savienot”.', 'Saite nokopēta', 'Kopējiet saiti no zemāk redzamā lauka.', 'Nekopīgojiet personīgo saiti ar svešiniekiem.']
+            'en': ['Send to computer', 'Copy personal link', 'Personal setup link', 'Open this link on your Windows computer to set up TOLF VPN.', 'Install for Windows', 'Open the downloaded file, load settings and optionally enter networks outside VPN. Choose “Save without connecting” or “Save and connect”.', 'Link copied', 'Copy the link from the field below.', 'Keep this personal link private.'],
+            'ru': ['Отправить на компьютер', 'Скопировать ссылку', 'Персональная ссылка настройки', 'Откройте эту ссылку на компьютере Windows, чтобы настроить TOLF VPN.', 'Установить для Windows', 'Откройте скачанный файл, загрузите настройки и при необходимости укажите сети вне VPN. Выберите «Сохранить без подключения» или «Сохранить и подключиться».', 'Ссылка скопирована', 'Скопируйте ссылку из поля ниже.', 'Не передавайте персональную ссылку посторонним.'],
+            'lv': ['Nosūtīt uz datoru', 'Kopēt saiti', 'Personīgā iestatīšanas saite', 'Atveriet šo saiti Windows datorā, lai iestatītu TOLF VPN.', 'Instalēt Windows', 'Atveriet lejupielādēto failu, ielādējiet iestatījumus un pēc vajadzības norādiet tīklus ārpus VPN. Izvēlieties saglabāšanu bez savienošanās vai savienojumu.', 'Saite nokopēta', 'Kopējiet saiti no zemāk redzamā lauka.', 'Nekopīgojiet personīgo saiti ar svešiniekiem.']
         }[lang]
         escape = html.escape
         url = 'https://api.tolf.is/windows/p/' + token
@@ -306,3 +306,4 @@ document.getElementById('send').addEventListener('click',async()=>{{
 </script></body></html>'''
         return HTMLResponse(body, headers={**HEADERS, 'X-Frame-Options': 'DENY',
             'Content-Security-Policy': f"default-src 'none'; style-src 'unsafe-inline'; script-src 'nonce-{nonce}'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"})
+

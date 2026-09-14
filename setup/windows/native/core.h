@@ -18,6 +18,7 @@
 #include <regex>
 #include <stdexcept>
 #include <utility>
+#include "networks.h"
 using Microsoft::WRL::ComPtr;
 struct Failure { std::wstring stage; DWORD code; };
 inline void Hr(HRESULT h, const wchar_t* s) { if(FAILED(h)) throw Failure{s,(DWORD)h}; }
@@ -53,7 +54,7 @@ inline void ParseSettings(const std::wstring& text, Settings& c){
 }
 struct Http {HINTERNET h;explicit Http(HINTERNET v):h(v){Win(h!=nullptr,L"NETWORK");}~Http(){WinHttpCloseHandle(h);}operator HINTERNET()const{return h;}};
 inline void Fetch(const std::wstring& token,Settings& c){
- Http session(WinHttpOpen(L"TOLF-Setup/2.0",WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY,WINHTTP_NO_PROXY_NAME,WINHTTP_NO_PROXY_BYPASS,0));
+ Http session(WinHttpOpen(L"TOLF-Setup/2.1",WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY,WINHTTP_NO_PROXY_NAME,WINHTTP_NO_PROXY_BYPASS,0));
  Win(WinHttpSetTimeouts(session,15000,15000,15000,15000),L"NETWORK");
  DWORD tls=WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2;Win(WinHttpSetOption(session,WINHTTP_OPTION_SECURE_PROTOCOLS,&tls,sizeof(tls)),L"NETWORK");
  Http host(WinHttpConnect(session,L"api.tolf.is",INTERNET_DEFAULT_HTTPS_PORT,0));
@@ -87,6 +88,20 @@ public:
 
  // Numeric provider enums verified against Windows VpnClient CDXML in CI.
  void policy(const std::wstring&name,bool apply){auto in=input(L"PS_VpnConnectionIPsecConfiguration",L"SetByCustomPolicy");text(in.Get(),L"ConnectionName",name.c_str());boolean(in.Get(),L"AllUserConnection",false);boolean(in.Get(),L"Force",true);boolean(in.Get(),L"PassThru",true);number(in.Get(),L"AuthenticationTransformConstants",2);number(in.Get(),L"CipherTransformConstants",5);number(in.Get(),L"EncryptionMethod",4);number(in.Get(),L"IntegrityCheckMethod",2);number(in.Get(),L"DHGroup",3);number(in.Get(),L"PfsGroup",0);if(apply)call(L"PS_VpnConnectionIPsecConfiguration",L"SetByCustomPolicy",in.Get());}
+ void split(const std::wstring& name, bool enabled) {
+  auto in=input(L"PS_VpnConnection",L"Set");
+  text(in.Get(),L"Name",name.c_str());boolean(in.Get(),L"AllUserConnection",false);
+  boolean(in.Get(),L"SplitTunneling",enabled);boolean(in.Get(),L"PassThru",true);
+  boolean(in.Get(),L"Force",true);call(L"PS_VpnConnection",L"Set",in.Get());
+ }
+ void route(const std::wstring& name,const std::wstring& prefix,bool add) {
+  const auto method=add?L"Add":L"Remove";
+  auto in=input(L"PS_VpnConnectionRoute",method);
+  text(in.Get(),L"ConnectionName",name.c_str());text(in.Get(),L"DestinationPrefix",prefix.c_str());
+  boolean(in.Get(),L"AllUserConnection",false);boolean(in.Get(),L"PassThru",true);
+  if(add)number(in.Get(),L"RouteMetric",1);
+  call(L"PS_VpnConnectionRoute",method,in.Get());
+ }
  void add(const std::wstring&name,const Settings&c){auto in=input(L"PS_VpnConnection",L"Add");text(in.Get(),L"Name",name.c_str());text(in.Get(),L"ServerAddress",c.server.c_str());text(in.Get(),L"TunnelType",L"Ikev2");text(in.Get(),L"EncryptionLevel",L"Required");strings(in.Get(),L"AuthenticationMethod",L"Eap");boolean(in.Get(),L"AllUserConnection",false);boolean(in.Get(),L"RememberCredential",true);boolean(in.Get(),L"SplitTunneling",false);boolean(in.Get(),L"UseWinlogonCredential",false);boolean(in.Get(),L"Force",true);boolean(in.Get(),L"PassThru",true);
  text(in.Get(),L"EapConfigXmlStream",LR"(<EapHostConfig xmlns="http://www.microsoft.com/provisioning/EapHostConfig"><EapMethod><Type xmlns="http://www.microsoft.com/provisioning/EapCommon">26</Type><VendorId xmlns="http://www.microsoft.com/provisioning/EapCommon">0</VendorId><VendorType xmlns="http://www.microsoft.com/provisioning/EapCommon">0</VendorType><AuthorId xmlns="http://www.microsoft.com/provisioning/EapCommon">0</AuthorId></EapMethod><Config xmlns="http://www.microsoft.com/provisioning/EapHostConfig"><Eap xmlns="http://www.microsoft.com/provisioning/BaseEapConnectionPropertiesV1"><Type>26</Type><EapType xmlns="http://www.microsoft.com/provisioning/MsChapV2ConnectionPropertiesV1"><UseWinLogonCredentials>false</UseWinLogonCredentials></EapType></Eap></Config></EapHostConfig>)");call(L"PS_VpnConnection",L"Add",in.Get());}
 };
@@ -94,13 +109,14 @@ inline std::wstring Phonebook(){PWSTR path=nullptr;Hr(SHGetKnownFolderPath(FOLDE
 inline void Services(){SC_HANDLE scm=OpenSCManagerW(nullptr,nullptr,SC_MANAGER_CONNECT);Win(scm!=nullptr,L"VPN_SERVICE");for(auto name:{L"RasMan",L"IKEEXT",L"PolicyAgent",L"Winmgmt"}){SC_HANDLE s=OpenServiceW(scm,name,SERVICE_QUERY_CONFIG);if(!s){DWORD e=GetLastError();CloseServiceHandle(scm);throw Failure{L"VPN_SERVICE",e};}DWORD n=0;QueryServiceConfigW(s,nullptr,0,&n);std::vector<BYTE>b(n);BOOL ok=QueryServiceConfigW(s,reinterpret_cast<QUERY_SERVICE_CONFIGW*>(b.data()),n,&n);DWORD e=ok?0:GetLastError();if(ok&&reinterpret_cast<QUERY_SERVICE_CONFIGW*>(b.data())->dwStartType==SERVICE_DISABLED)e=ERROR_SERVICE_DISABLED;CloseServiceHandle(s);if(e){CloseServiceHandle(scm);throw Failure{L"VPN_SERVICE",e};}}CloseServiceHandle(scm);}
 inline void Preflight(Wmi&w){Services();w.input(L"PS_VpnConnection",L"Add");w.policy(L"TOLF prerequisite check",false);}
 inline bool Existing(const std::wstring&pb,const std::wstring&name,const Settings&c){DWORD n=sizeof(RASENTRYW);std::vector<BYTE>b(n);auto e=reinterpret_cast<RASENTRYW*>(b.data());e->dwSize=sizeof(RASENTRYW);DWORD r=RasGetEntryPropertiesW(pb.c_str(),name.c_str(),e,&n,nullptr,nullptr);if(r==ERROR_BUFFER_TOO_SMALL){b.resize(n);e=reinterpret_cast<RASENTRYW*>(b.data());e->dwSize=sizeof(RASENTRYW);r=RasGetEntryPropertiesW(pb.c_str(),name.c_str(),e,&n,nullptr,nullptr);}if(r==ERROR_CANNOT_FIND_PHONEBOOK_ENTRY||r==ERROR_CANNOT_OPEN_PHONEBOOK||r==ERROR_FILE_NOT_FOUND)return false;if(r)throw Failure{L"VPN_CONFIGURATION",r};if(e->dwType!=RASET_Vpn||e->dwVpnStrategy!=VS_Ikev2Only||c.server!=e->szLocalPhoneNumber||!(e->dwfOptions&RASEO_RequireEAP)||e->dwCustomAuthKey!=26)throw Failure{L"NAME_CONFLICT",0};return true;}
-inline bool Connected(const std::wstring&pb,const std::wstring&name){
+inline bool Connected(const std::wstring&pb,const std::wstring&name,bool anyState=false){
  DWORD size=sizeof(RASCONNW),count=0;std::vector<BYTE>buffer(size);
  auto list=reinterpret_cast<RASCONNW*>(buffer.data());list[0].dwSize=sizeof(RASCONNW);
  DWORD error=RasEnumConnectionsW(list,&size,&count);
  if(error==ERROR_BUFFER_TOO_SMALL){buffer.resize(size);list=reinterpret_cast<RASCONNW*>(buffer.data());list[0].dwSize=sizeof(RASCONNW);error=RasEnumConnectionsW(list,&size,&count);}
  if(error)throw Failure{L"VPN_CONFIGURATION",error};
- for(DWORD i=0;i<count;i++)if(name==list[i].szEntryName&&_wcsicmp(pb.c_str(),list[i].szPhonebook)==0){RASCONNSTATUSW status={};status.dwSize=sizeof(status);if(RasGetConnectStatusW(list[i].hrasconn,&status)==0&&status.rasconnstate==RASCS_Connected)return true;}
+ for(DWORD i=0;i<count;i++)if(name==list[i].szEntryName&&_wcsicmp(pb.c_str(),list[i].szPhonebook)==0){if(anyState)return true;RASCONNSTATUSW status={};status.dwSize=sizeof(status);if(RasGetConnectStatusW(list[i].hrasconn,&status)==0&&status.rasconnstate==RASCS_Connected)return true;}
  return false;
 }
 inline void Configure(Wmi&w,const Settings&c,const std::wstring&name,bool failTest=false){auto pb=Phonebook();bool exists=Existing(pb,name,c),created=false;try{if(!exists){w.add(name,c);created=true;}if(!exists||!Connected(pb,name))w.policy(name,true);if(failTest)throw Failure{L"TEST_ROLLBACK",1};RASCREDENTIALSW cred={};cred.dwSize=sizeof(cred);cred.dwMask=RASCM_UserName|RASCM_Password|RASCM_Domain;wcscpy_s(cred.szUserName,c.user.c_str());wcscpy_s(cred.szPassword,c.password.value.c_str());DWORD e=RasSetCredentialsW(pb.c_str(),name.c_str(),&cred,FALSE);SecureZeroMemory(&cred,sizeof(cred));if(e)throw Failure{L"CREDENTIALS",e};}catch(...){if(created){DWORD e=RasDeleteEntryW(pb.c_str(),name.c_str());if(e)throw Failure{L"ROLLBACK",e};}throw;}}
+
