@@ -5,7 +5,7 @@ from pathlib import Path
 PAYLOADS = {}  # Replaced by build-update.py
 HASHES = {}
 # Native 2.0: exact normalized source from commit e346834e1263484d615e152e403917a491940371.
-EXPECTED = {'9fbc3ab4fb493b4d386e29c1eac5c340ff6f22fa4fb3544521e178a010112c3c', 'a4dec1ae9e2801b57758cdb96470bd6699df7f79cc6a11cdb72bf257b0309ba9', '3faefe06b19831d0b46d2a62fc694eccc4680db433c3b207c3d6cbd76d368397', '037d737bf4a7d236bf203a6fbaa5814f27792a7380adb2be1b783278ee2af850', 'a512aea770fa961d42d84cc5eef610d3af3ec2bcecadf8a70dbd3700d8c56959', '2047e0cfbeb063aa41c062ae3668f2ff2a07edb2e775e7aed7034a2c2090b5e3'}
+EXPECTED = {'3da4c567fd4befb7d53328e34dfd2c6138d21403d7e9070a0711826bb12b6314', '9fbc3ab4fb493b4d386e29c1eac5c340ff6f22fa4fb3544521e178a010112c3c', 'a4dec1ae9e2801b57758cdb96470bd6699df7f79cc6a11cdb72bf257b0309ba9', '3faefe06b19831d0b46d2a62fc694eccc4680db433c3b207c3d6cbd76d368397', '037d737bf4a7d236bf203a6fbaa5814f27792a7380adb2be1b783278ee2af850', 'a512aea770fa961d42d84cc5eef610d3af3ec2bcecadf8a70dbd3700d8c56959', '2047e0cfbeb063aa41c062ae3668f2ff2a07edb2e775e7aed7034a2c2090b5e3'}
 
 def write(path, data, info):
     fd, temp = tempfile.mkstemp(dir=path.parent, prefix='.tolf-update-')
