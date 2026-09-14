@@ -9,7 +9,7 @@ inline std::wstring KnownPath(REFKNOWNFOLDERID id) {
     PWSTR value=nullptr; Hr(SHGetKnownFolderPath(id,KF_FLAG_CREATE,nullptr,&value),L"SHORTCUT");
     std::wstring result=value; CoTaskMemFree(value); return result;
 }
-inline std::wstring ControllerPath() { return KnownPath(FOLDERID_LocalAppData)+L"\\TOLF\\VPN\\2.3.0\\TOLF-VPN.exe"; }
+inline std::wstring ControllerPath() { return KnownPath(FOLDERID_LocalAppData)+L"\\TOLF\\VPN\\2.4.0\\TOLF-VPN.exe"; }
 inline void Shortcut(const std::wstring& path,const std::wstring& exe,const wchar_t* args) {
     ComPtr<IShellLinkW> link; Hr(CoCreateInstance(CLSID_ShellLink,nullptr,CLSCTX_INPROC_SERVER,IID_PPV_ARGS(&link)),L"SHORTCUT");
     Hr(link->SetPath(exe.c_str()),L"SHORTCUT"); Hr(link->SetArguments(args),L"SHORTCUT");

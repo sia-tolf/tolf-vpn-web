@@ -31,7 +31,7 @@ try {
  $window = [IntPtr]::Zero
  for ($i=0; $i -lt 150; $i++) {
   Start-Sleep -Milliseconds 200
-  $window = [NativeUi]::FindWindow('TolfVpnController','TOLF VPN 2.3')
+  $window = [NativeUi]::FindWindow('TolfVpnController','TOLF VPN 2.4')
   if ($window -ne [IntPtr]::Zero -and [NativeUi]::GetDlgItem($window,205) -ne [IntPtr]::Zero) { break }
  }
  if ($window -eq [IntPtr]::Zero -or $process.HasExited) { [NativeUi]::Dump($process.Id); $process.Refresh(); Write-Output "Exited=$($process.HasExited) ExitCode=$($process.ExitCode)"; throw 'Controller did not start' }
@@ -54,6 +54,9 @@ try {
  [void][NativeUi]::SendMessage($window,0x8016,[IntPtr]::Zero,[IntPtr]::Zero)
  Start-Sleep -Milliseconds 500
  if (-not [NativeUi]::IsWindowEnabled([NativeUi]::GetDlgItem($window,204))) { throw 'Installed TOLF profile was not discovered' }
+ if ([NativeUi]::IsWindowVisible([NativeUi]::GetDlgItem($window,203))) { throw 'Save should be hidden until settings change' }
+ [void][NativeUi]::SendMessage($window,0x111,[IntPtr]208,[IntPtr]::Zero)
+ [void][NativeUi]::SendMessage($window,0x111,[IntPtr]208,[IntPtr]::Zero)
  Save-Window 'settings-preview.png'
  [void][NativeUi]::SendMessage($window,0x111,[IntPtr]205,[IntPtr]::Zero)
  if ([NativeUi]::IsWindowVisible([NativeUi]::GetDlgItem($window,202))) { throw 'Widget still exposes settings fields' }

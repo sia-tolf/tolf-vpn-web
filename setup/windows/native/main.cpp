@@ -72,7 +72,7 @@ static LRESULT CALLBACK Proc(HWND h,UINT m,WPARAM w,LPARAM l){switch(m){
  rdpHelp=control(L"STATIC",L(L"Remote Desktop: save without connecting first.",L"Удалённый рабочий стол: сначала сохраните без подключения.",L"Attālā darbvirsma: vispirms saglabājiet bez savienošanās."),0,36,320,488,28,0,smallFont);
  saveButton=control(L"BUTTON",L(L"Save without connecting",L"Сохранить без подключения",L"Saglabāt bez savienošanās"),WS_TABSTOP|BS_MULTILINE,36,366,236,48,104);
  connectButton=control(L"BUTTON",L(L"Save and connect",L"Сохранить и подключиться",L"Saglabāt un savienot"),WS_TABSTOP|BS_DEFPUSHBUTTON|BS_MULTILINE,288,366,236,48,105);
- status=control(L"STATIC",L"",0,36,218,488,54,0,smallFont);footer=control(L"STATIC",L(L"Built into Windows  •  TOLF VPN 2.3",L"Средствами Windows  •  TOLF VPN 2.3",L"Windows līdzekļi  •  TOLF VPN 2.3"),SS_CENTER,36,276,488,22,0,smallFont);
+ status=control(L"STATIC",L"",0,36,218,488,54,0,smallFont);footer=control(L"STATIC",L(L"Built into Windows  •  TOLF VPN 2.4",L"Средствами Windows  •  TOLF VPN 2.4",L"Windows līdzekļi  •  TOLF VPN 2.4"),SS_CENTER,36,276,488,22,0,smallFont);
  wchar_t file[32768];DWORD n=GetModuleFileNameW(nullptr,file,32768);if(n&&n<32768){std::wstring path=file;auto token=FilenameToken(path.substr(path.find_last_of(L"\\/")+1));if(!token.empty()){hasFileToken=true;SetWindowTextW(linkEdit,(L"https://api.tolf.is/windows/p/"+token).c_str());}}
  if(!hasFileToken){SetWindowTextW(introText,L(L"The setup link could not be read from the filename. Paste it below.",L"Не удалось определить ссылку по имени файла. Вставьте её ниже.",L"Iestatīšanas saiti nevarēja nolasīt no faila nosaukuma. Ielīmējiet to zemāk."));}
  Render();SetFocus(hasFileToken?loadButton:linkEdit);return 0;}
