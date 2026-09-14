@@ -24,6 +24,7 @@ public static class NativeUi {
 '@
 $exe = (Resolve-Path './setup/windows/dist/TOLF-Setup.exe').Path
 $process = $null
+$profileName = $null
 try {
  $process = Start-Process $exe -ArgumentList '--manage' -PassThru
  Write-Output ((Get-CimInstance Win32_Process -Filter "ProcessId = $($process.Id)").CommandLine)
@@ -47,12 +48,20 @@ try {
   $bitmap.Save((Join-Path (Resolve-Path './setup/windows/dist').Path $name),[System.Drawing.Imaging.ImageFormat]::Png)
   $graphics.Dispose(); $bitmap.Dispose()
  }
+ $profileName = 'TOLF - Riga - ' + [guid]::NewGuid().ToString()
+ [xml]$eap = '<EapHostConfig xmlns="http://www.microsoft.com/provisioning/EapHostConfig"><EapMethod><Type xmlns="http://www.microsoft.com/provisioning/EapCommon">26</Type><VendorId xmlns="http://www.microsoft.com/provisioning/EapCommon">0</VendorId><VendorType xmlns="http://www.microsoft.com/provisioning/EapCommon">0</VendorType><AuthorId xmlns="http://www.microsoft.com/provisioning/EapCommon">0</AuthorId></EapMethod><Config xmlns="http://www.microsoft.com/provisioning/EapHostConfig"><Eap xmlns="http://www.microsoft.com/provisioning/BaseEapConnectionPropertiesV1"><Type>26</Type><EapType xmlns="http://www.microsoft.com/provisioning/MsChapV2ConnectionPropertiesV1"><UseWinLogonCredentials>false</UseWinLogonCredentials></EapType></Eap></Config></EapHostConfig>'
+ Add-VpnConnection -Name $profileName -ServerAddress 'ikev2-riga.tolf.is' -TunnelType Ikev2 -AuthenticationMethod Eap -EncryptionLevel Required -RememberCredential -EapConfigXmlStream $eap -Force | Out-Null
+ [void][NativeUi]::SendMessage($window,0x8016,[IntPtr]::Zero,[IntPtr]::Zero)
+ Start-Sleep -Milliseconds 500
+ if (-not [NativeUi]::IsWindowEnabled([NativeUi]::GetDlgItem($window,204))) { throw 'Installed TOLF profile was not discovered' }
  Save-Window 'settings-preview.png'
  [void][NativeUi]::SendMessage($window,0x111,[IntPtr]205,[IntPtr]::Zero)
  if ([NativeUi]::IsWindowVisible([NativeUi]::GetDlgItem($window,202))) { throw 'Widget still exposes settings fields' }
  if (-not [NativeUi]::IsWindowVisible([NativeUi]::GetDlgItem($window,204))) { throw 'Widget connection button is hidden' }
+ Start-Sleep -Milliseconds 500
  Save-Window 'widget-preview.png'
  Write-Output 'PASS native settings startup, empty-profile guard and compact widget layout'
 } finally {
  if ($process -and -not $process.HasExited) { Stop-Process -Id $process.Id -Force }
+ if ($profileName) { Remove-VpnConnection -Name $profileName -Force -ErrorAction SilentlyContinue }
 }

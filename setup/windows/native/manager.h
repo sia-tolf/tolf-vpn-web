@@ -36,7 +36,7 @@ static void Layout() {
     SetWindowTextW(mode,compact?L(L"Settings",L"Настройки",L"Iestatījumi"):L(L"Show widget",L"Показать виджет",L"Rādīt logrīku"));
     RECT r={0,0,Px(width),Px(height)};AdjustWindowRectExForDpi(&r,DWORD(GetWindowLongPtrW(wnd,GWL_STYLE)),FALSE,0,scale);
     SetWindowPos(wnd,nullptr,0,0,r.right-r.left,r.bottom-r.top,SWP_NOMOVE|SWP_NOZORDER);
-    InvalidateRect(wnd,nullptr,TRUE);
+    RedrawWindow(wnd,nullptr,nullptr,RDW_INVALIDATE|RDW_ERASE|RDW_ALLCHILDREN|RDW_UPDATENOW);
 }
 static void Refresh(bool fields=false) {
     int i=Selection();bool active=false,connected=false;
