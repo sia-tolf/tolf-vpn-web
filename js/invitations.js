@@ -88,7 +88,7 @@ function renderInvitation() {
   createAccountButton.classList.toggle("secondary", !linkingSignIn);
   signInButton.classList.toggle("primary", !linkingSignIn);
   signInButton.classList.toggle("secondary", linkingSignIn);
-  invitationCard.classList.toggle("hidden", !vpnInvitation && !invitationMessageKey && !invitationProtected);
+  invitationCard.classList.toggle("hidden", !vpnInvitation && !invitationMessageKey);
   const conflict = Boolean(invitationAccount?.vpn?.configured);
   const key = invitationMessageKey || (vpnInvitation
     ? (!invitationAccount ? (invitationUsername ? "existingVpnVerifiedSignIn" : "inviteSignIn") : conflict ? "inviteConflict" : (invitationUsername ? "existingVpnVerifiedReady" : "inviteReady"))
