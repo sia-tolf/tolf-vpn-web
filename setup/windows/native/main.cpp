@@ -83,9 +83,11 @@ static LRESULT CALLBACK Proc(HWND h,UINT m,WPARAM w,LPARAM l){switch(m){
  case WM_CLOSE:if(!busy)DestroyWindow(h);return 0;
  case WM_DESTROY:settings.reset();DeleteObject(font);DeleteObject(smallFont);DeleteObject(titleFont);DeleteObject(brandFont);DeleteObject(whiteBrush);PostQuitMessage(0);return 0;
  }return DefWindowProcW(h,m,w,l);}
-int WINAPI wWinMain(HINSTANCE instance,HINSTANCE,PWSTR command,int show){
+int WINAPI wWinMain(HINSTANCE instance,HINSTANCE,PWSTR,int show){
  LANGID language=PRIMARYLANGID(GetUserDefaultUILanguage());lang=language==LANG_RUSSIAN?1:language==LANG_LATVIAN?2:0;
- if(command&&(wcscmp(command,L"--manage")==0||wcscmp(command,L"--widget")==0||wcscmp(command,L"--tray")==0))return Manager::Run(instance,wcscmp(command,L"--manage")!=0,wcscmp(command,L"--tray")==0);
+ int count=0;LPWSTR* args=CommandLineToArgvW(GetCommandLineW(),&count);
+ std::wstring action=(args&&count==2)?args[1]:L"";if(args)LocalFree(args);
+ if(action==L"--manage"||action==L"--widget"||action==L"--tray")return Manager::Run(instance,action!=L"--manage",action==L"--tray");
  HANDLE mutex=CreateMutexW(nullptr,FALSE,L"Local\\TOLF-Native-Setup");if(!mutex)return 1;if(GetLastError()==ERROR_ALREADY_EXISTS){MessageBoxW(nullptr,L"TOLF setup is already open.",L"TOLF VPN",MB_OK);CloseHandle(mutex);return 0;}
  LANGID id=PRIMARYLANGID(GetUserDefaultUILanguage());lang=id==LANG_RUSSIAN?1:id==LANG_LATVIAN?2:0;
  HRESULT init=CoInitializeEx(nullptr,COINIT_APARTMENTTHREADED);if(FAILED(init)){CloseHandle(mutex);return 1;}

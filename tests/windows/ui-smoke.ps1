@@ -26,6 +26,7 @@ $exe = (Resolve-Path './setup/windows/dist/TOLF-Setup.exe').Path
 $process = $null
 try {
  $process = Start-Process $exe -ArgumentList '--manage' -PassThru
+ Write-Output ((Get-CimInstance Win32_Process -Filter "ProcessId = $($process.Id)").CommandLine)
  $window = [IntPtr]::Zero
  for ($i=0; $i -lt 150; $i++) {
   Start-Sleep -Milliseconds 200
