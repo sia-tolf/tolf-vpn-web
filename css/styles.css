@@ -1379,7 +1379,7 @@ button:disabled { opacity: 0.55; cursor: default; }
 .windows-create-actions #windowsCreateButton { flex: 1; min-width: 0; }
 .windows-create-actions .windows-back-button { flex: 0 0 auto; width: auto; padding: 10px 0; border: 0; background: transparent; box-shadow: none; color: var(--secondary); font-size: 13px; font-weight: 500; }
 
-.windows-device-delivery { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; width: 100%; margin-top: 12px; }
+.windows-device-delivery { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; width: 100%; margin-top: 12px; }
 .windows-device-delivery > button { width: 100%; min-width: 0; height: auto; min-height: 48px; padding: 12px; font-weight: 600; overflow-wrap: anywhere; }
 .windows-device-delivery .windows-copy-button { appearance: none; background: var(--card); color: var(--text); border: 1px solid var(--border); border-radius: 12px; }
 .windows-device-open { grid-column: 1 / -1; }
@@ -1524,7 +1524,11 @@ button:disabled { opacity: 0.55; cursor: default; }
 .windows-password-row button { flex: 1 0 auto; }
 
 .windows-link-create { grid-template-columns: minmax(0, 1fr); }
-.windows-device-delivery > label { display: block; margin: 16px 0 8px; color: var(--secondary); font-weight: 400; }
+.windows-device-delivery > label { display: block; margin: 0; color: var(--secondary); font-weight: 400; }
 .windows-link-row { display: flex; flex-wrap: wrap; align-items: stretch; gap: 12px; }
 .windows-link-value { flex: 1 1 240px; min-width: 0; width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--card); color: var(--text); }
 .windows-link-row > button { flex: 0 0 auto; }
+
+.windows-device-delivery > .message { margin: 0; min-height: 0; }
+.windows-device-delivery > .message:empty { display: none; }
+.windows-device-delivery + .windows-password { margin-top: 16px; }
