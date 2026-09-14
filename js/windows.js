@@ -42,31 +42,46 @@ function clearWindowsDevices() {
   renderWindowsDevices();
 }
 
-function appendWindowsDelivery(card, device, actions) {
+function appendWindowsDelivery(card, device) {
   const url = windowsProfileLinks.get(device.id);
-  if (device.state !== 'active') return;
+  if (device.state !== 'active' || !url) return;
   const delivery = document.createElement('div');
   delivery.className = 'windows-device-delivery';
+  const label = document.createElement('label');
+  label.htmlFor = 'windows-link-' + device.id;
+  label.textContent = t('windowsLinkLabel');
+  const row = document.createElement('div');
+  row.className = 'windows-link-row';
+  const field = document.createElement('input');
+  field.id = label.htmlFor; field.className = 'windows-link-value';
+  field.type = 'text'; field.readOnly = true; field.value = url;
+  field.autocomplete = 'off'; field.spellcheck = false;
+  field.addEventListener('click', () => field.select());
   const feedback = document.createElement('p');
   feedback.className = 'message';
   feedback.setAttribute('role', 'status');
   feedback.setAttribute('aria-live', 'polite');
   const copy = document.createElement('button');
-  copy.type = 'button'; copy.className = 'windows-copy-button';
-  copy.textContent = t('windowsCopy'); copy.disabled = vpnBusy || !url;
+  copy.type = 'button'; copy.className = 'secondary';
+  copy.textContent = t('windowsCopy'); copy.disabled = vpnBusy;
   copy.addEventListener('click', async () => {
-    try { await copyText(url); feedback.textContent = t('profileLinkCopied'); }
-    catch { feedback.textContent = t('profileShareFailed'); }
+    try {
+      if (!navigator.clipboard || !navigator.clipboard.writeText) throw new Error('Clipboard unavailable');
+      await navigator.clipboard.writeText(url);
+      feedback.textContent = t('windowsLinkCopied');
+    } catch {
+      field.focus(); field.select();
+      feedback.textContent = t('windowsLinkCopyManual');
+    }
   });
-  actions.append(copy);
-  if (url && /Windows NT/i.test(navigator.userAgent || '')) {
+  row.append(field, copy); delivery.append(label, row, feedback);
+  if (/Windows NT/i.test(navigator.userAgent || '')) {
     const open = document.createElement('a');
     open.className = 'button-link primary windows-device-open';
     open.href = url; open.target = '_blank'; open.rel = 'noopener noreferrer';
     open.textContent = t('windowsOpen'); delivery.append(open);
   }
-  if (delivery.childElementCount) card.append(delivery);
-  card.append(feedback);
+  card.append(delivery);
 }
 
 function appendWindowsPassword(body, device) {
@@ -163,10 +178,10 @@ function renderWindowsDevices() {
     const user = document.createElement('p');
     user.textContent = t(device.server === 'moscow' ? 'windowsServerMoscow' : 'windowsServerRiga') + ' · ' + (device.username || t('windowsPreparing'));
     user.className = 'windows-device-username';
-    const actions = document.createElement('div'); actions.className = 'actions windows-device-links';
+    const actions = document.createElement('div'); actions.className = 'actions windows-device-links windows-link-create';
     const download = document.createElement('button'); download.type = 'button';
     download.className = 'constructive';
-    download.textContent = t(device.state === 'active' ? 'windowsReissue' : 'windowsContinue');
+    download.textContent = t(device.state !== 'active' ? 'windowsContinue' : windowsProfileLinks.has(device.id) ? 'windowsLinkNew' : 'windowsReissue');
     download.disabled = vpnBusy || device.state === 'deleting';
     download.addEventListener('click', () => windowsAction(async epoch => {
       const data = await apiRequest(`/windows/devices/${encodeURIComponent(device.id)}/profile`, {
@@ -191,7 +206,7 @@ function renderWindowsDevices() {
       });
     });
     actions.append(download); body.append(user, actions);
-    appendWindowsDelivery(body, device, actions);
+    appendWindowsDelivery(body, device);
     appendWindowsPassword(body, device);
     body.append(remove);
     card.append(name, body);

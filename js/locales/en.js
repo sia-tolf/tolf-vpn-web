@@ -1,4 +1,8 @@
 I18N.en = {
+  windowsLinkLabel: "Setup link",
+  windowsLinkCopied: "Link copied.",
+  windowsLinkCopyManual: "The link is selected. Copy it using the browser menu.",
+  windowsLinkNew: "Create a new link",
   windowsPasswordTitle: "VPN password",
   windowsPasswordShow: "Show password",
   windowsPasswordHide: "Hide password",
