@@ -1,7 +1,7 @@
 #pragma once
 #include "controller.h"
 namespace Manager {
-static HWND wnd,select,stateText,details,netLabel,netEdit,help,save,toggle,mode,autostart,pin,message,technical,divider;
+static HWND wnd,select,stateText,details,netLabel,netEdit,help,save,toggle,mode,autostart,pin,message,technical,divider,location;
 static HFONT normal,heading;static HBRUSH background;
 static std::vector<LocalProfile> profiles;
 static bool compact=false,working=false,dirty=false,trayPresent=false,showDetails=false;
@@ -29,10 +29,13 @@ static void Layout() {
     ShowWindow(details,!compact&&showDetails?SW_SHOW:SW_HIDE);
     ShowWindow(save,!compact&&dirty?SW_SHOW:SW_HIDE);
     ShowWindow(pin,compact?SW_SHOW:SW_HIDE);
+    ShowWindow(select,profiles.size()==1?SW_HIDE:SW_SHOW);
+    ShowWindow(location,profiles.size()==1?SW_SHOW:SW_HIDE);
     int width=compact?340:480;
     int footer=dirty?382:334;
     int height=compact?244:footer+130+(showDetails?112:0);
     MoveWindow(select,Px(24),Px(24),Px(compact?292:272),Px(220),TRUE);
+    MoveWindow(location,Px(24),Px(28),Px(compact?292:272),Px(26),TRUE);
     MoveWindow(stateText,Px(24),Px(76),Px(compact?292:276),Px(36),TRUE);
     MoveWindow(toggle,Px(compact?24:316),Px(compact?126:72),Px(compact?292:140),Px(42),TRUE);
     MoveWindow(mode,Px(compact?24:316),Px(compact?190:22),Px(compact?128:140),Px(32),TRUE);
@@ -110,13 +113,14 @@ static LRESULT CALLBACK Proc(HWND h,UINT msg,WPARAM w,LPARAM l) {
         netLabel=control(L"STATIC",L(L"Networks outside VPN",L"Сети вне VPN",L"Tīkli ārpus VPN"),0,24,230,492,24,0);
         netEdit=control(L"EDIT",L"",WS_BORDER|WS_VSCROLL|WS_TABSTOP|ES_MULTILINE|ES_AUTOVSCROLL|ES_WANTRETURN,24,263,492,94,202);SendMessageW(netEdit,EM_SETLIMITTEXT,4096,0);
         help=control(L"STATIC",L"",0,24,366,492,44,0);
-        save=control(L"BUTTON",L(L"Save changes",L"Сохранить",L"Saglabāt iestatījumus"),WS_TABSTOP,24,419,492,38,203);
-        toggle=control(L"BUTTON",L"",WS_TABSTOP|BS_DEFPUSHBUTTON,24,472,238,44,204);
-        mode=control(L"BUTTON",L"",WS_TABSTOP,278,472,238,36,205);
+        save=control(L"BUTTON",L(L"Save changes",L"Сохранить",L"Saglabāt iestatījumus"),WS_TABSTOP|BS_OWNERDRAW,24,419,492,38,203);
+        toggle=control(L"BUTTON",L"",WS_TABSTOP|BS_OWNERDRAW,24,472,238,44,204);
+        mode=control(L"BUTTON",L"",WS_TABSTOP|BS_OWNERDRAW,278,472,238,36,205);
         autostart=control(L"BUTTON",L(L"Start when I sign in to Windows",L"Запускать при входе в Windows",L"Rādīt ikonu, piesakoties Windows"),WS_TABSTOP|BS_AUTOCHECKBOX,24,530,492,24,206);
         pin=control(L"BUTTON",L(L"Always on top",L"Поверх окон",L"Virs citiem logiem"),WS_TABSTOP|BS_AUTOCHECKBOX,24,214,312,24,207);
         message=control(L"STATIC",L"",0,24,567,492,60,0);
-        technical=control(L"BUTTON",L"",WS_TABSTOP,24,372,228,32,208);
+        technical=control(L"BUTTON",L"",WS_TABSTOP|BS_OWNERDRAW,24,372,228,32,208);
+        location=control(L"STATIC",L(L"Riga",L"Рига",L"Rīga"),0,24,28,272,26,210);
         divider=control(L"STATIC",L"",SS_ETCHEDHORZ,24,140,432,1,209);
         icon=LoadIconW(GetModuleHandleW(nullptr),MAKEINTRESOURCEW(101));SendMessageW(h,WM_SETICON,ICON_SMALL,(LPARAM)icon);SendMessageW(h,WM_SETICON,ICON_BIG,(LPARAM)icon);
         auto startup=KnownPath(FOLDERID_Startup)+L"\\TOLF VPN.lnk";SendMessageW(autostart,BM_SETCHECK,GetFileAttributesW(startup.c_str())!=INVALID_FILE_ATTRIBUTES?BST_CHECKED:BST_UNCHECKED,0);
@@ -141,6 +145,24 @@ static LRESULT CALLBACK Proc(HWND h,UINT msg,WPARAM w,LPARAM l) {
         if(l==WM_LBUTTONUP){ActivateWindow(true);return 0;}
         if(l==WM_RBUTTONUP){HMENU menu=CreatePopupMenu();AppendMenuW(menu,MF_STRING,301,L(L"Show widget",L"Показать виджет",L"Rādīt logrīku"));AppendMenuW(menu,MF_STRING,302,L(L"Settings",L"Настройки",L"Iestatījumi"));AppendMenuW(menu,MF_STRING|((working||dirty||Selection()<0)?MF_GRAYED:0),303,lastActive?L(L"Disconnect",L"Отключить",L"Atvienot"):L(L"Connect",L"Подключить",L"Savienot"));AppendMenuW(menu,MF_SEPARATOR,0,nullptr);AppendMenuW(menu,MF_STRING|(working?MF_GRAYED:0),304,L(L"Exit widget (keep VPN)",L"Закрыть виджет (VPN остаётся)",L"Aizvērt logrīku (VPN paliek)"));POINT p;GetCursorPos(&p);SetForegroundWindow(h);int id=TrackPopupMenu(menu,TPM_RETURNCMD|TPM_RIGHTBUTTON,p.x,p.y,0,h,nullptr);DestroyMenu(menu);PostMessageW(h,WM_NULL,0,0);if(id==301)ActivateWindow(true);if(id==302)ActivateWindow(false);if(id==303)Start(false);if(id==304&&!working){if(dirty&&MessageBoxW(h,L(L"Discard unsaved changes?",L"Отменить несохранённые изменения?",L"Atmest nesaglabātās izmaiņas?"),L"TOLF VPN",MB_YESNO|MB_ICONQUESTION)!=IDYES)return 0;DestroyWindow(h);}return 0;}break;
     case WM_CLOSE:if(trayPresent)ShowWindow(h,SW_HIDE);else if(!working)DestroyWindow(h);return 0;
+    case WM_DRAWITEM:{
+        auto d=reinterpret_cast<DRAWITEMSTRUCT*>(l);
+        if(d->CtlType!=ODT_BUTTON)return FALSE;
+        bool disabled=(d->itemState&ODS_DISABLED)!=0,pressed=(d->itemState&ODS_SELECTED)!=0;
+        bool primary=d->hwndItem==toggle||d->hwndItem==save;
+        COLORREF fill=disabled?RGB(246,247,248):primary?(pressed?RGB(58,64,70):RGB(35,40,45)):(pressed?RGB(242,244,246):RGB(255,255,255));
+        COLORREF border=primary?fill:RGB(216,220,224);
+        HBRUSH brush=CreateSolidBrush(fill);HPEN pen=CreatePen(PS_SOLID,1,border);
+        auto oldBrush=SelectObject(d->hDC,brush);auto oldPen=SelectObject(d->hDC,pen);auto oldFont=SelectObject(d->hDC,normal);
+        FillRect(d->hDC,&d->rcItem,background);
+        RoundRect(d->hDC,d->rcItem.left,d->rcItem.top,d->rcItem.right,d->rcItem.bottom,Px(10),Px(10));
+        SetBkMode(d->hDC,TRANSPARENT);SetTextColor(d->hDC,disabled?RGB(145,150,155):primary?RGB(255,255,255):RGB(48,54,60));
+        auto text=Text(d->hwndItem);RECT r=d->rcItem;InflateRect(&r,-Px(8),0);
+        DrawTextW(d->hDC,text.c_str(),-1,&r,DT_CENTER|DT_VCENTER|DT_SINGLELINE);
+        if(d->itemState&ODS_FOCUS){r=d->rcItem;InflateRect(&r,-Px(4),-Px(4));DrawFocusRect(d->hDC,&r);}
+        SelectObject(d->hDC,oldFont);SelectObject(d->hDC,oldPen);SelectObject(d->hDC,oldBrush);DeleteObject(pen);DeleteObject(brush);return TRUE;
+    }
+    case WM_CTLCOLORBTN:
     case WM_CTLCOLORSTATIC:{SetBkMode((HDC)w,TRANSPARENT);SetTextColor((HDC)w,(HWND)l==stateText?RGB(30,34,38):RGB(92,98,105));return (LRESULT)background;}
     case WM_ERASEBKGND:{RECT r;GetClientRect(h,&r);FillRect((HDC)w,&r,background);return 1;}
     case WM_DESTROY:{KillTimer(h,1);NOTIFYICONDATAW data={};data.cbSize=sizeof(data);data.hWnd=h;data.uID=1;Shell_NotifyIconW(NIM_DELETE,&data);DeleteObject(normal);DeleteObject(heading);DeleteObject(background);PostQuitMessage(0);return 0;}
