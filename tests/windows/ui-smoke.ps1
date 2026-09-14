@@ -3,7 +3,15 @@ Add-Type -AssemblyName System.Drawing
 Add-Type @'
 using System;
 using System.Runtime.InteropServices;
+using System.Text;
 public static class NativeUi {
+ public delegate bool EnumProc(IntPtr w,IntPtr p);
+ [DllImport("user32.dll")] public static extern bool EnumWindows(EnumProc cb,IntPtr p);
+ [DllImport("user32.dll")] public static extern bool EnumChildWindows(IntPtr w,EnumProc cb,IntPtr p);
+ [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr w,out uint id);
+ [DllImport("user32.dll",CharSet=CharSet.Unicode)] public static extern int GetWindowText(IntPtr w,StringBuilder s,int n);
+ public static void Dump(int pid) { EnumWindows((w,p)=>{uint id;GetWindowThreadProcessId(w,out id);if(id==pid){var s=new StringBuilder(1024);GetWindowText(w,s,1024);Console.WriteLine("Window: "+s);EnumChildWindows(w,(c,q)=>{var t=new StringBuilder(1024);GetWindowText(c,t,1024);Console.WriteLine("Child: "+t);return true;},IntPtr.Zero);}return true;},IntPtr.Zero); }
+
  [StructLayout(LayoutKind.Sequential)] public struct Rect { public int Left,Top,Right,Bottom; }
  [DllImport("user32.dll", CharSet=CharSet.Unicode)] public static extern IntPtr FindWindow(string cls,string title);
  [DllImport("user32.dll")] public static extern IntPtr GetDlgItem(IntPtr w,int id);
@@ -19,12 +27,12 @@ $process = $null
 try {
  $process = Start-Process $exe -ArgumentList '--manage' -PassThru
  $window = [IntPtr]::Zero
- for ($i=0; $i -lt 50; $i++) {
+ for ($i=0; $i -lt 150; $i++) {
   Start-Sleep -Milliseconds 200
   $window = [NativeUi]::FindWindow('TolfVpnController',$null)
   if ($window -ne [IntPtr]::Zero -and [NativeUi]::GetDlgItem($window,205) -ne [IntPtr]::Zero) { break }
  }
- if ($window -eq [IntPtr]::Zero -or $process.HasExited) { throw 'Controller did not start' }
+ if ($window -eq [IntPtr]::Zero -or $process.HasExited) { [NativeUi]::Dump($process.Id); $process.Refresh(); Write-Output "Exited=$($process.HasExited) ExitCode=$($process.ExitCode)"; throw 'Controller did not start' }
  Start-Sleep -Milliseconds 500
  if (-not [NativeUi]::IsWindowVisible([NativeUi]::GetDlgItem($window,202))) { throw 'Settings field is not visible' }
  if ([NativeUi]::IsWindowEnabled([NativeUi]::GetDlgItem($window,204))) { throw 'Empty profile list must not allow dialing' }
