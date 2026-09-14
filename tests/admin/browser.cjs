@@ -26,7 +26,7 @@ const root=path.resolve(__dirname,'../..');
  assert.equal(await page.locator('#detailContent script').count(),0);
  await page.screenshot({path:'/tmp/tolf-admin-preview.png',fullPage:true});
  await page.getByRole('button',{name:'VPN-сеансы',exact:true}).click();
- await page.getByText('user_windows',{exact:true}).waitFor();
+ await page.getByRole('cell',{name:/^user_windows/}).waitFor();
  await page.locator('[data-node=riga]').getByText('На момент проверки сеансов нет.',{exact:true}).waitFor();
  assert.equal(await page.locator('[data-node=moscow] tbody tr').count(),1);
  await page.screenshot({path:'/tmp/tolf-admin-sessions.png',fullPage:true});
