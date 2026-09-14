@@ -42,3 +42,19 @@ installation alone adds no browser control and is the node-readiness stage.
 
 Build: `python3 setup/admin/nodes/build-control.py`
 Tests: `python3 -m pytest tests/admin/nodes/test_control.py -q`
+
+## Admin API 1.2
+
+The portal exposes a disconnect button only on the established Test #26 row.
+The API independently validates the administrator, exact portal Origin and JSON
+content type, the fixed test-account mapping and protected-account status.
+Preparation reads the structured inventory and creates an actor-bound opaque
+confirmation ticket valid for two minutes. Execution consumes that ticket in
+SQLite before sending SSH. Duplicate requests return the saved outcome; an
+interrupted operation remains unknown and is never automatically repeated.
+The node repeats its identity/ID/SPI check immediately before termination.
+
+Requested and completed/unknown/stale outcomes are written to admin_audit.
+The new additive admin_disconnect_tickets table retains consumed tickets to
+prevent retries across API restarts. Credentials and node provisioning are not
+changed. Deploy the node bridge first, then install-tolf-admin.py on London.

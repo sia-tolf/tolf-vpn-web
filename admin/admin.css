@@ -37,3 +37,7 @@
 .admin-node h2 { font-size: 22px; margin-bottom: 8px; }
 .admin-node-error { color: var(--error); }
 .admin-node td button { display: block; margin-top: 10px; }
+
+.admin-table button.admin-disconnect{color:#bd2436;background:#fff;border:1px solid #bd2436;margin-top:8px;}
+.admin-table button.admin-disconnect:hover{background:#fff5f6;}
+.admin-table button.admin-disconnect:disabled{opacity:.55;}

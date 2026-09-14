@@ -1,5 +1,8 @@
 """Admin inventory. VPN node state is never inferred from the account database."""
 import json
+import re
+import secrets
+import time
 import sqlite3
 import uuid
 import subprocess
@@ -8,7 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 from datetime import datetime, timezone
 
-VERSION = '1.1.0'
+VERSION = '1.2.0'
 SESSION_POLL = threading.BoundedSemaphore(1)
 HEADERS = {'Cache-Control': 'private, no-store, max-age=0', 'X-Content-Type-Options': 'nosniff'}
 CTX = {}
@@ -28,6 +31,7 @@ def initialize(path):
     with sqlite3.connect(path, timeout=15) as con:
         con.execute('CREATE TABLE IF NOT EXISTS admin_roles (user_id TEXT PRIMARY KEY, granted_at TEXT NOT NULL, granted_by TEXT NOT NULL)')
         con.execute('CREATE TABLE IF NOT EXISTS admin_audit (id INTEGER PRIMARY KEY AUTOINCREMENT, actor TEXT NOT NULL, action TEXT NOT NULL, target TEXT NOT NULL, created_at TEXT NOT NULL)')
+        con.execute('CREATE TABLE IF NOT EXISTS admin_disconnect_tickets (ticket TEXT PRIMARY KEY,actor TEXT NOT NULL,node TEXT NOT NULL,selection TEXT NOT NULL,expires REAL NOT NULL,state TEXT NOT NULL,result TEXT,created REAL NOT NULL)')
 
 
 def root_grant(path, number):
@@ -163,6 +167,80 @@ def map_session(con, session):
     return {'accountId': account_id, 'number': number}
 
 
+TEST_ACCOUNT = '0888048c-ac6e-44d2-8aed-9857aa31e9ed'
+TEST_USERNAME = 'user_0888048cac6e44d28aed9857aa31e9ed'
+CONTROL_LOCK = threading.BoundedSemaphore(1)
+
+
+def control_actor(request):
+    actor = require_admin(request)
+    # Browser calls must originate from our portal, with an explicit JSON request.
+    if request.headers.get('origin') != 'https://vpn.tolf.is' or request.headers.get('content-type', '').split(';')[0].strip() != 'application/json':
+        raise HTTPException(403, 'invalid_origin')
+    with db() as con:
+        row = con.execute('SELECT account_id,vpn_username FROM managed_users WHERE number=26 AND deleted_at IS NULL').fetchone()
+        if not row or tuple(row) != (TEST_ACCOUNT, TEST_USERNAME) or actor == TEST_ACCOUNT:
+            raise HTTPException(403, 'test_control_unavailable')
+        if con.execute('SELECT 1 FROM vpn_imports WHERE user_id=? AND protected=1', (TEST_ACCOUNT,)).fetchone():
+            raise HTTPException(403, 'test_control_unavailable')
+    return actor
+
+
+def control_call(node, selection=None):
+    if node not in ('riga', 'moscow'):
+        raise ValueError('invalid_node')
+    remote = 'admin-test-sessions ' + node
+    if selection is not None:
+        validate_selection(selection)
+        remote = 'admin-test-disconnect ' + node + ' ' + ' '.join(selection[k] for k in ('uniqueid', 'initiator-spi', 'responder-spi'))
+    command = ['/usr/bin/ssh', '-T', '-o', 'BatchMode=yes', '-o', 'IdentitiesOnly=yes',
+               '-o', 'ConnectTimeout=10', '-o', 'StrictHostKeyChecking=yes',
+               '-o', 'UserKnownHostsFile='+str(CTX['RIGA_KNOWN_HOSTS']),
+               '-i', str(CTX['RIGA_KEY']), str(CTX['RIGA_USER'])+'@'+str(CTX['RIGA_HOST']), remote]
+    try:
+        result = subprocess.run(command, capture_output=True, text=True, timeout=40, check=False)
+        if len(result.stdout) > 1024 * 1024:
+            return {'status': 'unknown'}
+        value = json.loads(result.stdout)
+        if not isinstance(value, dict):
+            return {'status': 'unknown'}
+        if value.get('error') == 'stale_or_forbidden_session':
+            return {'status': 'stale'}
+        if result.returncode or value.get('status') != 'ok' or value.get('node') != node or value.get('accountNumber') != 26:
+            return {'status': 'unknown'}
+        if selection is None:
+            sessions = value.get('sessions')
+            if not isinstance(sessions, list) or len(sessions) > 1000:
+                return {'status': 'unknown'}
+            for item in sessions:
+                validate_selection(item)
+            if len({s['uniqueid'] for s in sessions}) != len(sessions):
+                return {'status': 'unknown'}
+            return {'status': 'ok', 'sessions': sessions}
+        if value.get('disconnected') != selection['uniqueid'] or type(value.get('reconnected')) is not bool:
+            return {'status': 'unknown'}
+        return {'status': 'ok', 'reconnected': value['reconnected']}
+    except (ValueError, TypeError, KeyError, OSError, subprocess.TimeoutExpired):
+        return {'status': 'unknown'}
+
+
+def validate_selection(item):
+    if not isinstance(item, dict) or set(item) != {'uniqueid', 'initiator-spi', 'responder-spi'}:
+        raise ValueError('invalid_selection')
+    if any(not isinstance(v, str) for v in item.values()):
+        raise ValueError('invalid_selection')
+    if not re.fullmatch(r'[1-9][0-9]{0,9}', item['uniqueid']) or int(item['uniqueid']) > 4294967295:
+        raise ValueError('invalid_selection')
+    if any(not re.fullmatch(r'[0-9a-f]{16}', item[k]) for k in ('initiator-spi', 'responder-spi')):
+        raise ValueError('invalid_selection')
+
+
+def control_audit(con, actor, action, node, sid):
+    target = 'Test #26 / ' + node + ' / IKE #' + sid
+    con.execute('INSERT INTO admin_audit(actor,action,target,created_at) VALUES (?,?,?,?)',
+                (actor, action, target, datetime.now(timezone.utc).isoformat()))
+
+
 def install(app, context):
     global CTX, HTTPException, JSONResponse
     from fastapi import HTTPException, Request
@@ -172,7 +250,7 @@ def install(app, context):
 
     @app.get('/admin/capabilities')
     def capabilities():
-        return response({'version': VERSION, 'inventory': True, 'sessions': True, 'disconnect': False, 'suspend': False})
+        return response({'version': VERSION, 'inventory': True, 'sessions': True, 'disconnect': False, 'testDisconnect': True, 'suspend': False})
 
     @app.get('/admin/me')
     def me(request: Request):
@@ -180,7 +258,7 @@ def install(app, context):
         with db() as con:
             number = con.execute('SELECT MIN(number) FROM managed_users WHERE account_id=? AND deleted_at IS NULL', (user_id,)).fetchone()[0]
             allowed = bool(con.execute('SELECT 1 FROM admin_roles WHERE user_id=?', (user_id,)).fetchone())
-        return response({'isAdmin': allowed, 'number': number, 'features': {'sessions': True}})
+        return response({'isAdmin': allowed, 'number': number, 'features': {'sessions': True, 'testDisconnect': True}})
 
     @app.get('/admin/sessions')
     def sessions(request: Request):
@@ -200,6 +278,65 @@ def install(app, context):
             return response({'nodes': results, 'source': 'vpn_nodes'})
         finally:
             SESSION_POLL.release()
+
+    @app.post('/admin/disconnect/prepare')
+    def prepare_disconnect(request: Request, body: dict):
+        actor = control_actor(request)
+        node, sid = body.get('node'), body.get('id')
+        if set(body) != {'node', 'id'} or node not in ('riga', 'moscow') or type(sid) is not int or not 0 < sid <= 4294967295:
+            raise HTTPException(400, 'invalid_selection')
+        if not CONTROL_LOCK.acquire(blocking=False):
+            raise HTTPException(429, 'control_busy')
+        try:
+            result = control_call(node)
+            control_actor(request)  # role may have been revoked while SSH was running
+            if result['status'] != 'ok':
+                raise HTTPException(502, 'node_unavailable')
+            matches = [s for s in result['sessions'] if s['uniqueid'] == str(sid)]
+            if len(matches) != 1:
+                raise HTTPException(409, 'stale_or_forbidden_session')
+            ticket = secrets.token_urlsafe(32)
+            now = time.time()
+            with db() as con:
+                con.execute("DELETE FROM admin_disconnect_tickets WHERE state='pending' AND expires<?", (now,))
+                con.execute('INSERT INTO admin_disconnect_tickets VALUES (?,?,?,?,?,?,?,?)',
+                            (ticket, actor, node, json.dumps(matches[0]), now+120, 'pending', None, now))
+            return response({'ticket': ticket, 'accountNumber': 26, 'node': node, 'id': sid})
+        finally:
+            CONTROL_LOCK.release()
+
+    @app.post('/admin/disconnect')
+    def disconnect(request: Request, body: dict):
+        actor = control_actor(request)
+        ticket = body.get('ticket')
+        if set(body) != {'ticket'} or not isinstance(ticket, str) or not re.fullmatch(r'[A-Za-z0-9_-]{43}', ticket):
+            raise HTTPException(400, 'invalid_ticket')
+        if not CONTROL_LOCK.acquire(blocking=False):
+            raise HTTPException(429, 'control_busy')
+        try:
+            with db() as con:
+                con.execute('BEGIN IMMEDIATE')
+                row = con.execute('SELECT * FROM admin_disconnect_tickets WHERE ticket=? AND actor=?', (ticket, actor)).fetchone()
+                if not row:
+                    raise HTTPException(409, 'invalid_ticket')
+                if row['state'] != 'pending':
+                    return response(json.loads(row['result']) if row['result'] else {'status': 'unknown'})
+                if row['expires'] < time.time():
+                    raise HTTPException(409, 'expired_ticket')
+                selection = json.loads(row['selection'])
+                validate_selection(selection)
+                con.execute("UPDATE admin_disconnect_tickets SET state='attempted' WHERE ticket=?", (ticket,))
+                control_audit(con, actor, 'session.disconnect.requested', row['node'], selection['uniqueid'])
+            # A consumed ticket is NEVER resent, even after timeout or process restart.
+            control_actor(request)
+            result = control_call(row['node'], selection)
+            with db() as con:
+                con.execute("UPDATE admin_disconnect_tickets SET state='finished',result=? WHERE ticket=?", (json.dumps(result), ticket))
+                control_audit(con, actor, 'session.disconnect.' + result['status'], row['node'], selection['uniqueid'])
+            require_admin(request)
+            return response(result)
+        finally:
+            CONTROL_LOCK.release()
 
     @app.get('/admin/users')
     def users(request: Request, q: str = '', offset: int = 0, limit: int = 50):
