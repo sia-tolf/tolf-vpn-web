@@ -1514,3 +1514,9 @@ button:disabled { opacity: 0.55; cursor: default; }
 .windows-create-form > .card-description { margin: 0; }
 
 #windowsCancelButton { background: #fff; color: var(--danger); border: 1px solid var(--danger); }
+
+.windows-password { margin: 24px 0; padding-top: 20px; border-top: 1px solid var(--border); }
+.windows-password h4 { margin: 0 0 12px; }
+.windows-password-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
+.windows-password-value { flex: 1 1 220px; min-width: 0; font-family: ui-monospace, monospace; }
+.windows-password-row button { flex: 1 0 auto; }

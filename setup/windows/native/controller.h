@@ -4,12 +4,13 @@
 #include <iphlpapi.h>
 #include <shobjidl.h>
 #include <shellapi.h>
+#include <algorithm>
 
 inline std::wstring KnownPath(REFKNOWNFOLDERID id) {
     PWSTR value=nullptr; Hr(SHGetKnownFolderPath(id,KF_FLAG_CREATE,nullptr,&value),L"SHORTCUT");
     std::wstring result=value; CoTaskMemFree(value); return result;
 }
-inline std::wstring ControllerPath() { return KnownPath(FOLDERID_LocalAppData)+L"\\TOLF\\VPN\\2.5.0\\TOLF-VPN.exe"; }
+inline std::wstring ControllerPath() { return KnownPath(FOLDERID_LocalAppData)+L"\\TOLF\\VPN\\2.6.0\\TOLF-VPN.exe"; }
 inline void Shortcut(const std::wstring& path,const std::wstring& exe,const wchar_t* args) {
     ComPtr<IShellLinkW> link; Hr(CoCreateInstance(CLSID_ShellLink,nullptr,CLSCTX_INPROC_SERVER,IID_PPV_ARGS(&link)),L"SHORTCUT");
     Hr(link->SetPath(exe.c_str()),L"SHORTCUT"); Hr(link->SetArguments(args),L"SHORTCUT");
@@ -74,6 +75,26 @@ inline HRASCONN ProfileConnection(const std::wstring& name, RASCONNSTATUSW* conn
     }
     return nullptr;
 }
+// Save a replacement credential only; never recreate the connection or its routes.
+inline void UpdatePassword(const LocalProfile& profile,const Secret& password) {
+    if(password.value.empty()||password.value.size()>PWLEN||password.value==std::wstring(16,L'*')||
+       std::any_of(password.value.begin(),password.value.end(),[](wchar_t c){return c<32;}))
+        throw Failure{L"CREDENTIALS",ERROR_INVALID_PARAMETER};
+    Settings c;c.id=profile.id;c.server=profile.server;
+    if((c.server!=L"ikev2-riga.tolf.is"&&c.server!=L"ikev2.tolf.is")||profile.name!=ProfileName(c))
+        throw Failure{L"CREDENTIALS",ERROR_INVALID_PARAMETER};
+    auto pb=Phonebook();
+    if(!Existing(pb,profile.name,c))throw Failure{L"CREDENTIALS",ERROR_CANNOT_FIND_PHONEBOOK_ENTRY};
+    if(ProfileConnection(profile.name))throw Failure{L"CREDENTIALS",ERROR_BUSY};
+    std::wstring user=L"user_";for(auto ch:profile.id)if(ch!=L'-')user+=ch;
+    RASCREDENTIALSW credentials={};credentials.dwSize=sizeof(credentials);
+    struct Wipe {RASCREDENTIALSW& c;~Wipe(){SecureZeroMemory(&c,sizeof(c));}} wipe{credentials};
+    credentials.dwMask=RASCM_UserName|RASCM_Password|RASCM_Domain;
+    wcscpy_s(credentials.szUserName,user.c_str());wcscpy_s(credentials.szPassword,password.value.c_str());
+    DWORD e=RasSetCredentialsW(pb.c_str(),profile.name.c_str(),&credentials,FALSE);
+    if(e)throw Failure{L"CREDENTIALS",e};
+}
+
 inline std::wstring ConnectionDns(const std::wstring& name) {
     LUID luid={};if(!ProfileConnection(name,nullptr,&luid))return L"";
     ULONG bytes=16384;std::vector<BYTE> buffer(bytes);ULONG e=GetAdaptersAddresses(AF_UNSPEC,GAA_FLAG_SKIP_ANYCAST|GAA_FLAG_SKIP_MULTICAST,nullptr,reinterpret_cast<IP_ADAPTER_ADDRESSES*>(buffer.data()),&bytes);

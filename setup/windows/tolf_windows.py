@@ -49,6 +49,7 @@ def initialize():
         c.execute('CREATE INDEX IF NOT EXISTS windows_devices_owner ON windows_devices(user_id)')
         # Separate table preserves compatibility with older API rollback versions.
         c.execute('CREATE TABLE IF NOT EXISTS windows_device_nodes (device_id TEXT PRIMARY KEY, server TEXT NOT NULL)')
+        c.execute('CREATE TABLE IF NOT EXISTS windows_password_changes (device_id TEXT NOT NULL, request_id TEXT NOT NULL, state TEXT NOT NULL, PRIMARY KEY(device_id,request_id))')
 
 
 def now():
@@ -116,7 +117,7 @@ def language(payload):
     return value
 
 
-def package(row, credentials, lang):
+def validated_credentials(row, credentials):
     expected = 'user_' + uuid.UUID(row['id']).hex
     username, password = credentials.get('username'), credentials.get('password')
     if username != expected or (row['username'] and row['username'] != username) or not CTX['tolf_profiles']._valid_secret(password):
@@ -125,8 +126,13 @@ def package(row, credentials, lang):
     host, local_id = NODES[node]
     if credentials.get('server') != node or credentials.get('localId') != local_id:
         raise HTTPException(502, 'Invalid Windows route from VPN server')
-    settings = {'deviceId': row['id'], 'server': host,
-                'username': username, 'password': password}
+    return {'deviceId': row['id'], 'server': host, 'username': username, 'password': password}
+
+
+def package(row, credentials, lang):
+    settings = validated_credentials(row, credentials)
+    username = settings['username']
+    node = row.get('server', 'riga')
     output = io.BytesIO()
     template = Path(__file__).with_name('tolf-windows-install.ps1').read_text()
     with zipfile.ZipFile(output, 'w', zipfile.ZIP_DEFLATED) as archive:
@@ -186,7 +192,7 @@ def install(app, context):
 
     @app.get('/windows/capabilities')
     def capabilities():
-        return {'version': VERSION, 'servers': list(NODES), 'routing': 'sr', 'installerVersion': '2.5.0'}
+        return {'version': VERSION, 'servers': list(NODES), 'routing': 'sr', 'installerVersion': '2.6.0', 'passwordManagement': True}
 
     @app.get('/windows/devices')
     def devices(request: Request):
@@ -246,6 +252,40 @@ def install(app, context):
             with db() as c:
                 c.execute("UPDATE windows_devices SET state='active',username=? WHERE id=? AND user_id=?", (credentials['username'], row['id'], user_id))
             return {'profileUrl': url}
+
+    @app.post('/windows/devices/{device_id}/password')
+    def password(device_id: str, request: Request):
+        user_id = CTX['authenticated_user_id'](request)
+        with CTX['tolf_promos'].account_operation(CTX['DB'], user_id):
+            row = owned(user_id, device_id)
+            if row['state'] != 'active':
+                raise HTTPException(409, 'Windows device is not active')
+            credentials = CTX['provision_on_riga']('profile', row['id'], row['server'], NODES[row['server']][1])
+            return Response(json.dumps(validated_credentials(row, credentials)), media_type='application/json', headers=HEADERS)
+
+    @app.post('/windows/devices/{device_id}/password/rotate')
+    def rotate_password(device_id: str, request: Request, payload: dict):
+        user_id = CTX['authenticated_user_id'](request)
+        request_id = identity(payload.get('requestId'))
+        with CTX['tolf_promos'].account_operation(CTX['DB'], user_id):
+            row = owned(user_id, device_id)
+            if row['state'] != 'active':
+                raise HTTPException(409, 'Windows device is not active')
+            with db() as c:
+                previous = c.execute('SELECT state FROM windows_password_changes WHERE device_id=? AND request_id=?', (row['id'],request_id)).fetchone()
+                if previous and previous['state'] != 'done':
+                    raise HTTPException(409, 'Password change outcome is uncertain. Show the current password before trying again.')
+                if not previous:
+                    c.execute('INSERT INTO windows_password_changes VALUES (?,?,?)', (row['id'],request_id,'pending'))
+            # Invalidate old bearer packages before rotating, including uncertain outcomes.
+            if not previous:
+                invalidate(row['id'])
+            action = 'profile' if previous else 'rotate'
+            credentials = CTX['provision_on_riga'](action, row['id'], row['server'], NODES[row['server']][1])
+            result = validated_credentials(row, credentials)
+            with db() as c:
+                c.execute("UPDATE windows_password_changes SET state='done' WHERE device_id=? AND request_id=?", (row['id'],request_id))
+            return Response(json.dumps(result), media_type='application/json', headers=HEADERS)
 
     @app.post('/windows/devices/{device_id}/delete')
     def delete(device_id: str, request: Request):

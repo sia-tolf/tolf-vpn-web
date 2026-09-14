@@ -15,7 +15,8 @@ def test_lifecycle(monkeypatch):
   def provision(action, device_id, server='riga', local_id=None):
    calls.append((action,device_id))
    if action=='create': remote.setdefault(device_id, {'username':'user_'+uuid.UUID(device_id).hex,'password':'TEST_ONLY_4E7A'})
-   if action in ('create','profile'): return {**remote[device_id], 'server':server,'localId':local_id}
+   if action=='rotate': remote[device_id]['password']='TEST_ROTATED_'+str(uuid.uuid4())
+   if action in ('create','profile','rotate'): return {**remote[device_id], 'server':server,'localId':local_id}
    return {'status':'ok'}
   def remove(device_id,expected): remote.pop(device_id,None)
   def auth(request):
@@ -67,6 +68,43 @@ def test_lifecycle(monkeypatch):
    assert c.post('/windows/devices',headers=h,json={**mp,'server':'riga'}).status_code==409
    reissued=c.post('/windows/devices/'+mid+'/profile',headers=h,json={'language':'ru'}).json()['profileUrl'].replace('https://api.tolf.is','')
    assert c.post(reissued+'/settings').json()['server']=='ikev2.tolf.is'
+   # Password access is owner-only, does not create packages, and rotates one device.
+   assert c.get('/windows/capabilities').json()['passwordManagement'] is True
+   endpoint='/windows/devices/'+mid+'/password'
+   before_files=set(directory.iterdir())
+   for endpoint_action in (endpoint, endpoint+'/rotate'):
+    assert c.post(endpoint_action,json={'requestId':str(uuid.uuid4())}).status_code==401
+    assert c.post(endpoint_action,headers=hb,json={'requestId':str(uuid.uuid4())}).status_code==404
+   current=c.post(endpoint,headers=h,json={});assert current.status_code==200
+   assert current.json()['password']==remote[mid]['password']
+   assert 'no-store' in current.headers['cache-control']
+   assert set(directory.iterdir())==before_files
+   old_password=current.json()['password'];other_password=remote[device]['password']
+   rid={'requestId':str(uuid.uuid4())}
+   changed=c.post(endpoint+'/rotate',headers=h,json=rid);assert changed.status_code==200,changed.text
+   assert changed.json()['password']!=old_password
+   assert changed.json()['server']=='ikev2.tolf.is'
+   assert 'no-store' in changed.headers['cache-control']
+   assert c.post(mu+'/settings').status_code==404
+   assert c.post(reissued+'/settings').status_code==404
+   assert c.post(url+'/settings').status_code==200
+   assert remote[device]['password']==other_password
+   assert c.post(endpoint+'/rotate',headers=h,json=rid).json()==changed.json()
+   assert len([a for a,d in calls if a=='rotate' and d==mid])==1
+   assert b'TEST_ROTATED' not in Path(ctx['DB']).read_bytes()
+   # A lost rotation response is never blindly retried. Owner can retrieve current secret.
+   provision_before_failure=ctx['provision_on_riga']
+   def lost_rotation(*args):
+    value=provision_before_failure(*args)
+    if args[0]=='rotate': raise HTTPException(502,'lost rotation response')
+    return value
+   ctx['provision_on_riga']=lost_rotation
+   uncertain={'requestId':str(uuid.uuid4())}
+   assert c.post(endpoint+'/rotate',headers=h,json=uncertain).status_code==502
+   assert c.post(endpoint+'/rotate',headers=h,json=uncertain).status_code==409
+   assert len([a for a,d in calls if a=='rotate' and d==mid])==2
+   assert c.post(endpoint,headers=h,json={}).json()['password']==remote[mid]['password']
+   ctx['provision_on_riga']=provision_before_failure
    # A mismatched provisioning response must never produce a profile for a different node.
    original_provision=ctx['provision_on_riga']
    def wrong_node(*args):

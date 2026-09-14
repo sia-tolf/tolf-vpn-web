@@ -19,7 +19,19 @@ int wmain(){std::wstring name,moscowName;bool owned=false,moscowOwned=false;try{
  moscowName=ProfileName(mc);Check(moscowName==L"TOLF - Moscow - "+mc.id);Check(!Existing(pb,moscowName,mc));
  Configure(w,mc,moscowName);moscowOwned=true;Check(Existing(pb,moscowName,mc));
  bool discovered=false;for(const auto& p:LocalProfiles())if(p.name==moscowName){Check(p.server==L"ikev2.tolf.is");Check(p.id==mc.id);discovered=true;}Check(discovered);
+ // Updating a password keeps the existing profile, IPsec flags and exclusions.
+ auto passwordRoutes=CheckedNetworks(L"192.168.201.0/24");ConfigureRoutes(w,mc,moscowName,passwordRoutes);
+ auto beforePassword=RouteEntry(pb,moscowName);auto flagsBefore=reinterpret_cast<RASENTRYW*>(beforePassword.data())->dwfOptions2;
+ LocalProfile localMoscow{mc.id,moscowName,mc.server};Secret replacement;replacement.value=L"ci-replacement-secret";
+ UpdatePassword(localMoscow,replacement);Check(Existing(pb,moscowName,mc));Check(SavedNetworks(mc.id)==NetworkText(passwordRoutes));
+ auto afterPassword=RouteEntry(pb,moscowName);Check(reinterpret_cast<RASENTRYW*>(afterPassword.data())->dwfOptions2==flagsBefore);
+ RASCREDENTIALSW saved={};saved.dwSize=sizeof(saved);saved.dwMask=RASCM_UserName|RASCM_Password;
+ Check(RasGetCredentialsW(pb.c_str(),moscowName.c_str(),&saved)==0);Check(std::wstring(saved.szUserName)==mc.user);Check((saved.dwMask&RASCM_Password)!=0);SecureZeroMemory(&saved,sizeof(saved));
+ for(auto invalid:{L"",L"****************",L"bad\npassword"}){Secret bad;bad.value=invalid;bool rejected=false;try{UpdatePassword(localMoscow,bad);}catch(const Failure&){rejected=true;}Check(rejected);}
+ RegDeleteTreeW(HKEY_CURRENT_USER,RoutesKey(mc.id).c_str());
+ std::puts("PASS password update preserves profile, location and routes; invalid secrets rejected");
  Check(RasDeleteEntryW(pb.c_str(),moscowName.c_str())==0);moscowOwned=false;
+ bool passwordMissing=false;try{UpdatePassword(localMoscow,replacement);}catch(const Failure& f){passwordMissing=f.code==ERROR_CANNOT_FIND_PHONEBOOK_ENTRY;}Check(passwordMissing);Check(!Existing(pb,moscowName,mc));
  std::puts("PASS Moscow settings, native profile server and controller discovery");
 
  {SavedEapIdentity identity(pb,name);Check(identity.needsInteraction||identity.value!=nullptr);

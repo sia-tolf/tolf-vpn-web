@@ -161,3 +161,9 @@ No global routes, service, scheduled task, WebView or external runtime is instal
 Native integration tests include settings-only route updates preserving stored
 credentials and refusing to recreate a deleted profile. Live VPN dialing and
 Windows 10/11 visual checks still require an interactive Windows environment.
+
+## Password management (2.6.0)
+
+The authenticated Windows device card can show/copy the existing password or generate a new one. Viewing uses existing provisioning credentials without generating setup links. Rotation invalidates this device's old bearer packages; successful retries with the same request UUID read the current password, and uncertain retries are rejected until the owner retrieves it. No passwords are stored in the account SQLite database. The browser keeps a revealed password only in memory and clears it on hiding the page, closing the card, logout, or after one minute.
+
+Disconnect in TOLF VPN, then open Settings → Update password to paste and save the replacement using RasSetCredentialsW. This updates the current user's existing connection without recreating it or changing routes. This control saves a password issued by the website; it does not change the VPN server password. Native CI checks saved credential presence and unchanged profile/routes; a real reconnect after rotation remains an end-to-end check.

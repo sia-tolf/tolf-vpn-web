@@ -31,7 +31,7 @@ try {
  $window = [IntPtr]::Zero
  for ($i=0; $i -lt 150; $i++) {
   Start-Sleep -Milliseconds 200
-  $window = [NativeUi]::FindWindow('TolfVpnController','TOLF VPN 2.5.0')
+  $window = [NativeUi]::FindWindow('TolfVpnController','TOLF VPN 2.6.0')
   if ($window -ne [IntPtr]::Zero -and [NativeUi]::GetDlgItem($window,205) -ne [IntPtr]::Zero) { break }
  }
  if ($window -eq [IntPtr]::Zero -or $process.HasExited) { [NativeUi]::Dump($process.Id); $process.Refresh(); Write-Output "Exited=$($process.HasExited) ExitCode=$($process.ExitCode)"; throw 'Controller did not start' }
@@ -58,6 +58,12 @@ try {
  [void][NativeUi]::SendMessage($window,0x111,[IntPtr]208,[IntPtr]::Zero)
  [void][NativeUi]::SendMessage($window,0x111,[IntPtr]208,[IntPtr]::Zero)
  Save-Window 'settings-preview.png'
+ [void][NativeUi]::SendMessage($window,0x111,[IntPtr]211,[IntPtr]::Zero)
+ if (-not [NativeUi]::IsWindowVisible([NativeUi]::GetDlgItem($window,212))) { throw 'Password field did not open' }
+ if ([NativeUi]::IsWindowEnabled([NativeUi]::GetDlgItem($window,204))) { throw 'Do not dial while editing password' }
+ Save-Window 'password-preview.png'
+ [void][NativeUi]::SendMessage($window,0x111,[IntPtr]214,[IntPtr]::Zero)
+ if ([NativeUi]::IsWindowVisible([NativeUi]::GetDlgItem($window,212))) { throw 'Password field did not close' }
  [void][NativeUi]::SendMessage($window,0x111,[IntPtr]205,[IntPtr]::Zero)
  if ([NativeUi]::IsWindowVisible([NativeUi]::GetDlgItem($window,202))) { throw 'Widget still exposes settings fields' }
  if (-not [NativeUi]::IsWindowVisible([NativeUi]::GetDlgItem($window,204))) { throw 'Widget connection button is hidden' }
