@@ -14,7 +14,8 @@ SSH = ['/usr/bin/ssh', '-n', '-i', '/root/.ssh/id_ed25519_ike_users_sync',
 
 
 def parse_message(text):
-    tokens = re.findall(r'[^\s{}=\[\]]+|[{}=\[\]]', text)
+    matches = list(re.finditer(r'[^\s{}=\[\]]+|[{}=\[\]]', text))
+    tokens = [match.group() for match in matches]
     index = 0
 
     def take():
@@ -38,6 +39,19 @@ def parse_message(text):
                 continue
             if take() != '=':
                 raise ValueError('Invalid inventory field')
+            # swanctl prints empty scalar values as "remote-id= next-key=value".
+            # Keep the next field unconsumed. Require a whitespace boundary so
+            # malformed "a=b=c" is not accepted as two separate fields.
+            if index < len(tokens) and (
+                tokens[index] == '}' or (
+                    index + 1 < len(tokens)
+                    and tokens[index] not in '{}=[]'
+                    and tokens[index + 1] in ('=', '{')
+                    and text[matches[index - 1].end():matches[index].start()].isspace()
+                )
+            ):
+                result[key] = ''
+                continue
             value = take()
             if value == '[':
                 value = []

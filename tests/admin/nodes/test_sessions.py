@@ -49,3 +49,29 @@ def test_dispatch_patch():
     assert installer.patch(changed, installer.SSH_BLOCK) == changed
     with pytest.raises(RuntimeError):
         installer.patch('#!/bin/sh\n', installer.SSH_BLOCK)
+
+def test_empty_remote_id_keeps_eap_identity_and_other_sessions():
+    first = event('remote-id= remote-eap-id=user_test').replace('uniqueid=5436', 'uniqueid=5448')
+    combined = first.replace('list-sas reply {}\n', '') + event('remote-id=user_existing')
+    sessions = reader.parse_inventory(combined)
+    assert len(sessions) == 2
+    assert sessions[0]['identity'] == 'user_test'
+    assert sessions[0]['identitySource'] == 'remote-eap-id'
+    assert sessions[0]['id'] == 5448
+    assert sessions[0]['bytesOut'] == 42890200
+    assert sessions[1]['identity'] == 'user_existing'
+
+@pytest.mark.parametrize('text,expected', [
+    ('{a= b=value}', {'a':'', 'b':'value'}),
+    ('{a= b= c=value}', {'a':'', 'b':'', 'c':'value'}),
+    ('{a=}', {'a':''}),
+    ('{a= child {b=value}}', {'a':'', 'child':{'b':'value'}}),
+    ('{a=[] b=value}', {'a':[], 'b':'value'}),
+])
+def test_empty_scalar_boundaries(text, expected):
+    assert reader.parse_message(text) == expected
+
+@pytest.mark.parametrize('text', ['{a=b=c}', '{a= a=value}', '{a=', '{a= b=value'])
+def test_empty_value_does_not_relax_invalid_input(text):
+    with pytest.raises(ValueError):
+        reader.parse_message(text)
