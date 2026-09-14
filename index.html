@@ -12,7 +12,7 @@
 
   <link
     rel="stylesheet"
-    href="css/styles.css?v=passkey-delete-mobile-full-2"
+    href="css/styles.css?v=windows-add-step-1"
   >
   <link
     rel="stylesheet"
@@ -41,7 +41,7 @@
   <script defer src="js/librespeed.js?v=1"></script>
   <script defer src="js/latency.js?v=connection-test-1"></script>
   <script defer src="js/connection-test.js?v=connection-test-3"></script>
-  <script defer src="js/windows.js?v=windows-accordion-1"></script>
+  <script defer src="js/windows.js?v=windows-add-step-1"></script>
   <script defer src="js/invitations.js?v=hide-protected-banner-1"></script>
   <script defer src="js/app.js?v=windows-1"></script>
 </head>
@@ -412,13 +412,16 @@
           <h3 id="windowsTitle" data-i18n="windowsTitle">Windows devices</h3>
           <p class="card-description" data-i18n="windowsDescription">Prepare a separate VPN connection for your Windows computer.</p>
           <p class="card-description" data-i18n="windowsRoute">Entry through Riga. Russian destinations through Moscow, other traffic through Riga. DNS is assigned by the server.</p>
-          <h3 data-i18n="windowsAddHeading">Add a new computer</h3>
-          <form id="windowsCreateForm" class="windows-create-form">
+          <div id="windowsStartActions" class="windows-create-actions windows-start-actions">
+            <button id="windowsBackButton" class="windows-back-button" type="button">← Back to iOS</button>
+            <button id="windowsAddButton" class="primary" type="button" aria-expanded="false" aria-controls="windowsCreateForm" data-i18n="windowsAdd">Add Windows device</button>
+          </div>
+          <form id="windowsCreateForm" class="windows-create-form hidden">
             <label for="windowsDeviceName" data-i18n="windowsName">Computer name</label>
             <input id="windowsDeviceName" type="text" maxlength="64" required autocomplete="off">
             <div class="windows-create-actions">
-              <button id="windowsBackButton" class="windows-back-button" type="button">← Back to iOS</button>
-            <button id="windowsCreateButton" class="primary" type="submit" data-i18n="windowsAdd">Add Windows device</button>
+              <button id="windowsCancelButton" type="button" data-i18n="cancelButton">Cancel</button>
+              <button id="windowsCreateButton" class="primary" type="submit" data-i18n="windowsAdd">Add Windows device</button>
             </div>
           </form>
           <p id="windowsMessage" class="message" role="status" aria-live="polite"></p>

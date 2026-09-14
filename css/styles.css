@@ -1499,3 +1499,8 @@ button:disabled { opacity: 0.55; cursor: default; }
     flex: 1 1 100% !important;
   }
 }
+
+/* Ask for a device name only after the explicit add action. */
+.windows-start-actions { margin: 20px 0; }
+.windows-create-actions #windowsAddButton,
+.windows-create-form .windows-create-actions > button { flex: 1; min-width: 0; }

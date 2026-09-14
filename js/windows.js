@@ -4,6 +4,7 @@ let windowsEpoch = 0;
 let windowsRequestId = null;
 const windowsProfileLinks = new Map();
 let windowsReady = false;
+let windowsAdding = false;
 const windowsList = document.getElementById('windowsDeviceList');
 const windowsMessage = document.getElementById('windowsMessage');
 const windowsForm = document.getElementById('windowsCreateForm');
@@ -15,6 +16,7 @@ function clearWindowsDevices() {
   expandedWindowsDevice = null;
   windowsRequestId = null;
   windowsName.value = '';
+  windowsAdding = false;
   windowsMessage.textContent = '';
   windowsProfileLinks.clear();
   renderWindowsDevices();
@@ -115,6 +117,11 @@ function renderWindowsDevices() {
     card.append(name, body);
     windowsList.append(card);
   }
+  windowsForm.classList.toggle('hidden', !windowsAdding);
+  document.getElementById('windowsStartActions').classList.toggle('hidden', windowsAdding);
+  document.getElementById('windowsAddButton').setAttribute('aria-expanded', String(windowsAdding));
+  document.getElementById('windowsAddButton').disabled = vpnBusy || !windowsReady;
+  document.getElementById('windowsCancelButton').disabled = vpnBusy;
   document.getElementById('windowsCreateButton').disabled = vpnBusy || !windowsReady;
   windowsName.disabled = vpnBusy;
   document.getElementById("windowsBackButton").disabled = vpnBusy;
@@ -160,6 +167,20 @@ async function windowsAction(action) {
   }
 }
 
+document.getElementById('windowsAddButton').addEventListener('click', () => {
+  if (vpnBusy || !windowsReady || !lastVpnState) return;
+  windowsAdding = true;
+  renderWindowsDevices();
+  windowsName.focus();
+});
+document.getElementById('windowsCancelButton').addEventListener('click', () => {
+  if (vpnBusy) return;
+  windowsAdding = false;
+  windowsName.setCustomValidity('');
+  renderWindowsDevices();
+  document.getElementById('windowsAddButton').focus();
+});
+
 windowsName.addEventListener('invalid', () => {
   if (!windowsName.value.trim()) windowsName.setCustomValidity(t('windowsNameRequired'));
 });
@@ -167,6 +188,7 @@ windowsName.addEventListener('input', () => windowsName.setCustomValidity(''));
 
 windowsForm.addEventListener('submit', event => {
   event.preventDefault();
+  if (!windowsAdding || vpnBusy || !windowsReady || !lastVpnState) return;
   const name = windowsName.value.trim();
   if (!name) {
     windowsName.setCustomValidity(t('windowsNameRequired'));
@@ -182,6 +204,7 @@ windowsForm.addEventListener('submit', event => {
     windowsProfileLinks.set(data.device.id, data.profileUrl);
     expandedWindowsDevice = data.device.id;
     windowsRequestId = null; windowsName.value = '';
+    windowsAdding = false;
     windowsMessage.textContent = '';
   });
 });
