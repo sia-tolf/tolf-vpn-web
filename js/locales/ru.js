@@ -1,4 +1,8 @@
 I18N.ru = {
+  windowsLinkLabel: "Ссылка настройки",
+  windowsLinkCopied: "Ссылка скопирована.",
+  windowsLinkCopyManual: "Ссылка выделена. Скопируйте её через меню браузера.",
+  windowsLinkNew: "Создать новую ссылку",
   windowsPasswordTitle: "Пароль VPN",
   windowsPasswordShow: "Показать пароль",
   windowsPasswordHide: "Скрыть пароль",

@@ -1,4 +1,8 @@
 I18N.lv = {
+  windowsLinkLabel: "Iestatīšanas saite",
+  windowsLinkCopied: "Saite nokopēta.",
+  windowsLinkCopyManual: "Saite ir atlasīta. Kopējiet to pārlūka izvēlnē.",
+  windowsLinkNew: "Izveidot jaunu saiti",
   windowsPasswordTitle: "VPN parole",
   windowsPasswordShow: "Rādīt paroli",
   windowsPasswordHide: "Paslēpt paroli",

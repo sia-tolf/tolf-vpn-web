@@ -1520,3 +1520,9 @@ button:disabled { opacity: 0.55; cursor: default; }
 .windows-password-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
 .windows-password-value { flex: 1 1 220px; min-width: 0; font-family: ui-monospace, monospace; }
 .windows-password-row button { flex: 1 0 auto; }
+
+.windows-link-create { grid-template-columns: minmax(0, 1fr); }
+.windows-device-delivery > label { display: block; margin: 16px 0 8px; color: var(--secondary); font-weight: 400; }
+.windows-link-row { display: flex; flex-wrap: wrap; align-items: stretch; gap: 12px; }
+.windows-link-value { flex: 1 1 240px; min-width: 0; width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--card); color: var(--text); }
+.windows-link-row > button { flex: 0 0 auto; }
