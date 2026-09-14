@@ -1,0 +1,32 @@
+name: Admin inventory checks
+on:
+  push:
+    branches: ['codex/admin-inventory']
+    paths: ['admin/**', 'setup/admin/**', 'tests/admin/**', 'js/admin-entry.js', '.github/workflows/admin-checks.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install fastapi httpx pytest
+      - run: python -m pytest tests/admin -q
+      - run: |
+          python setup/admin/build.py
+          git diff --exit-code setup/admin/install-tolf-admin.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save --ignore-scripts playwright
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/admin/browser.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: admin-preview
+          path: /tmp/tolf-admin-preview.png

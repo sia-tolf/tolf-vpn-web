@@ -1,0 +1,34 @@
+[hidden] { display: none !important; }
+.admin-shell { max-width: 1120px; margin: 0 auto; padding: 32px 24px; }
+.admin-header, .admin-toolbar, .admin-detail-heading { display: flex; flex-wrap: wrap; gap: 20px; align-items: center; justify-content: space-between; }
+.admin-header h1 { margin: 14px 0 8px; font-size: 32px; }
+.admin-header p, .admin-note, .admin-muted { color: var(--secondary); }
+.admin-header a { color: var(--text); text-decoration: none; }
+.admin-languages, .admin-tabs { display: flex; flex-wrap: wrap; padding: 4px; gap: 4px; border: 1px solid var(--border); border-radius: 12px; }
+.admin-languages button, .admin-tabs button { min-height: 38px; padding: 8px 12px; font-weight: 500; background: transparent; color: var(--secondary); border: 1px solid transparent; border-radius: 8px; }
+.admin-languages button[aria-pressed=true], .admin-tabs button[aria-pressed=true] { color: var(--text); background: var(--card); border-color: var(--border); }
+.admin-card { padding: 24px; margin-top: 24px; }
+.admin-card > p:first-child { margin-top: 0; }
+.admin-card > .button-link { max-width: 320px; }
+.admin-toolbar { margin-top: 32px; }
+.admin-note { margin: 18px 0 24px; line-height: 1.5; }
+.admin-search label { display: block; margin-bottom: 8px; color: var(--secondary); }
+.admin-search > div { display: flex; gap: 12px; }
+.admin-search input { flex: 1; min-width: 0; border: 1px solid var(--border); border-radius: 12px; padding: 12px; color: var(--text); background: var(--card); }
+#status { min-height: 22px; color: var(--secondary); }
+.admin-table-wrap { overflow-x: auto; background: var(--card); border: 1px solid var(--border); border-radius: 16px; }
+.admin-table { border-collapse: collapse; width: 100%; font-size: 15px; }
+.admin-table th { font-weight: 500; color: var(--secondary); text-align: left; }
+.admin-table td, .admin-table th { padding: 16px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.admin-table tr:last-child td { border-bottom: 0; }
+.admin-table button { min-height: 34px; padding: 6px 12px; font-size: 14px; }
+.admin-table td small { display: block; margin-top: 6px; color: var(--secondary); }
+.admin-id { overflow-wrap: anywhere; font-family: ui-monospace, monospace; font-size: 13px; }
+.admin-pagination { display: flex; gap: 16px; align-items: center; justify-content: flex-end; margin-top: 18px; }
+.admin-pagination button { min-height: 38px; font-size: 14px; }
+.admin-detail-heading h2 { margin: 0; }
+.admin-detail-heading button { min-height: 36px; }
+.admin-device { border-top: 1px solid var(--border); padding: 14px 0; }
+.admin-device p { margin: 6px 0; }
+.admin-shell footer { text-align: center; margin: 36px 0 0; color: var(--secondary); font-size: 13px; }
+@media(max-width:640px) { .admin-shell { padding: 20px 16px; } .admin-toolbar { align-items: stretch; } .admin-table td,.admin-table th { padding: 12px; } }
