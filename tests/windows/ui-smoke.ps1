@@ -1,0 +1,49 @@
+$ErrorActionPreference = 'Stop'
+Add-Type -AssemblyName System.Drawing
+Add-Type @'
+using System;
+using System.Runtime.InteropServices;
+public static class NativeUi {
+ [StructLayout(LayoutKind.Sequential)] public struct Rect { public int Left,Top,Right,Bottom; }
+ [DllImport("user32.dll", CharSet=CharSet.Unicode)] public static extern IntPtr FindWindow(string cls,string title);
+ [DllImport("user32.dll")] public static extern IntPtr GetDlgItem(IntPtr w,int id);
+ [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr w);
+ [DllImport("user32.dll")] public static extern bool IsWindowEnabled(IntPtr w);
+ [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr w,out Rect r);
+ [DllImport("user32.dll")] public static extern IntPtr SendMessage(IntPtr w,uint msg,IntPtr a,IntPtr b);
+ [DllImport("user32.dll")] public static extern bool PrintWindow(IntPtr w,IntPtr dc,uint flags);
+}
+'@
+$exe = (Resolve-Path './setup/windows/dist/TOLF-Setup.exe').Path
+$process = $null
+try {
+ $process = Start-Process $exe -ArgumentList '--manage' -PassThru
+ $window = [IntPtr]::Zero
+ for ($i=0; $i -lt 50; $i++) {
+  Start-Sleep -Milliseconds 200
+  $window = [NativeUi]::FindWindow('TolfVpnController',$null)
+  if ($window -ne [IntPtr]::Zero -and [NativeUi]::GetDlgItem($window,205) -ne [IntPtr]::Zero) { break }
+ }
+ if ($window -eq [IntPtr]::Zero -or $process.HasExited) { throw 'Controller did not start' }
+ Start-Sleep -Milliseconds 500
+ if (-not [NativeUi]::IsWindowVisible([NativeUi]::GetDlgItem($window,202))) { throw 'Settings field is not visible' }
+ if ([NativeUi]::IsWindowEnabled([NativeUi]::GetDlgItem($window,204))) { throw 'Empty profile list must not allow dialing' }
+ function Save-Window([string]$name) {
+  $rect = New-Object NativeUi+Rect
+  [void][NativeUi]::GetWindowRect($window,[ref]$rect)
+  $bitmap = New-Object System.Drawing.Bitmap(($rect.Right-$rect.Left),($rect.Bottom-$rect.Top))
+  $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
+  $dc = $graphics.GetHdc()
+  try { [void][NativeUi]::PrintWindow($window,$dc,2) } finally { $graphics.ReleaseHdc($dc) }
+  $bitmap.Save((Join-Path (Resolve-Path './setup/windows/dist').Path $name),[System.Drawing.Imaging.ImageFormat]::Png)
+  $graphics.Dispose(); $bitmap.Dispose()
+ }
+ Save-Window 'settings-preview.png'
+ [void][NativeUi]::SendMessage($window,0x111,[IntPtr]205,[IntPtr]::Zero)
+ if ([NativeUi]::IsWindowVisible([NativeUi]::GetDlgItem($window,202))) { throw 'Widget still exposes settings fields' }
+ if (-not [NativeUi]::IsWindowVisible([NativeUi]::GetDlgItem($window,204))) { throw 'Widget connection button is hidden' }
+ Save-Window 'widget-preview.png'
+ Write-Output 'PASS native settings startup, empty-profile guard and compact widget layout'
+} finally {
+ if ($process -and -not $process.HasExited) { Stop-Process -Id $process.Id -Force }
+}

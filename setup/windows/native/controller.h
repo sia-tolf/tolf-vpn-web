@@ -3,6 +3,7 @@
 #include <ws2tcpip.h>
 #include <iphlpapi.h>
 #include <shobjidl.h>
+#include <shellapi.h>
 
 inline std::wstring KnownPath(REFKNOWNFOLDERID id) {
     PWSTR value=nullptr; Hr(SHGetKnownFolderPath(id,0,nullptr,&value),L"SHORTCUT");
@@ -20,12 +21,16 @@ inline void InstallController() {
     int error=SHCreateDirectoryExW(nullptr,folder.c_str(),nullptr);
     if(error!=ERROR_SUCCESS&&error!=ERROR_ALREADY_EXISTS&&error!=ERROR_FILE_EXISTS)throw Failure{L"SHORTCUT",DWORD(error)};
     wchar_t source[32768]; DWORD n=GetModuleFileNameW(nullptr,source,32768); Win(n&&n<32768,L"SHORTCUT");
-    if(_wcsicmp(source,exe.c_str())) {
-        // A running version cannot be overwritten. Reusing exactly the same version is safe.
-        if(!CopyFileW(source,exe.c_str(),FALSE)) {
-            DWORD e=GetLastError();
-            if(e!=ERROR_SHARING_VIOLATION)throw Failure{L"SHORTCUT",e};
-        }
+    if(_wcsicmp(source,exe.c_str()) && !CopyFileW(source,exe.c_str(),FALSE)) {
+        DWORD error=GetLastError();
+        // Only reuse a locked executable when every byte matches this build.
+        HANDLE first=CreateFileW(source,GENERIC_READ,FILE_SHARE_READ|FILE_SHARE_WRITE|FILE_SHARE_DELETE,nullptr,OPEN_EXISTING,0,nullptr);
+        HANDLE second=CreateFileW(exe.c_str(),GENERIC_READ,FILE_SHARE_READ|FILE_SHARE_WRITE|FILE_SHARE_DELETE,nullptr,OPEN_EXISTING,0,nullptr);
+        bool same=first!=INVALID_HANDLE_VALUE&&second!=INVALID_HANDLE_VALUE;
+        BYTE a[4096],b[4096];DWORD na=0,nb=0;
+        while(same){if(!ReadFile(first,a,sizeof(a),&na,nullptr)||!ReadFile(second,b,sizeof(b),&nb,nullptr)){same=false;break;}if(na!=nb||memcmp(a,b,na)!=0){same=false;break;}if(!na)break;}
+        if(first!=INVALID_HANDLE_VALUE)CloseHandle(first);if(second!=INVALID_HANDLE_VALUE)CloseHandle(second);
+        if(!same)throw Failure{L"SHORTCUT",error};
     }
     auto programs=KnownPath(FOLDERID_Programs)+L"\\TOLF";
     error=SHCreateDirectoryExW(nullptr,programs.c_str(),nullptr);
