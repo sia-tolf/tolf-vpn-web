@@ -38,18 +38,7 @@ function appendWindowsDelivery(card, device) {
     try { await copyText(url); feedback.textContent = t('profileLinkCopied'); }
     catch { feedback.textContent = t('profileShareFailed'); }
   });
-  const share = document.createElement('button');
-  share.type = 'button'; share.className = 'constructive';
-  share.textContent = t('windowsShare'); share.disabled = vpnBusy;
-  share.addEventListener('click', async () => {
-    try {
-      if (navigator.share) await navigator.share({title:'TOLF VPN — ' + device.name, url});
-      else { await copyText(url); feedback.textContent = t('profileLinkCopied'); }
-    } catch (error) {
-      if (error.name !== 'AbortError') feedback.textContent = t('profileShareFailed');
-    }
-  });
-  delivery.append(copy, share);
+  delivery.append(copy);
   if (/Windows NT/i.test(navigator.userAgent || '')) {
     const open = document.createElement('a');
     open.className = 'button-link primary windows-device-open';
@@ -101,7 +90,7 @@ function renderWindowsDevices() {
       windowsMessage.textContent = '';
     }));
     const remove = document.createElement('button'); remove.type = 'button';
-    remove.className = 'danger'; remove.textContent = t('windowsDelete'); remove.disabled = vpnBusy;
+    remove.className = 'danger windows-device-delete'; remove.textContent = t('windowsDelete'); remove.disabled = vpnBusy;
     remove.addEventListener('click', () => {
       if (!window.confirm(t('windowsDeleteConfirm', {name: device.name}))) return;
       windowsAction(async epoch => {
@@ -112,8 +101,9 @@ function renderWindowsDevices() {
         windowsMessage.textContent = t('windowsDeleted');
       });
     });
-    actions.append(download, remove); body.append(user, actions);
+    actions.append(download); body.append(user, actions);
     appendWindowsDelivery(body, device);
+    body.append(remove);
     card.append(name, body);
     windowsList.append(card);
   }
