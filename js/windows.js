@@ -9,6 +9,7 @@ const windowsList = document.getElementById('windowsDeviceList');
 const windowsMessage = document.getElementById('windowsMessage');
 const windowsForm = document.getElementById('windowsCreateForm');
 const windowsName = document.getElementById('windowsDeviceName');
+const windowsServer = document.getElementById('windowsDeviceServer');
 
 function clearWindowsDevices() {
   windowsEpoch++;
@@ -22,9 +23,9 @@ function clearWindowsDevices() {
   renderWindowsDevices();
 }
 
-function appendWindowsDelivery(card, device) {
+function appendWindowsDelivery(card, device, actions) {
   const url = windowsProfileLinks.get(device.id);
-  if (!url || device.state !== 'active') return;
+  if (device.state !== 'active') return;
   const delivery = document.createElement('div');
   delivery.className = 'windows-device-delivery';
   const feedback = document.createElement('p');
@@ -33,19 +34,20 @@ function appendWindowsDelivery(card, device) {
   feedback.setAttribute('aria-live', 'polite');
   const copy = document.createElement('button');
   copy.type = 'button'; copy.className = 'windows-copy-button';
-  copy.textContent = t('windowsCopy'); copy.disabled = vpnBusy;
+  copy.textContent = t('windowsCopy'); copy.disabled = vpnBusy || !url;
   copy.addEventListener('click', async () => {
     try { await copyText(url); feedback.textContent = t('profileLinkCopied'); }
     catch { feedback.textContent = t('profileShareFailed'); }
   });
-  delivery.append(copy);
-  if (/Windows NT/i.test(navigator.userAgent || '')) {
+  actions.append(copy);
+  if (url && /Windows NT/i.test(navigator.userAgent || '')) {
     const open = document.createElement('a');
     open.className = 'button-link primary windows-device-open';
     open.href = url; open.target = '_blank'; open.rel = 'noopener noreferrer';
     open.textContent = t('windowsOpen'); delivery.append(open);
   }
-  card.append(delivery, feedback);
+  if (delivery.childElementCount) card.append(delivery);
+  card.append(feedback);
 }
 
 function renderWindowsDevices() {
@@ -75,7 +77,7 @@ function renderWindowsDevices() {
     const user = document.createElement('p');
     user.textContent = device.username || t('windowsPreparing');
     user.className = 'windows-device-username';
-    const actions = document.createElement('div'); actions.className = 'actions';
+    const actions = document.createElement('div'); actions.className = 'actions windows-device-links';
     const download = document.createElement('button'); download.type = 'button';
     download.className = 'constructive';
     download.textContent = t(device.state === 'active' ? 'windowsReissue' : 'windowsContinue');
@@ -102,7 +104,7 @@ function renderWindowsDevices() {
       });
     });
     actions.append(download); body.append(user, actions);
-    appendWindowsDelivery(body, device);
+    appendWindowsDelivery(body, device, actions);
     body.append(remove);
     card.append(name, body);
     windowsList.append(card);
@@ -114,6 +116,7 @@ function renderWindowsDevices() {
   document.getElementById('windowsCancelButton').disabled = vpnBusy;
   document.getElementById('windowsCreateButton').disabled = vpnBusy || !windowsReady;
   windowsName.disabled = vpnBusy;
+  windowsServer.disabled = vpnBusy;
   document.getElementById("windowsBackButton").disabled = vpnBusy;
 }
 
@@ -159,6 +162,7 @@ async function windowsAction(action) {
 
 document.getElementById('windowsAddButton').addEventListener('click', () => {
   if (vpnBusy || !windowsReady || !lastVpnState) return;
+  windowsServer.value = 'riga';
   windowsAdding = true;
   renderWindowsDevices();
   windowsName.focus();
@@ -179,6 +183,7 @@ windowsName.addEventListener('input', () => windowsName.setCustomValidity(''));
 windowsForm.addEventListener('submit', event => {
   event.preventDefault();
   if (!windowsAdding || vpnBusy || !windowsReady || !lastVpnState) return;
+  if (windowsServer.value !== 'riga') return;
   const name = windowsName.value.trim();
   if (!name) {
     windowsName.setCustomValidity(t('windowsNameRequired'));
@@ -188,7 +193,7 @@ windowsForm.addEventListener('submit', event => {
   if (!windowsRequestId) windowsRequestId = crypto.randomUUID();
   windowsAction(async epoch => {
     const data = await apiRequest('/windows/devices', {
-      method:'POST', body:JSON.stringify({requestId:windowsRequestId,name,language:currentLanguage})
+      method:'POST', body:JSON.stringify({requestId:windowsRequestId,name,server:windowsServer.value,language:currentLanguage})
     });
     if (epoch !== windowsEpoch) return;
     windowsProfileLinks.set(data.device.id, data.profileUrl);

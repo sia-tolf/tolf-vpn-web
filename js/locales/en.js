@@ -1,4 +1,9 @@
 I18N.en = {
+  windowsServerLabel: "VPN location",
+  windowsServerRiga: "Riga",
+  windowsServerMoscowUnavailable: "Moscow — not available for Windows yet",
+  windowsServerUsUnavailable: "USA — not available for Windows yet",
+  windowsServerHelp: "This location applies to this Windows computer. Windows currently supports Riga only.",
   registerBack: "Back",
   createPasskeyAction: "Create Passkey",
   registerPasskeyHelp: "Helps you recognize this key when signing in. TOLF will be added to the name.",

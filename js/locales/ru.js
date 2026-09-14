@@ -1,4 +1,9 @@
 I18N.ru = {
+  windowsServerLabel: "Узел VPN",
+  windowsServerRiga: "Рига",
+  windowsServerMoscowUnavailable: "Москва — пока недоступна для Windows",
+  windowsServerUsUnavailable: "США — пока недоступны для Windows",
+  windowsServerHelp: "Этот узел используется данным Windows-компьютером. Сейчас для Windows доступна только Рига.",
   registerBack: "Назад",
   createPasskeyAction: "Создать Passkey",
   registerPasskeyHelp: "Поможет узнавать этот ключ при входе. К названию добавится TOLF.",

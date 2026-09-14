@@ -1,4 +1,9 @@
 I18N.lv = {
+  windowsServerLabel: "VPN mezgls",
+  windowsServerRiga: "Rīga",
+  windowsServerMoscowUnavailable: "Maskava — vēl nav pieejama Windows",
+  windowsServerUsUnavailable: "ASV — vēl nav pieejamas Windows",
+  windowsServerHelp: "Šis mezgls attiecas uz šo Windows datoru. Pašlaik Windows atbalsta tikai Rīgu.",
   registerBack: "Atpakaļ",
   createPasskeyAction: "Izveidot Passkey",
   registerPasskeyHelp: "Palīdz atpazīt šo atslēgu, piesakoties vietnē. Nosaukumam tiks pievienots TOLF.",

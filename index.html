@@ -12,7 +12,7 @@
 
   <link
     rel="stylesheet"
-    href="css/styles.css?v=windows-actions-20260914"
+    href="css/styles.css?v=windows-location-20260914"
   >
   <link
     rel="stylesheet"
@@ -21,19 +21,19 @@
 
   <!-- Keep this order. Deferred scripts run after the HTML has been parsed. -->
   <script defer src="js/config.js?v=windows-1"></script>
-  <script defer src="js/locales/en.js?v=registration-step-1"></script>
-  <script defer src="js/locales/ru.js?v=registration-step-1"></script>
-  <script defer src="js/locales/lv.js?v=registration-step-1"></script>
+  <script defer src="js/locales/en.js?v=windows-location-20260914"></script>
+  <script defer src="js/locales/ru.js?v=windows-location-20260914"></script>
+  <script defer src="js/locales/lv.js?v=windows-location-20260914"></script>
   <script defer src="js/dom.js?v=share-profile-1"></script>
   <script defer src="js/network-metrics.js?v=latency-decimal-1"></script>
   <script defer src="js/platform.js?v=windows-back-1"></script>
   <script defer src="js/i18n.js?v=website-signin-1"></script>
   <script defer src="js/webauthn.js?v=local-id-2"></script>
   <script defer src="js/api.js?v=local-id-2"></script>
-  <script defer src="js/ui.js?v=registration-step-1"></script>
+  <script defer src="js/ui.js?v=windows-location-20260914"></script>
   <script defer src="js/passkeys.js?v=last-passkey-message-1"></script>
   <script defer src="js/recovery.js?v=local-id-2"></script>
-  <script defer src="js/account.js?v=registration-step-1"></script>
+  <script defer src="js/account.js?v=windows-location-20260914"></script>
   <script defer src="js/profile-settings.js?v=profile-options-1"></script>
   <script defer src="js/vpn.js?v=windows-1"></script>
   <script defer src="js/promo.js?v=header-promo-1"></script>
@@ -41,7 +41,7 @@
   <script defer src="js/librespeed.js?v=1"></script>
   <script defer src="js/latency.js?v=connection-test-1"></script>
   <script defer src="js/connection-test.js?v=connection-test-3"></script>
-  <script defer src="js/windows.js?v=windows-actions-20260914"></script>
+  <script defer src="js/windows.js?v=windows-location-20260914"></script>
   <script defer src="js/invitations.js?v=hide-protected-banner-1"></script>
   <script defer src="js/app.js?v=windows-1"></script>
 </head>
@@ -419,6 +419,13 @@
           <form id="windowsCreateForm" class="windows-create-form hidden">
             <label for="windowsDeviceName" data-i18n="windowsName">Computer name</label>
             <input id="windowsDeviceName" type="text" maxlength="64" required autocomplete="off">
+            <label for="windowsDeviceServer" data-i18n="windowsServerLabel">VPN location</label>
+            <select id="windowsDeviceServer" aria-describedby="windowsServerHelp">
+              <option value="riga" data-i18n="windowsServerRiga">Riga</option>
+              <option value="moscow" disabled data-i18n="windowsServerMoscowUnavailable">Moscow — not available for Windows yet</option>
+              <option value="us" disabled data-i18n="windowsServerUsUnavailable">USA — not available for Windows yet</option>
+            </select>
+            <p id="windowsServerHelp" class="card-description" data-i18n="windowsServerHelp">This location applies to this Windows computer. Windows currently supports Riga only.</p>
             <div class="windows-create-actions">
               <button id="windowsCancelButton" type="button" data-i18n="cancelButton">Cancel</button>
               <button id="windowsCreateButton" class="primary" type="submit" data-i18n="windowsAdd">Add Windows device</button>
