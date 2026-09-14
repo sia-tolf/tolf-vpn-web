@@ -40,7 +40,7 @@ static void ResizeClient(int width,int height){RECT r={0,0,px(width),px(height)}
 static void Render(){
  bool loaded=bool(settings);
  for(HWND h:{networkLabel,networkEdit,networkHelp,rdpHelp,saveButton,connectButton})Visible(h,loaded);
- Visible(loadButton,!loaded);Visible(introText,!loaded);Visible(linkLabel,!loaded&&!hasFileToken);Visible(linkEdit,!loaded&&!hasFileToken);
+ Visible(loadButton,!loaded);Visible(introText,!loaded&&hasFileToken);Visible(linkLabel,!loaded&&!hasFileToken);Visible(linkEdit,!loaded&&!hasFileToken);
  SetWindowTextW(stepLabel,loaded?L(L"SETTINGS",L"ПАРАМЕТРЫ",L"IESTATĪJUMI"):L(L"WINDOWS SETUP",L"НАСТРОЙКА WINDOWS",L"WINDOWS IESTATĪŠANA"));
  SetWindowTextW(pageTitle,loaded?L(L"Connection settings",L"Параметры подключения",L"Savienojuma iestatījumi"):L"TOLF VPN");
  MoveWindow(status,px(36),px(loaded?458:218),px(488),px(54),TRUE);
@@ -90,6 +90,6 @@ int WINAPI wWinMain(HINSTANCE instance,HINSTANCE,PWSTR command,int show){
  LANGID id=PRIMARYLANGID(GetUserDefaultUILanguage());lang=id==LANG_RUSSIAN?1:id==LANG_LATVIAN?2:0;
  HRESULT init=CoInitializeEx(nullptr,COINIT_APARTMENTTHREADED);if(FAILED(init)){CloseHandle(mutex);return 1;}
  HRESULT sec=CoInitializeSecurity(nullptr,-1,nullptr,nullptr,RPC_C_AUTHN_LEVEL_DEFAULT,RPC_C_IMP_LEVEL_IMPERSONATE,nullptr,EOAC_NONE,nullptr);if(FAILED(sec)&&sec!=RPC_E_TOO_LATE){CoUninitialize();CloseHandle(mutex);return 1;}
- WNDCLASSW cls={};cls.hInstance=instance;cls.lpfnWndProc=Proc;cls.lpszClassName=L"TolfNativeSetup";cls.hCursor=LoadCursorW(nullptr,IDC_ARROW);cls.hbrBackground=(HBRUSH)(COLOR_WINDOW+1);RegisterClassW(&cls);
+ WNDCLASSW cls={};cls.hInstance=instance;cls.lpfnWndProc=Proc;cls.lpszClassName=L"TolfNativeSetup";cls.hIcon=LoadIconW(instance,MAKEINTRESOURCEW(101));cls.hCursor=LoadCursorW(nullptr,IDC_ARROW);cls.hbrBackground=(HBRUSH)(COLOR_WINDOW+1);RegisterClassW(&cls);
  dpi=GetDpiForSystem();RECT rect={0,0,px(560),px(330)};DWORD style=WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX;AdjustWindowRectExForDpi(&rect,style,FALSE,0,dpi);HWND h=CreateWindowExW(0,cls.lpszClassName,L"TOLF VPN",style,CW_USEDEFAULT,CW_USEDEFAULT,rect.right-rect.left,rect.bottom-rect.top,nullptr,nullptr,instance,nullptr);if(!h){CoUninitialize();CloseHandle(mutex);return 1;}ShowWindow(h,show);MSG msg;while(GetMessageW(&msg,nullptr,0,0)>0){if(!IsDialogMessageW(h,&msg)){TranslateMessage(&msg);DispatchMessageW(&msg);}}CoUninitialize();CloseHandle(mutex);return 0;
 }

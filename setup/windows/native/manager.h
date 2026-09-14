@@ -102,7 +102,7 @@ static LRESULT CALLBACK Proc(HWND h,UINT msg,WPARAM w,LPARAM l) {
         autostart=control(L"BUTTON",L(L"Show tray icon when I sign in",L"Значок в трее при входе в Windows",L"Rādīt ikonu, piesakoties Windows"),WS_TABSTOP|BS_AUTOCHECKBOX,24,530,492,24,206);
         pin=control(L"BUTTON",L(L"Always on top",L"Поверх окон",L"Virs citiem logiem"),WS_TABSTOP|BS_AUTOCHECKBOX,24,214,312,24,207);
         message=control(L"STATIC",L"",0,24,567,492,60,0);
-        icon=LoadIconW(nullptr,IDI_APPLICATION);SendMessageW(h,WM_SETICON,ICON_SMALL,(LPARAM)icon);SendMessageW(h,WM_SETICON,ICON_BIG,(LPARAM)icon);
+        icon=LoadIconW(GetModuleHandleW(nullptr),MAKEINTRESOURCEW(101));SendMessageW(h,WM_SETICON,ICON_SMALL,(LPARAM)icon);SendMessageW(h,WM_SETICON,ICON_BIG,(LPARAM)icon);
         auto startup=KnownPath(FOLDERID_Startup)+L"\\TOLF VPN.lnk";SendMessageW(autostart,BM_SETCHECK,GetFileAttributesW(startup.c_str())!=INVALID_FILE_ATTRIBUTES?BST_CHECKED:BST_UNCHECKED,0);
         taskbarCreated=RegisterWindowMessageW(L"TaskbarCreated");ReloadProfiles();Layout();SetTimer(h,1,1000,nullptr);return 0;}
     case WM_TIMER:Refresh();return 0;
@@ -137,7 +137,7 @@ inline int Run(HINSTANCE instance,bool widget,bool hidden) {
     HRESULT sec=CoInitializeSecurity(nullptr,-1,nullptr,nullptr,RPC_C_AUTHN_LEVEL_DEFAULT,RPC_C_IMP_LEVEL_IMPERSONATE,nullptr,EOAC_NONE,nullptr);
     if(FAILED(sec)&&sec!=RPC_E_TOO_LATE){WSACleanup();CoUninitialize();CloseHandle(mutex);return 1;}
     WNDCLASSW cls={};cls.hInstance=instance;cls.lpfnWndProc=Proc;cls.lpszClassName=L"TolfVpnController";cls.hCursor=LoadCursorW(nullptr,IDC_ARROW);RegisterClassW(&cls);
-    HWND h=nullptr;try{h=CreateWindowExW(0,cls.lpszClassName,L"TOLF VPN",WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX,CW_USEDEFAULT,CW_USEDEFAULT,540,640,nullptr,nullptr,instance,nullptr);}catch(...){MessageBoxW(nullptr,L(L"Could not open TOLF settings.",L"Не удалось открыть настройки TOLF.",L"Neizdevās atvērt TOLF iestatījumus."),L"TOLF VPN",MB_OK|MB_ICONERROR);}
+    HWND h=nullptr;try{h=CreateWindowExW(0,cls.lpszClassName,L"TOLF VPN 2.3",WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX,CW_USEDEFAULT,CW_USEDEFAULT,540,640,nullptr,nullptr,instance,nullptr);}catch(...){MessageBoxW(nullptr,L(L"Could not open TOLF settings.",L"Не удалось открыть настройки TOLF.",L"Neizdevās atvērt TOLF iestatījumus."),L"TOLF VPN",MB_OK|MB_ICONERROR);}
     if(h){if(!hidden||!trayPresent)ShowWindow(h,SW_SHOW);MSG msg;while(GetMessageW(&msg,nullptr,0,0)>0){if(!IsDialogMessageW(h,&msg)){TranslateMessage(&msg);DispatchMessageW(&msg);}}}
     WSACleanup();CoUninitialize();CloseHandle(mutex);return h?0:1;
 }
