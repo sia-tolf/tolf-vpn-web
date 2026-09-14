@@ -4,10 +4,11 @@ $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 Import-Module VpnClient
 $config = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'connection.json') -Raw -Encoding UTF8 | ConvertFrom-Json
-if ($config.server -ne 'ikev2-riga.tolf.is' -or $config.deviceId -notmatch '^[0-9a-f-]{36}$') {
+if ($config.server -notin @('ikev2-riga.tolf.is','ikev2.tolf.is') -or $config.deviceId -notmatch '^[0-9a-f-]{36}$') {
     throw 'Invalid TOLF configuration'
 }
-$name = 'TOLF - Riga - ' + $config.deviceId
+$location = if ($config.server -eq 'ikev2.tolf.is') { 'Moscow' } else { 'Riga' }
+$name = 'TOLF - ' + $location + ' - ' + $config.deviceId
 [xml]$eap = @'
 <EapHostConfig xmlns="http://www.microsoft.com/provisioning/EapHostConfig">
  <EapMethod><Type xmlns="http://www.microsoft.com/provisioning/EapCommon">26</Type><VendorId xmlns="http://www.microsoft.com/provisioning/EapCommon">0</VendorId><VendorType xmlns="http://www.microsoft.com/provisioning/EapCommon">0</VendorType><AuthorId xmlns="http://www.microsoft.com/provisioning/EapCommon">0</AuthorId></EapMethod>
