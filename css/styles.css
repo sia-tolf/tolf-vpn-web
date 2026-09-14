@@ -1512,3 +1512,5 @@ button:disabled { opacity: 0.55; cursor: default; }
 .windows-device-links > .windows-copy-button { background: var(--card); color: var(--text); border: 1px solid var(--border); }
 .windows-create-form select { box-sizing: border-box; width: 100%; min-width: 0; padding: 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--card); color: var(--text); font: inherit; }
 .windows-create-form > .card-description { margin: 0; }
+
+#windowsCancelButton { background: #fff; color: var(--danger); border: 1px solid var(--danger); }

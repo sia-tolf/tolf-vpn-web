@@ -1,4 +1,6 @@
 I18N.ru = {
+  windowsServerHelpReady: "Выберите узел входа в VPN для этого компьютера. Выбор сохраняется за устройством.",
+  windowsServerMoscow: "Москва",
   windowsServerLabel: "Узел VPN",
   windowsServerRiga: "Рига",
   windowsServerMoscowUnavailable: "Москва — пока недоступна для Windows",
@@ -258,7 +260,7 @@ I18N.ru = {
 Object.assign(I18N.ru, {
   "windowsTitle": "Устройства Windows",
   "windowsDescription": "Подготовьте отдельное VPN-подключение для Windows-компьютера. Доступ Apple и Android остаётся независимым.",
-  "windowsRoute": "Вход через Ригу: российские направления через Москву, остальные через Ригу. DNS назначает VPN-сервер.",
+  "windowsRoute": "Для каждого Windows-компьютера можно выбрать узел VPN. DNS и маршрутизацию задаёт выбранный VPN-сервер.",
   "windowsName": "Название компьютера",
   "windowsAdd": "Добавить устройство Windows",
   "windowsOpen": "Открыть настройку Windows",

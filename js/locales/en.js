@@ -1,4 +1,6 @@
 I18N.en = {
+  windowsServerHelpReady: "Choose the VPN entry point for this computer. The location is saved with the device.",
+  windowsServerMoscow: "Moscow",
   windowsServerLabel: "VPN location",
   windowsServerRiga: "Riga",
   windowsServerMoscowUnavailable: "Moscow — not available for Windows yet",
@@ -258,7 +260,7 @@ I18N.en = {
 Object.assign(I18N.en, {
   "windowsTitle": "Windows devices",
   "windowsDescription": "Prepare a separate VPN connection for your Windows computer. Your Apple and Android access stays independent.",
-  "windowsRoute": "Entry through Riga. Russian destinations through Moscow, other traffic through Riga. DNS is assigned by the VPN server.",
+  "windowsRoute": "Choose a VPN location for each Windows computer. DNS and routing are assigned by the selected VPN server.",
   "windowsName": "Computer name",
   "windowsAdd": "Add Windows device",
   "windowsOpen": "Open Windows setup",
