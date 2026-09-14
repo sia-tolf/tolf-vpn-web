@@ -1,3 +1,27 @@
+const registerPanel = document.getElementById("registerPanel");
+const submitRegisterButton = document.getElementById("submitRegisterButton");
+const cancelRegisterButton = document.getElementById("cancelRegisterButton");
+
+function closeRegistrationPanel() {
+  registerPanel.classList.add("hidden");
+}
+
+createAccountButton.addEventListener("click", () => {
+  signedOutMainActions.classList.add("hidden");
+  recoverPanel.classList.add("hidden");
+  registerPanel.classList.remove("hidden");
+  signedOutMessage.textContent = "";
+  signedOutMessage.className = "message";
+  document.getElementById("registerPasskeyName").focus();
+});
+
+cancelRegisterButton.addEventListener("click", () => {
+  closeRegistrationPanel();
+  signedOutMainActions.classList.remove("hidden");
+  signedOutMessage.textContent = "";
+  createAccountButton.focus();
+});
+
 async function loadAccount() {
   try {
     const data = await apiRequest("/me", {
@@ -78,7 +102,10 @@ signInButton.addEventListener("click", async () => {
   }
 });
 
-createAccountButton.addEventListener("click", async () => {
+submitRegisterButton.addEventListener("click", async () => {
+  if (submitRegisterButton.disabled) return;
+  submitRegisterButton.disabled = true;
+  cancelRegisterButton.disabled = true;
   createAccountButton.disabled = true;
   signInButton.disabled = true;
   showRecoverButton.disabled = true;
@@ -121,6 +148,8 @@ createAccountButton.addEventListener("click", async () => {
     signedOutMessage.textContent = error.message;
     signedOutMessage.className = "message error";
   } finally {
+    submitRegisterButton.disabled = false;
+    cancelRegisterButton.disabled = false;
     createAccountButton.disabled = false;
     signInButton.disabled = false;
     showRecoverButton.disabled = false;

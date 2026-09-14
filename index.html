@@ -21,19 +21,19 @@
 
   <!-- Keep this order. Deferred scripts run after the HTML has been parsed. -->
   <script defer src="js/config.js?v=windows-1"></script>
-  <script defer src="js/locales/en.js?v=protected-account-delete-1"></script>
-  <script defer src="js/locales/ru.js?v=protected-account-delete-1"></script>
-  <script defer src="js/locales/lv.js?v=protected-account-delete-1"></script>
+  <script defer src="js/locales/en.js?v=registration-step-1"></script>
+  <script defer src="js/locales/ru.js?v=registration-step-1"></script>
+  <script defer src="js/locales/lv.js?v=registration-step-1"></script>
   <script defer src="js/dom.js?v=share-profile-1"></script>
   <script defer src="js/network-metrics.js?v=latency-decimal-1"></script>
   <script defer src="js/platform.js?v=windows-back-1"></script>
   <script defer src="js/i18n.js?v=website-signin-1"></script>
   <script defer src="js/webauthn.js?v=local-id-2"></script>
   <script defer src="js/api.js?v=local-id-2"></script>
-  <script defer src="js/ui.js?v=full-vpn-username-1"></script>
+  <script defer src="js/ui.js?v=registration-step-1"></script>
   <script defer src="js/passkeys.js?v=last-passkey-message-1"></script>
   <script defer src="js/recovery.js?v=local-id-2"></script>
-  <script defer src="js/account.js?v=protected-account-delete-1"></script>
+  <script defer src="js/account.js?v=registration-step-1"></script>
   <script defer src="js/profile-settings.js?v=profile-options-1"></script>
   <script defer src="js/vpn.js?v=windows-1"></script>
   <script defer src="js/promo.js?v=header-promo-1"></script>
@@ -241,7 +241,17 @@
           Sign in to manage your VPN access and devices.
         </p>
 
-<div class="passkey-label-field"><label for="registerPasskeyName" data-i18n="passkeySignInName">Passkey name</label><input id="registerPasskeyName" class="settings-input" type="text" maxlength="80" autocomplete="off"><p data-i18n="passkeyLabelHelp">Choose a name you will recognize when signing in.</p></div>
+<div id="registerPanel" class="hidden">
+          <div class="passkey-label-field">
+            <label for="registerPasskeyName" data-i18n="passkeySignInName">Passkey name</label>
+            <input id="registerPasskeyName" class="settings-input" type="text" maxlength="80" autocomplete="off" aria-describedby="registerPasskeyHelp">
+            <p id="registerPasskeyHelp" data-i18n="registerPasskeyHelp">Helps you recognize this key when signing in.</p>
+          </div>
+          <div class="actions">
+            <button id="submitRegisterButton" class="primary" type="button" data-i18n="createPasskeyAction">Create Passkey</button>
+            <button id="cancelRegisterButton" class="secondary" type="button" data-i18n="registerBack">Back</button>
+          </div>
+        </div>
         <div
           id="signedOutMainActions"
           class="actions"

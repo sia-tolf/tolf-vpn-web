@@ -29,6 +29,17 @@ const root=path.resolve(__dirname,'../..');
  });
  await page.goto('https://vpn.tolf.is/#invite='+'x'.repeat(43));
  await page.waitForFunction(()=>!document.getElementById('signedOutCard').classList.contains('hidden'));
+
+ assert.equal(await page.locator('#registerPasskeyName').isVisible(),false);
+ const beforeRegister=requests.filter(r=>r.url.endsWith('/passkey/register/begin')).length;
+ await page.locator('#createAccountButton').click();
+ assert.equal(await page.locator('#registerPasskeyName').isVisible(),true);
+ assert.equal(await page.locator('#signedOutMainActions').isVisible(),false);
+ assert.equal(requests.filter(r=>r.url.endsWith('/passkey/register/begin')).length,beforeRegister);
+ await page.locator('#cancelRegisterButton').click();
+ assert.equal(await page.locator('#registerPasskeyName').isVisible(),false);
+ assert.equal(await page.locator('#signedOutMainActions').isVisible(),true);
+
  assert.equal(new URL(page.url()).hash,'');
  assert.equal(await page.locator('#invitationCard').isVisible(),true);
  assert.equal(await page.locator('#invitationButton').isVisible(),false);
@@ -50,6 +61,17 @@ const root=path.resolve(__dirname,'../..');
  await page.evaluate(()=>sessionStorage.clear());
  await page.goto('https://vpn.tolf.is/');
  await page.waitForFunction(()=>!document.getElementById('existingVpnCard').classList.contains('hidden'));
+
+ assert.equal(await page.locator('#registerPasskeyName').isVisible(),false);
+ const beforeRegister=requests.filter(r=>r.url.endsWith('/passkey/register/begin')).length;
+ await page.locator('#createAccountButton').click();
+ assert.equal(await page.locator('#registerPasskeyName').isVisible(),true);
+ assert.equal(await page.locator('#signedOutMainActions').isVisible(),false);
+ assert.equal(requests.filter(r=>r.url.endsWith('/passkey/register/begin')).length,beforeRegister);
+ await page.locator('#cancelRegisterButton').click();
+ assert.equal(await page.locator('#registerPasskeyName').isVisible(),false);
+ assert.equal(await page.locator('#signedOutMainActions').isVisible(),true);
+
  await page.locator('#existingVpnDetails summary').click();
  await page.locator('#existingVpnUsername').fill('user0');
  await page.locator('#existingVpnPassword').fill('private-test-value');

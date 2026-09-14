@@ -135,6 +135,7 @@ for (const input of serverInputs) {
 }
 
 function showSignedOutRecoveryCode(recoveryCode) {
+  closeRegistrationPanel();
   signedOutRecoveryCode.textContent = recoveryCode;
   signedOutRecoveryBox.classList.remove("hidden");
   signedOutMainActions.classList.add("hidden");
@@ -190,6 +191,7 @@ function setInstallLink(profileUrl) {
 }
 
 function showSignedOut() {
+  closeRegistrationPanel();
   if (typeof updateInvitationAccount === "function") updateInvitationAccount(null);
   if (typeof clearWindowsDevices === "function") clearWindowsDevices();
   loadingCard.classList.add("hidden");
@@ -283,6 +285,7 @@ function renderVpnState(vpn) {
 }
 
 function showVpn(vpn) {
+  closeRegistrationPanel();
   loadingCard.classList.add("hidden");
   signedOutCard.classList.add("hidden");
   vpnCard.classList.remove("hidden");
