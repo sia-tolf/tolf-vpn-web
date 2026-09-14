@@ -1506,3 +1506,11 @@ button:disabled { opacity: 0.55; cursor: default; }
 .windows-create-form .windows-create-actions > button { flex: 1; min-width: 0; }
 
 .windows-device-delete { display: block; width: 100%; box-sizing: border-box; margin-top: 12px; }
+
+.windows-device-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.windows-device-links > button { width: 100%; min-width: 0; height: auto; min-height: 52px; padding: 12px; white-space: normal; overflow-wrap: anywhere; }
+.windows-device-links > .windows-copy-button { background: var(--card); color: var(--text); border: 1px solid var(--border); }
+.windows-create-form select { box-sizing: border-box; width: 100%; min-width: 0; padding: 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--card); color: var(--text); font: inherit; }
+.windows-create-form > .card-description { margin: 0; }
+
+#windowsCancelButton { background: #fff; color: var(--danger); border: 1px solid var(--danger); }

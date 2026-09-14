@@ -53,6 +53,34 @@ def test_lifecycle(monkeypatch):
    assert 'id="download"' in page.text and ' hidden>' in page.text
    assert 'id="personal-link"' in page.text and 'navigator.share' in page.text
    dbbytes=Path(ctx['DB']).read_bytes(); assert b'TEST_ONLY' not in dbbytes
+   # Location is owned by a device, survives reissue, and cannot change on retry.
+   assert data['device']['server']=='riga'
+   assert c.get('/windows/capabilities').json()['servers']==['riga','moscow']
+   invalid={'requestId':str(uuid.uuid4()),'name':'Bad','server':'us'}
+   assert c.post('/windows/devices',headers=h,json=invalid).status_code==400
+   mp={'requestId':str(uuid.uuid4()),'name':'Moscow PC','server':'moscow','language':'ru'}
+   mr=c.post('/windows/devices',headers=h,json=mp);assert mr.status_code==200,mr.text
+   md=mr.json();mid=md['device']['id'];assert md['device']['server']=='moscow'
+   mu=md['profileUrl'].replace('https://api.tolf.is','')
+   assert c.post(mu+'/settings').json()['server']=='ikev2.tolf.is'
+   assert 'Москва' in c.get(mu).text
+   assert c.post('/windows/devices',headers=h,json={**mp,'server':'riga'}).status_code==409
+   reissued=c.post('/windows/devices/'+mid+'/profile',headers=h,json={'language':'ru'}).json()['profileUrl'].replace('https://api.tolf.is','')
+   assert c.post(reissued+'/settings').json()['server']=='ikev2.tolf.is'
+   # A mismatched provisioning response must never produce a profile for a different node.
+   original_provision=ctx['provision_on_riga']
+   def wrong_node(*args):
+    result=original_provision(*args)
+    return {**result,'server':'riga'} if args[0]=='profile' else result
+   ctx['provision_on_riga']=wrong_node
+   assert c.post('/windows/devices/'+mid+'/profile',headers=h,json={}).status_code==502
+   ctx['provision_on_riga']=original_provision
+   assert c.post('/windows/devices/'+mid+'/delete',headers=h,json={}).status_code==200
+   assert mid not in remote
+   # Legacy devices without a location row remain on Riga after migration.
+   with sqlite3.connect(ctx['DB']) as legacy:
+    legacy.execute('DELETE FROM windows_device_nodes WHERE device_id=?',(device,))
+   assert c.get('/windows/devices',headers=h).json()['devices'][0]['server']=='riga'
    # Reissue keeps credentials and owner. Expired packages are rejected.
    assert c.post(f'/windows/devices/{device}/profile',headers=h,json={'language':'lv'}).status_code==200
    token=url.rsplit('/',1)[1];path=directory/(token+'.json');meta=json.loads(path.read_text());meta['expiresAt']='2000-01-01T00:00:00+00:00';path.write_text(json.dumps(meta))

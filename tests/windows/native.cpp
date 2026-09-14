@@ -3,7 +3,7 @@
 #define TOLF_EMBED_TESTS
 #include "networks.cpp"
 static void Check(bool x){if(!x)throw Failure{L"TEST_ASSERT",1};}
-int wmain(){std::wstring name;bool owned=false;try{
+int wmain(){std::wstring name,moscowName;bool owned=false,moscowOwned=false;try{
  NetworkTests();
  Check(Token(L"https://api.tolf.is/windows/p/abcdefghijklmnopqrstuvwxyz123456")==L"abcdefghijklmnopqrstuvwxyz123456");
  for(auto s:{L"https://api.tolf.is.evil/windows/p/abcdefghijklmnopqrstuvwxyz123456",L"http://api.tolf.is/windows/p/abcdefghijklmnopqrstuvwxyz123456",L"https://api.tolf.is/windows/p/abcdefghijklmnopqrstuvwxyz123456?x=1",L"https://evil@api.tolf.is/windows/p/abcdefghijklmnopqrstuvwxyz123456"}){bool bad=false;try{Token(s);}catch(const Failure&){bad=true;}Check(bad);}
@@ -15,6 +15,13 @@ int wmain(){std::wstring name;bool owned=false;try{
  GUID id;Hr(CoCreateGuid(&id),L"TEST_GUID");wchar_t guid[40];StringFromGUID2(id,guid,40);name=L"TOLF CI "+std::wstring(guid);auto pb=Phonebook();Check(!Existing(pb,name,c));
  Configure(w,c,name);owned=true;Check(Existing(pb,name,c));std::puts("PASS native IKEv2 creation, IPsec policy and credential save");
  Configure(w,c,name);std::puts("PASS repeat setup without duplicate entry");
+ Settings mc;ParseSettings(LR"({"deviceId":"12345678-1234-1234-1234-123456789abc","server":"ikev2.tolf.is","username":"user_12345678123412341234123456789abc","password":"dummy!"})",mc);
+ moscowName=ProfileName(mc);Check(moscowName==L"TOLF - Moscow - "+mc.id);Check(!Existing(pb,moscowName,mc));
+ Configure(w,mc,moscowName);moscowOwned=true;Check(Existing(pb,moscowName,mc));
+ bool discovered=false;for(const auto& p:LocalProfiles())if(p.name==moscowName){Check(p.server==L"ikev2.tolf.is");Check(p.id==mc.id);discovered=true;}Check(discovered);
+ Check(RasDeleteEntryW(pb.c_str(),moscowName.c_str())==0);moscowOwned=false;
+ std::puts("PASS Moscow settings, native profile server and controller discovery");
+
  {SavedEapIdentity identity(pb,name);Check(identity.needsInteraction||identity.value!=nullptr);
  std::puts(identity.needsInteraction?"PASS fresh EAP credentials require Windows UI without failing with 703":"PASS cached EAP identity available");}
 
@@ -44,5 +51,5 @@ int wmain(){std::wstring name;bool owned=false;try{
  rollback=false;try{ConfigureRoutes(w,c,name,exclusions,0);}catch(const Failure&f){rollback=f.stage==L"TEST_ROUTE_ROLLBACK";}Check(rollback);Check(!Existing(pb,name,c));Check(SavedNetworks(c.id).empty());std::puts("PASS rollback of new profile with route failure");
  bool absent=false;try{ConfigureRoutes(w,c,name,{},-1,true);}catch(const Failure& f){absent=f.code==ERROR_CANNOT_FIND_PHONEBOOK_ENTRY;}Check(absent);Check(!Existing(pb,name,c));
  std::puts("PASS settings cannot recreate a removed profile");return 0;
- }catch(const Failure&f){std::fwprintf(stderr,L"FAIL %ls: %lu (0x%08lx)\n",f.stage.c_str(),f.code,f.code);if(owned)RasDeleteEntryW(Phonebook().c_str(),name.c_str());return 1;}catch(...){std::puts("FAIL unexpected exception");return 1;}}
+ }catch(const Failure&f){std::fwprintf(stderr,L"FAIL %ls: %lu (0x%08lx)\n",f.stage.c_str(),f.code,f.code);if(moscowOwned)RasDeleteEntryW(Phonebook().c_str(),moscowName.c_str());if(owned)RasDeleteEntryW(Phonebook().c_str(),name.c_str());return 1;}catch(...){std::puts("FAIL unexpected exception");return 1;}}
 

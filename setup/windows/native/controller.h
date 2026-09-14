@@ -9,7 +9,7 @@ inline std::wstring KnownPath(REFKNOWNFOLDERID id) {
     PWSTR value=nullptr; Hr(SHGetKnownFolderPath(id,KF_FLAG_CREATE,nullptr,&value),L"SHORTCUT");
     std::wstring result=value; CoTaskMemFree(value); return result;
 }
-inline std::wstring ControllerPath() { return KnownPath(FOLDERID_LocalAppData)+L"\\TOLF\\VPN\\2.4.1\\TOLF-VPN.exe"; }
+inline std::wstring ControllerPath() { return KnownPath(FOLDERID_LocalAppData)+L"\\TOLF\\VPN\\2.5.0\\TOLF-VPN.exe"; }
 inline void Shortcut(const std::wstring& path,const std::wstring& exe,const wchar_t* args) {
     ComPtr<IShellLinkW> link; Hr(CoCreateInstance(CLSID_ShellLink,nullptr,CLSCTX_INPROC_SERVER,IID_PPV_ARGS(&link)),L"SHORTCUT");
     Hr(link->SetPath(exe.c_str()),L"SHORTCUT"); Hr(link->SetArguments(args),L"SHORTCUT");
@@ -55,8 +55,8 @@ inline std::vector<LocalProfile> LocalProfiles() {
     std::vector<LocalProfile> result;
     for(DWORD i=0;i<count;i++) {
         std::wstring name=entries[i].szEntryName; std::wsmatch match;
-        if(!std::regex_match(name,match,std::wregex(L"TOLF - Riga - ([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})")))continue;
-        Settings c;c.id=match[1];c.server=L"ikev2-riga.tolf.is";
+        if(!std::regex_match(name,match,std::wregex(L"TOLF - (Riga|Moscow) - ([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})")))continue;
+        Settings c;c.id=match[2];c.server=match[1]==L"Moscow"?L"ikev2.tolf.is":L"ikev2-riga.tolf.is";
         try{if(Existing(pb,name,c))result.push_back({c.id,name,c.server});}catch(const Failure&){continue;}
     }
     return result;

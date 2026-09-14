@@ -1,4 +1,11 @@
 I18N.lv = {
+  windowsServerHelpReady: "Izvēlieties VPN ieejas mezglu šim datoram. Izvēle tiek saglabāta ierīcei.",
+  windowsServerMoscow: "Maskava",
+  windowsServerLabel: "VPN mezgls",
+  windowsServerRiga: "Rīga",
+  windowsServerMoscowUnavailable: "Maskava — vēl nav pieejama Windows",
+  windowsServerUsUnavailable: "ASV — vēl nav pieejamas Windows",
+  windowsServerHelp: "Šis mezgls attiecas uz šo Windows datoru. Pašlaik Windows atbalsta tikai Rīgu.",
   registerBack: "Atpakaļ",
   createPasskeyAction: "Izveidot Passkey",
   registerPasskeyHelp: "Palīdz atpazīt šo atslēgu, piesakoties vietnē. Nosaukumam tiks pievienots TOLF.",
@@ -253,7 +260,7 @@ I18N.lv = {
 Object.assign(I18N.lv, {
   "windowsTitle": "Windows ierīces",
   "windowsDescription": "Sagatavojiet atsevišķu VPN savienojumu Windows datoram. Apple un Android piekļuve paliek neatkarīga.",
-  "windowsRoute": "Ieeja caur Rīgu: Krievijas adreses caur Maskavu, pārējā datplūsma caur Rīgu. DNS piešķir VPN serveris.",
+  "windowsRoute": "Katram Windows datoram var izvēlēties VPN mezglu. DNS un maršrutēšanu nosaka izvēlētais VPN serveris.",
   "windowsName": "Datora nosaukums",
   "windowsAdd": "Pievienot Windows ierīci",
   "windowsOpen": "Atvērt Windows iestatīšanu",

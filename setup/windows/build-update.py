@@ -1,7 +1,7 @@
 from pathlib import Path
 import base64,hashlib,zlib
 root=Path(__file__).resolve().parent
-payloads={'tolf_windows.py':(root/'tolf_windows.py').read_bytes(),'TOLF-Setup.exe':(root/'dist/TOLF-Setup.exe').read_bytes()}
+payloads={'tolf-windows-install.ps1':(root/'tolf-windows-install.ps1').read_bytes(),'tolf_windows.py':(root/'tolf_windows.py').read_bytes(),'TOLF-Setup.exe':(root/'dist/TOLF-Setup.exe').read_bytes()}
 s=(root/'update-template.py').read_text()
 s=s.replace('PAYLOADS = {}  # Replaced by build-update.py','PAYLOADS = '+repr({name:base64.b64encode(zlib.compress(data,9)).decode() for name,data in payloads.items()}))
 s=s.replace('HASHES = {}','HASHES = '+repr({name:hashlib.sha256(data).hexdigest() for name,data in payloads.items()}))

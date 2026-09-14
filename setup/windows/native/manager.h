@@ -9,6 +9,7 @@ static UINT scale=96,taskbarCreated=0;static const UINT Finished=WM_APP+20,Tray=
 static HICON icon;static int cached=-2;static bool lastConnected=false,lastActive=false;
 struct Result {std::wstring error;bool saved=false;};
 static int Px(int x){return MulDiv(x,scale,96);}
+static const wchar_t* NodeLabel(const std::wstring& host){return host==L"ikev2.tolf.is"?L(L"Moscow",L"Москва",L"Maskava"):L(L"Riga",L"Рига",L"Rīga");}
 static int Selection(){auto i=SendMessageW(select,CB_GETCURSEL,0,0);return i>=0&&size_t(i)<profiles.size()?int(i):-1;}
 static void ErrorText(const Failure& f) {
     auto text=Error(f);if(f.stage==L"CONNECT"||f.stage==L"DISCONNECT"){
@@ -69,6 +70,7 @@ static void Refresh(bool fields=false) {
                 info+=L"\r\nDNS: "+(dns.empty()?std::wstring(L(L"Assigned by VPN server",L"Назначается VPN-сервером",L"Piešķir VPN serveris")):dns);
                 info+=L"\r\n"+std::wstring(L(L"Account: current Windows user",L"Учётная запись: текущий пользователь Windows",L"Konts: pašreizējais Windows lietotājs"));
             }
+            SetWindowTextW(location,i>=0?NodeLabel(profiles[i].server):L"");
             SetWindowTextW(details,info.c_str());cached=i;
         }
         lastConnected=connected;lastActive=active;
@@ -97,7 +99,7 @@ static void ActivateWindow(bool widget) {compact=widget;Layout();ShowWindow(wnd,
 static void ReloadProfiles() {
     if(working||dirty)return;auto old=Selection();std::wstring name=old>=0?profiles[old].name:L"";
     profiles=LocalProfiles();SendMessageW(select,CB_RESETCONTENT,0,0);int chosen=0;
-    for(size_t i=0;i<profiles.size();i++){auto label=profiles.size()==1?std::wstring(L(L"Riga",L"Рига",L"Rīga")):L"Riga · "+profiles[i].id.substr(0,8);SendMessageW(select,CB_ADDSTRING,0,reinterpret_cast<LPARAM>(label.c_str()));if(profiles[i].name==name)chosen=int(i);}
+    for(size_t i=0;i<profiles.size();i++){auto label=std::wstring(NodeLabel(profiles[i].server));if(profiles.size()>1)label+=L" · "+profiles[i].id.substr(0,8);SendMessageW(select,CB_ADDSTRING,0,reinterpret_cast<LPARAM>(label.c_str()));if(profiles[i].name==name)chosen=int(i);}
     SendMessageW(select,CB_SETCURSEL,chosen,0);cached=-2;Refresh(true);
 }
 static LRESULT CALLBACK Proc(HWND h,UINT msg,WPARAM w,LPARAM l) {
@@ -169,14 +171,14 @@ static LRESULT CALLBACK Proc(HWND h,UINT msg,WPARAM w,LPARAM l) {
     }return DefWindowProcW(h,msg,w,l);
 }
 inline int Run(HINSTANCE instance,bool widget,bool hidden) {
-    HANDLE mutex=CreateMutexW(nullptr,FALSE,L"Local\\TOLF-VPN-Control-2.4.1");if(!mutex)return 1;
+    HANDLE mutex=CreateMutexW(nullptr,FALSE,L"Local\\TOLF-VPN-Control-2.5.0");if(!mutex)return 1;
     if(GetLastError()==ERROR_ALREADY_EXISTS){HWND old=FindWindowW(L"TolfVpnController",nullptr);if(old){if(!hidden){AllowSetForegroundWindow(ASFW_ANY);PostMessageW(old,Activate,widget?1:0,0);}else PostMessageW(old,WM_TIMER,1,0);}CloseHandle(mutex);return 0;}
     compact=widget;HRESULT init=CoInitializeEx(nullptr,COINIT_APARTMENTTHREADED);if(FAILED(init)){CloseHandle(mutex);return 1;}
     WSADATA ws={};int wsa=WSAStartup(MAKEWORD(2,2),&ws);if(wsa){CoUninitialize();CloseHandle(mutex);return 1;}
     HRESULT sec=CoInitializeSecurity(nullptr,-1,nullptr,nullptr,RPC_C_AUTHN_LEVEL_DEFAULT,RPC_C_IMP_LEVEL_IMPERSONATE,nullptr,EOAC_NONE,nullptr);
     if(FAILED(sec)&&sec!=RPC_E_TOO_LATE){WSACleanup();CoUninitialize();CloseHandle(mutex);return 1;}
     WNDCLASSW cls={};cls.hInstance=instance;cls.lpfnWndProc=Proc;cls.lpszClassName=L"TolfVpnController";cls.hCursor=LoadCursorW(nullptr,IDC_ARROW);RegisterClassW(&cls);
-    HWND h=nullptr;try{h=CreateWindowExW(0,cls.lpszClassName,L"TOLF VPN 2.4.1",WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX,CW_USEDEFAULT,CW_USEDEFAULT,540,640,nullptr,nullptr,instance,nullptr);}catch(const Failure& f){MessageBoxW(nullptr,Error(f).c_str(),L"TOLF VPN",MB_OK|MB_ICONERROR);}catch(...){MessageBoxW(nullptr,L(L"Could not open TOLF settings.",L"Не удалось открыть настройки TOLF.",L"Neizdevās atvērt TOLF iestatījumus."),L"TOLF VPN",MB_OK|MB_ICONERROR);}
+    HWND h=nullptr;try{h=CreateWindowExW(0,cls.lpszClassName,L"TOLF VPN 2.5.0",WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX,CW_USEDEFAULT,CW_USEDEFAULT,540,640,nullptr,nullptr,instance,nullptr);}catch(const Failure& f){MessageBoxW(nullptr,Error(f).c_str(),L"TOLF VPN",MB_OK|MB_ICONERROR);}catch(...){MessageBoxW(nullptr,L(L"Could not open TOLF settings.",L"Не удалось открыть настройки TOLF.",L"Neizdevās atvērt TOLF iestatījumus."),L"TOLF VPN",MB_OK|MB_ICONERROR);}
     if(h){if(!hidden||!trayPresent)ShowWindow(h,SW_SHOW);MSG msg;while(GetMessageW(&msg,nullptr,0,0)>0){if(!IsDialogMessageW(h,&msg)){TranslateMessage(&msg);DispatchMessageW(&msg);}}}
     WSACleanup();CoUninitialize();CloseHandle(mutex);return h?0:1;
 }

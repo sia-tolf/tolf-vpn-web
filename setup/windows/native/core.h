@@ -47,14 +47,19 @@ inline void ParseSettings(const std::wstring& text, Settings& c){
  struct Wipe{std::map<std::wstring,std::wstring>&m;~Wipe(){for(auto&kv:m)if(!kv.second.empty())SecureZeroMemory(kv.second.data(),kv.second.size()*2);}}wipe{m};
  if(m.size()!=4||!m.count(L"deviceId")||!m.count(L"server")||!m.count(L"username")||!m.count(L"password"))throw Failure{L"SETTINGS",1};
  c.id=m[L"deviceId"];c.server=m[L"server"];c.user=m[L"username"];c.password.value=m[L"password"];
- if(!std::regex_match(c.id,std::wregex(L"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"))||c.server!=L"ikev2-riga.tolf.is")throw Failure{L"SETTINGS",2};
+ if(!std::regex_match(c.id,std::wregex(L"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"))||(c.server!=L"ikev2-riga.tolf.is"&&c.server!=L"ikev2.tolf.is"))throw Failure{L"SETTINGS",2};
  std::wstring plain;for(auto ch:c.id)if(ch!=L'-')plain+=ch;
  if(c.user!=L"user_"+plain||c.password.value.empty()||c.password.value.size()>256)throw Failure{L"SETTINGS",3};
  for(wchar_t ch:c.password.value)if(ch<32||ch==127)throw Failure{L"SETTINGS",4};
 }
+inline std::wstring ProfileName(const Settings& c) {
+ if(c.server==L"ikev2-riga.tolf.is")return L"TOLF - Riga - "+c.id;
+ if(c.server==L"ikev2.tolf.is")return L"TOLF - Moscow - "+c.id;
+ throw Failure{L"SETTINGS",2};
+}
 struct Http {HINTERNET h;explicit Http(HINTERNET v):h(v){Win(h!=nullptr,L"NETWORK");}~Http(){WinHttpCloseHandle(h);}operator HINTERNET()const{return h;}};
 inline void Fetch(const std::wstring& token,Settings& c){
- Http session(WinHttpOpen(L"TOLF-Setup/2.4.1",WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY,WINHTTP_NO_PROXY_NAME,WINHTTP_NO_PROXY_BYPASS,0));
+ Http session(WinHttpOpen(L"TOLF-Setup/2.5.0",WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY,WINHTTP_NO_PROXY_NAME,WINHTTP_NO_PROXY_BYPASS,0));
  Win(WinHttpSetTimeouts(session,15000,15000,15000,15000),L"NETWORK");
  DWORD tls=WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2;Win(WinHttpSetOption(session,WINHTTP_OPTION_SECURE_PROTOCOLS,&tls,sizeof(tls)),L"NETWORK");
  Http host(WinHttpConnect(session,L"api.tolf.is",INTERNET_DEFAULT_HTTPS_PORT,0));

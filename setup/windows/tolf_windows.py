@@ -18,6 +18,7 @@ from fastapi import HTTPException, Request
 from fastapi.responses import HTMLResponse, Response
 
 VERSION = '1.0'
+NODES = {'riga': ('ikev2-riga.tolf.is', 'sr'), 'moscow': ('ikev2.tolf.is', '')}
 INSTALLER = Path(__file__).with_name('TOLF-Setup.exe')
 CTX = None
 TOKEN = re.compile(r'[A-Za-z0-9_-]{32}')
@@ -46,6 +47,8 @@ def initialize():
             id TEXT PRIMARY KEY, user_id TEXT NOT NULL, name TEXT NOT NULL,
             username TEXT, state TEXT NOT NULL, created_at TEXT NOT NULL)''')
         c.execute('CREATE INDEX IF NOT EXISTS windows_devices_owner ON windows_devices(user_id)')
+        # Separate table preserves compatibility with older API rollback versions.
+        c.execute('CREATE TABLE IF NOT EXISTS windows_device_nodes (device_id TEXT PRIMARY KEY, server TEXT NOT NULL)')
 
 
 def now():
@@ -61,7 +64,7 @@ def identity(value):
 
 def owned(user_id, device_id):
     with db() as c:
-        row = c.execute('SELECT * FROM windows_devices WHERE user_id=? AND id=?',
+        row = c.execute('SELECT d.*, COALESCE(n.server, "riga") AS server FROM windows_devices d LEFT JOIN windows_device_nodes n ON n.device_id=d.id WHERE d.user_id=? AND d.id=?',
                         (user_id, identity(device_id))).fetchone()
     if row is None:
         raise HTTPException(404, 'Windows device not found')
@@ -71,7 +74,7 @@ def owned(user_id, device_id):
 
 
 def public(row):
-    return {k: row[k] for k in ('id', 'name', 'username', 'state', 'created_at')}
+    return {k: row[k] for k in ('id', 'name', 'username', 'state', 'created_at', 'server')}
 
 
 def invalidate(device_id):
@@ -118,9 +121,11 @@ def package(row, credentials, lang):
     username, password = credentials.get('username'), credentials.get('password')
     if username != expected or (row['username'] and row['username'] != username) or not CTX['tolf_profiles']._valid_secret(password):
         raise HTTPException(502, 'Invalid Windows credentials from VPN server')
-    if credentials.get('server') != 'riga' or credentials.get('localId') != 'sr':
+    node = row.get('server', 'riga')
+    host, local_id = NODES[node]
+    if credentials.get('server') != node or credentials.get('localId') != local_id:
         raise HTTPException(502, 'Invalid Windows route from VPN server')
-    settings = {'deviceId': row['id'], 'server': 'ikev2-riga.tolf.is',
+    settings = {'deviceId': row['id'], 'server': host,
                 'username': username, 'password': password}
     output = io.BytesIO()
     template = Path(__file__).with_name('tolf-windows-install.ps1').read_text()
@@ -134,7 +139,7 @@ def package(row, credentials, lang):
     token = secrets.token_urlsafe(24)
     content = output.getvalue()
     metadata = {'platform': 'windows', 'deviceId': row['id'], 'name': row['name'],
-                'username': username, 'language': lang, 'expiresAt': (now()+timedelta(hours=24)).isoformat(),
+                'username': username, 'server': node, 'language': lang, 'expiresAt': (now()+timedelta(hours=24)).isoformat(),
                 'sha256': hashlib.sha256(content).hexdigest()}
     archive_path = profiles.PROFILE_DIR / (token + '.windows.zip')
     meta_path = profiles.PROFILE_DIR / (token + '.json')
@@ -181,13 +186,13 @@ def install(app, context):
 
     @app.get('/windows/capabilities')
     def capabilities():
-        return {'version': VERSION, 'servers': ['riga'], 'routing': 'sr', 'installerVersion': '2.4.1'}
+        return {'version': VERSION, 'servers': list(NODES), 'routing': 'sr', 'installerVersion': '2.5.0'}
 
     @app.get('/windows/devices')
     def devices(request: Request):
         user_id = CTX['authenticated_user_id'](request)
         with db() as c:
-            rows = c.execute("SELECT * FROM windows_devices WHERE user_id=? AND state!='deleted' ORDER BY created_at,id", (user_id,)).fetchall()
+            rows = c.execute("SELECT d.*, COALESCE(n.server, 'riga') AS server FROM windows_devices d LEFT JOIN windows_device_nodes n ON n.device_id=d.id WHERE d.user_id=? AND d.state!='deleted' ORDER BY d.created_at,d.id", (user_id,)).fetchall()
         return Response(json.dumps({'devices': [public(r) for r in rows]}), media_type='application/json', headers=HEADERS)
 
     @app.post('/windows/devices')
@@ -195,6 +200,9 @@ def install(app, context):
         user_id = CTX['authenticated_user_id'](request)
         lang = language(payload)
         request_id = identity(payload.get('requestId'))
+        node = payload.get('server', 'riga')
+        if not isinstance(node, str) or node not in NODES:
+            raise HTTPException(400, 'Unsupported Windows VPN location')
         name = payload.get('name', '')
         if not isinstance(name, str) or not 1 <= len(name.strip()) <= 64 or any(ord(ch)<32 for ch in name):
             raise HTTPException(400, 'Enter a device name (1–64 characters)')
@@ -209,11 +217,14 @@ def install(app, context):
                         raise HTTPException(409, 'Windows device limit reached')
                     c.execute('INSERT INTO windows_devices VALUES (?,?,?,?,?,?)',
                               (device_id, user_id, name.strip(), None, 'provisioning', now().isoformat()))
+                    c.execute('INSERT INTO windows_device_nodes VALUES (?,?)', (device_id, node))
             row = owned(user_id, device_id)
+            if row['server'] != node:
+                raise HTTPException(409, 'This device already belongs to another VPN location')
             if row['state'] == 'deleting':
                 raise HTTPException(409, 'Device deletion is pending')
             CTX['provision_on_riga']('grant-moscow', device_id)
-            credentials = CTX['provision_on_riga']('create', device_id, 'riga', 'sr')
+            credentials = CTX['provision_on_riga']('create', device_id, row['server'], NODES[row['server']][1])
             url = package(row, credentials, lang)
             with db() as c:
                 c.execute("UPDATE windows_devices SET state='active',username=? WHERE id=? AND user_id=?", (credentials['username'], device_id, user_id))
@@ -230,7 +241,7 @@ def install(app, context):
             action = 'profile' if row['state'] == 'active' else 'create'
             if action == 'create':
                 CTX['provision_on_riga']('grant-moscow', row['id'])
-            credentials = CTX['provision_on_riga'](action, row['id'], 'riga', 'sr')
+            credentials = CTX['provision_on_riga'](action, row['id'], row['server'], NODES[row['server']][1])
             url = package(row, credentials, lang)
             with db() as c:
                 c.execute("UPDATE windows_devices SET state='active',username=? WHERE id=? AND user_id=?", (credentials['username'], row['id'], user_id))
@@ -269,7 +280,9 @@ def install(app, context):
     def page(token: str):
         metadata, _ = load(token)
         lang = metadata['language']
-        labels = TEXT[lang]
+        labels = list(TEXT[lang])
+        if metadata.get('server', 'riga') == 'moscow':
+            labels[6] = {'en': 'VPN entry point: Moscow. DNS and routing are assigned by the VPN server.', 'ru': 'Узел VPN: Москва. DNS и маршрутизация назначаются VPN-сервером.', 'lv': 'VPN mezgls: Maskava. DNS un maršrutēšanu piešķir VPN serveris.'}[lang]
         copy = {
             'en': ['Send to computer', 'Copy personal link', 'Personal setup link', 'Open this link on your Windows computer to set up TOLF VPN.', 'Install for Windows', 'Open the downloaded file, load settings and optionally enter networks outside VPN. Choose “Save without connecting” or “Save and connect”.', 'Link copied', 'Copy the link from the field below.', 'Keep this personal link private.'],
             'ru': ['Отправить на компьютер', 'Скопировать ссылку', 'Персональная ссылка настройки', 'Откройте эту ссылку на компьютере Windows, чтобы настроить TOLF VPN.', 'Установить для Windows', 'Откройте скачанный файл, загрузите настройки и при необходимости укажите сети вне VPN. Выберите «Сохранить без подключения» или «Сохранить и подключиться».', 'Ссылка скопирована', 'Скопируйте ссылку из поля ниже.', 'Не передавайте персональную ссылку посторонним.'],
