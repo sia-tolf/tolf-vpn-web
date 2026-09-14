@@ -133,3 +133,31 @@ by London: execute the release's updater there, then download the new installer.
 
 - https://learn.microsoft.com/en-us/previous-versions/windows/desktop/vpnclientpsprov/add-ps-vpnconnectionroute
 - https://learn.microsoft.com/en-us/previous-versions/windows/desktop/vpnclientpsprov/remove-ps-vpnconnectionroute
+
+
+## Native setup and controller 2.3
+
+The installer creates per-user Desktop and Start Menu shortcuts: **TOLF VPN**
+opens settings; **TOLF VPN Widget** opens a compact native Win32 control panel.
+The versioned application lives in `%LOCALAPPDATA%/TOLF/VPN/2.3.0` and no longer
+needs a setup token for everyday use. It discovers matching existing per-user
+TOLF Riga IKEv2/EAP26 profiles. Other VPN profiles are excluded.
+
+Connect uses native RAS and credentials already stored by Windows. Only a
+confirmed RAS connected state closes the setup window; failure leaves it open.
+The controller remains available in the notification area after successful setup.
+The widget can connect/disconnect the selected profile, open settings, and be
+pinned above other windows. Closing its window hides it to the tray; Exit closes
+the controller without disconnecting an established VPN. Launch at Windows sign-in
+is optional, off by default, and implemented as a per-user Startup shortcut.
+
+Settings show the actual profile server, IKEv2 protocol and assigned DNS when the
+interface is available. DNS and server selection remain server-managed. Saved
+IPv4 exclusions can be edited while disconnected without fetching a link or
+rewriting credentials. Unsaved edits disable profile switching and dialing.
+A one-second RAS status poll observes connections changed outside the controller.
+No global routes, service, scheduled task, WebView or external runtime is installed.
+
+Native integration tests include settings-only route updates preserving stored
+credentials and refusing to recreate a deleted profile. Live VPN dialing and
+Windows 10/11 visual checks still require an interactive Windows environment.

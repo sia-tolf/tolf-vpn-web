@@ -1,4 +1,4 @@
-#include "../../setup/windows/native/routes.h"
+#include "../../setup/windows/native/controller.h"
 #include <cstdio>
 #define TOLF_EMBED_TESTS
 #include "networks.cpp"
@@ -23,10 +23,23 @@ int wmain(){std::wstring name;bool owned=false;try{
  bool routeRollback=false;try{ConfigureRoutes(w,c,name,CheckedNetworks(L"172.20.0.0/16"),0);}catch(const Failure&f){routeRollback=f.stage==L"TEST_ROUTE_ROLLBACK";}Check(routeRollback);checkFlags(false);Check(SavedNetworks(c.id)==NetworkText(exclusions));
  ConfigureRoutes(w,c,name,{});checkFlags(true);Check(SavedNetworks(c.id).empty());
  ConfigureRoutes(w,c,name,{});std::puts("PASS route rollback and return to full tunnel");
+ RASCREDENTIALSW before={};before.dwSize=sizeof(before);before.dwMask=RASCM_UserName|RASCM_Password;
+ Check(RasGetCredentialsW(pb.c_str(),name.c_str(),&before)==0);
+ Settings local;local.id=c.id;local.server=c.server;local.user=L"must-not-be-written";
+ ConfigureRoutes(w,local,name,exclusions,-1,true);checkFlags(false);
+ RASCREDENTIALSW after={};after.dwSize=sizeof(after);after.dwMask=RASCM_UserName|RASCM_Password;
+ Check(RasGetCredentialsW(pb.c_str(),name.c_str(),&after)==0);
+ Check(std::wstring(before.szUserName)==after.szUserName);Check((before.dwMask & RASCM_Password)==(after.dwMask & RASCM_Password));
+ SecureZeroMemory(&before,sizeof(before));SecureZeroMemory(&after,sizeof(after));
+ ConfigureRoutes(w,local,name,{},-1,true);checkFlags(true);
+ std::puts("PASS settings-only edit preserves Windows credentials");
+
  RegDeleteTreeW(HKEY_CURRENT_USER,RoutesKey(c.id).c_str());
  Settings wrong;wrong.server=L"unexpected.example";bool conflict=false;try{Existing(pb,name,wrong);}catch(const Failure&f){conflict=f.stage==L"NAME_CONFLICT";}Check(conflict);std::puts("PASS conflicting entry rejection");
  DWORD r=RasDeleteEntryW(pb.c_str(),name.c_str());if(r)throw Failure{L"TEST_DELETE",r};owned=false;
  bool rollback=false;try{Configure(w,c,name,true);}catch(const Failure&f){rollback=f.stage==L"TEST_ROLLBACK";}Check(rollback);Check(!Existing(pb,name,c));std::puts("PASS rollback of newly created connection");
- rollback=false;try{ConfigureRoutes(w,c,name,exclusions,0);}catch(const Failure&f){rollback=f.stage==L"TEST_ROUTE_ROLLBACK";}Check(rollback);Check(!Existing(pb,name,c));Check(SavedNetworks(c.id).empty());std::puts("PASS rollback of new profile with route failure");return 0;
+ rollback=false;try{ConfigureRoutes(w,c,name,exclusions,0);}catch(const Failure&f){rollback=f.stage==L"TEST_ROUTE_ROLLBACK";}Check(rollback);Check(!Existing(pb,name,c));Check(SavedNetworks(c.id).empty());std::puts("PASS rollback of new profile with route failure");
+ bool absent=false;try{ConfigureRoutes(w,c,name,{},-1,true);}catch(const Failure& f){absent=f.code==ERROR_CANNOT_FIND_PHONEBOOK_ENTRY;}Check(absent);Check(!Existing(pb,name,c));
+ std::puts("PASS settings cannot recreate a removed profile");return 0;
  }catch(const Failure&f){std::fwprintf(stderr,L"FAIL %ls: %lu (0x%08lx)\n",f.stage.c_str(),f.code,f.code);if(owned)RasDeleteEntryW(Phonebook().c_str(),name.c_str());return 1;}catch(...){std::puts("FAIL unexpected exception");return 1;}}
 
