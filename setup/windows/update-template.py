@@ -40,8 +40,8 @@ def main():
         for i in range(12):
             try:
                 with urllib.request.urlopen('https://api.tolf.is/windows/capabilities',timeout=5) as response: data=json.load(response)
-                if data.get('installerVersion')=='2.1.0':
-                    print('OK: Native Windows installer 2.1 enabled. Test build is unsigned.'); return
+                if data.get('installerVersion')=='2.2.0':
+                    print('OK: Native Windows installer 2.2 enabled. Test build is unsigned.'); return
             except Exception: pass
             time.sleep(2)
         raise RuntimeError('API health check failed')
