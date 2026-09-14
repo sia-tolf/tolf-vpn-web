@@ -2,7 +2,7 @@
 (() => {
  const card=document.getElementById('vpnCard');if(!card)return;
  const labels={en:'Administration',ru:'Администрирование',lv:'Administrēšana'};
- const link=document.createElement('a');link.href='/admin/';link.className='button-link secondary hidden';
+ const link=document.createElement('a');link.href='/admin/v1.3.html';link.className='button-link secondary hidden';
  link.style.cssText='width:fit-content;margin:0 0 18px;min-height:40px';
  const heading=card.querySelector('.card-topline');if(!heading)return;heading.insertAdjacentElement('afterend',link);
  let epoch=0,visible=false;
