@@ -50,10 +50,11 @@ inline void SplitIPv4(const std::wstring& pb,const std::wstring& name,bool split
 // Configure only a disconnected profile. Windows owns route activation/deactivation;
 // no physical-interface routes or global defaults are written by this installer.
 inline void ConfigureRoutes(Wmi& w, const Settings& c, const std::wstring& name,
-                            const std::vector<Network4>& excluded, int failAfter = -1) {
+                            const std::vector<Network4>& excluded, int failAfter = -1, bool routesOnly = false) {
     auto pb = Phonebook();
     if (Connected(pb, name, true)) throw Failure{L"DISCONNECT_FIRST", ERROR_BUSY};
     bool existed = Existing(pb, name, c);
+    if (routesOnly && !existed) throw Failure{L"VPN_CONFIGURATION", ERROR_CANNOT_FIND_PHONEBOOK_ENTRY};
     auto previous = existed ? CheckedNetworks(SavedNetworks(c.id)) : std::vector<Network4>{};
     auto oldRoutes = TunnelPrefixes(previous), newRoutes = TunnelPrefixes(excluded);
     std::vector<std::wstring> removed, added;
@@ -66,7 +67,8 @@ inline void ConfigureRoutes(Wmi& w, const Settings& c, const std::wstring& name,
     bool configured=false, splitAttempted=false;
     auto checkpoint=[&] { if(failAfter==0)throw Failure{L"TEST_ROUTE_ROLLBACK",1};if(failAfter>0)--failAfter; };
     try {
-        Configure(w,c,name); configured=true;
+        if (!routesOnly) Configure(w,c,name);
+        configured=true;
         for(const auto& route:oldRoutes) if(std::find(newRoutes.begin(),newRoutes.end(),route)==newRoutes.end()) {
             w.route(name,route,false);removed.push_back(route);checkpoint();
         }
@@ -88,3 +90,4 @@ inline void ConfigureRoutes(Wmi& w, const Settings& c, const std::wstring& name,
         std::rethrow_exception(original);
     }
 }
+

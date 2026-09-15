@@ -14,6 +14,7 @@ static const wchar_t* L(const wchar_t*en,const wchar_t*ru,const wchar_t*lv){retu
 static int px(int n){return MulDiv(n,dpi,96);}
 static std::wstring Error(const Failure&f){
  std::wstring message;
+ if(f.stage==L"CONNECT"&&f.code==ERROR_CANCELLED)return L(L"Connection cancelled. Settings are saved.",L"Подключение отменено. Настройки сохранены.",L"Savienojums atcelts. Iestatījumi saglabāti.");
  if(f.stage==L"LINK")message=L(L"Paste the personal setup link from TOLF.",L"Вставьте персональную ссылку настройки с сайта TOLF.",L"Ielīmējiet personīgo iestatīšanas saiti no TOLF.");
  else if(f.stage==L"NETWORK")message=L(L"Could not retrieve settings. Check the Internet connection or create a new setup link.",L"Не удалось получить настройки. Проверьте интернет или создайте новую ссылку настройки.",L"Neizdevās saņemt iestatījumus. Pārbaudiet internetu vai izveidojiet jaunu iestatīšanas saiti.");
  else if(f.stage==L"VPN_SERVICE"||f.stage==L"WINDOWS_COMPONENTS")message=L(L"A required Windows VPN component is unavailable or disabled. Ask your administrator to restore it.",L"Нужный системный компонент Windows недоступен или отключён. Обратитесь к администратору для его восстановления.",L"Nepieciešamais Windows komponents nav pieejams vai ir atspējots. Sazinieties ar administratoru.");
@@ -24,6 +25,9 @@ static std::wstring Error(const Failure&f){
  else if(f.stage==L"ROUTE_CONFLICT")message=L(L"This profile has routing settings not managed by TOLF. Its routes were not changed.",L"В профиле есть настройки маршрутизации, заданные вне TOLF. Маршруты не изменены.",L"Profilā ir ārpus TOLF mainīti maršrutēšanas iestatījumi. Maršruti nav mainīti.");
  else if(f.stage==L"ROUTE_SETTINGS")message=L(L"Could not read or save this device's network preferences.",L"Не удалось прочитать или сохранить список сетей этого устройства.",L"Neizdevās nolasīt vai saglabāt ierīces tīklu iestatījumus.");
  else if(f.stage==L"ROUTE_ROLLBACK")message=L(L"Could not restore the previous VPN routes. Do not connect until the profile has been checked.",L"Не удалось восстановить прежние маршруты VPN. Перед подключением необходимо проверить профиль.",L"Neizdevās atjaunot iepriekšējos VPN maršrutus. Pirms savienošanās pārbaudiet profilu.");
+ else if(f.stage==L"SHORTCUT")message=L(L"VPN settings were saved, but the TOLF shortcuts could not be installed. Close the old TOLF widget and try saving again.",L"Настройки VPN сохранены, но не удалось установить ярлыки TOLF. Закройте прежний виджет TOLF и повторите сохранение.",L"VPN iestatījumi saglabāti, bet TOLF saīsnes neizdevās instalēt. Aizveriet iepriekšējo logrīku un mēģiniet vēlreiz.");
+ else if(f.stage==L"CREDENTIALS")message=L(L"Windows could not read or save VPN credentials.",L"Windows не удалось прочитать или сохранить учётные данные VPN.",L"Windows nevarēja nolasīt vai saglabāt VPN akreditācijas datus.");
+ else if(f.stage==L"CONNECT")message=L(L"VPN settings saved. Connection failed.",L"Настройки VPN сохранены. Подключиться не удалось.",L"VPN iestatījumi saglabāti. Savienojums neizdevās.");
  else message=L(L"Setup could not be completed.",L"Не удалось завершить настройку.",L"Neizdevās pabeigt iestatīšanu.");
  if(f.stage!=L"LINK")message+=L"\r\n"+f.stage+L": "+std::to_wstring(f.code);
  return message;
@@ -31,14 +35,15 @@ static std::wstring Error(const Failure&f){
 
 
 static std::wstring Text(HWND h){std::vector<wchar_t> value(GetWindowTextLengthW(h)+1);GetWindowTextW(h,value.data(),int(value.size()));return value.data();}
+#include "manager.h"
 static void Visible(HWND h,bool show){ShowWindow(h,show?SW_SHOW:SW_HIDE);}
 static void ResizeClient(int width,int height){RECT r={0,0,px(width),px(height)};DWORD style=DWORD(GetWindowLongPtrW(window,GWL_STYLE));AdjustWindowRectExForDpi(&r,style,FALSE,0,dpi);SetWindowPos(window,nullptr,0,0,r.right-r.left,r.bottom-r.top,SWP_NOMOVE|SWP_NOZORDER);}
 static void Render(){
  bool loaded=bool(settings);
  for(HWND h:{networkLabel,networkEdit,networkHelp,rdpHelp,saveButton,connectButton})Visible(h,loaded);
- Visible(loadButton,!loaded);Visible(introText,!loaded);Visible(linkLabel,!loaded&&!hasFileToken);Visible(linkEdit,!loaded&&!hasFileToken);
+ Visible(loadButton,!loaded);Visible(introText,!loaded&&hasFileToken);Visible(linkLabel,!loaded&&!hasFileToken);Visible(linkEdit,!loaded&&!hasFileToken);
  SetWindowTextW(stepLabel,loaded?L(L"SETTINGS",L"ПАРАМЕТРЫ",L"IESTATĪJUMI"):L(L"WINDOWS SETUP",L"НАСТРОЙКА WINDOWS",L"WINDOWS IESTATĪŠANA"));
- SetWindowTextW(pageTitle,loaded?L(L"Connection settings",L"Параметры подключения",L"Savienojuma iestatījumi"):L"TOLF VPN");
+ auto title=loaded?L"TOLF VPN · "+std::wstring(Manager::NodeLabel(settings->server)):std::wstring(L"TOLF VPN");SetWindowTextW(pageTitle,title.c_str());
  MoveWindow(status,px(36),px(loaded?458:218),px(488),px(54),TRUE);
  MoveWindow(footer,px(36),px(loaded?526:276),px(488),px(22),TRUE);
  ResizeClient(560,loaded?570:330);
@@ -50,7 +55,7 @@ static void Start(bool load,bool connect=false){
  try{if(load){auto link=Text(linkEdit);auto a=link.find_first_not_of(L" \r\n\t"),b=link.find_last_not_of(L" \r\n\t");token=Token(a==std::wstring::npos?L"":link.substr(a,b-a+1));settings.reset();}else excluded=CheckedNetworks(Text(networkEdit));}
  catch(const Failure&f){SetWindowTextW(status,Error(f).c_str());return;}
  busy=true;Render();SetWindowTextW(status,load?L(L"Loading settings…",L"Загрузка настроек…",L"Iestatījumu ielāde…"):L(L"Saving settings…",L"Сохранение настроек…",L"Iestatījumu saglabāšana…"));
- try{std::thread([load,connect,token,excluded]{auto r=std::make_unique<Result>();r->connect=connect;try{Com com;Wmi w;Preflight(w);if(load){r->loaded=std::make_unique<Settings>();Fetch(token,*r->loaded);r->networks=NetworkText(CheckedNetworks(SavedNetworks(r->loaded->id)));}else{r->name=(settings->server==L"ikev2.tolf.is"?L"TOLF - Moscow - ":L"TOLF - Riga - ")+settings->id;ConfigureRoutes(w,*settings,r->name,excluded);r->networks=NetworkText(excluded);}}catch(const Failure&f){r->loaded.reset();r->error=Error(f);}catch(...){r->loaded.reset();r->error=Error({L"SETUP",ERROR_GEN_FAILURE});}PostMessageW(window,Done,0,reinterpret_cast<LPARAM>(r.release()));}).detach();}
+ try{std::thread([load,connect,token,excluded]{auto r=std::make_unique<Result>();r->connect=connect;try{Com com;Wmi w;Preflight(w);if(load){r->loaded=std::make_unique<Settings>();Fetch(token,*r->loaded);r->networks=NetworkText(CheckedNetworks(SavedNetworks(r->loaded->id)));}else{r->name=ProfileName(*settings);ConfigureRoutes(w,*settings,r->name,excluded);SaveProfileLabels(*settings);InstallController();r->networks=NetworkText(excluded);if(connect)DialProfile(r->name,window);}}catch(const Failure&f){r->loaded.reset();r->error=Error(f);}catch(...){r->loaded.reset();r->error=Error({L"SETUP",ERROR_GEN_FAILURE});}PostMessageW(window,Done,0,reinterpret_cast<LPARAM>(r.release()));}).detach();}
  catch(...){busy=false;Render();SetWindowTextW(status,Error({L"SETUP",ERROR_GEN_FAILURE}).c_str());}
 }
 static LRESULT CALLBACK Proc(HWND h,UINT m,WPARAM w,LPARAM l){switch(m){
@@ -68,22 +73,27 @@ static LRESULT CALLBACK Proc(HWND h,UINT m,WPARAM w,LPARAM l){switch(m){
  rdpHelp=control(L"STATIC",L(L"Remote Desktop: save without connecting first.",L"Удалённый рабочий стол: сначала сохраните без подключения.",L"Attālā darbvirsma: vispirms saglabājiet bez savienošanās."),0,36,320,488,28,0,smallFont);
  saveButton=control(L"BUTTON",L(L"Save without connecting",L"Сохранить без подключения",L"Saglabāt bez savienošanās"),WS_TABSTOP|BS_MULTILINE,36,366,236,48,104);
  connectButton=control(L"BUTTON",L(L"Save and connect",L"Сохранить и подключиться",L"Saglabāt un savienot"),WS_TABSTOP|BS_DEFPUSHBUTTON|BS_MULTILINE,288,366,236,48,105);
- status=control(L"STATIC",L"",0,36,218,488,54,0,smallFont);footer=control(L"STATIC",L(L"Built into Windows  •  TOLF VPN 2.3",L"Средствами Windows  •  TOLF VPN 2.3",L"Windows līdzekļi  •  TOLF VPN 2.3"),SS_CENTER,36,276,488,22,0,smallFont);
+ status=control(L"STATIC",L"",0,36,218,488,54,0,smallFont);footer=control(L"STATIC",L(L"Built into Windows  •  TOLF VPN 2.6.1",L"Средствами Windows  •  TOLF VPN 2.6.1",L"Windows līdzekļi  •  TOLF VPN 2.6.1"),SS_CENTER,36,276,488,22,0,smallFont);
  wchar_t file[32768];DWORD n=GetModuleFileNameW(nullptr,file,32768);if(n&&n<32768){std::wstring path=file;auto token=FilenameToken(path.substr(path.find_last_of(L"\\/")+1));if(!token.empty()){hasFileToken=true;SetWindowTextW(linkEdit,(L"https://api.tolf.is/windows/p/"+token).c_str());}}
  if(!hasFileToken){SetWindowTextW(introText,L(L"The setup link could not be read from the filename. Paste it below.",L"Не удалось определить ссылку по имени файла. Вставьте её ниже.",L"Iestatīšanas saiti nevarēja nolasīt no faila nosaukuma. Ielīmējiet to zemāk."));}
  Render();SetFocus(hasFileToken?loadButton:linkEdit);return 0;}
  case WM_CTLCOLORSTATIC:{HDC dc=(HDC)w;SetBkMode(dc,TRANSPARENT);HWND c=(HWND)l;if(c==stepLabel){SetTextColor(dc,RGB(70,98,82));}else if(c==networkHelp||c==rdpHelp||c==footer||c==status){SetTextColor(dc,RGB(95,99,104));}else SetTextColor(dc,RGB(28,30,33));return (LRESULT)whiteBrush;}
  case WM_ERASEBKGND:{RECT r;GetClientRect(h,&r);FillRect((HDC)w,&r,whiteBrush);return 1;}
  case WM_COMMAND:if(HIWORD(w)==BN_CLICKED){if(LOWORD(w)==102)Start(true);if(LOWORD(w)==104)Start(false);if(LOWORD(w)==105)Start(false,true);}return 0;
- case Done:{std::unique_ptr<Result>r(reinterpret_cast<Result*>(l));if(!r->error.empty())SetWindowTextW(status,r->error.c_str());else if(r->loaded){settings=std::move(r->loaded);SetWindowTextW(networkEdit,r->networks.c_str());SetWindowTextW(status,L(L"Settings loaded. Review the exclusions and save.",L"Настройки загружены. Проверьте исключения и сохраните.",L"Iestatījumi ielādēti. Pārbaudiet izņēmumus un saglabājiet."));}else{SetWindowTextW(networkEdit,r->networks.c_str());SetWindowTextW(status,L(L"Settings saved. Windows will use them on every connection.",L"Настройки сохранены. Windows будет использовать их при каждом подключении.",L"Iestatījumi saglabāti. Windows tos izmantos katrā savienojumā."));if(r->connect)try{auto pb=Phonebook();RASDIALDLG d={};d.dwSize=sizeof(d);d.hwndOwner=h;BOOL ok=RasDialDlgW(pb.data(),r->name.data(),nullptr,&d);std::wstring message=ok?L(L"Connected.",L"Подключено.",L"Savienots."):std::wstring(L(L"Saved. Connection cancelled or unsuccessful. Windows code: ",L"Сохранено. Подключение отменено или не удалось. Код Windows: ",L"Saglabāts. Savienojums atcelts vai neizdevās. Windows kods: "))+std::to_wstring(d.dwError);SetWindowTextW(status,message.c_str());}catch(const Failure&f){SetWindowTextW(status,Error(f).c_str());}}busy=false;Render();return 0;}
+ case Done:{std::unique_ptr<Result>r(reinterpret_cast<Result*>(l));if(!r->error.empty())SetWindowTextW(status,r->error.c_str());else if(r->loaded){settings=std::move(r->loaded);SetWindowTextW(networkEdit,r->networks.c_str());SetWindowTextW(status,L(L"Settings loaded. Review the exclusions and save.",L"Настройки загружены. Проверьте исключения и сохраните.",L"Iestatījumi ielādēti. Pārbaudiet izņēmumus un saglabājiet."));}else{SetWindowTextW(networkEdit,r->networks.c_str());SetWindowTextW(status,L(L"Settings saved. Windows will use them on every connection.",L"Настройки сохранены. Windows будет использовать их при каждом подключении.",L"Iestatījumi saglabāti. Windows tos izmantos katrā savienojumā."));try{LaunchController(r->connect?L"--tray":L"--manage");if(r->connect&&Connected(Phonebook(),r->name)){busy=false;DestroyWindow(h);return 0;}}catch(const Failure&f){SetWindowTextW(status,Error(f).c_str());}}busy=false;Render();return 0;}
  case WM_CLOSE:if(!busy)DestroyWindow(h);return 0;
  case WM_DESTROY:settings.reset();DeleteObject(font);DeleteObject(smallFont);DeleteObject(titleFont);DeleteObject(brandFont);DeleteObject(whiteBrush);PostQuitMessage(0);return 0;
  }return DefWindowProcW(h,m,w,l);}
 int WINAPI wWinMain(HINSTANCE instance,HINSTANCE,PWSTR,int show){
+ LANGID language=PRIMARYLANGID(GetUserDefaultUILanguage());lang=language==LANG_RUSSIAN?1:language==LANG_LATVIAN?2:0;
+ int count=0;LPWSTR* args=CommandLineToArgvW(GetCommandLineW(),&count);
+ std::wstring action=(args&&count==2)?args[1]:L"";if(args)LocalFree(args);
+ if(action==L"--manage"||action==L"--widget"||action==L"--tray")return Manager::Run(instance,action!=L"--manage",action==L"--tray");
  HANDLE mutex=CreateMutexW(nullptr,FALSE,L"Local\\TOLF-Native-Setup");if(!mutex)return 1;if(GetLastError()==ERROR_ALREADY_EXISTS){MessageBoxW(nullptr,L"TOLF setup is already open.",L"TOLF VPN",MB_OK);CloseHandle(mutex);return 0;}
  LANGID id=PRIMARYLANGID(GetUserDefaultUILanguage());lang=id==LANG_RUSSIAN?1:id==LANG_LATVIAN?2:0;
  HRESULT init=CoInitializeEx(nullptr,COINIT_APARTMENTTHREADED);if(FAILED(init)){CloseHandle(mutex);return 1;}
  HRESULT sec=CoInitializeSecurity(nullptr,-1,nullptr,nullptr,RPC_C_AUTHN_LEVEL_DEFAULT,RPC_C_IMP_LEVEL_IMPERSONATE,nullptr,EOAC_NONE,nullptr);if(FAILED(sec)&&sec!=RPC_E_TOO_LATE){CoUninitialize();CloseHandle(mutex);return 1;}
- WNDCLASSW cls={};cls.hInstance=instance;cls.lpfnWndProc=Proc;cls.lpszClassName=L"TolfNativeSetup";cls.hCursor=LoadCursorW(nullptr,IDC_ARROW);cls.hbrBackground=(HBRUSH)(COLOR_WINDOW+1);RegisterClassW(&cls);
+ WNDCLASSW cls={};cls.hInstance=instance;cls.lpfnWndProc=Proc;cls.lpszClassName=L"TolfNativeSetup";cls.hIcon=LoadIconW(instance,MAKEINTRESOURCEW(101));cls.hCursor=LoadCursorW(nullptr,IDC_ARROW);cls.hbrBackground=(HBRUSH)(COLOR_WINDOW+1);RegisterClassW(&cls);
  dpi=GetDpiForSystem();RECT rect={0,0,px(560),px(330)};DWORD style=WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX;AdjustWindowRectExForDpi(&rect,style,FALSE,0,dpi);HWND h=CreateWindowExW(0,cls.lpszClassName,L"TOLF VPN",style,CW_USEDEFAULT,CW_USEDEFAULT,rect.right-rect.left,rect.bottom-rect.top,nullptr,nullptr,instance,nullptr);if(!h){CoUninitialize();CloseHandle(mutex);return 1;}ShowWindow(h,show);MSG msg;while(GetMessageW(&msg,nullptr,0,0)>0){if(!IsDialogMessageW(h,&msg)){TranslateMessage(&msg);DispatchMessageW(&msg);}}CoUninitialize();CloseHandle(mutex);return 0;
 }
+

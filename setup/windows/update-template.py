@@ -5,7 +5,7 @@ from pathlib import Path
 PAYLOADS = {}  # Replaced by build-update.py
 HASHES = {}
 # Native 2.0: exact normalized source from commit e346834e1263484d615e152e403917a491940371.
-EXPECTED = {'ff3604a51b0367f76761a278eefefb33a5b419b2cc1f3a7f99bfc2876a1bf54c', '3da4c567fd4befb7d53328e34dfd2c6138d21403d7e9070a0711826bb12b6314', '9fbc3ab4fb493b4d386e29c1eac5c340ff6f22fa4fb3544521e178a010112c3c', 'a4dec1ae9e2801b57758cdb96470bd6699df7f79cc6a11cdb72bf257b0309ba9', '3faefe06b19831d0b46d2a62fc694eccc4680db433c3b207c3d6cbd76d368397', '037d737bf4a7d236bf203a6fbaa5814f27792a7380adb2be1b783278ee2af850', 'a512aea770fa961d42d84cc5eef610d3af3ec2bcecadf8a70dbd3700d8c56959', '2047e0cfbeb063aa41c062ae3668f2ff2a07edb2e775e7aed7034a2c2090b5e3'}
+EXPECTED = {'46b9abf385fac997cc170f962e57575dc55f4d901d977b9649f209946119646d'}
 
 def write(path, data, info):
     fd, temp = tempfile.mkstemp(dir=path.parent, prefix='.tolf-update-')
@@ -22,7 +22,7 @@ def main():
     root=Path('/opt/tolf-api'); module=root/'tolf_windows.py'
     if os.geteuid()!=0 or not module.is_file(): raise RuntimeError('Run on London EDISUK, where Windows API v1 is installed')
     current=module.read_bytes()
-    if hashlib.sha256(current.replace(b'\r\n', b'\n')).hexdigest() not in EXPECTED: raise RuntimeError('Existing Windows module differs from verified supported version; nothing changed')
+    if hashlib.sha256(current.replace(b'\r\n', b'\n')).hexdigest() not in (EXPECTED | {HASHES.get('tolf_windows.py')}): raise RuntimeError('Existing Windows module differs from verified supported version; nothing changed')
     payloads={name:zlib.decompress(base64.b64decode(value)) for name,value in PAYLOADS.items()}
     for name,data in payloads.items():
         if hashlib.sha256(data).hexdigest()!=HASHES[name]: raise RuntimeError('Payload checksum mismatch')
@@ -40,9 +40,9 @@ def main():
         subprocess.run(['systemctl','restart','tolf-api.service'],check=True)
         for i in range(12):
             try:
-                with urllib.request.urlopen('https://api.tolf.is/windows/capabilities',timeout=5) as response: data=json.load(response)
-                if data.get('installerVersion')=='2.3.0':
-                    print('OK: Native Windows installer 2.3 enabled. Test build is unsigned.'); return
+                with urllib.request.urlopen('http://127.0.0.1:8000/windows/capabilities',timeout=5) as response: data=json.load(response)
+                if data.get('installerVersion')=='2.6.1' and data.get('profileLabels') is True and data.get('passwordManagement') is True and data.get('routingRevision')=='windows-routing-2.6-v1':
+                    print('OK: Windows 2.6.1 enabled: profile names, entry points and routing modes; passwords and routing preserved.'); return
             except Exception: pass
             time.sleep(2)
         raise RuntimeError('API health check failed')

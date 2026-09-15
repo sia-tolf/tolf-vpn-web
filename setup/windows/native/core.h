@@ -27,7 +27,7 @@ struct Bstr { BSTR p; explicit Bstr(const wchar_t* s):p(SysAllocString(s)){if(!p
 struct Var:VARIANT { Var(){VariantInit(this);} ~Var(){VariantClear(this);} Var(const Var&)=delete; };
 struct Com { Com(){Hr(CoInitializeEx(nullptr,COINIT_MULTITHREADED),L"WINDOWS_COMPONENTS");} ~Com(){CoUninitialize();} };
 struct Secret { std::wstring value; ~Secret(){ if(!value.empty())SecureZeroMemory(value.data(),value.size()*sizeof(wchar_t));} };
-struct Settings {std::wstring id,server,user; Secret password;};
+struct Settings {std::wstring id,server,user,displayName,routingMode; Secret password;};
 // The settings contract is a small flat JSON object of strings. Reject duplicates,
 // nested values, trailing data and control characters rather than guessing.
 class Json {
@@ -45,20 +45,32 @@ inline std::wstring FilenameToken(const std::wstring& file){std::wsmatch m;if(st
 inline void ParseSettings(const std::wstring& text, Settings& c){
  auto m=Json(text).parse();
  struct Wipe{std::map<std::wstring,std::wstring>&m;~Wipe(){for(auto&kv:m)if(!kv.second.empty())SecureZeroMemory(kv.second.data(),kv.second.size()*2);}}wipe{m};
- if(m.size()!=4||!m.count(L"deviceId")||!m.count(L"server")||!m.count(L"username")||!m.count(L"password"))throw Failure{L"SETTINGS",1};
+ if((m.size()!=4&&m.size()!=6)||!m.count(L"deviceId")||!m.count(L"server")||!m.count(L"username")||!m.count(L"password"))throw Failure{L"SETTINGS",1};
+ if(m.size()==6){
+  if(!m.count(L"displayName")||!m.count(L"routingMode"))throw Failure{L"SETTINGS",7};
+  c.displayName=m[L"displayName"];c.routingMode=m[L"routingMode"];
+  if(c.displayName.empty()||c.displayName.size()>160||
+     std::any_of(c.displayName.begin(),c.displayName.end(),[](wchar_t ch){return ch<32||ch==127;})||
+     (c.routingMode!=L""&&c.routingMode!=L"ru"&&c.routingMode!=L"sr"&&c.routingMode!=L"lv"))throw Failure{L"SETTINGS",7};
+ }else{c.displayName.clear();c.routingMode.clear();}
  c.id=m[L"deviceId"];c.server=m[L"server"];c.user=m[L"username"];c.password.value=m[L"password"];
  if(!std::regex_match(c.id,std::wregex(L"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"))||(c.server!=L"ikev2-riga.tolf.is"&&c.server!=L"ikev2.tolf.is"))throw Failure{L"SETTINGS",2};
  std::wstring plain;for(auto ch:c.id)if(ch!=L'-')plain+=ch;
  if(c.user!=L"user_"+plain||c.password.value.empty()||c.password.value.size()>256)throw Failure{L"SETTINGS",3};
  for(wchar_t ch:c.password.value)if(ch<32||ch==127)throw Failure{L"SETTINGS",4};
 }
+inline std::wstring ProfileName(const Settings& c) {
+ if(c.server==L"ikev2-riga.tolf.is")return L"TOLF - Riga - "+c.id;
+ if(c.server==L"ikev2.tolf.is")return L"TOLF - Moscow - "+c.id;
+ throw Failure{L"SETTINGS",2};
+}
 struct Http {HINTERNET h;explicit Http(HINTERNET v):h(v){Win(h!=nullptr,L"NETWORK");}~Http(){WinHttpCloseHandle(h);}operator HINTERNET()const{return h;}};
 inline void Fetch(const std::wstring& token,Settings& c){
- Http session(WinHttpOpen(L"TOLF-Setup/2.1",WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY,WINHTTP_NO_PROXY_NAME,WINHTTP_NO_PROXY_BYPASS,0));
+ Http session(WinHttpOpen(L"TOLF-Setup/2.6.1",WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY,WINHTTP_NO_PROXY_NAME,WINHTTP_NO_PROXY_BYPASS,0));
  Win(WinHttpSetTimeouts(session,15000,15000,15000,15000),L"NETWORK");
  DWORD tls=WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2;Win(WinHttpSetOption(session,WINHTTP_OPTION_SECURE_PROTOCOLS,&tls,sizeof(tls)),L"NETWORK");
  Http host(WinHttpConnect(session,L"api.tolf.is",INTERNET_DEFAULT_HTTPS_PORT,0));
- std::wstring path=L"/windows/p/"+token+L"/settings";
+ std::wstring path=L"/windows/p/"+token+L"/settings?labels=true";
  Http req(WinHttpOpenRequest(host,L"POST",path.c_str(),nullptr,WINHTTP_NO_REFERER,WINHTTP_DEFAULT_ACCEPT_TYPES,WINHTTP_FLAG_SECURE));
  DWORD redirect=WINHTTP_OPTION_REDIRECT_POLICY_NEVER;Win(WinHttpSetOption(req,WINHTTP_OPTION_REDIRECT_POLICY,&redirect,sizeof(redirect)),L"NETWORK");
  DWORD disabled=WINHTTP_DISABLE_COOKIES|WINHTTP_DISABLE_AUTHENTICATION;Win(WinHttpSetOption(req,WINHTTP_OPTION_DISABLE_FEATURE,&disabled,sizeof(disabled)),L"NETWORK");
@@ -113,4 +125,5 @@ inline bool Connected(const std::wstring&pb,const std::wstring&name,bool anyStat
  return false;
 }
 inline void Configure(Wmi&w,const Settings&c,const std::wstring&name,bool failTest=false){auto pb=Phonebook();bool exists=Existing(pb,name,c),created=false;try{if(!exists){w.add(name,c);created=true;}if(!exists||!Connected(pb,name))w.policy(name,true);if(failTest)throw Failure{L"TEST_ROLLBACK",1};RASCREDENTIALSW cred={};cred.dwSize=sizeof(cred);cred.dwMask=RASCM_UserName|RASCM_Password|RASCM_Domain;wcscpy_s(cred.szUserName,c.user.c_str());wcscpy_s(cred.szPassword,c.password.value.c_str());DWORD e=RasSetCredentialsW(pb.c_str(),name.c_str(),&cred,FALSE);SecureZeroMemory(&cred,sizeof(cred));if(e)throw Failure{L"CREDENTIALS",e};}catch(...){if(created){DWORD e=RasDeleteEntryW(pb.c_str(),name.c_str());if(e)throw Failure{L"ROLLBACK",e};}throw;}}
+
 

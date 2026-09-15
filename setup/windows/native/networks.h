@@ -84,3 +84,4 @@ inline std::vector<std::wstring> TunnelPrefixes(const std::vector<Network4>& exc
     if (result.size() > 512) throw std::invalid_argument("too many routes");
     return result;
 }
+
