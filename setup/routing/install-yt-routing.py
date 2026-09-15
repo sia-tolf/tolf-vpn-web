@@ -302,8 +302,13 @@ if ! grep -q '# TOLF Moscow YT routing v1' "$NFT"; then
     awk '
     /^chain ru_split_prerouting \{/ {
         if (split_seen++) exit 51
+        print "# TOLF Moscow YT routing v1"
+        print "chain moscow_yt_mss_forward {"
+        print "    type filter hook forward priority mangle + 11; policy accept;"
+        print "    ip saddr 10.19.0.0/24 tcp flags & syn == syn tcp option maxseg size > 1200 tcp option maxseg size set 1200"
+        print "    ip daddr 10.19.0.0/24 tcp flags & syn == syn tcp option maxseg size > 1200 tcp option maxseg size set 1200"
+        print "}"
         print
-        print "    # TOLF Moscow YT routing v1"
         print "    ip saddr 10.19.0.0/24 ip daddr @ru4 meta mark set 0x100"
         print "    ip saddr 10.19.0.0/24 ip daddr @ru_domains4 meta mark set 0x100"
         print "    ip saddr 10.19.0.0/24 ip daddr @yt_domains4 meta mark set 0x100"
@@ -323,16 +328,9 @@ if ! grep -q '# TOLF Moscow YT routing v1' "$NFT"; then
         print "    oifname \"awgriga\" ip saddr 10.19.0.0/24 snat to 10.31.0.1"
         next
     }
-    /^chain ikev2_mss_forward \{/ {
-        if (mss_seen++) exit 54
-        print
-        print "    ip saddr 10.19.0.0/24 tcp flags & syn == syn tcp option maxseg size > 1200 tcp option maxseg size set 1200"
-        print "    ip daddr 10.19.0.0/24 tcp flags & syn == syn tcp option maxseg size > 1200 tcp option maxseg size set 1200"
-        next
-    }
     { print }
     END {
-        if (split_seen != 1 || dns_seen != 1 || snat_seen != 1 || mss_seen != 1) exit 55
+        if (split_seen != 1 || dns_seen != 1 || snat_seen != 1) exit 55
     }
     ' "$NFT" > /tmp/90-ru-split.moscow-yt.$$
     chmod 0644 /tmp/90-ru-split.moscow-yt.$$
