@@ -130,6 +130,8 @@ button, input { font: inherit; }
   overflow: hidden;
 }
 .card-content { padding: 28px; }
+.quick-setup-card { margin-bottom: 16px; }
+.quick-setup-button { width: 100%; margin-top: 18px; }
 .card h2 {
   margin: 0;
   font-size: 24px;

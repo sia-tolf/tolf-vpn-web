@@ -2,7 +2,7 @@ name: Quick setup checks
 on:
   push:
     branches: ['codex/quick-setup', 'main']
-    paths: ['quick/**', 'setup/quick/**', 'tests/quick/**', 'js/quick-entry.js', '.github/workflows/quick-setup.yml']
+    paths: ['quick/**', 'setup/quick/**', 'tests/quick/**', 'index.html', 'css/styles.css', 'js/locales/**', 'js/quick-entry.js', '.github/workflows/quick-setup.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -23,6 +23,7 @@ jobs:
         with:
           node-version: '22'
       - run: node tests/quick/state.cjs
+      - run: node tests/quick/entry.cjs
       - run: npm install --no-save --ignore-scripts playwright
       - run: npx playwright install --with-deps chromium
       - run: node tests/quick/browser.cjs

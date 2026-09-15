@@ -12,7 +12,7 @@
 
   <link
     rel="stylesheet"
-    href="css/styles.css?v=windows-link-spacing-20260914"
+    href="css/styles.css?v=quick-start-20260915"
   >
   <link
     rel="stylesheet"
@@ -21,9 +21,9 @@
 
   <!-- Keep this order. Deferred scripts run after the HTML has been parsed. -->
   <script defer src="js/config.js?v=windows-1"></script>
-  <script defer src="js/locales/en.js?v=windows-link-field-20260914"></script>
-  <script defer src="js/locales/ru.js?v=windows-link-field-20260914"></script>
-  <script defer src="js/locales/lv.js?v=windows-link-field-20260914"></script>
+  <script defer src="js/locales/en.js?v=quick-start-20260915"></script>
+  <script defer src="js/locales/ru.js?v=quick-start-20260915"></script>
+  <script defer src="js/locales/lv.js?v=quick-start-20260915"></script>
   <script defer src="js/dom.js?v=share-profile-1"></script>
   <script defer src="js/network-metrics.js?v=latency-decimal-1"></script>
   <script defer src="js/platform.js?v=windows-back-1"></script>
@@ -43,7 +43,7 @@
   <script defer src="js/connection-test.js?v=connection-test-3"></script>
   <script defer src="js/windows.js?v=windows-link-field-20260914"></script>
   <script defer src="js/invitations.js?v=hide-protected-banner-1"></script>
-  <script defer src="js/quick-entry.js?v=quick-1"></script>
+  <script defer src="js/quick-entry.js?v=quick-2"></script>
   <script defer src="js/app.js?v=windows-1"></script>
   <script defer src="js/admin-entry.js?v=admin-1.3-path"></script>
 </head>
@@ -227,6 +227,18 @@
         <button id="invitationButton" class="primary hidden" type="button" data-i18n="inviteAccept">Link VPN access</button>
         <button id="invitationDismiss" class="danger hidden" type="button" data-i18n="inviteDismiss">Cancel linking</button>
       </div>
+      </div>
+    </section>
+
+    <section id="quickSetupCard" class="card quick-setup-card hidden">
+      <div class="card-content">
+        <h2 data-i18n="quickSetupTitle">Quick setup</h2>
+        <p class="card-description" data-i18n="quickSetupDescription">
+          Create access and get ready-to-use VPN settings in a few steps.
+        </p>
+        <a class="button-link primary quick-setup-button" href="/quick/" data-i18n="quickSetupAction">
+          Set up VPN
+        </a>
       </div>
     </section>
 

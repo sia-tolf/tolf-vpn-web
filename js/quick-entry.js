@@ -1,18 +1,16 @@
-// Enable new-account onboarding only after the matching server API is installed.
+// Show the simple onboarding entry only after the matching server API is installed.
 (() => {
  let enabled=false;
- const button=document.getElementById('createAccountButton');
- const labels={ru:'Создать аккаунт и настроить VPN',en:'Create account and set up VPN',lv:'Izveidot kontu un iestatīt VPN'};
+ const card=document.getElementById('quickSetupCard');
+ const signedOut=document.getElementById('signedOutCard');
+ const invitationCard=document.getElementById('invitationCard');
  function invitation(){return typeof vpnInvitation!=='undefined' && Boolean(vpnInvitation);}
- button.addEventListener('click',event=>{
-  if(!enabled || invitation())return;
-  event.preventDefault();event.stopImmediatePropagation();location.assign('/quick/');
- },true);
+ function render(){card.classList.toggle('hidden',!enabled || invitation() || signedOut.classList.contains('hidden'));}
+ new MutationObserver(render).observe(signedOut,{attributes:true,attributeFilter:['class']});
+ new MutationObserver(render).observe(invitationCard,{attributes:true,attributeFilter:['class']});
  fetch('https://api.tolf.is/quick-setup/capabilities',{credentials:'omit',cache:'no-store'})
  .then(r=>r.ok?r.json():null).then(data=>{
   enabled=data?.version===1;
-  if(!enabled || invitation())return;
-  const label=()=>{if(!invitation())button.textContent=labels[document.documentElement.lang]||labels.en;};
-  label();new MutationObserver(label).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
- }).catch(()=>{});
+  render();
+ }).catch(render);
 })();
