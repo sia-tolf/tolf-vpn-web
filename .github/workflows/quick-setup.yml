@@ -1,0 +1,33 @@
+name: Quick setup checks
+on:
+  push:
+    branches: ['codex/quick-setup', 'main']
+    paths: ['quick/**', 'setup/quick/**', 'tests/quick/**', 'js/quick-entry.js', '.github/workflows/quick-setup.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install fastapi httpx
+      - run: python -m unittest discover -s tests/quick -v
+      - run: |
+          python setup/quick/build.py
+          git diff --exit-code setup/quick/install-quick-setup.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node tests/quick/state.cjs
+      - run: npm install --no-save --ignore-scripts playwright
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/quick/browser.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: quick-preview
+          path: /tmp/tolf-quick*.png
