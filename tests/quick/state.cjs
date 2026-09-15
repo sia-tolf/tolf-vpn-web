@@ -22,13 +22,15 @@ async function scenario(country,device='ios',credentialError=''){
   else throw new Error(p);
   return{ok,status,json:async()=>data};
  }};
- vm.createContext(context);vm.runInContext(fs.readFileSync(path.join(root,'quick/strings-1.js'),'utf8'),context);vm.runInContext(fs.readFileSync(path.join(root,'quick/quick-1.js'),'utf8'),context);
+ vm.createContext(context);vm.runInContext(fs.readFileSync(path.join(root,'quick/strings-1.js'),'utf8'),context);vm.runInContext(fs.readFileSync(path.join(root,'quick/windows-1.js'),'utf8'),context);vm.runInContext(fs.readFileSync(path.join(root,'quick/quick-1.js'),'utf8'),context);
  for(let i=0;i<20;i++)await new Promise(setImmediate);
  assert.equal(elements.server.value,country==='moscow'?'moscow':'riga');
  assert.equal(elements.register.disabled,false);
+ assert.equal(elements.windowsPrep.hidden,device!=='windows');
+ if(device==='windows')assert.equal(elements.register.textContent,'Создать аккаунт и сохранить ключ входа');
  assert.match(elements.passkeyName.value,/^(iPhone|Windows)$/);elements.passkeyName.value='Personal iPad';
  await elements.register.onclick();for(let i=0;i<5;i++)await new Promise(setImmediate);
- if(credentialError){assert.match(elements.message.textContent,/Windows не создала ключ входа/);return true;}
+ if(credentialError){assert.match(elements.message.textContent,/менеджер паролей заблокирован/);return true;}
  assert.equal(registeredName,'Personal iPad');assert.equal(elements.code.value,'RECOVERY');assert.equal(requests,0);
  await elements.saved.onclick();assert.equal(requests,1);assert.equal(elements.code.value,'');assert.equal(elements.download.href,'https://config.tolf.is/p/test/download');
  assert.equal(elements.delivery.hidden,false);

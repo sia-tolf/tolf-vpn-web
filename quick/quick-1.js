@@ -22,6 +22,8 @@ function render() {
  document.documentElement.lang = lang;
  document.querySelectorAll('[data-text]').forEach(el => el.textContent = t(el.dataset.text));
  $('passkeyHelp').textContent = t(nativePlatform === 'windows' ? 'passkeyWindows' : 'passkey');
+ $('windowsPrep').hidden = nativePlatform !== 'windows' || uncertain;
+ $('register').textContent = t(nativePlatform === 'windows' ? 'createWindows' : 'create');
  document.querySelectorAll('[data-lang]').forEach(el => { el.setAttribute('aria-pressed', String(el.dataset.lang === lang)); el.disabled = busy; });
  $('deviceSummary').textContent = platform === 'ios' ? 'iPhone / iPad' : platform === 'android' ? 'Android' : 'Windows';
  $('serverSummary').textContent = t(server);
@@ -29,7 +31,7 @@ function render() {
  $('message').textContent = t(messageKey); $('message').className = failed ? 'error' : '';
  for (const id of ['change','platform','server']) $(id).disabled = busy || locked;
  $('change').hidden = locked || choicesOpened;
- for (const id of ['register','login','saved','prepare','copyCode','copyLink','share','retry']) $(id).disabled = busy;
+ for (const id of ['register','login','saved','prepare','copyCode','copyLink','copyChromeSettings','share','retry']) $(id).disabled = busy;
  $('register').hidden = uncertain;
  $('login').hidden = !uncertain && messageKey !== 'loginRequired';
  if(profile) renderDelivery();
@@ -158,6 +160,7 @@ async function copy(id){
  catch { /* Keep the actual text selected for manual copying, no false success. */ }
 }
 $('copyCode').onclick=()=>copy('code');$('copyLink').onclick=()=>copy('profileLink');
+$('copyChromeSettings').onclick=()=>copy('chromeSettings');
 $('share').onclick=async()=>{try{await navigator.share({title:'TOLF VPN',url:profile});}catch(e){if(e.name!=='AbortError')message('failed',true);}};
 window.addEventListener('pageshow',e=>{if(e.persisted){profile='';$('code').value='';initialize();}});
 render();initialize();
