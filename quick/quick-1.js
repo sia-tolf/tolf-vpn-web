@@ -28,6 +28,7 @@ function render() {
  $('change').hidden = locked;
  for (const id of ['register','login','saved','prepare','copyCode','copyLink','share','retry']) $(id).disabled = busy;
  $('register').hidden = uncertain;
+ $('login').hidden = !uncertain && messageKey !== 'loginRequired';
  if(profile) renderDelivery();
 }
 function panels(name) {
