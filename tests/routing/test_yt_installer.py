@@ -1,6 +1,7 @@
 import importlib.util
 from pathlib import Path
 import subprocess
+import tempfile
 import unittest
 
 
@@ -58,6 +59,13 @@ table inet tolf_vpn_mss {
         script = self.module.REMOTE_SCRIPT
         for domain in ("youtube.com", "youtu.be", "googlevideo.com", "ytimg.com"):
             self.assertIn(domain, script)
+
+    def test_atomic_restores_binary_backup(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "config"
+            self.module.atomic(path, b"original\n", 0o600)
+            self.assertEqual(path.read_bytes(), b"original\n")
+            self.assertEqual(path.stat().st_mode & 0o777, 0o600)
 
 
 if __name__ == "__main__":

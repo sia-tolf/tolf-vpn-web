@@ -7,6 +7,7 @@ from pathlib import Path
 import shutil
 import socket
 import subprocess
+import sys
 import tempfile
 import time
 
@@ -232,7 +233,8 @@ def atomic(path, content, mode=0o644):
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, name = tempfile.mkstemp(prefix="." + path.name + "-", dir=path.parent)
     try:
-        with os.fdopen(fd, "w") as target:
+        write_mode = "wb" if isinstance(content, bytes) else "w"
+        with os.fdopen(fd, write_mode) as target:
             target.write(content)
             target.flush()
             os.fsync(target.fileno())
@@ -354,8 +356,12 @@ def main():
                 if expected not in result.stdout:
                     raise RuntimeError("Riga validation failed: " + expected)
 
-            remote = run(REMOTE, input=REMOTE_SCRIPT, capture_output=True)
+            remote = run(REMOTE, input=REMOTE_SCRIPT, capture_output=True, check=False)
             print(remote.stdout, end="")
+            if remote.stderr:
+                print(remote.stderr, end="", file=sys.stderr)
+            if remote.returncode:
+                raise RuntimeError(f"Moscow installation failed with exit status {remote.returncode}")
         except Exception:
             if original.get(RIGA_RULE) is None:
                 run(["/bin/systemctl", "disable", "--now", "tolf-yt-routing.service"], check=False)
