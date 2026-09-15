@@ -8,7 +8,7 @@ const put = (key, value) => { try { if(value) sessionStorage.setItem(key, value)
 let lang; try { lang = localStorage.getItem('tolfLanguage'); } catch {}
 if (!QUICK_TEXT[lang]) lang = /^ru/i.test(navigator.language) ? 'ru' : /^lv/i.test(navigator.language) ? 'lv' : 'en';
 const t = key => QUICK_TEXT[lang][key] || key;
-let busy = false, authenticated = false, ready = false, locked = false, profile = '', messageKey = '', failed = false;
+let busy = false, authenticated = false, ready = false, locked = false, choicesOpened = false, profile = '', messageKey = '', failed = false;
 let server = ['riga','moscow'].includes(get('quickServer')) ? get('quickServer') : 'riga';
 let platform = ['ios','android','windows'].includes(get('quickPlatform')) ? get('quickPlatform') : nativePlatform;
 let manual = get('quickManual') === 'yes';
@@ -27,7 +27,7 @@ function render() {
  $('platform').value = platform; $('server').value = server;
  $('message').textContent = t(messageKey); $('message').className = failed ? 'error' : '';
  for (const id of ['change','platform','server']) $(id).disabled = busy || locked;
- $('change').hidden = locked;
+ $('change').hidden = locked || choicesOpened;
  for (const id of ['register','login','saved','prepare','copyCode','copyLink','share','retry']) $(id).disabled = busy;
  $('register').hidden = uncertain;
  $('login').hidden = !uncertain && messageKey !== 'loginRequired';
@@ -87,7 +87,7 @@ async function initialize() {
  } catch { ready=false; message('unavailable',true); $('retry').hidden=false; }
  finally { busy=false;render(); }
 }
-$('change').onclick=()=>{$('choices').hidden=!$('choices').hidden;};
+$('change').onclick=()=>{choicesOpened=true;$('choices').hidden=false;render();};
 $('platform').onchange=()=>{platform=$('platform').value;persist();render();};
 $('server').onchange=()=>{server=$('server').value;manual=true;put('quickManual','yes');persist();render();};
 document.querySelectorAll('[data-lang]').forEach(el=>el.onclick=()=>{lang=el.dataset.lang;try{localStorage.setItem('tolfLanguage',lang);}catch{}render();});
