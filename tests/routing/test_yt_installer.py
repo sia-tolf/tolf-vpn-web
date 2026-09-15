@@ -73,6 +73,7 @@ table inet tolf_vpn_mss {
         self.assertIn("MOSCOW_POOL='10.19.0.0/24'", script)
         self.assertIn("connections {\n    ikev2-yt {", script)
         self.assertIn("id = yt", script)
+        self.assertIn("vpn-pool-yt {\n        addrs = 10.19.0.0/24\n        dns = 10.254.0.54", script)
         self.assertIn("10.19.0.0/24 ip daddr @yt_domains4 meta mark set 0x100", script)
         self.assertIn("from \"$MOSCOW_POOL\" table 100", script)
 
