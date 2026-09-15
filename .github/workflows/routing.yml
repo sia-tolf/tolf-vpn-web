@@ -15,4 +15,4 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m unittest discover -s tests/routing -v
-      - run: python -m py_compile setup/routing/install-sryt-routing.py
+      - run: python -m py_compile setup/routing/install-yt-routing.py

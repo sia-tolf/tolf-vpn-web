@@ -5,17 +5,17 @@ import unittest
 
 
 ROOT = Path(__file__).resolve().parents[2]
-INSTALLER = ROOT / "setup/routing/install-sryt-routing.py"
+INSTALLER = ROOT / "setup/routing/install-yt-routing.py"
 
 
 def load_installer():
-    spec = importlib.util.spec_from_file_location("sryt_installer", INSTALLER)
+    spec = importlib.util.spec_from_file_location("yt_installer", INSTALLER)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
 
 
-class SrytInstallerTests(unittest.TestCase):
+class YtInstallerTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.module = load_installer()
@@ -45,12 +45,13 @@ table inet tolf_vpn_mss {
 """
         patched = self.module.patch_riga_nft(original)
         self.assertIn("10.18.0.0/24", patched)
-        self.assertIn("TOLF SRYT MSS v1", patched)
+        self.assertIn("TOLF YT MSS v1", patched)
         self.assertEqual(self.module.patch_riga_nft(patched), patched)
 
     def test_mode_is_not_added_to_public_frontend(self):
         config = (ROOT / "js/config.js").read_text()
-        self.assertNotIn("sryt", config)
+        self.assertNotIn("'yt'", config)
+        self.assertNotIn('"yt"', config)
         self.assertNotIn("yt_domains4", config)
 
     def test_required_youtube_delivery_domains_are_present(self):

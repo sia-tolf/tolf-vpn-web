@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Install the private SRYT routing mode on Riga and Moscow."""
+"""Install the private YT routing mode on Riga and Moscow."""
 
 import fcntl
 import os
@@ -11,12 +11,12 @@ import tempfile
 import time
 
 
-RIGA_CONF = Path("/etc/swanctl/conf.d/ikev2-riga-sryt.conf")
+RIGA_CONF = Path("/etc/swanctl/conf.d/ikev2-riga-yt.conf")
 RIGA_NFT = Path("/etc/nftables.conf")
-RIGA_RULE = Path("/etc/systemd/system/tolf-sryt-routing.service")
+RIGA_RULE = Path("/etc/systemd/system/tolf-yt-routing.service")
 ROOT_HELPER = Path("/usr/local/sbin/tolf-provision-root")
 SSH_HELPER = Path("/usr/local/sbin/tolf-provision-ssh")
-LOCK = Path("/var/lock/tolf-sryt-install.lock")
+LOCK = Path("/var/lock/tolf-yt-install.lock")
 REMOTE = [
     "/usr/bin/ssh", "-T",
     "-i", "/root/.ssh/id_ed25519_ike_users_sync",
@@ -28,7 +28,7 @@ REMOTE = [
 ]
 
 CONNECTION = """connections {
-    riga-sryt {
+    riga-yt {
         version = 2
         proposals = aes256-sha256-modp2048
         rekey_time = 0
@@ -43,24 +43,24 @@ CONNECTION = """connections {
 
         remote {
             auth = eap-mschapv2
-            id = sryt
+            id = yt
             eap_id = %any
         }
 
         children {
-            riga-sryt {
+            riga-yt {
                 local_ts = 0.0.0.0/0
                 esp_proposals = aes256-sha256
                 rekey_time = 0
             }
         }
 
-        pools = vpn-pool-riga-sryt
+        pools = vpn-pool-riga-yt
     }
 }
 
 pools {
-    vpn-pool-riga-sryt {
+    vpn-pool-riga-yt {
         addrs = 10.18.0.0/24
         dns = 10.254.0.54
     }
@@ -68,7 +68,7 @@ pools {
 """
 
 RULE_UNIT = """[Unit]
-Description=TOLF SRYT source routing to Moscow
+Description=TOLF YT source routing to Moscow
 After=network-online.target
 Wants=network-online.target
 
@@ -88,7 +88,7 @@ set -eu
 
 POOL='10.18.0.0/24'
 NFT='/etc/nftables.d/90-ru-split.nft'
-BACKUP="/root/tolf-sryt-moscow-backup-$(date +%Y%m%d-%H%M%S)-$$"
+BACKUP="/root/tolf-yt-moscow-backup-$(date +%Y%m%d-%H%M%S)-$$"
 
 [ -f "$NFT" ] || { echo "Missing $NFT" >&2; exit 1; }
 command -v uci >/dev/null
@@ -136,18 +136,18 @@ clone_uci() {
         uci batch
 }
 
-clone_uci network riga_ikev2_sr riga_ikev2_sryt '10\.16\.0\.0' '10.18.0.0'
-clone_uci network riga_ikev2_sr_return riga_ikev2_sryt_return '10\.16\.0\.0' '10.18.0.0'
-uci set network.riga_ikev2_sryt.priority='10004'
+clone_uci network riga_ikev2_sr riga_ikev2_yt '10\.16\.0\.0' '10.18.0.0'
+clone_uci network riga_ikev2_sr_return riga_ikev2_yt_return '10\.16\.0\.0' '10.18.0.0'
+uci set network.riga_ikev2_yt.priority='10004'
 
-uci -q delete network.tolf_dns_sryt || true
-uci set network.tolf_dns_sryt='interface'
-uci set network.tolf_dns_sryt.proto='static'
-uci set network.tolf_dns_sryt.device='lo'
-uci set network.tolf_dns_sryt.ipaddr='10.254.0.54'
-uci set network.tolf_dns_sryt.netmask='255.255.255.255'
+uci -q delete network.tolf_dns_yt || true
+uci set network.tolf_dns_yt='interface'
+uci set network.tolf_dns_yt.proto='static'
+uci set network.tolf_dns_yt.device='lo'
+uci set network.tolf_dns_yt.ipaddr='10.254.0.54'
+uci set network.tolf_dns_yt.netmask='255.255.255.255'
 
-clone_uci firewall riga_ikev2_sr_nat riga_ikev2_sryt_nat '10\.16\.0\.0' '10.18.0.0'
+clone_uci firewall riga_ikev2_sr_nat riga_ikev2_yt_nat '10\.16\.0\.0' '10.18.0.0'
 
 uci -q delete dhcp.tolf_youtube || true
 uci set dhcp.tolf_youtube='ipset'
@@ -159,7 +159,7 @@ for domain in \
     uci add_list dhcp.tolf_youtube.domain="$domain"
 done
 
-if ! grep -q '# TOLF SRYT routing v1' "$NFT"; then
+if ! grep -q '# TOLF YT routing v1' "$NFT"; then
     awk '
     /^chain ru_split_prerouting \{/ {
         if (split_seen++) exit 41
@@ -169,7 +169,7 @@ if ! grep -q '# TOLF SRYT routing v1' "$NFT"; then
         print "}"
         print ""
         print
-        print "    # TOLF SRYT routing v1"
+        print "    # TOLF YT routing v1"
         print "    ip saddr 10.18.0.0/24 ip daddr @ru4 meta mark set 0x100"
         print "    ip saddr 10.18.0.0/24 ip daddr @ru_domains4 meta mark set 0x100"
         print "    ip saddr 10.18.0.0/24 ip daddr @yt_domains4 meta mark set 0x100"
@@ -193,9 +193,9 @@ if ! grep -q '# TOLF SRYT routing v1' "$NFT"; then
     END {
         if (split_seen != 1 || dns_seen != 1 || snat_seen != 1) exit 44
     }
-    ' "$NFT" > /tmp/90-ru-split.sryt.$$
-    chmod "$(stat -c %a "$NFT")" /tmp/90-ru-split.sryt.$$
-    mv /tmp/90-ru-split.sryt.$$ "$NFT"
+    ' "$NFT" > /tmp/90-ru-split.yt.$$
+    chmod "$(stat -c %a "$NFT")" /tmp/90-ru-split.yt.$$
+    mv /tmp/90-ru-split.yt.$$ "$NFT"
 fi
 
 uci commit network
@@ -220,7 +220,7 @@ nft list chain inet fw4 ru_split_prerouting | grep -q '10.18.0.0/24.*yt_domains4
 SUCCESS=1
 trap - EXIT HUP INT TERM
 echo "Backup: $BACKUP"
-echo 'Moscow SRYT routing: OK'
+echo 'Moscow YT routing: OK'
 '''
 
 
@@ -257,12 +257,12 @@ def patch_riga_nft(source):
         "10.17.0.0/24, 10.18.0.0/24, 10.20.0.0/24",
         "Riga NAT source list",
     )
-    if "TOLF SRYT MSS v1" not in source:
+    if "TOLF YT MSS v1" not in source:
         anchor = "table inet tolf_vpn_mss {"
         if source.count(anchor) != 1:
             raise RuntimeError("Unexpected Riga MSS table; nothing changed")
-        block = """# TOLF SRYT MSS v1
-table inet tolf_sryt_mss {
+        block = """# TOLF YT MSS v1
+table inet tolf_yt_mss {
     chain forward {
         type filter hook forward priority -139; policy accept;
         ip saddr 10.18.0.0/24 tcp flags & syn == syn tcp option maxseg size > 1200 counter tcp option maxseg size set 1200
@@ -280,14 +280,14 @@ def patch_helpers():
     root = patch_once(
         root,
         "riga:sr|riga:ru|moscow:",
-        "riga:sr|riga:ru|riga:sryt|moscow:",
+        "riga:sr|riga:ru|riga:yt|moscow:",
         "provisioning Local ID allowlist",
     )
     ssh = SSH_HELPER.read_text()
     ssh = patch_once(
         ssh,
         "(sr|ru|lv|default)",
-        "(sr|ru|lv|sryt|default)",
+        "(sr|ru|lv|yt|default)",
         "SSH Local ID allowlist",
     )
     run(["/bin/bash", "-n"], input=root)
@@ -319,7 +319,7 @@ def main():
         if "ikev2-eap-domain" not in probe.stdout or "awgriga" not in probe.stdout:
             raise RuntimeError("Unexpected Moscow provisioning endpoint")
 
-        backup = Path("/root/tolf-sryt-riga-backup-" + time.strftime("%Y%m%d-%H%M%S") + "-" + str(os.getpid()))
+        backup = Path("/root/tolf-yt-riga-backup-" + time.strftime("%Y%m%d-%H%M%S") + "-" + str(os.getpid()))
         backup.mkdir(mode=0o700)
         targets = {
             RIGA_CONF: CONNECTION,
@@ -340,14 +340,14 @@ def main():
                 mode = (path.stat().st_mode & 0o777) if path.exists() else 0o644
                 atomic(path, content, mode)
             run(["/bin/systemctl", "daemon-reload"])
-            run(["/bin/systemctl", "enable", "--now", "tolf-sryt-routing.service"])
+            run(["/bin/systemctl", "enable", "--now", "tolf-yt-routing.service"])
             run(["/usr/sbin/nft", "-f", str(RIGA_NFT)])
             run(["/usr/sbin/swanctl", "--load-conns"])
             run(["/usr/sbin/swanctl", "--load-pools"])
             checks = [
                 (["/usr/sbin/ip", "-4", "rule", "show"], "from 10.18.0.0/24 lookup 102"),
-                (["/usr/sbin/swanctl", "--list-conns", "--raw"], "riga-sryt"),
-                (["/usr/sbin/swanctl", "--list-pools", "--raw"], "vpn-pool-riga-sryt"),
+                (["/usr/sbin/swanctl", "--list-conns", "--raw"], "riga-yt"),
+                (["/usr/sbin/swanctl", "--list-pools", "--raw"], "vpn-pool-riga-yt"),
             ]
             for command, expected in checks:
                 result = run(command, capture_output=True)
@@ -358,7 +358,7 @@ def main():
             print(remote.stdout, end="")
         except Exception:
             if original.get(RIGA_RULE) is None:
-                run(["/bin/systemctl", "disable", "--now", "tolf-sryt-routing.service"], check=False)
+                run(["/bin/systemctl", "disable", "--now", "tolf-yt-routing.service"], check=False)
             for path, content in original.items():
                 if content is None:
                     path.unlink(missing_ok=True)
@@ -366,13 +366,13 @@ def main():
                     atomic(path, content, path.stat().st_mode & 0o777 if path.exists() else 0o644)
             run(["/bin/systemctl", "daemon-reload"], check=False)
             if original.get(RIGA_RULE) is not None:
-                run(["/bin/systemctl", "restart", "tolf-sryt-routing.service"], check=False)
+                run(["/bin/systemctl", "restart", "tolf-yt-routing.service"], check=False)
             run(["/usr/sbin/nft", "-f", str(RIGA_NFT)], check=False)
             run(["/usr/sbin/swanctl", "--load-conns"], check=False)
             run(["/usr/sbin/swanctl", "--load-pools"], check=False)
             raise
 
-        print("OK: private SRYT routing mode installed.")
+        print("OK: private YT routing mode installed.")
         print("Existing VPN credentials and sessions were not changed.")
 
 
