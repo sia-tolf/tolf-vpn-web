@@ -29,6 +29,9 @@ class YtInstallerTests(unittest.TestCase):
             check=True,
         )
 
+    def test_uci_clone_emits_batch_set_commands(self):
+        self.assertIn("sed 's/^/set /'", self.module.REMOTE_SCRIPT)
+
     def test_riga_nft_patch_is_idempotent(self):
         original = """#!/usr/sbin/nft -f
 flush ruleset

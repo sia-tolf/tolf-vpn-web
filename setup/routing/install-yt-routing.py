@@ -134,6 +134,7 @@ clone_uci() {
     uci -q delete "$package.$new" || true
     uci show "$package.$old" |
         sed "s/^$package\\.$old/$package.$new/; s/$from/$to/g" |
+        sed 's/^/set /' |
         uci batch
 }
 
