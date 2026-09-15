@@ -196,7 +196,7 @@ if ! grep -q '# TOLF YT routing v1' "$NFT"; then
         if (split_seen != 1 || dns_seen != 1 || snat_seen != 1) exit 44
     }
     ' "$NFT" > /tmp/90-ru-split.yt.$$
-    chmod "$(stat -c %a "$NFT")" /tmp/90-ru-split.yt.$$
+    chmod 0644 /tmp/90-ru-split.yt.$$
     mv /tmp/90-ru-split.yt.$$ "$NFT"
 fi
 
