@@ -26,7 +26,6 @@ function render() {
  $('register').textContent = t(nativePlatform === 'windows' ? 'createWindows' : 'create');
  document.querySelectorAll('[data-lang]').forEach(el => { el.setAttribute('aria-pressed', String(el.dataset.lang === lang)); el.disabled = busy; });
  $('deviceSummary').textContent = platform === 'ios' ? 'iPhone / iPad' : platform === 'android' ? 'Android' : 'Windows';
- $('serverSummary').textContent = t(server);
  $('platform').value = platform; $('server').value = server;
  $('message').textContent = t(messageKey); $('message').className = failed ? 'error' : '';
  for (const id of ['change','platform','server']) $(id).disabled = busy || locked;
