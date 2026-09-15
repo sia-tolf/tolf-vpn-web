@@ -17,6 +17,12 @@ import zlib
 
 PAYLOAD = ''
 MARKER = '# TOLF quick setup v1'
+PUBLIC_REQUESTED_SERVER = '''def requested_server(user_id, payload):
+    server = (payload or {}).get("server", "riga")
+    if server not in ("riga", "moscow"):
+        raise HTTPException(400, "VPN server is not available")
+    return server
+'''
 
 
 def patch(source):
@@ -30,7 +36,8 @@ def patch(source):
             continue
         old = ''.join(lines[node.lineno-1:node.end_lineno])
         if node.name == 'requested_server':
-            if old.count('return server') != 1 or 'tolf_promos.allowed_servers(DB, user_id)' not in old:
+            public_variant = ast.dump(node) == ast.dump(ast.parse(PUBLIC_REQUESTED_SERVER).body[0])
+            if old.count('return server') != 1 or (not public_variant and 'tolf_promos.allowed_servers(DB, user_id)' not in old):
                 raise RuntimeError('Unrecognized requested_server; nothing changed')
             new = old.replace('tolf_promos.allowed_servers(DB, user_id)', 'tolf_quick.allowed_servers(DB, user_id)')
             new = new.replace('    return server', '''    if server == "moscow":

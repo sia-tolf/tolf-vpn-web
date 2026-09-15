@@ -109,4 +109,17 @@ async def passkey_register_finish(request):
   tree=ast.parse(new);func=next(n for n in tree.body if isinstance(n,ast.FunctionDef))
   exec(compile(ast.Module(body=[func],type_ignores=[]),'test','exec'),ns)
   with self.assertRaises(HTTPException):ns['requested_server'](USER,{'server':'moscow'})
+ def test_live_public_server_variant(self):
+  tree=ast.parse(self.SOURCE);old=ast.get_source_segment(self.SOURCE,tree.body[1])
+  source=self.SOURCE.replace(old,p.PUBLIC_REQUESTED_SERVER.strip())
+  new=p.patch(source);self.assertEqual(p.patch(new),new)
+  calls=[]
+  ns={'HTTPException':HTTPException,'provision_on_riga':lambda *args:calls.append(args)}
+  func=next(n for n in ast.parse(new).body if isinstance(n,ast.FunctionDef))
+  exec(compile(ast.Module(body=[func],type_ignores=[]),'test','exec'),ns)
+  self.assertEqual(ns['requested_server'](USER,{}),'riga');self.assertEqual(calls,[])
+  self.assertEqual(ns['requested_server'](USER,{'server':'moscow'}),'moscow')
+  self.assertEqual(calls,[('grant-moscow',USER)])
+  with self.assertRaises(HTTPException):ns['requested_server'](USER,{'server':'unknown'})
+  with self.assertRaises(RuntimeError):p.patch(source.replace('return server','return "riga"'))
 if __name__=='__main__':unittest.main()
