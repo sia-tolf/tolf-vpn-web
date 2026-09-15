@@ -76,6 +76,12 @@ table inet tolf_vpn_mss {
         self.assertIn("10.19.0.0/24 ip daddr @yt_domains4 meta mark set 0x100", script)
         self.assertIn("from \"$MOSCOW_POOL\" table 100", script)
 
+    def test_moscow_mss_chain_is_self_contained(self):
+        script = self.module.REMOTE_SCRIPT
+        self.assertIn("chain moscow_yt_mss_forward {", script)
+        self.assertIn("type filter hook forward priority mangle + 11", script)
+        self.assertNotIn("/^chain ikev2_mss_forward", script)
+
     def test_atomic_restores_binary_backup(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "config"
