@@ -7,7 +7,7 @@ const root=path.resolve(__dirname,'../..');
   for(const locale of ['ru','en','lv']){
    const context=await browser.newContext({viewport:{width:390,height:844},locale,userAgent:'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)'});
    const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
-   let auth=false,saved=null,prepares=0;
+   let auth=false,saved=null,prepares=0,registeredName='';
    await page.route('https://api.tolf.is/**',r=>{
     const req=r.request(),url=new URL(req.url());const headers={'Access-Control-Allow-Origin':'https://vpn.tolf.is','Access-Control-Allow-Credentials':'true','Access-Control-Allow-Headers':'content-type','Access-Control-Allow-Methods':'GET,POST'};
     if(req.method()==='OPTIONS')return r.fulfill({status:204,headers});
@@ -17,7 +17,7 @@ const root=path.resolve(__dirname,'../..');
      case '/entry-point-recommendation':body={entryPoint:'moscow'};break;
      case '/me':if(!auth){status=401;body={detail:'Login'};}else body={authenticated:true};break;
      case '/quick-setup/status':body={setup:saved};break;
-     case '/passkey/register/begin':body={options:{},challengeId:'fake'};break;
+     case '/passkey/register/begin':registeredName=req.postDataJSON().passkeyName;body={options:{},challengeId:'fake'};break;
      case '/passkey/register/finish':auth=true;body={recoveryCode:'RECOVERY-TEST'};break;
      case '/quick-setup/prepare':{
       const p=req.postDataJSON();assert.equal(p.platform,'ios');assert.equal(p.server,'moscow');assert.equal(p.language,locale);
@@ -35,9 +35,12 @@ const root=path.resolve(__dirname,'../..');
    await page.goto('https://vpn.tolf.is/quick/');
    await page.locator('#register:not([disabled])').waitFor();
    assert.equal(await page.locator('#server').inputValue(),'moscow');
+   assert.equal(await page.locator('#passkeyName').inputValue(),'iPhone');
+   await page.locator('#passkeyName').fill(locale==='ru'?'iPad Александра':'Personal iPad');
    await page.evaluate(()=>{prepareRegistrationOptions=x=>x;serializeCredential=x=>x;Object.defineProperty(navigator,'credentials',{value:{create:async()=>({id:'fake'})},configurable:true});});
    await page.screenshot({path:`/tmp/tolf-quick-${locale}.png`,fullPage:true});
    await page.locator('#register').click();await page.locator('#code').waitFor();
+   assert.equal(registeredName,locale==='ru'?'iPad Александра':'Personal iPad');
    assert.equal(await page.locator('#code').inputValue(),'RECOVERY-TEST');assert.equal(prepares,0);
    await page.locator('#saved').click();await page.locator('#download').waitFor();
    assert.equal(await page.locator('#download').getAttribute('href'),'https://config.tolf.is/p/test/download');

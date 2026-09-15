@@ -5,7 +5,7 @@ async function scenario(country,device='ios'){
  const ids=[...fs.readFileSync(path.join(root,'quick/index.html'),'utf8').matchAll(/id="([^"]+)"/g)].map(m=>m[1]);
  const elements=Object.fromEntries(ids.map(id=>[id,{hidden:false,disabled:false,value:'',textContent:'',dataset:{},setAttribute(){},focus(){},select(){}}]));
  const storage=new Map(),langs=['en','ru','lv'].map(lang=>({dataset:{lang},setAttribute(){}}));
- let auth=false,record=null,requests=0;
+ let auth=false,record=null,requests=0,registeredName='';
  const context={URL,AbortSignal,console,sessionStorage:{getItem:k=>storage.get(k),setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)},localStorage:{getItem:()=>null,setItem(){}},
  navigator:{userAgent:device==='windows'?'Windows NT':'iPhone',language:'ru',credentials:{create:async()=>({id:'fake'})}},
  document:{getElementById:id=>elements[id],documentElement:{lang:'ru'},querySelectorAll:s=>s==='[data-lang]'?langs:[]},window:{addEventListener(){}},
@@ -16,7 +16,7 @@ async function scenario(country,device='ios'){
   else if(p==='/entry-point-recommendation')data={entryPoint:country};
   else if(p==='/me'){data={authenticated:auth};if(!auth){ok=false;status=401;}}
   else if(p.endsWith('/status'))data={setup:record};
-  else if(p.endsWith('/begin'))data={options:{},challengeId:'test'};
+  else if(p==='/passkey/register/begin'){registeredName=JSON.parse(options.body).passkeyName;data={options:{},challengeId:'test'};}
   else if(p.endsWith('/finish')){auth=true;data={recoveryCode:'RECOVERY'};}
   else if(p.endsWith('/prepare')){requests++;const body=JSON.parse(options.body);record={platform:body.platform,server:body.server,state:'ready'};data={profileUrl:'https://config.tolf.is/p/test'};}
   else throw new Error(p);
@@ -26,7 +26,8 @@ async function scenario(country,device='ios'){
  for(let i=0;i<20;i++)await new Promise(setImmediate);
  assert.equal(elements.server.value,country==='moscow'?'moscow':'riga');
  assert.equal(elements.register.disabled,false);
- await elements.register.onclick();assert.equal(elements.code.value,'RECOVERY');assert.equal(requests,0);
+ assert.match(elements.passkeyName.value,/^(iPhone|Windows)$/);elements.passkeyName.value='Personal iPad';
+ await elements.register.onclick();assert.equal(registeredName,'Personal iPad');assert.equal(elements.code.value,'RECOVERY');assert.equal(requests,0);
  await elements.saved.onclick();assert.equal(requests,1);assert.equal(elements.code.value,'');assert.equal(elements.download.href,'https://config.tolf.is/p/test/download');
  assert.equal(elements.delivery.hidden,false);
  return true;

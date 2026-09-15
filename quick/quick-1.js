@@ -14,6 +14,8 @@ let platform = ['ios','android','windows'].includes(get('quickPlatform')) ? get(
 let manual = get('quickManual') === 'yes';
 let uncertain = get('quickRegistration') === 'pending';
 let loadNumber = 0;
+const suggestedPasskeyName = /iPad/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1) ? 'iPad' : nativePlatform==='ios'?'iPhone':nativePlatform==='windows'?'Windows':'Android';
+$('passkeyName').value = suggestedPasskeyName;
 function message(key, error = false) { messageKey = key; failed = error; render(); }
 function persist() { put('quickServer', server); put('quickPlatform', platform); }
 function render() {
@@ -92,8 +94,9 @@ document.querySelectorAll('[data-lang]').forEach(el=>el.onclick=()=>{lang=el.dat
 $('retry').onclick=()=>initialize();
 $('register').onclick=()=>action(async()=>{
  if(!ready || uncertain)return;
+ const passkeyName=$('passkeyName').value.trim();
+ if(!passkeyName){$('passkeyName').focus();message('passkeyNameRequired',true);return;}
  message('waiting');persist();
- const passkeyName = /iPad/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1) ? 'iPad' : nativePlatform==='ios'?'iPhone':nativePlatform==='windows'?'Windows':'Android';
  const begin=await api('/passkey/register/begin',{method:'POST',body:JSON.stringify({passkeyName})});
  const credential=await navigator.credentials.create({publicKey:prepareRegistrationOptions(begin.options)});
  if(!credential)throw new Error('No Passkey');
