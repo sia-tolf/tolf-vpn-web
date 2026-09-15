@@ -133,3 +133,69 @@ by London: execute the release's updater there, then download the new installer.
 
 - https://learn.microsoft.com/en-us/previous-versions/windows/desktop/vpnclientpsprov/add-ps-vpnconnectionroute
 - https://learn.microsoft.com/en-us/previous-versions/windows/desktop/vpnclientpsprov/remove-ps-vpnconnectionroute
+
+
+## Windows routing 2.3 (staged deployment)
+
+The API now stores `server` and `localId` separately for each Windows device.
+Supported combinations match the website's public routing choices:
+
+| Entry point | Mode | Server pool |
+| --- | --- | --- |
+| Riga | sr | vpn-pool-riga-sr |
+| Riga | ru | vpn-pool-riga-ru |
+| Moscow | default (empty localId) | vpn-pool |
+| Moscow | sr | vpn-pool-rf |
+| Moscow | ru | vpn-pool-ru |
+| Moscow | lv | vpn-pool-ee |
+
+The private `ch` mode is not exposed. Existing Windows records continue to use
+Riga/sr without a migration of their credentials or connection names. Routing
+metadata lives in a separate SQLite table, preserving the old six-column table
+for compatibility with the shipped API.
+
+Windows does not send these mode strings as its IKE identity. The root-only
+`routing-control.py` instead generates connections constrained by each device's
+EAP username. Both nodes use an EAP identity dispatcher with an unsatisfied group
+constraint, required for post-authentication selection on strongSwan 6.0.1.
+See the [strongSwan maintainer's explanation](https://github.com/strongswan/strongswan/discussions/1326).
+Generated connections use exact local public addresses to precede the wildcard
+Windows fallback. Existing explicit IKE-identity profiles remain in place.
+
+This connection-selection behavior still requires a real Windows handshake test
+on the installed daemons. API, renderer and rollback tests are not that test.
+
+Deployment artifacts in a successful native build:
+
+1. London: `update-windows-gui.py` installs the API, its routing RPC module and
+   native installer 2.3 together. Existing routing remains available if Riga has
+   not been upgraded. A different requested route is rejected, never silently
+   converted to Riga/sr.
+2. Riga: `install-windows-routing.py` installs the restricted controller after
+   checking both nodes' pools, local addresses and configuration includes. With
+   no arguments it does not enable new routing choices. With `--enable` it
+   advertises them to London. It does not restart VPN services or change
+   established connections.
+3. Create ONE new test Windows device with the desired entry point and mode.
+   Creating it writes the managed configuration and reloads the complete
+   `swanctl.conf` on both nodes. The API issues a setup link only after both nodes
+   confirm successful application. Existing devices retain their previous mode.
+4. On a computer with another means of access, test the connection and inspect
+   `swanctl --list-sas` on the selected entry node: the assigned address must
+   belong to the pool above, with the expected per-device connection selected.
+   Verify Internet routing and DNS before enabling wider use. On an RDP-only
+   computer, use **Save without connecting** until remote access is accounted for.
+
+A device's selected route is immutable for now. Create a separate device to test
+another route. Deleting it removes its separate VPN credentials and its managed
+routing entry; the parent account's Apple/Android credentials are untouched.
+Node updates are serialized with provisioning. A journal restores the committed
+configuration following interruption; a failed update never returns a setup link.
+The controller reloads the full configuration, because loading only a generated
+fragment would unload unrelated connections.
+
+To stop offering new choices, remove
+`/var/lib/ike-users/windows-routing/enabled` on Riga. This preserves existing
+managed assignments. Keep the 2.3 API while managed devices exist; an older API
+cannot service their selected routes. Do not delete managed configuration files
+while those devices are in use.

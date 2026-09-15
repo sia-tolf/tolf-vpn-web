@@ -12,6 +12,7 @@ import secrets
 import sqlite3
 import uuid
 import zipfile
+import tolf_windows_routes as routes
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from fastapi import HTTPException, Request
@@ -20,6 +21,7 @@ from fastapi.responses import HTMLResponse, Response
 VERSION = '1.0'
 INSTALLER = Path(__file__).with_name('TOLF-Setup.exe')
 CTX = None
+DEVICE_QUERY = "SELECT d.*, COALESCE(r.server,'riga') AS server, COALESCE(r.local_id,'sr') AS local_id, COALESCE(r.routing_managed,0) AS routing_managed FROM windows_devices d LEFT JOIN windows_device_routes r ON r.device_id=d.id"
 TOKEN = re.compile(r'[A-Za-z0-9_-]{32}')
 HEADERS = {'Cache-Control': 'private, no-store, max-age=0',
            'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer'}
@@ -45,6 +47,9 @@ def initialize():
         c.execute('''CREATE TABLE IF NOT EXISTS windows_devices (
             id TEXT PRIMARY KEY, user_id TEXT NOT NULL, name TEXT NOT NULL,
             username TEXT, state TEXT NOT NULL, created_at TEXT NOT NULL)''')
+        c.execute("""CREATE TABLE IF NOT EXISTS windows_device_routes (
+            device_id TEXT PRIMARY KEY, server TEXT NOT NULL, local_id TEXT NOT NULL,
+            routing_managed INTEGER NOT NULL DEFAULT 0)""")
         c.execute('CREATE INDEX IF NOT EXISTS windows_devices_owner ON windows_devices(user_id)')
 
 
@@ -61,7 +66,7 @@ def identity(value):
 
 def owned(user_id, device_id):
     with db() as c:
-        row = c.execute('SELECT * FROM windows_devices WHERE user_id=? AND id=?',
+        row = c.execute(DEVICE_QUERY+' WHERE d.user_id=? AND d.id=?',
                         (user_id, identity(device_id))).fetchone()
     if row is None:
         raise HTTPException(404, 'Windows device not found')
@@ -71,7 +76,7 @@ def owned(user_id, device_id):
 
 
 def public(row):
-    return {k: row[k] for k in ('id', 'name', 'username', 'state', 'created_at')}
+    return {**{k: row[k] for k in ('id', 'name', 'username', 'state', 'created_at', 'server')}, 'localId': row['local_id']}
 
 
 def invalidate(device_id):
@@ -94,6 +99,8 @@ def remove(user_id, device_id):
     invalidate(row['id'])
     CTX['remove_provisioned_vpn'](row['id'], row['username'])
     CTX['provision_on_riga']('revoke-moscow', row['id'])
+    if row['routing_managed']:
+        routes.rpc(CTX, 'remove', row['id'])
     with db() as c:
         c.execute("UPDATE windows_devices SET state='deleted' WHERE id=? AND user_id=?", (row['id'], user_id))
 
@@ -113,14 +120,24 @@ def language(payload):
     return value
 
 
+def route_description(server, mode, lang):
+    names = {'en': {'riga': 'Riga', 'moscow': 'Moscow'}, 'ru': {'riga': 'Рига', 'moscow': 'Москва'}, 'lv': {'riga': 'Rīga', 'moscow': 'Maskava'}}
+    descriptions = {
+        'en': {'split': 'Russian destinations through Moscow, other traffic through Riga.', 'ru': 'Internet traffic through Moscow.', 'lv': 'Internet traffic through Riga.', 'sr': 'Destinations in the Riga routing lists through Riga, other traffic through Moscow.'},
+        'ru': {'split': 'Российские направления через Москву, остальные через Ригу.', 'ru': 'Интернет-трафик через Москву.', 'lv': 'Интернет-трафик через Ригу.', 'sr': 'Направления из списков маршрутизации Риги через Ригу, остальные через Москву.'},
+        'lv': {'split': 'Krievijas adreses caur Maskavu, pārējā datplūsma caur Rīgu.', 'ru': 'Interneta datplūsma caur Maskavu.', 'lv': 'Interneta datplūsma caur Rīgu.', 'sr': 'Rīgas maršrutēšanas sarakstu adreses caur Rīgu, pārējā datplūsma caur Maskavu.'}}
+    key = 'split' if (server, mode) in (('riga', 'sr'), ('moscow', '')) else mode
+    return names[lang][server] + '. ' + descriptions[lang][key]
+
+
 def package(row, credentials, lang):
     expected = 'user_' + uuid.UUID(row['id']).hex
     username, password = credentials.get('username'), credentials.get('password')
     if username != expected or (row['username'] and row['username'] != username) or not CTX['tolf_profiles']._valid_secret(password):
         raise HTTPException(502, 'Invalid Windows credentials from VPN server')
-    if credentials.get('server') != 'riga' or credentials.get('localId') != 'sr':
+    if credentials.get('server') != row['server'] or credentials.get('localId') != row['local_id']:
         raise HTTPException(502, 'Invalid Windows route from VPN server')
-    settings = {'deviceId': row['id'], 'server': 'ikev2-riga.tolf.is',
+    settings = {'deviceId': row['id'], 'server': routes.HOSTS[row['server']],
                 'username': username, 'password': password}
     output = io.BytesIO()
     template = Path(__file__).with_name('tolf-windows-install.ps1').read_text()
@@ -128,13 +145,13 @@ def package(row, credentials, lang):
         archive.writestr('connection.json', json.dumps(settings, ensure_ascii=True))
         archive.writestr('Install-TOLF.ps1', template.encode('utf-8-sig'))
         archive.writestr('Install-TOLF.cmd', '@echo off\r\npowershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0Install-TOLF.ps1"\r\nif errorlevel 1 echo TOLF setup failed. Read the error above.\r\npause\r\n')
-        archive.writestr('README.txt', ('\n\n'.join([TEXT[lang][0], TEXT[lang][2], TEXT[lang][6], TEXT[lang][3]])).encode('utf-8-sig'))
+        archive.writestr('README.txt', ('\n\n'.join([TEXT[lang][0], TEXT[lang][2], route_description(row['server'], row['local_id'], lang), TEXT[lang][3]])).encode('utf-8-sig'))
     profiles = CTX['tolf_profiles']
     profiles.initialize()
     token = secrets.token_urlsafe(24)
     content = output.getvalue()
     metadata = {'platform': 'windows', 'deviceId': row['id'], 'name': row['name'],
-                'username': username, 'language': lang, 'expiresAt': (now()+timedelta(hours=24)).isoformat(),
+                'server': row['server'], 'localId': row['local_id'], 'username': username, 'language': lang, 'expiresAt': (now()+timedelta(hours=24)).isoformat(),
                 'sha256': hashlib.sha256(content).hexdigest()}
     archive_path = profiles.PROFILE_DIR / (token + '.windows.zip')
     meta_path = profiles.PROFILE_DIR / (token + '.json')
@@ -181,13 +198,14 @@ def install(app, context):
 
     @app.get('/windows/capabilities')
     def capabilities():
-        return {'version': VERSION, 'servers': ['riga'], 'routing': 'sr', 'installerVersion': '2.2.0'}
+        modes = routes.available(CTX)
+        return {'version': VERSION, 'servers': list(modes), 'routing': 'sr', 'routingModes': modes, 'installerVersion': '2.3.0'}
 
     @app.get('/windows/devices')
     def devices(request: Request):
         user_id = CTX['authenticated_user_id'](request)
         with db() as c:
-            rows = c.execute("SELECT * FROM windows_devices WHERE user_id=? AND state!='deleted' ORDER BY created_at,id", (user_id,)).fetchall()
+            rows = c.execute(DEVICE_QUERY+" WHERE d.user_id=? AND d.state!='deleted' ORDER BY d.created_at,d.id", (user_id,)).fetchall()
         return Response(json.dumps({'devices': [public(r) for r in rows]}), media_type='application/json', headers=HEADERS)
 
     @app.post('/windows/devices')
@@ -195,6 +213,7 @@ def install(app, context):
         user_id = CTX['authenticated_user_id'](request)
         lang = language(payload)
         request_id = identity(payload.get('requestId'))
+        server, mode = routes.selection(payload)
         name = payload.get('name', '')
         if not isinstance(name, str) or not 1 <= len(name.strip()) <= 64 or any(ord(ch)<32 for ch in name):
             raise HTTPException(400, 'Enter a device name (1–64 characters)')
@@ -202,18 +221,26 @@ def install(app, context):
         device_id = str(uuid.uuid5(uuid.UUID(user_id), 'windows:' + request_id))
         with CTX['tolf_promos'].account_operation(CTX['DB'], user_id):
             with db() as c:
-                existing = c.execute('SELECT id FROM windows_devices WHERE id=? AND user_id=?', (device_id, user_id)).fetchone()
+                existing = c.execute(DEVICE_QUERY+' WHERE d.id=? AND d.user_id=?', (device_id, user_id)).fetchone()
+                if existing and (existing['server'], existing['local_id']) != (server, mode):
+                    raise HTTPException(409, 'This request already belongs to another Windows routing selection')
                 if not existing:
+                    supported = routes.available(CTX)
+                    if mode not in supported.get(server, []):
+                        raise HTTPException(503, 'Selected Windows route is not available yet')
+                    managed = int(supported != {'riga': ['sr']})
                     count = c.execute("SELECT count(*) FROM windows_devices WHERE user_id=? AND state!='deleted'", (user_id,)).fetchone()[0]
                     if count >= 20:
                         raise HTTPException(409, 'Windows device limit reached')
-                    c.execute('INSERT INTO windows_devices VALUES (?,?,?,?,?,?)',
+                    c.execute('INSERT INTO windows_devices (id,user_id,name,username,state,created_at) VALUES (?,?,?,?,?,?)',
                               (device_id, user_id, name.strip(), None, 'provisioning', now().isoformat()))
+                    c.execute('INSERT INTO windows_device_routes VALUES (?,?,?,?)', (device_id, server, mode, managed))
             row = owned(user_id, device_id)
             if row['state'] == 'deleting':
                 raise HTTPException(409, 'Device deletion is pending')
             CTX['provision_on_riga']('grant-moscow', device_id)
-            credentials = CTX['provision_on_riga']('create', device_id, 'riga', 'sr')
+            credentials = CTX['provision_on_riga']('create', device_id, row['server'], row['local_id'])
+            routes.apply(CTX, row)
             url = package(row, credentials, lang)
             with db() as c:
                 c.execute("UPDATE windows_devices SET state='active',username=? WHERE id=? AND user_id=?", (credentials['username'], device_id, user_id))
@@ -230,7 +257,8 @@ def install(app, context):
             action = 'profile' if row['state'] == 'active' else 'create'
             if action == 'create':
                 CTX['provision_on_riga']('grant-moscow', row['id'])
-            credentials = CTX['provision_on_riga'](action, row['id'], 'riga', 'sr')
+            credentials = CTX['provision_on_riga'](action, row['id'], row['server'], row['local_id'])
+            routes.apply(CTX, row)
             url = package(row, credentials, lang)
             with db() as c:
                 c.execute("UPDATE windows_devices SET state='active',username=? WHERE id=? AND user_id=?", (credentials['username'], row['id'], user_id))
@@ -276,12 +304,15 @@ def install(app, context):
             'lv': ['Nosūtīt uz datoru', 'Kopēt saiti', 'Personīgā iestatīšanas saite', 'Atveriet šo saiti Windows datorā, lai iestatītu TOLF VPN.', 'Instalēt Windows', 'Atveriet lejupielādēto failu, ielādējiet iestatījumus un pēc vajadzības norādiet tīklus ārpus VPN. Izvēlieties saglabāšanu bez savienošanās vai savienojumu.', 'Saite nokopēta', 'Kopējiet saiti no zemāk redzamā lauka.', 'Nekopīgojiet personīgo saiti ar svešiniekiem.']
         }[lang]
         escape = html.escape
+        server = metadata.get('server', 'riga')
+        mode = metadata.get('localId', 'sr')
+        route_text = route_description(server, mode, lang)
         url = 'https://api.tolf.is/windows/p/' + token
         expiry = datetime.fromisoformat(metadata['expiresAt']).strftime('%d.%m.%Y, %H:%M UTC')
         nonce = secrets.token_urlsafe(18)
         body = f'''<!doctype html><html lang="{lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>TOLF — {escape(labels[0])}</title>
 <style>:root{{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color-scheme:light dark}}*{{box-sizing:border-box}}body{{max-width:660px;margin:32px auto;padding:24px;line-height:1.5}}a{{color:inherit}}h1{{font-size:28px}}.actions{{display:grid;gap:12px;margin:24px 0}}button,.download{{display:block;width:100%;text-align:center;border:1px solid #888;border-radius:12px;padding:14px;font:inherit;font-weight:600;text-decoration:none;background:transparent;color:inherit;cursor:pointer}}.primary{{background:#333;color:white;border-color:#333}}input{{width:100%;font:inherit;padding:12px;border:1px solid #aaa;border-radius:10px;background:transparent;color:inherit}}small,.note{{opacity:.7}}[hidden]{{display:none!important}}label{{display:block;margin:12px 0 6px}}</style></head><body><main><a href="https://vpn.tolf.is/">{escape(labels[4])}</a><h1>{escape(labels[0])}</h1><p>{escape(metadata['name'])}</p>
-<p id="mobile-help">{escape(copy[3])}</p><p id="windows-help" hidden>{escape(copy[5])}</p><p>{escape(labels[6])}</p>
+<p id="mobile-help">{escape(copy[3])}</p><p id="windows-help" hidden>{escape(copy[5])}</p><p>{escape(route_text)}</p>
 <div class="actions"><a id="download" class="download primary" href="/windows/p/{token}/download" hidden>{escape(copy[4])}</a><button id="send" class="primary" type="button">{escape(copy[0])}</button><button id="copy" type="button">{escape(copy[1])}</button></div>
 <label for="personal-link">{escape(copy[2])}</label><input id="personal-link" readonly value="{escape(url)}" spellcheck="false" autocomplete="off"><p id="status" role="status" aria-live="polite"></p><p class="note">{escape(copy[8])}</p><small>{escape(labels[5])}: {escape(expiry)}</small></main>
 <script nonce="{nonce}">

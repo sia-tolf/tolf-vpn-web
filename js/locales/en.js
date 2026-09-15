@@ -276,6 +276,8 @@ I18N.en = {
 };
 
 Object.assign(I18N.en, {
+  "windowsRoutingIntro": "Choose the VPN location and routing for each Windows computer.",
+  "windowsRoutingLabel": "Traffic routing",
   "windowsTitle": "Windows devices",
   "windowsDescription": "Prepare a separate VPN connection for your Windows computer. Your Apple and Android access stays independent.",
   "windowsRoute": "Choose a VPN location for each Windows computer. DNS and routing are assigned by the selected VPN server.",

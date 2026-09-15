@@ -9,6 +9,8 @@ int wmain(){std::wstring name;bool owned=false;try{
  for(auto s:{L"https://api.tolf.is.evil/windows/p/abcdefghijklmnopqrstuvwxyz123456",L"http://api.tolf.is/windows/p/abcdefghijklmnopqrstuvwxyz123456",L"https://api.tolf.is/windows/p/abcdefghijklmnopqrstuvwxyz123456?x=1",L"https://evil@api.tolf.is/windows/p/abcdefghijklmnopqrstuvwxyz123456"}){bool bad=false;try{Token(s);}catch(const Failure&){bad=true;}Check(bad);}
  Check(FilenameToken(L"TOLF-Setup-abcdefghijklmnopqrstuvwxyz123456 (2).exe")==L"abcdefghijklmnopqrstuvwxyz123456");
  Settings c;ParseSettings(LR"({"deviceId":"12345678-1234-1234-1234-123456789abc","server":"ikev2-riga.tolf.is","username":"user_12345678123412341234123456789abc","password":"dummy\u0021"})",c);Check(c.password.value==L"dummy!");
+ Settings m;ParseSettings(LR"({"deviceId":"12345678-1234-1234-1234-123456789abc","server":"ikev2.tolf.is","username":"user_12345678123412341234123456789abc","password":"dummy"})",m);Check(m.server==L"ikev2.tolf.is");
+ bool rejected=false;try{Settings bad;ParseSettings(LR"({"deviceId":"12345678-1234-1234-1234-123456789abc","server":"ikev2.tolf.is.evil","username":"user_12345678123412341234123456789abc","password":"dummy"})",bad);}catch(const Failure&){rejected=true;}Check(rejected);
  for(auto s:{LR"({"a":"b","a":"c"})",LR"({"a":true})",LR"({"a":"b"} garbage)"}){bool bad=false;try{Json(s).parse();}catch(const Failure&){bad=true;}Check(bad);}
  std::puts("PASS URL, token and strict JSON validation");
  Com com;Hr(CoInitializeSecurity(nullptr,-1,nullptr,nullptr,RPC_C_AUTHN_LEVEL_DEFAULT,RPC_C_IMP_LEVEL_IMPERSONATE,nullptr,EOAC_NONE,nullptr),L"TEST_COM");Wmi w;Preflight(w);std::puts("PASS native provider and service preflight");

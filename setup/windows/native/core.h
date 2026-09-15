@@ -47,7 +47,7 @@ inline void ParseSettings(const std::wstring& text, Settings& c){
  struct Wipe{std::map<std::wstring,std::wstring>&m;~Wipe(){for(auto&kv:m)if(!kv.second.empty())SecureZeroMemory(kv.second.data(),kv.second.size()*2);}}wipe{m};
  if(m.size()!=4||!m.count(L"deviceId")||!m.count(L"server")||!m.count(L"username")||!m.count(L"password"))throw Failure{L"SETTINGS",1};
  c.id=m[L"deviceId"];c.server=m[L"server"];c.user=m[L"username"];c.password.value=m[L"password"];
- if(!std::regex_match(c.id,std::wregex(L"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"))||c.server!=L"ikev2-riga.tolf.is")throw Failure{L"SETTINGS",2};
+ if(!std::regex_match(c.id,std::wregex(L"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"))||(c.server!=L"ikev2-riga.tolf.is"&&c.server!=L"ikev2.tolf.is"))throw Failure{L"SETTINGS",2};
  std::wstring plain;for(auto ch:c.id)if(ch!=L'-')plain+=ch;
  if(c.user!=L"user_"+plain||c.password.value.empty()||c.password.value.size()>256)throw Failure{L"SETTINGS",3};
  for(wchar_t ch:c.password.value)if(ch<32||ch==127)throw Failure{L"SETTINGS",4};

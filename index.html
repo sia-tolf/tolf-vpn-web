@@ -21,9 +21,9 @@
 
   <!-- Keep this order. Deferred scripts run after the HTML has been parsed. -->
   <script defer src="js/config.js?v=windows-1"></script>
-  <script defer src="js/locales/en.js?v=quick-start-20260915"></script>
-  <script defer src="js/locales/ru.js?v=quick-start-20260915"></script>
-  <script defer src="js/locales/lv.js?v=quick-start-20260915"></script>
+  <script defer src="js/locales/en.js?v=windows-routing-20260915"></script>
+  <script defer src="js/locales/ru.js?v=windows-routing-20260915"></script>
+  <script defer src="js/locales/lv.js?v=windows-routing-20260915"></script>
   <script defer src="js/dom.js?v=share-profile-1"></script>
   <script defer src="js/network-metrics.js?v=latency-decimal-1"></script>
   <script defer src="js/platform.js?v=windows-back-1"></script>
@@ -41,7 +41,7 @@
   <script defer src="js/librespeed.js?v=1"></script>
   <script defer src="js/latency.js?v=connection-test-1"></script>
   <script defer src="js/connection-test.js?v=connection-test-3"></script>
-  <script defer src="js/windows.js?v=windows-link-field-20260914"></script>
+  <script defer src="js/windows.js?v=windows-routing-20260915"></script>
   <script defer src="js/invitations.js?v=hide-protected-banner-1"></script>
   <script defer src="js/quick-entry.js?v=quick-2"></script>
   <script defer src="js/app.js?v=windows-1"></script>
@@ -425,7 +425,7 @@
         <section id="windowsPanel" class="hidden" aria-labelledby="windowsTitle">
           <h3 id="windowsTitle" data-i18n="windowsTitle">Windows devices</h3>
           <p class="card-description" data-i18n="windowsDescription">Prepare a separate VPN connection for your Windows computer.</p>
-          <p class="card-description" data-i18n="windowsRoute">Entry through Riga. Russian destinations through Moscow, other traffic through Riga. DNS is assigned by the server.</p>
+          <p class="card-description" data-i18n="windowsRoutingIntro">Choose the VPN location and routing for each Windows computer.</p>
           <div id="windowsStartActions" class="windows-create-actions windows-start-actions">
             <button id="windowsBackButton" class="windows-back-button" type="button">← Back to iOS</button>
             <button id="windowsAddButton" class="primary" type="button" aria-expanded="false" aria-controls="windowsCreateForm" data-i18n="windowsAdd">Add Windows device</button>
@@ -440,6 +440,8 @@
               <option value="us" disabled data-i18n="windowsServerUsUnavailable">USA — not available for Windows yet</option>
             </select>
             <p id="windowsServerHelp" class="card-description" data-i18n="windowsServerHelp">This location applies to this Windows computer. Windows currently supports Riga only.</p>
+            <label for="windowsDeviceMode" data-i18n="windowsRoutingLabel">Traffic routing</label>
+            <select id="windowsDeviceMode"></select>
             <div class="windows-create-actions">
               <button id="windowsCancelButton" class="danger" type="button" data-i18n="cancelButton">Cancel</button>
               <button id="windowsCreateButton" class="primary" type="submit" data-i18n="windowsAdd">Add Windows device</button>

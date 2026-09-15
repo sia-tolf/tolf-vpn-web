@@ -22,12 +22,28 @@ document.addEventListener('visibilitychange', () => {
   if (document.hidden) { forgetWindowsPasswords(); renderWindowsDevices(); }
 });
 let windowsServers = new Set(['riga']);
+let windowsRoutingModes = {riga: ['sr']};
 let windowsAdding = false;
 const windowsList = document.getElementById('windowsDeviceList');
 const windowsMessage = document.getElementById('windowsMessage');
 const windowsForm = document.getElementById('windowsCreateForm');
 const windowsName = document.getElementById('windowsDeviceName');
 const windowsServer = document.getElementById('windowsDeviceServer');
+const windowsMode = document.getElementById('windowsDeviceMode');
+
+function renderWindowsModes() {
+  const previous = windowsMode.value;
+  windowsMode.replaceChildren();
+  for (const mode of windowsRoutingModes[windowsServer.value] || []) {
+    const option = document.createElement('option');
+    option.value = mode;
+    option.textContent = t(LOCAL_ID_OPTIONS[windowsServer.value][mode]);
+    windowsMode.append(option);
+  }
+  if ((windowsRoutingModes[windowsServer.value] || []).includes(previous)) windowsMode.value = previous;
+  windowsMode.disabled = vpnBusy;
+}
+
 
 function clearWindowsDevices() {
   windowsEpoch++;
@@ -208,6 +224,10 @@ function renderWindowsDevices() {
     actions.append(download); body.append(user, actions);
     appendWindowsDelivery(body, device);
     appendWindowsPassword(body, device);
+    const route = document.createElement('p');
+    const mode = device.localId === undefined ? 'sr' : device.localId;
+    const key = (LOCAL_ID_OPTIONS[device.server || 'riga'] || {})[mode];
+    if (key) { route.textContent = t(key); body.prepend(route); }
     body.append(remove);
     card.append(name, body);
     windowsList.append(card);
@@ -220,6 +240,7 @@ function renderWindowsDevices() {
   document.getElementById('windowsCreateButton').disabled = vpnBusy || !windowsReady;
   windowsName.disabled = vpnBusy;
   windowsServer.disabled = vpnBusy;
+  renderWindowsModes();
   const moscowOption = windowsServer.querySelector('option[value="moscow"]');
   moscowOption.disabled = !windowsServers.has('moscow');
   moscowOption.textContent = t(windowsServers.has('moscow') ? 'windowsServerMoscow' : 'windowsServerMoscowUnavailable');
@@ -282,7 +303,8 @@ document.getElementById('windowsCancelButton').addEventListener('click', () => {
   document.getElementById('windowsAddButton').focus();
 });
 
-windowsServer.addEventListener('change', () => { windowsRequestId = null; });
+windowsServer.addEventListener('change', () => { windowsRequestId = null; windowsMode.value = ''; renderWindowsModes(); });
+windowsMode.addEventListener('change', () => { windowsRequestId = null; });
 
 windowsName.addEventListener('invalid', () => {
   if (!windowsName.value.trim()) windowsName.setCustomValidity(t('windowsNameRequired'));
@@ -302,7 +324,7 @@ windowsForm.addEventListener('submit', event => {
   if (!windowsRequestId) windowsRequestId = crypto.randomUUID();
   windowsAction(async epoch => {
     const data = await apiRequest('/windows/devices', {
-      method:'POST', body:JSON.stringify({requestId:windowsRequestId,name,server:windowsServer.value,language:currentLanguage})
+      method:'POST', body:JSON.stringify({requestId:windowsRequestId,name,server:windowsServer.value,localId:windowsMode.value,language:currentLanguage})
     });
     if (epoch !== windowsEpoch) return;
     windowsProfileLinks.set(data.device.id, data.profileUrl);
@@ -319,6 +341,7 @@ windowsForm.addEventListener('submit', event => {
     if (capabilities.version !== '1.0' || !capabilities.servers.includes('riga')) throw new Error('Windows unavailable');
     windowsPasswordManagement = capabilities.passwordManagement === true;
     windowsServers = new Set(capabilities.servers.filter(server => ['riga', 'moscow'].includes(server)));
+    windowsRoutingModes = capabilities.routingModes || {riga: ['sr']};
     windowsReady = true;
     document.getElementById('platformWindows').classList.remove('hidden');
     renderWindowsDevices();

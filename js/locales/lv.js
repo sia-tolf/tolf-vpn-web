@@ -276,6 +276,8 @@ I18N.lv = {
 };
 
 Object.assign(I18N.lv, {
+  "windowsRoutingIntro": "Izvēlieties VPN ieejas punktu un maršrutēšanu katram Windows datoram.",
+  "windowsRoutingLabel": "Datplūsmas maršrutēšana",
   "windowsTitle": "Windows ierīces",
   "windowsDescription": "Sagatavojiet atsevišķu VPN savienojumu Windows datoram. Apple un Android piekļuve paliek neatkarīga.",
   "windowsRoute": "Katram Windows datoram var izvēlēties VPN mezglu. DNS un maršrutēšanu nosaka izvēlētais VPN serveris.",

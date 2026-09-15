@@ -276,6 +276,8 @@ I18N.ru = {
 };
 
 Object.assign(I18N.ru, {
+  "windowsRoutingIntro": "Выберите точку входа и маршрутизацию для каждого Windows-компьютера.",
+  "windowsRoutingLabel": "Маршрутизация трафика",
   "windowsTitle": "Устройства Windows",
   "windowsDescription": "Подготовьте отдельное VPN-подключение для Windows-компьютера. Доступ Apple и Android остаётся независимым.",
   "windowsRoute": "Для каждого Windows-компьютера можно выбрать узел VPN. DNS и маршрутизацию задаёт выбранный VPN-сервер.",
