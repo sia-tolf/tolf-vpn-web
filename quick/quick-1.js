@@ -21,6 +21,7 @@ function persist() { put('quickServer', server); put('quickPlatform', platform);
 function render() {
  document.documentElement.lang = lang;
  document.querySelectorAll('[data-text]').forEach(el => el.textContent = t(el.dataset.text));
+ $('passkeyHelp').textContent = t(nativePlatform === 'windows' ? 'passkeyWindows' : 'passkey');
  document.querySelectorAll('[data-lang]').forEach(el => { el.setAttribute('aria-pressed', String(el.dataset.lang === lang)); el.disabled = busy; });
  $('deviceSummary').textContent = platform === 'ios' ? 'iPhone / iPad' : platform === 'android' ? 'Android' : 'Windows';
  $('serverSummary').textContent = t(server);
@@ -41,9 +42,17 @@ function panels(name) {
 async function api(path, options={}) {
  const response = await fetch(API+path,{credentials:'include',cache:'no-store',...options,
  headers:{'Content-Type':'application/json',...(options.headers||{})}});
- const data = await response.json();
- if(!response.ok) { const e = new Error('Request failed'); e.status = response.status; throw e; }
+ let data;
+ try { data = await response.json(); } catch { data = {}; }
+ if(!response.ok) { const e = new Error(data.detail || 'Request failed'); e.status = response.status; throw e; }
  return data;
+}
+function errorMessage(error) {
+ if(error && error.messageKey)return error.messageKey;
+ if(error && error.name === 'NotAllowedError')return nativePlatform === 'windows' ? 'passkeyWindowsNotAllowed' : 'passkeyNotAllowed';
+ if(error && (error.name === 'NotSupportedError' || error.name === 'SecurityError'))return 'passkeyUnavailable';
+ if(error && error.name === 'AbortError')return 'passkeyCancelled';
+ return 'failed';
 }
 async function action(fn) {
  if(busy) return;
@@ -51,7 +60,7 @@ async function action(fn) {
  try { await fn(); }
  catch(e) {
   if(e.status===401) { authenticated=false; panels('auth'); message('loginRequired',true); }
-  else message('failed',true);
+  else message(errorMessage(e),true);
  }
  finally { busy=false; render(); }
 }
@@ -96,6 +105,7 @@ $('register').onclick=()=>action(async()=>{
  if(!ready || uncertain)return;
  const passkeyName=$('passkeyName').value.trim();
  if(!passkeyName){$('passkeyName').focus();message('passkeyNameRequired',true);return;}
+ if(!window.PublicKeyCredential || !navigator.credentials || typeof navigator.credentials.create !== 'function')throw Object.assign(new Error('Passkey unavailable'),{messageKey:'passkeyUnavailable'});
  message('waiting');persist();
  const begin=await api('/passkey/register/begin',{method:'POST',body:JSON.stringify({passkeyName})});
  const credential=await navigator.credentials.create({publicKey:prepareRegistrationOptions(begin.options)});

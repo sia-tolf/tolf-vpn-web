@@ -1,14 +1,14 @@
 // Run the actual controller with a small DOM fixture; layout is checked in browser.cjs.
 const vm=require('vm'),fs=require('fs'),assert=require('assert/strict');
 const path=require('path'),root=path.resolve(__dirname,'../..');
-async function scenario(country,device='ios'){
+async function scenario(country,device='ios',credentialError=''){
  const ids=[...fs.readFileSync(path.join(root,'quick/index.html'),'utf8').matchAll(/id="([^"]+)"/g)].map(m=>m[1]);
  const elements=Object.fromEntries(ids.map(id=>[id,{hidden:false,disabled:false,value:'',textContent:'',dataset:{},setAttribute(){},focus(){},select(){}}]));
  const storage=new Map(),langs=['en','ru','lv'].map(lang=>({dataset:{lang},setAttribute(){}}));
  let auth=false,record=null,requests=0,registeredName='';
  const context={URL,AbortSignal,console,sessionStorage:{getItem:k=>storage.get(k),setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)},localStorage:{getItem:()=>null,setItem(){}},
- navigator:{userAgent:device==='windows'?'Windows NT':'iPhone',language:'ru',credentials:{create:async()=>({id:'fake'})}},
- document:{getElementById:id=>elements[id],documentElement:{lang:'ru'},querySelectorAll:s=>s==='[data-lang]'?langs:[]},window:{addEventListener(){}},
+ navigator:{userAgent:device==='windows'?'Windows NT':'iPhone',language:'ru',credentials:{create:async()=>{if(credentialError)throw Object.assign(new Error('credential failed'),{name:credentialError});return{id:'fake'};}}},
+ document:{getElementById:id=>elements[id],documentElement:{lang:'ru'},querySelectorAll:s=>s==='[data-lang]'?langs:[]},window:{PublicKeyCredential:function(){},addEventListener(){}},
  prepareRegistrationOptions:x=>x,serializeCredential:x=>x,
  fetch:async(url,options={})=>{
   const p=new URL(url).pathname;let data={},ok=true,status=200;
@@ -27,9 +27,11 @@ async function scenario(country,device='ios'){
  assert.equal(elements.server.value,country==='moscow'?'moscow':'riga');
  assert.equal(elements.register.disabled,false);
  assert.match(elements.passkeyName.value,/^(iPhone|Windows)$/);elements.passkeyName.value='Personal iPad';
- await elements.register.onclick();assert.equal(registeredName,'Personal iPad');assert.equal(elements.code.value,'RECOVERY');assert.equal(requests,0);
+ await elements.register.onclick();for(let i=0;i<5;i++)await new Promise(setImmediate);
+ if(credentialError){assert.match(elements.message.textContent,/Windows не создала ключ входа/);return true;}
+ assert.equal(registeredName,'Personal iPad');assert.equal(elements.code.value,'RECOVERY');assert.equal(requests,0);
  await elements.saved.onclick();assert.equal(requests,1);assert.equal(elements.code.value,'');assert.equal(elements.download.href,'https://config.tolf.is/p/test/download');
  assert.equal(elements.delivery.hidden,false);
  return true;
 }
-(async()=>{await scenario('moscow');await scenario('riga');await scenario(null);console.log('PASS controller: Russia, non-Russia, unknown country, registration, recovery and profile delivery');})().catch(e=>{console.error(e);process.exit(1)});
+(async()=>{await scenario('moscow');await scenario('riga');await scenario(null);await scenario('riga','windows','NotAllowedError');console.log('PASS controller: Russia, non-Russia, unknown country, registration, Windows Passkey error, recovery and profile delivery');})().catch(e=>{console.error(e);process.exit(1)});
