@@ -185,7 +185,7 @@ connections {
 pools {
     vpn-pool-yt {
         addrs = 10.19.0.0/24
-        dns = 10.254.0.53
+        dns = 10.254.0.54
     }
 }
 EOF
@@ -298,6 +298,9 @@ if ! grep -q '# TOLF YT routing v1' "$NFT"; then
     mv /tmp/90-ru-split.yt.$$ "$NFT"
 fi
 
+# Upgrade the DNS exception created by the first Moscow-ingress release.
+sed -i '/ip saddr 10\.19\.0\.0\/24 ip daddr != 10\.254\.0\.53/ s/10\.254\.0\.53/10.254.0.54/g' "$NFT"
+
 if ! grep -q '# TOLF Moscow YT routing v1' "$NFT"; then
     awk '
     /^chain ru_split_prerouting \{/ {
@@ -317,8 +320,8 @@ if ! grep -q '# TOLF Moscow YT routing v1' "$NFT"; then
     /^chain policy_dns_redirect \{/ {
         if (dns_seen++) exit 52
         print
-        print "    ip saddr 10.19.0.0/24 ip daddr != 10.254.0.53 udp dport 53 redirect to :53"
-        print "    ip saddr 10.19.0.0/24 ip daddr != 10.254.0.53 tcp dport 53 redirect to :53"
+        print "    ip saddr 10.19.0.0/24 ip daddr != 10.254.0.54 udp dport 53 redirect to :53"
+        print "    ip saddr 10.19.0.0/24 ip daddr != 10.254.0.54 tcp dport 53 redirect to :53"
         next
     }
     /^chain riga_ikev2_return_snat \{/ {
@@ -363,6 +366,7 @@ ip -4 rule show | grep -q 'from 10.19.0.0/24 lookup 100'
 nft list chain inet fw4 ru_split_prerouting | grep -q '10.19.0.0/24.*yt_domains4'
 swanctl --list-conns --raw 2>/dev/null | grep -q 'ikev2-yt'
 swanctl --list-pools --raw 2>/dev/null | grep -q 'vpn-pool-yt'
+grep -q 'dns = 10.254.0.54' "$YT_CONF"
 
 SUCCESS=1
 trap - EXIT HUP INT TERM
