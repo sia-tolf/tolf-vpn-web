@@ -88,7 +88,9 @@ REMOTE_SCRIPT = r'''#!/bin/sh
 set -eu
 
 POOL='10.18.0.0/24'
+MOSCOW_POOL='10.19.0.0/24'
 NFT='/etc/nftables.d/90-ru-split.nft'
+YT_CONF='/etc/swanctl/conf.d/ikev2-yt.conf'
 BACKUP="/root/tolf-yt-moscow-backup-$(date +%Y%m%d-%H%M%S)-$$"
 
 [ -f "$NFT" ] || { echo "Missing $NFT" >&2; exit 1; }
@@ -101,29 +103,93 @@ existing_rule="$(ip -4 rule show | grep '^10004:' || true)"
     echo 'Moscow rule priority 10004 is already in use' >&2
     exit 1
 }
+existing_moscow_rule="$(ip -4 rule show | grep '^10005:' || true)"
+[ -z "$existing_moscow_rule" ] || echo "$existing_moscow_rule" | grep -q 'from 10.19.0.0/24 lookup 100' || {
+    echo 'Moscow rule priority 10005 is already in use' >&2
+    exit 1
+}
 HAD_RULE=0
+HAD_MOSCOW_RULE=0
 HAD_ROUTE=0
 HAD_ADDR=0
 echo "$existing_rule" | grep -q 'from 10.18.0.0/24 lookup 100' && HAD_RULE=1 || true
+echo "$existing_moscow_rule" | grep -q 'from 10.19.0.0/24 lookup 100' && HAD_MOSCOW_RULE=1 || true
 ip -4 route show table main | grep -q '^10.18.0.0/24 dev awgriga' && HAD_ROUTE=1 || true
 ip address show dev lo | grep -q '10.254.0.54/32' && HAD_ADDR=1 || true
 
 mkdir -m 700 "$BACKUP"
 cp -p /etc/config/network /etc/config/firewall /etc/config/dhcp "$NFT" "$BACKUP/"
+HAD_YT_CONF=0
+if [ -f "$YT_CONF" ]; then
+    cp -p "$YT_CONF" "$BACKUP/ikev2-yt.conf"
+    HAD_YT_CONF=1
+fi
 
 restore() {
     cp -p "$BACKUP/network" /etc/config/network
     cp -p "$BACKUP/firewall" /etc/config/firewall
     cp -p "$BACKUP/dhcp" /etc/config/dhcp
     cp -p "$BACKUP/90-ru-split.nft" "$NFT"
+    if [ "$HAD_YT_CONF" = 1 ]; then
+        cp -p "$BACKUP/ikev2-yt.conf" "$YT_CONF"
+    else
+        rm -f "$YT_CONF"
+    fi
     [ "$HAD_RULE" = 1 ] || ip -4 rule del priority 10004 2>/dev/null || true
+    [ "$HAD_MOSCOW_RULE" = 1 ] || ip -4 rule del priority 10005 2>/dev/null || true
     [ "$HAD_ROUTE" = 1 ] || ip -4 route del 10.18.0.0/24 dev awgriga 2>/dev/null || true
     [ "$HAD_ADDR" = 1 ] || ip address del 10.254.0.54/32 dev lo 2>/dev/null || true
     /etc/init.d/firewall reload >/dev/null 2>&1 || true
     /etc/init.d/dnsmasq restart >/dev/null 2>&1 || true
+    swanctl --load-conns >/dev/null 2>&1 || true
+    swanctl --load-pools >/dev/null 2>&1 || true
 }
 SUCCESS=0
 trap 'if [ "$SUCCESS" != 1 ]; then restore; fi' EXIT HUP INT TERM
+
+cat > "$YT_CONF" <<'EOF'
+connections {
+    ikev2-yt {
+        version = 2
+        proposals = aes256-sha256-modp2048
+        rekey_time = 0
+        dpd_delay = 30s
+        fragmentation = yes
+        send_cert = always
+
+        local {
+            auth = pubkey
+            certs = ikev2.tolf.is.cer
+            id = ikev2.tolf.is
+        }
+
+        remote {
+            auth = eap-mschapv2
+            id = yt
+            eap_id = %any
+        }
+
+        children {
+            ikev2-yt {
+                local_ts = 0.0.0.0/0
+                esp_proposals = aes256-sha256
+                rekey_time = 0
+                dpd_action = restart
+            }
+        }
+
+        pools = vpn-pool-yt
+    }
+}
+
+pools {
+    vpn-pool-yt {
+        addrs = 10.19.0.0/24
+        dns = 10.254.0.53
+    }
+}
+EOF
+chmod 0644 "$YT_CONF"
 
 clone_uci() {
     package="$1" old="$2" new="$3" from="$4" to="$5"
@@ -142,6 +208,9 @@ clone_uci network riga_ikev2_sr riga_ikev2_yt '10\.16\.0\.0' '10.18.0.0'
 clone_uci network riga_ikev2_sr_return riga_ikev2_yt_return '10\.16\.0\.0' '10.18.0.0'
 uci set network.riga_ikev2_yt.priority='10004'
 
+clone_uci network riga_ikev2_yt ikev2_yt '10\.18\.0\.0' '10.19.0.0'
+uci set network.ikev2_yt.priority='10005'
+
 uci -q delete network.tolf_dns_yt || true
 uci set network.tolf_dns_yt='interface'
 uci set network.tolf_dns_yt.proto='static'
@@ -150,6 +219,35 @@ uci set network.tolf_dns_yt.ipaddr='10.254.0.54'
 uci set network.tolf_dns_yt.netmask='255.255.255.255'
 
 clone_uci firewall riga_ikev2_sr_nat riga_ikev2_yt_nat '10\.16\.0\.0' '10.18.0.0'
+
+uci -q delete firewall.ikev2_yt_nat || true
+uci set firewall.ikev2_yt_nat='nat'
+uci set firewall.ikev2_yt_nat.name='IKEv2-YT-Moscow-NAT'
+uci set firewall.ikev2_yt_nat.src='lan'
+uci set firewall.ikev2_yt_nat.src_ip="$MOSCOW_POOL"
+uci set firewall.ikev2_yt_nat.target='MASQUERADE'
+
+for proto in tcp udp; do
+    section="ikev2_yt_dns_$proto"
+    uci -q delete "firewall.$section" || true
+    uci set "firewall.$section=rule"
+    uci set "firewall.$section.name=IKEv2-YT-DNS-$proto"
+    uci set "firewall.$section.src=lan"
+    uci set "firewall.$section.src_ip=$MOSCOW_POOL"
+    uci set "firewall.$section.dest_port=53"
+    uci set "firewall.$section.proto=$proto"
+    uci set "firewall.$section.target=ACCEPT"
+
+    section="ikev2_yt_riga_$proto"
+    uci -q delete "firewall.$section" || true
+    uci set "firewall.$section=rule"
+    uci set "firewall.$section.name=IKEv2-YT-to-Riga-$proto"
+    uci set "firewall.$section.src=lan"
+    uci set "firewall.$section.dest=riga"
+    uci set "firewall.$section.src_ip=$MOSCOW_POOL"
+    uci set "firewall.$section.proto=$proto"
+    uci set "firewall.$section.target=ACCEPT"
+done
 
 uci -q delete dhcp.tolf_youtube || true
 uci set dhcp.tolf_youtube='ipset'
@@ -200,6 +298,47 @@ if ! grep -q '# TOLF YT routing v1' "$NFT"; then
     mv /tmp/90-ru-split.yt.$$ "$NFT"
 fi
 
+if ! grep -q '# TOLF Moscow YT routing v1' "$NFT"; then
+    awk '
+    /^chain ru_split_prerouting \{/ {
+        if (split_seen++) exit 51
+        print
+        print "    # TOLF Moscow YT routing v1"
+        print "    ip saddr 10.19.0.0/24 ip daddr @ru4 meta mark set 0x100"
+        print "    ip saddr 10.19.0.0/24 ip daddr @ru_domains4 meta mark set 0x100"
+        print "    ip saddr 10.19.0.0/24 ip daddr @yt_domains4 meta mark set 0x100"
+        next
+    }
+    /^chain policy_dns_redirect \{/ {
+        if (dns_seen++) exit 52
+        print
+        print "    ip saddr 10.19.0.0/24 ip daddr != 10.254.0.53 udp dport 53 redirect to :53"
+        print "    ip saddr 10.19.0.0/24 ip daddr != 10.254.0.53 tcp dport 53 redirect to :53"
+        next
+    }
+    /^chain riga_ikev2_return_snat \{/ {
+        if (snat_seen++) exit 53
+        print
+        print "    oifname \"gre4-riga_gre\" ip saddr 10.19.0.0/24 snat to 10.33.0.1"
+        print "    oifname \"awgriga\" ip saddr 10.19.0.0/24 snat to 10.31.0.1"
+        next
+    }
+    /^chain ikev2_mss_forward \{/ {
+        if (mss_seen++) exit 54
+        print
+        print "    ip saddr 10.19.0.0/24 tcp flags & syn == syn tcp option maxseg size > 1200 tcp option maxseg size set 1200"
+        print "    ip daddr 10.19.0.0/24 tcp flags & syn == syn tcp option maxseg size > 1200 tcp option maxseg size set 1200"
+        next
+    }
+    { print }
+    END {
+        if (split_seen != 1 || dns_seen != 1 || snat_seen != 1 || mss_seen != 1) exit 55
+    }
+    ' "$NFT" > /tmp/90-ru-split.moscow-yt.$$
+    chmod 0644 /tmp/90-ru-split.moscow-yt.$$
+    mv /tmp/90-ru-split.moscow-yt.$$ "$NFT"
+fi
+
 uci commit network
 uci commit firewall
 uci commit dhcp
@@ -208,21 +347,29 @@ fw4 check
 
 ip -4 rule del priority 10004 2>/dev/null || true
 ip -4 rule add priority 10004 from "$POOL" table 100
+ip -4 rule del priority 10005 2>/dev/null || true
+ip -4 rule add priority 10005 from "$MOSCOW_POOL" table 100
 ip -4 route replace "$POOL" dev awgriga
 ip address show dev lo | grep -q '10.254.0.54/32' || ip address add 10.254.0.54/32 dev lo
 
 /etc/init.d/firewall reload
 /etc/init.d/dnsmasq restart
+swanctl --load-conns
+swanctl --load-pools
 
 ip -4 rule show | grep -q 'from 10.18.0.0/24 lookup 100'
 ip -4 route show table main | grep -q '10.18.0.0/24 dev awgriga'
 nft list set inet fw4 yt_domains4 >/dev/null
 nft list chain inet fw4 ru_split_prerouting | grep -q '10.18.0.0/24.*yt_domains4'
+ip -4 rule show | grep -q 'from 10.19.0.0/24 lookup 100'
+nft list chain inet fw4 ru_split_prerouting | grep -q '10.19.0.0/24.*yt_domains4'
+swanctl --list-conns --raw 2>/dev/null | grep -q 'ikev2-yt'
+swanctl --list-pools --raw 2>/dev/null | grep -q 'vpn-pool-yt'
 
 SUCCESS=1
 trap - EXIT HUP INT TERM
 echo "Backup: $BACKUP"
-echo 'Moscow YT routing: OK'
+echo 'Moscow ingress YT routing: OK'
 '''
 
 
@@ -285,6 +432,12 @@ def patch_helpers():
         "riga:sr|riga:ru|moscow:",
         "riga:sr|riga:ru|riga:yt|moscow:",
         "provisioning Local ID allowlist",
+    )
+    root = patch_once(
+        root,
+        "riga:yt|moscow:",
+        "riga:yt|moscow:yt|moscow:",
+        "Moscow provisioning Local ID allowlist",
     )
     ssh = SSH_HELPER.read_text()
     ssh = patch_once(
