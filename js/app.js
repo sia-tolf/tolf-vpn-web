@@ -48,7 +48,7 @@ if (headerSwitchers && !document.getElementById("protocolSelector")) {
       min-width: 0;
       margin-left: auto;
       display: flex;
-      align-items: center;
+      align-items: stretch;
       justify-content: flex-end;
       gap: 12px;
     }
@@ -61,8 +61,9 @@ if (headerSwitchers && !document.getElementById("protocolSelector")) {
 
     .protocol-selector {
       flex: 0 0 auto;
-      display: flex;
-      align-items: center;
+      display: grid;
+      grid-template-columns: auto 28px;
+      align-items: stretch;
       gap: 8px;
       color: var(--text);
       user-select: none;
@@ -70,15 +71,18 @@ if (headerSwitchers && !document.getElementById("protocolSelector")) {
     }
 
     .protocol-label {
+      align-self: start;
+      margin-top: 8px;
       font-size: 13px;
-      line-height: 1;
+      line-height: 12px;
       font-weight: 600;
       white-space: nowrap;
     }
 
     .protocol-column {
       width: 28px;
-      height: 62px;
+      height: auto;
+      min-height: 100%;
       box-sizing: border-box;
       padding: 8px 0;
       display: flex;
@@ -135,16 +139,20 @@ if (headerSwitchers && !document.getElementById("protocolSelector")) {
       }
 
       .protocol-selector {
+        grid-template-columns: auto 26px;
         gap: 6px;
       }
 
       .protocol-label {
+        margin-top: 8px;
         font-size: 12px;
+        line-height: 12px;
       }
 
       .protocol-column {
         width: 26px;
-        height: 62px;
+        height: auto;
+        min-height: 100%;
       }
     }
   `;
