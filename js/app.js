@@ -47,6 +47,18 @@ if (headerSwitchers && !document.getElementById("protocolSelector")) {
       display: block !important;
     }
 
+    .brand-home-link {
+      color: inherit;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .brand-home-link:focus-visible {
+      outline: 2px solid var(--text);
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
+
     .header-control-cluster {
       min-width: 0;
       margin-left: auto;
@@ -160,6 +172,16 @@ if (headerSwitchers && !document.getElementById("protocolSelector")) {
     }
   `;
   document.head.appendChild(protocolStyle);
+}
+
+const brandHeading = document.querySelector(".brand-copy h1");
+if (brandHeading && !brandHeading.closest("a")) {
+  const brandHomeLink = document.createElement("a");
+  brandHomeLink.className = "brand-home-link";
+  brandHomeLink.href = "https://tolf.is";
+  brandHomeLink.setAttribute("aria-label", "TOLF home");
+  brandHeading.replaceWith(brandHomeLink);
+  brandHomeLink.appendChild(brandHeading);
 }
 
 languageEn.addEventListener(
