@@ -66,10 +66,14 @@
 
 .site-nav {
   display: grid;
-  grid-template-columns: repeat(2, 168px);
+  grid-template-columns: minmax(0, 168px);
   justify-content: flex-end;
   gap: 10px;
   margin-top: 22px;
+}
+
+.site-nav a[href="privacy.html"] {
+  display: none;
 }
 
 .site-nav a {
@@ -102,7 +106,7 @@
 .header-actions-row .site-nav {
   width: 100%;
   margin-top: 0;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .header-promo {
@@ -282,7 +286,7 @@ html[lang="lv"] .site-label[lang="lv"] {
   }
 
   .site-nav {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
     justify-content: stretch;
   }
 
