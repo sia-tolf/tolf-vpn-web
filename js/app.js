@@ -20,10 +20,13 @@ if (headerSwitchers && !document.getElementById("protocolSelector")) {
   const activeDot = document.createElement("span");
   activeDot.className = "protocol-dot protocol-dot-active";
 
+  const middleDot = document.createElement("span");
+  middleDot.className = "protocol-dot protocol-dot-reserve";
+
   const reserveDot = document.createElement("span");
   reserveDot.className = "protocol-dot protocol-dot-reserve";
 
-  protocolColumn.append(activeDot, reserveDot);
+  protocolColumn.append(activeDot, middleDot, reserveDot);
   protocolSelector.append(protocolLabel, protocolColumn);
 
   headerSwitchers.parentNode.insertBefore(controlsCluster, headerSwitchers);
@@ -178,8 +181,28 @@ document
   .getElementById("profileQrButton")
   ?.classList.replace("secondary", "constructive");
 
+let promoFocusAllowed = false;
+
+function allowPromoFocusFromUser() {
+  promoFocusAllowed = true;
+}
+
+promoInput.addEventListener("pointerdown", allowPromoFocusFromUser, true);
+redeemPromoButton.addEventListener("pointerdown", allowPromoFocusFromUser, true);
+window.addEventListener("keydown", event => {
+  if (event.key === "Tab") promoFocusAllowed = true;
+}, true);
+
+promoInput.addEventListener("focus", () => {
+  if (!promoFocusAllowed) {
+    promoInput.blur();
+    return;
+  }
+  promoFocusAllowed = false;
+}, true);
+
 function clearRestoredPromoFocus() {
-  if (document.activeElement === promoInput) {
+  if (document.activeElement === promoInput && !promoFocusAllowed) {
     promoInput.blur();
   }
 }
@@ -188,6 +211,7 @@ window.addEventListener("pageshow", () => {
   clearRestoredPromoFocus();
   requestAnimationFrame(clearRestoredPromoFocus);
   setTimeout(clearRestoredPromoFocus, 100);
+  setTimeout(clearRestoredPromoFocus, 500);
 });
 
 setLanguage(currentLanguage);
