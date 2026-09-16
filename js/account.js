@@ -18,6 +18,11 @@ function openRegistrationPanel() {
 function handleEntryAction() {
   const url = new URL(window.location.href);
   const action = url.searchParams.get("action");
+  const requestedLanguage = url.searchParams.get("lang");
+
+  if (["en", "ru", "lv"].includes(requestedLanguage)) {
+    setLanguage(requestedLanguage);
+  }
 
   if (action === "signup") {
     openRegistrationPanel();
@@ -32,11 +37,12 @@ function handleEntryAction() {
       signInButton.focus({ preventScroll: true });
       signedOutCard.scrollIntoView({ block: "start" });
     });
-  } else {
+  } else if (!["en", "ru", "lv"].includes(requestedLanguage)) {
     return;
   }
 
   url.searchParams.delete("action");
+  url.searchParams.delete("lang");
   window.history.replaceState({}, "", url.pathname + url.search + url.hash);
 }
 
@@ -78,11 +84,13 @@ signOutButton.addEventListener("click", async () => {
       body: "{}"
     });
 
-    signedOutMessage.textContent = "";
-    signedOutMessage.className = "message";
+    const language = ["en", "ru", "lv"].includes(currentLanguage)
+      ? currentLanguage
+      : "en";
 
-    document.getElementById("addPasskeyName").value = "";
-    showSignedOut();
+    window.location.assign(
+      `https://tolf.is/?lang=${encodeURIComponent(language)}`
+    );
   } catch (error) {
     vpnMessage.textContent = error.message;
     vpnMessage.className = "message error";
