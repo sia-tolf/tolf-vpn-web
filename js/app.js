@@ -178,5 +178,17 @@ document
   .getElementById("profileQrButton")
   ?.classList.replace("secondary", "constructive");
 
+function clearRestoredPromoFocus() {
+  if (document.activeElement === promoInput) {
+    promoInput.blur();
+  }
+}
+
+window.addEventListener("pageshow", () => {
+  clearRestoredPromoFocus();
+  requestAnimationFrame(clearRestoredPromoFocus);
+  setTimeout(clearRestoredPromoFocus, 100);
+});
+
 setLanguage(currentLanguage);
 loadAccount();
