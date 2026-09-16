@@ -1,3 +1,156 @@
+const headerSwitchers = document.querySelector(".header-switchers");
+
+if (headerSwitchers && !document.getElementById("protocolSelector")) {
+  const controlsCluster = document.createElement("div");
+  controlsCluster.className = "header-control-cluster";
+
+  const protocolSelector = document.createElement("div");
+  protocolSelector.id = "protocolSelector";
+  protocolSelector.className = "protocol-selector";
+  protocolSelector.setAttribute("aria-label", "IKEv2 selected");
+
+  const protocolLabel = document.createElement("span");
+  protocolLabel.className = "protocol-label";
+  protocolLabel.textContent = "IKEv2";
+
+  const protocolColumn = document.createElement("span");
+  protocolColumn.className = "protocol-column";
+  protocolColumn.setAttribute("aria-hidden", "true");
+
+  const activeDot = document.createElement("span");
+  activeDot.className = "protocol-dot protocol-dot-active";
+
+  const reserveDot = document.createElement("span");
+  reserveDot.className = "protocol-dot protocol-dot-reserve";
+
+  protocolColumn.append(activeDot, reserveDot);
+  protocolSelector.append(protocolLabel, protocolColumn);
+
+  headerSwitchers.parentNode.insertBefore(controlsCluster, headerSwitchers);
+  controlsCluster.append(protocolSelector, headerSwitchers);
+
+  const protocolStyle = document.createElement("style");
+  protocolStyle.textContent = `
+    .brand-copy::after {
+      content: none !important;
+      display: none !important;
+    }
+
+    .brand {
+      padding-top: 104px !important;
+    }
+
+    .brand-copy {
+      display: block !important;
+    }
+
+    .header-control-cluster {
+      min-width: 0;
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    .header-control-cluster .header-switchers,
+    .header-control-cluster .header-switchers.three-platform-switchers {
+      flex: 0 0 336px;
+      width: 336px;
+    }
+
+    .protocol-selector {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text);
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .protocol-label {
+      font-size: 13px;
+      line-height: 1;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .protocol-column {
+      width: 28px;
+      height: 62px;
+      box-sizing: border-box;
+      padding: 8px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--card);
+    }
+
+    .protocol-dot {
+      width: 12px;
+      height: 12px;
+      box-sizing: border-box;
+      display: block;
+      border-radius: 50%;
+    }
+
+    .protocol-dot-active {
+      background: var(--success);
+      border: 1px solid color-mix(in srgb, var(--success) 76%, #1d1d1f 24%);
+    }
+
+    .protocol-dot-reserve {
+      background: #ffffff;
+      border: 1px solid var(--border);
+    }
+
+    @media (max-width: 759px) {
+      .header-control-cluster .header-switchers,
+      .header-control-cluster .header-switchers.three-platform-switchers {
+        flex-basis: 300px;
+        width: 300px;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .brand {
+        padding-top: 142px !important;
+      }
+
+      .header-control-cluster {
+        width: 100%;
+        margin-left: 0;
+        gap: 8px;
+      }
+
+      .header-control-cluster .header-switchers,
+      .header-control-cluster .header-switchers.three-platform-switchers {
+        flex: 1 1 auto;
+        width: auto;
+        min-width: 0;
+      }
+
+      .protocol-selector {
+        gap: 6px;
+      }
+
+      .protocol-label {
+        font-size: 12px;
+      }
+
+      .protocol-column {
+        width: 26px;
+        height: 62px;
+      }
+    }
+  `;
+  document.head.appendChild(protocolStyle);
+}
+
 languageEn.addEventListener(
   "click",
   () => setLanguage("en")
