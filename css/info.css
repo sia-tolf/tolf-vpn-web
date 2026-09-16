@@ -346,3 +346,59 @@ html[lang="lv"] .site-label[lang="lv"] {
     width: 100%;
   }
 }
+
+/* Keep only language/platform selectors visible while scrolling. */
+.brand {
+  position: static;
+  top: auto;
+  z-index: auto;
+  padding-top: 0;
+  padding-bottom: 0;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.brand-copy p {
+  display: none;
+}
+
+.brand-top {
+  min-height: 76px;
+  padding-right: 324px;
+}
+
+.header-switchers,
+.header-switchers.three-platform-switchers {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top));
+  right: max(24px, calc((100vw - 760px) / 2 + 24px));
+  z-index: 50;
+  flex-basis: auto;
+  background: color-mix(in srgb, var(--background) 94%, var(--segment-background));
+  backdrop-filter: saturate(180%) blur(18px);
+  -webkit-backdrop-filter: saturate(180%) blur(18px);
+  box-shadow: 0 1px 8px rgba(0,0,0,.08);
+}
+
+@media (min-width: 760px) {
+  .brand-top {
+    padding-right: 360px;
+  }
+}
+
+@media (max-width: 520px) {
+  .brand-top {
+    min-height: 0;
+    padding-top: 86px;
+    padding-right: 0;
+  }
+
+  .header-switchers,
+  .header-switchers.three-platform-switchers {
+    top: max(8px, env(safe-area-inset-top));
+    left: 16px;
+    right: 16px;
+    width: auto;
+  }
+}
