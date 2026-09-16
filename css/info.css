@@ -487,9 +487,9 @@ html[lang="lv"] .site-label[lang="lv"] {
   }
 }
 
-/* Active protocol slot. A second protocol can be added here later. */
+/* Protocol selector: two slots now, second reserved for a future protocol. */
 .brand {
-  padding-top: 82px;
+  padding-top: 114px;
 }
 
 .brand-copy {
@@ -501,21 +501,30 @@ html[lang="lv"] .site-label[lang="lv"] {
 
 .brand-copy::after {
   content: "IKEv2";
-  min-width: 82px;
-  min-height: 30px;
-  padding: 6px 12px;
-  display: inline-flex;
-  align-items: center;
+  width: 92px;
+  height: 64px;
+  box-sizing: border-box;
+  padding-top: 8px;
+  display: flex;
+  align-items: flex-start;
   justify-content: center;
-  border: 1px solid color-mix(in srgb, var(--success) 72%, transparent);
-  border-radius: 9px;
-  background: color-mix(in srgb, var(--success) 84%, #1d1d1f 16%);
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background:
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--success) 84%, #1d1d1f 16%) 0,
+      color-mix(in srgb, var(--success) 84%, #1d1d1f 16%) calc(50% - .5px),
+      var(--border) calc(50% - .5px),
+      var(--border) calc(50% + .5px),
+      var(--card) calc(50% + .5px),
+      var(--card) 100%
+    );
   color: #ffffff;
   font-size: 13px;
   line-height: 1.2;
   font-weight: 650;
   letter-spacing: -0.01em;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.12);
   user-select: none;
   -webkit-user-select: none;
 }
@@ -533,8 +542,20 @@ html[lang="lv"] .site-label[lang="lv"] {
   }
 
   .brand-copy::after {
-    min-width: 74px;
-    min-height: 28px;
-    padding: 5px 10px;
+    width: 148px;
+    height: 30px;
+    padding: 0 0 0 19px;
+    align-items: center;
+    justify-content: flex-start;
+    background:
+      linear-gradient(
+        to right,
+        color-mix(in srgb, var(--success) 84%, #1d1d1f 16%) 0,
+        color-mix(in srgb, var(--success) 84%, #1d1d1f 16%) calc(50% - .5px),
+        var(--border) calc(50% - .5px),
+        var(--border) calc(50% + .5px),
+        var(--card) calc(50% + .5px),
+        var(--card) 100%
+      );
   }
 }
