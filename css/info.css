@@ -108,7 +108,7 @@
 .header-actions-row {
   display: flex;
   width: 100%;
-  margin-top: 16px;
+  margin-top: 0;
   padding: 14px;
   background: var(--card);
   border: 1px solid var(--border);
