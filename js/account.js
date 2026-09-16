@@ -6,14 +6,41 @@ function closeRegistrationPanel() {
   registerPanel.classList.add("hidden");
 }
 
-createAccountButton.addEventListener("click", () => {
+function openRegistrationPanel() {
   signedOutMainActions.classList.add("hidden");
   recoverPanel.classList.add("hidden");
   registerPanel.classList.remove("hidden");
   signedOutMessage.textContent = "";
   signedOutMessage.className = "message";
   document.getElementById("registerPasskeyName").focus();
-});
+}
+
+function handleEntryAction() {
+  const url = new URL(window.location.href);
+  const action = url.searchParams.get("action");
+
+  if (action === "signup") {
+    openRegistrationPanel();
+  } else if (action === "signin") {
+    closeRegistrationPanel();
+    recoverPanel.classList.add("hidden");
+    signedOutMainActions.classList.remove("hidden");
+    signedOutMessage.textContent = "";
+    signedOutMessage.className = "message";
+
+    requestAnimationFrame(() => {
+      signInButton.focus({ preventScroll: true });
+      signedOutCard.scrollIntoView({ block: "start" });
+    });
+  } else {
+    return;
+  }
+
+  url.searchParams.delete("action");
+  window.history.replaceState({}, "", url.pathname + url.search + url.hash);
+}
+
+createAccountButton.addEventListener("click", openRegistrationPanel);
 
 cancelRegisterButton.addEventListener("click", () => {
   closeRegistrationPanel();
@@ -35,6 +62,7 @@ async function loadAccount() {
     await updateInvitationAccount(data);
   } catch {
     showSignedOut();
+    handleEntryAction();
   }
 }
 
