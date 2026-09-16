@@ -13,5 +13,9 @@ languageLv.addEventListener(
   () => setLanguage("lv")
 );
 
+document
+  .getElementById("profileQrButton")
+  ?.classList.replace("secondary", "constructive");
+
 setLanguage(currentLanguage);
 loadAccount();
