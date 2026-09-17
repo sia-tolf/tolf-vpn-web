@@ -40,7 +40,7 @@ if (headerSwitchers && !document.getElementById("protocolSelector")) {
     }
 
     .brand {
-      padding-top: 104px !important;
+      padding-top: 0 !important;
       margin-bottom: 20px !important;
     }
 
@@ -58,6 +58,33 @@ if (headerSwitchers && !document.getElementById("protocolSelector")) {
       outline: 2px solid var(--text);
       outline-offset: 3px;
       border-radius: 4px;
+    }
+
+    .brand-top {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      transform: none !important;
+      z-index: 60 !important;
+      width: 100% !important;
+      min-height: 0 !important;
+      box-sizing: border-box;
+      padding-top: max(10px, env(safe-area-inset-top)) !important;
+      padding-bottom: 10px !important;
+      padding-left: max(24px, calc((100vw - 712px) / 2)) !important;
+      padding-right: max(24px, calc((100vw - 712px) / 2)) !important;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      background: color-mix(in srgb, var(--background) 90%, transparent) !important;
+      border: 0 !important;
+      border-bottom: 1px solid var(--border) !important;
+      border-radius: 0 !important;
+      backdrop-filter: saturate(180%) blur(20px) !important;
+      -webkit-backdrop-filter: saturate(180%) blur(20px) !important;
+      box-shadow: none !important;
     }
 
     .header-control-cluster {
@@ -129,6 +156,11 @@ if (headerSwitchers && !document.getElementById("protocolSelector")) {
     }
 
     @media (max-width: 759px) {
+      .brand-top {
+        padding-left: 24px !important;
+        padding-right: 24px !important;
+      }
+
       .header-control-cluster .header-switchers,
       .header-control-cluster .header-switchers.three-platform-switchers {
         flex-basis: 300px;
@@ -137,8 +169,14 @@ if (headerSwitchers && !document.getElementById("protocolSelector")) {
     }
 
     @media (max-width: 520px) {
-      .brand {
-        padding-top: 142px !important;
+      .brand-top {
+        padding-top: max(8px, env(safe-area-inset-top)) !important;
+        padding-bottom: 8px !important;
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
       }
 
       .header-control-cluster {
