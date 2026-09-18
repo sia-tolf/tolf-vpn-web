@@ -167,6 +167,7 @@ function destination() {
   const base = next === "vpn" ? "https://vpn.tolf.is/" : "https://tolf.is/";
   const target = new URL(base);
   target.searchParams.set("lang", language);
+  target.searchParams.set("ui", "20260918-1");
   return target.toString();
 }
 
