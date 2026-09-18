@@ -48,6 +48,10 @@ function renderPlatform() {
     onDemandSection.classList.toggle("hidden", !isIos);
   }
 
+  document.getElementById("androidServerSettings")?.classList.toggle(
+    "hidden", currentPlatform !== "android"
+  );
+
   if (onDemandAndroidNote) {
     onDemandAndroidNote.classList.toggle("hidden", isIos);
   }
