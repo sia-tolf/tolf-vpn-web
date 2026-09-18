@@ -118,6 +118,10 @@ I18N.lv = {
   wifiNetworkName: "Wi‑Fi tīkla nosaukums",
   onDemandAction: "Darbība pēc pieprasījuma",
   removeOnDemandRule: "Noņemt kārtulu",
+  androidServerSettingsTitle: "strongSwan servera parametri",
+  androidServerDpd: "DPD pārbauda VPN savienojuma pieejamību. Pārbaudes intervālu un darbību savienojuma zuduma gadījumā nosaka serverī.",
+  androidServerMobike: "MOBIKE atbalsta tīkla maiņu, piemēram, Wi-Fi → mobilais tīkls. To izmanto, ja tas ir atļauts gan serverī, gan strongSwan.",
+  androidServerSettingsNote: "DPD iestata serverī; MOBIKE izmantošanu saskaņo savienojuma izveides laikā. Šie parametri netiek iestatīti šajā lapā. Izvēlētā servera pašreizējās vērtības šeit netiek attēlotas.",
   androidAlwaysOnNote: "Android ierīcē pastāvīgais VPN savienojums jāiestata atsevišķi sistēmas iestatījumos.",
 
   promoRateLimit: "Pārāk daudz mēģinājumu. Mēģiniet vēlreiz pēc 15 minūtēm.",
