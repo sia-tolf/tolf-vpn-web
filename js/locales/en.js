@@ -118,6 +118,10 @@ I18N.en = {
   wifiNetworkName: "Wi-Fi network name",
   onDemandAction: "On Demand action",
   removeOnDemandRule: "Remove rule",
+  androidServerSettingsTitle: "strongSwan server settings",
+  androidServerDpd: "DPD checks whether the VPN connection is alive. The server controls its interval and action when the connection is lost.",
+  androidServerMobike: "MOBIKE supports network changes, such as Wi-Fi → mobile data. It is used when enabled on both the server and in strongSwan.",
+  androidServerSettingsNote: "DPD is configured on the server; MOBIKE use is negotiated when connecting. These parameters are not configured on this page. Their current settings on the selected server are not displayed here.",
   androidAlwaysOnNote: "On Android, Always-on VPN is configured separately in system settings.",
 
   promoRateLimit: "Too many attempts. Try again in 15 minutes.",
