@@ -22,12 +22,12 @@
   <!-- Keep this order. Deferred scripts run after the HTML has been parsed. -->
   <script defer src="passkey-session-label.20260917-1.js"></script>
   <script defer src="js/config.js?v=windows-1"></script>
-  <script defer src="js/locales/en.js?v=windows-routing-20260915"></script>
-  <script defer src="js/locales/ru.js?v=windows-routing-20260915"></script>
-  <script defer src="js/locales/lv.js?v=windows-routing-20260915"></script>
+  <script defer src="js/locales/en.js?v=android-server-note-20260918"></script>
+  <script defer src="js/locales/ru.js?v=android-server-note-20260918"></script>
+  <script defer src="js/locales/lv.js?v=android-server-note-20260918"></script>
   <script defer src="js/dom.js?v=share-profile-1"></script>
   <script defer src="js/network-metrics.js?v=latency-decimal-1"></script>
-  <script defer src="js/platform.js?v=windows-back-1"></script>
+  <script defer src="js/platform.js?v=android-server-note-20260918"></script>
   <script defer src="js/i18n.js?v=website-signin-1"></script>
   <script defer src="js/webauthn.js?v=local-id-2"></script>
   <script defer src="js/api.js?v=local-id-2"></script>
@@ -791,6 +791,12 @@
               On Android, Always-on VPN is configured
               separately in system settings.
             </p>
+            <section id="androidServerSettings" class="hidden" aria-labelledby="androidServerSettingsTitle">
+              <p id="androidServerSettingsTitle" class="section-description" data-i18n="androidServerSettingsTitle">strongSwan server settings</p>
+              <p class="section-description" data-i18n="androidServerDpd">DPD checks whether the VPN connection is alive. The server controls its interval and action when the connection is lost.</p>
+              <p class="section-description" data-i18n="androidServerMobike">MOBIKE supports network changes, such as Wi-Fi → mobile data. It is used when enabled on both the server and in strongSwan.</p>
+              <p class="section-description" data-i18n="androidServerSettingsNote">DPD is configured on the server; MOBIKE use is negotiated when connecting. These parameters are not configured on this page. Their current settings on the selected server are not displayed here.</p>
+            </section>
           </details>
         </div>
 
