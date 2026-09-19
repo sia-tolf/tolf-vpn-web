@@ -72,7 +72,10 @@ if (headerSwitchers && !document.getElementById("protocolSelector")) {
       text-decoration: none;
       line-height: 1.2;
     }
-    .brand-title-row .help-navigation { grid-column: 3; justify-self: end; }
+    .brand-title-row .help-navigation { grid-column: 3; justify-self: end; color: #1f4180; font-weight: 600; }
+    @media (prefers-color-scheme: dark) {
+      .brand-title-row .help-navigation { color: #9dbbff; }
+    }
     .home-navigation:focus-visible {
       outline: 2px solid var(--text);
       outline-offset: 3px;
