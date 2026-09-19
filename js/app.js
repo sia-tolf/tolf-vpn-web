@@ -72,6 +72,7 @@ if (headerSwitchers && !document.getElementById("protocolSelector")) {
       text-decoration: none;
       line-height: 1.2;
     }
+    .brand-title-row .help-navigation { grid-column: 3; justify-self: end; }
     .home-navigation:focus-visible {
       outline: 2px solid var(--text);
       outline-offset: 3px;
