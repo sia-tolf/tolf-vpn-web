@@ -343,10 +343,16 @@ windowsForm.addEventListener('submit', event => {
     windowsServers = new Set(capabilities.servers.filter(server => ['riga', 'moscow'].includes(server)));
     windowsRoutingModes = capabilities.routingModes || {riga: ['sr']};
     windowsReady = true;
-    document.getElementById('platformWindows').classList.remove('hidden');
+    const windowsPlatformButton = document.getElementById('platformWindows');
+    windowsPlatformButton.classList.remove('hidden');
+    windowsPlatformButton.disabled = false;
+    windowsPlatformButton.removeAttribute('aria-disabled');
     renderWindowsDevices();
     if (currentPlatform === 'windows') await loadWindowsDevices();
   } catch {
+    const windowsPlatformButton = document.getElementById('platformWindows');
+    windowsPlatformButton.disabled = true;
+    windowsPlatformButton.setAttribute('aria-disabled', 'true');
     // Do not expose creation controls before the server supports independent devices.
     if (currentPlatform === 'windows') setPlatform('ios');
   }
