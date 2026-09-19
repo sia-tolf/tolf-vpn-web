@@ -559,3 +559,295 @@ html[lang="lv"] .site-label[lang="lv"] {
       );
   }
 }
+
+/* Static final VPN header — rendered in its final geometry before deferred JS runs. */
+.brand-copy::after {
+  content: none !important;
+  display: none !important;
+}
+
+.brand {
+  padding-top: 0 !important;
+  margin-bottom: 16px !important;
+}
+
+.brand-copy {
+  display: block !important;
+  width: 100%;
+}
+
+.brand-copy > p {
+  display: none !important;
+}
+
+.brand-title-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  white-space: nowrap;
+}
+
+.brand-title-row h1 {
+  grid-column: 2;
+  margin: 0;
+  text-align: center;
+}
+
+.brand-title-row .home-navigation {
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  height: 42px;
+  justify-self: start;
+  padding: 0;
+  color: var(--text-secondary, #6e6e73);
+  font-size: 14px;
+  font-weight: 400;
+  text-decoration: none;
+  line-height: 1.2;
+}
+
+.brand-title-row .help-navigation {
+  grid-column: 3;
+  justify-self: end;
+  color: #1f4180;
+  font-weight: 600;
+}
+
+.home-navigation:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.brand-top {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  transform: none !important;
+  z-index: 60 !important;
+  width: 100% !important;
+  min-height: 0 !important;
+  box-sizing: border-box;
+  padding-top: max(10px, env(safe-area-inset-top)) !important;
+  padding-bottom: 10px !important;
+  padding-left: max(24px, calc((100vw - 712px) / 2)) !important;
+  padding-right: max(24px, calc((100vw - 712px) / 2)) !important;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 8px;
+  background: color-mix(in srgb, var(--background) 90%, transparent) !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--border) !important;
+  border-radius: 0 !important;
+  backdrop-filter: saturate(180%) blur(20px) !important;
+  -webkit-backdrop-filter: saturate(180%) blur(20px) !important;
+  box-shadow: none !important;
+}
+
+.header-control-cluster {
+  min-width: 0;
+  margin-left: auto;
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.header-control-cluster .header-switchers,
+.header-control-cluster .header-switchers.three-platform-switchers {
+  position: static;
+  top: auto;
+  right: auto;
+  left: auto;
+  z-index: auto;
+  flex: 0 0 336px;
+  width: 336px;
+  background: var(--segment-background);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+}
+
+.protocol-selector {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: auto 28px;
+  align-items: stretch;
+  gap: 8px;
+  color: var(--text);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.protocol-label {
+  align-self: start;
+  margin-top: 8px;
+  font-size: 13px;
+  line-height: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.protocol-column {
+  width: 28px;
+  min-height: 100%;
+  box-sizing: border-box;
+  padding: 8px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--card);
+}
+
+.protocol-dot {
+  width: 12px;
+  height: 12px;
+  box-sizing: border-box;
+  display: block;
+  border-radius: 50%;
+}
+
+.protocol-dot-active {
+  background: var(--success);
+  border: 1px solid color-mix(in srgb, var(--success) 76%, #1d1d1f 24%);
+}
+
+.protocol-dot-reserve {
+  background: #ffffff;
+  border: 1px solid var(--border);
+}
+
+/* Wide iPad: title and protocol/platform controls share one row from first paint. */
+@media (min-width: 768px) and (orientation: landscape) {
+  html.tolf-ipad .brand-top {
+    display: grid !important;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-rows: 42px auto;
+    column-gap: 12px;
+    row-gap: 8px;
+    align-items: center;
+  }
+
+  html.tolf-ipad .brand-copy,
+  html.tolf-ipad .brand-title-row {
+    display: contents !important;
+  }
+
+  html.tolf-ipad .brand-title-row .home-navigation {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: start;
+  }
+
+  html.tolf-ipad .brand-title-row .help-navigation {
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: end;
+  }
+
+  html.tolf-ipad .brand-title-row h1 {
+    grid-column: 1;
+    grid-row: 2;
+    justify-self: start;
+    margin: 0;
+    text-align: left;
+    font-size: 42px;
+    line-height: 1.04;
+  }
+
+  html.tolf-ipad .header-control-cluster {
+    grid-column: 2 / 4;
+    grid-row: 2;
+    justify-self: end;
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 759px) {
+  .brand-top {
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+  }
+
+  .header-control-cluster .header-switchers,
+  .header-control-cluster .header-switchers.three-platform-switchers {
+    flex-basis: 300px;
+    width: 300px;
+  }
+}
+
+@media (max-width: 520px) {
+  .brand-top {
+    padding-top: max(8px, env(safe-area-inset-top)) !important;
+    padding-bottom: 8px !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .header-control-cluster {
+    width: 100%;
+    margin-left: 0;
+    gap: 8px;
+  }
+
+  .header-control-cluster .header-switchers,
+  .header-control-cluster .header-switchers.three-platform-switchers {
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
+  }
+
+  .protocol-selector {
+    grid-template-columns: auto 26px;
+    gap: 6px;
+  }
+
+  .protocol-label {
+    font-size: 12px;
+  }
+
+  .protocol-column {
+    width: 26px;
+  }
+
+  .brand-title-row {
+    gap: 4px;
+  }
+
+  .brand-title-row h1 {
+    font-size: 20px;
+  }
+
+  .brand-title-row .home-navigation {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 350px) {
+  .brand-title-row h1 {
+    font-size: 18px;
+  }
+
+  .brand-title-row .home-navigation {
+    font-size: 11px;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .brand-title-row .help-navigation {
+    color: #9dbbff;
+  }
+}
+
