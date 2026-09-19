@@ -8,6 +8,26 @@
   >
   <meta name="color-scheme" content="light dark">
 
+  <script id="tolf-static-ipad-detect">
+    (() => {
+      const ua = navigator.userAgent || "";
+      const platform = navigator.platform || "";
+      const isIPad =
+        /iPad/i.test(ua) ||
+        (
+          navigator.maxTouchPoints > 1 &&
+          (
+            /Macintosh|Mac OS X/i.test(ua) ||
+            /Mac/i.test(platform)
+          )
+        );
+
+      if (isIPad && !/Android|Windows/i.test(ua)) {
+        document.documentElement.classList.add("tolf-ipad");
+      }
+    })();
+  </script>
+
   <title>TOLF VPN</title>
 
   <link
@@ -16,12 +36,12 @@
   >
   <link
     rel="stylesheet"
-    href="css/info.css?v=protocol-selector-20260916"
+    href="css/info.css?v=static-ipad-header-20260919-1"
   >
 
   <!-- Keep this order. Deferred scripts run after the HTML has been parsed. -->
   <script defer src="passkey-session-label.20260917-1.js"></script>
-  <script defer src="js/config.js?v=physical-platform-20260919-1"></script>
+  <script defer src="js/config.js?v=physical-platform-20260919-2"></script>
   <script defer src="js/locales/en.js?v=promo-disclosure-20260919"></script>
   <script defer src="js/locales/ru.js?v=promo-disclosure-20260919"></script>
   <script defer src="js/locales/lv.js?v=promo-disclosure-20260919"></script>
@@ -42,10 +62,10 @@
   <script defer src="js/librespeed.js?v=1"></script>
   <script defer src="js/latency.js?v=connection-test-1"></script>
   <script defer src="js/connection-test.js?v=connection-test-3"></script>
-  <script defer src="js/windows.js?v=windows-selector-stable-20260919-1"></script>
+  <script defer src="js/windows.js?v=windows-selector-stable-20260919-2"></script>
   <script defer src="js/invitations.js?v=hide-protected-banner-1"></script>
   <script defer src="js/quick-entry.js?v=quick-2"></script>
-  <script defer src="js/app.js?v=ipad-title-controls-20260919-1"></script>
+  <script defer src="js/app.js?v=static-ipad-header-20260919-1"></script>
   <script defer src="js/admin-entry.js?v=actions-20260917-2"></script>
 <link rel="stylesheet" href="tolf-buttons.20260917-3.css">
 <script defer src="tolf-wordmark.20260917-3.js"></script>
@@ -67,7 +87,17 @@
           </p>
         </div>
 
-        <div class="header-switchers three-platform-switchers">
+        <div class="header-control-cluster">
+          <div id="protocolSelector" class="protocol-selector" aria-label="IKEv2 selected">
+            <span class="protocol-label">IKEv2</span>
+            <span class="protocol-column" aria-hidden="true">
+              <span class="protocol-dot protocol-dot-active"></span>
+              <span class="protocol-dot protocol-dot-reserve"></span>
+              <span class="protocol-dot protocol-dot-reserve"></span>
+            </span>
+          </div>
+
+          <div class="header-switchers three-platform-switchers">
           <div
             class="language-switcher"
             aria-label="Language"
@@ -130,6 +160,7 @@
             </button>
             <button id="platformWindows" class="platform-button" type="button" aria-pressed="false" aria-disabled="true" disabled><svg class="platform-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 3h9v8H2zM13 3h9v8h-9zM2 13h9v8H2zM13 13h9v8h-9z"/></svg><span>Windows</span></button>
           </div>
+        </div>
         </div>
       </div>
 
