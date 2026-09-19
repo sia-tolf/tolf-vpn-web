@@ -28,7 +28,7 @@
   <script defer src="js/dom.js?v=share-profile-1"></script>
   <script defer src="js/network-metrics.js?v=latency-decimal-1"></script>
   <script defer src="js/platform.js?v=promo-disclosure-20260919"></script>
-  <script defer src="js/i18n.js?v=home-navigation-20260919"></script>
+  <script defer src="js/i18n.js?v=help-navigation-20260919"></script>
   <script defer src="js/webauthn.js?v=local-id-2"></script>
   <script defer src="js/api.js?v=local-id-2"></script>
   <script defer src="js/ui.js?v=windows-link-field-20260914"></script>
@@ -36,7 +36,7 @@
   <script defer src="js/recovery.js?v=local-id-2"></script>
   <script defer src="js/account.js?v=passkey-label-20260917-1"></script>
   <script defer src="js/profile-settings.js?v=profile-options-1"></script>
-  <script defer src="js/vpn.js?v=windows-1"></script>
+  <script defer src="js/vpn.js?v=delete-confirm-20260919"></script>
   <script defer src="js/promo.js?v=promo-disclosure-20260919"></script>
   <script defer src="js/location.js?v=entry-point-auto-8"></script>
   <script defer src="js/librespeed.js?v=1"></script>
@@ -45,7 +45,7 @@
   <script defer src="js/windows.js?v=windows-routing-20260915"></script>
   <script defer src="js/invitations.js?v=hide-protected-banner-1"></script>
   <script defer src="js/quick-entry.js?v=quick-2"></script>
-  <script defer src="js/app.js?v=home-navigation-20260919-2"></script>
+  <script defer src="js/app.js?v=help-navigation-20260919"></script>
   <script defer src="js/admin-entry.js?v=actions-20260917-2"></script>
 <link rel="stylesheet" href="tolf-buttons.20260917-3.css">
 <script defer src="tolf-wordmark.20260917-3.js"></script>
@@ -60,6 +60,7 @@
           <div class="brand-title-row">
             <a id="homeNavigation" class="home-navigation" href="https://tolf.is/?lang=en">‹ Home</a>
             <h1>TOLF VPN</h1>
+            <a id="helpNavigation" class="home-navigation help-navigation" href="help.html?lang=en">Help</a>
           </div>
           <p data-i18n="brandSubtitle">
             System VPN access for your devices.
@@ -132,34 +133,6 @@
         </div>
       </div>
 
-      <div class="header-actions-row">
-        <nav class="site-nav">
-          <a href="help.html">
-            <span class="site-label" lang="en">
-              Help &amp; FAQ
-            </span>
-            <span class="site-label" lang="ru">
-              Помощь и FAQ
-            </span>
-            <span class="site-label" lang="lv">
-              Palīdzība un BUJ
-            </span>
-          </a>
-
-          <a href="privacy.html">
-            <span class="site-label" lang="en">
-              Privacy
-            </span>
-            <span class="site-label" lang="ru">
-              Приватность
-            </span>
-            <span class="site-label" lang="lv">
-              Privātums
-            </span>
-          </a>
-        </nav>
-
-      </div>
     </header>
 
     <section id="loadingCard" class="card">
@@ -1037,15 +1010,6 @@
             type="button"
             data-i18n="deleteVpnAccess"
           >Delete VPN Access</button>
-
-          <p
-            class="delete-note"
-            data-i18n="deleteVpnNote"
-          >
-            This removes your VPN access from TOLF VPN
-            servers. Your TOLF account and Passkeys will
-            remain active.
-          </p>
         </div>
 
         </div>
