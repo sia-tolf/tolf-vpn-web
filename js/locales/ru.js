@@ -171,7 +171,7 @@ I18N.ru = {
   londonUk: "Лондон, Великобритания",
   comingSoon: "Скоро",
   serverAddress: "Адрес точки входа",
-  vpnOverviewTitle: "VPN",
+  vpnOverviewTitle: "VPN · IKEv2",
   status: "Статус",
   server: "Точка входа",
   username: "Имя пользователя",
