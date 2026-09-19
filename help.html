@@ -6,85 +6,94 @@
   <meta name="color-scheme" content="light dark">
   <title>Help — TOLF VPN</title>
   <link rel="stylesheet" href="css/styles.css?v=layout-3">
-  <link rel="stylesheet" href="css/info.css?v=layout-3">
+  
   <style>
-    .help-nav { display: flex; flex-wrap: wrap; gap: 10px 20px; margin: 24px 0; }
-    .help-page a { color: var(--text); text-underline-offset: 3px; }
-    .help-page section { margin-top: 28px; scroll-margin-top: 20px; }
-    .help-page h2 { margin-bottom: 14px; font-size: 21px; }
-    .help-page p, .help-page li, .help-page dd { font-size: 16px; line-height: 1.6; }
-    .help-page p { margin: 10px 0; }
-    .help-page ul, .help-page ol { padding-left: 22px; }
-    .help-page li + li { margin-top: 8px; }
-    .help-page dt { margin-top: 18px; font-weight: 600; }
-    .help-page dd { margin: 4px 0 0; color: var(--secondary); }
-    .help-page details { padding: 14px 0; border-bottom: 1px solid var(--border); }
-    .help-page summary { cursor: pointer; font-size: 16px; line-height: 1.5; font-weight: 600; }
-    .help-page code { font-size: .95em; overflow-wrap: anywhere; }
-    .help-page [hidden] { display: none !important; }
-    .help-sources { margin-top: 28px; color: var(--secondary); }
-  </style>
+.help-page { max-width: 760px; margin-inline: auto; }
+.help-header { margin-bottom: 20px; }
+.help-top { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; }
+.help-top h1 { margin: 0; font-size: 22px; font-weight: 600; }
+.help-top a { display: inline-flex; align-items: center; min-height: 42px; color: #1f4180; font-size: 14px; font-weight: 500; text-decoration: none; }
+.help-languages { display: flex; justify-content: center; margin-top: 10px; }
+.help-page .card-content { padding: 4px 20px; }
+.help-page details { padding: 0; border-bottom: 1px solid var(--border); }
+.help-page details:last-child { border-bottom: 0; }
+.help-page summary { cursor: pointer; padding: 16px 0; font-size: 16px; font-weight: 500; line-height: 1.4; }
+.help-page p, .help-page li, .help-page dd { font-size: 16px; line-height: 1.55; }
+.help-page p { margin: 0 0 14px; }
+.help-page ol { padding-left: 22px; margin: 0 0 16px; }
+.help-page li + li { margin-top: 8px; }
+.help-page dt { margin-top: 16px; font-weight: 500; }
+.help-page dd { margin: 4px 0 16px; color: var(--secondary); }
+.help-page code { overflow-wrap: anywhere; }
+.help-page [hidden] { display: none !important; }
+.help-page a:focus-visible, .help-page summary:focus-visible { outline: 2px solid #1f4180; outline-offset: 3px; }
+@media (prefers-color-scheme: dark) { .help-top a { color: #9dbbff; } }
+</style>
 <link rel="stylesheet" href="tolf-header.20260919-1.css?v=languages-2">
 </head>
 <body>
   <main class="page help-page">
-    <header class="brand">
-      <div class="brand-top">
-        <div class="brand-copy">
-          <h1>TOLF VPN</h1>
-          <p id="helpSubtitle">Help, glossary and FAQ.</p>
-        </div>
-        <div class="tolf-language language-switcher" aria-label="Language">
+    <header class="help-header">
+      <div class="help-top"><a id="helpBack" href="index.html?lang=en">‹ My VPN</a><h1 id="helpTitle">Help</h1></div>
+      <div class="help-languages"><div class="tolf-language language-switcher" aria-label="Language">
           <button id="helpEnButton" class="language-button active" type="button" aria-pressed="true" lang="en" aria-label="English">EN</button>
           <button id="helpRuButton" class="language-button" type="button" aria-pressed="false" lang="ru" aria-label="Русский">RU</button>
           <button id="helpLvButton" class="language-button" type="button" aria-pressed="false" lang="lv" aria-label="Latviešu">LV</button>
-        </div>
-      </div>
-      <nav class="site-nav">
-        <a href="index.html">
-          <span class="site-label" lang="en">My VPN</span>
-          <span class="site-label" lang="ru">Мой VPN</span>
-          <span class="site-label" lang="lv">Mans VPN</span>
-        </a>
-        <a href="privacy.html">
-          <span class="site-label" lang="en">Privacy</span>
-          <span class="site-label" lang="ru">Приватность</span>
-          <span class="site-label" lang="lv">Privātums</span>
-        </a>
-      </nav>
+        </div></div>
     </header>
 
     <div class="card">
       <div class="card-content">
-        <article id="helpEn" lang="en">
-          <nav class="help-nav" aria-label="Help sections">
-            <a href="#en-server">Choose a server</a>
-            <a href="#en-benefits">Why TOLF VPN</a>
-            <a href="#en-glossary">Glossary</a>
-            <a href="#en-faq">FAQ</a>
-          </nav>
-
-          <section id="en-server">
-            <h2>Which entry point should I choose?</h2>
+        <article id="helpEn" lang="en"><details>
+              <summary>How do I get started?</summary>
+              <p>Create an account with a Passkey and save the Recovery Code. Sign in, choose a server and create VPN access. Generate an install link, open “Install on Apple Device”, download the Mobile Config and finish installation in device settings. Then select the installed VPN and connect.</p>
+            </details><details id="en-server">
+            <summary>Which entry point should I choose?</summary>
             <p>The website automatically selects a recommended entry point from the country of your current connection. You can choose another entry point manually.</p>
             <p><strong>In Russia: start with Moscow.</strong> Your device connects to a Russian entry server; traffic that needs Riga travels over the link between our servers. Your device does not need a direct VPN connection to a foreign server.</p>
             <p><strong>Outside Russia: start with Riga</strong>, or another available server outside Russia. Your device can reach the foreign entry server directly, while Russian destinations can use the Moscow exit.</p>
             <p>This recommendation follows our network layout. Connection quality depends on your provider and location; it does not guarantee a faster connection or availability on every network.</p>
             <p><strong>The entry server and the exit IP are different things.</strong> With the default settings, Russian destinations in the server’s lists use Moscow; other Internet traffic uses Riga. This works with either entry server. Leave Local ID empty in the website: Riga uses <code>sr</code>, and Moscow uses its empty default value.</p>
-          </section>
-
-          <section id="en-benefits">
-            <h2>Why TOLF VPN?</h2>
-            <ul>
-              <li><strong>Built into Apple devices.</strong> Install a configuration profile and use the system IKEv2 VPN, without a separate VPN app.</li>
-              <li><strong>One connection, two exits.</strong> The default routing can use Russian IP addresses for Russian destinations and Riga for other traffic, without manually switching VPNs for each site.</li>
-              <li><strong>Sign in with a Passkey.</strong> There is no account password to invent or remember.</li>
-              <li><strong>Ready-to-install profiles.</strong> The website manages VPN access, generates profiles and lets experienced users choose Local ID.</li>
-            </ul>
-          </section>
-
-          <section id="en-glossary">
-            <h2>Glossary</h2>
+          </details><details><summary>VPN is connected, but the Internet does not work</summary><ol><li>Disconnect the VPN and check whether the Internet works without it.</li><li>Reconnect the VPN. If needed, try Wi-Fi or mobile data.</li><li>If the problem persists, note the selected server, device and whether all sites or only some fail.</li></ol></details><details>
+              <summary>Does “Active” mean my device is connected?</summary>
+              <p>No. It means VPN access exists on the server. Check the connection state in your device’s VPN settings. You can close the website after connecting; signing out of the website does not turn the VPN off.</p>
+            </details>
+<details>
+              <summary>Does automatic or manual selection of Moscow or Riga switch my VPN?</summary>
+              <p>No. The website automatically selects a recommended entry point, and you can change that choice manually. This only chooses which profile to generate. To change the actual connection, install the appropriate profile and select it in your device’s VPN settings.</p>
+            </details>
+<details>
+              <summary>Which Local ID values are available?</summary>
+              <p>Riga: <code>sr</code> is the default split routing; <code>ru</code> sends Internet traffic through Moscow.</p>
+              <p>Moscow: an empty value is the default split routing; <code>ru</code> uses Moscow for Internet traffic, and <code>lv</code> uses Riga. Moscow’s explicit <code>sr</code> is a different mode: DNS and destinations in the configured Riga lists use Riga; other Internet traffic uses Moscow.</p>
+              <p>After changing Local ID, generate and install a new profile. Use the website’s hint for the selected server.</p>
+            </details>
+<details>
+              <summary>Why do different sites see different countries?</summary>
+              <p>That is expected with default split routing. Russian destinations are identified using the server’s IP and domain lists, including <code>.ru</code>, <code>.su</code> and <code>.рф</code>. A site’s supporting domains, DNS settings and IP-location databases can affect the result; a domain suffix alone is not a guarantee.</p>
+            </details>
+<details>
+              <summary>What expires after 24 hours?</summary>
+              <p>The install link expires, not your account or an already installed VPN profile. Sign in and generate another link when needed.</p>
+            </details>
+<details>
+              <summary>What should I do if I lose my Passkey?</summary>
+              <p>Use another Passkey for the same account, or choose “Recover account” and enter your Recovery Code. Complete creation of a new Passkey, save the newly issued Recovery Code and sign in. The previous recovery code stops working. Without a usable Passkey, recovery code or existing signed-in session, the website cannot restore access.</p>
+            </details>
+<details>
+              <summary>What happens when I change the VPN password?</summary>
+              <p>The password changes for both Riga and Moscow. Generate and install a new profile for every server and device you use. Old profiles cannot reconnect with the old password. Your Passkeys and Recovery Code are unchanged.</p>
+            </details>
+<details>
+              <summary>What is the difference between deleting VPN access and deleting my account?</summary>
+              <p>Deleting VPN access removes VPN credentials on both servers, while preserving your account, Passkeys and accepted promo code. You can create VPN access again.</p>
+              <p>Deleting the account also removes its Passkey registrations, sessions, Recovery Code and VPN access. It cannot be undone. Removing a profile only from your device does not delete the account.</p>
+            </details>
+<details>
+              <summary>Do I need a separate account for another device?</summary>
+              <p>No. Sign in to the same account using a Passkey available on that device, then obtain and install a profile. Passkey availability across devices depends on your password manager and its sync settings.</p>
+            </details><details id="en-glossary">
+            <summary>Glossary</summary>
             <dl>
               <dt>VPN</dt><dd>An encrypted connection between your device and a VPN server. Traffic routed through it reaches the Internet through the configured exit.</dd>
               <dt>Account</dt><dd>Your TOLF identity: it links your Passkeys, recovery code and VPN access settings.</dd>
@@ -104,87 +113,58 @@
               <dt>MOBIKE</dt><dd>A mechanism that can help an IKEv2 connection adapt when the device’s network address changes, for example when moving between Wi-Fi and mobile data.</dd>
               <dt>DPD — Dead Peer Detection</dt><dd>A check that helps detect when the other end of the VPN connection is no longer responding.</dd>
             </dl>
-          </section>
+          </details></article>
 
-          <section id="en-faq">
-            <h2>Frequently Asked Questions</h2>
-            <details>
-              <summary>How do I get started?</summary>
-              <p>Create an account with a Passkey and save the Recovery Code. Sign in, choose a server and create VPN access. Generate an install link, open “Install on Apple Device”, download the Mobile Config and finish installation in device settings. Then select the installed VPN and connect.</p>
-            </details>
-            <details>
-              <summary>Does “Active” mean my device is connected?</summary>
-              <p>No. It means VPN access exists on the server. Check the connection state in your device’s VPN settings. You can close the website after connecting; signing out of the website does not turn the VPN off.</p>
-            </details>
-            <details>
-              <summary>Does automatic or manual selection of Moscow or Riga switch my VPN?</summary>
-              <p>No. The website automatically selects a recommended entry point, and you can change that choice manually. This only chooses which profile to generate. To change the actual connection, install the appropriate profile and select it in your device’s VPN settings.</p>
-            </details>
-            <details>
-              <summary>Which Local ID values are available?</summary>
-              <p>Riga: <code>sr</code> is the default split routing; <code>ru</code> sends Internet traffic through Moscow.</p>
-              <p>Moscow: an empty value is the default split routing; <code>ru</code> uses Moscow for Internet traffic, and <code>lv</code> uses Riga. Moscow’s explicit <code>sr</code> is a different mode: DNS and destinations in the configured Riga lists use Riga; other Internet traffic uses Moscow.</p>
-              <p>After changing Local ID, generate and install a new profile. Use the website’s hint for the selected server.</p>
-            </details>
-            <details>
-              <summary>Why do different sites see different countries?</summary>
-              <p>That is expected with default split routing. Russian destinations are identified using the server’s IP and domain lists, including <code>.ru</code>, <code>.su</code> and <code>.рф</code>. A site’s supporting domains, DNS settings and IP-location databases can affect the result; a domain suffix alone is not a guarantee.</p>
-            </details>
-            <details>
-              <summary>What expires after 24 hours?</summary>
-              <p>The install link expires, not your account or an already installed VPN profile. Sign in and generate another link when needed.</p>
-            </details>
-            <details>
-              <summary>What should I do if I lose my Passkey?</summary>
-              <p>Use another Passkey for the same account, or choose “Recover account” and enter your Recovery Code. Complete creation of a new Passkey, save the newly issued Recovery Code and sign in. The previous recovery code stops working. Without a usable Passkey, recovery code or existing signed-in session, the website cannot restore access.</p>
-            </details>
-            <details>
-              <summary>What happens when I change the VPN password?</summary>
-              <p>The password changes for both Riga and Moscow. Generate and install a new profile for every server and device you use. Old profiles cannot reconnect with the old password. Your Passkeys and Recovery Code are unchanged.</p>
-            </details>
-            <details>
-              <summary>What is the difference between deleting VPN access and deleting my account?</summary>
-              <p>Deleting VPN access removes VPN credentials on both servers, while preserving your account, Passkeys and accepted promo code. You can create VPN access again.</p>
-              <p>Deleting the account also removes its Passkey registrations, sessions, Recovery Code and VPN access. It cannot be undone. Removing a profile only from your device does not delete the account.</p>
-            </details>
-            <details>
-              <summary>Do I need a separate account for another device?</summary>
-              <p>No. Sign in to the same account using a Passkey available on that device, then obtain and install a profile. Passkey availability across devices depends on your password manager and its sync settings.</p>
-            </details>
-          </section>
-
-          <p class="help-sources">More about <a href="https://support.apple.com/guide/iphone/use-passkeys-to-sign-in-to-websites-and-apps-iphf538ea8d0/ios">Apple Passkeys</a> and <a href="https://docs.strongswan.org/docs/latest/interop/appleIkev2Profile.html">Apple IKEv2 profiles</a>.</p>
-        </article>
-
-        <article id="helpRu" lang="ru" hidden>
-          <nav class="help-nav" aria-label="Разделы помощи">
-            <a href="#ru-server">Выбор сервера</a>
-            <a href="#ru-benefits">Преимущества</a>
-            <a href="#ru-glossary">Глоссарий</a>
-            <a href="#ru-faq">Вопросы и ответы</a>
-          </nav>
-
-          <section id="ru-server">
-            <h2>Какую точку входа выбрать?</h2>
+        <article id="helpRu" lang="ru" hidden><details>
+              <summary>С чего начать?</summary>
+              <p>Создайте аккаунт с Passkey и сохраните Recovery Code. Войдите, выберите сервер и создайте VPN-доступ. Создайте ссылку для установки, нажмите «Установить на устройство Apple», скачайте Mobile Config и завершите установку в настройках устройства. Затем выберите установленный VPN и подключитесь.</p>
+            </details><details id="ru-server">
+            <summary>Какую точку входа выбрать?</summary>
             <p>Сайт автоматически выбирает рекомендуемую точку входа по стране текущего подключения. При необходимости вы можете вручную выбрать другую точку входа.</p>
             <p><strong>В России рекомендуем начать с Москвы.</strong> Устройство подключается к российскому серверу, а трафик, которому нужна Рига, передаётся по соединению между нашими серверами. Устройству не требуется прямое VPN-соединение с зарубежным сервером.</p>
             <p><strong>За пределами России рекомендуем начать с Риги</strong> или другого доступного сервера вне России. Устройство подключается напрямую к зарубежной точке входа, а российские направления могут использовать выход через Москву.</p>
             <p>Рекомендация основана на устройстве нашей сети. Качество связи зависит от оператора и вашего местоположения: это не гарантия более высокой скорости или работы в любой сети.</p>
             <p><strong>Сервер подключения и выходной IP — разные вещи.</strong> По умолчанию российские направления из списков сервера выходят через Москву, остальной интернет-трафик — через Ригу. Это работает при подключении к любому из двух серверов. Оставьте Local ID на сайте пустым: для Риги будет использован <code>sr</code>, для Москвы — пустое значение по умолчанию.</p>
-          </section>
-
-          <section id="ru-benefits">
-            <h2>Преимущества TOLF VPN</h2>
-            <ul>
-              <li><strong>Системный VPN на устройствах Apple.</strong> Установите профиль и используйте встроенный IKEv2 без отдельного VPN-приложения.</li>
-              <li><strong>Одно подключение — два выхода.</strong> Маршрутизация по умолчанию позволяет открывать российские направления с российского IP, остальные — через Ригу, без ручного переключения VPN для каждого сайта.</li>
-              <li><strong>Вход с Passkey.</strong> Не нужно придумывать и запоминать пароль от аккаунта.</li>
-              <li><strong>Готовые профили.</strong> В кабинете можно управлять VPN-доступом, создавать профили и выбирать Local ID, если нужна другая маршрутизация.</li>
-            </ul>
-          </section>
-
-          <section id="ru-glossary">
-            <h2>Глоссарий</h2>
+          </details><details><summary>VPN подключён, но интернет не работает</summary><ol><li>Отключите VPN и проверьте, работает ли интернет без него.</li><li>Подключите VPN заново. При необходимости попробуйте Wi-Fi или мобильную сеть.</li><li>Если проблема осталась, запишите выбранный сервер, устройство и какие сайты не открываются: все или только некоторые.</li></ol></details><details>
+              <summary>Статус «Активен» означает, что устройство подключено?</summary>
+              <p>Нет. Это означает, что на сервере создан VPN-доступ. Состояние соединения проверяйте в настройках VPN устройства. После подключения сайт можно закрыть; выход из кабинета не отключает VPN.</p>
+            </details>
+<details>
+              <summary>Автоматический или ручной выбор Москвы или Риги переключает VPN?</summary>
+              <p>Нет. Сайт автоматически выбирает рекомендуемую точку входа, а вы можете изменить выбор вручную. Это лишь определяет, для какой точки входа создать профиль. Для смены действующего подключения установите нужный профиль и выберите его в настройках VPN устройства.</p>
+            </details>
+<details>
+              <summary>Какие значения Local ID доступны?</summary>
+              <p>Рига: <code>sr</code> — разделённая маршрутизация по умолчанию; <code>ru</code> — интернет-трафик через Москву.</p>
+              <p>Москва: пустое поле — разделённая маршрутизация по умолчанию; <code>ru</code> — интернет-трафик через Москву; <code>lv</code> — через Ригу. Явно введённое <code>sr</code> на Москве выбирает другой режим: DNS и направления из заданных списков для Риги идут через Ригу, остальной интернет-трафик — через Москву.</p>
+              <p>После изменения Local ID создайте и установите новый профиль. Ориентируйтесь на подсказку для выбранного сервера в кабинете.</p>
+            </details>
+<details>
+              <summary>Почему разные сайты показывают разные страны?</summary>
+              <p>При разделённой маршрутизации это ожидаемо. Российские направления определяются по IP- и доменным спискам сервера, включая <code>.ru</code>, <code>.su</code> и <code>.рф</code>. На результат могут влиять дополнительные домены сайта, настройки DNS и базы определения страны по IP; одного окончания домена недостаточно для гарантии.</p>
+            </details>
+<details>
+              <summary>Что перестаёт действовать через 24 часа?</summary>
+              <p>Ссылка для установки, а не аккаунт или уже установленный VPN-профиль. Если нужна новая ссылка, создайте её в кабинете.</p>
+            </details>
+<details>
+              <summary>Что делать, если потерян Passkey?</summary>
+              <p>Войдите с другим Passkey того же аккаунта либо нажмите «Восстановить аккаунт» и введите Recovery Code. Завершите создание нового Passkey, сохраните новый Recovery Code и войдите. Прежний код восстановления перестанет действовать. Если нет доступного Passkey, кода восстановления или уже открытой сессии кабинета, восстановить доступ через сайт не получится.</p>
+            </details>
+<details>
+              <summary>Что происходит при смене пароля VPN?</summary>
+              <p>Пароль меняется для Риги и Москвы. Создайте и установите новые профили для всех используемых серверов и устройств. Старые профили не смогут переподключиться с прежним паролем. Passkey и Recovery Code при этом не меняются.</p>
+            </details>
+<details>
+              <summary>Чем удаление VPN-доступа отличается от удаления аккаунта?</summary>
+              <p>Удаление VPN-доступа убирает VPN-учётные данные на обоих серверах. Аккаунт, Passkey и принятый промокод сохраняются. VPN-доступ можно создать заново.</p>
+              <p>Удаление аккаунта также удаляет регистрации Passkey, сессии, Recovery Code и VPN-доступ. Отменить его нельзя. Удаление профиля только с устройства не удаляет аккаунт.</p>
+            </details>
+<details>
+              <summary>Для другого устройства нужен новый аккаунт?</summary>
+              <p>Нет. Войдите в тот же аккаунт с доступным на этом устройстве Passkey, получите профиль и установите его. Доступность Passkey на разных устройствах зависит от менеджера паролей и его настроек синхронизации.</p>
+            </details><details id="ru-glossary">
+            <summary>Глоссарий</summary>
             <dl>
               <dt>VPN</dt><dd>Зашифрованное соединение устройства с VPN-сервером. Направленный в него трафик выходит в интернет через настроенную точку выхода.</dd>
               <dt>Аккаунт</dt><dd>Ваша учётная запись TOLF. Она объединяет Passkey, код восстановления и настройки VPN-доступа.</dd>
@@ -204,87 +184,58 @@
               <dt>MOBIKE</dt><dd>Механизм, помогающий IKEv2-соединению приспособиться к смене сетевого адреса устройства, например при переходе между Wi-Fi и мобильной сетью.</dd>
               <dt>DPD — Dead Peer Detection</dt><dd>Проверка, помогающая обнаружить, что другая сторона VPN-соединения перестала отвечать.</dd>
             </dl>
-          </section>
+          </details></article>
 
-          <section id="ru-faq">
-            <h2>Частые вопросы — FAQ</h2>
-            <details>
-              <summary>С чего начать?</summary>
-              <p>Создайте аккаунт с Passkey и сохраните Recovery Code. Войдите, выберите сервер и создайте VPN-доступ. Создайте ссылку для установки, нажмите «Установить на устройство Apple», скачайте Mobile Config и завершите установку в настройках устройства. Затем выберите установленный VPN и подключитесь.</p>
-            </details>
-            <details>
-              <summary>Статус «Активен» означает, что устройство подключено?</summary>
-              <p>Нет. Это означает, что на сервере создан VPN-доступ. Состояние соединения проверяйте в настройках VPN устройства. После подключения сайт можно закрыть; выход из кабинета не отключает VPN.</p>
-            </details>
-            <details>
-              <summary>Автоматический или ручной выбор Москвы или Риги переключает VPN?</summary>
-              <p>Нет. Сайт автоматически выбирает рекомендуемую точку входа, а вы можете изменить выбор вручную. Это лишь определяет, для какой точки входа создать профиль. Для смены действующего подключения установите нужный профиль и выберите его в настройках VPN устройства.</p>
-            </details>
-            <details>
-              <summary>Какие значения Local ID доступны?</summary>
-              <p>Рига: <code>sr</code> — разделённая маршрутизация по умолчанию; <code>ru</code> — интернет-трафик через Москву.</p>
-              <p>Москва: пустое поле — разделённая маршрутизация по умолчанию; <code>ru</code> — интернет-трафик через Москву; <code>lv</code> — через Ригу. Явно введённое <code>sr</code> на Москве выбирает другой режим: DNS и направления из заданных списков для Риги идут через Ригу, остальной интернет-трафик — через Москву.</p>
-              <p>После изменения Local ID создайте и установите новый профиль. Ориентируйтесь на подсказку для выбранного сервера в кабинете.</p>
-            </details>
-            <details>
-              <summary>Почему разные сайты показывают разные страны?</summary>
-              <p>При разделённой маршрутизации это ожидаемо. Российские направления определяются по IP- и доменным спискам сервера, включая <code>.ru</code>, <code>.su</code> и <code>.рф</code>. На результат могут влиять дополнительные домены сайта, настройки DNS и базы определения страны по IP; одного окончания домена недостаточно для гарантии.</p>
-            </details>
-            <details>
-              <summary>Что перестаёт действовать через 24 часа?</summary>
-              <p>Ссылка для установки, а не аккаунт или уже установленный VPN-профиль. Если нужна новая ссылка, создайте её в кабинете.</p>
-            </details>
-            <details>
-              <summary>Что делать, если потерян Passkey?</summary>
-              <p>Войдите с другим Passkey того же аккаунта либо нажмите «Восстановить аккаунт» и введите Recovery Code. Завершите создание нового Passkey, сохраните новый Recovery Code и войдите. Прежний код восстановления перестанет действовать. Если нет доступного Passkey, кода восстановления или уже открытой сессии кабинета, восстановить доступ через сайт не получится.</p>
-            </details>
-            <details>
-              <summary>Что происходит при смене пароля VPN?</summary>
-              <p>Пароль меняется для Риги и Москвы. Создайте и установите новые профили для всех используемых серверов и устройств. Старые профили не смогут переподключиться с прежним паролем. Passkey и Recovery Code при этом не меняются.</p>
-            </details>
-            <details>
-              <summary>Чем удаление VPN-доступа отличается от удаления аккаунта?</summary>
-              <p>Удаление VPN-доступа убирает VPN-учётные данные на обоих серверах. Аккаунт, Passkey и принятый промокод сохраняются. VPN-доступ можно создать заново.</p>
-              <p>Удаление аккаунта также удаляет регистрации Passkey, сессии, Recovery Code и VPN-доступ. Отменить его нельзя. Удаление профиля только с устройства не удаляет аккаунт.</p>
-            </details>
-            <details>
-              <summary>Для другого устройства нужен новый аккаунт?</summary>
-              <p>Нет. Войдите в тот же аккаунт с доступным на этом устройстве Passkey, получите профиль и установите его. Доступность Passkey на разных устройствах зависит от менеджера паролей и его настроек синхронизации.</p>
-            </details>
-          </section>
-
-          <p class="help-sources">Подробнее: <a href="https://support.apple.com/guide/iphone/use-passkeys-to-sign-in-to-websites-and-apps-iphf538ea8d0/ios">Passkey на устройствах Apple</a> и <a href="https://docs.strongswan.org/docs/latest/interop/appleIkev2Profile.html">профили IKEv2 для Apple</a>.</p>
-        </article>
-
-        <article id="helpLv" lang="lv" hidden>
-          <nav class="help-nav" aria-label="Palīdzības sadaļas">
-            <a href="#lv-server">Servera izvēle</a>
-            <a href="#lv-benefits">Kāpēc TOLF VPN</a>
-            <a href="#lv-glossary">Terminu vārdnīca</a>
-            <a href="#lv-faq">BUJ</a>
-          </nav>
-
-          <section id="lv-server">
-            <h2>Kuru pieslēguma punktu izvēlēties?</h2>
+        <article id="helpLv" lang="lv" hidden><details>
+              <summary>Kā sākt lietošanu?</summary>
+              <p>Izveidojiet kontu ar Passkey un saglabājiet Recovery Code. Pierakstieties, izvēlieties serveri un izveidojiet VPN piekļuvi. Izveidojiet instalēšanas saiti, atveriet “Install on Apple Device”, lejupielādējiet Mobile Config un pabeidziet instalēšanu ierīces iestatījumos. Pēc tam izvēlieties instalēto VPN un pieslēdzieties.</p>
+            </details><details id="lv-server">
+            <summary>Kuru pieslēguma punktu izvēlēties?</summary>
             <p>Vietne automātiski izvēlas ieteicamo pieslēguma punktu atbilstoši jūsu pašreizējā savienojuma valstij. Vajadzības gadījumā varat manuāli izvēlēties citu pieslēguma punktu.</p>
             <p><strong>Krievijā sāciet ar Maskavu.</strong> Ierīce pieslēdzas Krievijas serverim, bet datplūsma, kurai nepieciešama Rīga, tiek pārsūtīta pa savienojumu starp mūsu serveriem. Ierīcei nav nepieciešams tiešs VPN savienojums ar ārvalstu serveri.</p>
             <p><strong>Ārpus Krievijas sāciet ar Rīgu</strong> vai citu pieejamu serveri ārpus Krievijas. Ierīce var tieši sasniegt ārvalstu pieslēguma serveri, savukārt Krievijas galamērķi var izmantot izeju Maskavā.</p>
             <p>Šis ieteikums ir balstīts uz mūsu tīkla uzbūvi. Savienojuma kvalitāte ir atkarīga no operatora un atrašanās vietas; tas negarantē lielāku ātrumu vai pieejamību jebkurā tīklā.</p>
             <p><strong>Pieslēguma serveris un izejas IP adrese nav viens un tas pats.</strong> Ar noklusējuma iestatījumiem Krievijas galamērķi servera sarakstos izmanto Maskavu, bet pārējā interneta datplūsma — Rīgu. Tas darbojas ar jebkuru no abiem pieslēguma serveriem. Vietnē atstājiet Local ID tukšu: Rīgai tiks izmantots <code>sr</code>, bet Maskavai — tukšā noklusējuma vērtība.</p>
-          </section>
-
-          <section id="lv-benefits">
-            <h2>Kāpēc TOLF VPN?</h2>
-            <ul>
-              <li><strong>Iebūvēts Apple ierīcēs.</strong> Instalējiet konfigurācijas profilu un izmantojiet sistēmas IKEv2 VPN bez atsevišķas VPN lietotnes.</li>
-              <li><strong>Viens savienojums, divas izejas.</strong> Noklusējuma maršrutēšana var izmantot Krievijas IP adreses Krievijas galamērķiem un Rīgu pārējai datplūsmai, nepārslēdzot VPN katrai vietnei.</li>
-              <li><strong>Pierakstīšanās ar Passkey.</strong> Nav jāizdomā un jāatceras konta parole.</li>
-              <li><strong>Instalēšanai gatavi profili.</strong> Vietnē var pārvaldīt VPN piekļuvi, izveidot profilus un pieredzējuši lietotāji var izvēlēties Local ID.</li>
-            </ul>
-          </section>
-
-          <section id="lv-glossary">
-            <h2>Terminu vārdnīca</h2>
+          </details><details><summary>VPN ir savienots, bet internets nedarbojas</summary><ol><li>Atvienojiet VPN un pārbaudiet, vai internets darbojas bez tā.</li><li>Pieslēdziet VPN vēlreiz. Ja nepieciešams, izmēģiniet Wi-Fi vai mobilos datus.</li><li>Ja problēma saglabājas, pierakstiet izvēlēto serveri, ierīci un to, vai nedarbojas visas vai tikai dažas vietnes.</li></ol></details><details>
+              <summary>Vai “Active” nozīmē, ka ierīce ir pieslēgta?</summary>
+              <p>Nē. Tas nozīmē, ka serverī pastāv VPN piekļuve. Savienojuma stāvokli pārbaudiet ierīces VPN iestatījumos. Pēc pieslēgšanās vietni var aizvērt; izrakstīšanās no vietnes neizslēdz VPN.</p>
+            </details>
+<details>
+              <summary>Vai automātiska vai manuāla Maskavas vai Rīgas izvēle pārslēdz VPN?</summary>
+              <p>Nē. Vietne automātiski izvēlas ieteicamo pieslēguma punktu, un šo izvēli var mainīt manuāli. Tas nosaka tikai izveidojamā profila serveri. Lai mainītu faktisko savienojumu, instalējiet vajadzīgo profilu un izvēlieties to ierīces VPN iestatījumos.</p>
+            </details>
+<details>
+              <summary>Kādas Local ID vērtības ir pieejamas?</summary>
+              <p>Rīga: <code>sr</code> ir noklusējuma dalītā maršrutēšana; <code>ru</code> nosūta interneta datplūsmu caur Maskavu.</p>
+              <p>Maskava: tukša vērtība ir noklusējuma dalītā maršrutēšana; <code>ru</code> izmanto Maskavu interneta datplūsmai, bet <code>lv</code> — Rīgu. Maskavas skaidri norādītais <code>sr</code> ir cits režīms: DNS un galamērķi konfigurētajos Rīgas sarakstos izmanto Rīgu, bet pārējā interneta datplūsma — Maskavu.</p>
+              <p>Pēc Local ID maiņas izveidojiet un instalējiet jaunu profilu. Izmantojiet vietnes norādi izvēlētajam serverim.</p>
+            </details>
+<details>
+              <summary>Kāpēc dažādas vietnes rāda dažādas valstis?</summary>
+              <p>Tā ir paredzēta noklusējuma dalītās maršrutēšanas darbība. Krievijas galamērķi tiek noteikti pēc servera IP adrešu un domēnu sarakstiem, tostarp <code>.ru</code>, <code>.su</code> un <code>.рф</code>. Rezultātu var ietekmēt vietnes palīgdomēni, DNS iestatījumi un IP ģeolokācijas datubāzes; domēna galotne pati par sevi nav garantija.</p>
+            </details>
+<details>
+              <summary>Kas beidzas pēc 24 stundām?</summary>
+              <p>Beidzas instalēšanas saites derīgums, nevis konta vai jau instalēta VPN profila derīgums. Vajadzības gadījumā pierakstieties un izveidojiet jaunu saiti.</p>
+            </details>
+<details>
+              <summary>Ko darīt, ja Passkey ir pazaudēta?</summary>
+              <p>Izmantojiet citu šī konta Passkey vai izvēlieties “Recover account” un ievadiet Recovery Code. Pabeidziet jaunas Passkey izveidi, saglabājiet tikko izsniegto Recovery Code un pierakstieties. Iepriekšējais atkopšanas kods vairs nedarbosies. Bez derīgas Passkey, Recovery Code vai jau atvērtas konta sesijas piekļuvi vietnē nevar atjaunot.</p>
+            </details>
+<details>
+              <summary>Kas notiek, mainot VPN paroli?</summary>
+              <p>Parole tiek mainīta gan Rīgai, gan Maskavai. Izveidojiet un instalējiet jaunu profilu katram izmantotajam serverim un ierīcei. Vecie profili vairs nevarēs pieslēgties ar iepriekšējo paroli. Passkey un Recovery Code nemainās.</p>
+            </details>
+<details>
+              <summary>Ar ko VPN piekļuves dzēšana atšķiras no konta dzēšanas?</summary>
+              <p>Dzēšot VPN piekļuvi, abos serveros tiek dzēsti VPN piekļuves dati, bet konts, Passkey un pieņemtais promo kods tiek saglabāts. VPN piekļuvi var izveidot no jauna.</p>
+              <p>Dzēšot kontu, tiek dzēstas arī Passkey reģistrācijas, sesijas, Recovery Code un VPN piekļuve. Šo darbību nevar atsaukt. Profila dzēšana tikai no ierīces neizdzēš kontu.</p>
+            </details>
+<details>
+              <summary>Vai citai ierīcei nepieciešams jauns konts?</summary>
+              <p>Nē. Pierakstieties tajā pašā kontā, izmantojot šajā ierīcē pieejamu Passkey, pēc tam iegūstiet un instalējiet profilu. Passkey pieejamība dažādās ierīcēs ir atkarīga no paroļu pārvaldnieka un tā sinhronizācijas iestatījumiem.</p>
+            </details><details id="lv-glossary">
+            <summary>Terminu vārdnīca</summary>
             <dl>
               <dt>VPN</dt><dd>Šifrēts savienojums starp jūsu ierīci un VPN serveri. Caur to maršrutētā datplūsma sasniedz internetu, izmantojot konfigurēto izeju.</dd>
               <dt>Konts</dt><dd>Jūsu TOLF identitāte, kas apvieno Passkey, Recovery Code un VPN piekļuves iestatījumus.</dd>
@@ -304,57 +255,7 @@
               <dt>MOBIKE</dt><dd>Mehānisms, kas palīdz IKEv2 savienojumam pielāgoties, kad mainās ierīces tīkla adrese, piemēram, pārejot no Wi‑Fi uz mobilajiem datiem.</dd>
               <dt>DPD — Dead Peer Detection</dt><dd>Pārbaude, kas palīdz noteikt, vai VPN savienojuma otra puse vairs neatbild.</dd>
             </dl>
-          </section>
-
-          <section id="lv-faq">
-            <h2>Bieži uzdotie jautājumi</h2>
-            <details>
-              <summary>Kā sākt lietošanu?</summary>
-              <p>Izveidojiet kontu ar Passkey un saglabājiet Recovery Code. Pierakstieties, izvēlieties serveri un izveidojiet VPN piekļuvi. Izveidojiet instalēšanas saiti, atveriet “Install on Apple Device”, lejupielādējiet Mobile Config un pabeidziet instalēšanu ierīces iestatījumos. Pēc tam izvēlieties instalēto VPN un pieslēdzieties.</p>
-            </details>
-            <details>
-              <summary>Vai “Active” nozīmē, ka ierīce ir pieslēgta?</summary>
-              <p>Nē. Tas nozīmē, ka serverī pastāv VPN piekļuve. Savienojuma stāvokli pārbaudiet ierīces VPN iestatījumos. Pēc pieslēgšanās vietni var aizvērt; izrakstīšanās no vietnes neizslēdz VPN.</p>
-            </details>
-            <details>
-              <summary>Vai automātiska vai manuāla Maskavas vai Rīgas izvēle pārslēdz VPN?</summary>
-              <p>Nē. Vietne automātiski izvēlas ieteicamo pieslēguma punktu, un šo izvēli var mainīt manuāli. Tas nosaka tikai izveidojamā profila serveri. Lai mainītu faktisko savienojumu, instalējiet vajadzīgo profilu un izvēlieties to ierīces VPN iestatījumos.</p>
-            </details>
-            <details>
-              <summary>Kādas Local ID vērtības ir pieejamas?</summary>
-              <p>Rīga: <code>sr</code> ir noklusējuma dalītā maršrutēšana; <code>ru</code> nosūta interneta datplūsmu caur Maskavu.</p>
-              <p>Maskava: tukša vērtība ir noklusējuma dalītā maršrutēšana; <code>ru</code> izmanto Maskavu interneta datplūsmai, bet <code>lv</code> — Rīgu. Maskavas skaidri norādītais <code>sr</code> ir cits režīms: DNS un galamērķi konfigurētajos Rīgas sarakstos izmanto Rīgu, bet pārējā interneta datplūsma — Maskavu.</p>
-              <p>Pēc Local ID maiņas izveidojiet un instalējiet jaunu profilu. Izmantojiet vietnes norādi izvēlētajam serverim.</p>
-            </details>
-            <details>
-              <summary>Kāpēc dažādas vietnes rāda dažādas valstis?</summary>
-              <p>Tā ir paredzēta noklusējuma dalītās maršrutēšanas darbība. Krievijas galamērķi tiek noteikti pēc servera IP adrešu un domēnu sarakstiem, tostarp <code>.ru</code>, <code>.su</code> un <code>.рф</code>. Rezultātu var ietekmēt vietnes palīgdomēni, DNS iestatījumi un IP ģeolokācijas datubāzes; domēna galotne pati par sevi nav garantija.</p>
-            </details>
-            <details>
-              <summary>Kas beidzas pēc 24 stundām?</summary>
-              <p>Beidzas instalēšanas saites derīgums, nevis konta vai jau instalēta VPN profila derīgums. Vajadzības gadījumā pierakstieties un izveidojiet jaunu saiti.</p>
-            </details>
-            <details>
-              <summary>Ko darīt, ja Passkey ir pazaudēta?</summary>
-              <p>Izmantojiet citu šī konta Passkey vai izvēlieties “Recover account” un ievadiet Recovery Code. Pabeidziet jaunas Passkey izveidi, saglabājiet tikko izsniegto Recovery Code un pierakstieties. Iepriekšējais atkopšanas kods vairs nedarbosies. Bez derīgas Passkey, Recovery Code vai jau atvērtas konta sesijas piekļuvi vietnē nevar atjaunot.</p>
-            </details>
-            <details>
-              <summary>Kas notiek, mainot VPN paroli?</summary>
-              <p>Parole tiek mainīta gan Rīgai, gan Maskavai. Izveidojiet un instalējiet jaunu profilu katram izmantotajam serverim un ierīcei. Vecie profili vairs nevarēs pieslēgties ar iepriekšējo paroli. Passkey un Recovery Code nemainās.</p>
-            </details>
-            <details>
-              <summary>Ar ko VPN piekļuves dzēšana atšķiras no konta dzēšanas?</summary>
-              <p>Dzēšot VPN piekļuvi, abos serveros tiek dzēsti VPN piekļuves dati, bet konts, Passkey un pieņemtais promo kods tiek saglabāts. VPN piekļuvi var izveidot no jauna.</p>
-              <p>Dzēšot kontu, tiek dzēstas arī Passkey reģistrācijas, sesijas, Recovery Code un VPN piekļuve. Šo darbību nevar atsaukt. Profila dzēšana tikai no ierīces neizdzēš kontu.</p>
-            </details>
-            <details>
-              <summary>Vai citai ierīcei nepieciešams jauns konts?</summary>
-              <p>Nē. Pierakstieties tajā pašā kontā, izmantojot šajā ierīcē pieejamu Passkey, pēc tam iegūstiet un instalējiet profilu. Passkey pieejamība dažādās ierīcēs ir atkarīga no paroļu pārvaldnieka un tā sinhronizācijas iestatījumiem.</p>
-            </details>
-          </section>
-
-          <p class="help-sources">Papildu informācija: <a href="https://support.apple.com/guide/iphone/use-passkeys-to-sign-in-to-websites-and-apps-iphf538ea8d0/ios">Apple Passkeys</a> un <a href="https://docs.strongswan.org/docs/latest/interop/appleIkev2Profile.html">Apple IKEv2 profili</a>.</p>
-        </article>
+          </details></article>
       </div>
     </div>
     <noscript><style>#helpRu[hidden], #helpLv[hidden] { display: block !important; margin-top: 40px; }</style></noscript>
@@ -384,7 +285,10 @@
           button.classList.toggle("active", active);
           button.setAttribute("aria-pressed", String(active));
         });
-        document.getElementById("helpSubtitle").textContent = copy[language][1];
+        document.getElementById("helpTitle").textContent = {en:"Help",ru:"Помощь",lv:"Palīdzība"}[language];
+        const back = document.getElementById("helpBack");
+        back.textContent = {en:"‹ My VPN",ru:"‹ Мой VPN",lv:"‹ Mans VPN"}[language];
+        back.href = "index.html?lang=" + language;
         try { localStorage.setItem("tolfLanguage", language); } catch {}
         if (/^#(?:en|ru|lv)-/.test(location.hash)) {
           const hash = location.hash.replace(/^#(?:en|ru|lv)-/, `#${language}-`);
@@ -400,6 +304,8 @@
       if (location.hash.startsWith("#ru-")) language = "ru";
       if (location.hash.startsWith("#en-")) language = "en";
       if (location.hash.startsWith("#lv-")) language = "lv";
+      const requestedLanguage = new URLSearchParams(location.search).get("lang");
+      if (["en", "ru", "lv"].includes(requestedLanguage)) language = requestedLanguage;
       setHelpLanguage(language);
       enButton.addEventListener("click", () => setHelpLanguage("en"));
       ruButton.addEventListener("click", () => setHelpLanguage("ru"));
