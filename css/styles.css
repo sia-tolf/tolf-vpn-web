@@ -1534,3 +1534,10 @@ button:disabled { opacity: 0.55; cursor: default; }
 .windows-device-delivery > .message { margin: 0; min-height: 0; }
 .windows-device-delivery > .message:empty { display: none; }
 .windows-device-delivery + .windows-password { margin-top: 16px; }
+
+/* Keep the account section heading subordinate to the page title. */
+#vpnCard .card-topline > h2 {
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.3;
+}
