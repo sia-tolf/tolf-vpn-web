@@ -12,7 +12,7 @@
 
   <link
     rel="stylesheet"
-    href="css/styles.css?v=section-heading-20260919"
+    href="css/styles.css?v=promo-disclosure-20260919"
   >
   <link
     rel="stylesheet"
@@ -22,12 +22,12 @@
   <!-- Keep this order. Deferred scripts run after the HTML has been parsed. -->
   <script defer src="passkey-session-label.20260917-1.js"></script>
   <script defer src="js/config.js?v=windows-1"></script>
-  <script defer src="js/locales/en.js?v=android-server-note-20260918"></script>
-  <script defer src="js/locales/ru.js?v=android-server-note-20260918"></script>
-  <script defer src="js/locales/lv.js?v=android-server-note-20260918"></script>
+  <script defer src="js/locales/en.js?v=promo-disclosure-20260919"></script>
+  <script defer src="js/locales/ru.js?v=promo-disclosure-20260919"></script>
+  <script defer src="js/locales/lv.js?v=promo-disclosure-20260919"></script>
   <script defer src="js/dom.js?v=share-profile-1"></script>
   <script defer src="js/network-metrics.js?v=latency-decimal-1"></script>
-  <script defer src="js/platform.js?v=android-server-note-20260918"></script>
+  <script defer src="js/platform.js?v=promo-disclosure-20260919"></script>
   <script defer src="js/i18n.js?v=home-navigation-20260919"></script>
   <script defer src="js/webauthn.js?v=local-id-2"></script>
   <script defer src="js/api.js?v=local-id-2"></script>
@@ -37,7 +37,7 @@
   <script defer src="js/account.js?v=passkey-label-20260917-1"></script>
   <script defer src="js/profile-settings.js?v=profile-options-1"></script>
   <script defer src="js/vpn.js?v=windows-1"></script>
-  <script defer src="js/promo.js?v=header-promo-1"></script>
+  <script defer src="js/promo.js?v=promo-disclosure-20260919"></script>
   <script defer src="js/location.js?v=entry-point-auto-8"></script>
   <script defer src="js/librespeed.js?v=1"></script>
   <script defer src="js/latency.js?v=connection-test-1"></script>
@@ -159,43 +159,6 @@
           </a>
         </nav>
 
-        <div class="promo-section header-promo">
-          <p
-            id="promoGranted"
-            class="hidden"
-            aria-hidden="true"
-          ></p>
-
-          <div id="promoForm">
-            <div class="promo-actions">
-              <input
-                id="promoInput"
-                class="promo-input"
-                type="text"
-                minlength="6"
-                maxlength="6"
-                pattern="[A-Za-z0-9]{6}"
-                autocomplete="off"
-                autocapitalize="characters"
-                spellcheck="false"
-                aria-label="Promo code"
-              >
-
-              <button
-                id="redeemPromoButton"
-                class="secondary"
-                type="button"
-                data-i18n="applyPromo"
-              >Apply</button>
-            </div>
-          </div>
-
-          <div
-            id="promoMessage"
-            class="promo-message"
-            role="status"
-          ></div>
-        </div>
       </div>
     </header>
 
@@ -1030,6 +993,38 @@
             You’ll need to install the new profile on your
             Apple devices.
           </p>
+        </div>
+
+        <div class="promo-section account-promo">
+          <p id="promoGranted" class="hidden"></p>
+          <details id="promoDetails">
+            <summary data-i18n="havePromo">Have a promo code?</summary>
+          <div id="promoForm">
+            <div class="promo-actions">
+              <input
+                id="promoInput"
+                class="promo-input"
+                type="text"
+                minlength="6"
+                maxlength="6"
+                pattern="[A-Za-z0-9]{6}"
+                autocomplete="off"
+                autocapitalize="characters"
+                spellcheck="false"
+                aria-label="Promo code"
+              >
+
+              <button
+                id="redeemPromoButton"
+                class="secondary"
+                type="button"
+                data-i18n="applyPromo"
+              >Apply</button>
+            </div>
+          </div>
+
+          </details>
+          <div id="promoMessage" class="promo-message" role="status"></div>
         </div>
 
         <div
