@@ -1,3 +1,22 @@
+
+// Safari may move the visible viewport while collapsing its browser toolbar.
+function syncVisibleHeaderTop() {
+  const offset = Math.max(0, window.visualViewport?.offsetTop || 0);
+  document.documentElement.style.setProperty("--tolf-viewport-top", offset + "px");
+}
+let visibleHeaderFrame = 0;
+function scheduleVisibleHeaderTop() {
+  if (visibleHeaderFrame) return;
+  visibleHeaderFrame = requestAnimationFrame(() => {
+    visibleHeaderFrame = 0;
+    syncVisibleHeaderTop();
+  });
+}
+syncVisibleHeaderTop();
+window.visualViewport?.addEventListener("resize", scheduleVisibleHeaderTop);
+window.visualViewport?.addEventListener("scroll", scheduleVisibleHeaderTop);
+window.addEventListener("pageshow", scheduleVisibleHeaderTop);
+window.addEventListener("resize", scheduleVisibleHeaderTop);
 const headerSwitchers = document.querySelector(".header-switchers");
 
 function syncHeaderVerticalSpacing() {
