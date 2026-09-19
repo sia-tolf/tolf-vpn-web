@@ -1576,3 +1576,20 @@ html[data-tolf-ui="vpn"] .header-actions-row .site-nav {
   font-size: 14px;
   line-height: 1.45;
 }
+
+/* Equal-width promo input and action fill the account card. */
+html[data-tolf-ui="vpn"] .account-promo .promo-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: 100%;
+  gap: 10px;
+}
+html[data-tolf-ui="vpn"] .account-promo .promo-actions > :is(input, button) {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  height: 42px;
+  min-height: 42px;
+  padding: 0 8px;
+}
