@@ -147,7 +147,8 @@ html[data-tolf-ui="vpn"] .compact-header .protocol-label {
 
 /* Help is a compact outlined action within the existing navigation row. */
 html[data-tolf-ui="vpn"] .compact-header .help-navigation,
-html[data-tolf-ui="vpn"] #signOutButton {
+html[data-tolf-ui="vpn"] #signOutButton,
+html[data-tolf-ui="vpn"] #vpnAdminLink {
   box-sizing: border-box;
   justify-content: center;
   height: 34px;
