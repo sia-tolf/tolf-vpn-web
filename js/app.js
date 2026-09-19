@@ -48,6 +48,39 @@ if (headerSwitchers && !document.getElementById("protocolSelector")) {
       display: block !important;
     }
 
+    .brand-title-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      white-space: nowrap;
+    }
+    .brand-title-row h1 { margin: 0; }
+    .brand-title-row .home-navigation {
+      display: inline-flex;
+      align-items: center;
+      flex: 0 0 auto;
+      box-sizing: border-box;
+      height: 42px;
+      padding: 0;
+      color: var(--text-secondary, #6e6e73);
+      font-size: 14px;
+      font-weight: 400;
+      text-decoration: none;
+      line-height: 1.2;
+    }
+    .home-navigation:focus-visible {
+      outline: 2px solid var(--text);
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
+    @media (min-width: 521px) and (max-width: 900px) {
+      .brand-top { flex-direction: column; align-items: stretch; }
+    }
+    @media (max-width: 380px) {
+      .brand-title-row { gap: 8px; }
+      .brand-title-row h1 { font-size: 22px; }
+    }
+
     .brand-home-link {
       color: inherit;
       text-decoration: none;
@@ -211,16 +244,6 @@ if (headerSwitchers && !document.getElementById("protocolSelector")) {
     }
   `;
   document.head.appendChild(protocolStyle);
-}
-
-const brandHeading = document.querySelector(".brand-copy h1");
-if (brandHeading && !brandHeading.closest("a")) {
-  const brandHomeLink = document.createElement("a");
-  brandHomeLink.className = "brand-home-link";
-  brandHomeLink.href = "https://tolf.is";
-  brandHomeLink.setAttribute("aria-label", "TOLF home");
-  brandHeading.replaceWith(brandHomeLink);
-  brandHomeLink.appendChild(brandHeading);
 }
 
 function syncHeaderVerticalSpacing() {
