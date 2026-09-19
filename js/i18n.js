@@ -19,6 +19,15 @@ function setLanguage(language) {
   currentLanguage = language;
   localStorage.setItem("tolfLanguage", language);
   document.documentElement.lang = language;
+  const homeNavigation = document.getElementById("homeNavigation");
+  if (homeNavigation) {
+    homeNavigation.textContent = {
+      en: "‹ Home",
+      ru: "‹ На главную",
+      lv: "‹ Uz sākumlapu"
+    }[language];
+    homeNavigation.href = "https://tolf.is/?lang=" + language;
+  }
 
   languageEn.classList.toggle(
     "active",
