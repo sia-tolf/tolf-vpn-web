@@ -13,6 +13,12 @@ function updateServerAvailability() {
 }
 
 function renderPromoState() {
+  const details = document.getElementById("promoDetails");
+  if (details) {
+    details.classList.toggle("hidden", promoRedeemed);
+    if (promoRedeemed) details.open = false;
+  }
+  promoGranted.textContent = promoRedeemed ? t("promoAccepted") : "";
   moscowAccessLabel.textContent = "";
   moscowAccessLabel.classList.add("hidden");
 
@@ -92,7 +98,9 @@ redeemPromoButton.addEventListener(
 
       applyServerAccess(data);
       promoInput.value = "";
-      promoMessage.textContent = t("promoAccepted");
+      const details = document.getElementById("promoDetails");
+      if (details && !promoPending) details.open = false;
+      promoMessage.textContent = promoRedeemed ? "" : t("promoAccepted");
       promoMessage.className = "promo-message success";
     } catch (error) {
       const messages = {
