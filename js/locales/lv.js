@@ -171,7 +171,7 @@ I18N.lv = {
   londonUk: "Londona, Apvienotā Karaliste",
   comingSoon: "Drīzumā",
   serverAddress: "Ieejas punkta adrese",
-  vpnOverviewTitle: "VPN",
+  vpnOverviewTitle: "VPN · IKEv2",
   status: "Statuss",
   server: "Ieejas punkts",
   username: "Lietotājvārds",
