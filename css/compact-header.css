@@ -107,14 +107,15 @@ html[data-tolf-ui="vpn"] .compact-header .protocol-label {
     padding-top: max(8px, env(safe-area-inset-top));
   }
   html[data-tolf-ui="vpn"] .brand {
-    position: sticky;
-    top: calc(env(safe-area-inset-top, 0px) - 90.6px);
-    z-index: 60;
+    display: contents;
+    position: static;
+    top: auto;
     padding: 0 !important;
     margin-bottom: 16px !important;
     background: var(--background);
   }
   html[data-tolf-ui="vpn"] .compact-header {
+    display: contents !important;
     position: static !important;
     top: auto !important;
     left: auto !important;
@@ -127,8 +128,19 @@ html[data-tolf-ui="vpn"] .compact-header .protocol-label {
   }
   html[data-tolf-ui="vpn"] .compact-header .header-navigation {
     justify-content: space-between;
+    margin-bottom: 8px;
   }
   html[data-tolf-ui="vpn"] .compact-header .brand-copy {
     justify-content: center;
+    margin-bottom: 8px;
+  }
+  html[data-tolf-ui="vpn"] .compact-header .header-switchers {
+    position: sticky;
+    top: max(8px, env(safe-area-inset-top));
+    left: auto;
+    right: auto;
+    z-index: 60;
+    margin-bottom: 24px;
+    box-shadow: 0 0 0 8px var(--background);
   }
 }
