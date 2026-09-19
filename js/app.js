@@ -95,7 +95,7 @@ if (headerSwitchers && !document.getElementById("protocolSelector")) {
 
     /* iPad / wide touch layout: keep navigation on the first row,
        then place TOLF VPN to the left of the protocol and segmented controls. */
-    @media (min-width: 768px) and (max-width: 1366px) {
+    @media (min-width: 768px) and (orientation: landscape) {
       html.tolf-ipad .brand-top {
         display: grid !important;
         grid-template-columns: auto minmax(0, 1fr) auto;
