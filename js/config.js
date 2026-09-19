@@ -46,12 +46,26 @@ if (!["en", "ru", "lv"].includes(currentLanguage)) {
       : "en";
 }
 
+const tolfUserAgent = navigator.userAgent || "";
+const tolfNavigatorPlatform = navigator.platform || "";
+
+const isTolfIPadDevice =
+  navigator.maxTouchPoints > 1 &&
+  !/Android|Windows/i.test(tolfUserAgent) &&
+  (
+    /iPad|Macintosh|Mac OS X/i.test(tolfUserAgent) ||
+    /iPad|Mac/i.test(tolfNavigatorPlatform)
+  );
+
 let currentPlatform = localStorage.getItem("tolfPlatform");
 
-if (!["ios", "android", "windows"].includes(currentPlatform)) {
-  currentPlatform = /Android/i.test(navigator.userAgent)
+if (isTolfIPadDevice) {
+  currentPlatform = "ios";
+  localStorage.setItem("tolfPlatform", "ios");
+} else if (!["ios", "android", "windows"].includes(currentPlatform)) {
+  currentPlatform = /Android/i.test(tolfUserAgent)
     ? "android"
-    : /Windows NT/i.test(navigator.userAgent) ? "windows" : "ios";
+    : /Windows NT/i.test(tolfUserAgent) ? "windows" : "ios";
 }
 
 let lastVpnState = null;
