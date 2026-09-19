@@ -46,21 +46,25 @@ if (headerSwitchers && !document.getElementById("protocolSelector")) {
 
     .brand-copy {
       display: block !important;
+      width: 100%;
     }
 
     .brand-title-row {
-      display: flex;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
       align-items: center;
-      gap: 12px;
+      gap: 8px;
+      width: 100%;
       white-space: nowrap;
     }
-    .brand-title-row h1 { margin: 0; }
+    .brand-title-row h1 { grid-column: 2; margin: 0; text-align: center; }
     .brand-title-row .home-navigation {
       display: inline-flex;
       align-items: center;
       flex: 0 0 auto;
       box-sizing: border-box;
       height: 42px;
+      justify-self: start;
       padding: 0;
       color: var(--text-secondary, #6e6e73);
       font-size: 14px;
@@ -76,9 +80,14 @@ if (headerSwitchers && !document.getElementById("protocolSelector")) {
     @media (min-width: 521px) and (max-width: 900px) {
       .brand-top { flex-direction: column; align-items: stretch; }
     }
-    @media (max-width: 380px) {
-      .brand-title-row { gap: 8px; }
-      .brand-title-row h1 { font-size: 22px; }
+    @media (max-width: 420px) {
+      .brand-title-row { gap: 4px; }
+      .brand-title-row h1 { font-size: 20px; }
+      .brand-title-row .home-navigation { font-size: 12px; }
+    }
+    @media (max-width: 350px) {
+      .brand-title-row h1 { font-size: 18px; }
+      .brand-title-row .home-navigation { font-size: 11px; }
     }
 
     .brand-home-link {
@@ -108,9 +117,10 @@ if (headerSwitchers && !document.getElementById("protocolSelector")) {
       padding-left: max(24px, calc((100vw - 712px) / 2)) !important;
       padding-right: max(24px, calc((100vw - 712px) / 2)) !important;
       display: flex;
-      align-items: center;
+      flex-direction: column;
+      align-items: stretch;
       justify-content: space-between;
-      gap: 20px;
+      gap: 8px;
       background: color-mix(in srgb, var(--background) 90%, transparent) !important;
       border: 0 !important;
       border-bottom: 1px solid var(--border) !important;
