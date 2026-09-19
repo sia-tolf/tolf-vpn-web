@@ -104,7 +104,7 @@ html[data-tolf-ui="vpn"] .compact-header .protocol-label {
 /* Narrow screens: navigation and title scroll away; selectors stay at the top. */
 @media (max-width: 699px) {
   html[data-tolf-ui="vpn"] .page {
-    padding-top: max(8px, env(safe-area-inset-top));
+    padding-top: calc(max(var(--tolf-viewport-top, 0px), env(safe-area-inset-top, 0px)) + 16px);
   }
   html[data-tolf-ui="vpn"] .brand {
     display: contents;
