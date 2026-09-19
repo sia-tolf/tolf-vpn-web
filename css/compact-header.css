@@ -128,7 +128,7 @@ html[data-tolf-ui="vpn"] .compact-header .protocol-label {
   }
   html[data-tolf-ui="vpn"] .compact-header .header-navigation {
     justify-content: space-between;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
   }
   html[data-tolf-ui="vpn"] .compact-header .brand-copy {
     justify-content: center;
