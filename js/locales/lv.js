@@ -129,6 +129,7 @@ I18N.lv = {
   promoAccepted: "Reklāmas kods pieņemts.",
   checkingPromo: "Pārbaudām reklāmas kodu…",
   enterPromo: "Ievadiet reklāmas kodu.",
+  havePromo: "Vai jums ir reklāmas kods?",
   promoDescription: "Ja jums ir reklāmas kods, ievadiet to šeit.",
   retryPromo: "Mēģināt vēlreiz",
   applyPromo: "Lietot",
