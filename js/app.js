@@ -41,7 +41,7 @@ if (headerSwitchers && !document.getElementById("protocolSelector")) {
 
     .brand {
       padding-top: 0 !important;
-      margin-bottom: 20px !important;
+      margin-bottom: 16px !important;
     }
 
     .brand-copy {
@@ -271,11 +271,11 @@ function syncHeaderVerticalSpacing() {
   const brandTopStyle = getComputedStyle(brandTop);
   const pagePaddingTop = parseFloat(pageStyle.paddingTop) || 0;
   const fixedTop = parseFloat(brandTopStyle.top) || 0;
-  const desiredGap = 20;
+  const desiredGap = 16;
 
   const paddingTop = Math.max(
     0,
-    fixedTop + brandTop.offsetHeight + desiredGap - pagePaddingTop
+    fixedTop + brandTop.offsetHeight - pagePaddingTop
   );
 
   brand.style.setProperty("padding-top", `${paddingTop}px`, "important");
