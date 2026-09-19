@@ -7,6 +7,18 @@ function syncHeaderVerticalSpacing() {
 
   if (!page || !brand || !brandTop) return;
 
+  // On narrow screens the header stays in normal flow. Only its final
+  // two rows remain visible when the upper part scrolls out of view.
+  if (window.matchMedia("(max-width: 699px)").matches && headerSwitchers) {
+    brand.style.setProperty("padding-top", "0px", "important");
+    brand.style.setProperty("margin-bottom", "16px", "important");
+    const hiddenHeight = headerSwitchers.getBoundingClientRect().top
+      - brand.getBoundingClientRect().top;
+    brand.style.setProperty("top", `calc(env(safe-area-inset-top, 0px) - ${hiddenHeight}px)`, "important");
+    return;
+  }
+  brand.style.removeProperty("top");
+
   const pageStyle = getComputedStyle(page);
   const brandTopStyle = getComputedStyle(brandTop);
   const pagePaddingTop = parseFloat(pageStyle.paddingTop) || 0;
