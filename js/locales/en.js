@@ -129,6 +129,7 @@ I18N.en = {
   promoAccepted: "Promo code accepted.",
   checkingPromo: "Checking promo code…",
   enterPromo: "Enter your promo code.",
+  havePromo: "Have a promo code?",
   promoDescription: "If you have a promo code, enter it here.",
   retryPromo: "Retry",
   applyPromo: "Apply",
