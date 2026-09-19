@@ -474,9 +474,49 @@ rotatePasswordButton.addEventListener("click", async () => {
   }
 });
 
+function confirmVpnDeletion() {
+  return new Promise(resolve => {
+    const dialog = document.createElement("dialog");
+    dialog.setAttribute("aria-labelledby", "vpnDeleteTitle");
+    dialog.setAttribute("aria-describedby", "vpnDeleteDescription");
+    dialog.style.cssText = "box-sizing:border-box;width:calc(100% - 32px);max-width:420px;padding:24px;border:1px solid var(--border);border-radius:16px;background:var(--card);color:var(--text)";
+    const title = document.createElement("h2");
+    title.id = "vpnDeleteTitle";
+    title.textContent = t("deleteVpnConfirmTitle");
+    title.style.cssText = "margin:0 0 12px;font-size:20px";
+    const description = document.createElement("p");
+    description.id = "vpnDeleteDescription";
+    description.textContent = t("deleteVpnConfirmBody");
+    description.style.cssText = "line-height:1.5;margin:0 0 20px";
+    const actions = document.createElement("div");
+    actions.style.cssText = "display:grid;grid-template-columns:1fr 1fr;gap:12px";
+    const cancel = document.createElement("button");
+    cancel.type = "button";
+    cancel.className = "secondary";
+    cancel.textContent = t("cancelButton");
+    cancel.autofocus = true;
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "danger";
+    remove.textContent = {en:"Delete",ru:"Удалить",lv:"Dzēst"}[currentLanguage] || "Delete";
+    cancel.addEventListener("click", () => dialog.close("cancel"));
+    remove.addEventListener("click", () => dialog.close("delete"));
+    dialog.addEventListener("close", () => {
+      const confirmed = dialog.returnValue === "delete";
+      dialog.remove();
+      resolve(confirmed);
+    }, {once:true});
+    actions.append(cancel, remove);
+    dialog.append(title, description, actions);
+    document.body.appendChild(dialog);
+    dialog.showModal();
+  });
+}
+
 deleteVpnButton.addEventListener("click", async () => {
   if (vpnBusy) return;
-  if (!confirmLocalized("deleteVpnConfirmTitle", "deleteVpnConfirmBody")) return;
+  if (!await confirmVpnDeletion()) return;
+  if (vpnBusy) return;
   setVpnBusy(true);
   setInstallLink(null);
   vpnMessage.textContent = t("deletingVpn");
