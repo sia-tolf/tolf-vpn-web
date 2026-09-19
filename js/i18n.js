@@ -29,6 +29,12 @@ function setLanguage(language) {
     homeNavigation.href = "https://tolf.is/?lang=" + language;
   }
 
+  const helpNavigation = document.getElementById("helpNavigation");
+  if (helpNavigation) {
+    helpNavigation.textContent = { en: "Help", ru: "Помощь", lv: "Palīdzība" }[language];
+    helpNavigation.href = "help.html?lang=" + language;
+  }
+
   languageEn.classList.toggle(
     "active",
     language === "en"
