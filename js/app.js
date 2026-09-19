@@ -1,3 +1,11 @@
+const isTolfIPad =
+  /iPad/.test(navigator.userAgent) ||
+  (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+if (isTolfIPad) {
+  document.documentElement.classList.add("tolf-ipad");
+}
+
 const headerSwitchers = document.querySelector(".header-switchers");
 
 if (headerSwitchers && !document.getElementById("protocolSelector")) {
@@ -74,7 +82,7 @@ if (headerSwitchers && !document.getElementById("protocolSelector")) {
     }
     .brand-title-row .help-navigation { grid-column: 3; justify-self: end; color: #1f4180; font-weight: 600; }
     @media (prefers-color-scheme: dark) {
-      .brand-title-row .help-navigation { color: #9dbbff; }
+      html.tolf-ipad .brand-title-row .help-navigation { color: #9dbbff; }
     }
     .home-navigation:focus-visible {
       outline: 2px solid var(--text);
@@ -87,8 +95,8 @@ if (headerSwitchers && !document.getElementById("protocolSelector")) {
 
     /* iPad / wide touch layout: keep navigation on the first row,
        then place TOLF VPN to the left of the protocol and segmented controls. */
-    @media (min-width: 768px) and (max-width: 1366px) and (hover: none) and (pointer: coarse) {
-      .brand-top {
+    @media (min-width: 768px) and (max-width: 1366px) {
+      html.tolf-ipad .brand-top {
         display: grid !important;
         grid-template-columns: auto minmax(0, 1fr) auto;
         grid-template-rows: 42px auto;
@@ -97,28 +105,28 @@ if (headerSwitchers && !document.getElementById("protocolSelector")) {
         align-items: center;
       }
 
-      .brand-copy,
-      .brand-title-row {
+      html.tolf-ipad .brand-copy,
+      html.tolf-ipad .brand-title-row {
         display: contents !important;
       }
 
-      .brand-copy > p {
+      html.tolf-ipad .brand-copy > p {
         display: none !important;
       }
 
-      .brand-title-row .home-navigation {
+      html.tolf-ipad .brand-title-row .home-navigation {
         grid-column: 1;
         grid-row: 1;
         justify-self: start;
       }
 
-      .brand-title-row .help-navigation {
+      html.tolf-ipad .brand-title-row .help-navigation {
         grid-column: 3;
         grid-row: 1;
         justify-self: end;
       }
 
-      .brand-title-row h1 {
+      html.tolf-ipad .brand-title-row h1 {
         grid-column: 1;
         grid-row: 2;
         justify-self: start;
@@ -126,7 +134,7 @@ if (headerSwitchers && !document.getElementById("protocolSelector")) {
         text-align: left;
       }
 
-      .header-control-cluster {
+      html.tolf-ipad .header-control-cluster {
         grid-column: 2 / 4;
         grid-row: 2;
         justify-self: end;
@@ -135,12 +143,12 @@ if (headerSwitchers && !document.getElementById("protocolSelector")) {
     }
     @media (max-width: 420px) {
       .brand-title-row { gap: 4px; }
-      .brand-title-row h1 { font-size: 20px; }
-      .brand-title-row .home-navigation { font-size: 12px; }
+      html.tolf-ipad .brand-title-row h1 { font-size: 20px; }
+      html.tolf-ipad .brand-title-row .home-navigation { font-size: 12px; }
     }
     @media (max-width: 350px) {
-      .brand-title-row h1 { font-size: 18px; }
-      .brand-title-row .home-navigation { font-size: 11px; }
+      html.tolf-ipad .brand-title-row h1 { font-size: 18px; }
+      html.tolf-ipad .brand-title-row .home-navigation { font-size: 11px; }
     }
 
     .brand-home-link {
