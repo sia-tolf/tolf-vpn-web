@@ -144,3 +144,30 @@ html[data-tolf-ui="vpn"] .compact-header .protocol-label {
     box-shadow: 0 0 0 8px var(--background);
   }
 }
+
+/* Help is a compact outlined action within the existing navigation row. */
+html[data-tolf-ui="vpn"] .compact-header .help-navigation {
+  box-sizing: border-box;
+  justify-content: center;
+  height: 34px;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--tolf-outline);
+  border-radius: 11px;
+  background: transparent;
+  color: var(--tolf-action-text);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+html[data-tolf-ui="vpn"] .compact-header .help-navigation:hover {
+  background: var(--tolf-secondary-hover);
+  text-decoration: none;
+}
+html[data-tolf-ui="vpn"] .compact-header .help-navigation:active {
+  background: var(--tolf-secondary-pressed);
+}
+html[data-tolf-ui="vpn"] .compact-header .help-navigation:focus-visible {
+  outline: 2px solid var(--tolf-outline);
+  outline-offset: 3px;
+}
