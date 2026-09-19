@@ -171,7 +171,7 @@ I18N.en = {
   londonUk: "London, United Kingdom",
   comingSoon: "Coming Soon",
   serverAddress: "Entry point address",
-  vpnOverviewTitle: "VPN",
+  vpnOverviewTitle: "VPN · IKEv2",
   status: "Status",
   server: "Entry point",
   username: "Username",
