@@ -207,3 +207,8 @@ html[data-tolf-ui="vpn"] .compact-header .help-navigation:focus-visible {
   html[data-tolf-ui="vpn"] .compact-header .brand-copy { gap: 8px; }
   html[data-tolf-ui="vpn"] .compact-header h1 { font-size: 28px; }
 }
+
+/* Slightly wider Help action; retain its shared height. */
+html[data-tolf-ui="vpn"] .compact-header .help-navigation {
+  padding-inline: 16px;
+}
