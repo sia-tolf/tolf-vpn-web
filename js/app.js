@@ -84,6 +84,55 @@ if (headerSwitchers && !document.getElementById("protocolSelector")) {
     @media (min-width: 521px) and (max-width: 900px) {
       .brand-top { flex-direction: column; align-items: stretch; }
     }
+
+    /* iPad / wide touch layout: keep navigation on the first row,
+       then place TOLF VPN to the left of the protocol and segmented controls. */
+    @media (min-width: 768px) and (max-width: 1366px) and (hover: none) and (pointer: coarse) {
+      .brand-top {
+        display: grid !important;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        grid-template-rows: 42px auto;
+        column-gap: 12px;
+        row-gap: 8px;
+        align-items: center;
+      }
+
+      .brand-copy,
+      .brand-title-row {
+        display: contents !important;
+      }
+
+      .brand-copy > p {
+        display: none !important;
+      }
+
+      .brand-title-row .home-navigation {
+        grid-column: 1;
+        grid-row: 1;
+        justify-self: start;
+      }
+
+      .brand-title-row .help-navigation {
+        grid-column: 3;
+        grid-row: 1;
+        justify-self: end;
+      }
+
+      .brand-title-row h1 {
+        grid-column: 1;
+        grid-row: 2;
+        justify-self: start;
+        margin: 0;
+        text-align: left;
+      }
+
+      .header-control-cluster {
+        grid-column: 2 / 4;
+        grid-row: 2;
+        justify-self: end;
+        margin-left: 0;
+      }
+    }
     @media (max-width: 420px) {
       .brand-title-row { gap: 4px; }
       .brand-title-row h1 { font-size: 20px; }
