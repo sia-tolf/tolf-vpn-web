@@ -129,6 +129,7 @@ I18N.ru = {
   promoAccepted: "Промокод принят.",
   checkingPromo: "Проверяем промокод…",
   enterPromo: "Введите промокод.",
+  havePromo: "Есть промокод?",
   promoDescription: "Если у вас есть промокод, введите его здесь.",
   retryPromo: "Повторить",
   applyPromo: "Применить",
