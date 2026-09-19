@@ -70,35 +70,23 @@
 <link rel="stylesheet" href="tolf-buttons.20260917-3.css">
 <script defer src="tolf-wordmark.20260917-3.js"></script>
 <link rel="stylesheet" href="tolf-header.20260919-1.css?v=languages-2">
+<link rel="stylesheet" href="css/compact-header.css?v=20260919-1">
 </head>
 
 <body>
   <main class="page">
     <header class="brand">
-      <div class="brand-top">
-        <div class="brand-copy">
-          <div class="brand-title-row">
-            <a id="homeNavigation" class="home-navigation" href="https://tolf.is/?lang=en">‹ Home</a>
-            <h1>TOLF VPN</h1>
-            <a id="helpNavigation" class="home-navigation help-navigation" href="help.html?lang=en">Help</a>
-          </div>
-          <p data-i18n="brandSubtitle">
-            System VPN access for your devices.
-          </p>
-        </div>
-
-        <div class="header-control-cluster">
-          <div id="protocolSelector" class="protocol-selector" aria-label="IKEv2 selected">
+<div class="brand-top compact-header">
+<nav class="header-navigation" aria-label="Navigation"><a id="homeNavigation" class="home-navigation" href="https://tolf.is/?lang=en">‹ Home</a><a id="helpNavigation" class="home-navigation help-navigation" href="help.html?lang=en">Help</a></nav>
+<div class="brand-copy"><div class="brand-title-row"><h1>TOLF VPN</h1></div><div id="protocolSelector" class="protocol-selector" aria-label="IKEv2 selected">
             <span class="protocol-label">IKEv2</span>
             <span class="protocol-column" aria-hidden="true">
               <span class="protocol-dot protocol-dot-active"></span>
               <span class="protocol-dot protocol-dot-reserve"></span>
               <span class="protocol-dot protocol-dot-reserve"></span>
             </span>
-          </div>
-
-          <div class="header-switchers three-platform-switchers">
-          <div
+          </div></div>
+<div class="header-switchers three-platform-switchers"><div
             class="language-switcher"
             aria-label="Language"
           >
@@ -119,9 +107,7 @@
               class="language-button"
               type="button"
              lang="lv" aria-label="Latviešu">Latviešu</button>
-          </div>
-
-          <div
+          </div><div
             class="platform-switcher"
             aria-label="Device platform"
           >
@@ -159,10 +145,8 @@
               <span>Android</span>
             </button>
             <button id="platformWindows" class="platform-button" type="button" aria-pressed="false" aria-disabled="true" disabled><svg class="platform-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 3h9v8H2zM13 3h9v8h-9zM2 13h9v8H2zM13 13h9v8h-9z"/></svg><span>Windows</span></button>
-          </div>
-        </div>
-        </div>
-      </div>
+          </div></div>
+</div>
 
     </header>
 
@@ -1224,3 +1208,4 @@
   </main>
 </body>
 </html>
+
