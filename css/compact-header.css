@@ -37,7 +37,7 @@ html[data-tolf-ui="vpn"] .compact-header .brand-copy {
 html[data-tolf-ui="vpn"] .compact-header .brand-title-row { display: block !important; width: auto; }
 html[data-tolf-ui="vpn"] .compact-header h1 {
   margin: 0;
-  font-size: 32px;
+  font-size: 34px;
   line-height: 1.1;
   letter-spacing: -.025em;
   text-align: left;
