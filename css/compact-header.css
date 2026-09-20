@@ -27,8 +27,15 @@ html[data-tolf-ui="vpn"] .compact-header .home-navigation {
 }
 html[data-tolf-ui="vpn"] .compact-header .home-navigation .tolf-wordmark {
   color: var(--text);
+  font-size: 20px;
   font-weight: 650;
-  letter-spacing: .08em;
+  line-height: 1;
+  letter-spacing: .16em;
+}
+@media (max-width: 520px) {
+  html[data-tolf-ui="vpn"] .compact-header .home-navigation .tolf-wordmark {
+    font-size: 19px;
+  }
 }
 html[data-tolf-ui="vpn"] .compact-header .home-navigation:hover { text-decoration: underline; }
 html[data-tolf-ui="vpn"] .compact-header .brand-copy {
