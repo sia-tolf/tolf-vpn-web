@@ -21,11 +21,13 @@ function setLanguage(language) {
   document.documentElement.lang = language;
   const homeNavigation = document.getElementById("homeNavigation");
   if (homeNavigation) {
-    homeNavigation.textContent = {
-      en: "‹ Home",
-      ru: "‹ На главную",
-      lv: "‹ Uz sākumlapu"
-    }[language];
+    homeNavigation.innerHTML =
+      '‹ <span class="tolf-wordmark">TOLF</span>';
+    homeNavigation.setAttribute("aria-label", {
+      en: "TOLF home",
+      ru: "На главную TOLF",
+      lv: "Uz TOLF sākumlapu"
+    }[language]);
     homeNavigation.href = "https://tolf.is/?lang=" + language;
   }
 
@@ -73,6 +75,10 @@ function setLanguage(language) {
 
   if (typeof renderConnectionTestTarget === "function") {
     renderConnectionTestTarget();
+  }
+
+  if (typeof renderEntryPointRecommendation === "function") {
+    renderEntryPointRecommendation();
   }
 }
 
