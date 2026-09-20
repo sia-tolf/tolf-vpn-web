@@ -228,16 +228,6 @@ for (const input of serverInputs) {
   });
 }
 
-languageEn.addEventListener(
-  "click",
-  renderEntryPointRecommendation
-);
-
-languageRu.addEventListener(
-  "click",
-  renderEntryPointRecommendation
-);
-
 renderEntryPointRecommendation();
 loadEntryPointRecommendation();
 
