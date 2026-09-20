@@ -34,7 +34,13 @@ const ON_DEMAND_ACTIONS = [
   "Ignore"
 ];
 
-let currentLanguage = localStorage.getItem("tolfLanguage");
+const tolfRequestedLanguage =
+  new URL(window.location.href).searchParams.get("lang");
+
+let currentLanguage =
+  ["en", "ru", "lv"].includes(tolfRequestedLanguage)
+    ? tolfRequestedLanguage
+    : localStorage.getItem("tolfLanguage");
 
 if (!["en", "ru", "lv"].includes(currentLanguage)) {
   const browserLanguage = navigator.language.toLowerCase();
