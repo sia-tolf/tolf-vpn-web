@@ -102,7 +102,7 @@ def install(app, ns):
 
     @app.get('/password/capabilities')
     def capabilities():
-        return JSONResponse({'version':VERSION, 'minPasswordLength':15, 'maxPasswordLength':128}, headers=HEADERS)
+        return JSONResponse({'version':VERSION, 'accountManagement':True, 'minPasswordLength':15, 'maxPasswordLength':128}, headers=HEADERS)
 
     @app.post('/password/register')
     def register(request: Request, payload: dict):
@@ -171,4 +171,44 @@ def install(app, ns):
             con.execute('DELETE FROM sessions WHERE user_id=?', (row[0],))
             con.execute('DELETE FROM challenges WHERE user_id=?', (row[0],))
             response = session(con, row[0], {'username':name,'recoveryCode':new_code})
+        return response
+
+    @app.get('/password/account')
+    def account(request: Request):
+        uid = ns['authenticated_user_id'](request)
+        with db() as con:
+            row = con.execute('SELECT p.username FROM users u LEFT JOIN account_passwords p ON p.user_id=u.id WHERE u.id=?', (uid,)).fetchone()
+        if not row:
+            raise HTTPException(401, 'authentication_required')
+        return JSONResponse({'enabled':row[0] is not None, 'username':row[0]}, headers=HEADERS)
+
+    @app.post('/password/set')
+    def set_password(request: Request, payload: dict):
+        uid = ns['authenticated_user_id'](request)
+        guard(request, 'set', uid)
+        value = password(payload.get('password'))
+        with db() as con:
+            existing = con.execute('SELECT username FROM account_passwords WHERE user_id=?', (uid,)).fetchone()
+        name = existing[0] if existing else username(payload.get('username'))
+        salt = secrets.token_bytes(16)
+        digest = derive(value, salt)
+        with db() as con:
+            con.execute('BEGIN IMMEDIATE')
+            # Recheck the exact session after hashing: recovery/logout may have revoked it.
+            token = request.cookies.get(ns['SESSION_COOKIE'], '')
+            valid = con.execute('SELECT 1 FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.user_id=? AND s.token_hash=? AND s.expires_at>?',
+                                (uid, hashlib.sha256(token.encode()).digest(), ns['utc_iso'](ns['utc_now']()))).fetchone()
+            if not valid:
+                raise HTTPException(401, 'authentication_required')
+            current = con.execute('SELECT username FROM account_passwords WHERE user_id=?', (uid,)).fetchone()
+            if current:
+                name = current[0]
+                con.execute('UPDATE account_passwords SET salt=?,digest=? WHERE user_id=?', (salt,digest,uid))
+            else:
+                if con.execute('SELECT 1 FROM account_passwords WHERE username=?', (name,)).fetchone():
+                    raise HTTPException(409, 'username_taken')
+                con.execute('INSERT INTO account_passwords VALUES (?,?,?,?,?)', (uid,name,salt,digest,ns['utc_iso'](ns['utc_now']())))
+            con.execute('DELETE FROM sessions WHERE user_id=?', (uid,))
+            con.execute('DELETE FROM challenges WHERE user_id=?', (uid,))
+            response = session(con, uid, {'username':name})
         return response

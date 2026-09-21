@@ -291,3 +291,5 @@ input:focus {
 button:disabled { opacity: .55; cursor: wait; }
 #continueButton:disabled { cursor: default; }
 .auth-card input:focus-visible, .auth-card button:focus-visible { outline: 2px solid var(--accent, #234687); outline-offset: 3px; }
+
+#credentialCopyFallback { box-sizing:border-box; width:100%; min-height:180px; font:inherit; }

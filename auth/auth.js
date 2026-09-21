@@ -232,6 +232,10 @@ const passwordCopy = {
 };
 Object.keys(passwordCopy).forEach(lang => Object.assign(copy[lang], passwordCopy[lang]));
 
+Object.assign(copy.en, {copyCredentials: 'Copy sign-in details', credentialsCopied: 'Sign-in details copied.', credentialsCopyFailed: 'Select and copy the text below.', credentialsTitle: 'Your sign-in details'});
+Object.assign(copy.ru, {copyCredentials: 'Скопировать данные', credentialsCopied: 'Данные для входа скопированы.', credentialsCopyFailed: 'Выделите и скопируйте текст ниже.', credentialsTitle: 'Ваши данные для входа'});
+Object.assign(copy.lv, {copyCredentials: 'Kopēt piekļuves datus', credentialsCopied: 'Piekļuves dati nokopēti.', credentialsCopyFailed: 'Atlasiet un kopējiet tekstu zemāk.', credentialsTitle: 'Jūsu piekļuves dati'});
+
 const panels = {
   signin: document.getElementById("signInPanel"),
   signup: document.getElementById("signupPanel"),
@@ -362,8 +366,7 @@ async function apiRequest(path, options = {}) {
 
 async function copyText(value) {
   if (navigator.clipboard?.writeText) {
-    await navigator.clipboard.writeText(value);
-    return;
+    try { await navigator.clipboard.writeText(value); return; } catch {}
   }
   const textarea = document.createElement("textarea");
   textarea.value = value;
@@ -371,8 +374,9 @@ async function copyText(value) {
   textarea.style.opacity = "0";
   document.body.appendChild(textarea);
   textarea.select();
-  document.execCommand("copy");
+  const copied = document.execCommand("copy");
   textarea.remove();
+  if (!copied) throw new Error("copy_failed");
 }
 
 async function startSignIn(messageId = "signInMessage") {
@@ -417,6 +421,7 @@ async function finishAndLeave(messageId) {
     await startSignIn(messageId);
   }
   savedCredentials = null;
+  document.getElementById("credentialCopyFallback")?.remove();
   newRecoveryCode.textContent = "";
   window.location.assign(destination());
 }
@@ -637,11 +642,24 @@ credentialsSaved.addEventListener('change', () => { continueButton.disabled = bu
 window.addEventListener('beforeunload', event => {
   if (currentMode === 'recovery' && !credentialsSaved.checked) { event.preventDefault(); event.returnValue = ''; }
 });
-document.getElementById('downloadCredentialsButton').addEventListener('click', () => {
+function credentialText() {
   const parts = ['TOLF — https://vpn.tolf.is/auth/', text('downloadNote'), ''];
   if (savedCredentials) parts.push(text('usernameLabel')+': '+savedCredentials.username, text('passwordLabel')+': '+savedCredentials.password, '');
   parts.push(text('recoveryCode')+': '+newRecoveryCode.textContent, '', text('recoveryInstructions'));
-  const address = URL.createObjectURL(new Blob([parts.join('\n')+'\n'], {type:'text/plain;charset=utf-8'}));
+  return parts.join('\n')+'\n';
+}
+document.getElementById('copyCredentialsButton').addEventListener('click', async () => {
+  try { await copyText(credentialText()); setMessage('recoveryCodeMessage', text('credentialsCopied'), 'success'); }
+  catch {
+    let field = document.getElementById('credentialCopyFallback');
+    if (!field) { field = document.createElement('textarea'); field.id = 'credentialCopyFallback'; field.readOnly = true; newRecoveryCode.after(field); }
+    field.setAttribute('aria-label', text('credentialsTitle'));
+    field.value = credentialText(); field.focus(); field.select();
+    setMessage('recoveryCodeMessage', text('credentialsCopyFailed'));
+  }
+});
+document.getElementById('downloadCredentialsButton').addEventListener('click', () => {
+  const address = URL.createObjectURL(new Blob([credentialText()], {type:'text/plain;charset=utf-8'}));
   const link = document.createElement('a'); link.href = address; link.download = 'TOLF-account-recovery.txt';
   document.body.appendChild(link); link.click(); link.remove();
   setTimeout(() => URL.revokeObjectURL(address), 1000);

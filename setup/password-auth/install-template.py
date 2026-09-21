@@ -79,7 +79,7 @@ def main():
             for attempt in range(8):
                 try:
                     with urllib.request.urlopen('https://api.tolf.is/password/capabilities',timeout=5) as r:data=json.load(r)
-                    if data.get('version')!=1:raise RuntimeError('Capabilities mismatch')
+                    if data.get('version')!=1 or data.get('accountManagement') is not True:raise RuntimeError('Capabilities mismatch')
                     subprocess.run(['systemctl','is-active','--quiet','tolf-api.service'],check=True)
                     break
                 except Exception:

@@ -55,10 +55,12 @@ async function loadAccount() {
 
     applyServerAccess(data);
     showVpn(data.vpn);
+    loadAccountPassword();
 
     await loadPasskeys();
     await updateInvitationAccount(data);
   } catch {
+    clearAccountPassword();
     showSignedOut();
     handleEntryAction();
   }
@@ -187,6 +189,7 @@ deleteAccountButton.addEventListener("click", async () => {
     signedOutMessage.textContent = t("accountDeleted");
     signedOutMessage.className = "message success";
 
+    clearAccountPassword();
     showSignedOut();
   } catch (error) {
     vpnMessage.textContent = error.message;

@@ -42,6 +42,7 @@ class PasswordTests(unittest.TestCase):
                 row=con.execute('SELECT user_id FROM sessions WHERE token_hash=? AND expires_at>?', (hashlib.sha256(token.encode()).digest(),ns['utc_iso'](ns['utc_now']()))).fetchone()
             if not row:raise HTTPException(401)
             return {'userId':row[0]}
+        ns['authenticated_user_id']=lambda request:me(request)['userId']
         self.client=TestClient(self.app,base_url='https://api.tolf.is',headers={'Origin':ns['ORIGIN']})
 
     def post(self,path,body,status=200,client=None):
@@ -137,6 +138,54 @@ class PasswordTests(unittest.TestCase):
             with sqlite3.connect(self.db) as con:con.execute('UPDATE account_passwords SET digest=?',(b'x'*32,))
             return result
         with patch.object(mod,'derive',interleave):self.post('login',{'username':'lena-work','password':PASS},401)
+
+    def test_manage_password_after_passkey_session(self):
+        original=self.register().json()['recoveryCode']
+        uid=self.client.get('/me').json()['userId']
+        old_token=self.client.cookies.get('tolf_session')
+        # A Passkey login issues the identical session contract. Use an independent
+        # session, without submitting the account password to the management API.
+        passkey_token=secrets.token_urlsafe(32)
+        with sqlite3.connect(self.db) as con:
+            con.execute('INSERT INTO sessions SELECT ?,user_id,created_at,expires_at FROM sessions LIMIT 1',(hashlib.sha256(passkey_token.encode()).digest(),))
+            con.execute('INSERT INTO passkeys(credential_id,user_id) VALUES (?,?)',(b'passkey',uid))
+        self.client.cookies.clear();self.client.cookies.set('tolf_session',passkey_token)
+        metadata=self.client.get('/password/account')
+        self.assertEqual(metadata.json(),{'enabled':True,'username':'lena-work'})
+        self.assertEqual(metadata.headers['cache-control'],'no-store')
+        self.assertNotIn('digest',metadata.text);self.assertNotIn(PASS,metadata.text)
+        self.post('set',{'password':NEW,'username':'ignored-rename','userId':'someone-else'})
+        self.assertEqual(self.client.get('/me').json()['userId'],uid)
+        self.assertEqual(self.rows('SELECT username FROM account_passwords'),[('lena-work',)])
+        self.assertEqual(self.rows('SELECT count(*) FROM passkeys'),[(1,)])
+        self.assertEqual(self.rows('SELECT recovery_code_hash FROM users'),[(hashlib.sha256(original.encode()).digest(),)])
+        self.assertEqual(self.rows('SELECT count(*) FROM sessions'),[(1,)])
+        self.post('login',{'username':'lena-work','password':PASS},401)
+        self.post('login',{'username':'lena-work','password':NEW})
+
+    def test_add_password_to_passkey_only_account_and_isolation(self):
+        self.register('owner-one');uid=self.client.get('/me').json()['userId']
+        with sqlite3.connect(self.db) as con:con.execute('DELETE FROM account_passwords WHERE user_id=?',(uid,))
+        self.assertEqual(self.client.get('/password/account').json(),{'enabled':False,'username':None})
+        self.post('set',{'username':'new-login','password':NEW})
+        self.assertEqual(self.rows('SELECT id FROM users'),[(uid,)])
+        self.post('login',{'username':'new-login','password':NEW})
+        other=TestClient(self.app,base_url='https://api.tolf.is',headers={'Origin':'https://vpn.tolf.is'})
+        self.register('owner-two')
+        self.post('set',{'password':PASS,'userId':uid})
+        self.assertEqual(self.rows('SELECT username FROM account_passwords WHERE user_id=?',(uid,)),[('new-login',)])
+        self.assertEqual(other.get('/password/account').status_code,401)
+        self.post('set',{'username':'new-login','password':NEW},401,client=other)
+        self.post('login',{'username':'new-login','password':NEW})
+
+    def test_revoked_session_cannot_set_password(self):
+        self.register();real=mod.derive
+        def revoke(value,salt):
+            result=real(value,salt)
+            with sqlite3.connect(self.db) as con:con.execute('DELETE FROM sessions')
+            return result
+        with patch.object(mod,'derive',revoke):self.post('set',{'password':NEW},401)
+        self.post('login',{'username':'lena-work','password':PASS})
 
     def test_installer_is_additive_and_idempotent(self):
         spec=importlib.util.spec_from_file_location('installer',ROOT/'setup/password-auth/install-template.py')

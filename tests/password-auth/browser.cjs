@@ -17,6 +17,7 @@ const root=path.resolve(__dirname,'../..');
  try {
   for(const lang of ['ru','en','lv']) {
    const page=await browser.newPage({viewport:{width:390,height:844}});
+   await page.addInitScript(()=>{window.copies=[];Object.defineProperty(navigator,'clipboard',{value:{writeText:async text=>window.copies.push(text)}});});
    const errors=[];page.on('pageerror',e=>errors.push(e.message));
    let session=false;const sent=[];
    await page.route('https://api.tolf.is/**',async route=>{
@@ -49,6 +50,8 @@ const root=path.resolve(__dirname,'../..');
    const downloadPromise=page.waitForEvent('download');await page.locator('#downloadCredentialsButton').click();
    const download=await downloadPromise;const file=await download.path();
    const content=fs.readFileSync(file,'utf8');assert(content.includes('lena-work'));assert(content.includes('My edited password 1234'));assert(content.includes('TOLF-TEST'));
+   await page.locator('#copyCredentialsButton').click();await page.locator('#copyCredentialsButton').click();
+   const copies=await page.evaluate(()=>window.copies);assert.equal(copies.length,2);assert(copies[0].includes('My edited password 1234')&&copies[0].includes('TOLF-TEST'));
    await page.locator('#credentialsSaved').check();assert.equal(await page.locator('#continueButton').isEnabled(),true);
    const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth);assert(!overflow);
    assert.deepEqual(errors,[]);

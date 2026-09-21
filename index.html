@@ -54,7 +54,9 @@
   <script defer src="js/ui.js?v=windows-link-field-20260914"></script>
   <script defer src="js/passkeys.js?v=last-passkey-message-1"></script>
   <script defer src="js/recovery.js?v=password-20260921-1"></script>
-  <script defer src="js/account.js?v=password-20260921-1"></script>
+  <script defer src="js/account-password.js?v=20260921-1"></script>
+  <link rel="stylesheet" href="css/account-password.css?v=20260921-1">
+  <script defer src="js/account.js?v=password-20260921-2"></script>
   <script defer src="js/profile-settings.js?v=profile-options-1"></script>
   <script defer src="js/vpn.js?v=delete-confirm-20260919"></script>
   <script defer src="js/promo.js?v=promo-disclosure-20260919"></script>
@@ -1065,6 +1067,41 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
         ></div>
         </div>
       </div>
+
+      <section id="accountPasswordSection" class="card hidden">
+        <div class="card-content">
+          <h3 class="section-title" data-password-text="title">Username and password</h3>
+          <p class="section-description" data-password-text="help"></p>
+          <div id="apExisting" class="hidden">
+            <label for="apLogin" data-password-text="username">Username</label>
+            <input id="apLogin" readonly autocomplete="username">
+            <button id="apCopyLogin" type="button" class="secondary ap-wide" data-password-text="copyLogin"></button>
+          </div>
+          <p id="apNone" class="section-description" data-password-text="none"></p>
+          <button id="apOpen" type="button" class="secondary ap-wide"></button>
+          <form id="apForm" class="hidden">
+            <div id="apNewLoginGroup">
+              <label for="apNewLogin" data-password-text="username"></label>
+              <input id="apNewLogin" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" minlength="3" maxlength="32" pattern="[A-Za-z0-9][A-Za-z0-9_.\-]{2,31}">
+              <p class="section-description" data-password-text="loginHelp"></p>
+            </div>
+            <label for="apPassword" data-password-text="password"></label>
+            <input id="apPassword" name="password" type="password" autocomplete="new-password" minlength="15" maxlength="128" required>
+            <div class="ap-actions"><button id="apToggle" type="button" class="secondary" data-password-text="show"></button><button id="apGenerate" type="button" class="secondary" data-password-text="generate"></button></div>
+            <p class="section-description" data-password-text="passwordHelp"></p>
+            <p class="section-description" data-password-text="impact"></p>
+            <div class="ap-actions"><button type="submit" class="primary" data-password-text="save"></button><button id="apCancel" type="button" class="secondary" data-password-text="cancel"></button></div>
+          </form>
+          <div id="apResult" class="hidden">
+            <p class="section-description" data-password-text="once"></p>
+            <label for="apCredentials" data-password-text="title"></label>
+            <textarea id="apCredentials" readonly spellcheck="false" autocomplete="off"></textarea>
+            <button id="apCopyDetails" type="button" class="primary ap-wide" data-password-text="copy"></button>
+            <button id="apSaved" type="button" class="secondary ap-wide" data-password-text="saved"></button>
+          </div>
+          <p id="apMessage" class="message" role="status"></p>
+        </div>
+      </section>
 
       <div
         id="passkeysSection"

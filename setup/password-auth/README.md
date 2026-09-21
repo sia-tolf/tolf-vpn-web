@@ -27,8 +27,11 @@ Run as root on London / EDISUK, not on Riga or Moscow:
 Build that single-file installer with `python3 setup/password-auth/build.py`.
 Use an immutable commit URL and verify its SHA-256 before executing it.
 
-Only new accounts choose password registration in v1. Existing Passkeys still
-work and password accounts can add Passkeys using the existing account UI.
+Existing accounts can add username/password after signing in with a Passkey.
+The account section displays the username, never the stored password. Setting a
+new password rotates account sessions but preserves Passkeys, recovery codes and
+VPN credentials. Newly saved credentials remain copyable until dismissed or the
+page is left. Registration also offers repeated copying and a text download.
 Recovery for a password account requires username + current recovery code.
 It changes the password, rotates the recovery code, and revokes existing account
 sessions/pending challenges in one transaction. VPN profiles and Passkeys remain.
