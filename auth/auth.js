@@ -232,9 +232,9 @@ const passwordCopy = {
 };
 Object.keys(passwordCopy).forEach(lang => Object.assign(copy[lang], passwordCopy[lang]));
 
-Object.assign(copy.en, {copyCredentials: 'Copy sign-in details', credentialsCopied: 'Sign-in details copied.', credentialsCopyFailed: 'Select and copy the text below.', credentialsTitle: 'Your sign-in details'});
-Object.assign(copy.ru, {copyCredentials: 'Скопировать данные', credentialsCopied: 'Данные для входа скопированы.', credentialsCopyFailed: 'Выделите и скопируйте текст ниже.', credentialsTitle: 'Ваши данные для входа'});
-Object.assign(copy.lv, {copyCredentials: 'Kopēt piekļuves datus', credentialsCopied: 'Piekļuves dati nokopēti.', credentialsCopyFailed: 'Atlasiet un kopējiet tekstu zemāk.', credentialsTitle: 'Jūsu piekļuves dati'});
+Object.assign(copy.en, {"saveRecoveryTitle":"Save your account details","saveRecoveryDescription":"Download a text file with your sign-in and recovery details. Keep it somewhere safe and do not share it.","downloadCredentials":"Download sign-in and recovery details","savedAcknowledgement":"I saved the file.","savedContinue":"Continue"});
+Object.assign(copy.ru, {"saveRecoveryTitle":"Сохраните данные аккаунта","saveRecoveryDescription":"Скачайте текстовый файл с данными для входа и восстановления. Храните его в надёжном месте и никому не передавайте.","downloadCredentials":"Скачать данные для входа и восстановления","savedAcknowledgement":"Я сохранил файл.","savedContinue":"Продолжить"});
+Object.assign(copy.lv, {"saveRecoveryTitle":"Saglabājiet konta datus","saveRecoveryDescription":"Lejupielādējiet teksta failu ar pieteikšanās un atkopšanas datiem. Glabājiet to drošā vietā un neizpaudiet citiem.","downloadCredentials":"Lejupielādēt pieteikšanās un atkopšanas datus","savedAcknowledgement":"Es saglabāju failu.","savedContinue":"Turpināt"});
 
 const panels = {
   signin: document.getElementById("signInPanel"),
@@ -256,7 +256,6 @@ const signupButton = document.getElementById("signupButton");
 const signupBackButton = document.getElementById("signupBackButton");
 const recoverButton = document.getElementById("recoverButton");
 const recoverBackButton = document.getElementById("recoverBackButton");
-const copyRecoveryButton = document.getElementById("copyRecoveryButton");
 const continueButton = document.getElementById("continueButton");
 const passkeyName = document.getElementById("passkeyName");
 const recoveryCode = document.getElementById("recoveryCode");
@@ -371,21 +370,6 @@ async function apiRequest(path, options = {}) {
   return data;
 }
 
-async function copyText(value) {
-  if (navigator.clipboard?.writeText) {
-    try { await navigator.clipboard.writeText(value); return; } catch {}
-  }
-  const textarea = document.createElement("textarea");
-  textarea.value = value;
-  textarea.style.position = "fixed";
-  textarea.style.opacity = "0";
-  document.body.appendChild(textarea);
-  textarea.select();
-  const copied = document.execCommand("copy");
-  textarea.remove();
-  if (!copied) throw new Error("copy_failed");
-}
-
 async function startSignIn(messageId = "signInMessage") {
   if (!("PublicKeyCredential" in window)) {
     throw new Error(text("unsupported"));
@@ -428,7 +412,6 @@ async function finishAndLeave(messageId) {
     await startSignIn(messageId);
   }
   savedCredentials = null;
-  document.getElementById("credentialCopyFallback")?.remove();
   newRecoveryCode.textContent = "";
   window.location.assign(destination());
 }
@@ -557,17 +540,6 @@ recoverButton.addEventListener("click", async () => {
   }
 });
 
-copyRecoveryButton.addEventListener("click", async () => {
-  const code = newRecoveryCode.textContent.trim();
-  if (!code) return;
-  try {
-    await copyText(code);
-    setMessage("recoveryCodeMessage", text("copyDone"), "success");
-  } catch {
-    setMessage("recoveryCodeMessage", text("copyFailed"), "error");
-  }
-});
-
 continueButton.addEventListener("click", async () => {
   if (!credentialsSaved.checked) { setMessage("recoveryCodeMessage", text("savedRequired"), "error"); return; }
   setBusy(true);
@@ -655,16 +627,6 @@ function credentialText() {
   parts.push(text('recoveryCode')+': '+newRecoveryCode.textContent, '', text('recoveryInstructions'));
   return parts.join('\n')+'\n';
 }
-document.getElementById('copyCredentialsButton').addEventListener('click', async () => {
-  try { await copyText(credentialText()); setMessage('recoveryCodeMessage', text('credentialsCopied'), 'success'); }
-  catch {
-    let field = document.getElementById('credentialCopyFallback');
-    if (!field) { field = document.createElement('textarea'); field.id = 'credentialCopyFallback'; field.readOnly = true; newRecoveryCode.after(field); }
-    field.setAttribute('aria-label', text('credentialsTitle'));
-    field.value = credentialText(); field.focus(); field.select();
-    setMessage('recoveryCodeMessage', text('credentialsCopyFailed'));
-  }
-});
 document.getElementById('downloadCredentialsButton').addEventListener('click', () => {
   const address = URL.createObjectURL(new Blob([credentialText()], {type:'text/plain;charset=utf-8'}));
   const link = document.createElement('a'); link.href = address; link.download = 'TOLF-account-recovery.txt';

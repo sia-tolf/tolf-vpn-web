@@ -6,10 +6,10 @@
   <meta name="color-scheme" content="light dark">
   <meta name="theme-color" content="#f5f5f7">
   <title>TOLF Account</title>
-  <link rel="stylesheet" href="styles.css?v=auth-header-20260921-3">
+  <link rel="stylesheet" href="styles.css?v=save-file-20260921">
   <script defer src="../passkey-session-label.20260917-1.js"></script>
   <script defer src="../js/webauthn.js?v=auth-20260917-1"></script>
-  <script defer src="auth.js?v=account-page-20260921"></script>
+  <script defer src="auth.js?v=save-file-20260921"></script>
 <link rel="stylesheet" href="../tolf-buttons.20260917-3.css">
 <script defer src="../tolf-wordmark.20260917-3.js"></script>
 <link rel="stylesheet" href="../tolf-header.20260919-1.css?v=languages-2">
@@ -121,16 +121,13 @@
       </section>
 
       <section id="recoveryCodePanel" class="panel hidden">
-        <h1 data-i18n="saveRecoveryTitle">Save your recovery code</h1>
-        <p class="description" data-i18n="saveRecoveryDescription">Store this code somewhere safe. It can be used to recover your account if you lose your Passkey.</p>
+        <h1 data-i18n="saveRecoveryTitle">Save your account details</h1>
+        <p class="description" data-i18n="saveRecoveryDescription">Download a text file with your sign-in and recovery details. Keep it somewhere safe and do not share it.</p>
         <p id="savedUsername" class="field-help hidden"></p>
         <code id="newRecoveryCode" class="recovery-code"></code>
-        <button id="copyRecoveryButton" class="button secondary" type="button" data-i18n="copyCode">Copy code</button>
-        <p class="field-help" data-i18n="recoveryInstructions"></p>
-        <button id="copyCredentialsButton" class="button secondary" type="button" data-i18n="copyCredentials">Copy sign-in details</button>
-        <button id="downloadCredentialsButton" class="button secondary" type="button" data-i18n="downloadCredentials">Download recovery details</button>
-        <label class="saved-check"><input id="credentialsSaved" type="checkbox"><span data-i18n="savedAcknowledgement">I saved my sign-in details and recovery code.</span></label>
-        <button disabled id="continueButton" class="button primary" type="button" data-i18n="savedContinue">I saved it — continue</button>
+        <button id="downloadCredentialsButton" class="button secondary" type="button" data-i18n="downloadCredentials">Download sign-in and recovery details</button>
+        <label class="saved-check"><input id="credentialsSaved" type="checkbox"><span data-i18n="savedAcknowledgement">I saved the file.</span></label>
+        <button disabled id="continueButton" class="button primary" type="button" data-i18n="savedContinue">Continue</button>
         <p id="recoveryCodeMessage" class="message" role="status"></p>
       </section>
     </section>

@@ -273,10 +273,11 @@ button:disabled { opacity: .55; cursor: wait; }
 #continueButton:disabled { cursor: default; }
 .auth-card input:focus-visible, .auth-card button:focus-visible { outline: 2px solid var(--accent, #234687); outline-offset: 3px; }
 
-#credentialCopyFallback { box-sizing:border-box; width:100%; min-height:180px; font:inherit; }
 
 html[data-tolf-ui="auth"] .topbar-inner > .brand { gap:8px; justify-content:flex-start; }
 html[data-tolf-ui="auth"] .brand .tolf-wordmark { font-size:20px; font-weight:650; letter-spacing:.16em; line-height:1.47; }
 .brand-emblem { display:block; flex:0 0 22px; }
 .back-chevron { font-size:24px; font-weight:400; color:var(--secondary); letter-spacing:0; }
 .auth-card > .eyebrow { margin-top:0; }
+ 
+#downloadCredentialsButton { height:auto; min-height:46px; padding:12px 16px; white-space:normal; }
