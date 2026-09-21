@@ -222,11 +222,18 @@ function getProfileSettingsSelection() {
 
   if (!onDemand) return null;
 
+  const routingRules = typeof getRoutingRulesSelection === "function"
+    ? getRoutingRulesSelection({ focus: true })
+    : {};
+
+  if (!routingRules) return null;
+
   return {
     dnsMode: dnsMode?.value === "custom" ? "custom" : "tolf",
     dnsServers: servers,
     onDemandEnabled: onDemand.enabled,
-    onDemandRules: onDemand.rules
+    onDemandRules: onDemand.rules,
+    routingRules
   };
 }
 
@@ -263,6 +270,10 @@ function renderProfileSettings() {
   if (dnsMode?.value === "custom" && dnsServersInput?.value.trim()) {
     validateDnsSettings();
   }
+
+  if (typeof renderRoutingRules === "function") {
+    renderRoutingRules();
+  }
 }
 
 function resetProfileSettings() {
@@ -277,6 +288,10 @@ function resetProfileSettings() {
   onDemandRules
     ?.querySelectorAll(".on-demand-rule")
     .forEach(rule => rule.remove());
+
+  if (typeof resetRoutingRules === "function") {
+    resetRoutingRules();
+  }
 
   renderProfileSettings();
 }

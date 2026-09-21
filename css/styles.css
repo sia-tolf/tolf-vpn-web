@@ -577,6 +577,143 @@ button:disabled { opacity: 0.55; cursor: default; }
 
 .settings-validation.error { color: var(--error); }
 
+.routing-rule-groups {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.routing-rule-group {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.routing-rule-group-header {
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 12px;
+  background: color-mix(in srgb, var(--text) 3%, transparent);
+}
+
+.routing-rule-group-title {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.routing-rule-count,
+.routing-rule-status {
+  color: var(--secondary);
+  font-size: 12px;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.routing-rule-list:empty::before {
+  content: attr(data-empty-label);
+  display: block;
+  padding: 11px 12px;
+  color: var(--secondary);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.routing-rule-item {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 7px 5px 12px;
+  border-top: 1px solid var(--border);
+}
+
+.routing-rule-domain {
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow-wrap: anywhere;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.routing-rule-remove {
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--secondary);
+  font: inherit;
+  font-size: 23px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.routing-rule-add {
+  width: 100%;
+  min-height: 42px;
+  border: 0;
+  border-top: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.routing-rule-editor {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 7px;
+  padding: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.routing-rule-editor .settings-input {
+  min-height: 40px;
+  padding: 8px 10px;
+  font-size: 14px;
+}
+
+.routing-rule-editor button {
+  min-height: 40px;
+  padding: 8px 11px;
+  border-radius: 9px;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.routing-rule-save {
+  border: 0;
+  background: var(--text);
+  color: var(--card);
+}
+
+.routing-rule-cancel {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+}
+
+.routing-rule-add:active,
+.routing-rule-remove:active {
+  background: color-mix(in srgb, var(--text) 6%, transparent);
+}
+
+.routing-rule-group[data-available="false"] {
+  opacity: 0.58;
+}
+
 .settings-switch-row {
   min-height: 50px;
   display: flex;
@@ -736,6 +873,8 @@ button:disabled { opacity: 0.55; cursor: default; }
   .on-demand-rule { grid-template-columns: minmax(0, 1fr) 34px; }
   .on-demand-rule-action { grid-column: 1 / 2; }
   .remove-on-demand-rule { grid-column: 2; grid-row: 1 / 3; }
+  .routing-rule-editor { grid-template-columns: 1fr 1fr; }
+  .routing-rule-editor .settings-input { grid-column: 1 / -1; }
 }
 
 .server-copy {

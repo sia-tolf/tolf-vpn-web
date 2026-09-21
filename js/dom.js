@@ -99,6 +99,12 @@ const dnsMode = document.getElementById("dnsMode");
 const dnsCustomGroup = document.getElementById("dnsCustomGroup");
 const dnsServersInput = document.getElementById("dnsServersInput");
 const dnsValidation = document.getElementById("dnsValidation");
+const routingRulesSection =
+  document.getElementById("routingRulesSection");
+const routingRuleGroups =
+  document.getElementById("routingRuleGroups");
+const routingRulesValidation =
+  document.getElementById("routingRulesValidation");
 
 const onDemandSection = document.getElementById("onDemandSection");
 const onDemandAndroidNote =
