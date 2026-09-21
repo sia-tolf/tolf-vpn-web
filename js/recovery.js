@@ -1,12 +1,4 @@
-showRecoverButton.addEventListener("click", () => {
-  signedOutMainActions.classList.add("hidden");
-  recoverPanel.classList.remove("hidden");
-
-  signedOutMessage.textContent = "";
-  signedOutMessage.className = "message";
-
-  recoveryInput.focus();
-});
+showRecoverButton.addEventListener("click", () => openAccountAuth("recover"));
 
 cancelRecoverButton.addEventListener("click", () => {
   recoveryInput.value = "";
@@ -164,3 +156,4 @@ recoverAccountButton.addEventListener("click", async () => {
     cancelRecoverButton.disabled = false;
   }
 });
+

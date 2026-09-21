@@ -35,14 +35,17 @@ const root=path.resolve(__dirname,'../..');
    await page.goto('https://vpn.tolf.is/quick/');
    await page.locator('#register:not([disabled])').waitFor();
    assert.equal(await page.locator('#server').inputValue(),'moscow');
-   assert.equal(await page.locator('#passkeyName').inputValue(),'iPhone');
-   await page.locator('#passkeyName').fill(locale==='ru'?'iPad Александра':'Personal iPad');
-   await page.evaluate(()=>{prepareRegistrationOptions=x=>x;serializeCredential=x=>x;Object.defineProperty(navigator,'credentials',{value:{create:async()=>({id:'fake'})},configurable:true});});
-   await page.screenshot({path:`/tmp/tolf-quick-${locale}.png`,fullPage:true});
-   await page.locator('#register').click();await page.locator('#code').waitFor();
-   assert.equal(registeredName,locale==='ru'?'iPad Александра':'Personal iPad');
-   assert.equal(await page.locator('#code').inputValue(),'RECOVERY-TEST');assert.equal(prepares,0);
-   await page.locator('#saved').click();await page.locator('#download').waitFor();
+   assert.equal(await page.locator('#passkeyNameField').isVisible(),false);
+   // Shared auth page is covered by password-auth/browser.cjs; emulate return
+   // with a valid session, retaining the user's selection in sessionStorage.
+   await page.route('https://vpn.tolf.is/auth/**',r=>r.fulfill({contentType:'text/html',body:'<p>Account sign-in</p>'}));
+   await page.locator('#register').click();
+   await page.waitForURL('**/auth/?mode=signup&next=quick&lang='+locale);
+   assert.equal(prepares,0);
+   auth=true;
+   await page.goto('https://vpn.tolf.is/quick/');
+   await page.locator('#prepare:not([disabled])').waitFor();
+   await page.locator('#prepare').click();await page.locator('#download').waitFor();
    assert.equal(await page.locator('#download').getAttribute('href'),'https://config.tolf.is/p/test/download');
    assert.equal(await page.locator('#code').inputValue(),'');assert.equal(prepares,1);
    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
@@ -73,6 +76,7 @@ const root=path.resolve(__dirname,'../..');
   await page.locator('#prepare').click();await page.locator('#profileLink').waitFor();assert.equal(sends,1);assert.equal(await page.locator('#download').isVisible(),false);
   assert.equal(await page.locator('#profileLink').inputValue(),'https://api.tolf.is/windows/p/test');
   await page.screenshot({path:'/tmp/tolf-quick-share.png',fullPage:true});
-  console.log('PASS: three locales, registration, recovery, IP default/fallback, manual choice, resume, cross-device delivery');
+  console.log('PASS: three locales, shared auth return, IP default/fallback, manual choice, resume, cross-device delivery');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exit(1)});
+

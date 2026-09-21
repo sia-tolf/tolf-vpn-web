@@ -114,6 +114,124 @@ const copy = {
   }
 };
 
+const passwordCopy = {
+  "en": {
+    "signInDescription": "Choose how to sign in to your TOLF account.",
+    "signupDescription": "Choose a sign-in method. No email address or phone number is required.",
+    "passwordMethod": "Username and password",
+    "passkeyAbout": "Passkey is a convenient, phishing-resistant way to sign in without a password. It can be stored in Google Password Manager, 1Password, iCloud Keychain or Windows Hello, depending on your device and setup. If a suitable method is not available, choose username and password.",
+    "usernameLabel": "Username",
+    "passwordLabel": "Account password",
+    "newPassword": "New account password",
+    "usernameHelp": "Choose your own username: 3–32 Latin letters, numbers, dots, hyphens or underscores. Start with a letter or number. Uppercase and lowercase are treated the same. Example: lena-work.",
+    "passwordHelp": "Use 15–128 characters. You can generate a password or enter your own; a generated password can also be edited.",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "generatePassword": "Generate password",
+    "passwordSignIn": "Sign in",
+    "saveCredentialsHint": "Save your username and password in a password manager before continuing. This is your TOLF account password; VPN connection passwords are separate.",
+    "resetHelp": "Enter the username you saved, your recovery code and a new password. Previous account sessions will be signed out. Your VPN profiles and existing Passkeys stay in place.",
+    "passwordRecoverDescription": "Use the recovery code saved when you registered with a username and password.",
+    "resetPassword": "Set new password",
+    "saveRecoveryDescription": "Save this code in a safe place. It gives access to your account, so do not share it. We do not send it by email.",
+    "recoveryInstructions": "If you lose access, open TOLF → Sign in → Recover account. Choose your sign-in method and enter this code; for password recovery, enter your username too. After recovery, save the new code: the old one will no longer work. If you lose both your sign-in credentials and this code, you cannot recover the account.",
+    "downloadCredentials": "Download sign-in details",
+    "savedAcknowledgement": "I have saved my sign-in details and recovery code.",
+    "savingAccount": "Creating account…",
+    "signingIn": "Signing in…",
+    "savedRequired": "Save your sign-in details and code, then tick the checkbox.",
+    "invalid_username": "Use 3–32 Latin letters, numbers, dots, hyphens or underscores, starting with a letter or number.",
+    "invalid_password": "Use a password of 15–128 characters.",
+    "weak_password": "Choose a less predictable password or generate one.",
+    "username_taken": "This username is already taken. Choose another.",
+    "invalid_credentials": "The username or password is incorrect.",
+    "invalid_recovery": "The username or recovery code is incorrect, or the code has already been replaced.",
+    "too_many_attempts": "Too many attempts. Try again in 15 minutes.",
+    "try_later": "Please try again in a few seconds.",
+    "invalid_origin": "Reload the TOLF sign-in page and try again.",
+    "passwordUnavailable": "Password sign-in is temporarily unavailable. Please try again later.",
+    "passwordSessionExpired": "Sign in again with your username and password. Your account has already been created.",
+    "downloadNote": "Keep this file private. It contains account access details."
+  },
+  "ru": {
+    "signInDescription": "Выберите способ входа в аккаунт TOLF.",
+    "signupDescription": "Выберите способ входа. Электронная почта и номер телефона не нужны.",
+    "passwordMethod": "Логин и пароль",
+    "passkeyAbout": "Passkey — удобный вход без пароля с защитой от фишинга. Ключ можно хранить в Google Password Manager, 1Password, Связке ключей iCloud или Windows Hello — в зависимости от устройства и его настроек. Если подходящий способ недоступен, выберите логин и пароль.",
+    "usernameLabel": "Логин",
+    "passwordLabel": "Пароль аккаунта",
+    "newPassword": "Новый пароль аккаунта",
+    "usernameHelp": "Придумайте логин: 3–32 латинские буквы, цифры, точки, дефисы или подчёркивания. Первый символ — буква или цифра. Регистр букв не важен. Например: lena-work.",
+    "passwordHelp": "От 15 до 128 символов. Сгенерируйте пароль или введите свой; сгенерированный пароль тоже можно отредактировать.",
+    "showPassword": "Показать пароль",
+    "hidePassword": "Скрыть пароль",
+    "generatePassword": "Сгенерировать",
+    "passwordSignIn": "Войти",
+    "saveCredentialsHint": "Перед продолжением сохраните логин и пароль в менеджере паролей. Это пароль аккаунта TOLF; у VPN-подключений отдельные пароли.",
+    "resetHelp": "Введите сохранённый логин, код восстановления и новый пароль. Прежние сеансы входа в аккаунт будут закрыты. VPN-профили и существующие Passkey сохранятся.",
+    "passwordRecoverDescription": "Используйте код, сохранённый при регистрации с логином и паролем.",
+    "resetPassword": "Задать новый пароль",
+    "saveRecoveryDescription": "Сохраните код в надёжном месте. Он даёт доступ к аккаунту, поэтому никому его не передавайте. По почте мы его не отправляем.",
+    "recoveryInstructions": "Если потеряете доступ, откройте TOLF → Войти → Восстановить аккаунт. Выберите свой способ входа и введите этот код; для восстановления пароля также укажите логин. После восстановления сохраните новый код: старый перестанет действовать. Если потерять и данные для входа, и код, восстановить аккаунт не получится.",
+    "downloadCredentials": "Скачать данные для входа",
+    "savedAcknowledgement": "Я сохранил данные для входа и код восстановления.",
+    "savingAccount": "Создание аккаунта…",
+    "signingIn": "Вход…",
+    "savedRequired": "Сохраните данные для входа и код, затем отметьте это галочкой.",
+    "invalid_username": "Используйте 3–32 латинские буквы, цифры, точки, дефисы или подчёркивания. Начните с буквы или цифры.",
+    "invalid_password": "Длина пароля — от 15 до 128 символов.",
+    "weak_password": "Выберите менее предсказуемый пароль или сгенерируйте его.",
+    "username_taken": "Этот логин уже занят. Выберите другой.",
+    "invalid_credentials": "Неверный логин или пароль.",
+    "invalid_recovery": "Неверный логин или код восстановления, либо код уже заменён новым.",
+    "too_many_attempts": "Слишком много попыток. Повторите через 15 минут.",
+    "try_later": "Повторите через несколько секунд.",
+    "invalid_origin": "Перезагрузите страницу входа TOLF и повторите попытку.",
+    "passwordUnavailable": "Вход по паролю временно недоступен. Попробуйте позже.",
+    "passwordSessionExpired": "Войдите снова с логином и паролем. Аккаунт уже создан.",
+    "downloadNote": "Храните этот файл в тайне: он содержит данные доступа к аккаунту."
+  },
+  "lv": {
+    "signInDescription": "Izvēlieties, kā pieteikties savā TOLF kontā.",
+    "signupDescription": "Izvēlieties pieteikšanās veidu. E-pasts un tālruņa numurs nav nepieciešams.",
+    "passwordMethod": "Lietotājvārds un parole",
+    "passkeyAbout": "Passkey ir ērta pieteikšanās bez paroles ar aizsardzību pret pikšķerēšanu. Atslēgu var glabāt Google Password Manager, 1Password, iCloud Keychain vai Windows Hello atkarībā no ierīces un tās iestatījumiem. Ja piemērots veids nav pieejams, izvēlieties lietotājvārdu un paroli.",
+    "usernameLabel": "Lietotājvārds",
+    "passwordLabel": "Konta parole",
+    "newPassword": "Jaunā konta parole",
+    "usernameHelp": "Izvēlieties savu lietotājvārdu: 3–32 latīņu burti, cipari, punkti, defises vai pasvītrojumi. Sāciet ar burtu vai ciparu. Lielie un mazie burti netiek atšķirti. Piemēram: lena-work.",
+    "passwordHelp": "15–128 rakstzīmes. Ģenerējiet paroli vai ievadiet savu; ģenerēto paroli arī var rediģēt.",
+    "showPassword": "Rādīt paroli",
+    "hidePassword": "Paslēpt paroli",
+    "generatePassword": "Ģenerēt paroli",
+    "passwordSignIn": "Pieteikties",
+    "saveCredentialsHint": "Pirms turpināt, saglabājiet lietotājvārdu un paroli paroļu pārvaldniekā. Šī ir TOLF konta parole; VPN savienojumiem ir atsevišķas paroles.",
+    "resetHelp": "Ievadiet saglabāto lietotājvārdu, atkopšanas kodu un jauno paroli. Iepriekšējās konta sesijas tiks slēgtas. VPN profili un esošās Passkey atslēgas saglabāsies.",
+    "passwordRecoverDescription": "Izmantojiet kodu, ko saglabājāt, reģistrējoties ar lietotājvārdu un paroli.",
+    "resetPassword": "Iestatīt jaunu paroli",
+    "saveRecoveryDescription": "Saglabājiet kodu drošā vietā. Tas nodrošina piekļuvi kontam, tāpēc neizpaudiet to citiem. Mēs to nesūtām pa e-pastu.",
+    "recoveryInstructions": "Ja zaudējat piekļuvi, atveriet TOLF → Pieteikties → Atjaunot kontu. Izvēlieties savu pieteikšanās veidu un ievadiet šo kodu; paroles atjaunošanai ievadiet arī lietotājvārdu. Pēc atjaunošanas saglabājiet jauno kodu: vecais vairs nedarbosies. Ja pazaudēsiet gan pieteikšanās datus, gan kodu, kontu nevarēs atjaunot.",
+    "downloadCredentials": "Lejupielādēt piekļuves datus",
+    "savedAcknowledgement": "Esmu saglabājis pieteikšanās datus un atkopšanas kodu.",
+    "savingAccount": "Veido kontu…",
+    "signingIn": "Piesakās…",
+    "savedRequired": "Saglabājiet piekļuves datus un kodu, pēc tam atzīmējiet izvēles rūtiņu.",
+    "invalid_username": "Izmantojiet 3–32 latīņu burtus, ciparus, punktus, defises vai pasvītrojumus. Sāciet ar burtu vai ciparu.",
+    "invalid_password": "Parolei jābūt 15–128 rakstzīmes garai.",
+    "weak_password": "Izvēlieties grūtāk uzminamu paroli vai ģenerējiet to.",
+    "username_taken": "Šis lietotājvārds jau ir aizņemts. Izvēlieties citu.",
+    "invalid_credentials": "Nepareizs lietotājvārds vai parole.",
+    "invalid_recovery": "Nepareizs lietotājvārds vai atkopšanas kods, vai kods jau ir aizstāts.",
+    "too_many_attempts": "Pārāk daudz mēģinājumu. Mēģiniet pēc 15 minūtēm.",
+    "try_later": "Mēģiniet vēlreiz pēc dažām sekundēm.",
+    "invalid_origin": "Pārlādējiet TOLF pieteikšanās lapu un mēģiniet vēlreiz.",
+    "passwordUnavailable": "Pieteikšanās ar paroli īslaicīgi nav pieejama. Mēģiniet vēlāk.",
+    "passwordSessionExpired": "Piesakieties vēlreiz ar lietotājvārdu un paroli. Konts jau ir izveidots.",
+    "downloadNote": "Glabājiet šo failu privāti: tajā ir konta piekļuves dati."
+  }
+};
+Object.keys(passwordCopy).forEach(lang => Object.assign(copy[lang], passwordCopy[lang]));
+
 const panels = {
   signin: document.getElementById("signInPanel"),
   signup: document.getElementById("signupPanel"),
@@ -144,7 +262,7 @@ const backHome = document.getElementById("backHome");
 const url = new URL(window.location.href);
 const requestedLang = url.searchParams.get("lang");
 const requestedMode = url.searchParams.get("mode");
-const next = url.searchParams.get("next") === "vpn" ? "vpn" : "home";
+const next = ["vpn", "quick"].includes(url.searchParams.get("next")) ? url.searchParams.get("next") : "home";
 
 let language = ["en", "ru", "lv"].includes(requestedLang)
   ? requestedLang
@@ -164,7 +282,7 @@ function text(key) {
 }
 
 function destination() {
-  const base = next === "vpn" ? "https://vpn.tolf.is/" : "https://tolf.is/";
+  const base = next === "quick" ? "https://vpn.tolf.is/quick/" : next === "vpn" ? "https://vpn.tolf.is/" : "https://tolf.is/";
   const target = new URL(base);
   target.searchParams.set("lang", language);
   target.searchParams.set("ui", "20260918-1");
@@ -206,7 +324,7 @@ function setMode(mode, updateUrl = true) {
     history.replaceState(null, "", nextUrl.pathname + nextUrl.search);
   }
 
-  if (mode === "signup") requestAnimationFrame(() => passkeyName.focus());
+  if (mode === "signup") requestAnimationFrame(() => (authMethod === "password" ? document.getElementById("signupUsername") : passkeyName).focus());
   if (mode === "recover") requestAnimationFrame(() => recoveryCode.focus());
 }
 
@@ -216,23 +334,16 @@ function setMessage(id, value = "", state = "") {
   element.className = `message${state ? ` ${state}` : ""}`;
 }
 
-function setBusy(busy) {
-  [
-    signInButton,
-    goSignupButton,
-    goRecoverButton,
-    signupButton,
-    signupBackButton,
-    recoverButton,
-    recoverBackButton,
-    copyRecoveryButton,
-    continueButton
-  ].forEach(button => { button.disabled = busy; });
+function setBusy(value) {
+  busy = value;
+  document.querySelectorAll('.auth-card button, .auth-card input').forEach(element => { element.disabled = value; });
+  continueButton.disabled = value || !credentialsSaved.checked;
 }
 
 async function apiRequest(path, options = {}) {
   const response = await fetch(API + path, {
     credentials: "include",
+    cache: "no-store",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -301,9 +412,12 @@ async function alreadyAuthenticated() {
 
 async function finishAndLeave(messageId) {
   if (!(await alreadyAuthenticated())) {
+    if (savedCredentials) throw new Error(text("passwordSessionExpired"));
     setMessage(messageId, text("signingInAfterRegistration"));
     await startSignIn(messageId);
   }
+  savedCredentials = null;
+  newRecoveryCode.textContent = "";
   window.location.assign(destination());
 }
 
@@ -379,9 +493,7 @@ signupButton.addEventListener("click", async () => {
 
     if (!finish?.recoveryCode) throw new Error(text("recoveryCodeMissing"));
 
-    newRecoveryCode.textContent = finish.recoveryCode;
-    setMessage("recoveryCodeMessage");
-    setMode("recovery", false);
+    showRecovery(finish);
   } catch (error) {
     setMessage("signupMessage", error.message, "error");
   } finally {
@@ -425,9 +537,7 @@ recoverButton.addEventListener("click", async () => {
     if (!finish?.recoveryCode) throw new Error(text("recoveryCodeMissing"));
 
     recoveryCode.value = "";
-    newRecoveryCode.textContent = finish.recoveryCode;
-    setMessage("recoveryCodeMessage");
-    setMode("recovery", false);
+    showRecovery(finish);
   } catch (error) {
     setMessage("recoverMessage", error.message, "error");
   } finally {
@@ -447,6 +557,7 @@ copyRecoveryButton.addEventListener("click", async () => {
 });
 
 continueButton.addEventListener("click", async () => {
+  if (!credentialsSaved.checked) { setMessage("recoveryCodeMessage", text("savedRequired"), "error"); return; }
   setBusy(true);
   setMessage("recoveryCodeMessage");
   try {
@@ -462,9 +573,124 @@ Object.entries(langButtons).forEach(([lang, button]) => {
   button.addEventListener("click", () => setLanguage(lang));
 });
 
+// No account passwords or recovery codes are stored in browser storage.
+let authMethod = 'passkey';
+let passwordReady = false;
+let busy = false;
+let savedCredentials = null;
+const credentialsSaved = document.getElementById('credentialsSaved');
+const savedUsername = document.getElementById('savedUsername');
+function updateMethod() {
+  document.querySelectorAll('[data-auth-method]').forEach(button => {
+    button.setAttribute('aria-pressed', String(button.dataset.authMethod === authMethod));
+  });
+  document.querySelectorAll('[data-for-method]').forEach(element => {
+    element.classList.toggle('hidden', element.dataset.forMethod !== authMethod);
+  });
+  const description = document.querySelector('[data-i18n="recoverDescription"], [data-i18n="passwordRecoverDescription"]');
+  description.dataset.i18n = authMethod === 'password' ? 'passwordRecoverDescription' : 'recoverDescription';
+  description.textContent = text(description.dataset.i18n);
+}
+document.querySelectorAll('[data-auth-method]').forEach(button => {
+  button.addEventListener('click', () => {
+    if (busy || !passwordReady) return;
+    authMethod = button.dataset.authMethod;
+    updateMethod();
+    ['signInMessage','signupMessage','recoverMessage'].forEach(id => setMessage(id));
+  });
+});
+document.querySelectorAll('[data-toggle-password]').forEach(button => {
+  button.addEventListener('click', () => {
+    const input = document.getElementById(button.dataset.togglePassword);
+    input.type = input.type === 'password' ? 'text' : 'password';
+    button.dataset.i18n = input.type === 'password' ? 'showPassword' : 'hidePassword';
+    button.textContent = text(button.dataset.i18n);
+    button.setAttribute('aria-pressed', String(input.type === 'text'));
+  });
+});
+document.querySelectorAll('[data-generate-password]').forEach(button => {
+  button.addEventListener('click', () => {
+    const input = document.getElementById(button.dataset.generatePassword);
+    // 64-symbol alphabet, uniform selection, 120 bits from Web Crypto.
+    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+    input.value = Array.from(crypto.getRandomValues(new Uint8Array(20)), n => alphabet[n & 63]).join('');
+    input.type = 'text';
+    const toggle = document.querySelector('[data-toggle-password="'+input.id+'"]');
+    toggle.dataset.i18n = 'hidePassword';
+    toggle.textContent = text('hidePassword');
+    toggle.setAttribute('aria-pressed', 'true');
+    input.dispatchEvent(new Event('input', {bubbles:true}));
+    input.focus();
+  });
+});
+function showRecovery(finish, credentials = null) {
+  savedCredentials = credentials;
+  newRecoveryCode.textContent = finish.recoveryCode;
+  credentialsSaved.checked = false;
+  savedUsername.classList.toggle('hidden', !credentials);
+  savedUsername.textContent = credentials ? text('usernameLabel')+': '+credentials.username : '';
+  setMessage('recoveryCodeMessage');
+  setMode('recovery', false);
+  continueButton.disabled = true;
+}
+credentialsSaved.addEventListener('change', () => { continueButton.disabled = busy || !credentialsSaved.checked; });
+window.addEventListener('beforeunload', event => {
+  if (currentMode === 'recovery' && !credentialsSaved.checked) { event.preventDefault(); event.returnValue = ''; }
+});
+document.getElementById('downloadCredentialsButton').addEventListener('click', () => {
+  const parts = ['TOLF — https://vpn.tolf.is/auth/', text('downloadNote'), ''];
+  if (savedCredentials) parts.push(text('usernameLabel')+': '+savedCredentials.username, text('passwordLabel')+': '+savedCredentials.password, '');
+  parts.push(text('recoveryCode')+': '+newRecoveryCode.textContent, '', text('recoveryInstructions'));
+  const address = URL.createObjectURL(new Blob([parts.join('\n')+'\n'], {type:'text/plain;charset=utf-8'}));
+  const link = document.createElement('a'); link.href = address; link.download = 'TOLF-account-recovery.txt';
+  document.body.appendChild(link); link.click(); link.remove();
+  setTimeout(() => URL.revokeObjectURL(address), 1000);
+});
+for (const [formId, prefix, action, message] of [
+  ['passwordLoginForm','login','login','signInMessage'],
+  ['passwordSignupForm','signup','register','signupMessage'],
+  ['passwordResetForm','reset','recover','recoverMessage']
+]) {
+  document.getElementById(formId).addEventListener('submit', async event => {
+    event.preventDefault();
+    if (busy) return;
+    if (!passwordReady) { setMessage(message, text('passwordUnavailable'), 'error'); return; }
+    const input = document.getElementById(prefix+'Password');
+    const nameInput = document.getElementById(prefix+'Username');
+    const name = nameInput.value.toLowerCase();
+    const value = input.value;
+    const payload = {username:name, password:value};
+    if (action === 'recover') {
+      payload.recoveryCode = recoveryCode.value.trim().toUpperCase();
+      if (!payload.recoveryCode) { setMessage(message,text('recoveryRequired'),'error'); recoveryCode.focus(); return; }
+    }
+    setBusy(true);
+    setMessage(message, text(action === 'register' ? 'savingAccount' : action === 'login' ? 'signingIn' : 'checkingRecovery'));
+    try {
+      const result = await apiRequest('/password/'+action, {method:'POST',body:JSON.stringify(payload)});
+      if (action === 'login') { input.value = ''; window.location.assign(destination()); }
+      else {
+        if (!result?.recoveryCode) throw new Error(text('recoveryCodeMissing'));
+        showRecovery(result, {username:result.username || name, password:value});
+        input.value = ''; recoveryCode.value = '';
+      }
+    } catch (error) { setMessage(message, text(error.message), 'error'); }
+    finally { setBusy(false); }
+  });
+}
+async function checkPasswordCapability() {
+  try {
+    const result = await apiRequest('/password/capabilities', {method:'GET', signal:AbortSignal.timeout(8000)});
+    passwordReady = result?.version === 1;
+  } catch { passwordReady = false; }
+  document.querySelectorAll('[data-method-selector]').forEach(element => element.classList.toggle('hidden', !passwordReady));
+}
+
 setLanguage(language);
 setMode(currentMode, false);
+checkPasswordCapability();
 
 alreadyAuthenticated().then(authenticated => {
-  if (authenticated) window.location.replace(destination());
+  if (authenticated && currentMode !== "recover") window.location.replace(destination());
 });
+

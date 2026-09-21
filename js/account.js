@@ -6,14 +6,15 @@ function closeRegistrationPanel() {
   registerPanel.classList.add("hidden");
 }
 
-function openRegistrationPanel() {
-  signedOutMainActions.classList.add("hidden");
-  recoverPanel.classList.add("hidden");
-  registerPanel.classList.remove("hidden");
-  signedOutMessage.textContent = "";
-  signedOutMessage.className = "message";
-  document.getElementById("registerPasskeyName").focus();
+function openAccountAuth(mode) {
+  const target = new URL('/auth/', window.location.origin);
+  target.searchParams.set('mode', mode);
+  target.searchParams.set('lang', ['en','ru','lv'].includes(currentLanguage) ? currentLanguage : 'en');
+  target.searchParams.set('next', 'vpn');
+  window.location.assign(target.href);
 }
+
+function openRegistrationPanel() { openAccountAuth('signup'); }
 
 function handleEntryAction() {
   const url = new URL(window.location.href);
@@ -27,16 +28,7 @@ function handleEntryAction() {
   if (action === "signup") {
     openRegistrationPanel();
   } else if (action === "signin") {
-    closeRegistrationPanel();
-    recoverPanel.classList.add("hidden");
-    signedOutMainActions.classList.remove("hidden");
-    signedOutMessage.textContent = "";
-    signedOutMessage.className = "message";
-
-    requestAnimationFrame(() => {
-      signInButton.focus({ preventScroll: true });
-      signedOutCard.scrollIntoView({ block: "start" });
-    });
+    openAccountAuth('signin');
   } else if (!["en", "ru", "lv"].includes(requestedLanguage)) {
     return;
   }
@@ -99,44 +91,7 @@ signOutButton.addEventListener("click", async () => {
   }
 });
 
-signInButton.addEventListener("click", async () => {
-  signInButton.disabled = true;
-
-  signedOutMessage.textContent = t("waitingPasskey");
-  signedOutMessage.className = "message";
-
-  try {
-    const begin = await apiRequest("/passkey/login/begin", {
-      method: "POST",
-      body: "{}"
-    });
-
-    const credential = await navigator.credentials.get({
-      publicKey: prepareAuthenticationOptions(begin.options)
-    });
-
-    if (!credential) {
-      throw new Error(t("passkeyNotProvided"));
-    }
-
-    await apiRequest("/passkey/login/finish", {
-      method: "POST",
-      body: JSON.stringify({
-        challengeId: begin.challengeId,
-        credential: serializeCredential(credential)
-      })
-    });
-
-    signedOutMessage.textContent = "";
-
-    await loadAccount();
-  } catch (error) {
-    signedOutMessage.textContent = error.message;
-    signedOutMessage.className = "message error";
-  } finally {
-    signInButton.disabled = false;
-  }
-});
+signInButton.addEventListener("click", () => openAccountAuth('signin'));
 
 submitRegisterButton.addEventListener("click", async () => {
   if (submitRegisterButton.disabled) return;
@@ -247,3 +202,4 @@ deleteAccountButton.addEventListener("click", async () => {
     deleteVpnButton.disabled = false;
   }
 });
+

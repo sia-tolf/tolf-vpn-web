@@ -8,6 +8,8 @@ const put = (key, value) => { try { if(value) sessionStorage.setItem(key, value)
 let lang; try { lang = localStorage.getItem('tolfLanguage'); } catch {}
 if (!QUICK_TEXT[lang]) lang = /^ru/i.test(navigator.language) ? 'ru' : /^lv/i.test(navigator.language) ? 'lv' : 'en';
 const t = key => QUICK_TEXT[lang][key] || key;
+const accountText = {en:['Create account','Sign in','Choose Passkey or username and password. No email address is required.'],ru:['Создать аккаунт','Войти','Выберите Passkey или логин и пароль. Электронная почта не нужна.'],lv:['Izveidot kontu','Pieteikties','Izvēlieties Passkey vai lietotājvārdu un paroli. E-pasts nav nepieciešams.']};
+function accountAuth(mode) { persist(); window.location.assign('/auth/?mode='+mode+'&next=quick&lang='+lang); }
 let busy = false, authenticated = false, ready = false, locked = false, choicesOpened = false, profile = '', messageKey = '', failed = false;
 let server = ['riga','moscow'].includes(get('quickServer')) ? get('quickServer') : 'riga';
 let platform = ['ios','android','windows'].includes(get('quickPlatform')) ? get('quickPlatform') : nativePlatform;
@@ -21,9 +23,11 @@ function persist() { put('quickServer', server); put('quickPlatform', platform);
 function render() {
  document.documentElement.lang = lang;
  document.querySelectorAll('[data-text]').forEach(el => el.textContent = t(el.dataset.text));
- $('passkeyHelp').textContent = t(nativePlatform === 'windows' ? 'passkeyWindows' : 'passkey');
- $('windowsPrep').hidden = nativePlatform !== 'windows' || uncertain;
- $('register').textContent = t(nativePlatform === 'windows' ? 'createWindows' : 'create');
+ $('passkeyHelp').textContent = accountText[lang][2];
+ $('windowsPrep').hidden = true;
+ $('passkeyNameField').hidden = true;
+ $('register').textContent = accountText[lang][0];
+ $('login').textContent = accountText[lang][1];
  document.querySelectorAll('[data-lang]').forEach(el => { el.setAttribute('aria-pressed', String(el.dataset.lang === lang)); el.disabled = busy; });
  $('deviceSummary').textContent = platform === 'ios' ? 'iPhone / iPad' : platform === 'android' ? 'Android' : 'Windows';
  $('platform').value = platform; $('server').value = server;
@@ -32,7 +36,7 @@ function render() {
  $('change').hidden = locked || choicesOpened;
  for (const id of ['register','login','saved','prepare','copyCode','copyLink','copyChromeSettings','share','retry']) $(id).disabled = busy;
  $('register').hidden = uncertain;
- $('login').hidden = !uncertain && messageKey !== 'loginRequired';
+ $('login').hidden = false;
  if(profile) renderDelivery();
 }
 function panels(name) {
@@ -102,33 +106,8 @@ $('platform').onchange=()=>{platform=$('platform').value;persist();render();};
 $('server').onchange=()=>{server=$('server').value;manual=true;put('quickManual','yes');persist();render();};
 document.querySelectorAll('[data-lang]').forEach(el=>el.onclick=()=>{lang=el.dataset.lang;try{localStorage.setItem('tolfLanguage',lang);}catch{}render();});
 $('retry').onclick=()=>initialize();
-$('register').onclick=()=>action(async()=>{
- if(!ready || uncertain)return;
- const passkeyName=$('passkeyName').value.trim();
- if(!passkeyName){$('passkeyName').focus();message('passkeyNameRequired',true);return;}
- if(!window.PublicKeyCredential || !navigator.credentials || typeof navigator.credentials.create !== 'function')throw Object.assign(new Error('Passkey unavailable'),{messageKey:'passkeyUnavailable'});
- message('waiting');persist();
- const begin=await api('/passkey/register/begin',{method:'POST',body:JSON.stringify({passkeyName})});
- const credential=await navigator.credentials.create({publicKey:prepareRegistrationOptions(begin.options)});
- if(!credential)throw new Error('No Passkey');
- // Once a finish request is sent, do not create a second account after a lost response.
- uncertain=true;put('quickRegistration','pending');
- let finish;
- try { finish=await api('/passkey/register/finish',{method:'POST',body:JSON.stringify({challengeId:begin.challengeId,credential:serializeCredential(credential)})}); }
- catch { panels('auth');message('uncertain',true);return; }
- if(!finish.recoveryCode){panels('auth');message('uncertain',true);return;}
- authenticated=true; uncertain=false;put('quickRegistration','');
- $('code').value=finish.recoveryCode;
- panels('recovery');message('');
-});
-$('login').onclick=()=>action(async()=>{
- message('waiting');
- const begin=await api('/passkey/login/begin',{method:'POST',body:'{}'});
- const credential=await navigator.credentials.get({publicKey:prepareAuthenticationOptions(begin.options)});
- if(!credential)throw new Error('No Passkey');
- await api('/passkey/login/finish',{method:'POST',body:JSON.stringify({challengeId:begin.challengeId,credential:serializeCredential(credential)})});
- await loadAccount();if(!locked)message('');
-});
+$('register').onclick=()=>accountAuth('signup');
+$('login').onclick=()=>accountAuth('signin');
 async function prepare() {
  if(!authenticated)return;
  locked=true;$('choices').hidden=true; message('busy');
@@ -164,3 +143,4 @@ $('share').onclick=async()=>{try{await navigator.share({title:'TOLF VPN',url:pro
 window.addEventListener('pageshow',e=>{if(e.persisted){profile='';$('code').value='';initialize();}});
 render();initialize();
 })();
+

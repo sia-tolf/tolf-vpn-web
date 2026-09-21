@@ -8,7 +8,7 @@ async function scenario(country,device='ios',credentialError=''){
  let auth=false,record=null,requests=0,registeredName='';
  const context={URL,AbortSignal,console,sessionStorage:{getItem:k=>storage.get(k),setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)},localStorage:{getItem:()=>null,setItem(){}},
  navigator:{userAgent:device==='windows'?'Windows NT':'iPhone',language:'ru',credentials:{create:async()=>{if(credentialError)throw Object.assign(new Error('credential failed'),{name:credentialError});return{id:'fake'};}}},
- document:{getElementById:id=>elements[id],documentElement:{lang:'ru'},querySelectorAll:s=>s==='[data-lang]'?langs:[]},window:{PublicKeyCredential:function(){},addEventListener(){}},
+ document:{getElementById:id=>elements[id],documentElement:{lang:'ru'},querySelectorAll:s=>s==='[data-lang]'?langs:[]},window:{location:{assign:url=>{elements.destination={value:url};}},PublicKeyCredential:function(){},addEventListener(){}},
  prepareRegistrationOptions:x=>x,serializeCredential:x=>x,
  fetch:async(url,options={})=>{
   const p=new URL(url).pathname;let data={},ok=true,status=200;
@@ -26,14 +26,18 @@ async function scenario(country,device='ios',credentialError=''){
  for(let i=0;i<20;i++)await new Promise(setImmediate);
  assert.equal(elements.server.value,country==='moscow'?'moscow':'riga');
  assert.equal(elements.register.disabled,false);
- assert.equal(elements.windowsPrep.hidden,device!=='windows');
- if(device==='windows')assert.equal(elements.register.textContent,'Создать аккаунт и сохранить ключ входа');
- assert.match(elements.passkeyName.value,/^(iPhone|Windows)$/);elements.passkeyName.value='Personal iPad';
- await elements.register.onclick();for(let i=0;i<5;i++)await new Promise(setImmediate);
- if(credentialError){assert.match(elements.message.textContent,/менеджер паролей заблокирован/);return true;}
- assert.equal(registeredName,'Personal iPad');assert.equal(elements.code.value,'RECOVERY');assert.equal(requests,0);
- await elements.saved.onclick();assert.equal(requests,1);assert.equal(elements.code.value,'');assert.equal(elements.download.href,'https://config.tolf.is/p/test/download');
- assert.equal(elements.delivery.hidden,false);
+ assert.equal(elements.windowsPrep.hidden,true);
+ assert.equal(elements.passkeyNameField.hidden,true);
+ assert.equal(elements.register.textContent,'Создать аккаунт');
+ await elements.register.onclick();
+ assert.equal(elements.destination.value,'/auth/?mode=signup&next=quick&lang=ru');
+ assert.equal(storage.get('quickServer'),country==='moscow'?'moscow':'riga');
+ assert.equal(storage.get('quickPlatform'),device);
+ assert.equal(requests,0);
+ await elements.login.onclick();
+ assert.equal(elements.destination.value,'/auth/?mode=signin&next=quick&lang=ru');
+
  return true;
 }
-(async()=>{await scenario('moscow');await scenario('riga');await scenario(null);await scenario('riga','windows','NotAllowedError');console.log('PASS controller: Russia, non-Russia, unknown country, registration, Windows Passkey error, recovery and profile delivery');})().catch(e=>{console.error(e);process.exit(1)});
+(async()=>{await scenario('moscow');await scenario('riga');await scenario(null);await scenario('riga','windows','NotAllowedError');console.log('PASS controller: Russia, non-Russia, unknown country, shared auth navigation and preserved setup selection');})().catch(e=>{console.error(e);process.exit(1)});
+

@@ -6,10 +6,10 @@
   <meta name="color-scheme" content="light dark">
   <meta name="theme-color" content="#f5f5f7">
   <title>TOLF Account</title>
-  <link rel="stylesheet" href="styles.css?v=20260917-1">
+  <link rel="stylesheet" href="styles.css?v=password-20260921-1">
   <script defer src="../passkey-session-label.20260917-1.js"></script>
   <script defer src="../js/webauthn.js?v=auth-20260917-1"></script>
-  <script defer src="auth.js?v=postlogin-cache-20260918-1"></script>
+  <script defer src="auth.js?v=password-20260921-1"></script>
 <link rel="stylesheet" href="../tolf-buttons.20260917-3.css">
 <script defer src="../tolf-wordmark.20260917-3.js"></script>
 <link rel="stylesheet" href="../tolf-header.20260919-1.css?v=languages-2">
@@ -34,7 +34,25 @@
       <section id="signInPanel" class="panel">
         <h1 data-i18n="signInTitle">Sign in to TOLF</h1>
         <p class="description" data-i18n="signInDescription">Use your Passkey to access your TOLF account.</p>
-        <button id="signInButton" class="button primary" type="button" data-i18n="signIn">Sign in with Passkey</button>
+        <div class="auth-methods hidden" data-method-selector role="group" aria-label="Sign-in method">
+          <button type="button" data-auth-method="passkey" aria-pressed="true">Passkey</button>
+          <button type="button" data-auth-method="password" aria-pressed="false" data-i18n="passwordMethod">Username and password</button>
+        </div>
+        <p class="field-help" data-for-method="passkey" data-i18n="passkeyAbout"></p>
+        <button data-for-method="passkey" id="signInButton" class="button primary" type="button" data-i18n="signIn">Sign in with Passkey</button>
+        <form id="passwordLoginForm" data-for-method="password" class="hidden">
+          <label for="loginUsername" data-i18n="usernameLabel">Username</label>
+          <input id="loginUsername" name="username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" minlength="3" maxlength="32" pattern="[A-Za-z0-9][A-Za-z0-9_.\-]{2,31}" required>
+          
+          <label for="loginPassword" data-i18n="passwordLabel">Password</label>
+          <input id="loginPassword" name="password" type="password" autocomplete="current-password"  maxlength="128" required>
+          <div class="password-tools">
+            <button class="text-button" type="button" data-toggle-password="loginPassword" aria-pressed="false" data-i18n="showPassword">Show password</button>
+            
+          </div>
+          
+          <button class="button primary" type="submit" data-i18n="passwordSignIn">Sign in</button>
+        </form>
         <div class="secondary-actions">
           <button id="goSignupButton" class="text-button" type="button" data-i18n="createAccount">Create account</button>
           <span aria-hidden="true">·</span>
@@ -46,10 +64,31 @@
       <section id="signupPanel" class="panel hidden">
         <h1 data-i18n="signupTitle">Create your TOLF account</h1>
         <p class="description" data-i18n="signupDescription">Create a Passkey for this device. You will receive a recovery code after registration.</p>
+        <div class="auth-methods hidden" data-method-selector role="group" aria-label="Sign-in method">
+          <button type="button" data-auth-method="passkey" aria-pressed="true">Passkey</button>
+          <button type="button" data-auth-method="password" aria-pressed="false" data-i18n="passwordMethod">Username and password</button>
+        </div>
+        <div data-for-method="passkey">
+        <p class="field-help" data-i18n="passkeyAbout"></p>
         <label for="passkeyName" data-i18n="passkeyName">Passkey name</label>
         <input id="passkeyName" type="text" maxlength="80" autocomplete="off" spellcheck="false">
         <p class="field-help" data-i18n="passkeyHelp">Use a short name that helps you recognize this device or key.</p>
         <button id="signupButton" class="button primary" type="button" data-i18n="createPasskey">Create Passkey</button>
+        </div>
+        <form id="passwordSignupForm" data-for-method="password" class="hidden">
+          <label for="signupUsername" data-i18n="usernameLabel">Username</label>
+          <input id="signupUsername" name="username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" minlength="3" maxlength="32" pattern="[A-Za-z0-9][A-Za-z0-9_.\-]{2,31}" required>
+          <p class="field-help" data-i18n="usernameHelp"></p>
+          <label for="signupPassword" data-i18n="passwordLabel">Password</label>
+          <input id="signupPassword" name="password" type="password" autocomplete="new-password" minlength="15" maxlength="128" required>
+          <div class="password-tools">
+            <button class="text-button" type="button" data-toggle-password="signupPassword" aria-pressed="false" data-i18n="showPassword">Show password</button>
+            <button class="text-button" type="button" data-generate-password="signupPassword" data-i18n="generatePassword">Generate</button>
+          </div>
+          <p class="field-help" data-i18n="passwordHelp"></p>
+          <p class="field-help" data-i18n="saveCredentialsHint"></p>
+          <button class="button primary" type="submit" data-i18n="createAccount">Create account</button>
+        </form>
         <button id="signupBackButton" class="button secondary" type="button" data-i18n="back">Back</button>
         <p id="signupMessage" class="message" role="status"></p>
       </section>
@@ -57,9 +96,27 @@
       <section id="recoverPanel" class="panel hidden">
         <h1 data-i18n="recoverTitle">Recover your TOLF account</h1>
         <p class="description" data-i18n="recoverDescription">Enter your recovery code. A new Passkey and a new recovery code will be created.</p>
+        <div class="auth-methods hidden" data-method-selector role="group" aria-label="Sign-in method">
+          <button type="button" data-auth-method="passkey" aria-pressed="true">Passkey</button>
+          <button type="button" data-auth-method="password" aria-pressed="false" data-i18n="passwordMethod">Username and password</button>
+        </div>
         <label for="recoveryCode" data-i18n="recoveryCode">Recovery code</label>
-        <input id="recoveryCode" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false">
-        <button id="recoverButton" class="button primary" type="button" data-i18n="recoverAction">Recover account</button>
+        <input id="recoveryCode" maxlength="128" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false">
+        <button data-for-method="passkey" id="recoverButton" class="button primary" type="button" data-i18n="recoverAction">Recover account</button>
+        <form id="passwordResetForm" data-for-method="password" class="hidden">
+          <label for="resetUsername" data-i18n="usernameLabel">Username</label>
+          <input id="resetUsername" name="username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" minlength="3" maxlength="32" pattern="[A-Za-z0-9][A-Za-z0-9_.\-]{2,31}" required>
+          <p class="field-help" data-i18n="usernameHelp"></p>
+          <label for="resetPassword" data-i18n="newPassword">Password</label>
+          <input id="resetPassword" name="password" type="password" autocomplete="new-password" minlength="15" maxlength="128" required>
+          <div class="password-tools">
+            <button class="text-button" type="button" data-toggle-password="resetPassword" aria-pressed="false" data-i18n="showPassword">Show password</button>
+            <button class="text-button" type="button" data-generate-password="resetPassword" data-i18n="generatePassword">Generate</button>
+          </div>
+          <p class="field-help" data-i18n="passwordHelp"></p>
+          <p class="field-help" data-i18n="resetHelp"></p>
+          <button class="button primary" type="submit" data-i18n="resetPassword">Set new password</button>
+        </form>
         <button id="recoverBackButton" class="button secondary" type="button" data-i18n="back">Back</button>
         <p id="recoverMessage" class="message" role="status"></p>
       </section>
@@ -67,9 +124,13 @@
       <section id="recoveryCodePanel" class="panel hidden">
         <h1 data-i18n="saveRecoveryTitle">Save your recovery code</h1>
         <p class="description" data-i18n="saveRecoveryDescription">Store this code somewhere safe. It can be used to recover your account if you lose your Passkey.</p>
+        <p id="savedUsername" class="field-help hidden"></p>
         <code id="newRecoveryCode" class="recovery-code"></code>
         <button id="copyRecoveryButton" class="button secondary" type="button" data-i18n="copyCode">Copy code</button>
-        <button id="continueButton" class="button primary" type="button" data-i18n="savedContinue">I saved it — continue</button>
+        <p class="field-help" data-i18n="recoveryInstructions"></p>
+        <button id="downloadCredentialsButton" class="button secondary" type="button" data-i18n="downloadCredentials">Download recovery details</button>
+        <label class="saved-check"><input id="credentialsSaved" type="checkbox"><span data-i18n="savedAcknowledgement">I saved my sign-in details and recovery code.</span></label>
+        <button disabled id="continueButton" class="button primary" type="button" data-i18n="savedContinue">I saved it — continue</button>
         <p id="recoveryCodeMessage" class="message" role="status"></p>
       </section>
     </section>
@@ -78,3 +139,4 @@
   </main>
 </body>
 </html>
+

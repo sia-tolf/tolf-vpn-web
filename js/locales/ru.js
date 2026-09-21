@@ -38,9 +38,9 @@ I18N.ru = {
   passkeyNameRequired: "Введите понятное название — от 1 до 80 символов.",
   passkeyNamingUnavailable: "Именование Passkey ещё не включено на сервере. Повторите после обновления API.",
   passkeyNamesNote: "Название задаётся при создании нового Passkey и помогает различать ключи в списке на сайте. Оно не меняет VPN-логин.",
-  inviteSetupHelp: "Настройте вход с Passkey. После входа проверенный VPN-доступ привяжется автоматически; VPN-логин, пароль и профили сохранятся.",
-  inviteExistingPasskey: "Войти с Passkey",
-  inviteCreatePasskey: "Настроить вход на сайт",
+  inviteSetupHelp: "Создайте аккаунт с Passkey или паролем, чтобы управлять существующим VPN-доступом. Логин и пароль VPN сохранятся.",
+  inviteExistingPasskey: "Войти в аккаунт",
+  inviteCreatePasskey: "Создать аккаунт",
   existingVpnVerifiedReady: "Подключаем VPN-доступ {username} к вашему входу на сайт.",
   existingVpnVerifiedSignIn: "VPN-доступ {username} проверен. Нажмите «Настроить вход на сайт», сохраните код восстановления и войдите с созданным Passkey. VPN-доступ привяжется автоматически.",
   existingVpnOpen: "У меня уже есть VPN-доступ — настроить вход на сайт",
@@ -144,7 +144,7 @@ I18N.ru = {
   quickSetupAction: "Настроить VPN",
   vpnAccessTitle: "Доступ к VPN",
   vpnAccessDescription: "Войдите, чтобы управлять VPN-доступом и устройствами.",
-  signInWithPasskey: "Войти с Passkey",
+  signInWithPasskey: "Войти",
   createNewAccount: "Создать новый аккаунт",
   recoverAccount: "Восстановить аккаунт",
   recoverDescription: "Введите Recovery Code. Если код действителен, вы сможете создать новый Passkey для этого аккаунта.",
@@ -209,7 +209,7 @@ I18N.ru = {
   addAnotherBeforeRemoving: "Перед удалением этого Passkey добавьте другой.",
 
   recovery: "Восстановление и аккаунт",
-  recoveryDescription: "Recovery Code позволяет восстановить доступ к аккаунту TOLF, если вы потеряете все Passkey.",
+  recoveryDescription: "Код восстановления поможет вернуть доступ, если вы потеряете пароль аккаунта или Passkey. Сохраните его в надёжном месте.",
   generateNewRecoveryCode: "Создать новый Recovery Code",
   saveNewRecoveryCode: "Сохраните новый Recovery Code",
   newRecoveryCodeWarning: "Этот код показывается только сейчас. Все предыдущие Recovery Code больше недействительны.",
@@ -299,3 +299,4 @@ Object.assign(I18N.ru, {
   "windowsWorking": "Подготавливаем Windows-подключение…",
   "windowsReady": "Настройка Windows готова. Откройте ссылку на компьютере или отправьте её."
 });
+

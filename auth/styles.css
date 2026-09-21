@@ -278,3 +278,16 @@ input:focus {
     padding: 0 7px;
   }
 }
+
+
+/* Account methods share the same form widths on desktop and mobile. */
+.auth-methods { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; margin: 20px 0; border: 1px solid var(--line); border-radius: 14px; background: var(--background, #eeeef0); }
+.auth-methods button { min-height: 42px; border: 0; border-radius: 10px; padding: 8px; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+.auth-methods button[aria-pressed="true"] { background: var(--surface-solid); color: var(--text); box-shadow: 0 1px 3px #0002; }
+.password-tools { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; margin: 8px 0 16px; }
+.password-tools button { min-height: 36px; }
+.saved-check { display: flex; align-items: flex-start; gap: 10px; margin: 20px 0; line-height: 1.5; font-weight: 400; }
+.saved-check input { width: 20px; min-height: 20px; height: 20px; flex: 0 0 20px; margin: 2px 0 0; padding: 0; }
+button:disabled { opacity: .55; cursor: wait; }
+#continueButton:disabled { cursor: default; }
+.auth-card input:focus-visible, .auth-card button:focus-visible { outline: 2px solid var(--accent, #234687); outline-offset: 3px; }

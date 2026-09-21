@@ -38,9 +38,9 @@ I18N.en = {
   passkeyNameRequired: "Enter a meaningful name of 1–80 characters.",
   passkeyNamingUnavailable: "Passkey naming is not enabled on the server yet. Retry after the API update.",
   passkeyNamesNote: "Choose a name when creating a new Passkey to distinguish keys in the website list. It does not change your VPN username.",
-  inviteSetupHelp: "Set up Passkey sign-in. After sign-in, your verified VPN access will be linked automatically; the VPN username, password and profiles stay unchanged.",
-  inviteExistingPasskey: "Sign in with Passkey",
-  inviteCreatePasskey: "Set up website sign-in",
+  inviteSetupHelp: "Create an account with a Passkey or password to manage your existing VPN access. Your VPN login and password will be preserved.",
+  inviteExistingPasskey: "Sign in",
+  inviteCreatePasskey: "Create account",
   existingVpnVerifiedReady: "Linking VPN access {username} to your website sign-in.",
   existingVpnVerifiedSignIn: "VPN access {username} verified. Set up website sign-in, save your recovery code and sign in with the new Passkey. VPN access will be linked automatically.",
   existingVpnOpen: "I already have VPN access — set up website sign-in",
@@ -144,7 +144,7 @@ I18N.en = {
   quickSetupAction: "Set up VPN",
   vpnAccessTitle: "VPN access",
   vpnAccessDescription: "Sign in to manage your VPN access and devices.",
-  signInWithPasskey: "Sign in with Passkey",
+  signInWithPasskey: "Sign in",
   createNewAccount: "Create new account",
   recoverAccount: "Recover account",
   recoverDescription: "Enter your Recovery Code. If it is valid, you will create a new Passkey for this account.",
@@ -209,7 +209,7 @@ I18N.en = {
   addAnotherBeforeRemoving: "Add another Passkey before removing this one.",
 
   recovery: "Recovery & Account",
-  recoveryDescription: "A Recovery Code can restore access to your TOLF account if you lose all Passkeys.",
+  recoveryDescription: "Your recovery code helps restore access if you lose your account password or Passkey. Keep it somewhere safe.",
   generateNewRecoveryCode: "Generate New Recovery Code",
   saveNewRecoveryCode: "Save your new Recovery Code",
   newRecoveryCodeWarning: "This code is shown only now. Any previous Recovery Code is no longer valid.",
@@ -299,3 +299,4 @@ Object.assign(I18N.en, {
   "windowsWorking": "Preparing Windows setup…",
   "windowsReady": "Windows setup is ready. Open the link on your computer or share it."
 });
+

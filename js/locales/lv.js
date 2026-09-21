@@ -38,9 +38,9 @@ I18N.lv = {
   passkeyNameRequired: "Ievadiet saprotamu nosaukumu no 1 līdz 80 rakstzīmēm.",
   passkeyNamingUnavailable: "Passkey nosaukumi serverī vēl nav iespējoti. Mēģiniet pēc API atjaunināšanas.",
   passkeyNamesNote: "Izveidojot jaunu Passkey, izvēlieties nosaukumu, lai atšķirtu atslēgas vietnes sarakstā. Tas nemaina VPN lietotājvārdu.",
-  inviteSetupHelp: "Iestatiet ieeju ar Passkey. Pēc ieiešanas pārbaudītā VPN piekļuve tiks piesaistīta automātiski; VPN lietotājvārds, parole un profili saglabāsies.",
-  inviteExistingPasskey: "Pieteikties ar Passkey",
-  inviteCreatePasskey: "Iestatīt piekļuvi vietnei",
+  inviteSetupHelp: "Izveidojiet kontu ar Passkey vai paroli, lai pārvaldītu esošo VPN piekļuvi. VPN lietotājvārds un parole saglabāsies.",
+  inviteExistingPasskey: "Pieteikties",
+  inviteCreatePasskey: "Izveidot kontu",
   existingVpnVerifiedReady: "Piesaistām VPN piekļuvi {username} jūsu ieejai vietnē.",
   existingVpnVerifiedSignIn: "VPN piekļuve {username} pārbaudīta. Iestatiet ieeju vietnē, saglabājiet atkopšanas kodu un ieejiet ar jauno Passkey. VPN piekļuve tiks piesaistīta automātiski.",
   existingVpnOpen: "Man jau ir VPN piekļuve — iestatīt ieeju vietnē",
@@ -144,7 +144,7 @@ I18N.lv = {
   quickSetupAction: "Iestatīt VPN",
   vpnAccessTitle: "VPN piekļuve",
   vpnAccessDescription: "Pierakstieties, lai pārvaldītu VPN piekļuvi un ierīces.",
-  signInWithPasskey: "Pierakstīties ar Passkey",
+  signInWithPasskey: "Pieteikties",
   createNewAccount: "Izveidot jaunu kontu",
   recoverAccount: "Atgūt kontu",
   recoverDescription: "Ievadiet Recovery Code. Ja kods ir derīgs, šim kontam varēsiet izveidot jaunu Passkey.",
@@ -209,7 +209,7 @@ I18N.lv = {
   addAnotherBeforeRemoving: "Pirms šī Passkey dzēšanas pievienojiet citu.",
 
   recovery: "Atkopšana un konts",
-  recoveryDescription: "Recovery Code ļauj atgūt piekļuvi TOLF kontam, ja zaudējat visus Passkey.",
+  recoveryDescription: "Atkopšanas kods palīdz atjaunot piekļuvi, ja zaudējat konta paroli vai Passkey. Glabājiet to drošā vietā.",
   generateNewRecoveryCode: "Izveidot jaunu Recovery Code",
   saveNewRecoveryCode: "Saglabājiet jauno Recovery Code",
   newRecoveryCodeWarning: "Šis kods tiek parādīts tikai tagad. Visi iepriekšējie Recovery Code vairs nav derīgi.",
@@ -299,3 +299,4 @@ Object.assign(I18N.lv, {
   "windowsWorking": "Tiek sagatavots Windows savienojums…",
   "windowsReady": "Windows iestatījumi ir gatavi. Atveriet saiti datorā vai kopīgojiet to."
 });
+
