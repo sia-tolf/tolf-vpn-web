@@ -9,7 +9,7 @@ const root=path.resolve(__dirname,'../..');
  await page.route('**/*',async route=>{
   const url=new URL(route.request().url());
   if(url.hostname==='vpn.tolf.is') {
-    const file=path.join(root,url.pathname==='/'?'index.html':url.pathname);
+    const file=path.join(root,url.pathname.endsWith('/')?url.pathname+'index.html':url.pathname);
     if(fs.existsSync(file)) return route.fulfill({body:fs.readFileSync(file),contentType:file.endsWith('.js')?'application/javascript':file.endsWith('.css')?'text/css':'text/html'});
   }
   if(url.hostname==='api.tolf.is') {
@@ -33,12 +33,11 @@ const root=path.resolve(__dirname,'../..');
  assert.equal(await page.locator('#registerPasskeyName').isVisible(),false);
  var beforeRegister=requests.filter(r=>r.url.endsWith('/passkey/register/begin')).length;
  await page.locator('#createAccountButton').click();
- assert.equal(await page.locator('#registerPasskeyName').isVisible(),true);
- assert.equal(await page.locator('#signedOutMainActions').isVisible(),false);
+ await page.waitForURL('**/auth/**');
+ assert.equal(new URL(page.url()).searchParams.get('mode'),'signup');
  assert.equal(requests.filter(r=>r.url.endsWith('/passkey/register/begin')).length,beforeRegister);
- await page.locator('#cancelRegisterButton').click();
- assert.equal(await page.locator('#registerPasskeyName').isVisible(),false);
- assert.equal(await page.locator('#signedOutMainActions').isVisible(),true);
+ await page.goto('https://vpn.tolf.is/');
+ await page.locator('#signedOutMainActions').waitFor({state:'visible'});
 
  assert.equal(new URL(page.url()).hash,'');
  assert.equal(await page.locator('#invitationCard').isVisible(),true);
@@ -49,7 +48,8 @@ const root=path.resolve(__dirname,'../..');
  assert.equal(await page.locator('#invitationButton').isVisible(),false);
  await page.waitForFunction(()=>document.getElementById('invitationText').textContent.includes('user0'));
  assert.equal(await page.locator('#deleteVpnButton').isVisible(),false);
- assert.equal(await page.locator('#deleteAccountButton').isVisible(),true);
+ assert.equal(await page.locator('#deleteAccountButton').count(),0);
+ assert.equal(await page.locator('#accountNavigation').isVisible(),true);
  for(const lang of ['ru','lv','en']) {
   await page.evaluate(lang=>setLanguage(lang),lang);
   assert.equal(await page.locator('#invitationText').textContent().then(x=>x.includes('user0')),true);
@@ -65,12 +65,11 @@ const root=path.resolve(__dirname,'../..');
  assert.equal(await page.locator('#registerPasskeyName').isVisible(),false);
  var beforeRegister=requests.filter(r=>r.url.endsWith('/passkey/register/begin')).length;
  await page.locator('#createAccountButton').click();
- assert.equal(await page.locator('#registerPasskeyName').isVisible(),true);
- assert.equal(await page.locator('#signedOutMainActions').isVisible(),false);
+ await page.waitForURL('**/auth/**');
+ assert.equal(new URL(page.url()).searchParams.get('mode'),'signup');
  assert.equal(requests.filter(r=>r.url.endsWith('/passkey/register/begin')).length,beforeRegister);
- await page.locator('#cancelRegisterButton').click();
- assert.equal(await page.locator('#registerPasskeyName').isVisible(),false);
- assert.equal(await page.locator('#signedOutMainActions').isVisible(),true);
+ await page.goto('https://vpn.tolf.is/');
+ await page.locator('#signedOutMainActions').waitFor({state:'visible'});
 
  await page.locator('#existingVpnDetails summary').click();
  await page.locator('#existingVpnUsername').fill('user0');
