@@ -1593,3 +1593,11 @@ html[data-tolf-ui="vpn"] .account-promo .promo-actions > :is(input, button) {
   min-height: 42px;
   padding: 0 8px;
 }
+
+/* Empty status slots must not reserve space below account and VPN actions. */
+.message:empty, .passkey-message:empty, .recovery-message:empty, .promo-message:empty { display:none; }
+.card-content { padding-bottom:20px; }
+.card-content > :last-child { margin-bottom:0; }
+.delete-section:has(> .delete-button.hidden) { display:none; }
+.account-navigation { color:var(--text); font-size:14px; font-weight:600; text-decoration:none; border:1px solid var(--border); border-radius:10px; padding:10px 12px; min-height:42px; display:inline-flex; align-items:center; }
+.card-topline { flex-wrap:wrap; gap:12px; }

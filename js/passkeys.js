@@ -6,7 +6,7 @@ function formatPasskeyDate(value) {
   if (Number.isNaN(date.getTime())) return "";
 
   return new Intl.DateTimeFormat(
-    currentLanguage === "ru" ? "ru-RU" : "en-GB",
+    currentLanguage === "ru" ? "ru-RU" : currentLanguage === "lv" ? "lv-LV" : "en-GB",
     {
       day: "numeric",
       month: "short",
@@ -117,7 +117,7 @@ async function loadPasskeys() {
   }
 }
 
-addPasskeyButton.addEventListener("click", async () => {
+addPasskeyButton?.addEventListener("click", async () => {
   addPasskeyButton.disabled = true;
   deleteAccountButton.disabled = true;
 

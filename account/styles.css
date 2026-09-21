@@ -1,0 +1,19 @@
+
+.topbar { border-bottom:1px solid var(--border); background:var(--background); }
+.topbar-inner { max-width:760px; margin:auto; padding:8px 24px; display:flex; justify-content:space-between; align-items:center; gap:16px; }
+.topbar .brand { display:inline-flex; align-items:center; gap:8px; margin:0; color:var(--text); text-decoration:none; }
+.topbar .brand .tolf-wordmark { font-size:20px; font-weight:650; letter-spacing:.16em; line-height:1.47; }
+.brand-emblem { display:block; flex:0 0 22px; }
+.back-chevron { font-size:24px; color:var(--secondary); }
+.account-settings { padding-top:24px; }
+.account-heading { display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin-bottom:20px; }
+.account-heading h1 { flex:1 1 100%; margin:0; font-size:28px; font-weight:650; }
+.account-heading a { color:var(--text); text-decoration:none; }
+.account-heading > a,.account-heading > button { min-height:42px; padding:10px 14px; border:1px solid var(--border); border-radius:10px; font-size:14px; }
+#accountContent > .card + .card { margin-top:16px; }
+.account-settings .card-content { padding:22px; }
+.account-delete-section { margin-top:14px; padding-top:0; border:0; }
+.account-delete-note { margin-bottom:0; }
+.passkey-note { margin-bottom:0; }
+.account-settings .settings-input { width:100%; min-width:0; }
+@media(max-width:520px){.topbar-inner{padding-inline:16px}.account-settings{padding:20px 12px 32px}.account-settings .card-content{padding:20px}.account-heading h1{font-size:26px}}

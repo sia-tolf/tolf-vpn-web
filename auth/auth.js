@@ -266,7 +266,7 @@ const backHome = document.getElementById("backHome");
 const url = new URL(window.location.href);
 const requestedLang = url.searchParams.get("lang");
 const requestedMode = url.searchParams.get("mode");
-const next = ["vpn", "quick"].includes(url.searchParams.get("next")) ? url.searchParams.get("next") : "home";
+const next = ["vpn", "quick", "account"].includes(url.searchParams.get("next")) ? url.searchParams.get("next") : "home";
 
 function storedLanguage() {
   try { return localStorage.getItem("tolf-language") || localStorage.getItem("tolfLanguage"); } catch { return null; }
@@ -290,7 +290,7 @@ function text(key) {
 }
 
 function destination() {
-  const base = next === "quick" ? "https://vpn.tolf.is/quick/" : next === "vpn" ? "https://vpn.tolf.is/" : "https://tolf.is/";
+  const base = next === "account" ? "https://vpn.tolf.is/account/" : next === "quick" ? "https://vpn.tolf.is/quick/" : next === "vpn" ? "https://vpn.tolf.is/" : "https://tolf.is/";
   const target = new URL(base);
   target.searchParams.set("lang", language);
   target.searchParams.set("ui", "20260918-1");

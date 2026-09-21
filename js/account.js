@@ -55,12 +55,12 @@ async function loadAccount() {
 
     applyServerAccess(data);
     showVpn(data.vpn);
-    loadAccountPassword();
 
-    await loadPasskeys();
+
+
     await updateInvitationAccount(data);
   } catch {
-    clearAccountPassword();
+
     showSignedOut();
     handleEntryAction();
   }
@@ -146,63 +146,6 @@ submitRegisterButton.addEventListener("click", async () => {
     createAccountButton.disabled = false;
     signInButton.disabled = false;
     showRecoverButton.disabled = false;
-  }
-});
-
-deleteAccountButton.addEventListener("click", async () => {
-  if (typeof invitationProtected !== "undefined" && invitationProtected) {
-    window.alert(t("protectedAccountDelete"));
-    return;
-  }
-
-  const confirmed = confirmLocalized(
-    "deleteAccountConfirmTitle",
-    "deleteAccountConfirmBody"
-  );
-
-  if (!confirmed) {
-    return;
-  }
-
-  deleteAccountButton.disabled = true;
-  signOutButton.disabled = true;
-  addPasskeyButton.disabled = true;
-  generateRecoveryButton.disabled = true;
-  createVpnButton.disabled = true;
-  generateProfileButton.disabled = true;
-  rotatePasswordButton.disabled = true;
-  deleteVpnButton.disabled = true;
-
-  setInstallLink(null);
-
-  vpnMessage.textContent = t("deletingAccount");
-  vpnMessage.className = "message";
-
-  try {
-    await apiRequest("/account/delete", {
-      method: "POST",
-      body: JSON.stringify({
-        confirm: "DELETE"
-      })
-    });
-
-    signedOutMessage.textContent = t("accountDeleted");
-    signedOutMessage.className = "message success";
-
-    clearAccountPassword();
-    showSignedOut();
-  } catch (error) {
-    vpnMessage.textContent = error.message;
-    vpnMessage.className = "message error";
-  } finally {
-    deleteAccountButton.disabled = false;
-    signOutButton.disabled = false;
-    addPasskeyButton.disabled = false;
-    generateRecoveryButton.disabled = false;
-    createVpnButton.disabled = false;
-    generateProfileButton.disabled = false;
-    rotatePasswordButton.disabled = false;
-    deleteVpnButton.disabled = false;
   }
 });
 

@@ -14,7 +14,7 @@ const fs=require('node:fs');
     if(data){sent.push(data);enabled=true;}
     await r.fulfill({json:data?{username:'lena-work'}:{enabled,username:enabled?'lena-work':null}});
    });
-   const html=fs.readFileSync('index.html','utf8');
+   const html=fs.readFileSync('account/index.html','utf8');
    const section=html.slice(html.indexOf('<section id="accountPasswordSection"'),html.indexOf('</section>',html.indexOf('<section id="accountPasswordSection"'))+10);
    await page.setContent('<html lang="'+lang+'"><style>.hidden{display:none!important}*{box-sizing:border-box}body{margin:16px}'+fs.readFileSync('css/account-password.css','utf8')+'</style>'+section+'</html>');
    await page.evaluate(()=>{window.copies=[];Object.defineProperty(navigator,'clipboard',{value:{writeText:async text=>window.copies.push(text)}});});

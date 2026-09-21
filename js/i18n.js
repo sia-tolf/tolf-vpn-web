@@ -31,6 +31,11 @@ function setLanguage(language) {
     homeNavigation.href = "https://tolf.is/?lang=" + language;
   }
 
+  const accountNavigation = document.getElementById("accountNavigation");
+  if (accountNavigation) {
+    accountNavigation.textContent = {en:"TOLF Account",ru:"Аккаунт TOLF",lv:"TOLF konts"}[language];
+    accountNavigation.href = "account/?lang=" + language;
+  }
   const helpNavigation = document.getElementById("helpNavigation");
   if (helpNavigation) {
     helpNavigation.textContent = { en: "Help", ru: "Помощь", lv: "Palīdzība" }[language];

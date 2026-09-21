@@ -200,16 +200,6 @@ function showSignedOut() {
 
   setInstallLink(null);
 
-  passkeyList.textContent = "";
-  lastPasskeys = [];
-
-  passkeyMessage.textContent = "";
-  passkeyMessage.className = "passkey-message";
-
-  recoveryMessage.textContent = "";
-  recoveryMessage.className = "recovery-message";
-
-  hideAccountRecoveryCode();
   lastVpnState = null;
 
   promoInput.value = "";

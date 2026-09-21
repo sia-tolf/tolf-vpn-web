@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en" data-tolf-ui="account"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="color-scheme" content="light dark">
+<title>TOLF Account</title>
+<link rel="stylesheet" href="../css/styles.css?v=account-page-20260921">
+<link rel="stylesheet" href="../tolf-buttons.20260917-3.css">
+<link rel="stylesheet" href="../tolf-header.20260919-1.css?v=languages-2">
+<link rel="stylesheet" href="../css/account-password.css?v=20260921-1">
+<link rel="stylesheet" href="styles.css?v=1">
+<script defer src="config.js?v=1"></script>
+<script defer src="../js/locales/en.js?v=password-20260921-1"></script>
+<script defer src="../js/locales/ru.js?v=password-20260921-1"></script>
+<script defer src="../js/locales/lv.js?v=password-20260921-1"></script>
+<script defer src="../js/webauthn.js?v=auth-20260917-1"></script>
+<script defer src="page.js?v=1"></script>
+<script defer src="../js/account-password.js?v=20260921-1"></script>
+<script defer src="../js/passkeys.js?v=account-page-20260921"></script>
+<script defer src="recovery.js?v=1"></script>
+<script defer src="../tolf-wordmark.20260917-3.js"></script>
+</head><body><header class="topbar">
+    <div class="topbar-inner">
+      <a id="backHome" class="brand" href="https://tolf.is/" aria-label="TOLF home"><span class="back-chevron" aria-hidden="true">‹</span><img class="brand-emblem" src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20284%20284%22%20role%3D%22img%22%20aria-labelledby%3D%22title%20desc%22%3E%0A%20%20%3Ctitle%20id%3D%22title%22%3ETOLF%20logo%3C%2Ftitle%3E%0A%20%20%3Cdesc%20id%3D%22desc%22%3EA%20white%20eight-point%20star%20with%20equal%2C%20widened%20rays%20in%20a%20dark%20cherry%20circle.%3C%2Fdesc%3E%0A%20%20%3Ccircle%20cx%3D%22142%22%20cy%3D%22142%22%20r%3D%22142%22%20fill%3D%22%237D1534%22%2F%3E%0A%20%20%3Cpolygon%20points%3D%22142.0000%2C21.0000%20161.1342%2C95.8060%20227.5599%2C56.4401%20188.1940%2C122.8658%20263.0000%2C142.0000%20188.1940%2C161.1342%20227.5599%2C227.5599%20161.1342%2C188.1940%20142.0000%2C263.0000%20122.8658%2C188.1940%2056.4401%2C227.5599%2095.8060%2C161.1342%2021.0000%2C142.0000%2095.8060%2C122.8658%2056.4401%2C56.4401%20122.8658%2C95.8060%22%20fill%3D%22%23FFFFFF%22%2F%3E%0A%3C%2Fsvg%3E%0A" alt="" width="22" height="22"><span class="tolf-wordmark">TOLF</span></a>
+      <div class="tolf-language language" aria-label="Language">
+        <button id="langEn" type="button" lang="en" aria-label="English">EN</button>
+        <button id="langRu" type="button" lang="ru" aria-label="Русский">RU</button>
+        <button id="langLv" type="button" lang="lv" aria-label="Latviešu">LV</button>
+      </div>
+    </div>
+  </header>
+<main class="page account-settings">
+<div class="account-heading"><h1 data-i18n="accountTitle">TOLF Account</h1><a id="vpnNavigation" href="../?lang=en" data-i18n="myVpn">My VPN</a><button id="accountSignOut" class="secondary" data-i18n="signOut">Sign out</button></div>
+<p id="accountStatus" class="message" role="status"></p>
+<div id="accountContent" class="hidden"><section id="accountPasswordSection" class="card hidden">
+        <div class="card-content">
+          <h3 class="section-title" data-password-text="title">Username and password</h3>
+          <p class="section-description" data-password-text="help"></p>
+          <div id="apExisting" class="hidden">
+            <label for="apLogin" data-password-text="username">Username</label>
+            <input id="apLogin" readonly autocomplete="username">
+            <button id="apCopyLogin" type="button" class="secondary ap-wide" data-password-text="copyLogin"></button>
+          </div>
+          <p id="apNone" class="section-description" data-password-text="none"></p>
+          <button id="apOpen" type="button" class="secondary ap-wide"></button>
+          <form id="apForm" class="hidden">
+            <div id="apNewLoginGroup">
+              <label for="apNewLogin" data-password-text="username"></label>
+              <input id="apNewLogin" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" minlength="3" maxlength="32" pattern="[A-Za-z0-9][A-Za-z0-9_.\-]{2,31}">
+              <p class="section-description" data-password-text="loginHelp"></p>
+            </div>
+            <label for="apPassword" data-password-text="password"></label>
+            <input id="apPassword" name="password" type="password" autocomplete="new-password" minlength="15" maxlength="128" required>
+            <div class="ap-actions"><button id="apToggle" type="button" class="secondary" data-password-text="show"></button><button id="apGenerate" type="button" class="secondary" data-password-text="generate"></button></div>
+            <p class="section-description" data-password-text="passwordHelp"></p>
+            <p class="section-description" data-password-text="impact"></p>
+            <div class="ap-actions"><button type="submit" class="primary" data-password-text="save"></button><button id="apCancel" type="button" class="secondary" data-password-text="cancel"></button></div>
+          </form>
+          <div id="apResult" class="hidden">
+            <p class="section-description" data-password-text="once"></p>
+            <label for="apCredentials" data-password-text="title"></label>
+            <textarea id="apCredentials" readonly spellcheck="false" autocomplete="off"></textarea>
+            <button id="apCopyDetails" type="button" class="primary ap-wide" data-password-text="copy"></button>
+            <button id="apSaved" type="button" class="secondary ap-wide" data-password-text="saved"></button>
+          </div>
+          <p id="apMessage" class="message" role="status"></p>
+        </div>
+      </section>
+
+      <div
+        id="passkeysSection"
+        class="card passkeys-section"
+      >
+        <div class="card-content">
+          <h3
+            class="section-title"
+            data-i18n="passkeys"
+          >Passkeys</h3>
+
+          <p
+            class="section-description"
+            data-i18n="passkeysDescription"
+          >
+            Passkeys provide access to your TOLF account.
+            Add another Passkey before removing your
+            current one.
+          </p>
+
+          <div
+            id="passkeyList"
+            class="passkey-list"
+          ></div>
+
+          <div class="passkey-label-field"><label for="addPasskeyName" data-i18n="passkeyAdditionalName">Passkey name</label><input id="addPasskeyName" class="settings-input" type="text" maxlength="80" autocomplete="off"><p data-i18n="passkeyLabelHelp">Choose a name you will recognize when signing in.</p></div>
+<div class="passkey-add-row">
+            <button
+              id="addPasskeyButton"
+              class="primary add-passkey-button"
+              type="button"
+              data-i18n="addPasskey"
+            >Add Passkey</button>
+          </div>
+
+          <p
+            class="passkey-note"
+            data-i18n="passkeyNamesNote"
+          >
+            Choose a name for each new Passkey to distinguish it in the website list.
+          </p>
+
+          <div
+            id="passkeyMessage"
+            class="passkey-message"
+          ></div>
+        </div>
+      </div>
+
+      <div
+        id="recoverySection"
+        class="card recovery-section"
+      >
+        <div class="card-content">
+          <h3
+            class="section-title"
+            data-i18n="recovery"
+          >Recovery &amp; Account</h3>
+
+          <p
+            class="section-description"
+            data-i18n="recoveryDescription"
+          >
+            A Recovery Code can restore access to your
+            TOLF account if you lose all Passkeys.
+          </p>
+
+          <div class="recovery-actions">
+            <button
+              id="generateRecoveryButton"
+              class="secondary"
+              type="button"
+              data-i18n="generateNewRecoveryCode"
+            >Generate New Recovery Code</button>
+          </div>
+
+          <div
+            id="accountRecoveryBox"
+            class="recovery-code-box hidden"
+          >
+            <p
+              class="recovery-code-heading"
+              data-i18n="saveNewRecoveryCode"
+            >Save your new Recovery Code</p>
+
+            <div
+              id="accountRecoveryCode"
+              class="recovery-code"
+            ></div>
+
+            <p
+              class="recovery-code-warning"
+              data-i18n="newRecoveryCodeWarning"
+          >
+              This code is shown only now. Any previous
+              Recovery Code is no longer valid.
+            </p>
+
+            <div class="recovery-code-actions">
+              <button
+                id="copyAccountRecoveryButton"
+                class="primary"
+                type="button"
+                data-i18n="copyRecoveryCode"
+              >Copy Recovery Code</button>
+
+              <button
+                id="savedAccountRecoveryButton"
+                class="secondary"
+                type="button"
+                data-i18n="savedIt"
+              >I saved it</button>
+            </div>
+          </div>
+
+          <div
+            id="recoveryMessage"
+            class="recovery-message"
+          ></div>
+
+
+        </div>
+      </div>
+<section class="card"><div class="card-content"><h2 class="section-title" data-i18n="deleteTolfAccount">Delete TOLF Account</h2>        <div
+          id="accountDeleteSection"
+          class="account-delete-section"
+        >
+          <button
+            id="deleteAccountButton"
+            class="account-delete-button"
+            type="button"
+            data-i18n="deleteTolfAccount"
+          >Delete TOLF Account</button>
+
+          <p
+            class="account-delete-note"
+            data-i18n="deleteAccountNote"
+          >
+            Permanently deletes your TOLF account,
+            Passkey registrations, active sessions,
+            Recovery Code, and VPN access. This cannot
+            be undone.
+          </p>
+        </div></div></section>
+</div></main></body></html>
