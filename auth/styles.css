@@ -96,18 +96,7 @@ button { -webkit-tap-highlight-color: transparent; }
   box-shadow: var(--shadow);
 }
 
-.auth-mark {
-  display: inline-flex;
-  min-height: 32px;
-  align-items: center;
-  padding: 0 10px;
-  border: 1px solid var(--line);
-  border-radius: 9px;
-  background: var(--soft);
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: .02em;
-}
+
 
 .eyebrow {
   margin: 18px 0 8px;
@@ -237,15 +226,7 @@ input:focus {
   -webkit-user-select: all;
 }
 
-.back-home {
-  display: block;
-  margin: 18px auto 0;
-  color: var(--secondary);
-  text-align: center;
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 560;
-}
+
 
 .hidden { display: none !important; }
 
@@ -293,3 +274,9 @@ button:disabled { opacity: .55; cursor: wait; }
 .auth-card input:focus-visible, .auth-card button:focus-visible { outline: 2px solid var(--accent, #234687); outline-offset: 3px; }
 
 #credentialCopyFallback { box-sizing:border-box; width:100%; min-height:180px; font:inherit; }
+
+html[data-tolf-ui="auth"] .topbar-inner > .brand { gap:8px; justify-content:flex-start; }
+html[data-tolf-ui="auth"] .brand .tolf-wordmark { font-size:20px; font-weight:650; letter-spacing:.16em; line-height:1.47; }
+.brand-emblem { display:block; flex:0 0 22px; }
+.back-chevron { font-size:24px; font-weight:400; color:var(--secondary); letter-spacing:0; }
+.auth-card > .eyebrow { margin-top:0; }

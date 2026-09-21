@@ -268,9 +268,13 @@ const requestedLang = url.searchParams.get("lang");
 const requestedMode = url.searchParams.get("mode");
 const next = ["vpn", "quick"].includes(url.searchParams.get("next")) ? url.searchParams.get("next") : "home";
 
+function storedLanguage() {
+  try { return localStorage.getItem("tolf-language") || localStorage.getItem("tolfLanguage"); } catch { return null; }
+}
+
 let language = ["en", "ru", "lv"].includes(requestedLang)
   ? requestedLang
-  : localStorage.getItem("tolf-language") || localStorage.getItem("tolfLanguage");
+  : storedLanguage();
 
 if (!["en", "ru", "lv"].includes(language)) {
   const browser = navigator.language.toLowerCase();
@@ -297,8 +301,10 @@ function setLanguage(nextLanguage) {
   if (!["en", "ru", "lv"].includes(nextLanguage)) return;
   language = nextLanguage;
   document.documentElement.lang = language;
-  localStorage.setItem("tolf-language", language);
-  localStorage.setItem("tolfLanguage", language);
+  try {
+    localStorage.setItem("tolf-language", language);
+    localStorage.setItem("tolfLanguage", language);
+  } catch { /* Language switching also works when Safari blocks storage. */ }
 
   document.querySelectorAll("[data-i18n]").forEach(element => {
     element.textContent = text(element.dataset.i18n);
@@ -309,6 +315,7 @@ function setLanguage(nextLanguage) {
     button.setAttribute("aria-pressed", key === language ? "true" : "false");
   });
 
+  backHome.setAttribute("aria-label", text("backHome").replace(/^←\s*/, ""));
   backHome.href = `https://tolf.is/?lang=${encodeURIComponent(language)}`;
 
   const nextUrl = new URL(window.location.href);

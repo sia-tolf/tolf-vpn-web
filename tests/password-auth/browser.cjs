@@ -34,6 +34,13 @@ const root=path.resolve(__dirname,'../..');
     await route.fulfill({status,headers,contentType:'application/json',body:JSON.stringify(body)});
    });
    await page.goto(base+'/auth/?mode=signup&lang='+lang+'&next=quick');
+   for(const target of ['en','lv','ru',lang]) {
+    await page.locator('#lang'+target[0].toUpperCase()+target.slice(1)).click();
+    assert.equal(await page.locator('html').getAttribute('lang'),target);
+    assert.equal(await page.locator('#backHome').getAttribute('href'),'https://tolf.is/?lang='+target);
+   }
+   assert.equal(await page.locator('.auth-mark,.back-home').count(),0);
+   assert.equal(await page.locator('#backHome .brand-emblem').count(),1);
    await page.locator('#signupPanel [data-auth-method="password"]').click();
    await page.locator('#signupUsername').fill('Lena-Work');
    await page.locator('[data-generate-password="signupPassword"]').click();
