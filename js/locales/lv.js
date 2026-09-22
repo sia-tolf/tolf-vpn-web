@@ -119,6 +119,7 @@ I18N.lv = {
   routingAddSite: "+ Pievienot vietni",
   routingDomainLabel: "Vietne vai domēns",
   routingDomainPlaceholder: "example.com, delfi.lv",
+  routingEditGroup: "Rediģēt grupu: {domain}",
   routingDomainHint: "Pievienojiet vienu vietni vai vairākas, atdalot tās ar komatiem.",
   routingDomainsAdded: "Pievienoto vietņu skaits: {count}.",
   routingSave: "Pievienot",
