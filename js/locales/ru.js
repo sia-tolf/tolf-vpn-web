@@ -199,6 +199,8 @@ I18N.ru = {
   entryPointRecommendationMoscow: "Для вашего подключения рекомендуем Москву. Это обычно быстрее и надёжнее.",
   entryPointRecommendationRiga: "Для вашего подключения рекомендуем Ригу. Это обычно быстрее и надёжнее.",
   cityRiga: "Рига",
+  entryPointRecommended: "Рекомендуется для вашего подключения.",
+  entryPointRigaWarning: "Прямое подключение из России может быть ограничено вашим оператором.",
   cityMoscow: "Москва",
   cityLondon: "Лондон",
   cityNewYork: "Нью-Йорк",
