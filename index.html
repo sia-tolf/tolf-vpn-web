@@ -32,7 +32,7 @@
 
   <link
     rel="stylesheet"
-    href="css/styles.css?v=personal-routing-1"
+    href="css/styles.css?v=entry-recommendation-20260922"
   >
   <link
     rel="stylesheet"
@@ -42,9 +42,9 @@
   <!-- Keep this order. Deferred scripts run after the HTML has been parsed. -->
   <script defer src="passkey-session-label.20260917-1.js"></script>
   <script defer src="js/config.js?v=language-handoff-20260920-1"></script>
-  <script defer src="js/locales/en.js?v=personal-routing-2"></script>
-  <script defer src="js/locales/ru.js?v=personal-routing-2"></script>
-  <script defer src="js/locales/lv.js?v=personal-routing-2"></script>
+  <script defer src="js/locales/en.js?v=entry-recommendation-20260922"></script>
+  <script defer src="js/locales/ru.js?v=entry-recommendation-20260922"></script>
+  <script defer src="js/locales/lv.js?v=entry-recommendation-20260922"></script>
   <script defer src="js/dom.js?v=personal-routing-1"></script>
   <script defer src="js/network-metrics.js?v=latency-decimal-1"></script>
   <script defer src="js/platform.js?v=promo-disclosure-20260919"></script>
@@ -60,7 +60,7 @@
   <script defer src="js/profile-settings.js?v=personal-routing-2"></script>
   <script defer src="js/vpn.js?v=account-page-20260921"></script>
   <script defer src="js/promo.js?v=promo-disclosure-20260919"></script>
-  <script defer src="js/location.js?v=recommendation-language-20260920-1"></script>
+  <script defer src="js/location.js?v=entry-recommendation-20260922"></script>
   <script defer src="js/librespeed.js?v=1"></script>
   <script defer src="js/latency.js?v=connection-test-1"></script>
   <script defer src="js/connection-test.js?v=connection-test-3"></script>
@@ -479,6 +479,8 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
                     id="latencyRiga"
                     class="server-latency"
                   >Measuring…</span>
+                  <span id="rigaRecommendation" class="server-guidance hidden"></span>
+                  <span id="rigaConnectionWarning" class="server-guidance hidden"></span>
                 </span>
               </label>
             </div>
@@ -504,6 +506,7 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
                     id="latencyMoscow"
                     class="server-latency"
                   >Measuring…</span>
+                  <span id="moscowRecommendation" class="server-guidance hidden"></span>
                 </span>
                 <span
                   id="moscowAccessLabel"
