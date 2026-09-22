@@ -119,6 +119,7 @@ I18N.en = {
   routingAddSite: "+ Add site",
   routingDomainLabel: "Website or domain",
   routingDomainPlaceholder: "example.com, delfi.lv",
+  routingEditGroup: "Edit group: {domain}",
   routingDomainHint: "Add one website or several separated by commas.",
   routingDomainsAdded: "Websites added: {count}.",
   routingSave: "Add",
