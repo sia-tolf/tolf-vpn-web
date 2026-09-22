@@ -222,18 +222,11 @@ function getProfileSettingsSelection() {
 
   if (!onDemand) return null;
 
-  const routingRules = typeof getRoutingRulesSelection === "function"
-    ? getRoutingRulesSelection({ focus: true })
-    : {};
-
-  if (!routingRules) return null;
-
   return {
     dnsMode: dnsMode?.value === "custom" ? "custom" : "tolf",
     dnsServers: servers,
     onDemandEnabled: onDemand.enabled,
-    onDemandRules: onDemand.rules,
-    routingRules
+    onDemandRules: onDemand.rules
   };
 }
 
@@ -243,6 +236,7 @@ function setProfileSettingsBusy(value) {
     .forEach(control => {
       control.disabled = value;
     });
+  if (typeof renderRoutingPolicyControls === "function") renderRoutingPolicyControls();
 }
 
 function renderProfileSettings() {
