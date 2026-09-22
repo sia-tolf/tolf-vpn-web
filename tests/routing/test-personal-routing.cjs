@@ -89,3 +89,36 @@ test("routing preferences use their own API instead of the profile payload", () 
   assert.match(index, /js\/routing-policy\.js/);
   assert.match(index, /id="routingPolicySave"/);
 });
+
+test("comma list adds normalized separate domains and deduplicates the batch", () => {
+  const c = routingContext();
+  const input = {value:" delfi.lv, EXAMPLE.com, delfi.lv, ",setAttribute(){},focus(){}};
+  assert.equal(c.addRoutingDomain("moscow", input), true);
+  assert.deepEqual(Array.from(c.getRoutingRulesSelection().moscow), ["delfi.lv","example.com"]);
+});
+
+test("invalid or conflicting batch preserves all existing rules and input", () => {
+  const c = routingContext();
+  c.setRoutingRules({riga:["example.com"]});
+  for (const value of ["delfi.lv, bad domain", "delfi.lv, example.com"]) {
+    const input = {value,setAttribute(){},focus(){}};
+    assert.equal(c.addRoutingDomain("moscow", input), false);
+    assert.equal(input.value, value);
+    assert.deepEqual(Array.from(c.getRoutingRulesSelection().moscow), []);
+  }
+});
+
+test("batch limit is checked before adding any domains", () => {
+  const c = routingContext();
+  c.setRoutingRules({moscow:Array.from({length:199},(_,i)=>"site"+i+".test")});
+  assert.equal(c.addRoutingDomain("moscow", {value:"one.test,two.test",setAttribute(){},focus(){}}), false);
+  assert.equal(c.getRoutingRulesSelection().moscow.length, 199);
+});
+
+test("save with open editor includes the complete comma list", () => {
+  const c = routingContext();
+  const input = {value:"delfi.lv, example.com",closest:()=>({dataset:{exit:"moscow"}})};
+  c.routingRuleGroups = {querySelector:()=>input,replaceChildren(){}};
+  c.renderRoutingRules = ()=>{};
+  assert.deepEqual(Array.from(c.getRoutingRulesSelection().moscow), ["delfi.lv","example.com"]);
+});
