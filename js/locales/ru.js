@@ -175,6 +175,7 @@ I18N.ru = {
   brandSubtitle: "Системный VPN-доступ для ваших устройств.",
   loadingTitle: "Загрузка",
   loadingDescription: "Проверяем ваш аккаунт.",
+  accountLoadFailed: "Не удалось загрузить аккаунт. Проверьте соединение и нажмите «Повторить».",
   quickSetupTitle: "Быстрая настройка",
   quickSetupDescription: "Создайте доступ и получите готовые настройки VPN за несколько шагов.",
   quickSetupAction: "Настроить VPN",

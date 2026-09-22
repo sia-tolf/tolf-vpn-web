@@ -47,10 +47,23 @@ cancelRegisterButton.addEventListener("click", () => {
   createAccountButton.focus();
 });
 
+let accountLoadPending = false;
+let accountLoadFailed = false;
+const accountRetry = document.getElementById("accountRetry");
+const accountLoadMessage = document.getElementById("accountLoadMessage");
+
 async function loadAccount() {
+  if (accountLoadPending) return;
+  accountLoadPending = true;
+  accountLoadFailed = false;
+  accountRetry.classList.add("hidden");
+  accountLoadMessage.dataset.i18n = "loadingDescription";
+  accountLoadMessage.textContent = t("loadingDescription");
   try {
     const data = await apiRequest("/me", {
-      method: "GET"
+      method: "GET",
+      cache: "no-store",
+      timeoutMs: 12000
     });
 
     applyServerAccess(data);
@@ -58,13 +71,33 @@ async function loadAccount() {
 
 
 
-    await updateInvitationAccount(data);
-  } catch {
-
-    showSignedOut();
-    handleEntryAction();
+    // Invitations must not delay or invalidate the authenticated account screen.
+    Promise.resolve().then(() => updateInvitationAccount(data)).catch(() => {});
+  } catch (error) {
+    if (error.status === 401) {
+      showSignedOut();
+      handleEntryAction();
+    } else {
+      accountLoadFailed = true;
+      loadingCard.classList.remove("hidden");
+      vpnCard.classList.add("hidden");
+      signedOutCard.classList.add("hidden");
+      accountLoadMessage.dataset.i18n = "accountLoadFailed";
+      accountLoadMessage.textContent = t("accountLoadFailed");
+      accountRetry.classList.remove("hidden");
+    }
+  } finally {
+    accountLoadPending = false;
   }
 }
+
+accountRetry.addEventListener("click", loadAccount);
+function retryFailedAccountLoad() {
+  if (accountLoadFailed && !document.hidden) loadAccount();
+}
+window.addEventListener("online", retryFailedAccountLoad);
+window.addEventListener("pageshow", retryFailedAccountLoad);
+document.addEventListener("visibilitychange", retryFailedAccountLoad);
 
 signOutButton.addEventListener("click", async () => {
   signOutButton.disabled = true;
@@ -148,4 +181,3 @@ submitRegisterButton.addEventListener("click", async () => {
     showRecoverButton.disabled = false;
   }
 });
-

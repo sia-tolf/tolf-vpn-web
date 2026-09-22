@@ -175,6 +175,7 @@ I18N.en = {
   brandSubtitle: "System VPN access for your devices.",
   loadingTitle: "Loading",
   loadingDescription: "Checking your account.",
+  accountLoadFailed: "Could not load your account. Check your connection and try again.",
   quickSetupTitle: "Quick setup",
   quickSetupDescription: "Create access and get ready-to-use VPN settings in a few steps.",
   quickSetupAction: "Set up VPN",
