@@ -1441,23 +1441,23 @@ button:disabled { opacity: 0.55; cursor: default; }
 .vpn-overview #usernameRow,
 .vpn-overview .network-metrics .row,
 .vpn-overview-speed .speed-row {
-  height: 56px;
-  min-height: 56px;
+  height: auto;
+  min-height: 48px;
   padding: 8px 16px;
   align-items: center;
 }
 
 .connection-test-result {
-  height: 56px;
-  min-height: 56px;
+  height: auto;
+  min-height: 48px;
   box-sizing: border-box;
-  gap: 4px;
-  padding: 7px 8px;
+  gap: 2px;
+  padding: 5px 8px;
 }
 
 .network-metrics .network-test-row {
-  height: 56px;
-  min-height: 56px;
+  height: auto;
+  min-height: 48px;
   box-sizing: border-box;
   padding: 8px 16px;
 }
@@ -1506,14 +1506,6 @@ button:disabled { opacity: 0.55; cursor: default; }
     font-size: 14px;
   }
 
-  .vpn-overview .row,
-  .vpn-overview #usernameRow,
-  .vpn-overview .network-metrics .row,
-  .vpn-overview-speed .speed-row,
-  .connection-test-result {
-    height: 64px;
-    min-height: 64px;
-  }
 }
 
 #networkMetricRigaToMoscow,
@@ -1593,10 +1585,7 @@ button:disabled { opacity: 0.55; cursor: default; }
 /* Keep complete usernames inside the card when they wrap. */
 .vpn-overview #usernameRow {
   height: auto;
-  min-height: 56px;
-}
-@media (max-width: 600px) {
-  .vpn-overview #usernameRow { min-height: 64px; }
+  min-height: 48px;
 }
 .passkey-label-actions {
   display: grid;
