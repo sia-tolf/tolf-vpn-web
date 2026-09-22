@@ -166,14 +166,11 @@ body:has(#vpnCard:not(.hidden))
 }
 
 .entry-point-note {
-  margin: 12px 0 0;
-  padding: 13px 14px;
-  background: var(--segment-background);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  color: var(--text);
-  font-size: 14px;
-  line-height: 1.5;
+  margin: 8px 4px 0;
+  color: var(--secondary);
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 400;
 }
 
 .site-nav a:hover {
@@ -850,4 +847,3 @@ html[lang="lv"] .site-label[lang="lv"] {
     color: #9dbbff;
   }
 }
-
