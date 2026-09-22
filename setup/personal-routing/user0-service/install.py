@@ -29,7 +29,7 @@ def main():
     for tool in ('python3', 'nft', 'dnsmasq', 'conntrack', 'ip', 'ubus'):
         if not shutil.which(tool):
             raise RuntimeError('Missing command: ' + tool)
-    for filename in ('service.py', 'core.py'):
+    for filename in ('service.py', 'core.py', 'policy.py', 'rpc.py'):
         compile((SOURCE / filename).read_text(), filename, 'exec')
     run(['sh', '-n', str(SOURCE / 'tolf-user0-routing.init')])
     sys.path.insert(0, '/opt/tolf-routing-python')
@@ -53,9 +53,11 @@ add rule inet tolf_user0_install_check pre ip saddr 10.10.10.2 ipsec in reqid 1 
     TARGET.mkdir(mode=0o700)
     init_created = False
     try:
-        for filename in ('service.py', 'core.py'):
+        for filename in ('service.py', 'core.py', 'policy.py', 'rpc.py'):
             shutil.copyfile(SOURCE / filename, TARGET / filename)
             (TARGET / filename).chmod(0o600)
+        (TARGET / 'policy.json').write_text(json.dumps(module.policy.bootstrap()))
+        (TARGET / 'policy.json').chmod(0o600)
         with INIT.open('x') as handle:
             init_created = True
             handle.write((SOURCE / 'tolf-user0-routing.init').read_text())
