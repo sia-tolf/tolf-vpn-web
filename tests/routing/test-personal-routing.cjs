@@ -76,14 +76,16 @@ test("loads a grouped routing policy without cross-exit duplicates", () => {
   });
 });
 
-test("profile payload includes grouped routing rules", () => {
+test("routing preferences use their own API instead of the profile payload", () => {
   const profileSettings = fs.readFileSync(
     path.join(root, "js/profile-settings.js"),
     "utf8"
   );
   const index = fs.readFileSync(path.join(root, "index.html"), "utf8");
 
-  assert.match(profileSettings, /routingRules\s*$/m);
+  assert.doesNotMatch(profileSettings, /routingRules\s*$/m);
   assert.match(index, /id="routingRulesSection"/);
   assert.match(index, /js\/routing-rules\.js/);
+  assert.match(index, /js\/routing-policy\.js/);
+  assert.match(index, /id="routingPolicySave"/);
 });
