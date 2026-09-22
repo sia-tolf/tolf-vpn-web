@@ -17,7 +17,9 @@ async function apiRequest(path, options = {}) {
   }
 
   if (!response.ok) {
-    throw new Error(data?.detail || "Request failed");
+    const error = new Error(data?.detail || "Request failed");
+    error.status = response.status;
+    throw error;
   }
 
   return data;

@@ -236,6 +236,7 @@ function setProfileSettingsBusy(value) {
     .forEach(control => {
       control.disabled = value;
     });
+  if (typeof renderRoutingPolicyControls === "function") renderRoutingPolicyControls();
 }
 
 function renderProfileSettings() {
@@ -263,6 +264,10 @@ function renderProfileSettings() {
   if (dnsMode?.value === "custom" && dnsServersInput?.value.trim()) {
     validateDnsSettings();
   }
+
+  if (typeof renderRoutingRules === "function") {
+    renderRoutingRules();
+  }
 }
 
 function resetProfileSettings() {
@@ -277,6 +282,10 @@ function resetProfileSettings() {
   onDemandRules
     ?.querySelectorAll(".on-demand-rule")
     .forEach(rule => rule.remove());
+
+  if (typeof resetRoutingRules === "function") {
+    resetRoutingRules();
+  }
 
   renderProfileSettings();
 }
