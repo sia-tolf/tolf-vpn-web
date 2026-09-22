@@ -1,4 +1,22 @@
 async function apiRequest(path, options = {}) {
+  const { timeoutMs = 0, ...requestOptions } = options;
+  if (timeoutMs > 0) {
+    const controller = new AbortController();
+    let timer;
+    try {
+      return await Promise.race([
+        apiRequest(path, { ...requestOptions, signal: controller.signal }),
+        new Promise((_, reject) => {
+          timer = setTimeout(() => {
+            reject(new Error("Request timed out"));
+            controller.abort();
+          }, timeoutMs);
+        })
+      ]);
+    } finally {
+      clearTimeout(timer);
+    }
+  }
   const response = await fetch(API + path, {
     credentials: "include",
     ...options,
