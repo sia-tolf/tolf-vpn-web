@@ -42,6 +42,8 @@ function validateRoutingSnapshot(data) {
 }
 
 function routingSnapshotStatus(data) {
+  if (data.enforcementAvailable && data.state === "conflict") return "routingAddressConflict";
+  if (data.enforcementAvailable && data.state === "unavailable") return "routingNodeUnavailable";
   if (data.state === "applied" && data.enforcementAvailable === true &&
       data.appliedRevision === data.revision) return "routingAppliedMoscow";
   if (data.state === "ready" && data.enforcementAvailable === true &&
@@ -62,7 +64,7 @@ async function refreshRoutingPolicy({ discard = false } = {}) {
       method: "GET", cache: "no-store"
     }));
     if (epoch !== routingEpoch || request !== routingRequest) return;
-    if (routingDirty && !discard) {
+    if ((routingDirty || document.querySelector(".routing-rule-editor")) && !discard) {
       if (data.revision !== routingRevision) {
         routingConflict = true;
         routingStatusKey = "routingConflict";
