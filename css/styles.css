@@ -683,6 +683,15 @@ button:disabled { opacity: 0.55; cursor: default; }
   border-top: 1px solid var(--border);
 }
 
+.routing-rule-hint {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  margin: 0;
+  color: var(--secondary);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
 .routing-rule-editor .settings-input {
   min-height: 40px;
   padding: 8px 10px;
