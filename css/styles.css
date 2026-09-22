@@ -219,6 +219,12 @@ button, input { font: inherit; }
 }
 .server-option input:disabled + label { opacity: 0.38; cursor: default; }
 .server-option input:focus-visible + label { outline: 2px solid var(--text); outline-offset: 2px; }
+.server-option.server-caution input:not(:checked) + label {
+  background: var(--segment-background);
+  color: var(--secondary);
+}
+.server-option.server-caution input:not(:checked) + label .server-flag { filter: saturate(0.35); }
+.server-guidance { display: block; font-size: 12px; line-height: 1.35; font-weight: 400; margin-top: 5px; }
 .server-flag { display: block; font-size: 37.5px; line-height: 1; }
 .server-city { display: block; white-space: nowrap; }
 .server-coming-soon { font-size: 11px; line-height: 1.2; font-weight: 500; }
