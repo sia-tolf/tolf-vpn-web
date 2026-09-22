@@ -175,6 +175,7 @@ I18N.lv = {
   brandSubtitle: "Sistēmas VPN piekļuve jūsu ierīcēm.",
   loadingTitle: "Ielāde",
   loadingDescription: "Pārbaudām jūsu kontu.",
+  accountLoadFailed: "Neizdevās ielādēt kontu. Pārbaudiet savienojumu un mēģiniet vēlreiz.",
   quickSetupTitle: "Ātrā iestatīšana",
   quickSetupDescription: "Izveidojiet piekļuvi un dažos soļos saņemiet gatavus VPN iestatījumus.",
   quickSetupAction: "Iestatīt VPN",
