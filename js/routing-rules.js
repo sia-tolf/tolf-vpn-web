@@ -82,34 +82,40 @@ function closeRoutingRuleEditors() {
 
 function addRoutingDomain(exitKey, input) {
   if (!ROUTING_RULE_EXITS.some(exit => exit.key === exitKey && exit.available)) return false;
-  const domain = normalizeRoutingDomain(input.value);
+  const values = input.value.split(",").map(value => value.trim()).filter(Boolean);
+  const domains = [...new Set(values.map(normalizeRoutingDomain))];
 
-  if (!domain) {
+  if (!domains.length || domains.includes(null)) {
     input.setAttribute("aria-invalid", "true");
     showRoutingRulesMessage("routingDomainInvalid", {}, true);
     input.focus();
     return false;
   }
 
-  const existingExit = findRoutingDomain(domain);
-  if (existingExit) {
-    input.setAttribute("aria-invalid", "true");
-    showRoutingRulesMessage(
-      "routingDomainDuplicate",
-      { server: t(existingExit.nameKey) },
-      true
-    );
-    input.focus();
-    return false;
+  for (const domain of domains) {
+    const existingExit = findRoutingDomain(domain);
+    if (existingExit) {
+      input.setAttribute("aria-invalid", "true");
+      showRoutingRulesMessage(
+        "routingDomainDuplicate",
+        { server: t(existingExit.nameKey) },
+        true
+      );
+      input.focus();
+      return false;
+    }
   }
 
-  if (Object.values(routingRulesByExit).flat().length >= 200) {
+  if (Object.values(routingRulesByExit).flat().length + domains.length > 200) {
     showRoutingRulesMessage("routingLimit", {}, true);
     return false;
   }
-  routingRulesByExit[exitKey].push(domain);
+  routingRulesByExit[exitKey].push(...domains);
   routingRulesByExit[exitKey].sort((left, right) => left.localeCompare(right));
-  showRoutingRulesMessage("routingDomainAdded", { domain });
+  showRoutingRulesMessage(
+    domains.length === 1 ? "routingDomainAdded" : "routingDomainsAdded",
+    { domain: domains[0], count: domains.length }
+  );
   routingRulesChanged();
   renderRoutingRules();
   return true;
@@ -125,12 +131,18 @@ function openRoutingRuleEditor(exitKey, group, addButton) {
   const input = document.createElement("input");
   input.type = "text";
   input.className = "settings-input";
-  input.maxLength = 253;
+  input.maxLength = 52000;
   input.autocomplete = "off";
   input.autocapitalize = "none";
   input.spellcheck = false;
   input.placeholder = t("routingDomainPlaceholder");
   input.setAttribute("aria-label", t("routingDomainLabel"));
+
+  const hint = document.createElement("p");
+  hint.id = "routing-domain-hint-" + exitKey;
+  hint.className = "routing-rule-hint";
+  hint.textContent = t("routingDomainHint");
+  input.setAttribute("aria-describedby", hint.id);
 
   const save = document.createElement("button");
   save.type = "button";
@@ -165,7 +177,7 @@ function openRoutingRuleEditor(exitKey, group, addButton) {
   save.addEventListener("click", submit);
   cancel.addEventListener("click", dismiss);
 
-  editor.append(input, save, cancel);
+  editor.append(input, hint, save, cancel);
   group.appendChild(editor);
   input.focus();
 }
@@ -267,9 +279,7 @@ function getRoutingRulesSelection({ focus = false } = {}) {
     ?.querySelector(".routing-rule-editor input");
 
   if (editorInput) {
-    const domain = normalizeRoutingDomain(editorInput.value);
-
-    if (!domain) {
+    if (!editorInput.value.trim()) {
       editorInput.setAttribute("aria-invalid", "true");
       showRoutingRulesMessage("routingFinishEditing", {}, true);
 
