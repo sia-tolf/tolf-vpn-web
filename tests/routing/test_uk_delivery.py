@@ -229,3 +229,95 @@ class UpgradedAPITests(existing.RoutingTests):
 
 if __name__ == '__main__':
     unittest.main()
+
+class GroupTests(DeliveryTests):
+    def test_group_roundtrip_and_legacy_save(self):
+        rules = {'riga': [], 'moscow': ['a.test','b.test','c.test'], 'usa': []}
+        groups = {'riga': [], 'moscow': [['b.test','a.test'],['c.test']], 'usa': []}
+        result = api.save_policy(self.db, contract.ACCOUNT,
+            {'revision':1,'routingRules':rules,'routingGroups':groups})
+        self.assertEqual(result['revision'], 2)
+        self.assertEqual(self.tick()['routingGroups'], groups)
+        self.assertEqual(self.remote['routingRules'], rules)
+        result = api.save_policy(self.db, contract.ACCOUNT,
+            {'revision':2,'routingRules':rules})
+        self.assertEqual(result['revision'], 2)
+        self.assertEqual(result['routingGroups'], groups)
+        rearranged = {**groups, 'moscow': [['c.test'],['a.test','b.test']]}
+        result = api.save_policy(self.db, contract.ACCOUNT,
+            {'revision':2,'routingRules':rules,'routingGroups':rearranged})
+        self.assertEqual(result['revision'], 3)
+        self.assertEqual(self.tick()['routingGroups'], rearranged)
+        self.assertEqual(self.remote['routingRules'], rules)
+        self.assertEqual(api.get_policy(self.db, 'bob')['routingGroups'],
+                         {'riga': [], 'moscow': [], 'usa': []})
+
+    def test_malformed_groups_never_mutate_rules(self):
+        for groups in [
+            {'riga': [], 'moscow': [['other.test']], 'usa': []},
+            {'riga': [], 'moscow': [['delfi.lv'],['delfi.lv']], 'usa': []},
+            {'riga': [], 'moscow': [[]], 'usa': []},
+        ]:
+            with self.assertRaises(api.HTTPException):
+                api.save_policy(self.db, contract.ACCOUNT,
+                    {'revision':1,'routingRules':{'moscow':['delfi.lv']},'routingGroups':groups})
+            self.assertEqual(api.get_policy(self.db, contract.ACCOUNT)['revision'], 1)
+
+    def test_additive_migration_and_old_client_edit(self):
+        with sqlite3.connect(self.db) as con:
+            con.execute('ALTER TABLE vpn_personal_routing DROP COLUMN groups_json')
+        api.initialize(self.db)
+        api.initialize(self.db)
+        self.assertEqual(api.get_policy(self.db, contract.ACCOUNT)['routingGroups']['moscow'],
+                         [['delfi.lv']])
+        api.save_policy(self.db, contract.ACCOUNT,
+            {'revision':1,'routingRules':{'moscow':['a.test','b.test']},
+             'routingGroups':{'riga':[],'moscow':[['b.test','a.test']],'usa':[]}})
+        result = api.save_policy(self.db, contract.ACCOUNT,
+            {'revision':2,'routingRules':{'moscow':['b.test','c.test']}})
+        self.assertEqual(result['routingGroups']['moscow'], [['b.test'],['c.test']])
+
+class GroupsInstallerTests(unittest.TestCase):
+    def test_upgrade_and_failed_restart_rollback(self):
+        import hashlib
+        upgrade = load('groups_upgrade_test', BASE / 'uk-delivery/install-groups.py')
+        for fail_restart in (False, True):
+            with self.subTest(fail_restart=fail_restart), tempfile.TemporaryDirectory() as folder:
+                root = Path(folder) / 'api'
+                root.mkdir()
+                target = root / 'tolf_personal_routing.py'
+                original = b'# previous API\n'
+                target.write_bytes(original)
+                db = Path(folder) / 'tolf.db'
+                with sqlite3.connect(db) as con:
+                    con.executescript("""
+                        CREATE TABLE users(id TEXT PRIMARY KEY);
+                        CREATE TABLE vpn_personal_routing(
+                            user_id TEXT PRIMARY KEY, vpn_username TEXT,
+                            revision INTEGER, rules_json TEXT, updated_at TEXT);
+                    """)
+                    con.execute("INSERT INTO vpn_personal_routing VALUES(?,?,?,?,?)",
+                                ('alice','vpn_alice',7,json.dumps({'riga':[],'moscow':['delfi.lv'],'usa':[]}), 'today'))
+                restarts = []
+                def run(args, **kwargs):
+                    if 'restart' in args:
+                        restarts.append(args)
+                        if fail_restart and len(restarts) == 1:
+                            raise subprocess.CalledProcessError(1, args)
+                    return subprocess.CompletedProcess(args, 0)
+                with patch.object(upgrade,'ROOT',root), patch.object(upgrade,'DB',db), \
+                     patch.object(upgrade,'OLD_HASH',hashlib.sha256(original).hexdigest()), \
+                     patch.object(upgrade.socket,'gethostname',return_value='EDISUK'), \
+                     patch.object(upgrade.os,'geteuid',return_value=0), \
+                     patch.object(upgrade.os,'chown'), patch.object(upgrade,'health'), \
+                     patch.object(upgrade.subprocess,'run',side_effect=run):
+                    if fail_restart:
+                        with self.assertRaises(subprocess.CalledProcessError):
+                            upgrade.main()
+                        self.assertEqual(target.read_bytes(), original)
+                    else:
+                        upgrade.main()
+                        self.assertEqual(target.read_bytes(), (BASE/'uk-delivery/tolf_personal_routing.py').read_bytes())
+                with sqlite3.connect(db) as con:
+                    self.assertEqual(con.execute('SELECT revision FROM vpn_personal_routing').fetchone()[0], 7)
+                    self.assertIn('groups_json', [r[1] for r in con.execute('PRAGMA table_info(vpn_personal_routing)')])
