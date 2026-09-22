@@ -54,6 +54,7 @@ class ServiceTests(unittest.TestCase):
             stack.enter_context(patch.object(service, 'STOP', False))
             for name in ('check_route', 'dns_alive'):
                 stack.enter_context(patch.object(service, name))
+            stack.enter_context(patch.object(service.policy, 'load', return_value=service.policy.bootstrap()))
             stack.enter_context(patch.object(service, 'owned_table', return_value=True))
             stack.enter_context(patch.object(service.socket, 'socket'))
             stack.enter_context(patch.object(service.time, 'sleep'))
@@ -108,6 +109,7 @@ class InstallerTests(unittest.TestCase):
             stack.enter_context(patch.object(installer.shutil, 'which', return_value='/bin/mock'))
             stack.enter_context(patch.object(installer.socket, 'socket'))
             fake = MagicMock()
+            fake.policy.bootstrap.return_value = service.policy.bootstrap()
             fake.owned_table.return_value = False
             fake.core.input_rules.return_value = []
             fake.core.PORT = 1053
