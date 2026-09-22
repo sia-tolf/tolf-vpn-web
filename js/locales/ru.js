@@ -119,6 +119,7 @@ I18N.ru = {
   routingAddSite: "+ Добавить сайт",
   routingDomainLabel: "Сайт или домен",
   routingDomainPlaceholder: "example.com, delfi.lv",
+  routingEditGroup: "Изменить группу: {domain}",
   routingDomainHint: "Можно добавить один сайт или несколько через запятую.",
   routingDomainsAdded: "Добавлено сайтов: {count}.",
   routingSave: "Добавить",
