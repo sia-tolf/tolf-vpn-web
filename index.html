@@ -42,21 +42,22 @@
   <!-- Keep this order. Deferred scripts run after the HTML has been parsed. -->
   <script defer src="passkey-session-label.20260917-1.js"></script>
   <script defer src="js/config.js?v=language-handoff-20260920-1"></script>
-  <script defer src="js/locales/en.js?v=personal-routing-1"></script>
-  <script defer src="js/locales/ru.js?v=personal-routing-1"></script>
-  <script defer src="js/locales/lv.js?v=personal-routing-1"></script>
+  <script defer src="js/locales/en.js?v=personal-routing-2"></script>
+  <script defer src="js/locales/ru.js?v=personal-routing-2"></script>
+  <script defer src="js/locales/lv.js?v=personal-routing-2"></script>
   <script defer src="js/dom.js?v=personal-routing-1"></script>
   <script defer src="js/network-metrics.js?v=latency-decimal-1"></script>
   <script defer src="js/platform.js?v=promo-disclosure-20260919"></script>
   <script defer src="js/i18n.js?v=account-page-20260921"></script>
   <script defer src="js/webauthn.js?v=local-id-2"></script>
-  <script defer src="js/api.js?v=local-id-2"></script>
-  <script defer src="js/ui.js?v=account-page-20260921"></script>
+  <script defer src="js/api.js?v=personal-routing-2"></script>
+  <script defer src="js/ui.js?v=personal-routing-2"></script>
   <script defer src="js/passkeys.js?v=account-page-20260921"></script>
   <script defer src="js/recovery.js?v=account-page-20260921"></script>
   <script defer src="js/account.js?v=account-page-20260921"></script>
-  <script defer src="js/routing-rules.js?v=personal-routing-1"></script>
-  <script defer src="js/profile-settings.js?v=personal-routing-1"></script>
+  <script defer src="js/routing-rules.js?v=personal-routing-2"></script>
+  <script defer src="js/routing-policy.js?v=personal-routing-2"></script>
+  <script defer src="js/profile-settings.js?v=personal-routing-2"></script>
   <script defer src="js/vpn.js?v=account-page-20260921"></script>
   <script defer src="js/promo.js?v=promo-disclosure-20260919"></script>
   <script defer src="js/location.js?v=recommendation-language-20260920-1"></script>
@@ -712,6 +713,11 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
                 role="status"
                 aria-live="polite"
               ></p>
+              <div class="actions">
+                <button id="routingPolicySave" type="button" class="secondary" data-i18n="routingPolicySave" disabled>Save rules</button>
+                <button id="routingPolicyReload" type="button" class="secondary" data-i18n="routingPolicyReload" disabled>Reload saved rules</button>
+              </div>
+              <p id="routingPolicyStatus" class="settings-validation" role="status" aria-live="polite"></p>
             </section>
 
             <div class="settings-divider"></div>
