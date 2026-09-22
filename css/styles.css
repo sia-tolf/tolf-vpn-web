@@ -1481,7 +1481,7 @@ button:disabled { opacity: 0.55; cursor: default; }
 
 @media (max-width: 520px) {
   .server-option label {
-    height: 80px;
+    height: 100%;
     min-height: 80px;
     padding: 6px 4px;
     gap: 3px;
