@@ -42,19 +42,19 @@
   <!-- Keep this order. Deferred scripts run after the HTML has been parsed. -->
   <script defer src="passkey-session-label.20260917-1.js"></script>
   <script defer src="js/config.js?v=language-handoff-20260920-1"></script>
-  <script defer src="js/locales/en.js?v=entry-recommendation-20260922"></script>
-  <script defer src="js/locales/ru.js?v=entry-recommendation-20260922"></script>
-  <script defer src="js/locales/lv.js?v=entry-recommendation-20260922"></script>
+  <script defer src="js/locales/en.js?v=account-retry-20260922"></script>
+  <script defer src="js/locales/ru.js?v=account-retry-20260922"></script>
+  <script defer src="js/locales/lv.js?v=account-retry-20260922"></script>
   <script defer src="js/dom.js?v=personal-routing-1"></script>
   <script defer src="js/network-metrics.js?v=latency-decimal-1"></script>
   <script defer src="js/platform.js?v=promo-disclosure-20260919"></script>
   <script defer src="js/i18n.js?v=account-page-20260921"></script>
   <script defer src="js/webauthn.js?v=local-id-2"></script>
-  <script defer src="js/api.js?v=personal-routing-2"></script>
+  <script defer src="js/api.js?v=account-retry-20260922"></script>
   <script defer src="js/ui.js?v=personal-routing-2"></script>
   <script defer src="js/passkeys.js?v=account-page-20260921"></script>
   <script defer src="js/recovery.js?v=account-page-20260921"></script>
-  <script defer src="js/account.js?v=account-page-20260921"></script>
+  <script defer src="js/account.js?v=account-retry-20260922"></script>
   <script defer src="js/routing-rules.js?v=personal-routing-2"></script>
   <script defer src="js/routing-policy.js?v=personal-routing-2"></script>
   <script defer src="js/profile-settings.js?v=personal-routing-2"></script>
@@ -191,9 +191,11 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
       <div class="card-content">
         <h2 data-i18n="loadingTitle">Loading</h2>
         <p
+          id="accountLoadMessage"
           class="card-description"
           data-i18n="loadingDescription"
         >Checking your account.</p>
+        <button id="accountRetry" class="secondary hidden" type="button" data-i18n="retryPromo">Retry</button>
       </div>
     </section>
 
