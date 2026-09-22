@@ -191,6 +191,7 @@ function setInstallLink(profileUrl) {
 }
 
 function showSignedOut() {
+  if (typeof setRoutingAccount === "function") setRoutingAccount(null);
   closeRegistrationPanel();
   if (typeof updateInvitationAccount === "function") updateInvitationAccount(null);
   if (typeof clearWindowsDevices === "function") clearWindowsDevices();
@@ -286,6 +287,9 @@ function showVpn(vpn) {
   vpnMessage.className = "message";
 
   renderVpnState(vpn);
+  if (typeof setRoutingAccount === "function") {
+    setRoutingAccount(vpn.configured ? vpn.username : null);
+  }
   renderPlatform();
   if (currentPlatform === "windows" && typeof loadWindowsDevices === "function") loadWindowsDevices();
 }
