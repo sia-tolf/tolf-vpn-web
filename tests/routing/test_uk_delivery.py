@@ -182,6 +182,8 @@ class DeliveryTests(unittest.TestCase):
                      patch.object(installer,'UNIT',unit), patch.object(installer,'__file__',str(stage/'install.py')), \
                      patch.object(installer,'check_context'), patch.object(installer,'health'), \
                      patch.object(installer.socket,'gethostname',return_value='EDISUK'), \
+                     patch.object(installer.os,'geteuid',return_value=0), \
+                     patch.object(installer.os,'chown'), \
                      patch.object(installer,'command',side_effect=command), \
                      patch.object(delivery,'transport',side_effect=self.rpc), \
                      patch.object(installer.subprocess,'run',return_value=subprocess.CompletedProcess([],0)), \
