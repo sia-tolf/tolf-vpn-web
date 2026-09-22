@@ -631,7 +631,7 @@ button:disabled { opacity: 0.55; cursor: default; }
 }
 
 .routing-rule-item {
-  min-height: 44px;
+  min-height: 46px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -648,6 +648,7 @@ button:disabled { opacity: 0.55; cursor: default; }
 }
 
 .routing-rule-remove {
+  min-height: 34px;
   flex: 0 0 34px;
   width: 34px;
   height: 34px;
