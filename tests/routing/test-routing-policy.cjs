@@ -49,6 +49,20 @@ test('only matching, enabled server acknowledgement is shown as applied', () => 
   assert.equal(c.routingSnapshotStatus(snapshot(2, {state:'applied',appliedRevision:1,enforcementAvailable:true})), 'routingPending');
   assert.equal(c.routingSnapshotStatus(snapshot(2, {state:'applied',appliedRevision:2,enforcementAvailable:false})), 'routingStoredOnly');
   assert.equal(c.routingSnapshotStatus(snapshot(2, {state:'applied',appliedRevision:2,enforcementAvailable:true})), 'routingAppliedMoscow');
+  assert.equal(c.routingSnapshotStatus(snapshot(2, {state:'conflict',enforcementAvailable:true})), 'routingAddressConflict');
+  assert.equal(c.routingSnapshotStatus(snapshot(2, {state:'unavailable',enforcementAvailable:true})), 'routingNodeUnavailable');
+});
+
+test('a late status response preserves an open unsaved input editor', async () => {
+  const wait = deferred(); let gets = 0;
+  const c = context(async () => ++gets === 1 ? snapshot() : wait.promise);
+  c.setRoutingAccount('user0'); await settle();
+  const pending = c.refreshRoutingPolicy();
+  c.document.querySelector = () => ({className:'routing-rule-editor'});
+  wait.resolve(snapshot(2, {routingRules:{riga:['example.com'],moscow:[],usa:[]}}));
+  await pending;
+  assert.deepEqual(Array.from(c.getRoutingRulesSelection().moscow), ['delfi.lv']);
+  assert.equal(vm.runInContext('routingConflict', c), true);
 });
 
 test('conflict keeps draft and disables overwrite until explicit reload', async () => {
