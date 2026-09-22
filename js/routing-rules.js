@@ -10,6 +10,22 @@ let routingRulesByExit = {
   usa: []
 };
 
+let routingDomainGroups = { riga: [], moscow: [], usa: [] };
+let routingGroupingAvailable = false;
+
+function syncRoutingDomains() {
+  for (const exit of ROUTING_RULE_EXITS) {
+    routingRulesByExit[exit.key] = routingDomainGroups[exit.key].flat()
+      .sort((a, b) => a.localeCompare(b));
+  }
+}
+
+function getRoutingDomainGroups() {
+  return Object.fromEntries(ROUTING_RULE_EXITS.map(exit => [
+    exit.key, routingDomainGroups[exit.key].map(group => [...group])
+  ]));
+}
+
 function routingRulesChanged() {
   if (typeof routingPolicyEdited === "function") routingPolicyEdited();
 }
@@ -50,10 +66,13 @@ function normalizeRoutingDomain(rawValue) {
   return valid ? value : null;
 }
 
-function findRoutingDomain(domain) {
+function findRoutingDomain(domain, editingExit = null, editingIndex = -1) {
   for (const exit of ROUTING_RULE_EXITS) {
-    if (routingRulesByExit[exit.key].some(existing => existing === domain ||
-        existing.endsWith("." + domain) || domain.endsWith("." + existing))) {
+    const existingDomains = routingDomainGroups[exit.key]
+      .filter((_, index) => exit.key !== editingExit || index !== editingIndex).flat();
+    if (existingDomains.some(existing => existing === domain ||
+        (exit.key !== editingExit &&
+          (existing.endsWith("." + domain) || domain.endsWith("." + existing))))) {
       return exit;
     }
   }
@@ -82,6 +101,9 @@ function closeRoutingRuleEditors() {
 
 function addRoutingDomain(exitKey, input) {
   if (!ROUTING_RULE_EXITS.some(exit => exit.key === exitKey && exit.available)) return false;
+  const editingIndex = input.dataset?.groupIndex === undefined ? -1 : Number(input.dataset.groupIndex);
+  if (editingIndex !== -1 && (!Number.isInteger(editingIndex) ||
+      !routingDomainGroups[exitKey][editingIndex])) return false;
   const values = input.value.split(",").map(value => value.trim()).filter(Boolean);
   const domains = [...new Set(values.map(normalizeRoutingDomain))];
 
@@ -93,7 +115,7 @@ function addRoutingDomain(exitKey, input) {
   }
 
   for (const domain of domains) {
-    const existingExit = findRoutingDomain(domain);
+    const existingExit = findRoutingDomain(domain, exitKey, editingIndex);
     if (existingExit) {
       input.setAttribute("aria-invalid", "true");
       showRoutingRulesMessage(
@@ -106,12 +128,15 @@ function addRoutingDomain(exitKey, input) {
     }
   }
 
-  if (Object.values(routingRulesByExit).flat().length + domains.length > 200) {
+  const previousCount = editingIndex < 0 ? 0 : routingDomainGroups[exitKey][editingIndex].length;
+  if (Object.values(routingRulesByExit).flat().length - previousCount + domains.length > 200) {
     showRoutingRulesMessage("routingLimit", {}, true);
     return false;
   }
-  routingRulesByExit[exitKey].push(...domains);
-  routingRulesByExit[exitKey].sort((left, right) => left.localeCompare(right));
+  const groups = routingGroupingAvailable ? [domains] : domains.map(domain => [domain]);
+  if (editingIndex < 0) routingDomainGroups[exitKey].push(...groups);
+  else routingDomainGroups[exitKey].splice(editingIndex, 1, ...groups);
+  syncRoutingDomains();
   showRoutingRulesMessage(
     domains.length === 1 ? "routingDomainAdded" : "routingDomainsAdded",
     { domain: domains[0], count: domains.length }
@@ -121,7 +146,7 @@ function addRoutingDomain(exitKey, input) {
   return true;
 }
 
-function openRoutingRuleEditor(exitKey, group, addButton) {
+function openRoutingRuleEditor(exitKey, group, addButton, groupIndex = -1) {
   closeRoutingRuleEditors();
   addButton.classList.add("hidden");
 
@@ -130,6 +155,10 @@ function openRoutingRuleEditor(exitKey, group, addButton) {
 
   const input = document.createElement("input");
   input.type = "text";
+  if (groupIndex >= 0) {
+    input.dataset.groupIndex = String(groupIndex);
+    input.value = routingDomainGroups[exitKey][groupIndex].join(", ");
+  }
   input.className = "settings-input";
   input.maxLength = 52000;
   input.autocomplete = "off";
@@ -221,7 +250,8 @@ function createRoutingRuleGroup(exit) {
   list.className = "routing-rule-list";
   list.dataset.emptyLabel = t("routingNoSites");
 
-  for (const domain of routingRulesByExit[exit.key]) {
+  for (const [groupIndex, domains] of routingDomainGroups[exit.key].entries()) {
+    const domain = domains.join(", ");
     const item = document.createElement("div");
     item.className = "routing-rule-item";
 
@@ -238,14 +268,27 @@ function createRoutingRuleGroup(exit) {
       t("routingRemoveDomain", { domain })
     );
     remove.addEventListener("click", () => {
-      routingRulesByExit[exit.key] = routingRulesByExit[exit.key]
-        .filter(value => value !== domain);
+      closeRoutingRuleEditors();
+      routingDomainGroups[exit.key].splice(groupIndex, 1);
+      syncRoutingDomains();
       showRoutingRulesMessage("routingDomainRemoved", { domain });
       routingRulesChanged();
       renderRoutingRules();
     });
 
-    item.append(domainText, remove);
+    item.append(domainText);
+    if (routingGroupingAvailable && exit.available) {
+      const edit = document.createElement("button");
+      edit.type = "button";
+      edit.className = "routing-rule-edit";
+      edit.textContent = "✎";
+      edit.setAttribute("aria-label", t("routingEditGroup", { domain }));
+      edit.addEventListener("click", () => {
+        openRoutingRuleEditor(exit.key, group, group.querySelector(".routing-rule-add"), groupIndex);
+      });
+      item.append(edit);
+    }
+    item.append(remove);
     list.appendChild(item);
   }
 
@@ -308,7 +351,7 @@ function getRoutingRulesSelection({ focus = false } = {}) {
   );
 }
 
-function setRoutingRules(value = {}) {
+function setRoutingRules(value = {}, groups = null) {
   const source = value?.exits && typeof value.exits === "object"
     ? value.exits
     : value;
@@ -333,6 +376,9 @@ function setRoutingRules(value = {}) {
   }
 
   routingRulesByExit = next;
+  routingDomainGroups = Object.fromEntries(ROUTING_RULE_EXITS.map(exit => [
+    exit.key, groups ? groups[exit.key].map(group => [...group]) : next[exit.key].map(domain => [domain])
+  ]));
   renderRoutingRules();
 }
 
