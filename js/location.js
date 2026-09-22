@@ -32,18 +32,7 @@ function calculateRecommendedEntryPoint() {
   const moscowAvailable = latencyAvailable(moscow);
 
   if (geographicEntryPoint === "moscow") {
-    if (!moscowAvailable && rigaAvailable) {
-      return "riga";
-    }
-
-    if (
-      moscowAvailable
-      && rigaAvailable
-      && moscow >= riga + LATENCY_OVERRIDE_THRESHOLD_MS
-    ) {
-      return "riga";
-    }
-
+    // An HTTP latency response does not establish that IKEv2 is reachable.
     return "moscow";
   }
 
@@ -136,6 +125,21 @@ function selectRecommendedEntryPoint() {
 }
 
 function renderEntryPointRecommendation() {
+  for (const server of ["riga", "moscow"]) {
+    const note = document.getElementById(server + "Recommendation");
+    if (note) {
+      note.textContent = t("entryPointRecommended");
+      note.classList.toggle("hidden", recommendedEntryPoint !== server);
+    }
+  }
+  const restricted = geographicEntryPoint === "moscow";
+  const warning = document.getElementById("rigaConnectionWarning");
+  if (warning) {
+    warning.textContent = t("entryPointRigaWarning");
+    warning.classList.toggle("hidden", !restricted);
+  }
+  document.getElementById("serverRiga")?.closest(".server-option")
+    ?.classList.toggle("server-caution", restricted);
   if (!entryPointNote) {
     return;
   }
@@ -152,8 +156,10 @@ function renderEntryPointRecommendation() {
     return;
   }
 
-  entryPointNote.textContent = t(key);
-  entryPointNote.className = "entry-point-note";
+  // Keep the live announcement accessible; visible copy lives under each server.
+  entryPointNote.textContent = t(recommendedEntryPoint === "moscow" ? "cityMoscow" : "cityRiga")
+    + ": " + t("entryPointRecommended");
+  entryPointNote.className = "visually-hidden";
 }
 
 async function loadEntryPointRecommendation() {

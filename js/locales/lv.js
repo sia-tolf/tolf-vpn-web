@@ -199,6 +199,8 @@ I18N.lv = {
   entryPointRecommendationMoscow: "Jūsu savienojumam iesakām Maskavu. Parasti tā ir ātrāka un uzticamāka.",
   entryPointRecommendationRiga: "Jūsu savienojumam iesakām Rīgu. Parasti tā ir ātrāka un uzticamāka.",
   cityRiga: "Rīga",
+  entryPointRecommended: "Ieteicams jūsu savienojumam.",
+  entryPointRigaWarning: "Jūsu operators var ierobežot tiešus savienojumus no Krievijas.",
   cityMoscow: "Maskava",
   cityLondon: "Londona",
   cityNewYork: "Ņujorka",

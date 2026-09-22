@@ -199,6 +199,8 @@ I18N.en = {
   entryPointRecommendationMoscow: "For your connection, we recommend Moscow. This is usually faster and more reliable.",
   entryPointRecommendationRiga: "For your connection, we recommend Riga. This is usually faster and more reliable.",
   cityRiga: "Riga",
+  entryPointRecommended: "Recommended for your connection.",
+  entryPointRigaWarning: "Your operator may restrict direct connections from Russia.",
   cityMoscow: "Moscow",
   cityLondon: "London",
   cityNewYork: "New York",
