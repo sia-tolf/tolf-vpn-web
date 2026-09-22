@@ -11,9 +11,7 @@ let routingRulesByExit = {
 };
 
 function routingRulesChanged() {
-  if (typeof profileSettingsChanged === "function") {
-    profileSettingsChanged();
-  }
+  if (typeof routingPolicyEdited === "function") routingPolicyEdited();
 }
 
 function normalizeRoutingDomain(rawValue) {
@@ -54,7 +52,8 @@ function normalizeRoutingDomain(rawValue) {
 
 function findRoutingDomain(domain) {
   for (const exit of ROUTING_RULE_EXITS) {
-    if (routingRulesByExit[exit.key].includes(domain)) {
+    if (routingRulesByExit[exit.key].some(existing => existing === domain ||
+        existing.endsWith("." + domain) || domain.endsWith("." + existing))) {
       return exit;
     }
   }
@@ -82,6 +81,7 @@ function closeRoutingRuleEditors() {
 }
 
 function addRoutingDomain(exitKey, input) {
+  if (!ROUTING_RULE_EXITS.some(exit => exit.key === exitKey && exit.available)) return false;
   const domain = normalizeRoutingDomain(input.value);
 
   if (!domain) {
@@ -103,6 +103,10 @@ function addRoutingDomain(exitKey, input) {
     return false;
   }
 
+  if (Object.values(routingRulesByExit).flat().length >= 200) {
+    showRoutingRulesMessage("routingLimit", {}, true);
+    return false;
+  }
   routingRulesByExit[exitKey].push(domain);
   routingRulesByExit[exitKey].sort((left, right) => left.localeCompare(right));
   showRoutingRulesMessage("routingDomainAdded", { domain });
@@ -255,6 +259,7 @@ function renderRoutingRules() {
   routingRuleGroups.replaceChildren(
     ...ROUTING_RULE_EXITS.map(createRoutingRuleGroup)
   );
+  if (typeof renderRoutingPolicyControls === "function") renderRoutingPolicyControls();
 }
 
 function getRoutingRulesSelection({ focus = false } = {}) {
