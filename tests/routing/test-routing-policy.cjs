@@ -108,3 +108,19 @@ test('polling preserves dirty editor when another browser updates the server', a
   assert.deepEqual(Array.from(c.getRoutingRulesSelection().riga), ['example.com']);
   assert.equal(c.elements.routingPolicyStatus.textContent, 'routingConflict');
 });
+
+test("group-aware API saves and restores ordered groups alongside flat routes", async () => {
+  const groups = {riga:[],moscow:[["b.test","a.test"],["c.test"]],usa:[]};
+  let posted;
+  const c = context(async (_url, opts) => {
+    if (opts.method === "POST") posted = JSON.parse(opts.body);
+    return snapshot(2, {groupingAvailable:true,routingGroups:groups,
+      routingRules:{riga:[],moscow:["a.test","b.test","c.test"],usa:[]}});
+  });
+  c.setRoutingAccount("user0"); await settle();
+  c.routingPolicyEdited(); await c.saveRoutingPolicy();
+  assert.deepEqual(posted.routingGroups, groups);
+  assert.deepEqual(JSON.parse(JSON.stringify(c.getRoutingDomainGroups())), groups);
+  assert.throws(() => c.validateRoutingSnapshot(snapshot(2, {
+    groupingAvailable:true,routingGroups:groups})), /match/);
+});

@@ -17,6 +17,7 @@ spec.loader.exec_module(routing)
 
 class RoutingTests(unittest.TestCase):
     def setUp(self):
+        self.max_body = routing.MAX_BODY
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.db = str(Path(self.temp.name) / 'test.db')
@@ -88,7 +89,7 @@ class RoutingTests(unittest.TestCase):
         self.assertEqual(self.client.post('/vpn/routing-rules', headers=self.headers, content='{}').status_code, 415)
         headers = {**self.headers, 'content-type': 'application/json'}
         self.assertEqual(self.client.post('/vpn/routing-rules', headers=headers, content='x').status_code, 400)
-        self.assertEqual(self.client.post('/vpn/routing-rules', headers=headers, content='x'*65537).status_code, 413)
+        self.assertEqual(self.client.post('/vpn/routing-rules', headers=headers, content='x'*(self.max_body + 1)).status_code, 413)
 
     def test_clear_rules(self):
         self.save()

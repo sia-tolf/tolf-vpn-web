@@ -14,7 +14,7 @@ VERSION = 1
 EXITS = ("riga", "moscow", "usa")
 AVAILABLE = ("riga", "moscow")
 MAX_DOMAINS = 200
-MAX_BODY = 65536
+MAX_BODY = 131072
 
 
 def connect(db):
@@ -35,6 +35,10 @@ def initialize(db):
                 updated_at TEXT NOT NULL
             )
         """)
+
+        columns = {row["name"] for row in con.execute("PRAGMA table_info(vpn_personal_routing)")}
+        if "groups_json" not in columns:
+            con.execute("ALTER TABLE vpn_personal_routing ADD COLUMN groups_json TEXT")
 
 
 def domain_name(value):
@@ -91,8 +95,60 @@ def validate_rules(rules):
     return result
 
 
+def validate_groups(value, rules):
+    if not isinstance(value, dict) or set(value) != set(EXITS):
+        raise HTTPException(400, "Invalid routing groups")
+    result = {}
+    count = 0
+    for key in EXITS:
+        groups = value[key]
+        if not isinstance(groups, list) or len(groups) > MAX_DOMAINS:
+            raise HTTPException(400, "Invalid routing groups")
+        result[key] = []
+        seen = set()
+        for group in groups:
+            if not isinstance(group, list) or not group:
+                raise HTTPException(400, "Routing groups must be nonempty lists")
+            count += len(group)
+            if count > MAX_DOMAINS:
+                raise HTTPException(400, "Maximum 200 routing domains per account")
+            normalized = [domain_name(domain) for domain in group]
+            if len(set(normalized)) != len(normalized) or seen.intersection(normalized):
+                raise HTTPException(400, "Duplicate grouped domain")
+            seen.update(normalized)
+            result[key].append(normalized)
+        if seen != set(rules[key]):
+            raise HTTPException(400, "Routing groups must match routing rules")
+    return result
+
+
+def stored_groups(row, rules):
+    if row and row["groups_json"]:
+        return json.loads(row["groups_json"])
+    return {key: [[domain] for domain in rules[key]] for key in EXITS}
+
+
+def reconcile_groups(row, rules):
+    old_rules = json.loads(row["rules_json"]) if row else {key: [] for key in EXITS}
+    old = stored_groups(row, old_rules)
+    result = {}
+    for key in EXITS:
+        remaining = set(rules[key])
+        result[key] = []
+        for group in old[key]:
+            retained = [domain for domain in group if domain in remaining]
+            if retained:
+                result[key].append(retained)
+                remaining.difference_update(retained)
+        result[key].extend([[domain] for domain in rules[key] if domain in remaining])
+    return result
+
+
 def snapshot(row):
+    rules = json.loads(row["rules_json"]) if row else {key: [] for key in EXITS}
     return {
+        "groupingAvailable": True,
+        "routingGroups": stored_groups(row, rules),
         "protocol": VERSION,
         "revision": row["revision"] if row else 0,
         "routingRules": json.loads(row["rules_json"]) if row else {key: [] for key in EXITS},
@@ -122,12 +178,14 @@ def get_policy(db, user_id):
 
 
 def save_policy(db, user_id, payload):
-    if not isinstance(payload, dict) or set(payload) != {"revision", "routingRules"}:
+    if (not isinstance(payload, dict) or not {"revision", "routingRules"} <= set(payload)
+            or set(payload) - {"revision", "routingRules", "routingGroups"}):
         raise HTTPException(400, "Expected revision and routingRules")
     expected = payload["revision"]
     if type(expected) is not int or not 0 <= expected < 2**53 - 1:
         raise HTTPException(400, "Invalid routing revision")
     rules = validate_rules(payload["routingRules"])
+    groups = validate_groups(payload["routingGroups"], rules) if "routingGroups" in payload else None
     encoded = json.dumps(rules, sort_keys=True, separators=(",", ":"))
     with closing(connect(db)) as con, con:
         con.execute("BEGIN IMMEDIATE")
@@ -136,15 +194,20 @@ def save_policy(db, user_id, payload):
         revision = row["revision"] if row else 0
         if expected != revision:
             raise HTTPException(409, "Routing policy changed; reload before saving")
+        if groups is None:
+            groups = reconcile_groups(row, rules)
+        groups_encoded = json.dumps(groups, sort_keys=True, separators=(",", ":"))
         # Repeated identical saves need not create another pending revision.
-        if row and row["rules_json"] == encoded and row["vpn_username"] == username:
+        if (row and row["rules_json"] == encoded and row["vpn_username"] == username
+                and stored_groups(row, rules) == groups):
             return snapshot(row)
         now = datetime.now(timezone.utc).isoformat()
         con.execute("""INSERT INTO vpn_personal_routing
-            (user_id,vpn_username,revision,rules_json,updated_at) VALUES (?,?,?,?,?)
+            (user_id,vpn_username,revision,rules_json,updated_at,groups_json) VALUES (?,?,?,?,?,?)
             ON CONFLICT(user_id) DO UPDATE SET vpn_username=excluded.vpn_username,
-            revision=excluded.revision,rules_json=excluded.rules_json,updated_at=excluded.updated_at
-            """, (user_id, username, revision + 1, encoded, now))
+            revision=excluded.revision,rules_json=excluded.rules_json,updated_at=excluded.updated_at,
+            groups_json=excluded.groups_json
+            """, (user_id, username, revision + 1, encoded, now, groups_encoded))
         row = con.execute("SELECT * FROM vpn_personal_routing WHERE user_id=?", (user_id,)).fetchone()
         return snapshot(row)
 

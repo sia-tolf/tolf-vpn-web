@@ -122,3 +122,28 @@ test("save with open editor includes the complete comma list", () => {
   c.renderRoutingRules = ()=>{};
   assert.deepEqual(Array.from(c.getRoutingRulesSelection().moscow), ["delfi.lv","example.com"]);
 });
+
+test("group order survives load, editing replaces a group, invalid edit is atomic", () => {
+  const c = routingContext();
+  vm.runInContext("routingGroupingAvailable = true", c);
+  const groups = {riga:[],moscow:[["b.test","a.test"],["c.test"]],usa:[]};
+  c.setRoutingRules({moscow:["a.test","b.test","c.test"]}, groups);
+  assert.deepEqual(JSON.parse(JSON.stringify(c.getRoutingDomainGroups())), groups);
+  const input = {value:"b.test, d.test",dataset:{groupIndex:"0"},setAttribute(){},focus(){}};
+  assert.equal(c.addRoutingDomain("moscow", input), true);
+  assert.deepEqual(JSON.parse(JSON.stringify(c.getRoutingDomainGroups().moscow)), [["b.test","d.test"],["c.test"]]);
+  input.value = "c.test, e.test";
+  assert.equal(c.addRoutingDomain("moscow", input), false);
+  assert.deepEqual(JSON.parse(JSON.stringify(c.getRoutingDomainGroups().moscow)), [["b.test","d.test"],["c.test"]]);
+});
+
+test("separate additions keep their boundaries and old rules become singletons", () => {
+  const c = routingContext();
+  c.setRoutingRules({moscow:["old.test"]});
+  vm.runInContext("routingGroupingAvailable = true", c);
+  for (const value of ["b.test,a.test","c.test"]) {
+    assert.equal(c.addRoutingDomain("moscow", {value,setAttribute(){},focus(){}}), true);
+  }
+  assert.deepEqual(JSON.parse(JSON.stringify(c.getRoutingDomainGroups().moscow)),
+    [["old.test"],["b.test","a.test"],["c.test"]]);
+});

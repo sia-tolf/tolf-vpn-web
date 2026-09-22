@@ -38,6 +38,23 @@ function validateRoutingSnapshot(data) {
       throw new Error("Invalid routing domains");
     }
   }
+  if (data.groupingAvailable === true) {
+    if (!data.routingGroups || Object.keys(data.routingGroups).sort().join(",") !== "moscow,riga,usa") {
+      throw new Error("Invalid routing groups");
+    }
+    for (const key of ["riga", "moscow", "usa"]) {
+      const groups = data.routingGroups[key];
+      if (!Array.isArray(groups) || groups.some(group => !Array.isArray(group) || !group.length ||
+          group.some(domain => typeof domain !== "string" || normalizeRoutingDomain(domain) !== domain))) {
+        throw new Error("Invalid routing group");
+      }
+      const flat = groups.flat();
+      if (new Set(flat).size !== flat.length ||
+          JSON.stringify([...flat].sort()) !== JSON.stringify([...data.routingRules[key]].sort())) {
+        throw new Error("Routing groups do not match rules");
+      }
+    }
+  }
   return data;
 }
 
@@ -77,7 +94,8 @@ async function refreshRoutingPolicy({ discard = false } = {}) {
     for (const exit of ROUTING_RULE_EXITS) {
       exit.available = exit.key !== "usa" && data.availableExits.includes(exit.key);
     }
-    setRoutingRules(data.routingRules);
+    routingGroupingAvailable = data.groupingAvailable === true;
+    setRoutingRules(data.routingRules, routingGroupingAvailable ? data.routingGroups : null);
     routingStatusKey = routingSnapshotStatus(data);
   } catch (error) {
     if (epoch !== routingEpoch || request !== routingRequest) return;
@@ -96,18 +114,21 @@ async function saveRoutingPolicy() {
   if (!rules) return;
   const epoch = routingEpoch;
   ++routingRequest; // An older status GET must not replace the POST result.
+  const payload = { revision: routingRevision, routingRules: rules };
+  if (routingGroupingAvailable) payload.routingGroups = getRoutingDomainGroups();
   routingSaving = true;
   routingStatusKey = "routingSaving";
   renderRoutingPolicyControls();
   try {
     const data = validateRoutingSnapshot(await apiRequest("/vpn/routing-rules", {
-      method: "POST", body: JSON.stringify({ revision: routingRevision, routingRules: rules })
+      method: "POST", body: JSON.stringify(payload)
     }));
     if (epoch !== routingEpoch) return;
     routingRevision = data.revision;
     routingDirty = false;
     routingConflict = false;
-    setRoutingRules(data.routingRules);
+    routingGroupingAvailable = data.groupingAvailable === true;
+    setRoutingRules(data.routingRules, routingGroupingAvailable ? data.routingGroups : null);
     routingStatusKey = routingSnapshotStatus(data);
   } catch (error) {
     if (epoch !== routingEpoch) return;
@@ -131,6 +152,7 @@ function setRoutingAccount(username) {
   routingRevision = null;
   routingDirty = routingSaving = routingLoading = routingConflict = false;
   routingStatusKey = username ? "routingLoading" : "routingSignIn";
+  routingGroupingAvailable = false;
   resetRoutingRules();
   renderRoutingPolicyControls();
   if (routingAccount) {
