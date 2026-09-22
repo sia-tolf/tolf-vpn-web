@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Local user0/delfi.lv -> Moscow service; no API applied acknowledgements."""
+"""Account-scoped desired-policy receiver, with observed runtime acknowledgements."""
 import ctypes
 import fcntl
 import importlib.util
@@ -18,6 +18,9 @@ ROOT = Path(__file__).resolve().parent
 spec = importlib.util.spec_from_file_location('routing_core', ROOT / 'core.py')
 core = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(core)
+spec = importlib.util.spec_from_file_location('routing_policy', ROOT / 'policy.py')
+policy = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(policy)
 core.TABLE = 'tolf_user0_routing'
 core.TAG = 'tolf-user0-routing-v1'
 RUNTIME = Path('/var/run/tolf-user0-routing')
@@ -96,42 +99,59 @@ def die_with_parent(parent):
         os._exit(125)
 
 
-def check_route():
-    data = core.command([
-        'ip', '-4', 'route', 'get', '104.20.18.136',
-        'from', '10.10.10.2', 'iif', 'br-lan', 'mark', '0x100'
-    ], capture_output=True, text=True).stdout.split()
-    if 'dev' not in data or data[data.index('dev') + 1] != 'br-lan':
-        raise RuntimeError('Moscow mark no longer selects br-lan')
+def check_route(configured=None):
+    groups = (configured or policy.bootstrap())['routingRules']
+    for exit_name, mark, devices in [('moscow', '0x100', ('br-lan',)),
+                                     ('riga', '0x200', ('awgriga', 'gre4-riga_gre'))]:
+        if not groups[exit_name]:
+            continue
+        data = core.command([
+            'ip', '-4', 'route', 'get', '104.20.18.136',
+            'from', '10.10.10.2', 'iif', 'br-lan', 'mark', mark
+        ], capture_output=True, text=True).stdout.split()
+        if 'dev' not in data or data[data.index('dev') + 1] not in devices:
+            raise RuntimeError(exit_name + ' mark selects an unexpected output')
 
 
-def run_service():
+def conflict_count():
+    sets = []
+    for name in ('moscow4', 'riga4'):
+        value = json.loads(core.command(['nft', '-j', 'list', 'set', 'inet', core.TABLE, name],
+                                       capture_output=True, text=True).stdout)
+        sets.append(policy.nft_addresses(value))
+    return len(sets[0] & sets[1])
+
+
+def run_service(configured=None):
+    configured = configured or policy.load()
+    fingerprint = policy.digest(configured)
     for kind in (socket.SOCK_STREAM, socket.SOCK_DGRAM):
         with socket.socket(socket.AF_INET, kind) as sock:
             sock.bind((core.DNS, core.PORT))
-    check_route()
+    check_route(configured)
     dns_alive(53)
     config = RUNTIME / 'dnsmasq.conf'
     config.write_text(
         f'port={core.PORT}\nlisten-address={core.DNS}\nbind-interfaces\n'
         f'pid-file={RUNTIME}/dnsmasq.pid\nno-resolv\nno-hosts\n'
         'cache-size=0\nmax-ttl=300\nuser=root\n'
-        f'server={core.DNS}#53\nnftset=/delfi.lv/4#inet#{core.TABLE}#delfi4\n'
-        'log-facility=-\n')
+        f'server={core.DNS}#53\n' + ''.join(
+            f'nftset=/{domain}/4#inet#{core.TABLE}#{exit_name}4\n'
+            for exit_name in ('moscow', 'riga') for domain in configured['routingRules'][exit_name]
+        ) + 'log-facility=-\n')
     core.command(['dnsmasq', '--test', '--conf-file=' + str(config)])
     setup = f'''create table inet {core.TABLE} {{ comment "{OWNER}"; }}
-add set inet {core.TABLE} delfi4 {{ type ipv4_addr; flags timeout; timeout 24h; size 4096; }}
+add set inet {core.TABLE} moscow4 {{ type ipv4_addr; flags timeout; timeout 24h; size 4096; }}
+add set inet {core.TABLE} riga4 {{ type ipv4_addr; flags timeout; timeout 24h; size 4096; }}
 add chain inet {core.TABLE} guard {{ type filter hook input priority -10; policy accept; }}
 add chain inet {core.TABLE} dns_redirect {{ type nat hook prerouting priority -101; policy accept; }}
-add chain inet {core.TABLE} mark_moscow {{ type filter hook prerouting priority -140; policy accept; }}
+add chain inet {core.TABLE} mark_personal {{ type filter hook prerouting priority -140; policy accept; }}
 add chain inet {core.TABLE} verify_exit {{ type filter hook forward priority -5; policy accept; }}
 '''
     # The service itself may probe its private listener; forwarded clients still
     # require authenticated IPsec selectors and a translated DNS connection.
     def rules(current):
-        return core.rule_batch(current) + (
-            f'insert rule inet {core.TABLE} guard iifname "lo" '
-            f'ip daddr {core.DNS} meta l4proto {{ tcp, udp }} th dport {core.PORT} accept\n')
+        return policy.nft_rules(current, core.TABLE, core.DNS, core.PORT, configured)
 
     core.nft(setup + rules([]), check=True)
     worker = None
@@ -149,13 +169,18 @@ add chain inet {core.TABLE} verify_exit {{ type filter hook forward priority -5;
         dns_alive(core.PORT)
         previous = []
         last_health = time.monotonic()
-        log('Local rule enabled: user0 / delfi.lv -> Moscow; waiting for authenticated sessions')
+        log('Policy ready: user0 revision ' + str(configured['revision']))
         while not STOP:
+            if policy.digest(policy.load()) != fingerprint:
+                log('New desired policy detected; replacing the previous rules')
+                return
             if worker.poll() is not None:
                 raise RuntimeError('Private dnsmasq stopped')
             if not owned_table():
                 raise RuntimeError('Routing table disappeared; restarting cleanly')
             current = core.read_bindings()
+            if not any(configured['routingRules'].values()):
+                current = []
             new_addresses = addresses | {b[0] for b in current}
             if new_addresses != addresses:
                 state_write(RUNTIME / 'addresses.json', sorted(new_addresses))
@@ -173,11 +198,14 @@ add chain inet {core.TABLE} verify_exit {{ type filter hook forward priority -5;
                 log('Restored fw4 input exceptions')
             if time.monotonic() - last_health >= 15:
                 dns_alive(core.PORT)
-                check_route()
+                check_route(configured)
                 last_health = time.monotonic()
             state_write(RUNTIME / 'status.json', {
                 'pid': os.getpid(), 'updated': time.time(), 'bindings': current,
-                'rule': 'user0: delfi.lv -> moscow', 'apiAcknowledged': False
+                'protocol': policy.PROTOCOL,
+                'policyRevision': configured['revision'], 'policyDigest': fingerprint,
+                'routingRules': configured['routingRules'],
+                'conflictingAddresses': conflict_count(), 'apiAcknowledged': False
             })
             time.sleep(2)
     finally:
@@ -215,7 +243,8 @@ def main():
         signal.signal(sig, stop)
     recover()
     if '--cleanup' not in sys.argv:
-        run_service()
+        while not STOP:
+            run_service(policy.load())
 
 
 if __name__ == '__main__':
