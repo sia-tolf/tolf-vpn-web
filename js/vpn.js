@@ -314,7 +314,7 @@ profileQrStyle.textContent = `
     flex: 0 0 100%;
     width: 100%;
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
     gap: 12px;
   }
   .profile-delivery-actions.hidden { display: none !important; }
@@ -324,7 +324,7 @@ profileQrStyle.textContent = `
     order: 1;
     min-width: 0;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr);
     align-items: stretch;
     gap: 8px;
   }
@@ -341,16 +341,32 @@ profileQrStyle.textContent = `
     font: inherit;
     font-size: 16px;
   }
-  .profile-link-row button {
-    width: auto;
+  .profile-link-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 8px;
     min-width: 0;
-    min-height: 44px;
-    margin: 0;
-    padding: 8px 12px;
-    font-size: 14px;
-    line-height: 1.2;
-    max-width: 160px;
   }
+  #profileDeliveryActions .profile-link-buttons > button {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    min-height: 50px;
+    height: 100%;
+    margin: 0;
+    padding: 10px 8px;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.25;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #profileQrButton { order: 2; }
   .profile-link-status {
     grid-column: 1 / -1;
     margin: 0;
@@ -431,13 +447,16 @@ profileLinkInput.spellcheck = false;
 const profileCopyLinkButton = document.createElement("button");
 profileCopyLinkButton.id = "profileCopyLinkButton";
 profileCopyLinkButton.type = "button";
-profileCopyLinkButton.className = "constructive";
+profileCopyLinkButton.className = "button-link constructive";
 profileCopyLinkButton.textContent = profileQrText("copy");
 const profileLinkStatus = document.createElement("p");
 profileLinkStatus.className = "profile-link-status";
 profileLinkStatus.setAttribute("role", "status");
 profileLinkStatus.setAttribute("aria-live", "polite");
-profileLinkRow.append(profileLinkInput, profileCopyLinkButton, profileLinkStatus);
+const profileLinkButtons = document.createElement("div");
+profileLinkButtons.className = "profile-link-buttons";
+profileLinkButtons.append(profileCopyLinkButton, shareProfileButton);
+profileLinkRow.append(profileLinkInput, profileLinkButtons, profileLinkStatus);
 profileDeliveryActions.append(profileLinkRow);
 
 profileCopyLinkButton.addEventListener("click", async () => {
