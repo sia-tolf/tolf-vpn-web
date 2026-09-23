@@ -51,16 +51,28 @@ function profileQrText(key) {
   const language = (typeof currentLanguage === "string" ? currentLanguage : document.documentElement.lang) || "en";
   const copy = {
     en: {
+      link: "Profile installation link",
+      copy: "Copy link",
+      copied: "Link copied",
+      copyFailed: "Select and copy the link manually.",
       button: "QR code",
       caption: "Scan this code on another iPhone or iPad to open the profile installation page.",
       error: "Could not create the QR code for this profile."
     },
     ru: {
+      link: "Ссылка на установку профиля",
+      copy: "Скопировать ссылку",
+      copied: "Ссылка скопирована",
+      copyFailed: "Выделите и скопируйте ссылку вручную.",
       button: "QR-код",
       caption: "Отсканируйте этот код на другом iPhone или iPad, чтобы открыть страницу установки профиля.",
       error: "Не удалось создать QR-код для этого профиля."
     },
     lv: {
+      link: "Profila instalēšanas saite",
+      copy: "Kopēt saiti",
+      copied: "Saite nokopēta",
+      copyFailed: "Atlasiet un kopējiet saiti manuāli.",
       button: "QR kods",
       caption: "Noskenējiet šo kodu citā iPhone vai iPad, lai atvērtu profila instalēšanas lapu.",
       error: "Neizdevās izveidot šī profila QR kodu."
@@ -307,7 +319,48 @@ profileQrStyle.textContent = `
   }
   .profile-delivery-actions.hidden { display: none !important; }
   .profile-delivery-actions > .button-link { width: 100%; min-width: 0; }
+  .profile-link-row {
+    grid-column: 1 / -1;
+    order: 1;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .profile-link-row input {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    height: 44px;
+    padding: 0 10px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--code-background);
+    color: var(--text);
+    font: inherit;
+    font-size: 16px;
+  }
+  .profile-link-row button {
+    width: auto;
+    min-width: 0;
+    min-height: 44px;
+    margin: 0;
+    padding: 8px 12px;
+    font-size: 14px;
+    line-height: 1.2;
+    max-width: 160px;
+  }
+  .profile-link-status {
+    grid-column: 1 / -1;
+    margin: 0;
+    color: var(--secondary);
+    font-size: 13px;
+    line-height: 1.4;
+  }
+  .profile-link-status:empty { display: none; }
   .profile-qr-panel {
+    order: 3;
     grid-column: 1 / -1;
     display: flex;
     flex-direction: column;
@@ -338,6 +391,7 @@ profileQrStyle.textContent = `
   @media (max-width: 620px) {
     .profile-delivery-actions { grid-template-columns: minmax(0, 1fr); }
     .profile-qr-panel { grid-column: 1; }
+    #profileQrButton { order: 2; }
   }
 `;
 document.head.appendChild(profileQrStyle);
@@ -365,11 +419,55 @@ profileQrCaption.textContent = profileQrText("caption");
 profileQrPanel.append(profileQrCanvas, profileQrCaption);
 profileDeliveryActions.append(profileQrButton, profileQrPanel);
 
+const profileLinkRow = document.createElement("div");
+profileLinkRow.className = "profile-link-row";
+const profileLinkInput = document.createElement("input");
+profileLinkInput.id = "profileInstallLink";
+profileLinkInput.type = "text";
+profileLinkInput.readOnly = true;
+profileLinkInput.setAttribute("aria-label", profileQrText("link"));
+profileLinkInput.autocomplete = "off";
+profileLinkInput.spellcheck = false;
+const profileCopyLinkButton = document.createElement("button");
+profileCopyLinkButton.id = "profileCopyLinkButton";
+profileCopyLinkButton.type = "button";
+profileCopyLinkButton.className = "constructive";
+profileCopyLinkButton.textContent = profileQrText("copy");
+const profileLinkStatus = document.createElement("p");
+profileLinkStatus.className = "profile-link-status";
+profileLinkStatus.setAttribute("role", "status");
+profileLinkStatus.setAttribute("aria-live", "polite");
+profileLinkRow.append(profileLinkInput, profileCopyLinkButton, profileLinkStatus);
+profileDeliveryActions.append(profileLinkRow);
+
+profileCopyLinkButton.addEventListener("click", async () => {
+  const url = profileLinkInput.value;
+  if (!url) return;
+  let copied = false;
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(url);
+      copied = true;
+    }
+  } catch {}
+  if (profileLinkInput.value !== url) return;
+  if (!copied) {
+    profileLinkInput.focus();
+    profileLinkInput.select();
+    profileLinkInput.setSelectionRange(0, url.length);
+    try { copied = document.execCommand("copy"); } catch {}
+  }
+  profileLinkStatus.textContent = profileQrText(copied ? "copied" : "copyFailed");
+});
+
 const setInstallLinkWithoutQr = setInstallLink;
 setInstallLink = function setInstallLinkWithQr(profileUrl) {
   setInstallLinkWithoutQr(profileUrl);
   prepareProfileShareFile(profileUrl);
   profileQrUrl = profileUrl ? String(profileUrl) : "";
+  profileLinkInput.value = profileQrUrl;
+  profileCopyLinkButton.disabled = !profileQrUrl;
+  profileLinkStatus.textContent = "";
   profileQrPanel.classList.add("hidden");
   profileQrButton.setAttribute("aria-expanded", "false");
   profileQrCanvas.width = 0;
@@ -398,6 +496,9 @@ profileQrButton.addEventListener("click", () => {
 });
 
 new MutationObserver(() => {
+  profileLinkInput.setAttribute("aria-label", profileQrText("link"));
+  profileCopyLinkButton.textContent = profileQrText("copy");
+  profileLinkStatus.textContent = "";
   profileQrButton.textContent = profileQrText("button");
   profileQrCaption.textContent = profileQrText("caption");
 }).observe(document.documentElement, {attributes: true, attributeFilter: ["lang"]});
