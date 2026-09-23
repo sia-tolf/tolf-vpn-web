@@ -324,16 +324,21 @@ profileQrStyle.textContent = `
     order: 1;
     min-width: 0;
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
     align-items: stretch;
     gap: 8px;
+  }
+  .profile-link-field {
+    position: relative;
+    grid-column: 1 / -1;
+    min-width: 0;
   }
   .profile-link-row input {
     box-sizing: border-box;
     width: 100%;
     min-width: 0;
-    height: 44px;
-    padding: 0 10px;
+    height: 50px;
+    padding: 0 54px 0 10px;
     border: 1px solid var(--border);
     border-radius: 10px;
     background: var(--code-background);
@@ -341,11 +346,30 @@ profileQrStyle.textContent = `
     font: inherit;
     font-size: 16px;
   }
-  .profile-link-row input { grid-column: 1 / -1; }
-  .profile-link-buttons { display: contents; }
-  .profile-link-buttons > #profileCopyLinkButton { grid-column: 1; }
-  .profile-link-buttons > #shareProfileButton { grid-column: 2; }
-  .profile-link-buttons > #profileQrButton { grid-column: 1 / -1; }
+  #profileCopyLinkButton {
+    position: absolute;
+    top: 50%;
+    right: 5px;
+    transform: translateY(-50%);
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+  }
+  #profileCopyLinkButton:hover { background: rgba(100, 110, 125, .12); }
+  #profileCopyLinkButton:focus-visible { outline: 2px solid var(--text); outline-offset: -2px; }
+  #profileCopyLinkButton:disabled { opacity: .5; cursor: default; }
+  #profileCopyLinkButton svg { display: block; width: 22px; height: 22px; }
+  .profile-link-buttons { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .profile-link-buttons > #shareProfileButton { grid-column: 1; }
+  .profile-link-buttons > #profileQrButton { grid-column: 1; }
   #profileDeliveryActions .profile-link-buttons > button {
     box-sizing: border-box;
     width: 100%;
@@ -365,18 +389,25 @@ profileQrStyle.textContent = `
     justify-content: center;
   }
   @media (min-width: 621px) {
-    .profile-link-row { grid-template-columns: repeat(6, minmax(0, 1fr)); }
-    .profile-link-row input { grid-column: 1 / span 4; height: 50px; }
-    .profile-link-buttons > #profileCopyLinkButton { grid-column: 5 / span 2; }
-    .profile-link-buttons > #shareProfileButton { grid-column: 1 / span 3; }
-    .profile-link-buttons > #profileQrButton { grid-column: 4 / span 3; }
+    .profile-link-buttons { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .profile-link-buttons > #profileQrButton { grid-column: 2; }
   }
   .profile-link-status {
-    grid-column: 1 / -1;
+    position: absolute;
+    z-index: 1;
+    right: 0;
+    bottom: calc(100% + 6px);
+    max-width: min(320px, 100%);
+    box-sizing: border-box;
     margin: 0;
-    color: var(--secondary);
+    padding: 7px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--code-background);
+    color: var(--text);
     font-size: 13px;
     line-height: 1.4;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .12);
   }
   .profile-link-status:empty { display: none; }
   .profile-qr-panel {
@@ -478,18 +509,23 @@ profileLinkInput.spellcheck = false;
 const profileCopyLinkButton = document.createElement("button");
 profileCopyLinkButton.id = "profileCopyLinkButton";
 profileCopyLinkButton.type = "button";
-profileCopyLinkButton.className = "button-link constructive";
-profileCopyLinkButton.textContent = profileQrText("copy");
+profileCopyLinkButton.setAttribute("aria-label", profileQrText("copy"));
+profileCopyLinkButton.title = profileQrText("copy");
+profileCopyLinkButton.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>';
 const profileLinkStatus = document.createElement("p");
 profileLinkStatus.className = "profile-link-status";
 profileLinkStatus.setAttribute("role", "status");
 profileLinkStatus.setAttribute("aria-live", "polite");
 const profileLinkButtons = document.createElement("div");
 profileLinkButtons.className = "profile-link-buttons";
-profileLinkButtons.append(profileCopyLinkButton, shareProfileButton, profileQrButton);
-profileLinkRow.append(profileLinkInput, profileLinkButtons, profileLinkStatus);
+profileLinkButtons.append(shareProfileButton, profileQrButton);
+const profileLinkField = document.createElement("div");
+profileLinkField.className = "profile-link-field";
+profileLinkField.append(profileLinkInput, profileCopyLinkButton, profileLinkStatus);
+profileLinkRow.append(profileLinkField, profileLinkButtons);
 profileDeliveryActions.append(profileLinkRow);
 
+let profileLinkStatusTimer;
 profileCopyLinkButton.addEventListener("click", async () => {
   const url = profileLinkInput.value;
   if (!url) return;
@@ -508,6 +544,8 @@ profileCopyLinkButton.addEventListener("click", async () => {
     try { copied = document.execCommand("copy"); } catch {}
   }
   profileLinkStatus.textContent = profileQrText(copied ? "copied" : "copyFailed");
+  clearTimeout(profileLinkStatusTimer);
+  if (copied) profileLinkStatusTimer = setTimeout(() => { profileLinkStatus.textContent = ""; }, 2500);
 });
 
 const setInstallLinkWithoutQr = setInstallLink;
@@ -517,6 +555,7 @@ setInstallLink = function setInstallLinkWithQr(profileUrl) {
   profileQrUrl = profileUrl ? String(profileUrl) : "";
   profileLinkInput.value = profileQrUrl;
   profileCopyLinkButton.disabled = !profileQrUrl;
+  clearTimeout(profileLinkStatusTimer);
   profileLinkStatus.textContent = "";
   profileQrPanel.classList.add("hidden");
   profileQrButton.setAttribute("aria-expanded", "false");
@@ -547,7 +586,9 @@ profileQrButton.addEventListener("click", () => {
 
 new MutationObserver(() => {
   profileLinkInput.setAttribute("aria-label", profileQrText("link"));
-  profileCopyLinkButton.textContent = profileQrText("copy");
+  profileCopyLinkButton.setAttribute("aria-label", profileQrText("copy"));
+  profileCopyLinkButton.title = profileQrText("copy");
+  clearTimeout(profileLinkStatusTimer);
   profileLinkStatus.textContent = "";
   profileQrButton.textContent = profileQrText("button");
   profileQrCaption.textContent = profileQrText("caption");
