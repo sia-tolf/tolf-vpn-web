@@ -409,8 +409,7 @@ profileQrStyle.textContent = `
     line-height: 1.45;
     text-align: center;
   }
-  @media (min-width: 621px) {
-    .vpn-profile-actions:has(#profileDeliveryActions:not(.hidden)) {
+  .vpn-profile-actions:has(#profileDeliveryActions:not(.hidden)) {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       align-items: stretch;
@@ -438,7 +437,6 @@ profileQrStyle.textContent = `
     .vpn-profile-actions:has(#profileDeliveryActions:not(.hidden)) #rotatePasswordNote {
       grid-column: 1 / -1;
     }
-  }
   @media (max-width: 620px) {
     .profile-delivery-actions { grid-template-columns: minmax(0, 1fr); }
     .profile-qr-panel { grid-column: 1; }
