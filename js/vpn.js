@@ -379,9 +379,6 @@ profileQrStyle.textContent = `
     height: 100%;
     margin: 0;
     padding: 10px 8px;
-    font-size: 14px;
-    font-weight: 600;
-    line-height: 1.25;
     white-space: normal;
     overflow-wrap: anywhere;
     display: flex;
