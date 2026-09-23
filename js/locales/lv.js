@@ -236,7 +236,7 @@ I18N.lv = {
   shareAndroidProfile: "Kopīgot .sswan",
   profileLinkCopied: "Profila saite nokopēta.",
   profileShareFailed: "Profilu neizdevās kopīgot.",
-  changeVpnPassword: "Mainīt VPN piekļuves paroli",
+  changeVpnPassword: "Mainīt VPN paroli",
   changePasswordNote: "Šī parole ir kopīga Apple un Android profiliem Rīgā un Maskavā. Pēc maiņas izveidojiet un instalējiet jaunus profilus. Windows ierīcēm ir atsevišķas paroles.",
   deleteVpnAccess: "Dzēst VPN piekļuvi",
   deleteVpnNote: "Apple un Android piekļuve tiks dzēsta abos serveros. Windows ierīces un TOLF konts tiks saglabāti.",
