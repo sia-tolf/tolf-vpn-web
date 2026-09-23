@@ -367,9 +367,9 @@ profileQrStyle.textContent = `
   #profileCopyLinkButton:focus-visible { outline: 2px solid var(--text); outline-offset: -2px; }
   #profileCopyLinkButton:disabled { opacity: .5; cursor: default; }
   #profileCopyLinkButton svg { display: block; width: 22px; height: 22px; }
-  .profile-link-buttons { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .profile-link-buttons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
   .profile-link-buttons > #shareProfileButton { grid-column: 1; }
-  .profile-link-buttons > #profileQrButton { grid-column: 1; }
+  .profile-link-buttons > #profileQrButton { grid-column: 2; }
   #profileDeliveryActions .profile-link-buttons > button {
     box-sizing: border-box;
     width: 100%;
@@ -384,10 +384,6 @@ profileQrStyle.textContent = `
     display: flex;
     align-items: center;
     justify-content: center;
-  }
-  @media (min-width: 621px) {
-    .profile-link-buttons { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .profile-link-buttons > #profileQrButton { grid-column: 2; }
   }
   .profile-link-status {
     position: absolute;
