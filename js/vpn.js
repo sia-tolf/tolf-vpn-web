@@ -1,4 +1,51 @@
 let profileQrUrl = "";
+let profileShareFile = null;
+let profileShareRequest = null;
+let profileShareController = null;
+
+function prepareProfileShareFile(profileUrl) {
+  profileShareController?.abort();
+  profileShareFile = null;
+  profileShareRequest = null;
+  if (!profileUrl) return;
+
+  const downloadUrl = profileDownloadUrl(profileUrl);
+  const platform = currentPlatform;
+  profileShareController = new AbortController();
+  profileShareRequest = fetch(downloadUrl, {
+    credentials: "omit",
+    cache: "no-store",
+    signal: profileShareController.signal
+  }).then(async response => {
+    if (!response.ok) throw new Error("Profile download failed");
+    const blob = await response.blob();
+    if (!blob.size || /text\/html/i.test(blob.type)) {
+      throw new Error("Profile file was not returned");
+    }
+    const file = new File([blob], platform === "android"
+      ? "TOLF-VPN.sswan" : "TOLF-VPN.mobileconfig", {
+      type: platform === "android" ? "application/vnd.strongswan.profile"
+        : "application/x-apple-aspen-config"
+    });
+    if (shareProfileButton.dataset.profileUrl === downloadUrl) {
+      profileShareFile = file;
+    }
+    return file;
+  });
+  // A failed preload is reported only when the user presses Share.
+  profileShareRequest.catch(() => {});
+}
+
+function downloadProfileShareFile(file) {
+  const url = URL.createObjectURL(file);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = file.name;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+}
 
 function profileQrText(key) {
   const language = (typeof currentLanguage === "string" ? currentLanguage : document.documentElement.lang) || "en";
@@ -321,6 +368,7 @@ profileDeliveryActions.append(profileQrButton, profileQrPanel);
 const setInstallLinkWithoutQr = setInstallLink;
 setInstallLink = function setInstallLinkWithQr(profileUrl) {
   setInstallLinkWithoutQr(profileUrl);
+  prepareProfileShareFile(profileUrl);
   profileQrUrl = profileUrl ? String(profileUrl) : "";
   profileQrPanel.classList.add("hidden");
   profileQrButton.setAttribute("aria-expanded", "false");
@@ -431,21 +479,41 @@ shareProfileButton.addEventListener("click", async () => {
   if (!profileUrl) return;
 
   try {
-    if (typeof navigator.share === "function") {
-      await navigator.share({
-        title: "TOLF VPN",
-        url: profileUrl
-      });
+    let file = profileShareFile;
+    if (!file) {
+      shareProfileButton.disabled = true;
+      if (!profileShareRequest) prepareProfileShareFile(profileUrl);
+      file = await profileShareRequest;
+      if (shareProfileButton.dataset.profileUrl !== profileUrl) return;
+      // Safari requires a fresh tap if downloading used up user activation.
+      if (navigator.userActivation && !navigator.userActivation.isActive &&
+          typeof navigator.share === "function" &&
+          navigator.canShare?.({ files: [file] })) {
+        const copy = {
+          ru: "Файл готов. Нажмите «Поделиться» ещё раз и выберите «Сохранить в Файлы».",
+          lv: "Fails ir gatavs. Vēlreiz nospiediet Kopīgot un izvēlieties Saglabāt failos.",
+          en: "File ready. Tap Share again, then choose Save to Files."
+        };
+        vpnMessage.textContent = copy[currentLanguage] || copy.en;
+        vpnMessage.className = "message success";
+        return;
+      }
+    }
+
+    if (typeof navigator.share === "function" &&
+        navigator.canShare?.({ files: [file] })) {
+      await navigator.share({ files: [file] });
       return;
     }
 
-    await navigator.clipboard.writeText(profileUrl);
-    vpnMessage.textContent = t("profileLinkCopied");
-    vpnMessage.className = "message success";
+    downloadProfileShareFile(file);
   } catch (error) {
     if (error?.name === "AbortError") return;
+    profileShareRequest = null;
     vpnMessage.textContent = t("profileShareFailed");
     vpnMessage.className = "message error";
+  } finally {
+    shareProfileButton.disabled = false;
   }
 });
 
