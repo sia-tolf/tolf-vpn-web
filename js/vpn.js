@@ -463,6 +463,12 @@ profileQrStyle.textContent = `
   @media (max-width: 620px) {
     .profile-delivery-actions { grid-template-columns: minmax(0, 1fr); }
     .profile-qr-panel { grid-column: 1; }
+    .vpn-profile-actions:has(#profileDeliveryActions:not(.hidden)) #installProfileButton,
+    .vpn-profile-actions:has(#profileDeliveryActions:not(.hidden)) #rotatePasswordButton {
+      min-height: 56px;
+      padding: 8px 6px;
+      line-height: 1.2;
+    }
   }
 `;
 document.head.appendChild(profileQrStyle);
