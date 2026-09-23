@@ -324,7 +324,7 @@ profileQrStyle.textContent = `
     order: 1;
     min-width: 0;
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: stretch;
     gap: 8px;
   }
@@ -341,13 +341,11 @@ profileQrStyle.textContent = `
     font: inherit;
     font-size: 16px;
   }
-  .profile-link-buttons {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: stretch;
-    gap: 8px;
-    min-width: 0;
-  }
+  .profile-link-row input { grid-column: 1 / -1; }
+  .profile-link-buttons { display: contents; }
+  .profile-link-buttons > #profileCopyLinkButton { grid-column: 1; }
+  .profile-link-buttons > #shareProfileButton { grid-column: 2; }
+  .profile-link-buttons > #profileQrButton { grid-column: 1 / -1; }
   #profileDeliveryActions .profile-link-buttons > button {
     box-sizing: border-box;
     width: 100%;
@@ -366,11 +364,12 @@ profileQrStyle.textContent = `
     align-items: center;
     justify-content: center;
   }
-  #profileQrButton { order: 2; }
-  .profile-link-buttons > #profileQrButton { grid-column: 1 / -1; }
   @media (min-width: 621px) {
-    .profile-link-buttons { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .profile-link-buttons > #profileQrButton { grid-column: auto; }
+    .profile-link-row { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    .profile-link-row input { grid-column: 1 / span 4; height: 50px; }
+    .profile-link-buttons > #profileCopyLinkButton { grid-column: 5 / span 2; }
+    .profile-link-buttons > #shareProfileButton { grid-column: 1 / span 3; }
+    .profile-link-buttons > #profileQrButton { grid-column: 4 / span 3; }
   }
   .profile-link-status {
     grid-column: 1 / -1;
@@ -440,7 +439,6 @@ profileQrStyle.textContent = `
   @media (max-width: 620px) {
     .profile-delivery-actions { grid-template-columns: minmax(0, 1fr); }
     .profile-qr-panel { grid-column: 1; }
-    #profileQrButton { order: 2; }
   }
 `;
 document.head.appendChild(profileQrStyle);
