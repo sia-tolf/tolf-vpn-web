@@ -367,6 +367,11 @@ profileQrStyle.textContent = `
     justify-content: center;
   }
   #profileQrButton { order: 2; }
+  .profile-link-buttons > #profileQrButton { grid-column: 1 / -1; }
+  @media (min-width: 621px) {
+    .profile-link-buttons { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .profile-link-buttons > #profileQrButton { grid-column: auto; }
+  }
   .profile-link-status {
     grid-column: 1 / -1;
     margin: 0;
@@ -455,7 +460,7 @@ profileLinkStatus.setAttribute("role", "status");
 profileLinkStatus.setAttribute("aria-live", "polite");
 const profileLinkButtons = document.createElement("div");
 profileLinkButtons.className = "profile-link-buttons";
-profileLinkButtons.append(profileCopyLinkButton, shareProfileButton);
+profileLinkButtons.append(profileCopyLinkButton, shareProfileButton, profileQrButton);
 profileLinkRow.append(profileLinkInput, profileLinkButtons, profileLinkStatus);
 profileDeliveryActions.append(profileLinkRow);
 
