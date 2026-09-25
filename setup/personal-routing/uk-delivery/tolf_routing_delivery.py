@@ -10,12 +10,13 @@ import time
 from contextlib import closing
 
 import tolf_routing_contract as contract
+import tolf_nodes
 
 DB = '/var/lib/tolf-api/tolf.db'
 SSH = ['/usr/bin/ssh', '-T', '-i', '/opt/tolf-api/provision_ed25519',
        '-o', 'IdentitiesOnly=yes', '-o', 'BatchMode=yes', '-o', 'StrictHostKeyChecking=yes',
        '-o', 'UserKnownHostsFile=/opt/tolf-api/.ssh/known_hosts',
-       '-o', 'ConnectTimeout=10', 'tolfprov@188.214.39.114']
+       '-o', 'ConnectTimeout=10', 'tolfprov@' + tolf_nodes.RIGA_PUBLIC_HOST]
 FRESH = 60
 EMPTY = {'moscow': [], 'riga': [], 'usa': []}
 

@@ -73,7 +73,12 @@ def check_source(con):
 
 
 def check_context():
-    expected = {'RIGA_HOST': '188.214.39.114', 'RIGA_USER': 'tolfprov',
+    config = ast.parse((ROOT / 'tolf_nodes.py').read_text())
+    riga_host = next(ast.literal_eval(node.value) for node in config.body
+                     if isinstance(node, ast.Assign)
+                     and any(isinstance(target, ast.Name) and target.id == 'RIGA_PUBLIC_HOST'
+                             for target in node.targets))
+    expected = {'RIGA_HOST': riga_host, 'RIGA_USER': 'tolfprov',
                 'RIGA_KEY': '/opt/tolf-api/provision_ed25519',
                 'RIGA_KNOWN_HOSTS': '/opt/tolf-api/.ssh/known_hosts'}
     found = {}
@@ -81,7 +86,10 @@ def check_context():
         if isinstance(node, ast.Assign):
             for target in node.targets:
                 if isinstance(target, ast.Name) and target.id in expected:
-                    found[target.id] = ast.literal_eval(node.value)
+                    if target.id == 'RIGA_HOST' and ast.unparse(node.value) == 'tolf_nodes.RIGA_PUBLIC_HOST':
+                        found[target.id] = riga_host
+                    else:
+                        found[target.id] = ast.literal_eval(node.value)
     if found != expected or 'tolf_personal_routing.install(app, globals())' not in (ROOT / 'main.py').read_text():
         raise RuntimeError('API integration or SSH settings differ; inspect before installing')
 
