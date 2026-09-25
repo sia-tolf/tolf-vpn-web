@@ -1,4 +1,6 @@
 I18N.ru = {
+  entryAddressCompact: "Адрес:",
+  entryPointRecommendedShort: "Рекомендуется",
   appleClientSettings: "Параметры клиента Apple",
   profileNameLabel: "Название профиля",
   profileNameHelp: "Используется для установленного профиля из скачиваемого файла.",

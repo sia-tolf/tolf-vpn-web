@@ -1766,3 +1766,34 @@ html[data-tolf-ui="vpn"] .account-promo .promo-actions > :is(input, button) {
 #routingRulesSection[open] > summary {
   margin-bottom: 10px;
 }
+
+/* Compact entry address and recommendation */
+.server-address {
+  justify-content: flex-start;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 13px;
+}
+.server-address-value {
+  text-align: left;
+  font-weight: 400;
+}
+.server-recommendation {
+  display: block;
+  max-width: 100%;
+  color: var(--secondary);
+  font-size: 11px;
+  line-height: 1.2;
+  font-weight: 400;
+  overflow-wrap: anywhere;
+}
+.server-recommendation.hidden {
+  display: none;
+}
+.server-option input:checked + label .server-recommendation {
+  color: inherit;
+  opacity: 0.8;
+}
+#profileSettings {
+  margin-top: 16px;
+}

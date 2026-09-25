@@ -133,19 +133,27 @@ function renderEntryPointRecommendation() {
   }
   document.getElementById("serverRiga")?.closest(".server-option")
     ?.classList.toggle("server-caution", restricted);
-  if (!entryPointNote) {
-    return;
-  }
-
-  if (recommendedEntryPoint !== "moscow" && recommendedEntryPoint !== "riga") {
+  if (entryPointNote) {
     entryPointNote.textContent = "";
     entryPointNote.className = "entry-point-note hidden";
-    return;
   }
 
-  entryPointNote.textContent = t(recommendedEntryPoint === "moscow" ? "cityMoscow" : "cityRiga")
-    + ": " + t("entryPointRecommended");
-  entryPointNote.className = "entry-point-note";
+  for (const server of ["riga", "moscow"]) {
+    const input = document.getElementById(
+      server === "moscow" ? "serverMoscow" : "serverRiga"
+    );
+    const copy = input?.closest(".server-option")?.querySelector(".server-copy");
+    if (!copy) continue;
+
+    let badge = copy.querySelector(".server-recommendation");
+    if (!badge) {
+      badge = document.createElement("span");
+      badge.className = "server-recommendation";
+      copy.appendChild(badge);
+    }
+    badge.textContent = t("entryPointRecommendedShort");
+    badge.classList.toggle("hidden", recommendedEntryPoint !== server);
+  }
 }
 
 async function loadEntryPointRecommendation() {

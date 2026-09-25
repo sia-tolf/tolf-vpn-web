@@ -1,4 +1,6 @@
 I18N.en = {
+  entryAddressCompact: "Address:",
+  entryPointRecommendedShort: "Recommended",
   appleClientSettings: "Apple client settings",
   profileNameLabel: "Profile name",
   profileNameHelp: "Used for the installed profile and the downloaded file.",

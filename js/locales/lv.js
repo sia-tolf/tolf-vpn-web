@@ -1,4 +1,6 @@
 I18N.lv = {
+  entryAddressCompact: "Adrese:",
+  entryPointRecommendedShort: "Ieteicams",
   appleClientSettings: "Apple klienta iestatījumi",
   profileNameLabel: "Profila nosaukums",
   profileNameHelp: "Tiek izmantots instalētajam profilam un lejupielādētajam failam.",
