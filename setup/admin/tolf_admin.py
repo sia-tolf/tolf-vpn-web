@@ -8,6 +8,8 @@ import uuid
 import subprocess
 import threading
 from concurrent.futures import ThreadPoolExecutor
+import tolf_nodes
+from tolf_admin_session_parser import parse_inventory
 from contextlib import contextmanager
 from datetime import datetime, timezone
 
@@ -101,15 +103,31 @@ def query_node(node):
     stamp = datetime.now(timezone.utc).isoformat()
     failed = {'node': node, 'status': 'error', 'attemptedAt': stamp, 'error': 'node_unavailable'}
     try:
-        command = ['/usr/bin/ssh', '-T', '-o', 'BatchMode=yes', '-o', 'IdentitiesOnly=yes',
-                   '-o', 'ConnectTimeout=10', '-o', 'StrictHostKeyChecking=yes',
-                   '-o', 'UserKnownHostsFile='+str(CTX['RIGA_KNOWN_HOSTS']),
-                   '-i', str(CTX['RIGA_KEY']), str(CTX['RIGA_USER'])+'@'+str(CTX['RIGA_HOST']),
-                   'admin-sessions '+node]
-        result = subprocess.run(command, capture_output=True, text=True, timeout=40, check=False)
-        if result.returncode or len(result.stdout) > 8 * 1024 * 1024:
-            return failed
-        value = json.loads(result.stdout)
+        if node == 'moscow':
+            command = ['/usr/bin/ssh', '-T', '-o', 'BatchMode=yes',
+                       '-o', 'IdentitiesOnly=yes', '-o', 'ConnectTimeout=10',
+                       '-o', 'StrictHostKeyChecking=yes',
+                       '-o', 'UserKnownHostsFile=/etc/tolf-api/ssh/known_hosts',
+                       '-i', '/etc/tolf-api/ssh/install_ru_sync_key',
+                       'root@' + tolf_nodes.MOSCOW_PUBLIC_HOST,
+                       'swanctl --list-sas --raw']
+            result = subprocess.run(command, capture_output=True, text=True,
+                                    timeout=40, check=False)
+            if result.returncode or len(result.stdout) > 8 * 1024 * 1024:
+                return failed
+            value = {'status': 'ok', 'version': '1.0.0', 'node': node,
+                     'observedAt': datetime.now(timezone.utc).isoformat(),
+                     'sessions': parse_inventory(result.stdout)}
+        else:
+            command = ['/usr/bin/ssh', '-T', '-o', 'BatchMode=yes', '-o', 'IdentitiesOnly=yes',
+                       '-o', 'ConnectTimeout=10', '-o', 'StrictHostKeyChecking=yes',
+                       '-o', 'UserKnownHostsFile='+str(CTX['RIGA_KNOWN_HOSTS']),
+                       '-i', str(CTX['RIGA_KEY']), str(CTX['RIGA_USER'])+'@'+str(CTX['RIGA_HOST']),
+                       'admin-sessions '+node]
+            result = subprocess.run(command, capture_output=True, text=True, timeout=40, check=False)
+            if result.returncode or len(result.stdout) > 8 * 1024 * 1024:
+                return failed
+            value = json.loads(result.stdout)
         if not isinstance(value, dict) or value.get('status') != 'ok' or value.get('node') != node or value.get('version') != '1.0.0':
             return failed
         observed = value.get('observedAt')
