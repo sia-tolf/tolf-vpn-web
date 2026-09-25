@@ -542,6 +542,18 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
             </div>
           </div>
 
+          <div class="server-address">
+            <span
+              class="server-address-label"
+              data-i18n="serverAddress"
+            >Entry point address</span>
+
+            <span
+              id="selectedServerAddress"
+              class="server-address-value"
+            >ikev2-riga.tolf.is</span>
+          </div>
+
           <p
             id="entryPointNote"
             class="entry-point-note hidden"
@@ -557,19 +569,8 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
               VPN Settings
             </summary>
 
-            <div class="server-address">
-              <span
-                class="server-address-label"
-                data-i18n="serverAddress"
-              >Entry point address</span>
 
-              <span
-                id="selectedServerAddress"
-                class="server-address-value"
-              >ikev2-riga.tolf.is</span>
-            </div>
-
-            <div id="appleProfileNameSettings" class="hidden" style="margin-bottom:16px">
+            <div id="appleProfileNameSettings" class="hidden" style="margin-top:16px;margin-bottom:16px">
               <label class="settings-label" for="profileNameInput">
                 <span data-i18n="profileNameLabel">Profile name</span>
                 <small class="section-description" style="font-size:12px;font-weight:400;margin-left:8px" data-i18n="profileNameHelp">Used for the installed profile and the downloaded file.</small>
