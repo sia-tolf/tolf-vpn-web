@@ -1778,22 +1778,9 @@ html[data-tolf-ui="vpn"] .account-promo .promo-actions > :is(input, button) {
   text-align: left;
   font-weight: 400;
 }
-.server-recommendation {
-  display: block;
-  max-width: 100%;
-  color: var(--secondary);
-  font-size: 11px;
-  line-height: 1.2;
-  font-weight: 400;
-  overflow-wrap: anywhere;
-}
-.server-recommendation.hidden {
-  display: none;
-}
-.server-option input:checked + label .server-recommendation {
-  color: inherit;
-  opacity: 0.8;
-}
+
+
+
 #profileSettings {
   margin-top: 16px;
 }
@@ -1835,3 +1822,21 @@ html[data-tolf-ui] #vpnCard .vpn-account-actions > :is(#accountNavigation, #sign
     font-size: 13px;
   }
 }
+
+/* Recommendation above the corresponding entry point card. */
+.server-recommendations {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+  padding:0 6px 7px;
+}
+.server-recommendations .server-recommendation {
+  display:block;
+  min-width:0;
+  color:var(--secondary);
+  font-size:13px;
+  line-height:1.3;
+  font-weight:600;
+  text-align:center;
+}
+.server-recommendations .server-recommendation.hidden { display:none; }

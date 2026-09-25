@@ -138,20 +138,22 @@ function renderEntryPointRecommendation() {
     entryPointNote.className = "entry-point-note hidden";
   }
 
-  for (const server of ["riga", "moscow"]) {
-    const input = document.getElementById(
-      server === "moscow" ? "serverMoscow" : "serverRiga"
-    );
-    const copy = input?.closest(".server-option")?.querySelector(".server-copy");
-    if (!copy) continue;
+  const recommendationRow = document.getElementById("serverRecommendations");
+  recommendationRow?.classList.toggle(
+    "hidden",
+    recommendedEntryPoint !== "riga" && recommendedEntryPoint !== "moscow"
+  );
 
-    let badge = copy.querySelector(".server-recommendation");
-    if (!badge) {
-      badge = document.createElement("span");
-      badge.className = "server-recommendation";
-      copy.appendChild(badge);
-    }
+  for (const server of ["riga", "moscow"]) {
+    const badge = document.getElementById(
+      server === "moscow" ? "serverRecommendationMoscow" : "serverRecommendationRiga"
+    );
+    if (!badge) continue;
     badge.textContent = t("entryPointRecommendedShort");
+    badge.setAttribute(
+      "aria-label",
+      `${t(server === "moscow" ? "cityMoscow" : "cityRiga")}: ${badge.textContent}`
+    );
     badge.classList.toggle("hidden", recommendedEntryPoint !== server);
   }
 }

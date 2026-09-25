@@ -32,7 +32,7 @@
 
   <link
     rel="stylesheet"
-    href="css/styles.css?v=account-actions-20260925"
+    href="css/styles.css?v=recommendation-above-20260925"
   >
   <link
     rel="stylesheet"
@@ -60,7 +60,7 @@
   <script defer src="js/profile-settings.js?v=profile-name-20260925"></script>
   <script defer src="js/vpn.js?v=profile-name-20260925"></script>
   <script defer src="js/promo.js?v=promo-disclosure-20260919"></script>
-  <script defer src="js/location.js?v=entry-layout-20260925"></script>
+  <script defer src="js/location.js?v=recommendation-above-20260925"></script>
   <script defer src="js/librespeed.js?v=1"></script>
   <script defer src="js/latency.js?v=connection-test-1"></script>
   <script defer src="js/connection-test.js?v=connection-test-3"></script>
@@ -453,6 +453,12 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
             class="server-heading"
             data-i18n="vpnServer"
           >VPN Entry Point</p>
+
+          <div id="serverRecommendations" class="server-recommendations hidden" aria-live="polite">
+            <span id="serverRecommendationRiga" class="server-recommendation hidden"></span>
+            <span id="serverRecommendationMoscow" class="server-recommendation hidden"></span>
+            <span aria-hidden="true"></span>
+          </div>
 
           <div
             class="server-selector"
