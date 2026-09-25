@@ -43,7 +43,7 @@
   <script defer src="passkey-session-label.20260917-1.js"></script>
   <script defer src="js/config.js?v=language-handoff-20260920-1"></script>
   <script defer src="js/locales/en.js?v=profile-name-20260925"></script>
-  <script defer src="js/locales/ru.js?v=profile-name-20260925"></script>
+  <script defer src="js/locales/ru.js?v=profile-name-layout-20260925"></script>
   <script defer src="js/locales/lv.js?v=profile-name-20260925"></script>
   <script defer src="js/dom.js?v=personal-routing-1"></script>
   <script defer src="js/network-metrics.js?v=latency-decimal-1"></script>
@@ -726,13 +726,12 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
             <div class="settings-divider"></div>
 
             <div id="appleConnectionSettings" class="hidden">
-              <div class="settings-title-row">
-                <span class="settings-title" data-i18n="appleClientSettings">Apple client settings</span>
-              </div>
-              <label class="settings-label" for="profileNameInput" data-i18n="profileNameLabel">Profile name</label>
+              <label class="settings-label" for="profileNameInput">
+                <span data-i18n="profileNameLabel">Profile name</span>
+                <small class="section-description" style="font-size:12px;font-weight:400;margin-left:8px" data-i18n="profileNameHelp">Used for the installed profile and the downloaded file.</small>
+              </label>
               <input id="profileNameInput" class="settings-input" type="text"
                 maxlength="80" autocomplete="off" spellcheck="false">
-              <p class="section-description" data-i18n="profileNameHelp">Used for the installed profile and the downloaded file.</p>
 
               <label class="settings-label" for="dpdRate" data-i18n="dpdRateLabel">DPD check frequency</label>
               <select id="dpdRate" class="settings-select">

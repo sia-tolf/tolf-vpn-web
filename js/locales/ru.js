@@ -1,7 +1,7 @@
 I18N.ru = {
   appleClientSettings: "Параметры клиента Apple",
   profileNameLabel: "Название профиля",
-  profileNameHelp: "Используется для установленного профиля и скачиваемого файла.",
+  profileNameHelp: "Используется для установленного профиля из скачиваемого файла.",
   dpdRateLabel: "Частота проверки DPD",
   dpdLow: "Низкая",
   dpdMedium: "Средняя",
