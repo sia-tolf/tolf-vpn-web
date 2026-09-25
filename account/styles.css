@@ -43,8 +43,8 @@
   flex:0 0 160px;
   width:160px;
   max-width:calc((100% - 12px)/2);
-  height:50px;
-  min-height:50px;
-  max-height:50px;
+  height:42px;
+  min-height:42px;
+  max-height:42px;
   padding:0 12px;
 }
