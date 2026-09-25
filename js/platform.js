@@ -7,6 +7,7 @@ function renderPlatform() {
   }
   backButton.disabled = vpnBusy;
   const isIos = currentPlatform === "ios";
+  document.getElementById("appleProfileNameSettings")?.classList.toggle("hidden", !isIos);
   document.getElementById("appleConnectionSettings")?.classList.toggle("hidden", !isIos);
   const isWindows = currentPlatform === "windows";
   const winButton = document.getElementById("platformWindows");

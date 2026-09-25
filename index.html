@@ -47,7 +47,7 @@
   <script defer src="js/locales/lv.js?v=profile-name-20260925"></script>
   <script defer src="js/dom.js?v=personal-routing-1"></script>
   <script defer src="js/network-metrics.js?v=latency-decimal-1"></script>
-  <script defer src="js/platform.js?v=dpd-mobike-20260925"></script>
+  <script defer src="js/platform.js?v=profile-name-top-20260925"></script>
   <script defer src="js/i18n.js?v=account-page-20260921"></script>
   <script defer src="js/webauthn.js?v=local-id-2"></script>
   <script defer src="js/api.js?v=account-retry-20260922"></script>
@@ -569,6 +569,15 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
               >ikev2-riga.tolf.is</span>
             </div>
 
+            <div id="appleProfileNameSettings" class="hidden" style="margin-bottom:16px">
+              <label class="settings-label" for="profileNameInput">
+                <span data-i18n="profileNameLabel">Profile name</span>
+                <small class="section-description" style="font-size:12px;font-weight:400;margin-left:8px" data-i18n="profileNameHelp">Used for the installed profile and the downloaded file.</small>
+              </label>
+              <input id="profileNameInput" class="settings-input" type="text"
+                maxlength="80" autocomplete="off" spellcheck="false">
+            </div>
+
             <label
               class="local-id-label"
               for="localIdInput"
@@ -726,14 +735,9 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
             <div class="settings-divider"></div>
 
             <div id="appleConnectionSettings" class="hidden">
-              <label class="settings-label" for="profileNameInput">
-                <span data-i18n="profileNameLabel">Profile name</span>
-                <small class="section-description" style="font-size:12px;font-weight:400;margin-left:8px" data-i18n="profileNameHelp">Used for the installed profile and the downloaded file.</small>
-              </label>
-              <input id="profileNameInput" class="settings-input" type="text"
-                maxlength="80" autocomplete="off" spellcheck="false">
 
-              <label class="settings-label" style="margin-top:16px" for="dpdRate" data-i18n="dpdRateLabel">DPD check frequency</label>
+
+              <label class="settings-label" for="dpdRate" data-i18n="dpdRateLabel">DPD check frequency</label>
               <select id="dpdRate" class="settings-select">
                 <option value="Low" data-i18n="dpdLow">Low</option>
                 <option value="Medium" data-i18n="dpdMedium" selected>Medium</option>
