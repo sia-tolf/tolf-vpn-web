@@ -12,6 +12,7 @@ import json
 import os
 from pathlib import Path
 import shlex
+import socket
 import subprocess
 import sys
 import tempfile
@@ -22,7 +23,18 @@ CONF = '/etc/swanctl/conf.d/tolf-windows-managed.conf'
 MODES = {'riga': ['sr', 'ru'], 'moscow': ['', 'sr', 'ru', 'lv']}
 POOLS = {'riga': {'sr': 'vpn-pool-riga-sr', 'ru': 'vpn-pool-riga-ru'},
          'moscow': {'': 'vpn-pool', 'sr': 'vpn-pool-rf', 'ru': 'vpn-pool-ru', 'lv': 'vpn-pool-ee'}}
-HOSTS = {'riga': ('188.214.39.114', 'ikev2-riga.tolf.is'), 'moscow': ('92.243.66.32', 'ikev2.tolf.is')}
+def resolve_ipv4(host):
+    addresses = {entry[4][0] for entry in socket.getaddrinfo(
+        host, None, family=socket.AF_INET, type=socket.SOCK_STREAM
+    )}
+    if len(addresses) != 1:
+        raise RuntimeError('VPN entry must resolve to exactly one IPv4 address: ' + host)
+    return addresses.pop()
+
+
+HOST_NAMES = {'riga': 'ikev2-riga.tolf.is', 'moscow': 'ikev2.tolf.is'}
+# Resolve once per controller invocation, including preflight and rollback.
+HOSTS = {node: (resolve_ipv4(host), host) for node, host in HOST_NAMES.items()}
 SSH = ['/usr/bin/ssh', '-T', '-o', 'BatchMode=yes', '-o', 'IdentitiesOnly=yes',
        '-o', 'StrictHostKeyChecking=yes', '-o', 'ConnectTimeout=10',
        '-i', '/root/.ssh/id_ed25519_ike_users_sync', 'root@10.31.0.1', 'sh', '-s']
