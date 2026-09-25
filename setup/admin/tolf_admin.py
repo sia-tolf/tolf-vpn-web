@@ -9,6 +9,7 @@ import subprocess
 import threading
 from concurrent.futures import ThreadPoolExecutor
 import tolf_nodes
+import tolf_admin_cpu_history
 from tolf_admin_session_parser import parse_inventory
 from contextlib import contextmanager
 from datetime import datetime, timezone
@@ -206,13 +207,15 @@ def query_metrics(node):
         if parsed.utcoffset() is None:
             return failed
         numbers = {}
-        for key in ('cpuPercent', 'memoryTotalBytes', 'memoryUsedBytes',
+        for key in ('cpuPercent', 'cpuTotalTicks', 'cpuIdleTicks',
+                    'memoryTotalBytes', 'memoryUsedBytes',
                     'diskTotalBytes', 'diskUsedBytes'):
             number = value.get(key)
             if type(number) is not int or number < 0 or number > 2**63 - 1:
                 return failed
             numbers[key] = number
         if (numbers['cpuPercent'] > 100
+                or numbers['cpuIdleTicks'] > numbers['cpuTotalTicks']
                 or not 0 <= numbers['memoryUsedBytes'] <= numbers['memoryTotalBytes']
                 or not 0 <= numbers['diskUsedBytes'] <= numbers['diskTotalBytes']
                 or not numbers['memoryTotalBytes'] or not numbers['diskTotalBytes']):
@@ -369,6 +372,8 @@ def install(app, context):
                 results = [job.result() for job in sessions_pending]
                 readings = [job.result() for job in metrics_pending]
             for result, reading in zip(results, readings):
+                if reading['status'] == 'ok':
+                    reading['cpu15mPercent'] = tolf_admin_cpu_history.average(result['node'])
                 result['metrics'] = reading
             # Recheck after the remote wait, so a revoked role cannot receive a late response.
             require_admin(request)

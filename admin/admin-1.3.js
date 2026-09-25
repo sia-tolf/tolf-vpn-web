@@ -94,6 +94,9 @@ function showRegistry(data){const body=table(['account','vpn','linked','provisio
 function showAudit(data){const body=table(['when','actor','action','target']);for(const e of data.events){const row=node('tr');row.append(node('td',date(e.createdAt)),node('td',e.actor==='root'?t('root'):e.actor),node('td',e.action==='admin.grant'?t('grant'):e.action==='admin.revoke'?t('revoke'):t(e.action)),node('td',e.target,'admin-id'));body.append(row);}}
 function duration(value){if(value==null)return '—';const n=Math.floor(value);return Math.floor(n/3600)+':'+String(Math.floor(n/60)%60).padStart(2,'0')+':'+String(n%60).padStart(2,'0');}
 function bytes(value){const units=['B','KiB','MiB','GiB','TiB'];let n=value,i=0;while(n>=1024&&i<units.length-1){n/=1024;i++;}return n.toLocaleString(lang,{maximumFractionDigits:i?1:0})+' '+units[i];}
+Object.assign(copy.en,{cpuNow:'Now',cpu15m:'Last 15 minutes',cpuCollecting:'Collecting data'});
+Object.assign(copy.ru,{cpuNow:'Сейчас',cpu15m:'За 15 минут',cpuCollecting:'Данные собираются'});
+Object.assign(copy.lv,{cpuNow:'Tagad',cpu15m:'Pēdējās 15 minūtēs',cpuCollecting:'Dati tiek vākti'});
 function showNodeMetrics(metrics,section){
  if(metrics?.status!=='ok'){
   section.append(node('p',t('resourcesUnavailable'),'admin-muted'));
@@ -108,7 +111,13 @@ function showNodeMetrics(metrics,section){
  const grid=node('div',undefined,'admin-resources');
  for(const [label,value] of items){
   const card=node('div',undefined,'admin-resource');
-  card.append(node('span',t(label),'admin-resource-label'),node('strong',value));
+  card.append(node('span',t(label),'admin-resource-label'),
+              node('strong',label==='cpuUsage'?t('cpuNow')+': '+value:value));
+  if(label==='cpuUsage'){
+   const average=Number.isInteger(metrics.cpu15mPercent)
+    ? metrics.cpu15mPercent+'%' : t('cpuCollecting');
+   card.append(node('small',t('cpu15m')+': '+average,'admin-resource-average'));
+  }
   grid.append(card);
  }
  section.append(node('p',t('resourcesChecked')+': '+date(metrics.observedAt),'admin-muted'),grid);

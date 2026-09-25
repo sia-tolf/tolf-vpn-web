@@ -69,3 +69,5 @@
   font-weight: 600;
   overflow-wrap: anywhere;
 }
+
+.admin-resource-average { color: var(--secondary); font-size: 13px; line-height: 1.35; }

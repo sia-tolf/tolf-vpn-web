@@ -1,0 +1,11 @@
+[Unit]
+Description=Collect VPN node CPU counters every minute
+
+[Timer]
+OnCalendar=*-*-* *:*:00
+AccuracySec=5s
+Persistent=true
+Unit=tolf-admin-cpu-history.service
+
+[Install]
+WantedBy=timers.target

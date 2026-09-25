@@ -54,5 +54,5 @@ disk_total=$1
 disk_used=$2
 
 observed=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-printf '{"version":"1.0.0","node":"%s","observedAt":"%s","cpuPercent":%s,"memoryTotalBytes":%s,"memoryUsedBytes":%s,"diskTotalBytes":%s,"diskUsedBytes":%s}\n' \
-    "$node" "$observed" "$cpu" "$memory_total" "$memory_used" "$disk_total" "$disk_used"
+printf '{"version":"1.0.0","node":"%s","observedAt":"%s","cpuPercent":%s,"cpuTotalTicks":%s,"cpuIdleTicks":%s,"memoryTotalBytes":%s,"memoryUsedBytes":%s,"diskTotalBytes":%s,"diskUsedBytes":%s}\n' \
+    "$node" "$observed" "$cpu" "$total2" "$idle2" "$memory_total" "$memory_used" "$disk_total" "$disk_used"

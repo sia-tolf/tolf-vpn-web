@@ -1,0 +1,12 @@
+[Unit]
+Description=Collect VPN node CPU counters on London
+
+[Service]
+Type=oneshot
+User=tolfa
+Group=tolfa
+WorkingDirectory=/opt/tolf-api
+ExecStart=/opt/tolf-api/venv/bin/python3 -B /opt/tolf-api/tolf_admin_cpu_history.py
+TimeoutStartSec=60
+NoNewPrivileges=true
+PrivateTmp=true
