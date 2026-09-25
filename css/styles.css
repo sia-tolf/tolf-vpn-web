@@ -1749,35 +1749,19 @@ html[data-tolf-ui="vpn"] .account-promo .promo-actions > :is(input, button) {
 
 /* Collapsible routing settings */
 #routingRulesSection {
-  margin: 0;
+  margin: 0 0 0 12px;
   padding: 0;
   border: 0;
   background: transparent;
   box-shadow: none;
 }
 #routingRulesSection > summary {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0;
-  padding: 6px 0;
-  border: 0;
-  background: transparent;
+  display: list-item;
+}
+#routingRulesSection > summary > .settings-title {
+  display: inline;
+  font: inherit;
   color: inherit;
-  cursor: pointer;
-  list-style: none;
-}
-#routingRulesSection > summary::-webkit-details-marker {
-  display: none;
-}
-#routingRulesSection > summary::before {
-  content: "▸";
-}
-#routingRulesSection[open] > summary::before {
-  content: "▾";
-}
-#routingRulesSection > summary::after {
-  content: none;
 }
 #routingRulesSection[open] > summary {
   margin-bottom: 10px;
