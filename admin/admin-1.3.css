@@ -43,3 +43,29 @@
 .admin-table button.admin-disconnect:disabled{opacity:.55;}
 
 .admin-access{padding:20px;border:1px solid #d5d5da;border-radius:16px;background:#fff;margin:20px 0}.admin-access-actions{display:flex;gap:12px;flex-wrap:wrap}.admin-access button.admin-access-suspend{color:#bd2436;background:#fff;border:1px solid #bd2436}.admin-access h2{margin-top:0}
+
+.admin-resources {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+  margin: 12px 0 20px;
+}
+.admin-resource {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+}
+.admin-resource-label {
+  color: var(--secondary);
+  font-size: 13px;
+}
+.admin-resource strong {
+  font-size: 16px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}

@@ -171,6 +171,56 @@ def query_node(node):
         return failed
 
 
+
+def query_metrics(node):
+    if node not in ('riga', 'moscow'):
+        raise ValueError('invalid node')
+    failed = {'status': 'error', 'error': 'metrics_unavailable'}
+    try:
+        command = ['/usr/bin/ssh', '-T', '-o', 'BatchMode=yes',
+                   '-o', 'IdentitiesOnly=yes', '-o', 'ConnectTimeout=10',
+                   '-o', 'StrictHostKeyChecking=yes']
+        if node == 'riga':
+            command += ['-o', 'UserKnownHostsFile=' + str(CTX['RIGA_KNOWN_HOSTS']),
+                        '-i', str(CTX['RIGA_KEY']),
+                        str(CTX['RIGA_USER']) + '@' + str(CTX['RIGA_HOST']),
+                        'admin-metrics']
+        else:
+            command += ['-o', 'UserKnownHostsFile=/etc/tolf-api/ssh/known_hosts',
+                        '-i', '/etc/tolf-api/ssh/install_ru_sync_key',
+                        'root@' + tolf_nodes.MOSCOW_PUBLIC_HOST,
+                        '/root/tolf-admin-metrics moscow']
+        result = subprocess.run(command, capture_output=True, text=True,
+                                timeout=20, check=False)
+        if result.returncode or len(result.stdout) > 4096:
+            return failed
+        value = json.loads(result.stdout)
+        if (not isinstance(value, dict)
+                or value.get('version') != '1.0.0'
+                or value.get('node') != node):
+            return failed
+        observed = value.get('observedAt')
+        if not isinstance(observed, str):
+            return failed
+        parsed = datetime.fromisoformat(observed)
+        if parsed.utcoffset() is None:
+            return failed
+        numbers = {}
+        for key in ('cpuPercent', 'memoryTotalBytes', 'memoryUsedBytes',
+                    'diskTotalBytes', 'diskUsedBytes'):
+            number = value.get(key)
+            if type(number) is not int or number < 0 or number > 2**63 - 1:
+                return failed
+            numbers[key] = number
+        if (numbers['cpuPercent'] > 100
+                or not 0 <= numbers['memoryUsedBytes'] <= numbers['memoryTotalBytes']
+                or not 0 <= numbers['diskUsedBytes'] <= numbers['diskTotalBytes']
+                or not numbers['memoryTotalBytes'] or not numbers['diskTotalBytes']):
+            return failed
+        return {'status': 'ok', 'observedAt': observed, **numbers}
+    except (KeyError, ValueError, TypeError, OSError, subprocess.TimeoutExpired):
+        return failed
+
 def map_session(con, session):
     username = session.get('identity')
     if not username:
@@ -311,8 +361,15 @@ def install(app, context):
         if not SESSION_POLL.acquire(blocking=False):
             raise HTTPException(429, 'session_poll_in_progress')
         try:
-            with ThreadPoolExecutor(max_workers=2) as pool:
-                results = list(pool.map(query_node, ('riga', 'moscow')))
+            with ThreadPoolExecutor(max_workers=4) as pool:
+                sessions_pending = [pool.submit(query_node, node)
+                                    for node in ('riga', 'moscow')]
+                metrics_pending = [pool.submit(query_metrics, node)
+                                   for node in ('riga', 'moscow')]
+                results = [job.result() for job in sessions_pending]
+                readings = [job.result() for job in metrics_pending]
+            for result, reading in zip(results, readings):
+                result['metrics'] = reading
             # Recheck after the remote wait, so a revoked role cannot receive a late response.
             require_admin(request)
             with db() as con:

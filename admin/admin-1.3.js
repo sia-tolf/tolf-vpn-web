@@ -8,6 +8,9 @@ const copy = {
 Object.assign(copy.en,{sessions:'VPN sessions',inventoryNote:'Account and VPN access records. Current connections are shown in VPN sessions.',sessionNote:'Snapshot at the time shown for each node. Refresh to retrieve current data.',nodeError:'Could not query this node. Session count is unknown.',noSessions:'No sessions at the time of this check.',checked:'Checked',peer:'Peer identity',addresses:'Client addresses',duration:'Duration',traffic:'Traffic',received:'Received by node',sent:'Sent by node',unmatched:'No unique registry match',sessionState:'State',ESTABLISHED:'Established',CONNECTING:'Connecting',REKEYING:'Rekeying',DELETING:'Disconnecting',trafficNote:'Traffic counters cover the current CHILD SAs; they may reset on rekey. This is not lifetime usage.',backendPending:'Update the London API to display sessions.',pollBusy:'A session check is already running. Try Refresh shortly.'});
 Object.assign(copy.ru,{sessions:'VPN-сеансы',inventoryNote:'Здесь показаны аккаунты и записи доступа VPN. Текущие подключения — на вкладке «VPN-сеансы».',sessionNote:'Снимок состояния на указанное для каждого узла время. Кнопка «Обновить» запрашивает новые данные.',nodeError:'Не удалось опросить узел. Количество сеансов неизвестно.',noSessions:'На момент проверки сеансов нет.',checked:'Проверено',peer:'Идентификатор клиента',addresses:'Адреса клиента',duration:'Длительность',traffic:'Трафик',received:'Принято узлом',sent:'Отправлено узлом',unmatched:'Нет однозначного совпадения в реестре',sessionState:'Состояние',ESTABLISHED:'Установлено',CONNECTING:'Подключение',REKEYING:'Обновление ключей',DELETING:'Отключение',trafficNote:'Счётчики относятся к текущим CHILD SA и могут сбрасываться при обновлении ключей. Это не трафик за всё время.',backendPending:'Для отображения сеансов обновите API на Лондоне.',pollBusy:'Опрос сеансов уже выполняется. Чуть позже нажмите «Обновить».'});
 Object.assign(copy.lv,{sessions:'VPN sesijas',inventoryNote:'Konti un VPN piekļuves ieraksti. Pašreizējie savienojumi redzami cilnē “VPN sesijas”.',sessionNote:'Stāvoklis katram mezglam norādītajā laikā. Lai iegūtu jaunus datus, nospiediet “Atjaunināt”.',nodeError:'Neizdevās pārbaudīt mezglu. Sesiju skaits nav zināms.',noSessions:'Pārbaudes brīdī sesiju nav.',checked:'Pārbaudīts',peer:'Klienta identifikators',addresses:'Klienta adreses',duration:'Ilgums',traffic:'Datu apjoms',received:'Mezgls saņēmis',sent:'Mezgls nosūtījis',unmatched:'Nav viennozīmīgas atbilstības reģistrā',sessionState:'Stāvoklis',ESTABLISHED:'Izveidota',CONNECTING:'Savienojas',REKEYING:'Atslēgu atjaunināšana',DELETING:'Atvienojas',trafficNote:'Skaitītāji attiecas uz pašreizējām CHILD SA un var atiestatīties, atjauninot atslēgas. Tas nav kopējais vēsturiskais datu apjoms.',backendPending:'Lai parādītu sesijas, atjauniniet Londonas API.',pollBusy:'Sesiju pārbaude jau notiek. Drīzumā nospiediet “Atjaunināt”.'});
+Object.assign(copy.en,{cpuUsage:'CPU',memoryUsage:'Memory',diskUsage:'Disk',resourcesChecked:'Resource sample',resourcesUnavailable:'Resource usage is unavailable.'});
+Object.assign(copy.ru,{cpuUsage:'Процессор',memoryUsage:'Память',diskUsage:'Диск',resourcesChecked:'Нагрузка измерена',resourcesUnavailable:'Не удалось получить показатели нагрузки.'});
+Object.assign(copy.lv,{cpuUsage:'Procesors',memoryUsage:'Atmiņa',diskUsage:'Disks',resourcesChecked:'Resursi izmērīti',resourcesUnavailable:'Neizdevās iegūt resursu rādītājus.'});
 Object.assign(copy.ru,{target:'Объект',disconnectTest:'Отключить Test',confirmDisconnect:'Отключить VPN-сеанс Test №26? Доступ сохранится: iPhone сможет подключиться снова.',disconnected:'Сеанс Test отключён.',reconnected:'Сеанс Test отключён. Устройство уже подключилось снова.',disconnectUnknown:'Результат отключения не подтверждён. Обновите список сеансов; команда автоматически не повторяется.',disconnectStale:'Сеанс изменился или уже завершён. Обновите список.',controlUnavailable:'Не удалось подготовить отключение. Соединение не изменено.', 'session.disconnect.requested':'Запрошено отключение сеанса', 'session.disconnect.ok':'Сеанс отключён', 'session.disconnect.stale':'Отключение отклонено: сеанс изменился', 'session.disconnect.unknown':'Результат отключения неизвестен'});
 Object.assign(copy.en,{target:'Target',disconnectTest:'Disconnect Test',confirmDisconnect:'Disconnect the VPN session for Test #26? Access will remain enabled: the iPhone may reconnect.',disconnected:'Test session disconnected.',reconnected:'Test session disconnected. The device has already reconnected.',disconnectUnknown:'Disconnection was not confirmed. Refresh the session list; the command is not retried automatically.',disconnectStale:'The session has changed or ended. Refresh the list.',controlUnavailable:'Could not prepare disconnection. The connection was not changed.', 'session.disconnect.requested':'Session disconnection requested', 'session.disconnect.ok':'Session disconnected', 'session.disconnect.stale':'Disconnection rejected: session changed', 'session.disconnect.unknown':'Disconnection outcome unknown'});
 Object.assign(copy.lv,{target:'Mērķis',disconnectTest:'Atvienot Test',confirmDisconnect:'Atvienot Test #26 VPN sesiju? Piekļuve saglabāsies: iPhone varēs izveidot savienojumu atkārtoti.',disconnected:'Test sesija atvienota.',reconnected:'Test sesija atvienota. Ierīce jau ir izveidojusi jaunu savienojumu.',disconnectUnknown:'Atvienošana nav apstiprināta. Atjauniniet sesiju sarakstu; komanda netiek automātiski atkārtota.',disconnectStale:'Sesija ir mainījusies vai beigusies. Atjauniniet sarakstu.',controlUnavailable:'Neizdevās sagatavot atvienošanu. Savienojums nav mainīts.', 'session.disconnect.requested':'Pieprasīta sesijas atvienošana', 'session.disconnect.ok':'Sesija atvienota', 'session.disconnect.stale':'Atvienošana noraidīta: sesija mainījusies', 'session.disconnect.unknown':'Atvienošanas rezultāts nav zināms'});
@@ -91,11 +94,31 @@ function showRegistry(data){const body=table(['account','vpn','linked','provisio
 function showAudit(data){const body=table(['when','actor','action','target']);for(const e of data.events){const row=node('tr');row.append(node('td',date(e.createdAt)),node('td',e.actor==='root'?t('root'):e.actor),node('td',e.action==='admin.grant'?t('grant'):e.action==='admin.revoke'?t('revoke'):t(e.action)),node('td',e.target,'admin-id'));body.append(row);}}
 function duration(value){if(value==null)return '—';const n=Math.floor(value);return Math.floor(n/3600)+':'+String(Math.floor(n/60)%60).padStart(2,'0')+':'+String(n%60).padStart(2,'0');}
 function bytes(value){const units=['B','KiB','MiB','GiB','TiB'];let n=value,i=0;while(n>=1024&&i<units.length-1){n/=1024;i++;}return n.toLocaleString(lang,{maximumFractionDigits:i?1:0})+' '+units[i];}
+function showNodeMetrics(metrics,section){
+ if(metrics?.status!=='ok'){
+  section.append(node('p',t('resourcesUnavailable'),'admin-muted'));
+  return;
+ }
+ const used=(value,total)=>bytes(value)+' / '+bytes(total)+' ('+Math.round(value/total*100)+'%)';
+ const items=[
+  ['cpuUsage',metrics.cpuPercent+'%'],
+  ['memoryUsage',used(metrics.memoryUsedBytes,metrics.memoryTotalBytes)],
+  ['diskUsage',used(metrics.diskUsedBytes,metrics.diskTotalBytes)]
+ ];
+ const grid=node('div',undefined,'admin-resources');
+ for(const [label,value] of items){
+  const card=node('div',undefined,'admin-resource');
+  card.append(node('span',t(label),'admin-resource-label'),node('strong',value));
+  grid.append(card);
+ }
+ section.append(node('p',t('resourcesChecked')+': '+date(metrics.observedAt),'admin-muted'),grid);
+}
 function showSessions(data){
  if(testAccess)accessPanel($('results'));
  for(const result of data.nodes){
   const section=node('section',undefined,'admin-node');section.dataset.node=result.node;
   section.append(node('h2',t(result.node)));$('results').append(section);
+  showNodeMetrics(result.metrics,section);
   if(result.status!=='ok'){section.append(node('p',t('nodeError'),'admin-node-error'));continue;}
   section.append(node('p',t('checked')+': '+date(result.observedAt),'admin-muted'));
   if(!result.sessions.length){section.append(node('p',t('noSessions')));continue;}
