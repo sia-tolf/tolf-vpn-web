@@ -36,3 +36,15 @@
 .passkey-note { margin-bottom:0; }
 .account-settings .settings-input { width:100%; min-width:0; }
 @media(max-width:520px){.topbar-inner{padding-inline:16px}.account-settings{padding:20px 12px 32px}.account-settings .card-content{padding:20px}.account-heading h1{font-size:26px}}
+
+.account-heading > #vpnNavigation,
+.account-heading > #accountSignOut {
+  box-sizing:border-box;
+  flex:0 0 160px;
+  width:160px;
+  max-width:calc((100% - 12px)/2);
+  height:50px;
+  min-height:50px;
+  max-height:50px;
+  padding:0 12px;
+}
