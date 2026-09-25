@@ -23,6 +23,8 @@ const signedOutRecoveryBox =
   document.getElementById("signedOutRecoveryBox");
 const signedOutRecoveryCode =
   document.getElementById("signedOutRecoveryCode");
+const saveSignedOutRecoveryButton =
+  document.getElementById("saveSignedOutRecoveryButton");
 const copySignedOutRecoveryButton =
   document.getElementById("copySignedOutRecoveryButton");
 const savedSignedOutRecoveryButton =

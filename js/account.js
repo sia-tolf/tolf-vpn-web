@@ -166,7 +166,7 @@ submitRegisterButton.addEventListener("click", async () => {
       throw new Error(t("recoveryCodeNotReturned"));
     }
 
-    showSignedOutRecoveryCode(finish.recoveryCode);
+    showSignedOutRecoveryCode(finish.recoveryCode, finish);
 
     signedOutMessage.textContent = t("accountCreatedSaveRecovery");
     signedOutMessage.className = "message success";

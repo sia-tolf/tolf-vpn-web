@@ -205,6 +205,12 @@ I18N.en = {
   saveRecoveryCode: "Save your Recovery Code",
   recoveryCodeInitialWarning: "This code can restore access if you lose all Passkeys. TOLF cannot show this code again.",
   copyRecoveryCode: "Copy Recovery Code",
+  saveRecoveryFile: "Save as text file",
+  recoveryFileTitle: "TOLF Account recovery",
+  recoveryFileAccountId: "Account ID",
+  recoveryFilePasskey: "Passkey",
+  recoveryFileCode: "Recovery Code",
+  recoveryFileFailed: "Could not save the file. Copy the Recovery Code instead.",
   savedIt: "I saved it",
 
   myVpn: "My VPN",

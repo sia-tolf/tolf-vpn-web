@@ -9,6 +9,51 @@ cancelRecoverButton.addEventListener("click", () => {
   signedOutMessage.textContent = "";
 });
 
+saveSignedOutRecoveryButton.addEventListener("click", async () => {
+  const code = signedOutRecoveryCode.textContent.trim();
+  if (!code) return;
+
+  const details = signedOutRecoveryDetails || {};
+  const lines = [t("recoveryFileTitle"), ""];
+  if (details.userId) {
+    lines.push(`${t("recoveryFileAccountId")}: ${details.userId}`);
+  }
+  if (details.passkeyName) {
+    lines.push(`${t("recoveryFilePasskey")}: ${details.passkeyName}`);
+  }
+  lines.push(`${t("recoveryFileCode")}: ${code}`, "");
+
+  try {
+    const file = new File(
+      [String.fromCharCode(0xFEFF), lines.join(String.fromCharCode(10))],
+      "TOLF-Recovery-Code.txt",
+      { type: "text/plain;charset=utf-8" }
+    );
+
+    if (typeof navigator.share === "function" &&
+        navigator.canShare?.({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file] });
+        return;
+      } catch (error) {
+        if (error?.name === "AbortError") return;
+      }
+    }
+
+    const url = URL.createObjectURL(file);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = file.name;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  } catch {
+    signedOutMessage.textContent = t("recoveryFileFailed");
+    signedOutMessage.className = "message error";
+  }
+});
+
 copySignedOutRecoveryButton.addEventListener("click", async () => {
   const code = signedOutRecoveryCode.textContent;
 
@@ -79,7 +124,7 @@ recoverAccountButton.addEventListener("click", async () => {
 
     recoveryInput.value = "";
 
-    showSignedOutRecoveryCode(finish.recoveryCode);
+    showSignedOutRecoveryCode(finish.recoveryCode, finish);
 
     signedOutMessage.textContent = t("recoveredPasskeyCreated", {
       name: finish.passkeyName || t("newPasskey")

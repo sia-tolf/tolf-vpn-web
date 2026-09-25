@@ -205,6 +205,12 @@ I18N.lv = {
   saveRecoveryCode: "Saglabājiet Recovery Code",
   recoveryCodeInitialWarning: "Šis kods ļauj atgūt piekļuvi, ja zaudējat visus Passkey. TOLF nevarēs šo kodu parādīt vēlreiz.",
   copyRecoveryCode: "Kopēt Recovery Code",
+  saveRecoveryFile: "Saglabāt teksta failu",
+  recoveryFileTitle: "TOLF konta atkopšana",
+  recoveryFileAccountId: "Konta ID",
+  recoveryFilePasskey: "Passkey nosaukums",
+  recoveryFileCode: "Recovery Code",
+  recoveryFileFailed: "Failu neizdevās saglabāt. Nokopējiet Recovery Code.",
   savedIt: "Esmu saglabājis kodu",
 
   myVpn: "Mans VPN",

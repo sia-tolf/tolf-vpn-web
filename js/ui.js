@@ -135,8 +135,11 @@ for (const input of serverInputs) {
   });
 }
 
-function showSignedOutRecoveryCode(recoveryCode) {
+let signedOutRecoveryDetails = null;
+
+function showSignedOutRecoveryCode(recoveryCode, details = {}) {
   closeRegistrationPanel();
+  signedOutRecoveryDetails = details;
   signedOutRecoveryCode.textContent = recoveryCode;
   signedOutRecoveryBox.classList.remove("hidden");
   signedOutMainActions.classList.add("hidden");
@@ -144,6 +147,7 @@ function showSignedOutRecoveryCode(recoveryCode) {
 }
 
 function hideSignedOutRecoveryCode() {
+  signedOutRecoveryDetails = null;
   signedOutRecoveryCode.textContent = "";
   signedOutRecoveryBox.classList.add("hidden");
   signedOutMainActions.classList.remove("hidden");

@@ -1840,3 +1840,9 @@ html[data-tolf-ui] #vpnCard .vpn-account-actions > :is(#accountNavigation, #sign
   text-align:center;
 }
 .server-recommendations .server-recommendation.hidden { display:none; }
+
+.recovery-code-box > .recovery-file-button {
+  display:block;
+  width:100%;
+  margin:12px 0;
+}

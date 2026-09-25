@@ -205,6 +205,12 @@ I18N.ru = {
   saveRecoveryCode: "Сохраните Recovery Code",
   recoveryCodeInitialWarning: "Этот код позволяет восстановить доступ, если вы потеряете все Passkey. TOLF не сможет показать этот код повторно.",
   copyRecoveryCode: "Скопировать Recovery Code",
+  saveRecoveryFile: "Сохранить текстовый файл",
+  recoveryFileTitle: "Восстановление аккаунта TOLF",
+  recoveryFileAccountId: "ID аккаунта",
+  recoveryFilePasskey: "Имя Passkey",
+  recoveryFileCode: "Recovery Code",
+  recoveryFileFailed: "Не удалось сохранить файл. Скопируйте Recovery Code.",
   savedIt: "Я сохранил код",
 
   myVpn: "Мой VPN",

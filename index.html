@@ -32,7 +32,7 @@
 
   <link
     rel="stylesheet"
-    href="css/styles.css?v=recommendation-above-20260925"
+    href="css/styles.css?v=recovery-file-20260925"
   >
   <link
     rel="stylesheet"
@@ -42,19 +42,19 @@
   <!-- Keep this order. Deferred scripts run after the HTML has been parsed. -->
   <script defer src="passkey-session-label.20260917-1.js"></script>
   <script defer src="js/config.js?v=language-handoff-20260920-1"></script>
-  <script defer src="js/locales/en.js?v=entry-layout-20260925"></script>
-  <script defer src="js/locales/ru.js?v=entry-layout-20260925"></script>
-  <script defer src="js/locales/lv.js?v=entry-layout-20260925"></script>
-  <script defer src="js/dom.js?v=personal-routing-1"></script>
+  <script defer src="js/locales/en.js?v=recovery-file-20260925"></script>
+  <script defer src="js/locales/ru.js?v=recovery-file-20260925"></script>
+  <script defer src="js/locales/lv.js?v=recovery-file-20260925"></script>
+  <script defer src="js/dom.js?v=recovery-file-20260925"></script>
   <script defer src="js/network-metrics.js?v=latency-decimal-1"></script>
   <script defer src="js/platform.js?v=profile-name-top-20260925"></script>
   <script defer src="js/i18n.js?v=account-page-20260921"></script>
   <script defer src="js/webauthn.js?v=local-id-2"></script>
   <script defer src="js/api.js?v=account-retry-20260922"></script>
-  <script defer src="js/ui.js?v=profile-name-20260925"></script>
+  <script defer src="js/ui.js?v=recovery-file-20260925"></script>
   <script defer src="js/passkeys.js?v=account-page-20260921"></script>
-  <script defer src="js/recovery.js?v=account-page-20260921"></script>
-  <script defer src="js/account.js?v=account-retry-20260922"></script>
+  <script defer src="js/recovery.js?v=recovery-file-20260925"></script>
+  <script defer src="js/account.js?v=recovery-file-20260925"></script>
   <script defer src="js/routing-rules.js?v=routing-groups-20260922"></script>
   <script defer src="js/routing-policy.js?v=routing-groups-20260922"></script>
   <script defer src="js/profile-settings.js?v=profile-name-20260925"></script>
@@ -357,6 +357,10 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
             This code can restore access if you lose all
             Passkeys. TOLF cannot show this code again.
           </p>
+
+          <button id="saveSignedOutRecoveryButton"
+            class="secondary recovery-file-button" type="button"
+            data-i18n="saveRecoveryFile">Save as text file</button>
 
           <div class="recovery-code-actions">
             <button
