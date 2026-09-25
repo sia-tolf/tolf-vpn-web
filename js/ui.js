@@ -29,6 +29,7 @@ function getSelectedLocalId() {
 }
 
 function renderLocalIdSettings() {
+  if (typeof updateProfileNameDefault === "function") updateProfileNameDefault();
   if (!localIdInput) {
     return;
   }

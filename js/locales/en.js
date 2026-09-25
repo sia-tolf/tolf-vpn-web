@@ -1,9 +1,12 @@
 I18N.en = {
+  appleClientSettings: "Apple client settings",
+  profileNameLabel: "Profile name",
+  profileNameHelp: "Used for the installed profile and the downloaded file.",
   dpdRateLabel: "DPD check frequency",
   dpdLow: "Low",
   dpdMedium: "Medium",
   dpdHigh: "High",
-  dpdHelp: "Checks whether the VPN server responds. High means more frequent checks.",
+  dpdHelp: "How often the Apple client checks whether the VPN server responds. High means more frequent checks. DPD cannot be disabled here.",
   mobikeHelp: "Allows the tunnel to follow network or IP address changes when supported by the server.",
   connectionSettingsApply: "Changes take effect after you generate and install an updated profile.",
   windowsLinkLabel: "Setup link",

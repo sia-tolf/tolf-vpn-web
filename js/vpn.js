@@ -3,6 +3,30 @@ let profileShareFile = null;
 let profileShareRequest = null;
 let profileShareController = null;
 
+
+function profileShareFilename(response, platform) {
+  if (platform === "android") return "TOLF-VPN.sswan";
+
+  const disposition = response.headers.get("Content-Disposition") || "";
+  const encoded = disposition.match(/(?:^|;)\s*filename\*\s*=\s*UTF-8''([^;]+)/i);
+  const plain = disposition.match(/(?:^|;)\s*filename\s*=\s*"([^"]*)"/i);
+  let name = plain?.[1] || "TOLF-VPN.mobileconfig";
+
+  if (encoded) {
+    try {
+      name = decodeURIComponent(encoded[1].trim());
+    } catch {
+      // Keep the plain filename if the encoded value is malformed.
+    }
+  }
+
+  name = name.replace(/[\\/:*?"<>|\x00-\x1f\x7f-\x9f]/g, "_")
+    .replace(/^[ .]+|[ .]+$/g, "");
+  if (!name || name === "mobileconfig") return "TOLF-VPN.mobileconfig";
+  if (!name.toLowerCase().endsWith(".mobileconfig")) name += ".mobileconfig";
+  return name;
+}
+
 function prepareProfileShareFile(profileUrl) {
   profileShareController?.abort();
   profileShareFile = null;
@@ -22,8 +46,7 @@ function prepareProfileShareFile(profileUrl) {
     if (!blob.size || /text\/html/i.test(blob.type)) {
       throw new Error("Profile file was not returned");
     }
-    const file = new File([blob], platform === "android"
-      ? "TOLF-VPN.sswan" : "TOLF-VPN.mobileconfig", {
+    const file = new File([blob], profileShareFilename(response, platform), {
       type: platform === "android" ? "application/vnd.strongswan.profile"
         : "application/x-apple-aspen-config"
     });

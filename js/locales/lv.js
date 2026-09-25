@@ -1,9 +1,12 @@
 I18N.lv = {
+  appleClientSettings: "Apple klienta iestatījumi",
+  profileNameLabel: "Profila nosaukums",
+  profileNameHelp: "Tiek izmantots instalētajam profilam un lejupielādētajam failam.",
   dpdRateLabel: "DPD pārbaudes biežums",
   dpdLow: "Zems",
   dpdMedium: "Vidējs",
   dpdHigh: "Augsts",
-  dpdHelp: "Pārbauda, vai VPN serveris atbild. Augsts — biežākas pārbaudes.",
+  dpdHelp: "Cik bieži Apple klients pārbauda VPN servera pieejamību. Augsts — biežākas pārbaudes. DPD izslēgšana nav paredzēta.",
   mobikeHelp: "Ļauj saglabāt tuneli, mainoties tīklam vai IP adresei, ja serveris atbalsta MOBIKE.",
   connectionSettingsApply: "Izmaiņas stāsies spēkā pēc atjauninātā profila izveides un instalēšanas.",
   windowsLinkLabel: "Iestatīšanas saite",

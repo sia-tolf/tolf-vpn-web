@@ -1,3 +1,24 @@
+
+function defaultAppleProfileName() {
+  const city = getSelectedServerKey() === "riga" ? "Riga" : "Moscow";
+  const localId = getSelectedLocalId() || "";
+  return `TOLF ${city}${localId ? " " + localId : ""}`;
+}
+
+function updateProfileNameDefault() {
+  const input = document.getElementById("profileNameInput");
+  if (!input || typeof getSelectedServerKey !== "function" ||
+      typeof getSelectedLocalId !== "function") return;
+  if (input.dataset.custom !== "true") {
+    input.value = defaultAppleProfileName();
+  }
+}
+
+function selectedAppleProfileName() {
+  const input = document.getElementById("profileNameInput");
+  return input?.value.trim() || defaultAppleProfileName();
+}
+
 const dpdRate = document.getElementById("dpdRate");
 const mobikeEnabled = document.getElementById("mobikeEnabled");
 
@@ -227,6 +248,7 @@ function getProfileSettingsSelection() {
 
   return {
     ...(currentPlatform === "ios" ? {
+      profileName: selectedAppleProfileName(),
       dpd: dpdRate?.value || "Medium",
       mobike: mobikeEnabled?.checked ?? true
     } : {}),
@@ -247,6 +269,7 @@ function setProfileSettingsBusy(value) {
 }
 
 function renderProfileSettings() {
+  updateProfileNameDefault();
   updateDnsVisibility();
   updateOnDemandVisibility();
 
@@ -278,6 +301,11 @@ function renderProfileSettings() {
 }
 
 function resetProfileSettings() {
+  const nameInput = document.getElementById("profileNameInput");
+  if (nameInput) {
+    delete nameInput.dataset.custom;
+    nameInput.value = "";
+  }
   if (dpdRate) dpdRate.value = "Medium";
   if (mobikeEnabled) mobikeEnabled.checked = true;
   if (dnsMode) dnsMode.value = "automatic";
@@ -334,3 +362,14 @@ renderProfileSettings();
 
 dpdRate?.addEventListener("change", profileSettingsChanged);
 mobikeEnabled?.addEventListener("change", profileSettingsChanged);
+
+document.getElementById("profileNameInput")?.addEventListener("input", event => {
+  const input = event.target;
+  input.dataset.custom = String(
+    Boolean(input.value.trim()) && input.value.trim() !== defaultAppleProfileName()
+  );
+  profileSettingsChanged();
+});
+document.getElementById("profileNameInput")?.addEventListener("blur", () => {
+  updateProfileNameDefault();
+});
