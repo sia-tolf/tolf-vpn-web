@@ -7,7 +7,7 @@
 .back-chevron { font-size:24px; color:var(--secondary); }
 .account-settings { padding-top:24px; }
 .account-heading { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin-bottom:20px; }
-.account-heading h1 { flex:1 1 100%; margin:0; font-size:28px; font-weight:650; }
+.account-heading h1 { flex:1 1 100%; margin:0; font-size:28px; font-weight:650; text-align:center; }
 .account-heading > :is(a,button) {
   box-sizing:border-box;
   display:inline-flex;
