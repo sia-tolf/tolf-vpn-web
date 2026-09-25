@@ -163,7 +163,10 @@ function profileDownloadUrl(profileUrl) {
     const url = new URL(profileUrl, window.location.href);
     const directFile = /\.(?:mobileconfig|sswan)$/i.test(url.pathname);
 
-    if (!directFile && !url.pathname.endsWith("/download")) {
+    if (url.hostname === "install-ru.tolf.is" &&
+        ["/cgi-bin/profile", "/cgi-bin/mobileconfig"].includes(url.pathname)) {
+      url.pathname = "/cgi-bin/mobileconfig";
+    } else if (!directFile && !url.pathname.endsWith("/download")) {
       url.pathname = `${url.pathname.replace(/\/$/, "")}/download`;
     }
 
