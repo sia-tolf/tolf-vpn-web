@@ -32,7 +32,7 @@
 
   <link
     rel="stylesheet"
-    href="css/styles.css?v=compact-info-rows-20260922"
+    href="css/styles.css?v=routing-collapse-20260925"
   >
   <link
     rel="stylesheet"
@@ -684,18 +684,18 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
 
             <div class="settings-divider"></div>
 
-            <section
+            <details
               id="routingRulesSection"
               class="routing-rules-section"
               aria-labelledby="routingRulesTitle"
             >
-              <div class="settings-title-row">
+              <summary class="routing-rules-summary">
                 <span
                   id="routingRulesTitle"
                   class="settings-title"
                   data-i18n="routingRules"
                 >Routing Rules</span>
-              </div>
+              </summary>
 
               <p
                 class="section-description"
@@ -721,7 +721,7 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
                 <button id="routingPolicyReload" type="button" class="secondary" data-i18n="routingPolicyReload" disabled>Reload saved rules</button>
               </div>
               <p id="routingPolicyStatus" class="settings-validation" role="status" aria-live="polite"></p>
-            </section>
+            </details>
 
             <div class="settings-divider"></div>
 

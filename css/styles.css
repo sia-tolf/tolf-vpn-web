@@ -1746,3 +1746,39 @@ html[data-tolf-ui="vpn"] .account-promo .promo-actions > :is(input, button) {
 .delete-section:has(> .delete-button.hidden) { display:none; }
 .account-navigation { color:var(--text); font-size:14px; font-weight:600; text-decoration:none; border:1px solid var(--border); border-radius:10px; padding:10px 12px; min-height:42px; display:inline-flex; align-items:center; }
 .card-topline { flex-wrap:wrap; gap:12px; }
+
+/* Collapsible routing settings */
+#routingRulesSection {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+#routingRulesSection > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 6px 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  list-style: none;
+}
+#routingRulesSection > summary::-webkit-details-marker {
+  display: none;
+}
+#routingRulesSection > summary::before {
+  content: "▸";
+}
+#routingRulesSection[open] > summary::before {
+  content: "▾";
+}
+#routingRulesSection > summary::after {
+  content: none;
+}
+#routingRulesSection[open] > summary {
+  margin-bottom: 10px;
+}
