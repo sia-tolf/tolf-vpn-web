@@ -1,3 +1,6 @@
+const dpdRate = document.getElementById("dpdRate");
+const mobikeEnabled = document.getElementById("mobikeEnabled");
+
 function profileSettingsChanged() {
   setInstallLink(null);
   vpnMessage.textContent = "";
@@ -223,6 +226,10 @@ function getProfileSettingsSelection() {
   if (!onDemand) return null;
 
   return {
+    ...(currentPlatform === "ios" ? {
+      dpd: dpdRate?.value || "Medium",
+      mobike: mobikeEnabled?.checked ?? true
+    } : {}),
     dnsMode: dnsMode?.value === "custom" ? "custom" : "tolf",
     dnsServers: servers,
     onDemandEnabled: onDemand.enabled,
@@ -271,6 +278,8 @@ function renderProfileSettings() {
 }
 
 function resetProfileSettings() {
+  if (dpdRate) dpdRate.value = "Medium";
+  if (mobikeEnabled) mobikeEnabled.checked = true;
   if (dnsMode) dnsMode.value = "automatic";
   if (dnsServersInput) dnsServersInput.value = "";
   if (onDemandEnabled) onDemandEnabled.checked = false;
@@ -322,3 +331,6 @@ addOnDemandRule?.addEventListener("click", () => {
 });
 
 renderProfileSettings();
+
+dpdRate?.addEventListener("change", profileSettingsChanged);
+mobikeEnabled?.addEventListener("change", profileSettingsChanged);

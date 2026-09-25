@@ -1,4 +1,11 @@
 I18N.lv = {
+  dpdRateLabel: "DPD pārbaudes biežums",
+  dpdLow: "Zems",
+  dpdMedium: "Vidējs",
+  dpdHigh: "Augsts",
+  dpdHelp: "Pārbauda, vai VPN serveris atbild. Augsts — biežākas pārbaudes.",
+  mobikeHelp: "Ļauj saglabāt tuneli, mainoties tīklam vai IP adresei, ja serveris atbalsta MOBIKE.",
+  connectionSettingsApply: "Izmaiņas stāsies spēkā pēc atjauninātā profila izveides un instalēšanas.",
   windowsLinkLabel: "Iestatīšanas saite",
   windowsLinkCopied: "Saite nokopēta.",
   windowsLinkCopyManual: "Saite ir atlasīta. Kopējiet to pārlūka izvēlnē.",

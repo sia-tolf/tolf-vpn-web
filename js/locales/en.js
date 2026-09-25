@@ -1,4 +1,11 @@
 I18N.en = {
+  dpdRateLabel: "DPD check frequency",
+  dpdLow: "Low",
+  dpdMedium: "Medium",
+  dpdHigh: "High",
+  dpdHelp: "Checks whether the VPN server responds. High means more frequent checks.",
+  mobikeHelp: "Allows the tunnel to follow network or IP address changes when supported by the server.",
+  connectionSettingsApply: "Changes take effect after you generate and install an updated profile.",
   windowsLinkLabel: "Setup link",
   windowsLinkCopied: "Link copied.",
   windowsLinkCopyManual: "The link is selected. Copy it using the browser menu.",

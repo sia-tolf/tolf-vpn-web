@@ -42,12 +42,12 @@
   <!-- Keep this order. Deferred scripts run after the HTML has been parsed. -->
   <script defer src="passkey-session-label.20260917-1.js"></script>
   <script defer src="js/config.js?v=language-handoff-20260920-1"></script>
-  <script defer src="js/locales/en.js?v=short-password-label-20260923"></script>
-  <script defer src="js/locales/ru.js?v=short-password-label-20260923"></script>
-  <script defer src="js/locales/lv.js?v=short-password-label-20260923"></script>
+  <script defer src="js/locales/en.js?v=dpd-mobike-20260925"></script>
+  <script defer src="js/locales/ru.js?v=dpd-mobike-20260925"></script>
+  <script defer src="js/locales/lv.js?v=dpd-mobike-20260925"></script>
   <script defer src="js/dom.js?v=personal-routing-1"></script>
   <script defer src="js/network-metrics.js?v=latency-decimal-1"></script>
-  <script defer src="js/platform.js?v=promo-disclosure-20260919"></script>
+  <script defer src="js/platform.js?v=dpd-mobike-20260925"></script>
   <script defer src="js/i18n.js?v=account-page-20260921"></script>
   <script defer src="js/webauthn.js?v=local-id-2"></script>
   <script defer src="js/api.js?v=account-retry-20260922"></script>
@@ -57,7 +57,7 @@
   <script defer src="js/account.js?v=account-retry-20260922"></script>
   <script defer src="js/routing-rules.js?v=routing-groups-20260922"></script>
   <script defer src="js/routing-policy.js?v=routing-groups-20260922"></script>
-  <script defer src="js/profile-settings.js?v=personal-routing-2"></script>
+  <script defer src="js/profile-settings.js?v=dpd-mobike-20260925"></script>
   <script defer src="js/vpn.js?v=compact-profile-password-buttons-20260923-1"></script>
   <script defer src="js/promo.js?v=promo-disclosure-20260919"></script>
   <script defer src="js/location.js?v=entry-guidance-20260922"></script>
@@ -724,6 +724,23 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
             </section>
 
             <div class="settings-divider"></div>
+
+            <div id="appleConnectionSettings" class="hidden">
+              <label class="settings-label" for="dpdRate" data-i18n="dpdRateLabel">DPD check frequency</label>
+              <select id="dpdRate" class="settings-select">
+                <option value="Low" data-i18n="dpdLow">Low</option>
+                <option value="Medium" data-i18n="dpdMedium" selected>Medium</option>
+                <option value="High" data-i18n="dpdHigh">High</option>
+              </select>
+              <p class="section-description" data-i18n="dpdHelp">Checks whether the VPN server responds. High means more frequent checks.</p>
+              <label class="settings-switch-row" for="mobikeEnabled">
+                <span>MOBIKE</span>
+                <input id="mobikeEnabled" class="ios-switch" type="checkbox" checked>
+              </label>
+              <p class="section-description" data-i18n="mobikeHelp">Allows the tunnel to follow network or IP address changes when supported by the server.</p>
+              <p class="section-description" data-i18n="connectionSettingsApply">Changes take effect after you generate and install an updated profile.</p>
+              <div class="settings-divider"></div>
+            </div>
 
             <div id="onDemandSection">
               <div class="settings-title-row">
