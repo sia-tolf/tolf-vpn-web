@@ -17,6 +17,12 @@
   link.className = "button-link secondary vpn-administration-button hidden";
   actions.insertBefore(link, signOut);
 
+  const account = document.getElementById("accountNavigation");
+  if (account) {
+    account.classList.add("sign-out-button");
+    actions.insertBefore(account, signOut);
+  }
+
   let epoch = 0;
   let visible = false;
   function label() {
