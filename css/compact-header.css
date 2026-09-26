@@ -290,3 +290,38 @@ html.tolf-ipad[data-tolf-ui="vpn"] .compact-header .protocol-selector {
   transform: none !important;
   z-index: 61 !important;
 }
+
+/* Final title geometry: title centered on the same content width as platform/card; protocol inline right. */
+html[data-tolf-ui="vpn"] .compact-header .brand-copy,
+html.tolf-ipad[data-tolf-ui="vpn"] .compact-header .brand-copy {
+  position: relative !important;
+  display: flex !important;
+  width: 100% !important;
+  min-height: 34px !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+html[data-tolf-ui="vpn"] .compact-header .brand-title-row,
+html.tolf-ipad[data-tolf-ui="vpn"] .compact-header .brand-title-row {
+  position: static !important;
+  display: block !important;
+  width: max-content !important;
+  margin: 0 !important;
+  transform: none !important;
+}
+html[data-tolf-ui="vpn"] .compact-header .protocol-selector,
+html.tolf-ipad[data-tolf-ui="vpn"] .compact-header .protocol-selector {
+  position: absolute !important;
+  left: calc(50% + 88px) !important;
+  top: 50% !important;
+  margin: 0 !important;
+  transform: translateY(-50%) !important;
+  display: flex !important;
+  align-items: center !important;
+}
+html[data-tolf-ui="vpn"] .compact-header .protocol-label,
+html.tolf-ipad[data-tolf-ui="vpn"] .compact-header .protocol-label {
+  align-self: center !important;
+  margin: 0 !important;
+  line-height: 1.2 !important;
+}
