@@ -188,12 +188,22 @@ html[data-tolf-ui="vpn"] #vpnCard .vpn-account-actions > #signOutButton svg {
   flex: 0 0 18px;
 }
 html[data-tolf-ui="vpn"] #vpnCard .server-option label {
-  min-height: 76px;
-  padding: 6px;
-  gap: 4px 8px;
+  min-height: 66px;
+  padding: 4px 6px;
+  gap: 3px 7px;
 }
 html[data-tolf-ui="vpn"] #vpnCard .server-option .server-recommendation {
   font-size: 10px;
   font-weight: 400;
   line-height: 1.2;
+}
+
+html[data-tolf-ui="vpn"] #vpnCard .server-flag {
+  font-size: 21px;
+}
+html[data-tolf-ui="vpn"] #vpnCard .server-city {
+  font-size: 14px;
+}
+html[data-tolf-ui="vpn"] #vpnCard .server-latency {
+  font-size: 11px;
 }
