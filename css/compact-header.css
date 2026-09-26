@@ -297,3 +297,22 @@ html[data-tolf-ui="vpn"] .compact-header .brand-title-row > .protocol-selector {
     display: inline-block !important;
   }
 }
+
+/* Build 16: on wide iPad the legacy compact-header grid has an unused second column.
+   Make both rows span the full header width before centering the title. */
+@media (min-width: 768px) and (orientation: landscape) {
+  html.tolf-ipad[data-tolf-ui="vpn"] .compact-header {
+    grid-template-columns: 1fr !important;
+  }
+  html.tolf-ipad[data-tolf-ui="vpn"] .compact-header .header-navigation {
+    grid-area: 1 / 1 / 2 / 2 !important;
+  }
+  html.tolf-ipad[data-tolf-ui="vpn"] .compact-header .brand-copy {
+    grid-area: 2 / 1 / 3 / 2 !important;
+    width: 100% !important;
+  }
+  html.tolf-ipad[data-tolf-ui="vpn"] .compact-header .brand-title-row {
+    width: 100% !important;
+    text-align: center !important;
+  }
+}
