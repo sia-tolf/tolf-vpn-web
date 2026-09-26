@@ -270,3 +270,23 @@ html[data-tolf-ui="vpn"] .compact-header .protocol-selector {
     justify-self: auto !important;
   }
 }
+
+/* Final iPad override: center TOLF VPN against the viewport, not the padded page/header. */
+html.tolf-ipad[data-tolf-ui="vpn"] .compact-header .brand-copy {
+  position: static !important;
+}
+html.tolf-ipad[data-tolf-ui="vpn"] .compact-header .brand-title-row {
+  position: fixed !important;
+  left: 50vw !important;
+  top: auto !important;
+  transform: translateX(-50%) !important;
+  width: max-content !important;
+  z-index: 61 !important;
+}
+html.tolf-ipad[data-tolf-ui="vpn"] .compact-header .protocol-selector {
+  position: fixed !important;
+  left: calc(50vw + 88px) !important;
+  top: auto !important;
+  transform: none !important;
+  z-index: 61 !important;
+}
