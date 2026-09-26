@@ -266,3 +266,34 @@ html[data-tolf-ui="vpn"] .compact-header .brand-title-row .protocol-label {
     text-align: center !important;
   }
 }
+
+/* Build 15: make title row span the same full content width as the platform switcher. */
+html[data-tolf-ui="vpn"] .compact-header .brand-copy {
+  display: block !important;
+}
+html[data-tolf-ui="vpn"] .compact-header .brand-title-row {
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+  text-align: center !important;
+}
+html[data-tolf-ui="vpn"] .compact-header .brand-title-row > h1 {
+  display: inline-block !important;
+  margin: 0 auto !important;
+}
+html[data-tolf-ui="vpn"] .compact-header .brand-title-row > .protocol-selector {
+  left: calc(50% + 88px) !important;
+}
+@media (min-width: 768px) and (orientation: landscape) {
+  html.tolf-ipad[data-tolf-ui="vpn"] .compact-header .brand-copy {
+    display: block !important;
+  }
+  html.tolf-ipad[data-tolf-ui="vpn"] .compact-header .brand-title-row {
+    display: block !important;
+    width: 100% !important;
+    text-align: center !important;
+  }
+  html.tolf-ipad[data-tolf-ui="vpn"] .compact-header .brand-title-row > h1 {
+    display: inline-block !important;
+  }
+}
