@@ -222,121 +222,70 @@ html[data-tolf-ui="vpn"] #vpnCard .server-city {
 html[data-tolf-ui="vpn"] #vpnCard .server-latency {
   font-size: 11px;
 }
-
-/* Exact visual title centering, independent of protocol label and legacy iPad layout. */
+/* VPN title: center exactly on the page content axis; IKEv2 is decorative and does not participate. */
 html[data-tolf-ui="vpn"] .compact-header .brand-copy {
+  grid-area: 2 / 1 / 3 / 3 !important;
   position: relative !important;
   display: block !important;
   width: 100% !important;
   min-height: 34px !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 html[data-tolf-ui="vpn"] .compact-header .brand-title-row {
   position: absolute !important;
-  display: block !important;
   left: 50% !important;
   top: 50% !important;
+  display: block !important;
   width: max-content !important;
   margin: 0 !important;
   transform: translate(-50%, -50%) !important;
 }
 html[data-tolf-ui="vpn"] .compact-header .brand-title-row h1 {
-  display: block !important;
   position: static !important;
+  display: block !important;
   margin: 0 !important;
   transform: none !important;
   text-align: center !important;
 }
 html[data-tolf-ui="vpn"] .compact-header .protocol-selector {
   position: absolute !important;
-  display: block !important;
   left: calc(50% + 88px) !important;
   top: 50% !important;
+  display: flex !important;
+  align-items: center !important;
   margin: 0 !important;
   transform: translateY(-50%) !important;
 }
+html[data-tolf-ui="vpn"] .compact-header .protocol-label {
+  align-self: center !important;
+  margin: 0 !important;
+  line-height: 1.2 !important;
+}
 @media (min-width: 768px) and (orientation: landscape) {
   html.tolf-ipad[data-tolf-ui="vpn"] .compact-header .brand-copy {
-    display: block !important;
     grid-area: 2 / 1 / 3 / 3 !important;
+    position: relative !important;
+    display: block !important;
   }
   html.tolf-ipad[data-tolf-ui="vpn"] .compact-header .brand-title-row {
+    position: absolute !important;
+    left: 50% !important;
+    top: 50% !important;
     display: block !important;
     grid-column: auto !important;
     grid-row: auto !important;
+    transform: translate(-50%, -50%) !important;
   }
   html.tolf-ipad[data-tolf-ui="vpn"] .compact-header .brand-title-row h1 {
     grid-column: auto !important;
     grid-row: auto !important;
     justify-self: auto !important;
+    font-size: 28px !important;
+    line-height: 1.2 !important;
   }
-}
-
-/* Final iPad override: center TOLF VPN against the viewport, not the padded page/header. */
-html.tolf-ipad[data-tolf-ui="vpn"] .compact-header .brand-copy {
-  position: static !important;
-}
-html.tolf-ipad[data-tolf-ui="vpn"] .compact-header .brand-title-row {
-  position: fixed !important;
-  left: 50vw !important;
-  top: auto !important;
-  transform: translateX(-50%) !important;
-  width: max-content !important;
-  z-index: 61 !important;
-}
-html.tolf-ipad[data-tolf-ui="vpn"] .compact-header .protocol-selector {
-  position: fixed !important;
-  left: calc(50vw + 88px) !important;
-  top: auto !important;
-  transform: none !important;
-  z-index: 61 !important;
-}
-
-/* Final title geometry: title centered on the same content width as platform/card; protocol inline right. */
-html[data-tolf-ui="vpn"] .compact-header .brand-copy,
-html.tolf-ipad[data-tolf-ui="vpn"] .compact-header .brand-copy {
-  position: relative !important;
-  display: flex !important;
-  width: 100% !important;
-  min-height: 34px !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
-html[data-tolf-ui="vpn"] .compact-header .brand-title-row,
-html.tolf-ipad[data-tolf-ui="vpn"] .compact-header .brand-title-row {
-  position: static !important;
-  display: block !important;
-  width: max-content !important;
-  margin: 0 !important;
-  transform: none !important;
-}
-html[data-tolf-ui="vpn"] .compact-header .protocol-selector,
-html.tolf-ipad[data-tolf-ui="vpn"] .compact-header .protocol-selector {
-  position: absolute !important;
-  left: calc(50% + 88px) !important;
-  top: 50% !important;
-  margin: 0 !important;
-  transform: translateY(-50%) !important;
-  display: flex !important;
-  align-items: center !important;
-}
-html[data-tolf-ui="vpn"] .compact-header .protocol-label,
-html.tolf-ipad[data-tolf-ui="vpn"] .compact-header .protocol-label {
-  align-self: center !important;
-  margin: 0 !important;
-  line-height: 1.2 !important;
-}
-
-/* Content-axis correction: .page is 760px outer / 712px content on wide screens. */
-@media (min-width: 521px) {
-  html[data-tolf-ui="vpn"] .compact-header .brand-title-row,
-  html.tolf-ipad[data-tolf-ui="vpn"] .compact-header .brand-title-row {
-    position: absolute !important;
-    left: 50% !important;
-    top: 50% !important;
-    transform: translate(-50%, -50%) !important;
-  }
-  html[data-tolf-ui="vpn"] .compact-header .protocol-selector,
   html.tolf-ipad[data-tolf-ui="vpn"] .compact-header .protocol-selector {
+    position: absolute !important;
     left: calc(50% + 88px) !important;
     top: 50% !important;
     transform: translateY(-50%) !important;
