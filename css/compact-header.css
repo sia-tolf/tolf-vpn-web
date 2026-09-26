@@ -325,3 +325,20 @@ html.tolf-ipad[data-tolf-ui="vpn"] .compact-header .protocol-label {
   margin: 0 !important;
   line-height: 1.2 !important;
 }
+
+/* Content-axis correction: .page is 760px outer / 712px content on wide screens. */
+@media (min-width: 521px) {
+  html[data-tolf-ui="vpn"] .compact-header .brand-title-row,
+  html.tolf-ipad[data-tolf-ui="vpn"] .compact-header .brand-title-row {
+    position: absolute !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+  }
+  html[data-tolf-ui="vpn"] .compact-header .protocol-selector,
+  html.tolf-ipad[data-tolf-ui="vpn"] .compact-header .protocol-selector {
+    left: calc(50% + 88px) !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+  }
+}
