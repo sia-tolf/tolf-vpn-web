@@ -276,3 +276,18 @@ html[data-tolf-ui="vpn"] .compact-header .vpn-title-anchor .protocol-label {
     line-height: 1.2 !important;
   }
 }
+
+/* Build 12: center title on the actual 712px content box, independent of compact-header grid tracks. */
+@media (min-width: 761px) {
+  html[data-tolf-ui="vpn"] .compact-header .brand-copy,
+  html.tolf-ipad[data-tolf-ui="vpn"] .compact-header .brand-copy {
+    position: absolute !important;
+    left: 50% !important;
+    width: min(712px, calc(100% - 48px)) !important;
+    transform: translateX(-50%) !important;
+  }
+  html[data-tolf-ui="vpn"] .compact-header .vpn-title-anchor,
+  html.tolf-ipad[data-tolf-ui="vpn"] .compact-header .vpn-title-anchor {
+    left: 50% !important;
+  }
+}
