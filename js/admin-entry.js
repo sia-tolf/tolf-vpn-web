@@ -16,7 +16,7 @@
   heading.insertBefore(menu, signOut);
   const account = document.getElementById("accountNavigation");
   if (account) actions.append(account);
-  const labels = { en: "Administration", ru: "Администрирование", lv: "Administrēšana" };
+  const labels = { en: "Admin", ru: "Админ", lv: "Admin" };
   const link = document.createElement("a");
   link.id = "vpnAdminLink";
   link.href = "/admin/v1.3.html";

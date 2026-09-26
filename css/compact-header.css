@@ -124,3 +124,76 @@ html[data-tolf-ui="vpn"] #vpnCard .vpn-account-menu .vpn-account-actions > :is(a
   html[data-tolf-ui="vpn"] .compact-header .language-button { width:29px; }
   html[data-tolf-ui="vpn"] .compact-header .help-navigation { font-size:12px; padding:0; }
 }
+
+/* Account dropdown repair 20260926 */
+html[data-tolf-ui="vpn"] #vpnCard .vpn-account-menu > .vpn-account-actions {
+  box-sizing: border-box !important;
+  width: 260px !important;
+  min-width: 0 !important;
+  max-width: calc(100vw - 80px) !important;
+  left: auto !important;
+  right: 0 !important;
+  padding: 6px !important;
+  gap: 0 !important;
+}
+html[data-tolf-ui="vpn"] #vpnCard .vpn-account-actions > :is(
+  #accountNavigation, #vpnAdminLink, #signOutButton
+) {
+  box-sizing: border-box !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  flex: 0 0 auto !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  height: auto !important;
+  min-height: 46px !important;
+  max-height: none !important;
+  margin: 0 !important;
+  padding: 11px 12px !important;
+  gap: 10px !important;
+  border: 0 !important;
+  border-radius: 6px !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  color: var(--text) !important;
+  font-family: inherit !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  line-height: 1.4 !important;
+  text-align: left !important;
+  text-decoration: none !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+}
+html[data-tolf-ui="vpn"] #vpnCard .vpn-account-actions > .hidden {
+  display: none !important;
+}
+html[data-tolf-ui="vpn"] #vpnCard .vpn-account-actions > :is(a,button):hover {
+  background: var(--segment-background) !important;
+}
+html[data-tolf-ui="vpn"] #vpnCard .vpn-account-actions > :is(a,button):focus-visible {
+  outline: 2px solid var(--tolf-action-text);
+  outline-offset: -2px;
+}
+html[data-tolf-ui="vpn"] #vpnCard .vpn-account-actions > #signOutButton {
+  margin-top: 4px !important;
+  border-top: 1px solid var(--border) !important;
+  border-radius: 0 0 6px 6px !important;
+}
+html[data-tolf-ui="vpn"] #vpnCard .vpn-account-actions > #signOutButton svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+}
+html[data-tolf-ui="vpn"] #vpnCard .server-option label {
+  min-height: 76px;
+  padding: 6px;
+  gap: 4px 8px;
+}
+html[data-tolf-ui="vpn"] #vpnCard .server-option .server-recommendation {
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 1.2;
+}
