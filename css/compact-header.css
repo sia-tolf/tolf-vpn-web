@@ -386,3 +386,25 @@ html[data-tolf-ui="vpn"] .compact-header .header-navigation > .help-navigation {
     line-height: 1.2 !important;
   }
 }
+
+/* Build 19: language selector moves to the right beside Help; title stays in restored flow. */
+html[data-tolf-ui="vpn"] .compact-header .header-navigation {
+  display: grid !important;
+  grid-template-columns: auto 1fr auto auto !important;
+  align-items: center !important;
+  column-gap: 12px !important;
+}
+html[data-tolf-ui="vpn"] .compact-header .header-navigation > .home-navigation:not(.help-navigation) {
+  grid-column: 1 !important;
+  justify-self: start !important;
+}
+html[data-tolf-ui="vpn"] .compact-header .header-navigation > .language-switcher {
+  position: static !important;
+  grid-column: 3 !important;
+  justify-self: end !important;
+  transform: none !important;
+}
+html[data-tolf-ui="vpn"] .compact-header .header-navigation > .help-navigation {
+  grid-column: 4 !important;
+  justify-self: end !important;
+}
