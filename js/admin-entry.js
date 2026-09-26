@@ -13,6 +13,19 @@
   const actions = document.createElement("div");
   actions.className = "vpn-account-actions";
   menu.append(toggle, actions);
+
+  // Align dropdown left edge with viewport center.
+  function alignAccountDropdown() {
+    if (!menu.open) return;
+    const center = document.documentElement.clientWidth / 2;
+    const width = menu.getBoundingClientRect().right - center;
+    if (width > 0) {
+      actions.style.setProperty("width", width + "px", "important");
+    }
+  }
+  menu.addEventListener("toggle", alignAccountDropdown);
+  window.addEventListener("resize", alignAccountDropdown);
+
   heading.insertBefore(menu, signOut);
   const account = document.getElementById("accountNavigation");
   if (account) actions.append(account);
