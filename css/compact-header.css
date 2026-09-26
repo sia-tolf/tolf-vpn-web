@@ -408,3 +408,17 @@ html[data-tolf-ui="vpn"] .compact-header .header-navigation > .help-navigation {
   grid-column: 4 !important;
   justify-self: end !important;
 }
+
+/* Build 20: typography parity with Smart DNS. */
+html[data-tolf-ui="vpn"] .compact-header .brand-title-row > h1 {
+  font-size: 21px !important;
+  font-weight: 600 !important;
+  line-height: normal !important;
+  letter-spacing: normal !important;
+}
+html[data-tolf-ui="vpn"] #vpnCard .card-topline > h2 {
+  font-size: 22px !important;
+  font-weight: 700 !important;
+  line-height: normal !important;
+  letter-spacing: -0.3px !important;
+}
