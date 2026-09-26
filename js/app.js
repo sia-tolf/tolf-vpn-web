@@ -28,7 +28,7 @@ function syncHeaderVerticalSpacing() {
 
   // Narrow header wrappers have no layout box; the selectors stick directly.
   brand.style.removeProperty("top");
-  if (window.matchMedia("(max-width: 699px)").matches) {
+  if (window.matchMedia("(max-width: 699px)").matches || getComputedStyle(brandTop).position === "static") {
     brand.style.setProperty("padding-top", "0px", "important");
     return;
   }

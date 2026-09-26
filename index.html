@@ -67,12 +67,12 @@
   <script defer src="js/windows.js?v=windows-device-origin-20260926"></script>
   <script defer src="js/invitations.js?v=account-page-20260921"></script>
   <script defer src="js/quick-entry.js?v=quick-2"></script>
-  <script defer src="js/app.js?v=compact-sticky-20260919-3"></script>
-  <script defer src="js/admin-entry.js?v=account-actions-20260925"></script>
+  <script defer src="js/app.js?v=calm-layout-20260926"></script>
+  <script defer src="js/admin-entry.js?v=calm-layout-20260926"></script>
 <link rel="stylesheet" href="tolf-buttons.20260917-3.css">
 <script defer src="tolf-wordmark.20260917-3.js"></script>
 <link rel="stylesheet" href="tolf-header.20260919-1.css?v=languages-2">
-<link rel="stylesheet" href="css/compact-header.css?v=20260920-3">
+<link rel="stylesheet" href="css/compact-header.css?v=calm-layout-20260926">
 
 <style id="tolf-navigation-emblem">
 #homeNavigation .tolf-wordmark::before {
@@ -131,19 +131,19 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
               id="languageEn"
               class="language-button"
               type="button"
-             lang="en" aria-label="English">English</button>
+             lang="en" aria-label="English">EN</button>
 
             <button
               id="languageRu"
               class="language-button"
               type="button"
-             lang="ru" aria-label="Русский">Русский</button>
+             lang="ru" aria-label="Русский">RU</button>
 
             <button
               id="languageLv"
               class="language-button"
               type="button"
-             lang="lv" aria-label="Latviešu">Latviešu</button>
+             lang="lv" aria-label="Latviešu">LV</button>
           </div><div
             class="platform-switcher"
             aria-label="Device platform"
@@ -459,8 +459,8 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
           >VPN Entry Point</p>
 
           <div id="serverRecommendations" class="server-recommendations hidden" aria-live="polite">
-            <span id="serverRecommendationRiga" class="server-recommendation hidden"></span>
-            <span id="serverRecommendationMoscow" class="server-recommendation hidden"></span>
+            
+            
             <span aria-hidden="true"></span>
           </div>
 
@@ -477,7 +477,7 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
                 value="riga"
                 checked
               >
-              <label for="serverRiga">
+              <label for="serverRiga"><span id="serverRecommendationRiga" class="server-recommendation hidden"></span>
                 <span
                   class="server-flag"
                   aria-hidden="true"
@@ -502,7 +502,7 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
                 name="vpnServer"
                 value="moscow"
               >
-              <label for="serverMoscow">
+              <label for="serverMoscow"><span id="serverRecommendationMoscow" class="server-recommendation hidden"></span>
                 <span
                   class="server-flag"
                   aria-hidden="true"
@@ -525,7 +525,7 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
               </label>
             </div>
 
-            <div class="server-option">
+            <div class="server-option hidden">
               <input
                 id="serverNewYork"
                 type="radio"
@@ -552,17 +552,7 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
             </div>
           </div>
 
-          <div class="server-address">
-            <span
-              class="server-address-label"
-              data-i18n="entryAddressCompact"
-            >Address:</span>
 
-            <span
-              id="selectedServerAddress"
-              class="server-address-value"
-            >ikev2-riga.tolf.is</span>
-          </div>
 
           <p
             id="entryPointNote"
@@ -578,6 +568,17 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
             <summary data-i18n="vpnSettings">
               VPN Settings
             </summary>
+          <div class="server-address">
+            <span
+              class="server-address-label"
+              data-i18n="entryAddressCompact"
+            >Address:</span>
+
+            <span
+              id="selectedServerAddress"
+              class="server-address-value"
+            >ikev2-riga.tolf.is</span>
+          </div>
 
 
             <div id="appleProfileNameSettings" class="hidden" style="margin-top:16px;margin-bottom:16px">
@@ -1179,3 +1180,4 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
   </main>
 </body>
 </html>
+
