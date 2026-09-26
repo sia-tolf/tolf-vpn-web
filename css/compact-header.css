@@ -128,7 +128,7 @@ html[data-tolf-ui="vpn"] #vpnCard .vpn-account-menu .vpn-account-actions > :is(a
 /* Account dropdown repair 20260926 */
 html[data-tolf-ui="vpn"] #vpnCard .vpn-account-menu > .vpn-account-actions {
   box-sizing: border-box !important;
-  width: 260px !important;
+  width: 170px !important;
   min-width: 0 !important;
   max-width: calc(100vw - 80px) !important;
   left: auto !important;
