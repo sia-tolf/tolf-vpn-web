@@ -2,7 +2,7 @@ const API = "https://api.tolf.is";
 
 const copy = {
   en: {
-    account: "TOLF Account",
+    account: "My account",
     signInTitle: "Sign in to TOLF",
     signInDescription: "Use your Passkey to access your TOLF account.",
     signIn: "Sign in with Passkey",
@@ -39,7 +39,7 @@ const copy = {
     requestFailed: "Request failed"
   },
   ru: {
-    account: "Аккаунт TOLF",
+    account: "Личный кабинет",
     signInTitle: "Вход в TOLF",
     signInDescription: "Используйте Passkey для входа в аккаунт TOLF.",
     signIn: "Войти с Passkey",
@@ -76,7 +76,7 @@ const copy = {
     requestFailed: "Ошибка запроса"
   },
   lv: {
-    account: "TOLF konts",
+    account: "Mans konts",
     signInTitle: "Pieteikšanās TOLF",
     signInDescription: "Izmantojiet Passkey, lai piekļūtu savam TOLF kontam.",
     signIn: "Pieteikties ar Passkey",
