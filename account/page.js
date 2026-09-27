@@ -2,7 +2,7 @@
 const $=id=>document.getElementById(id);
 const passkeyList=$('passkeyList'), passkeyMessage=$('passkeyMessage'), addPasskeyButton=$('addPasskeyButton'), deleteAccountButton=$('deleteAccountButton');
 const generateRecoveryButton=$('generateRecoveryButton'), accountRecoveryCode=$('accountRecoveryCode'), accountRecoveryBox=$('accountRecoveryBox'), copyAccountRecoveryButton=$('copyAccountRecoveryButton'), savedAccountRecoveryButton=$('savedAccountRecoveryButton'), recoveryMessage=$('recoveryMessage');
-for(const [lang,title] of Object.entries({en:'TOLF Account',ru:'Аккаунт TOLF',lv:'TOLF konts'})) Object.assign(I18N[lang],{accountTitle:title});
+for(const [lang,title] of Object.entries({en:'My account',ru:'Личный кабинет',lv:'Mans konts'})) Object.assign(I18N[lang],{accountTitle:title});
 function t(key,replacements={}){let value=I18N[currentLanguage]?.[key]??I18N.en[key]??key;for(const [k,v] of Object.entries(replacements))value=value.replaceAll('{'+k+'}',v);return value;}
 function confirmLocalized(title,body,replacements={}){return confirm(t(title)+'\n\n'+t(body,replacements));}
 function setLanguage(lang){
