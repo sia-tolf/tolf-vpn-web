@@ -33,7 +33,7 @@ function setLanguage(language) {
 
   const accountNavigation = document.getElementById("accountNavigation");
   if (accountNavigation) {
-    accountNavigation.textContent = {en:"TOLF Account",ru:"Аккаунт TOLF",lv:"TOLF konts"}[language];
+    accountNavigation.textContent = {en:"My account",ru:"Личный кабинет",lv:"Mans konts"}[language];
     accountNavigation.href = "account/?lang=" + language;
   }
   const helpNavigation = document.getElementById("helpNavigation");
