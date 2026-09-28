@@ -82,3 +82,50 @@
   .account-service-links { flex-basis:100%; }
   .account-heading .account-service-links > a { flex:1 1 0; min-width:0; }
 }
+
+/* Compact account navigation on phones. */
+.service-label-narrow { display:none; }
+@media (max-width:699px) {
+  .account-settings { padding-top:12px; }
+  .account-heading {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    align-items:center;
+    gap:12px;
+    margin-bottom:12px;
+  }
+  .account-heading > h1 {
+    grid-column:1;
+    grid-row:1;
+    min-width:0;
+    margin:0;
+    font-size:24px;
+    font-weight:650;
+    line-height:1.2;
+    letter-spacing:-0.015em;
+    text-align:left;
+  }
+  .account-heading > #accountSignOut {
+    grid-column:2;
+    grid-row:1;
+    width:auto;
+    max-width:none;
+    margin:0;
+    padding-inline:12px;
+  }
+  .account-heading > .account-service-links {
+    grid-column:1 / -1;
+    grid-row:2;
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:12px;
+    width:100%;
+  }
+  .account-heading .account-service-links > a {
+    width:100%;
+    max-width:none;
+    min-width:0;
+  }
+  .account-heading .service-label-wide { display:none; }
+  .account-heading .service-label-narrow { display:inline; }
+}
