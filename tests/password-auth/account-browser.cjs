@@ -49,12 +49,14 @@ const fs=require('node:fs');
    await page.locator('#apResult').waitFor({state:'visible'});
    assert.equal(sent[1].username,'lena-work');
    assert.equal(sent[1].password,'Edited account password 123');
-   await page.evaluate(()=>{window.shared=[];navigator.canShare=()=>true;navigator.share=async data=>window.shared.push(await data.files[0].text());});
+   await page.evaluate(()=>{window.shared=[];navigator.canShare=()=>true;navigator.share=async data=>window.shared.push({files:data.files.length,keys:Object.keys(data),text:await data.files[0].text()});});
    await page.locator('#apExportDetails').click();
    await page.waitForFunction(()=>window.shared.length===1);
    const shared=await page.evaluate(()=>window.shared);
    assert.equal(shared.length,1);
-   assert(shared[0].includes('lena-work')&&shared[0].includes('Edited account password 123'));
+   assert.equal(shared[0].files,1);
+   assert.deepEqual(shared[0].keys,['files']);
+   assert(shared[0].text.includes('lena-work')&&shared[0].text.includes('Edited account password 123'));
    await page.locator('#apSaved').click();assert.equal(await page.locator('#apCredentials').inputValue(),'');
    assert.deepEqual(errors,[]);await page.close();
   }

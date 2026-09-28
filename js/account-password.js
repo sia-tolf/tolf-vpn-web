@@ -54,7 +54,7 @@ async function exportDetails(){
  if(!details)return;
  const file=new File(['\uFEFF',$('apCredentials').value.replace(/\n/g,'\r\n')],'TOLF-account-sign-in.txt',{type:'text/plain;charset=utf-8'});
  if(canShareFile()){
-  try{await navigator.share({files:[file],title:'TOLF'});message('downloaded');}
+  try{await navigator.share({files:[file]});message('downloaded');}
   catch(error){if(error.name!=='AbortError')message('error');}
   return;
  }
