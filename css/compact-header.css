@@ -444,6 +444,14 @@ html[data-tolf-ui="vpn"] #vpnCard .card-topline > h2 {
 
 /* Keep the VPN title in the top row on wide screens. */
 @media (min-width:700px) {
+  html[data-tolf-ui="vpn"] .page { padding-top:8px; }
+  html[data-tolf-ui="vpn"] .compact-header .brand-title-row > h1,
+  html.tolf-ipad[data-tolf-ui="vpn"] .compact-header .brand-title-row > h1 {
+    font-size:24px!important;
+    font-weight:650!important;
+    line-height:1.2!important;
+    letter-spacing:-.015em!important;
+  }
   html[data-tolf-ui="vpn"] .compact-header {
     grid-template-columns:minmax(0,1fr)!important;
     grid-template-rows:auto!important;
