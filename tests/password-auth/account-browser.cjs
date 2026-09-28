@@ -46,6 +46,7 @@ const fs=require('node:fs');
    assert.equal(sent[1].password,'Edited account password 123');
    await page.evaluate(()=>{window.shared=[];navigator.canShare=()=>true;navigator.share=async data=>window.shared.push(await data.files[0].text());});
    await page.locator('#apExportDetails').click();
+   await page.waitForFunction(()=>window.shared.length===1);
    const shared=await page.evaluate(()=>window.shared);
    assert.equal(shared.length,1);
    assert(shared[0].includes('lena-work')&&shared[0].includes('Edited account password 123'));
