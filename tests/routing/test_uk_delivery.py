@@ -9,6 +9,7 @@ import tempfile
 import time
 import unittest
 from unittest.mock import patch
+from types import SimpleNamespace
 
 BASE = Path(__file__).resolve().parents[2] / 'setup/personal-routing'
 
@@ -20,7 +21,8 @@ def load(name, path):
     return module
 
 contract = load('tolf_routing_contract', BASE / 'user0-service/policy.py')
-delivery = load('tolf_routing_delivery', BASE / 'uk-delivery/tolf_routing_delivery.py')
+with patch.dict(sys.modules, {'tolf_nodes': SimpleNamespace(RIGA_PUBLIC_HOST='riga.test')}):
+    delivery = load('tolf_routing_delivery', BASE / 'uk-delivery/tolf_routing_delivery.py')
 api = load('delivery_api_test', BASE / 'uk-delivery/tolf_personal_routing.py')
 installer = load('delivery_install_test', BASE / 'uk-delivery/install.py')
 
