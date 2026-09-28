@@ -530,3 +530,16 @@ html[data-tolf-ui="vpn"] .compact-header .help-navigation svg {
     left: calc(50% + 38px) !important;
   }
 }
+
+/* The card title already identifies VPN on narrow screens. */
+@media (max-width: 699px) {
+  html[data-tolf-ui="vpn"] .compact-header {
+    grid-template-rows: auto !important;
+    row-gap: 0 !important;
+    gap: 0 !important;
+  }
+  html[data-tolf-ui="vpn"] .compact-header .brand-copy,
+  html.tolf-ipad[data-tolf-ui="vpn"] .compact-header .brand-copy {
+    display: none !important;
+  }
+}
