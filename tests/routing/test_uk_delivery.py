@@ -189,7 +189,8 @@ class DeliveryTests(unittest.TestCase):
                      patch.object(installer,'command',side_effect=command), \
                      patch.object(delivery,'transport',side_effect=self.rpc), \
                      patch.object(installer.subprocess,'run',return_value=subprocess.CompletedProcess([],0)), \
-                     patch('builtins.open',side_effect=local_open):
+                     patch('builtins.open',side_effect=local_open), \
+                     patch.dict(sys.modules, {'tolf_nodes': SimpleNamespace(RIGA_PUBLIC_HOST='riga.test')}):
                     if fail:
                         with self.assertRaises(subprocess.CalledProcessError):
                             installer.main()
