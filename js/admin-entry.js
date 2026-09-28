@@ -14,9 +14,13 @@
   actions.className = "vpn-account-actions";
   menu.append(toggle, actions);
 
-  // Align dropdown left edge with viewport center.
+  // On narrow screens extend the menu toward the center; on wide screens match the button.
   function alignAccountDropdown() {
     if (!menu.open) return;
+    if (window.matchMedia("(min-width:700px)").matches) {
+      actions.style.setProperty("width", menu.getBoundingClientRect().width + "px", "important");
+      return;
+    }
     const center = document.documentElement.clientWidth / 2;
     const width = menu.getBoundingClientRect().right - center;
     if (width > 0) {

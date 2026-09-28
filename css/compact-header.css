@@ -477,3 +477,22 @@ html[data-tolf-ui="vpn"] #vpnCard .card-topline > h2 {
     left:calc(100% + 10px)!important;
   }
 }
+
+/* On wide screens, align the account control with the language selector. */
+@media (min-width:700px) {
+  html[data-tolf-ui="vpn"] #vpnCard .card-topline > .vpn-account-menu {
+    box-sizing:border-box;
+    width:146px;
+  }
+  html[data-tolf-ui="vpn"] #vpnCard .vpn-account-menu > summary {
+    box-sizing:border-box;
+    width:100%;
+    justify-content:space-between;
+  }
+  html[data-tolf-ui="vpn"] #vpnCard .vpn-account-menu > .vpn-account-actions {
+    width:100%!important;
+    max-width:none!important;
+    left:0!important;
+    right:auto!important;
+  }
+}
