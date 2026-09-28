@@ -517,7 +517,7 @@ html[data-tolf-ui="vpn"] .compact-header .header-navigation > .help-navigation {
 }
 html[data-tolf-ui="vpn"] .compact-header .help-navigation svg {
   display:block;
-  width:21px;
-  height:21px;
+  width:27px;
+  height:27px;
   flex:none;
 }
