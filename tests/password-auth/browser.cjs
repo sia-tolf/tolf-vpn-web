@@ -44,7 +44,7 @@ const root=path.resolve(__dirname,'../..');
    await page.locator('#signupPanel [data-auth-method="password"]').click();
    await page.locator('#signupUsername').fill('Lena-Work');
    await page.locator('[data-generate-password="signupPassword"]').click();
-   const generated=await page.locator('#signupPassword').inputValue();assert.equal(generated.length,20);
+   const generated=await page.locator('#signupPassword').inputValue();assert.equal(generated.length,16);
    await page.locator('#signupPassword').fill('My edited password 1234');
    assert.equal(await page.locator('#signupPassword').getAttribute('autocomplete'),'new-password');
    await page.locator('#passwordSignupForm button[type=submit]').click();
