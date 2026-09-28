@@ -447,6 +447,7 @@ html[data-tolf-ui="vpn"] #vpnCard .card-topline > h2 {
   html[data-tolf-ui="vpn"] .page { padding-top:8px; }
   html[data-tolf-ui="vpn"] .compact-header .brand-title-row > h1,
   html.tolf-ipad[data-tolf-ui="vpn"] .compact-header .brand-title-row > h1 {
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Segoe UI",sans-serif!important;
     font-size:24px!important;
     font-weight:650!important;
     line-height:1.2!important;
@@ -510,6 +511,9 @@ html[data-tolf-ui="vpn"] .compact-header .header-navigation > .help-navigation {
   height:42px;
   min-height:42px;
   padding:0;
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:var(--segment-background);
 }
 html[data-tolf-ui="vpn"] .compact-header .help-navigation svg {
   display:block;
