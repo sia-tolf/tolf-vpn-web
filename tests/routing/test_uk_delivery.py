@@ -23,8 +23,8 @@ def load(name, path):
 contract = load('tolf_routing_contract', BASE / 'user0-service/policy.py')
 with patch.dict(sys.modules, {'tolf_nodes': SimpleNamespace(RIGA_PUBLIC_HOST='riga.test')}):
     delivery = load('tolf_routing_delivery', BASE / 'uk-delivery/tolf_routing_delivery.py')
-api = load('delivery_api_test', BASE / 'uk-delivery/tolf_personal_routing.py')
-installer = load('delivery_install_test', BASE / 'uk-delivery/install.py')
+    api = load('delivery_api_test', BASE / 'uk-delivery/tolf_personal_routing.py')
+    installer = load('delivery_install_test', BASE / 'uk-delivery/install.py')
 
 
 class DeliveryTests(unittest.TestCase):
