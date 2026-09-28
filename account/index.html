@@ -5,7 +5,7 @@
 <link rel="stylesheet" href="../css/styles.css?v=account-page-20260921">
 <link rel="stylesheet" href="../tolf-buttons.20260917-3.css">
 <link rel="stylesheet" href="../tolf-header.20260919-1.css?v=languages-2">
-<link rel="stylesheet" href="../css/account-password.css?v=20260921-1">
+<link rel="stylesheet" href="../css/account-password.css?v=20260928-save-credentials-1">
 <link rel="stylesheet" href="styles.css?v=account-mobile-20260928-3">
 <script defer src="config.js?v=1"></script>
 <script defer src="../js/locales/en.js?v=account-services-20260928-1"></script>
@@ -13,7 +13,7 @@
 <script defer src="../js/locales/lv.js?v=account-services-20260928-1"></script>
 <script defer src="../js/webauthn.js?v=auth-20260917-1"></script>
 <script defer src="page.js?v=account-services-20260928-1"></script>
-<script defer src="../js/account-password.js?v=20260921-1"></script>
+<script defer src="../js/account-password.js?v=20260928-save-credentials-1"></script>
 <script defer src="../js/passkeys.js?v=account-page-20260921"></script>
 <script defer src="recovery.js?v=1"></script>
 <script defer src="../tolf-wordmark.20260917-3.js"></script>
@@ -38,10 +38,16 @@
           <div id="apExisting" class="hidden">
             <label for="apLogin" data-password-text="username">Username</label>
             <input id="apLogin" readonly autocomplete="username">
-            <button id="apCopyLogin" type="button" class="secondary ap-wide" data-password-text="copyLogin"></button>
+            <button id="apSaveExisting" type="button" class="secondary ap-wide" data-password-text="exportExisting">Save sign-in details</button>
           </div>
           <p id="apNone" class="section-description" data-password-text="none"></p>
           <button id="apOpen" type="button" class="secondary ap-wide"></button>
+          <form id="apExportForm" class="hidden">
+            <p class="section-description" data-password-text="exportHelp"></p>
+            <label for="apCurrentPassword" data-password-text="currentPassword">Current account password</label>
+            <input id="apCurrentPassword" name="password" type="password" autocomplete="current-password" maxlength="128" required>
+            <div class="ap-actions"><button type="submit" class="primary" data-password-text="verify">Verify password</button><button id="apExportCancel" type="button" class="secondary" data-password-text="cancel">Cancel</button></div>
+          </form>
           <form id="apForm" class="hidden">
             <div id="apNewLoginGroup">
               <label for="apNewLogin" data-password-text="username"></label>
@@ -59,7 +65,7 @@
             <p class="section-description" data-password-text="once"></p>
             <label for="apCredentials" data-password-text="title"></label>
             <textarea id="apCredentials" readonly spellcheck="false" autocomplete="off"></textarea>
-            <button id="apCopyDetails" type="button" class="primary ap-wide" data-password-text="copy"></button>
+            <button id="apExportDetails" type="button" class="primary ap-wide"></button>
             <button id="apSaved" type="button" class="secondary ap-wide" data-password-text="saved"></button>
           </div>
           <p id="apMessage" class="message" role="status"></p>
