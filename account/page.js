@@ -13,7 +13,9 @@ function setLanguage(lang){
  for(const key of ['en','ru','lv']){$('lang'+key[0].toUpperCase()+key.slice(1)).setAttribute('aria-pressed',String(key===lang));}
  $('backHome').href='https://tolf.is/?lang='+lang;
  $('backHome').setAttribute('aria-label',{en:'TOLF home',ru:'На главную TOLF',lv:'Uz TOLF sākumlapu'}[lang]);
- $('vpnNavigation').href='../?lang='+lang;document.title=t('accountTitle');
+ $('vpnNavigation').href='../?lang='+lang;
+ $('smartDnsNavigation').href='https://smartdns.tolf.is/?lang='+encodeURIComponent(lang);
+ document.title=t('accountTitle');
  const url=new URL(location.href);url.searchParams.set('lang',lang);history.replaceState(null,'',url);
  if(lastPasskeys.length)renderPasskeys(lastPasskeys);
 }
