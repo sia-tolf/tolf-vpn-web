@@ -521,3 +521,12 @@ html[data-tolf-ui="vpn"] .compact-header .help-navigation svg {
   height:27px;
   flex:none;
 }
+
+/* Narrow VPN header: centered VPN title with equal space above and below. */
+@media (max-width: 699px) {
+  html[data-tolf-ui="vpn"] .compact-header { gap: 12px !important; }
+  html[data-tolf-ui="vpn"] .compact-header .vpn-title-prefix { display: none; }
+  html[data-tolf-ui="vpn"] .compact-header .brand-title-row > .protocol-selector {
+    left: calc(50% + 38px) !important;
+  }
+}
