@@ -214,6 +214,7 @@ I18N.en = {
   savedIt: "I saved it",
 
   myVpn: "My VPN",
+  mySmartDns: "My Smart DNS",
   signOut: "Sign out",
   manageVpnDescription: "Manage your TOLF VPN access.",
   vpnServer: "VPN Entry Point",
