@@ -496,3 +496,24 @@ html[data-tolf-ui="vpn"] #vpnCard .card-topline > h2 {
     right:auto!important;
   }
 }
+
+/* A fixed icon keeps the language controls aligned in every translation. */
+html[data-tolf-ui="vpn"] .compact-header .help-navigation,
+html[data-tolf-ui="vpn"] .compact-header .header-navigation > .help-navigation {
+  box-sizing:border-box;
+  display:inline-flex;
+  flex:0 0 42px;
+  align-items:center;
+  justify-content:center;
+  width:42px;
+  min-width:42px;
+  height:42px;
+  min-height:42px;
+  padding:0;
+}
+html[data-tolf-ui="vpn"] .compact-header .help-navigation svg {
+  display:block;
+  width:21px;
+  height:21px;
+  flex:none;
+}

@@ -38,7 +38,9 @@ function setLanguage(language) {
   }
   const helpNavigation = document.getElementById("helpNavigation");
   if (helpNavigation) {
-    helpNavigation.textContent = { en: "Help", ru: "Помощь", lv: "Palīdzība" }[language];
+    const helpLabel = { en: "Help", ru: "Помощь", lv: "Palīdzība" }[language];
+    helpNavigation.setAttribute("aria-label", helpLabel);
+    helpNavigation.title = helpLabel;
     helpNavigation.href = "help.html?lang=" + language;
   }
 
