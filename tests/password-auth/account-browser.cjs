@@ -32,6 +32,8 @@ const fs=require('node:fs');
    assert.equal(download.suggestedFilename(),'TOLF-account-sign-in.txt');
    const file=fs.readFileSync(await download.path(),'utf8');
    assert(file.includes('lena-work')&&file.includes('Edited account password 123'));
+   assert(file.includes(({en:'Password',ru:'Пароль',lv:'Parole'})[lang]+': Edited account password 123'));
+   assert.equal((file.match(/Edited account password 123/g)||[]).length,1);
    assert(!await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth));
    await page.screenshot({path:'/tmp/tolf-password-account-'+lang+'.png',fullPage:true});
    await page.locator('#apSaved').click();assert.equal(await page.locator('#apCredentials').inputValue(),'');
