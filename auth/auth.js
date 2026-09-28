@@ -604,9 +604,9 @@ document.querySelectorAll('[data-toggle-password]').forEach(button => {
 document.querySelectorAll('[data-generate-password]').forEach(button => {
   button.addEventListener('click', () => {
     const input = document.getElementById(button.dataset.generatePassword);
-    // 64-symbol alphabet, uniform selection, 120 bits from Web Crypto.
+    // 64-symbol alphabet, uniform selection, 96 bits from Web Crypto.
     const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
-    input.value = Array.from(crypto.getRandomValues(new Uint8Array(20)), n => alphabet[n & 63]).join('');
+    input.value = Array.from(crypto.getRandomValues(new Uint8Array(16)), n => alphabet[n & 63]).join('');
     input.type = 'text';
     const toggle = document.querySelector('[data-toggle-password="'+input.id+'"]');
     toggle.dataset.i18n = 'hidePassword';
