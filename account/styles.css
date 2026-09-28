@@ -8,7 +8,8 @@
 .account-settings { padding-top:24px; }
 .account-heading { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin-bottom:20px; }
 .account-heading h1 { flex:1 1 100%; margin:0; font-size:28px; font-weight:650; text-align:center; }
-.account-heading > :is(a,button) {
+.account-heading .account-service-links > a,
+.account-heading > #accountSignOut {
   box-sizing:border-box;
   display:inline-flex;
   align-items:center;
@@ -37,7 +38,7 @@
 .account-settings .settings-input { width:100%; min-width:0; }
 @media(max-width:520px){.topbar-inner{padding-inline:16px}.account-settings{padding:20px 12px 32px}.account-settings .card-content{padding:20px}.account-heading h1{font-size:26px}}
 
-.account-heading > #vpnNavigation,
+.account-heading .account-service-links > a,
 .account-heading > #accountSignOut {
   box-sizing:border-box;
   flex:0 0 160px;
@@ -73,4 +74,11 @@
   }
   .account-heading h1 { display:none; }
   .account-settings { padding-top:12px; }
+}
+
+.account-service-links { display:flex; flex:1 1 332px; min-width:0; gap:12px; }
+.account-heading > #accountSignOut { margin-left:auto; }
+@media(max-width:520px){
+  .account-service-links { flex-basis:100%; }
+  .account-heading .account-service-links > a { flex:1 1 0; min-width:0; }
 }
