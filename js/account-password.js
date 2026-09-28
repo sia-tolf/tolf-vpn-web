@@ -92,7 +92,7 @@ $('apCancel').onclick=()=>{$('apPassword').value='';$('apForm').classList.add('h
 $('apToggle').onclick=()=>{$('apPassword').type=$('apPassword').type==='password'?'text':'password';render();};
 $('apGenerate').onclick=()=>{
  const chars='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
- $('apPassword').value=Array.from(crypto.getRandomValues(new Uint8Array(20)),b=>chars[b&63]).join('');
+ $('apPassword').value=Array.from(crypto.getRandomValues(new Uint8Array(16)),b=>chars[b&63]).join('');
  $('apPassword').type='text';render();$('apPassword').focus();
 };
 $('apForm').onsubmit=async event=>{
