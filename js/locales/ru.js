@@ -214,6 +214,7 @@ I18N.ru = {
   savedIt: "Я сохранил код",
 
   myVpn: "Мой VPN",
+  mySmartDns: "Мой Smart DNS",
   signOut: "Выйти",
   manageVpnDescription: "Управление доступом TOLF VPN.",
   vpnServer: "Точка входа VPN",
