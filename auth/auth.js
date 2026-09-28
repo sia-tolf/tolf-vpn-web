@@ -252,6 +252,7 @@ const langButtons = {
 const signInButton = document.getElementById("signInButton");
 const goSignupButton = document.getElementById("goSignupButton");
 const goRecoverButton = document.getElementById("goRecoverButton");
+const signupRecoverButton = document.getElementById("signupRecoverButton");
 const signupButton = document.getElementById("signupButton");
 const signupBackButton = document.getElementById("signupBackButton");
 const recoverButton = document.getElementById("recoverButton");
@@ -283,6 +284,7 @@ if (!["en", "ru", "lv"].includes(language)) {
 let currentMode = ["signin", "signup", "recover"].includes(requestedMode)
   ? requestedMode
   : "signin";
+let recoverReturnMode = "signin";
 
 function text(key) {
   return copy[language]?.[key] || copy.en[key] || key;
@@ -435,7 +437,14 @@ goSignupButton.addEventListener("click", () => {
 });
 
 goRecoverButton.addEventListener("click", () => {
+  recoverReturnMode = "signin";
   setMessage("signInMessage");
+  setMode("recover");
+});
+
+signupRecoverButton.addEventListener("click", () => {
+  recoverReturnMode = "signup";
+  setMessage("signupMessage");
   setMode("recover");
 });
 
@@ -447,7 +456,7 @@ signupBackButton.addEventListener("click", () => {
 recoverBackButton.addEventListener("click", () => {
   recoveryCode.value = "";
   setMessage("recoverMessage");
-  setMode("signin");
+  setMode(recoverReturnMode);
 });
 
 signupButton.addEventListener("click", async () => {
