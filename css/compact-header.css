@@ -441,3 +441,31 @@ html[data-tolf-ui="vpn"] #vpnCard .card-topline > h2 {
   line-height: normal !important;
   letter-spacing: -0.3px !important;
 }
+
+/* Keep the VPN title in the top row on wide screens. */
+@media (min-width:700px) {
+  html[data-tolf-ui="vpn"] .compact-header {
+    grid-template-columns:minmax(0,1fr)!important;
+    grid-template-rows:auto!important;
+    row-gap:0!important;
+  }
+  html[data-tolf-ui="vpn"] .compact-header .header-navigation {
+    grid-area:1/1/2/2!important;
+  }
+  html[data-tolf-ui="vpn"] .compact-header .brand-copy,
+  html.tolf-ipad[data-tolf-ui="vpn"] .compact-header .brand-copy {
+    grid-area:1/1/2/2!important;
+    justify-self:center!important;
+    align-self:center!important;
+    width:max-content!important;
+    min-height:0!important;
+    pointer-events:none;
+  }
+  html[data-tolf-ui="vpn"] .compact-header .brand-title-row,
+  html.tolf-ipad[data-tolf-ui="vpn"] .compact-header .brand-title-row {
+    width:max-content!important;
+  }
+  html[data-tolf-ui="vpn"] .compact-header .brand-title-row > .protocol-selector {
+    left:calc(100% + 10px)!important;
+  }
+}
