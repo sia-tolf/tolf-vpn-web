@@ -25,6 +25,8 @@ with patch.dict(sys.modules, {'tolf_nodes': SimpleNamespace(RIGA_PUBLIC_HOST='ri
     delivery = load('tolf_routing_delivery', BASE / 'uk-delivery/tolf_routing_delivery.py')
     api = load('delivery_api_test', BASE / 'uk-delivery/tolf_personal_routing.py')
     installer = load('delivery_install_test', BASE / 'uk-delivery/install.py')
+# The installer imports the same delivery module after switching to a staged path.
+sys.modules['tolf_routing_delivery'] = delivery
 
 
 class DeliveryTests(unittest.TestCase):
