@@ -49,6 +49,7 @@ const root=path.resolve(__dirname,'../..');
  await page.waitForFunction(()=>document.getElementById('invitationText').textContent.includes('user0'));
  assert.equal(await page.locator('#deleteVpnButton').isVisible(),false);
  assert.equal(await page.locator('#deleteAccountButton').count(),0);
+ await page.locator('#vpnCard .vpn-account-menu > summary').click();
  assert.equal(await page.locator('#accountNavigation').isVisible(),true);
  for(const lang of ['ru','lv','en']) {
   await page.evaluate(lang=>setLanguage(lang),lang);
