@@ -214,6 +214,7 @@ I18N.lv = {
   savedIt: "Esmu saglabājis kodu",
 
   myVpn: "Mans VPN",
+  mySmartDns: "Mans Smart DNS",
   signOut: "Izrakstīties",
   manageVpnDescription: "TOLF VPN piekļuves pārvaldība.",
   vpnServer: "VPN ieejas punkts",
