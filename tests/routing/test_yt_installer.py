@@ -56,10 +56,10 @@ table inet tolf_vpn_mss {
         self.assertIn("TOLF YT MSS v1", patched)
         self.assertEqual(self.module.patch_riga_nft(patched), patched)
 
-    def test_mode_is_not_added_to_public_frontend(self):
+    def test_mode_is_available_for_both_entry_points(self):
         config = (ROOT / "js/config.js").read_text()
-        self.assertNotIn("'yt'", config)
-        self.assertNotIn('"yt"', config)
+        self.assertIn('riga: { sr: "routingRigaSr", ru: "routingRu", yt: "routingYt" }', config)
+        self.assertIn('yt: "routingYt"', config)
         self.assertNotIn("yt_domains4", config)
 
     def test_required_youtube_delivery_domains_are_present(self):

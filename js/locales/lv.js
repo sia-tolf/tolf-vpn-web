@@ -103,6 +103,7 @@ I18N.lv = {
   routingMoscowSr: "sr — DNS pieprasījumi un galamērķu datplūsma no servera Rīgas sarakstiem tiek virzīta caur Rīgu, pārējā interneta datplūsma — caur Maskavu.",
   routingRu: "ru — interneta datplūsma iziet caur Maskavu.",
   routingLv: "lv — interneta datplūsma iziet caur Rīgu.",
+  routingYt: "yt — YouTube iziet internetā tieši no Maskavas, nešķērsojot Rīgu; Krievijas galamērķi no servera sarakstiem arī tiek virzīti caur Maskavu, pārējā datplūsma — caur Rīgu.",
   routingPolicySave: "Saglabāt kārtulas",
   routingPolicyReload: "Ielādēt saglabātās",
   routingSignIn: "Lai saglabātu kārtulas, vispirms izveidojiet VPN piekļuvi.",

@@ -103,6 +103,7 @@ I18N.en = {
   routingMoscowSr: "sr — DNS and destinations on the server’s Riga lists use the Riga exit; other Internet traffic uses Moscow.",
   routingRu: "ru — Internet traffic uses the Moscow exit.",
   routingLv: "lv — Internet traffic uses the Riga exit.",
+  routingYt: "yt — YouTube exits directly from Moscow without transiting Riga; Russian destinations on the server’s lists also use Moscow, and other traffic uses Riga.",
   routingPolicySave: "Save rules",
   routingPolicyReload: "Reload saved rules",
   routingSignIn: "Configure VPN access to save rules.",
