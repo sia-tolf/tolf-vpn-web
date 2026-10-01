@@ -124,7 +124,7 @@
       });
       if (!response.ok) throw new Error("HTTP " + response.status);
       const data = await response.json();
-      if (!["ru", "lv", "yt"].includes(data?.mode)) throw new Error("Invalid mode");
+      if (!["auto", "ru", "lv", "yt"].includes(data?.mode)) throw new Error("Invalid mode");
       anyConnectMode = data.mode;
       policyLoaded = true;
       setModeStatus("");
@@ -138,7 +138,7 @@
   }
 
   async function savePolicy(mode) {
-    if (policyBusy || !["ru", "lv", "yt"].includes(mode)) return;
+    if (policyBusy || !["auto", "ru", "lv", "yt"].includes(mode)) return;
     const previous = anyConnectMode;
     anyConnectMode = mode;
     policyBusy = true;
@@ -249,12 +249,6 @@
     button.addEventListener("click", () => {
       if (transport !== "anyconnect") return;
       const mode = button.dataset.mode;
-      if (mode === "auto") {
-        anyConnectMode = "auto";
-        setModeStatus("");
-        renderMode();
-        return;
-      }
       if (mode === anyConnectMode && policyLoaded) return;
       savePolicy(mode);
     });
