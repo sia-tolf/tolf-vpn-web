@@ -19,6 +19,7 @@
   let policyLoaded = false;
   let policyBusy = false;
   let savedStatusTimer = null;
+  let policyConfirmed = false;
 
   const COPY = {
     en: {
@@ -29,10 +30,10 @@
       failed: "Could not save",
       loading: "Loading…",
       autoLabel: "Auto",
-      auto: "RU → Moscow · rest → Riga",
-      ru: "All → Moscow",
-      lv: "All → Riga",
-      yt: "RU + YouTube → Moscow · rest → Riga"
+      auto: ["RU → Moscow", "rest → Riga"],
+      ru: ["All traffic", "→ Moscow"],
+      lv: ["All traffic", "→ Riga"],
+      yt: ["RU + YouTube → Moscow", "rest → Riga"]
     },
     ru: {
       country: "Россия",
@@ -42,10 +43,10 @@
       failed: "Не удалось сохранить",
       loading: "Загрузка…",
       autoLabel: "Авто",
-      auto: "RU → Москва · остальное → Рига",
-      ru: "Всё → Москва",
-      lv: "Всё → Рига",
-      yt: "RU + YouTube → Москва · остальное → Рига"
+      auto: ["RU → Москва", "остальное → Рига"],
+      ru: ["Весь трафик", "→ Москва"],
+      lv: ["Весь трафик", "→ Рига"],
+      yt: ["RU + YouTube → Москва", "остальное → Рига"]
     },
     lv: {
       country: "Krievija",
@@ -55,10 +56,10 @@
       failed: "Neizdevās saglabāt",
       loading: "Ielāde…",
       autoLabel: "Automātiski",
-      auto: "RU → Maskava · pārējais → Rīga",
-      ru: "Viss → Maskava",
-      lv: "Viss → Rīga",
-      yt: "RU + YouTube → Maskava · pārējais → Rīga"
+      auto: ["RU → Maskava", "pārējais → Rīga"],
+      ru: ["Visa datplūsma", "→ Maskava"],
+      lv: ["Visa datplūsma", "→ Rīga"],
+      yt: ["RU + YouTube → Maskava", "pārējais → Rīga"]
     }
   };
 
@@ -99,8 +100,19 @@
       button.setAttribute("aria-checked", String(active));
       button.disabled = policyBusy;
     }
+    const controls = document.getElementById("anyConnectModeSelector");
+    controls?.classList.toggle("policy-confirmed", policyConfirmed && !policyBusy);
+
     if (modeHelp) {
-      modeHelp.textContent = anyConnectMode ? (c[anyConnectMode] || "") : "";
+      const lines = anyConnectMode ? c[anyConnectMode] : null;
+      modeHelp.replaceChildren();
+      if (Array.isArray(lines)) {
+        for (const line of lines) {
+          const span = document.createElement("span");
+          span.textContent = line;
+          modeHelp.appendChild(span);
+        }
+      }
     }
   }
 
@@ -113,7 +125,8 @@
   async function loadPolicy() {
     if (policyLoaded || policyBusy) return;
     policyBusy = true;
-    setModeStatus(copy().loading);
+    policyConfirmed = false;
+    setModeStatus("");
     renderMode();
     try {
       const response = await fetch(POLICY_URL, {
@@ -127,6 +140,7 @@
       if (!["auto", "ru", "lv", "yt"].includes(data?.mode)) throw new Error("Invalid mode");
       anyConnectMode = data.mode;
       policyLoaded = true;
+      policyConfirmed = true;
       setModeStatus("");
     } catch (error) {
       console.error("AnyConnect policy load failed:", error);
@@ -142,7 +156,8 @@
     const previous = anyConnectMode;
     anyConnectMode = mode;
     policyBusy = true;
-    setModeStatus(copy().saving);
+    policyConfirmed = false;
+    setModeStatus("");
     renderMode();
 
     try {
@@ -161,14 +176,12 @@
       if (data?.mode !== mode || data?.applied !== true) throw new Error("Mode not applied");
       anyConnectMode = data.mode;
       policyLoaded = true;
-      setModeStatus(copy().saved);
-      clearTimeout(savedStatusTimer);
-      savedStatusTimer = setTimeout(() => {
-        if (!policyBusy) setModeStatus("");
-      }, 1800);
+      policyConfirmed = true;
+      setModeStatus("");
     } catch (error) {
       console.error("AnyConnect policy save failed:", error);
       anyConnectMode = previous;
+      policyConfirmed = false;
       setModeStatus(copy().failed, true);
     } finally {
       policyBusy = false;
