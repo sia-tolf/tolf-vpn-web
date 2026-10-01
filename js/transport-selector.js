@@ -28,6 +28,8 @@
       saving: "Saving…",
       failed: "Could not save",
       loading: "Loading…",
+      autoLabel: "Auto",
+      auto: "Russia — Moscow; the rest — Riga",
       ru: "All traffic — Moscow",
       lv: "All traffic — Riga",
       yt: "Russia and YouTube — Moscow; the rest — Riga"
@@ -39,6 +41,8 @@
       saving: "Сохранение…",
       failed: "Не удалось сохранить",
       loading: "Загрузка…",
+      autoLabel: "Авто",
+      auto: "Россия — Москва, остальное — Рига",
       ru: "Весь трафик — Москва",
       lv: "Весь трафик — Рига",
       yt: "Россия и YouTube — Москва, остальное — Рига"
@@ -50,6 +54,8 @@
       saving: "Saglabāšana…",
       failed: "Neizdevās saglabāt",
       loading: "Ielāde…",
+      autoLabel: "Automātiski",
+      auto: "Krievija — Maskava, pārējais — Rīga",
       ru: "Visa datplūsma — Maskava",
       lv: "Visa datplūsma — Rīga",
       yt: "Krievija un YouTube — Maskava, pārējais — Rīga"
@@ -85,6 +91,8 @@
 
     const c = copy();
     if (modeLabel) modeLabel.textContent = c.mode;
+    const autoButton = document.getElementById("anyConnectModeAuto");
+    if (autoButton) autoButton.textContent = c.autoLabel;
     for (const button of modeButtons) {
       const active = button.dataset.mode === anyConnectMode;
       button.classList.toggle("active", active);
@@ -116,7 +124,7 @@
       });
       if (!response.ok) throw new Error("HTTP " + response.status);
       const data = await response.json();
-      if (!["ru", "lv", "yt"].includes(data?.mode)) throw new Error("Invalid mode");
+      if (!["auto", "ru", "lv", "yt"].includes(data?.mode)) throw new Error("Invalid mode");
       anyConnectMode = data.mode;
       policyLoaded = true;
       setModeStatus("");
@@ -130,7 +138,7 @@
   }
 
   async function savePolicy(mode) {
-    if (policyBusy || !["ru", "lv", "yt"].includes(mode)) return;
+    if (policyBusy || !["auto", "ru", "lv", "yt"].includes(mode)) return;
     const previous = anyConnectMode;
     anyConnectMode = mode;
     policyBusy = true;
