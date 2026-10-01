@@ -1866,16 +1866,40 @@ html[data-tolf-ui] #vpnCard .vpn-account-actions > :is(#accountNavigation, #sign
 
 
 /* AnyConnect routing mode row — 2026-10-01. */
-.anyconnect-mode-value {
-  display:grid;
-  grid-template-columns:minmax(0,1fr) auto;
-  align-items:center;
-  gap:14px;
-  width:100%;
+.anyconnect-mode-row {
+  position:relative;
 }
+.anyconnect-mode-value {
+  display:contents;
+}
+.anyconnect-mode-meta {
+  min-width:0;
+  color:var(--secondary);
+  font-size:12px;
+  line-height:1.3;
+  white-space:nowrap;
+  text-align:right;
+}
+#anyConnectModeHelp {
+  display:block;
+  white-space:nowrap;
+}
+#anyConnectModeStatus {
+  position:absolute;
+  right:16px;
+  bottom:3px;
+  color:var(--success);
+  font-size:10px;
+  line-height:1;
+  white-space:nowrap;
+}
+#anyConnectModeStatus:empty { display:none; }
+#anyConnectModeStatus.status-error { color:var(--error); }
+
 .anyconnect-mode-controls {
   display:flex;
   align-items:center;
+  justify-content:flex-end;
   gap:8px;
   height:36px;
 }
@@ -1928,41 +1952,40 @@ html[data-tolf-ui] #vpnCard .vpn-account-actions > :is(#accountNavigation, #sign
   border-color:var(--border);
 }
 .anyconnect-mode-button:disabled { opacity:.55; cursor:default; }
-.anyconnect-mode-meta {
-  min-width:0;
-  display:flex;
-  align-items:center;
-  justify-content:flex-end;
-  gap:8px;
-  color:var(--secondary);
-  font-size:12px;
-  line-height:1.3;
-  white-space:nowrap;
-}
-#anyConnectModeHelp { white-space:nowrap; }
-#anyConnectModeStatus {
-  flex:0 0 auto;
-  color:var(--success);
-}
-#anyConnectModeStatus:empty { display:none; }
-#anyConnectModeStatus.status-error { color:var(--error); }
+
 @media (min-width:760px) {
   .vpn-overview .anyconnect-mode-row {
     height:72px;
     min-height:72px;
-    grid-template-columns:minmax(120px,.45fr) minmax(0,2fr);
-    gap:16px;
+    grid-template-columns:126px minmax(150px,1fr) auto;
+    gap:14px;
   }
 }
 @media (max-width:759px) {
-  .anyconnect-mode-value { gap:10px; }
-  .anyconnect-explicit-modes { grid-template-columns:repeat(3,48px); }
+  .vpn-overview .anyconnect-mode-row {
+    grid-template-columns:110px minmax(120px,1fr) auto;
+    gap:10px;
+  }
+  .anyconnect-explicit-modes {
+    grid-template-columns:repeat(3,48px);
+  }
   .anyconnect-auto-button { min-width:62px; }
 }
 @media (max-width:520px) {
+  .vpn-overview .anyconnect-mode-row {
+    grid-template-columns:1fr;
+    gap:7px;
+  }
   .anyconnect-mode-value {
+    display:grid;
     grid-template-columns:1fr;
     gap:8px;
   }
-  .anyconnect-mode-meta { justify-content:flex-start; }
+  .anyconnect-mode-meta { text-align:left; }
+  .anyconnect-mode-controls { justify-content:flex-start; }
+  #anyConnectModeStatus {
+    position:static;
+    font-size:11px;
+    margin-top:2px;
+  }
 }
