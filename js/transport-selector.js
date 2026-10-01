@@ -18,11 +18,12 @@
   let anyConnectMode = null;
   let policyLoaded = false;
   let policyBusy = false;
+  let savedStatusTimer = null;
 
   const COPY = {
     en: {
       country: "Russia",
-      mode: "Mode",
+      mode: "Routing",
       saved: "Saved",
       saving: "Saving…",
       failed: "Could not save",
@@ -33,7 +34,7 @@
     },
     ru: {
       country: "Россия",
-      mode: "Режим",
+      mode: "Маршрутизация",
       saved: "Сохранено",
       saving: "Сохранение…",
       failed: "Не удалось сохранить",
@@ -44,7 +45,7 @@
     },
     lv: {
       country: "Krievija",
-      mode: "Režīms",
+      mode: "Maršrutēšana",
       saved: "Saglabāts",
       saving: "Saglabāšana…",
       failed: "Neizdevās saglabāt",
@@ -153,6 +154,10 @@
       anyConnectMode = data.mode;
       policyLoaded = true;
       setModeStatus(copy().saved);
+      clearTimeout(savedStatusTimer);
+      savedStatusTimer = setTimeout(() => {
+        if (!policyBusy) setModeStatus("");
+      }, 1800);
     } catch (error) {
       console.error("AnyConnect policy save failed:", error);
       anyConnectMode = previous;
