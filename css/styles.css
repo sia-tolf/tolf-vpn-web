@@ -2036,3 +2036,13 @@ html[data-tolf-ui] #vpnCard .vpn-account-actions > :is(#accountNavigation, #sign
     margin-top:2px;
   }
 }
+
+/* Join AnyConnect routing to the following separator without an extra grid gap. */
+.vpn-overview-top:has(#anyConnectModeRow:not(.hidden)) + .connection-test-card {
+  margin-top:-18px;
+}
+@media (max-width:759px) {
+  .vpn-overview-top:has(#anyConnectModeRow:not(.hidden)) + .connection-test-card {
+    margin-top:-14px;
+  }
+}
