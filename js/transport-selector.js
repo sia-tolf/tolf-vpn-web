@@ -13,6 +13,7 @@
   if (!selector || !ikev2 || !anyConnect || !overviewTitle) return;
 
   const POLICY_URL = `${API}/oc-test/policy`;
+  const SESSION_URL = `${API}/oc-test/session`;
   let transport = "ikev2";
   let ikev2Server = null;
   let anyConnectMode = "auto";
@@ -20,6 +21,9 @@
   let policyBusy = false;
   let savedStatusTimer = null;
   let policyConfirmed = false;
+  let sessionConnected = false;
+  let sessionInFlight = false;
+  let sessionRequestToken = 0;
 
   const COPY = {
     en: {
@@ -104,8 +108,8 @@
       button.disabled = policyBusy;
     }
     const controls = document.getElementById("anyConnectModeSelector");
-    // Policy persistence does not confirm an active VPN session.
-    controls?.classList.remove("policy-confirmed");
+    controls?.classList.toggle("policy-confirmed",
+      policyLoaded && !policyBusy && sessionConnected);
 
     if (modeHelp) {
       const lines = anyConnectMode ? c[anyConnectMode] : null;
@@ -124,6 +128,33 @@
     if (!modeStatus) return;
     modeStatus.textContent = text;
     modeStatus.classList.toggle("status-error", error);
+  }
+
+  async function pollSession() {
+    if (transport !== "anyconnect" || !policyLoaded || policyBusy ||
+        document.hidden || sessionInFlight) return;
+    sessionInFlight = true;
+    const requestToken = ++sessionRequestToken;
+    const selectedMode = anyConnectMode;
+    try {
+      const response = await fetch(SESSION_URL, {
+        method: "GET",
+        cache: "no-store",
+        credentials: "omit",
+        headers: { Accept: "application/json" }
+      });
+      if (!response.ok) throw new Error("HTTP " + response.status);
+      const data = await response.json();
+      if (requestToken === sessionRequestToken) {
+        sessionConnected = data?.username === "pilot-tolf" &&
+          data?.mode === selectedMode && data?.connected === true;
+      }
+    } catch {
+      if (requestToken === sessionRequestToken) sessionConnected = false;
+    } finally {
+      sessionInFlight = false;
+      renderMode();
+    }
   }
 
   async function loadPolicy() {
@@ -152,6 +183,7 @@
     } finally {
       policyBusy = false;
       renderMode();
+      pollSession();
     }
   }
 
@@ -159,6 +191,8 @@
     if (policyBusy || !["auto", "ru", "lv", "yt"].includes(mode)) return;
     const previous = anyConnectMode;
     anyConnectMode = mode;
+    sessionRequestToken++;
+    sessionConnected = false;
     policyBusy = true;
     policyConfirmed = false;
     setModeStatus("");
@@ -190,6 +224,7 @@
     } finally {
       policyBusy = false;
       renderMode();
+      pollSession();
     }
   }
 
@@ -253,11 +288,14 @@
     }
 
     renderMode();
-    loadPolicy();
+    if (policyLoaded) pollSession();
+    else loadPolicy();
   }
 
   ikev2.addEventListener("click", () => {
     transport = "ikev2";
+    sessionRequestToken++;
+    sessionConnected = false;
     render();
   });
 
@@ -277,6 +315,18 @@
       savePolicy(mode);
     });
   }
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      sessionRequestToken++;
+      sessionConnected = false;
+      renderMode();
+    } else {
+      pollSession();
+    }
+  });
+  window.addEventListener("focus", pollSession);
+  setInterval(pollSession, 10000);
 
   new MutationObserver(render).observe(document.documentElement, {
     attributes: true,
