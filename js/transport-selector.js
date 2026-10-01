@@ -12,7 +12,7 @@
 
   if (!selector || !ikev2 || !anyConnect || !overviewTitle) return;
 
-  const POLICY_URL = "https://config.tolf.is/oc-test/policy";
+  const POLICY_URL = `${API}/oc-test/policy`;
   let transport = "ikev2";
   let ikev2Server = null;
   let anyConnectMode = "auto";
