@@ -1868,15 +1868,15 @@ html[data-tolf-ui] #vpnCard .vpn-account-actions > :is(#accountNavigation, #sign
 /* AnyConnect routing mode row — 2026-10-01. */
 .anyconnect-mode-value {
   display:grid;
-  grid-template-columns:minmax(0,1fr) 186px;
+  grid-template-columns:minmax(0,1fr) 260px;
   align-items:center;
   gap:16px;
   width:100%;
 }
 .anyconnect-mode-selector {
   display:grid;
-  grid-template-columns:repeat(3,1fr);
-  width:186px;
+  grid-template-columns:1.45fr repeat(3,1fr);
+  width:260px;
   height:36px;
   padding:3px;
   gap:3px;
@@ -1941,10 +1941,10 @@ html[data-tolf-ui] #vpnCard .vpn-account-actions > :is(#accountNavigation, #sign
 }
 @media (max-width:759px) {
   .anyconnect-mode-value {
-    grid-template-columns:minmax(0,1fr) 170px;
+    grid-template-columns:minmax(0,1fr) 230px;
     gap:10px;
   }
-  .anyconnect-mode-selector { width:170px; }
+  .anyconnect-mode-selector { width:230px; }
 }
 @media (max-width:520px) {
   .anyconnect-mode-value {
