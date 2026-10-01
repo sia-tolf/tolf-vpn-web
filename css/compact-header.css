@@ -543,3 +543,65 @@ html[data-tolf-ui="vpn"] .compact-header .help-navigation svg {
     display: none !important;
   }
 }
+
+
+/* AnyConnect step 1: wide-screen connection type selector. */
+.vpn-transport-selector { display:none; }
+
+@media (min-width:700px) {
+  html[data-tolf-ui="vpn"] #vpnCard .card-topline {
+    grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)!important;
+  }
+  html[data-tolf-ui="vpn"] #vpnCard .card-topline > h2 {
+    grid-column:1!important;
+    justify-self:start;
+  }
+  html[data-tolf-ui="vpn"] #vpnCard .vpn-transport-selector {
+    grid-column:2;
+    grid-row:1;
+    justify-self:center;
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0,1fr));
+    width:214px;
+    height:42px;
+    padding:4px;
+    gap:4px;
+    border:1px solid var(--border);
+    border-radius:11px;
+    background:var(--segment-background);
+  }
+  html[data-tolf-ui="vpn"] #vpnCard .vpn-transport-button {
+    box-sizing:border-box;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-width:0;
+    height:32px;
+    min-height:32px;
+    max-height:32px;
+    padding:0 10px;
+    border:1px solid transparent;
+    border-radius:7px;
+    background:transparent;
+    color:var(--secondary);
+    font-family:inherit;
+    font-size:14px;
+    font-weight:500;
+    line-height:1.2;
+    cursor:pointer;
+  }
+  html[data-tolf-ui="vpn"] #vpnCard .vpn-transport-button.active {
+    color:var(--text);
+    background:var(--card);
+    border-color:var(--border);
+  }
+  html[data-tolf-ui="vpn"] #vpnCard .vpn-transport-button:focus-visible {
+    outline:2px solid var(--tolf-action-text,var(--text));
+    outline-offset:1px;
+  }
+  html[data-tolf-ui="vpn"] #vpnCard .card-topline > .vpn-account-menu {
+    grid-column:3!important;
+    grid-row:1!important;
+    justify-self:end;
+  }
+}
