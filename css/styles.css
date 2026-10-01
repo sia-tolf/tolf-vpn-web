@@ -1881,8 +1881,14 @@ html[data-tolf-ui] #vpnCard .vpn-account-actions > :is(#accountNavigation, #sign
   text-align:right;
 }
 #anyConnectModeHelp {
-  display:block;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:2px;
   white-space:nowrap;
+}
+#anyConnectModeHelp > span {
+  display:block;
 }
 #anyConnectModeStatus {
   position:absolute;
@@ -1923,6 +1929,7 @@ html[data-tolf-ui] #vpnCard .vpn-account-actions > :is(#accountNavigation, #sign
 }
 .anyconnect-mode-button {
   box-sizing:border-box;
+  position:relative;
   display:inline-flex;
   align-items:center;
   justify-content:center;
@@ -1950,6 +1957,21 @@ html[data-tolf-ui] #vpnCard .vpn-account-actions > :is(#accountNavigation, #sign
   color:var(--text);
   background:var(--card);
   border-color:var(--border);
+}
+.anyconnect-mode-button.active::before {
+  content:"";
+  width:6px;
+  height:6px;
+  flex:0 0 6px;
+  margin-right:6px;
+  border:1px solid var(--border);
+  border-radius:50%;
+  background:transparent;
+  box-sizing:border-box;
+}
+.anyconnect-mode-controls.policy-confirmed .anyconnect-mode-button.active::before {
+  border-color:var(--success);
+  background:var(--success);
 }
 .anyconnect-mode-button:disabled { opacity:.55; cursor:default; }
 
@@ -1982,6 +2004,7 @@ html[data-tolf-ui] #vpnCard .vpn-account-actions > :is(#accountNavigation, #sign
     gap:8px;
   }
   .anyconnect-mode-meta { text-align:left; }
+  #anyConnectModeHelp { align-items:flex-start; }
   .anyconnect-mode-controls { justify-content:flex-start; }
   #anyConnectModeStatus {
     position:static;
