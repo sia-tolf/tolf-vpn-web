@@ -15,7 +15,7 @@
   const POLICY_URL = "https://config.tolf.is/oc-test/policy";
   let transport = "ikev2";
   let ikev2Server = null;
-  let anyConnectMode = null;
+  let anyConnectMode = "auto";
   let policyLoaded = false;
   let policyBusy = false;
   let savedStatusTimer = null;
@@ -29,10 +29,10 @@
       failed: "Could not save",
       loading: "Loading…",
       autoLabel: "Auto",
-      auto: "Russia — Moscow; the rest — Riga",
-      ru: "All traffic — Moscow",
-      lv: "All traffic — Riga",
-      yt: "Russia and YouTube — Moscow; the rest — Riga"
+      auto: "RU → Moscow · rest → Riga",
+      ru: "All → Moscow",
+      lv: "All → Riga",
+      yt: "RU + YouTube → Moscow · rest → Riga"
     },
     ru: {
       country: "Россия",
@@ -42,10 +42,10 @@
       failed: "Не удалось сохранить",
       loading: "Загрузка…",
       autoLabel: "Авто",
-      auto: "Россия — Москва, остальное — Рига",
-      ru: "Весь трафик — Москва",
-      lv: "Весь трафик — Рига",
-      yt: "Россия и YouTube — Москва, остальное — Рига"
+      auto: "RU → Москва · остальное → Рига",
+      ru: "Всё → Москва",
+      lv: "Всё → Рига",
+      yt: "RU + YouTube → Москва · остальное → Рига"
     },
     lv: {
       country: "Krievija",
@@ -55,10 +55,10 @@
       failed: "Neizdevās saglabāt",
       loading: "Ielāde…",
       autoLabel: "Automātiski",
-      auto: "Krievija — Maskava, pārējais — Rīga",
-      ru: "Visa datplūsma — Maskava",
-      lv: "Visa datplūsma — Rīga",
-      yt: "Krievija un YouTube — Maskava, pārējais — Rīga"
+      auto: "RU → Maskava · pārējais → Rīga",
+      ru: "Viss → Maskava",
+      lv: "Viss → Rīga",
+      yt: "RU + YouTube → Maskava · pārējais → Rīga"
     }
   };
 
@@ -96,7 +96,7 @@
     for (const button of modeButtons) {
       const active = button.dataset.mode === anyConnectMode;
       button.classList.toggle("active", active);
-      button.setAttribute("aria-pressed", String(active));
+      button.setAttribute("aria-checked", String(active));
       button.disabled = policyBusy;
     }
     if (modeHelp) {
@@ -124,7 +124,7 @@
       });
       if (!response.ok) throw new Error("HTTP " + response.status);
       const data = await response.json();
-      if (!["auto", "ru", "lv", "yt"].includes(data?.mode)) throw new Error("Invalid mode");
+      if (!["ru", "lv", "yt"].includes(data?.mode)) throw new Error("Invalid mode");
       anyConnectMode = data.mode;
       policyLoaded = true;
       setModeStatus("");
@@ -138,7 +138,7 @@
   }
 
   async function savePolicy(mode) {
-    if (policyBusy || !["auto", "ru", "lv", "yt"].includes(mode)) return;
+    if (policyBusy || !["ru", "lv", "yt"].includes(mode)) return;
     const previous = anyConnectMode;
     anyConnectMode = mode;
     policyBusy = true;
@@ -249,6 +249,12 @@
     button.addEventListener("click", () => {
       if (transport !== "anyconnect") return;
       const mode = button.dataset.mode;
+      if (mode === "auto") {
+        anyConnectMode = "auto";
+        setModeStatus("");
+        renderMode();
+        return;
+      }
       if (mode === anyConnectMode && policyLoaded) return;
       savePolicy(mode);
     });
