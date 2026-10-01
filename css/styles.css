@@ -1925,6 +1925,8 @@ html[data-tolf-ui] #vpnCard .vpn-account-actions > :is(#accountNavigation, #sign
 .anyconnect-explicit-modes {
   display:grid;
   grid-template-columns:repeat(3,54px);
+  align-items:center;
+  align-content:center;
   gap:3px;
 }
 .anyconnect-mode-button {
@@ -1952,6 +1954,28 @@ html[data-tolf-ui] #vpnCard .vpn-account-actions > :is(#accountNavigation, #sign
   height:36px;
   min-height:36px;
   max-height:36px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:var(--segment-background);
+  color:var(--text);
+}
+.anyconnect-auto-button.anyconnect-mode-button.active {
+  background:var(--card);
+}
+.anyconnect-auto-button.anyconnect-mode-button:hover:not(:disabled) {
+  background:var(--card);
+}
+.vpn-overview .anyconnect-mode-row {
+  align-items:center;
+  padding-top:12px;
+  padding-bottom:12px;
+}
+.anyconnect-mode-controls,
+.anyconnect-mode-meta {
+  align-self:center;
+}
+.anyconnect-mode-button {
+  margin:0;
 }
 .anyconnect-mode-button.active {
   color:var(--text);
