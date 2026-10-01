@@ -1868,21 +1868,34 @@ html[data-tolf-ui] #vpnCard .vpn-account-actions > :is(#accountNavigation, #sign
 /* AnyConnect routing mode row — 2026-10-01. */
 .anyconnect-mode-value {
   display:grid;
-  grid-template-columns:minmax(0,1fr) 260px;
+  grid-template-columns:minmax(0,1fr) auto;
   align-items:center;
-  gap:16px;
+  gap:14px;
   width:100%;
 }
-.anyconnect-mode-selector {
-  display:grid;
-  grid-template-columns:1.45fr repeat(3,1fr);
-  width:260px;
+.anyconnect-mode-controls {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  height:36px;
+}
+.anyconnect-auto-button,
+.anyconnect-explicit-modes {
   height:36px;
   padding:3px;
-  gap:3px;
   border:1px solid var(--border);
   border-radius:10px;
   background:var(--segment-background);
+  box-sizing:border-box;
+}
+.anyconnect-auto-button {
+  min-width:66px;
+  padding:0 12px;
+}
+.anyconnect-explicit-modes {
+  display:grid;
+  grid-template-columns:repeat(3,54px);
+  gap:3px;
 }
 .anyconnect-mode-button {
   box-sizing:border-box;
@@ -1904,6 +1917,11 @@ html[data-tolf-ui] #vpnCard .vpn-account-actions > :is(#accountNavigation, #sign
   line-height:1.2;
   cursor:pointer;
 }
+.anyconnect-auto-button.anyconnect-mode-button {
+  height:36px;
+  min-height:36px;
+  max-height:36px;
+}
 .anyconnect-mode-button.active {
   color:var(--text);
   background:var(--card);
@@ -1921,10 +1939,7 @@ html[data-tolf-ui] #vpnCard .vpn-account-actions > :is(#accountNavigation, #sign
   line-height:1.3;
   white-space:nowrap;
 }
-#anyConnectModeHelp {
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
+#anyConnectModeHelp { white-space:nowrap; }
 #anyConnectModeStatus {
   flex:0 0 auto;
   color:var(--success);
@@ -1940,11 +1955,9 @@ html[data-tolf-ui] #vpnCard .vpn-account-actions > :is(#accountNavigation, #sign
   }
 }
 @media (max-width:759px) {
-  .anyconnect-mode-value {
-    grid-template-columns:minmax(0,1fr) 230px;
-    gap:10px;
-  }
-  .anyconnect-mode-selector { width:230px; }
+  .anyconnect-mode-value { gap:10px; }
+  .anyconnect-explicit-modes { grid-template-columns:repeat(3,48px); }
+  .anyconnect-auto-button { min-width:62px; }
 }
 @media (max-width:520px) {
   .anyconnect-mode-value {
