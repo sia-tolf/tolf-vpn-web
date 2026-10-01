@@ -8,6 +8,12 @@
   if (!selector || !ikev2 || !anyConnect || !overviewTitle) return;
 
   let transport = "ikev2";
+  let ikev2Server = null;
+
+  function selectedServer() {
+    return Array.from(typeof serverInputs !== "undefined" ? serverInputs : [])
+      .find(input => input.checked)?.value || null;
+  }
 
   function setPressed() {
     const isIkev2 = transport === "ikev2";
@@ -20,10 +26,24 @@
   function render() {
     setPressed();
 
+    const riga = document.getElementById("serverRiga");
+    const moscow = document.getElementById("serverMoscow");
+
     if (transport === "ikev2") {
       overviewTitle.textContent = typeof t === "function"
         ? t("vpnOverviewTitle")
         : "VPN · IKEv2";
+
+      if (riga) riga.disabled = false;
+      if (moscow) moscow.disabled = false;
+
+      const restore = ikev2Server === "moscow" ? moscow : riga;
+      if (restore && !restore.checked) {
+        restore.checked = true;
+        if (typeof updateSelectedServerAddress === "function") {
+          updateSelectedServerAddress();
+        }
+      }
 
       if (typeof lastVpnState !== "undefined" && lastVpnState) {
         renderVpnState(lastVpnState);
@@ -34,6 +54,17 @@
     overviewTitle.textContent = "VPN · AnyConnect";
 
     // AnyConnect currently has one entry point: Moscow.
+    if (riga) riga.disabled = true;
+    if (moscow) {
+      moscow.disabled = false;
+      if (!moscow.checked) {
+        moscow.checked = true;
+        if (typeof updateSelectedServerAddress === "function") {
+          updateSelectedServerAddress();
+        }
+      }
+    }
+
     if (typeof vpnServerName !== "undefined" && vpnServerName) {
       vpnServerName.textContent = typeof t === "function" ? t("cityMoscow") : "Moscow";
     }
@@ -53,6 +84,9 @@
   });
 
   anyConnect.addEventListener("click", () => {
+    if (transport === "ikev2") {
+      ikev2Server = selectedServer();
+    }
     transport = "anyconnect";
     render();
   });
