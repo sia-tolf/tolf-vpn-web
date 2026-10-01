@@ -24,6 +24,7 @@
   const COPY = {
     en: {
       country: "Russia",
+      protocol: "Protocol",
       mode: "Routing",
       saved: "Saved",
       saving: "Saving…",
@@ -37,6 +38,7 @@
     },
     ru: {
       country: "Россия",
+      protocol: "Протокол",
       mode: "Маршрутизация",
       saved: "Сохранено",
       saving: "Сохранение…",
@@ -50,6 +52,7 @@
     },
     lv: {
       country: "Krievija",
+      protocol: "Protokols",
       mode: "Maršrutēšana",
       saved: "Saglabāts",
       saving: "Saglabāšana…",
@@ -101,7 +104,8 @@
       button.disabled = policyBusy;
     }
     const controls = document.getElementById("anyConnectModeSelector");
-    controls?.classList.toggle("policy-confirmed", policyConfirmed && !policyBusy);
+    // Policy persistence does not confirm an active VPN session.
+    controls?.classList.remove("policy-confirmed");
 
     if (modeHelp) {
       const lines = anyConnectMode ? c[anyConnectMode] : null;
@@ -189,15 +193,23 @@
     }
   }
 
+  window.renderVpnProtocol = function () {
+    overviewTitle.removeAttribute("data-i18n");
+    overviewTitle.textContent = copy().protocol;
+    const value = document.getElementById("vpnStatus");
+    if (value) {
+      value.textContent = transport === "anyconnect" ? "AnyConnect" : "IKEv2";
+      value.className = "vpn-overview-status";
+    }
+  };
+
   function render() {
+    window.renderVpnProtocol();
     setPressed();
     const riga = document.getElementById("serverRiga");
     const moscow = document.getElementById("serverMoscow");
 
     if (transport === "ikev2") {
-      overviewTitle.textContent = typeof t === "function"
-        ? t("vpnOverviewTitle")
-        : "VPN · IKEv2";
 
       if (riga) riga.disabled = false;
       if (moscow) moscow.disabled = false;
@@ -217,7 +229,6 @@
       return;
     }
 
-    overviewTitle.textContent = "VPN · AnyConnect";
 
     if (riga) riga.disabled = true;
     if (moscow) {

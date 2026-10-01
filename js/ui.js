@@ -242,9 +242,6 @@ function renderVpnState(vpn) {
   updateSelectedServerAddress();
 
   if (vpn.configured) {
-    vpnStatus.textContent = t("configured");
-    vpnStatus.className =
-      "vpn-overview-status status-active";
 
     serverSection.classList.remove("hidden");
     showConfiguredServer(vpn);
@@ -262,8 +259,6 @@ function renderVpnState(vpn) {
     rotatePasswordNote.classList.remove("hidden");
     deleteSection.classList.remove("hidden");
   } else {
-    vpnStatus.textContent = t("notConfigured");
-    vpnStatus.className = "vpn-overview-status";
 
     serverRow.classList.add("hidden");
     vpnServerName.textContent = "";
@@ -281,6 +276,7 @@ function renderVpnState(vpn) {
     deleteSection.classList.add("hidden");
     createVpnButton.classList.remove("hidden");
   }
+  if (typeof window.renderVpnProtocol === "function") window.renderVpnProtocol();
 }
 
 function showVpn(vpn) {
