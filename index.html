@@ -72,7 +72,7 @@
 <link rel="stylesheet" href="tolf-buttons.20260917-3.css">
 <script defer src="tolf-wordmark.20260917-3.js"></script>
 <link rel="stylesheet" href="tolf-header.20260919-1.css?v=languages-2">
-<link rel="stylesheet" href="css/compact-header.css?v=mobile-title-20260928-2">
+<link rel="stylesheet" href="css/compact-header.css?v=transport-selector-20261001-1">
 
 <style id="tolf-navigation-emblem">
 #homeNavigation .tolf-wordmark::before {
@@ -389,7 +389,12 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
       <div class="card">
         <div class="card-content">
         <div class="card-topline">
-          <h2 data-i18n="myVpn">My VPN</h2><a id="accountNavigation" class="account-navigation" href="account/?lang=en">My account</a>
+          <h2 data-i18n="myVpn">My VPN</h2>
+          <div id="vpnTransportSelector" class="vpn-transport-selector" role="group" aria-label="Connection type">
+            <button id="vpnTransportIkev2" class="vpn-transport-button active" type="button" aria-pressed="true">IKEv2</button>
+            <button id="vpnTransportAnyConnect" class="vpn-transport-button" type="button" aria-pressed="false">AnyConnect</button>
+          </div>
+          <a id="accountNavigation" class="account-navigation" href="account/?lang=en">My account</a>
 
           <button
             id="signOutButton"
