@@ -32,7 +32,7 @@
 
   <link
     rel="stylesheet"
-    href="css/styles.css?v=anyconnect-auto-20261001-1"
+    href="css/styles.css?v=anyconnect-auto-separated-20261001-1"
   >
   <link
     rel="stylesheet"
@@ -69,7 +69,7 @@
   <script defer src="js/quick-entry.js?v=quick-2"></script>
   <script defer src="js/app.js?v=calm-layout-20260926"></script>
   <script defer src="js/admin-entry.js?v=account-menu-width-20260928-1"></script>
-  <script defer src="js/transport-selector.js?v=auto-preview-20261001-1"></script>
+  <script defer src="js/transport-selector.js?v=auto-default-preview-20261001-1"></script>
 <link rel="stylesheet" href="tolf-buttons.20260917-3.css">
 <script defer src="tolf-wordmark.20260917-3.js"></script>
 <link rel="stylesheet" href="tolf-header.20260919-1.css?v=languages-2">
@@ -933,11 +933,13 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
                     <span id="anyConnectModeHelp"></span>
                     <span id="anyConnectModeStatus" aria-live="polite"></span>
                   </div>
-                  <div id="anyConnectModeSelector" class="anyconnect-mode-selector" role="group" aria-label="AnyConnect routing mode">
-                    <button id="anyConnectModeAuto" type="button" class="anyconnect-mode-button" data-mode="auto" aria-pressed="false">Auto</button>
-                    <button type="button" class="anyconnect-mode-button" data-mode="ru" aria-pressed="false">RU</button>
-                    <button type="button" class="anyconnect-mode-button" data-mode="lv" aria-pressed="false">LV</button>
-                    <button type="button" class="anyconnect-mode-button" data-mode="yt" aria-pressed="false">YT</button>
+                  <div id="anyConnectModeSelector" class="anyconnect-mode-controls" role="radiogroup" aria-label="AnyConnect routing mode">
+                    <button id="anyConnectModeAuto" type="button" class="anyconnect-mode-button anyconnect-auto-button" data-mode="auto" role="radio" aria-checked="false">Auto</button>
+                    <div class="anyconnect-explicit-modes">
+                      <button type="button" class="anyconnect-mode-button" data-mode="ru" role="radio" aria-checked="false">RU</button>
+                      <button type="button" class="anyconnect-mode-button" data-mode="lv" role="radio" aria-checked="false">LV</button>
+                      <button type="button" class="anyconnect-mode-button" data-mode="yt" role="radio" aria-checked="false">YT</button>
+                    </div>
                   </div>
                 </div>
               </div>
