@@ -6,12 +6,22 @@ const CONNECTION_TEST_SERVERS = {
   moscow: {
     nameKey: "cityMoscow",
     server: "https://ikev2.tolf.is:8443/"
+  },
+  anyconnect: {
+    nameKey: "cityMoscow",
+    server: "https://speedtest.vpn.tolf.is:8444/"
   }
 };
 
 let activeConnectionTest = null;
 let activeConnectionTestServer = null;
 let connectionTestWatchdog = null;
+
+function getConnectionTestServerKey() {
+  return window.getVpnTransport?.() === "anyconnect"
+    ? "anyconnect"
+    : getSelectedServerKey();
+}
 
 function connectionMetric(value, unit, decimals = 1) {
   const number = Number.parseFloat(value);
@@ -28,7 +38,7 @@ function setConnectionTestButtonLabel(key) {
 function renderConnectionTestTarget() {
   if (!connectionTestTitle) return;
 
-  const serverKey = activeConnectionTestServer || getSelectedServerKey();
+  const serverKey = activeConnectionTestServer || getConnectionTestServerKey();
   const server = CONNECTION_TEST_SERVERS[serverKey];
 
   connectionTestTitle.textContent = t("connectionTo", {
@@ -131,7 +141,7 @@ function startConnectionTest() {
     return;
   }
 
-  const serverKey = getSelectedServerKey();
+  const serverKey = getConnectionTestServerKey();
   const target = CONNECTION_TEST_SERVERS[serverKey];
 
   if (!target) return;
@@ -176,8 +186,12 @@ function startConnectionTest() {
       getIpURL: "getIP.php"
     });
 
-    speedtest.onupdate = updateConnectionTestResults;
-    speedtest.onend = finishConnectionTest;
+    speedtest.onupdate = data => {
+      if (activeConnectionTest === speedtest) updateConnectionTestResults(data);
+    };
+    speedtest.onend = aborted => {
+      if (activeConnectionTest === speedtest) finishConnectionTest(aborted);
+    };
     speedtest.start();
     connectionTestWatchdog = setTimeout(() => {
       if (activeConnectionTest !== speedtest) return;
@@ -192,6 +206,16 @@ function startConnectionTest() {
 }
 
 connectionTestButton?.addEventListener("click", startConnectionTest);
+
+window.addEventListener("vpntransportchange", () => {
+  if (activeConnectionTest) {
+    activeConnectionTest.abort();
+    finishConnectionTest(true);
+  }
+  activeConnectionTestServer = null;
+  resetConnectionTestResults();
+  renderConnectionTestTarget();
+});
 
 for (const input of serverInputs) {
   input.addEventListener("change", () => {

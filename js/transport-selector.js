@@ -15,6 +15,7 @@
   const POLICY_URL = `${API}/oc-test/policy`;
   const SESSION_URL = `${API}/oc-test/session`;
   let transport = "ikev2";
+  window.getVpnTransport = () => transport;
   let ikev2Server = null;
   let anyConnectMode = "auto";
   let policyLoaded = false;
@@ -293,18 +294,22 @@
   }
 
   ikev2.addEventListener("click", () => {
+    if (transport === "ikev2") return;
     transport = "ikev2";
     sessionRequestToken++;
     sessionConnected = false;
     render();
+    window.dispatchEvent(new Event("vpntransportchange"));
   });
 
   anyConnect.addEventListener("click", () => {
+    if (transport === "anyconnect") return;
     if (transport === "ikev2") {
       ikev2Server = selectedServer();
     }
     transport = "anyconnect";
     render();
+    window.dispatchEvent(new Event("vpntransportchange"));
   });
 
   for (const button of modeButtons) {
