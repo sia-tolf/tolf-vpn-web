@@ -174,6 +174,12 @@ Import passwords are never included in URIs. Connection names have a unique
 device suffix and at most 24 characters.
 All steps use the same content inset. Import/download actions share a full-width
 row with equal-width columns and inherit the site's standard button styles.
+Import expiration and manual-import instructions share the same secondary text
+style. The revoke action fills the space remaining beside additional access.
+The overview username comes from the authenticated account's `vpn.username`,
+as in IKEv2; it is hidden if that field is absent. Device certificate CNs remain
+in certificate selection, session checks and routing commands, and are not
+shown as account usernames or as standalone setup instructions.
 
 Cisco URI reference:
 https://www.cisco.com/c/en/us/td/docs/security/vpn_client/anyconnect/Cisco-Secure-Client-5/admin/guide/cisco-secure-client-admin-guide-new/ac-on-mobile-devices-intro/t_automate_anyconnect_actions_using_the_uri_handler.html

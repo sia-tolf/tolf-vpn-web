@@ -93,7 +93,7 @@
   let downloadedPackage = null;
   const copy = () => COPY[document.documentElement.lang] || COPY.en;
   const selected = () => devices.find(d => d.id === selectedId && d.state === "active") || null;
-  window.ocAccess = { selected };
+  window.ocAccess = { selected, accountUsername: () => account?.vpn?.username || "" };
   const path = id => "/oc/access/devices/" + encodeURIComponent(id);
   function connectionUri(d) {
     const name = "TOLF " + Array.from(d.label).slice(0,10).join("") + " " + d.id.replaceAll("-", "").slice(-8);
@@ -242,7 +242,7 @@
     const pending = devices.find(d => d.id === selectedId && d.state === "pending");
     if (pending) root.append(button(c.resume, () => perform(token => create(pending.request_id, pending.label, token)), true));
     if (devices.length) {
-      const actions = element("div", null, "oc-actions");
+      const actions = element("div", null, "oc-actions oc-device-actions");
       if (!addingDevice) actions.append(button(c.additional, () => { addingDevice = true; render(); }));
       const current = devices.find(d => d.id === selectedId);
       if (current) {
@@ -310,10 +310,10 @@
         importActions.append(button(c.download, downloadCertificate));
         cert.append(importActions, element("p", c.expires, "oc-note"));
       }
-      cert.append(element("p", mobile ? c.manual : c.windows)); steps.append(cert);
+      cert.append(element("p", mobile ? c.manual : c.windows, "oc-note")); steps.append(cert);
       const connect = element("section", null, "oc-step"); connect.append(element("h4", "4. " + c.connect), element("p", c.return));
       if (mobile) connect.append(element("p", c.controlReminder), link(c.add, connectionUri(d), true));
-      connect.append(element("p", c.host), element("p", d.username, "oc-note")); steps.append(connect);
+      connect.append(element("p", c.host)); steps.append(connect);
       const enable = element("section", null, "oc-step");
       enable.append(element("h4", "5. " + c.enableTitle), element("p", c.enable));
       steps.append(enable); root.append(steps);
@@ -326,7 +326,11 @@
     root.append(link(c.docs, GUIDE));
   }
   window.setAnyConnectAccount = data => {
-    if (account?.userId === data?.userId && account) return;
+    if (account?.userId === data?.userId && account) {
+      account = data;
+      window.renderVpnProtocol?.();
+      return;
+    }
     epoch++; account = data?.authenticated ? data : null;
     clearCopyNotice();
     clearDownloadedPackage();

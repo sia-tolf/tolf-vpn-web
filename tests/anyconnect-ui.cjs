@@ -41,7 +41,7 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
     body:new Element('body'),
     getElementById: id => ids[id], querySelectorAll: () => modes,
     createElement: tag => new Element(tag), addEventListener() {}};
-  const handlers = {}, window = {tolfAccountState:{authenticated:true,userId:'owner'},
+  const handlers = {}, window = {tolfAccountState:{authenticated:true,userId:'owner',vpn:{username:'user0_ipad'}},
     addEventListener(name, fn) { (handlers[name] ||= []).push(fn); },
     dispatchEvent(event) { for (const fn of handlers[event.type] || []) fn(event); },
     confirm: () => true};
@@ -96,7 +96,7 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   assert(descendants(ids.anyConnectAccess).some(n=>n.tagName==='a'&&n.textContent==='Установить Cisco Secure Client'));
   assert(!ids.anyConnectAccess.textContent.includes('Перед импортом сертификата'));
   assert.equal(descendants(ids.anyConnectAccess).filter(n=>n.tagName==='input').length,0);
-  assert(ids.anyConnectAccess.children.some(n=>n.className==='oc-actions'&&
+  assert(ids.anyConnectAccess.children.some(n=>n.className==='oc-actions oc-device-actions'&&
     n.children.some(child=>child.textContent==='Создать дополнительный доступ')&&
     n.children.some(child=>child.textContent==='Отозвать доступ')));
   assert(!descendants(ids.anyConnectAccess).some(n=>n.tagName==='button'&&n.textContent==='Обновить'));
@@ -104,7 +104,7 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   assert.equal(descendants(ids.anyConnectAccess).filter(n=>n.tagName==='input').length,1);
   button(ids.anyConnectAccess,'Отмена').click();
   assert.equal(descendants(ids.anyConnectAccess).filter(n=>n.tagName==='input').length,0);
-  assert.equal(ids.vpnUsername.textContent,first.username);
+  assert.equal(ids.vpnUsername.textContent,'user0_ipad');
   assert(ids.anyConnectModeSelector.classList.contains('policy-confirmed'));
   button(ids.anyConnectAccess,'Получить сертификат').click(); await settle();
   assert(ids.anyConnectAccess.textContent.includes('private-import-password'));
@@ -118,6 +118,9 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   const certificateStep = descendants(ids.anyConnectAccess).find(n=>n.className==='oc-step'&&n.textContent.startsWith('3.'));
   const importPosition = certificateStep.children.findIndex(n=>n.className==='oc-actions oc-import-actions');
   assert(certificateStep.children[importPosition-1].textContent.includes('Перед импортом сертификата'));
+  assert(certificateStep.children[importPosition+1].className==='oc-note');
+  assert(certificateStep.children.at(-1).className==='oc-note');
+  assert(!ids.anyConnectAccess.textContent.includes(first.username));
   const connectionStep = descendants(ids.anyConnectAccess).find(n=>n.className==='oc-step'&&n.textContent.startsWith('4.'));
   const connectionPosition = connectionStep.children.findIndex(n=>n.tagName==='a');
   assert(connectionStep.children[connectionPosition-1].textContent.includes('External Control → Prompt'));
@@ -135,7 +138,7 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   assert(!ids.anyConnectAccess.textContent.includes('private-import-password'));
   assert(!descendants(ids.anyConnectAccess).some(n=>n.className==='oc-copy-feedback'));
   assert.deepEqual(revokedUrls,['blob:test-package']);
-  assert.equal(ids.vpnUsername.textContent,second.username);
+  assert.equal(ids.vpnUsername.textContent,'user0_ipad');
   modes[1].click(); await settle();
   assert.equal(first.mode,'auto'); assert.equal(second.mode,'ru');
   button(ids.anyConnectAccess,'Создать дополнительный доступ').click();
@@ -143,10 +146,15 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   nameInput.value='New device';nameInput.events.input();
   button(ids.anyConnectAccess,'Создать доступ').click();await settle();
   assert.equal(descendants(ids.anyConnectAccess).filter(n=>n.tagName==='input').length,0);
-  assert.equal(ids.vpnUsername.textContent,'tolf-oc-'+'3'.repeat(32));
+  assert.equal(ids.vpnUsername.textContent,'user0_ipad');
   assert(!ids.anyConnectAccess.textContent.includes('private-import-password'));
   assert(calls.every(call => !call[1].includes('/oc-test')));
   assert(calls.filter(call=>call[1].endsWith('/policy')||call[1].endsWith('/session')).every(call=>call[2]==='include'));
+  window.setAnyConnectAccount({authenticated:true,userId:'owner'});
+  assert.equal(ids.vpnUsername.textContent,'');
+  assert(ids.usernameRow.classList.contains('hidden'));
+  window.setAnyConnectAccount({authenticated:true,userId:'owner',vpn:{username:'user0_ipad'}});
+  assert.equal(ids.vpnUsername.textContent,'user0_ipad');
   // A late session response must not restore the green indicator after logout.
   let release; heldSession = new Promise(resolve=>{release=resolve;});
   window.dispatchEvent(new c.Event('focus')); await settle();

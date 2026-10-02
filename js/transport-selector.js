@@ -255,10 +255,10 @@
       value.className = "vpn-overview-status";
     }
     if (transport === "anyconnect") {
-      const selected = device();
-      document.getElementById("usernameRow")?.classList.toggle("hidden", !selected);
+      const accountUsername = window.ocAccess?.accountUsername?.() || "";
+      document.getElementById("usernameRow")?.classList.toggle("hidden", !accountUsername);
       const username = document.getElementById("vpnUsername");
-      if (username) username.textContent = selected?.username || "";
+      if (username) username.textContent = accountUsername;
     }
   };
 
