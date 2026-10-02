@@ -1,0 +1,20 @@
+name: Connection measurement checks
+on:
+  push:
+    branches: ['main']
+    paths: ['js/measurement-targets.js', 'js/latency.js', 'js/connection-test.js', 'speedtest_worker.js', 'tests/measurement*.cjs', 'index.html', '.github/workflows/measurements.yml']
+  pull_request:
+    paths: ['js/measurement-targets.js', 'js/latency.js', 'js/connection-test.js', 'speedtest_worker.js', 'tests/measurement*.cjs', 'index.html', '.github/workflows/measurements.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node tests/measurement-targets.cjs
+      - run: node tests/measurement-regression.cjs

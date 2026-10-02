@@ -79,6 +79,8 @@ const c = vm.createContext({
   connectionTestStatus: element(), connectionTestLatency: element(),
   connectionTestJitter: element(), connectionTestDownload: element(), connectionTestUpload: element(),
   serverInputs: [], getSelectedServerKey: () => 'riga', t: key => key,
+  window: {addEventListener() {}},
+  MEASUREMENT_TARGETS: {riga: {nameKey: 'cityRiga'}},
   clearTimeout() {}, console
 });
 vm.runInContext(fs.readFileSync(path.join(root, 'js/connection-test.js'), 'utf8'), c);

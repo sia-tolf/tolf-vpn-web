@@ -340,6 +340,8 @@ I18N.ru = {
   connectionTestReady: "Готово",
   connectionTestComplete: "Завершено",
   connectionTestFailed: "Ошибка замера",
+  connectionTestUnavailable: "Недоступна",
+  connectionTestChecking: "Проверяем доступность…",
 };
 
 Object.assign(I18N.ru, {

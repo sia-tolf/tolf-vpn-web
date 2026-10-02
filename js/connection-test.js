@@ -1,26 +1,12 @@
-const CONNECTION_TEST_SERVERS = {
-  riga: {
-    nameKey: "cityRiga",
-    server: "https://ikev2-riga.tolf.is:8443/"
-  },
-  moscow: {
-    nameKey: "cityMoscow",
-    server: "https://ikev2.tolf.is:8443/"
-  },
-  anyconnect: {
-    nameKey: "cityMoscow",
-    server: "https://speedtest.vpn.tolf.is:8444/"
-  }
-};
-
 let activeConnectionTest = null;
 let activeConnectionTestServer = null;
 let connectionTestWatchdog = null;
+let connectionTestPreparing = false;
+let connectionTestRequest = 0;
+let connectionTestStatusKey = "connectionTestReady";
 
 function getConnectionTestServerKey() {
-  return window.getVpnTransport?.() === "anyconnect"
-    ? "anyconnect"
-    : getSelectedServerKey();
+  return getSelectedServerKey();
 }
 
 function connectionMetric(value, unit, decimals = 1) {
@@ -39,11 +25,15 @@ function renderConnectionTestTarget() {
   if (!connectionTestTitle) return;
 
   const serverKey = activeConnectionTestServer || getConnectionTestServerKey();
-  const server = CONNECTION_TEST_SERVERS[serverKey];
+  const server = MEASUREMENT_TARGETS[serverKey];
 
   connectionTestTitle.textContent = t("connectionTo", {
     city: t(server?.nameKey || "cityRiga")
   });
+  if (connectionTestStatus) connectionTestStatus.textContent = t(connectionTestStatusKey);
+  setConnectionTestButtonLabel(
+    activeConnectionTest || connectionTestPreparing ? "measuringConnection" : "measureConnection"
+  );
 }
 
 function resetConnectionTestResults() {
@@ -57,6 +47,7 @@ function resetConnectionTestResults() {
   }
 
   if (connectionTestStatus) {
+    connectionTestStatusKey = "connectionTestReady";
     connectionTestStatus.textContent = t("connectionTestReady");
     connectionTestStatus.className = "vpn-overview-updated";
   }
@@ -118,9 +109,8 @@ function finishConnectionTest(aborted) {
   }
 
   if (connectionTestStatus) {
-    connectionTestStatus.textContent = t(
-      completed ? "connectionTestComplete" : "connectionTestFailed"
-    );
+    connectionTestStatusKey = completed ? "connectionTestComplete" : "connectionTestFailed";
+    connectionTestStatus.textContent = t(connectionTestStatusKey);
     connectionTestStatus.className = completed
       ? "vpn-overview-updated status-active"
       : "vpn-overview-updated status-error";
@@ -132,9 +122,10 @@ function finishConnectionTest(aborted) {
   renderConnectionTestTarget();
 }
 
-function startConnectionTest() {
-  if (activeConnectionTest || typeof Speedtest !== "function") {
+async function startConnectionTest() {
+  if (activeConnectionTest || connectionTestPreparing || typeof Speedtest !== "function") {
     if (typeof Speedtest !== "function" && connectionTestStatus) {
+      connectionTestStatusKey = "connectionTestFailed";
       connectionTestStatus.textContent = t("connectionTestFailed");
       connectionTestStatus.className = "vpn-overview-updated status-error";
     }
@@ -142,22 +133,37 @@ function startConnectionTest() {
   }
 
   const serverKey = getConnectionTestServerKey();
-  const target = CONNECTION_TEST_SERVERS[serverKey];
-
-  if (!target) return;
+  if (!MEASUREMENT_TARGETS[serverKey]) return;
+  const request = ++connectionTestRequest;
 
   resetConnectionTestResults();
   activeConnectionTestServer = serverKey;
   renderConnectionTestTarget();
 
   if (connectionTestStatus) {
-    connectionTestStatus.textContent = t("measuringConnection");
+    connectionTestStatusKey = "connectionTestChecking";
+    connectionTestStatus.textContent = t(connectionTestStatusKey);
     connectionTestStatus.className = "vpn-overview-updated";
   }
 
+  connectionTestPreparing = true;
   setConnectionTestRunning(true);
 
   try {
+    const target = await resolveMeasurementTarget(serverKey, { refresh: true });
+    if (request !== connectionTestRequest) return;
+    connectionTestPreparing = false;
+    if (!target) {
+      connectionTestStatusKey = "connectionTestUnavailable";
+      if (connectionTestStatus) {
+        connectionTestStatus.textContent = t(connectionTestStatusKey);
+        connectionTestStatus.className = "vpn-overview-updated status-error";
+      }
+      setConnectionTestRunning(false);
+      return;
+    }
+    connectionTestStatusKey = "measuringConnection";
+    if (connectionTestStatus) connectionTestStatus.textContent = t(connectionTestStatusKey);
     const speedtest = new Speedtest();
     activeConnectionTest = speedtest;
 
@@ -193,6 +199,11 @@ function startConnectionTest() {
       if (activeConnectionTest === speedtest) finishConnectionTest(aborted);
     };
     speedtest.start();
+    speedtest.worker.onerror = error => {
+      if (activeConnectionTest !== speedtest) return;
+      console.error("Connection test worker failed:", error);
+      finishConnectionTest(true);
+    };
     connectionTestWatchdog = setTimeout(() => {
       if (activeConnectionTest !== speedtest) return;
       speedtest.abort();
@@ -200,6 +211,8 @@ function startConnectionTest() {
       finishConnectionTest(true);
     }, 90000);
   } catch (error) {
+    if (request !== connectionTestRequest) return;
+    connectionTestPreparing = false;
     console.error("Connection test failed:", error);
     finishConnectionTest(true);
   }
@@ -207,24 +220,25 @@ function startConnectionTest() {
 
 connectionTestButton?.addEventListener("click", startConnectionTest);
 
-window.addEventListener("vpntransportchange", () => {
+function resetConnectionTestContext() {
+  connectionTestRequest++;
+  connectionTestPreparing = false;
   if (activeConnectionTest) {
     activeConnectionTest.abort();
     finishConnectionTest(true);
   }
+  setConnectionTestRunning(false);
   activeConnectionTestServer = null;
   resetConnectionTestResults();
   renderConnectionTestTarget();
-});
+}
+
+window.addEventListener("vpntransportchange", resetConnectionTestContext);
+window.addEventListener("tolf:network-context-changed", resetConnectionTestContext);
+window.addEventListener("online", resetConnectionTestContext);
 
 for (const input of serverInputs) {
-  input.addEventListener("change", () => {
-    if (!activeConnectionTest) {
-      activeConnectionTestServer = null;
-      resetConnectionTestResults();
-      renderConnectionTestTarget();
-    }
-  });
+  input.addEventListener("change", resetConnectionTestContext);
 }
 
 if (connectionTestStatus) {

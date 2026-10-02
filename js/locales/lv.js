@@ -340,6 +340,8 @@ I18N.lv = {
   connectionTestReady: "Gatavs",
   connectionTestComplete: "Pabeigts",
   connectionTestFailed: "Mērījums neizdevās",
+  connectionTestUnavailable: "Nav pieejams",
+  connectionTestChecking: "Pārbauda pieejamību…",
 };
 
 Object.assign(I18N.lv, {

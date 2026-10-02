@@ -340,6 +340,8 @@ I18N.en = {
   connectionTestReady: "Ready",
   connectionTestComplete: "Complete",
   connectionTestFailed: "Test failed",
+  connectionTestUnavailable: "Unavailable",
+  connectionTestChecking: "Checking availability…",
 };
 
 Object.assign(I18N.en, {
