@@ -11,12 +11,13 @@
       control: "Перед импортом сертификата откройте настройки приложения Cisco Secure Client и выберите External Control → Prompt. Затем вернитесь сюда и нажмите «Импортировать в AnyConnect».",
       controlReminder: "Перед нажатием «Добавить соединение в AnyConnect» проверьте, что в приложении Cisco Secure Client выбрано External Control → Prompt.",
       enableTitle: "Включите VPN",
-      certificate: "Импортируйте сертификат", prepare: "Получить сертификат и ссылки",
+      certificate: "Импортируйте сертификат", prepare: "Получить сертификат",
+      connectionLinkHelp: "Ссылка на добавление соединения в AnyConnect находится в шаге 4.",
       import: "Импортировать в AnyConnect", download: "Скачать сертификат .p12", password: "Пароль импорта",
       copy: "Скопировать пароль", copied: "Пароль скопирован",
       expires: "Ссылка одноразовая и действует 10 минут. Пароль понадобится при импорте. После обновления страницы получите новую ссылку.",
       expired: "Ссылка истекла. Получите новый сертификат и ссылки.",
-      manual: "Если ссылка не открывает приложение, скачайте файл .p12 и импортируйте его через раздел сертификатов AnyConnect с указанным паролем.",
+      manual: "Для ручного импорта сохраните файл .p12. На iPhone и iPad откройте его в «Файлах» и через «Поделиться» передайте в Cisco Secure Client. Используйте указанный пароль импорта.",
       windows: "Скачайте файл .p12. Откройте его и импортируйте с указанным паролем в хранилище сертификатов текущего пользователя → Личное.",
       connect: "Добавьте соединение", add: "Добавить соединение в AnyConnect",
       return: "После успешного импорта вернитесь на эту страницу и нажмите кнопку добавления соединения.",
@@ -37,12 +38,13 @@
       control: "Before importing the certificate, open Cisco Secure Client settings and select External Control → Prompt. Then return here and select “Import into AnyConnect”.",
       controlReminder: "Before selecting “Add connection in AnyConnect”, check that Cisco Secure Client has External Control → Prompt selected.",
       enableTitle: "Enable VPN",
-      certificate: "Import the certificate", prepare: "Get certificate and links",
+      certificate: "Import the certificate", prepare: "Get certificate",
+      connectionLinkHelp: "The link to add the AnyConnect connection is in step 4.",
       import: "Import into AnyConnect", download: "Download .p12 certificate", password: "Import password",
       copy: "Copy password", copied: "Password copied",
       expires: "The link works once and expires in 10 minutes. Use this password during import. After reloading the page, get a new link.",
       expired: "The link expired. Get a new certificate and links.",
-      manual: "If the link does not open the app, download the .p12 file and import it through the AnyConnect certificates section using this password.",
+      manual: "For manual import, save the .p12 file. On iPhone and iPad, open it in Files and use Share to send it to Cisco Secure Client. Use the displayed import password.",
       windows: "Download the .p12 file. Open it and import it with this password into Current User → Personal certificate store.",
       connect: "Add the connection", add: "Add connection in AnyConnect",
       return: "After successful import, return to this page and add the connection.",
@@ -63,12 +65,13 @@
       control: "Pirms sertifikāta importēšanas atveriet Cisco Secure Client iestatījumus un izvēlieties External Control → Prompt. Pēc tam atgriezieties šeit un nospiediet “Importēt AnyConnect”.",
       controlReminder: "Pirms nospiežat “Pievienot savienojumu AnyConnect”, pārbaudiet, vai Cisco Secure Client ir izvēlēts External Control → Prompt.",
       enableTitle: "Ieslēdziet VPN",
-      certificate: "Importējiet sertifikātu", prepare: "Saņemt sertifikātu un saites",
+      certificate: "Importējiet sertifikātu", prepare: "Saņemt sertifikātu",
+      connectionLinkHelp: "Saite AnyConnect savienojuma pievienošanai ir 4. solī.",
       import: "Importēt AnyConnect", download: "Lejupielādēt .p12 sertifikātu", password: "Importēšanas parole",
       copy: "Kopēt paroli", copied: "Parole nokopēta",
       expires: "Saite ir vienreizēja un derīga 10 minūtes. Importēšanai izmantojiet šo paroli. Pēc lapas pārlādes saņemiet jaunu saiti.",
       expired: "Saites derīgums beidzies. Saņemiet jaunu sertifikātu un saites.",
-      manual: "Ja saite neatver lietotni, lejupielādējiet .p12 failu un importējiet to AnyConnect sertifikātu sadaļā ar norādīto paroli.",
+      manual: "Manuālai importēšanai saglabājiet .p12 failu. iPhone un iPad atveriet to lietotnē Files un ar Share nosūtiet uz Cisco Secure Client. Izmantojiet norādīto importēšanas paroli.",
       windows: "Lejupielādējiet .p12 failu. Atveriet to un importējiet ar norādīto paroli pašreizējā lietotāja personīgajā sertifikātu krātuvē.",
       connect: "Pievienojiet savienojumu", add: "Pievienot savienojumu AnyConnect",
       return: "Pēc veiksmīgas importēšanas atgriezieties šajā lapā un pievienojiet savienojumu.",
@@ -87,6 +90,7 @@
   let grant = null, busy = false, loading = false, epoch = 0, message = "", error = false;
   let deviceName = "", creationRequest = null, addingDevice = false;
   let copyNotice = null, copyNoticeTimer = null;
+  let downloadedPackage = null;
   const copy = () => COPY[document.documentElement.lang] || COPY.en;
   const selected = () => devices.find(d => d.id === selectedId && d.state === "active") || null;
   window.ocAccess = { selected };
@@ -115,8 +119,48 @@
     return node;
   }
   function choose(id) {
-    selectedId = id; grant = null; clearCopyNotice();
+    selectedId = id; grant = null; clearCopyNotice(); clearDownloadedPackage();
     window.refreshAnyConnectTransport?.(); render();
+  }
+  function clearDownloadedPackage() {
+    if (downloadedPackage) URL.revokeObjectURL(downloadedPackage.url);
+    downloadedPackage = null;
+  }
+  async function downloadCertificate() {
+    const currentGrant = grant;
+    if (!currentGrant) return;
+    await perform(async token => {
+      if (!downloadedPackage || downloadedPackage.grant !== currentGrant) {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 20000);
+        let bytes;
+        try {
+          const response = await fetch(currentGrant.certificateUrl, {cache:"no-store", credentials:"omit", signal:controller.signal});
+          if (!response.ok) throw new Error("Certificate download failed");
+          bytes = await response.arrayBuffer();
+        } finally { clearTimeout(timer); }
+        if (token !== epoch || currentGrant !== grant) return;
+        clearDownloadedPackage();
+        downloadedPackage = {grant:currentGrant, url:URL.createObjectURL(new Blob([bytes], {type:"application/octet-stream"}))};
+      }
+      if (token !== epoch || currentGrant !== grant) return;
+      const anchor = document.createElement("a");
+      anchor.href = downloadedPackage.url;
+      anchor.download = "TOLF-AnyConnect.p12";
+      anchor.style.display = "none";
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+    });
+  }
+  function revokeDevice(d) {
+    if (!window.confirm(copy().confirm)) return;
+    perform(async token => {
+      const result = await apiRequest(path(d.id) + "/revoke", {method:"POST", timeoutMs:70000});
+      if (token !== epoch) return;
+      grant = null; clearCopyNotice(); clearDownloadedPackage(); await refresh();
+      if (token === epoch) message = result.device?.state === "revoked" ? copy().revoked : copy().revokePending;
+    });
   }
   function clearCopyNotice() {
     clearTimeout(copyNoticeTimer);
@@ -150,6 +194,7 @@
       if (!devices.some(d => d.id === selectedId)) {
         selectedId = devices.find(d => d.state === "active")?.id || devices[0]?.id || null;
         grant = null;
+        clearDownloadedPackage();
       }
     } else { message = copy().failed; error = true; }
     loading = false;
@@ -196,9 +241,15 @@
     }
     const pending = devices.find(d => d.id === selectedId && d.state === "pending");
     if (pending) root.append(button(c.resume, () => perform(token => create(pending.request_id, pending.label, token)), true));
-    if (devices.length && !addingDevice) {
+    if (devices.length) {
       const actions = element("div", null, "oc-actions");
-      actions.append(button(c.additional, () => { addingDevice = true; render(); }));
+      if (!addingDevice) actions.append(button(c.additional, () => { addingDevice = true; render(); }));
+      const current = devices.find(d => d.id === selectedId);
+      if (current) {
+        const revoke = button(c.revoke, () => revokeDevice(current));
+        revoke.className = "oc-action danger";
+        actions.append(revoke);
+      }
       root.append(actions);
     }
     if (!devices.length || addingDevice) {
@@ -230,9 +281,9 @@
       const prepare = button(c.prepare, () => perform(async token => {
         const id = d.id;
         const result = await apiRequest(path(id) + "/import", { method: "POST", timeoutMs: 30000 });
-        if (token === epoch && selectedId === id) { grant = result; clearCopyNotice(); }
+        if (token === epoch && selectedId === id) { grant = result; clearCopyNotice(); clearDownloadedPackage(); }
       }), true);
-      prepare.disabled ||= capabilities?.issuance !== true; cert.append(prepare);
+      prepare.disabled ||= capabilities?.issuance !== true; cert.append(prepare, element("p", c.connectionLinkHelp, "oc-note"));
       if (grant?.deviceId === d.id) {
         cert.append(element("p", c.password));
         const passwordRow = element("div", null, "oc-password-row");
@@ -256,7 +307,7 @@
         if (mobile) cert.append(element("p", c.control));
         const importActions = element("div", null, "oc-actions oc-import-actions");
         if (mobile) importActions.append(link(c.import, grant.importUri, true));
-        importActions.append(link(c.download, grant.certificateUrl));
+        importActions.append(button(c.download, downloadCertificate));
         cert.append(importActions, element("p", c.expires, "oc-note"));
       }
       cert.append(element("p", mobile ? c.manual : c.windows)); steps.append(cert);
@@ -266,15 +317,6 @@
       const enable = element("section", null, "oc-step");
       enable.append(element("h4", "5. " + c.enableTitle), element("p", c.enable));
       steps.append(enable); root.append(steps);
-      root.append(button(c.revoke, () => {
-        if (!window.confirm(c.confirm)) return;
-        perform(async token => {
-          const result = await apiRequest(path(d.id) + "/revoke", { method: "POST", timeoutMs: 70000 });
-          if (token !== epoch) return;
-          grant = null; await refresh();
-          if (token === epoch) message = result.device?.state === "revoked" ? copy().revoked : copy().revokePending;
-        });
-      }));
     }
     const status = element("p", message, "oc-message" + (error ? " oc-error" : ""));
     status.setAttribute("role", "status"); status.setAttribute("aria-live", "polite"); root.append(status);
@@ -287,6 +329,7 @@
     if (account?.userId === data?.userId && account) return;
     epoch++; account = data?.authenticated ? data : null;
     clearCopyNotice();
+    clearDownloadedPackage();
     devices = []; selectedId = null; grant = null; capabilities = null;
     deviceName = ""; creationRequest = null; addingDevice = false; busy = false; loading = false; message = ""; error = false;
     window.refreshAnyConnectTransport?.(); render();
@@ -295,9 +338,9 @@
   for (const event of ["vpntransportchange", "vpnplatformchange"]) window.addEventListener(event, render);
   new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
   setInterval(() => {
-    if (grant && Date.parse(grant.expiresAt) <= Date.now()) { grant = null; clearCopyNotice(); message = copy().expired; render(); }
+    if (grant && Date.parse(grant.expiresAt) <= Date.now()) { grant = null; clearCopyNotice(); clearDownloadedPackage(); message = copy().expired; render(); }
   }, 1000);
-  window.addEventListener("pagehide", () => { grant = null; clearCopyNotice(); });
+  window.addEventListener("pagehide", () => { grant = null; clearCopyNotice(); clearDownloadedPackage(); });
   window.addEventListener("pageshow", render);
   window.setAnyConnectAccount(window.tolfAccountState || null);
 })();

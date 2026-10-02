@@ -7,6 +7,7 @@ class Element {
   constructor(tag = 'div') {
     this.tagName = tag; this.children = []; this.events = {}; this.attributes = {};
     this.dataset = {}; this.disabled = false; this.value = ''; this._text = '';
+    this.style = {};
     const classes = new Set();
     this.classList = {toggle(name, on) { if (on) classes.add(name); else classes.delete(name); },
       contains: name => classes.has(name), remove: name => classes.delete(name), add: name => classes.add(name)};
@@ -19,7 +20,8 @@ class Element {
   setAttribute(name, value) { this.attributes[name] = value; }
   removeAttribute(name) { delete this.attributes[name]; }
   addEventListener(name, fn) { this.events[name] = fn; }
-  click() { assert.equal(this.disabled, false); return this.events.click?.(); }
+  click() { assert.equal(this.disabled, false); this.clicked = true; return this.events.click?.(); }
+  remove() { this.removed = true; }
   focus() {}
 }
 function descendants(node) { return node.children.flatMap(child => [child, ...descendants(child)]); }
@@ -36,6 +38,7 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   const modes = ['auto','ru','lv','yt'].map(mode => { const n = new Element('button'); n.dataset.mode = mode; return n; });
   ids.anyConnectModeAuto = modes[0];
   const document = {documentElement:{lang:'ru',dataset:{}}, hidden:false,
+    body:new Element('body'),
     getElementById: id => ids[id], querySelectorAll: () => modes,
     createElement: tag => new Element(tag), addEventListener() {}};
   const handlers = {}, window = {tolfAccountState:{authenticated:true,userId:'owner'},
@@ -45,6 +48,7 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   const first = {id:'one',label:'iPad',username:'tolf-oc-'+'1'.repeat(32),state:'active',mode:'auto'};
   const second = {id:'two',label:'Phone',username:'tolf-oc-'+'2'.repeat(32),state:'active',mode:'lv'};
   const devices = [first,second], calls = [];
+  const downloads = [], revokedUrls = [];
   let heldSession = null;
   async function request(url, options = {}) {
     const p = url.replace('https://api.tolf.is',''); calls.push([options.method || 'GET',p,options.credentials]);
@@ -75,8 +79,15 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
     Event:class {constructor(type){this.type=type;}},
     MutationObserver:class {observe(){}},
     setInterval(){},setTimeout,clearTimeout,
-    apiRequest:request,copyText:async value=>{c.copied=value;},
-    fetch:async (url,options)=>({ok:true,json:async()=>request(url,options)})});
+    apiRequest:request,copyText:async value=>{c.copied=value;},Blob,AbortController,
+    URL:{createObjectURL(blob){assert.equal(blob.type,'application/octet-stream');return 'blob:test-package';},
+      revokeObjectURL(url){revokedUrls.push(url);}},
+    fetch:async (url,options)=>{
+      if(url==='https://api.tolf.is/import/token.p12'){
+        downloads.push(url);return {ok:true,arrayBuffer:async()=>new Uint8Array([48,2,1,0]).buffer};
+      }
+      return {ok:true,json:async()=>request(url,options)};
+    }});
   for (const file of ['transport-selector.js','anyconnect-access.js']) {
     vm.runInContext(fs.readFileSync(path.join(root,'js',file),'utf8'),c);
   }
@@ -85,6 +96,9 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   assert(descendants(ids.anyConnectAccess).some(n=>n.tagName==='a'&&n.textContent==='Установить Cisco Secure Client'));
   assert(!ids.anyConnectAccess.textContent.includes('Перед импортом сертификата'));
   assert.equal(descendants(ids.anyConnectAccess).filter(n=>n.tagName==='input').length,0);
+  assert(ids.anyConnectAccess.children.some(n=>n.className==='oc-actions'&&
+    n.children.some(child=>child.textContent==='Создать дополнительный доступ')&&
+    n.children.some(child=>child.textContent==='Отозвать доступ')));
   assert(!descendants(ids.anyConnectAccess).some(n=>n.tagName==='button'&&n.textContent==='Обновить'));
   button(ids.anyConnectAccess,'Создать дополнительный доступ').click();
   assert.equal(descendants(ids.anyConnectAccess).filter(n=>n.tagName==='input').length,1);
@@ -92,7 +106,7 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   assert.equal(descendants(ids.anyConnectAccess).filter(n=>n.tagName==='input').length,0);
   assert.equal(ids.vpnUsername.textContent,first.username);
   assert(ids.anyConnectModeSelector.classList.contains('policy-confirmed'));
-  button(ids.anyConnectAccess,'Получить сертификат и ссылки').click(); await settle();
+  button(ids.anyConnectAccess,'Получить сертификат').click(); await settle();
   assert(ids.anyConnectAccess.textContent.includes('private-import-password'));
   assert(!descendants(ids.anyConnectAccess).some(n=>n.tagName==='button'&&n.textContent==='Скопировать пароль'));
   const copyIcon = descendants(ids.anyConnectAccess).find(n=>n.tagName==='button'&&n.attributes['aria-label']==='Скопировать пароль');
@@ -109,10 +123,18 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   assert(connectionStep.children[connectionPosition-1].textContent.includes('External Control → Prompt'));
   const importLink = descendants(ids.anyConnectAccess).find(n=>n.tagName==='a'&&n.textContent==='Импортировать в AnyConnect');
   assert(importLink.className.includes('button-link')&&importLink.className.includes('primary'));
+  button(ids.anyConnectAccess,'Скачать сертификат .p12').click();await settle();
+  const downloadAnchor=document.body.children.at(-1);
+  assert.equal(downloadAnchor.href,'blob:test-package');
+  assert.equal(downloadAnchor.download,'TOLF-AnyConnect.p12');
+  assert(downloadAnchor.clicked&&downloadAnchor.removed);
+  button(ids.anyConnectAccess,'Скачать сертификат .p12').click();await settle();
+  assert.equal(downloads.length,1,'repeat save reuses the one-time download in page memory');
   const select = descendants(ids.anyConnectAccess).find(n=>n.tagName==='select');
   select.value = second.id; select.events.change(); await settle();
   assert(!ids.anyConnectAccess.textContent.includes('private-import-password'));
   assert(!descendants(ids.anyConnectAccess).some(n=>n.className==='oc-copy-feedback'));
+  assert.deepEqual(revokedUrls,['blob:test-package']);
   assert.equal(ids.vpnUsername.textContent,second.username);
   modes[1].click(); await settle();
   assert.equal(first.mode,'auto'); assert.equal(second.mode,'ru');
