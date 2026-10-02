@@ -7,8 +7,10 @@
     ru: {
       title: "Доступ AnyConnect", device: "Устройство", newDevice: "Название нового устройства",
       create: "Создать доступ", additional: "Создать дополнительный доступ", cancel: "Отмена", resume: "Завершить выдачу", refresh: "Повторить попытку", choose: "Выберите устройство",
-      install: "Установите Cisco Secure Client (AnyConnect).", app: "Открыть страницу приложения",
-      control: "В настройках приложения выберите External Control → Prompt, чтобы разрешить ссылки с этой страницы.",
+      install: "Установите Cisco Secure Client (AnyConnect).", app: "Установить Cisco Secure Client",
+      control: "Перед импортом сертификата откройте настройки приложения Cisco Secure Client и выберите External Control → Prompt. Затем вернитесь сюда и нажмите «Импортировать в AnyConnect».",
+      controlReminder: "Перед нажатием «Добавить соединение в AnyConnect» проверьте, что в приложении Cisco Secure Client выбрано External Control → Prompt.",
+      enableTitle: "Включите VPN",
       certificate: "Импортируйте сертификат", prepare: "Получить сертификат и ссылки",
       import: "Импортировать в AnyConnect", download: "Скачать сертификат .p12", password: "Пароль импорта",
       copy: "Скопировать пароль", copied: "Пароль скопирован",
@@ -31,8 +33,10 @@
     en: {
       title: "AnyConnect access", device: "Device", newDevice: "New device name",
       create: "Create access", additional: "Create additional access", cancel: "Cancel", resume: "Complete issuance", refresh: "Try again", choose: "Choose a device",
-      install: "Install Cisco Secure Client (AnyConnect).", app: "Open application page",
-      control: "In the application settings, select External Control → Prompt to allow links from this page.",
+      install: "Install Cisco Secure Client (AnyConnect).", app: "Install Cisco Secure Client",
+      control: "Before importing the certificate, open Cisco Secure Client settings and select External Control → Prompt. Then return here and select “Import into AnyConnect”.",
+      controlReminder: "Before selecting “Add connection in AnyConnect”, check that Cisco Secure Client has External Control → Prompt selected.",
+      enableTitle: "Enable VPN",
       certificate: "Import the certificate", prepare: "Get certificate and links",
       import: "Import into AnyConnect", download: "Download .p12 certificate", password: "Import password",
       copy: "Copy password", copied: "Password copied",
@@ -55,8 +59,10 @@
     lv: {
       title: "AnyConnect piekļuve", device: "Ierīce", newDevice: "Jaunās ierīces nosaukums",
       create: "Izveidot piekļuvi", additional: "Izveidot papildu piekļuvi", cancel: "Atcelt", resume: "Pabeigt izsniegšanu", refresh: "Mēģināt vēlreiz", choose: "Izvēlieties ierīci",
-      install: "Instalējiet Cisco Secure Client (AnyConnect).", app: "Atvērt lietotnes lapu",
-      control: "Lietotnes iestatījumos izvēlieties External Control → Prompt, lai atļautu saites no šīs lapas.",
+      install: "Instalējiet Cisco Secure Client (AnyConnect).", app: "Instalēt Cisco Secure Client",
+      control: "Pirms sertifikāta importēšanas atveriet Cisco Secure Client iestatījumus un izvēlieties External Control → Prompt. Pēc tam atgriezieties šeit un nospiediet “Importēt AnyConnect”.",
+      controlReminder: "Pirms nospiežat “Pievienot savienojumu AnyConnect”, pārbaudiet, vai Cisco Secure Client ir izvēlēts External Control → Prompt.",
+      enableTitle: "Ieslēdziet VPN",
       certificate: "Importējiet sertifikātu", prepare: "Saņemt sertifikātu un saites",
       import: "Importēt AnyConnect", download: "Lejupielādēt .p12 sertifikātu", password: "Importēšanas parole",
       copy: "Kopēt paroli", copied: "Parole nokopēta",
@@ -80,6 +86,7 @@
   let account = null, devices = [], selectedId = null, capabilities = null;
   let grant = null, busy = false, loading = false, epoch = 0, message = "", error = false;
   let deviceName = "", creationRequest = null, addingDevice = false;
+  let copyNotice = null, copyNoticeTimer = null;
   const copy = () => COPY[document.documentElement.lang] || COPY.en;
   const selected = () => devices.find(d => d.id === selectedId && d.state === "active") || null;
   window.ocAccess = { selected };
@@ -108,8 +115,25 @@
     return node;
   }
   function choose(id) {
-    selectedId = id; grant = null;
+    selectedId = id; grant = null; clearCopyNotice();
     window.refreshAnyConnectTransport?.(); render();
+  }
+  function clearCopyNotice() {
+    clearTimeout(copyNoticeTimer);
+    copyNotice = null;
+  }
+  async function copyPassword() {
+    const token = epoch, currentGrant = grant;
+    if (!currentGrant) return;
+    clearCopyNotice();
+    try {
+      await copyText(currentGrant.password);
+      if (token !== epoch || currentGrant !== grant) return;
+      copyNotice = "copied"; render();
+      copyNoticeTimer = setTimeout(() => { copyNotice = null; render(); }, 2000);
+    } catch {
+      if (token === epoch && currentGrant === grant) { copyNotice = "failed"; render(); }
+    }
   }
   async function refresh() {
     if (!account) return;
@@ -159,7 +183,6 @@
       currentPlatform === "android" ? "https://play.google.com/store/apps/details?id=com.cisco.anyconnect.vpn.android.avf" :
       "https://www.cisco.com/c/en/us/support/security/secure-client-5/model.html";
     root.append(link(c.app, appUrl));
-    if (mobile) root.append(element("p", c.control));
     root.append(element("h4", "2. " + c.device));
     if (devices.length) {
       root.append(element("label", c.device));
@@ -202,39 +225,47 @@
     if (!capabilities?.issuance) root.append(element("p", loading ? c.loading : c.unavailable, "oc-note"));
     const d = selected();
     if (d) {
-      const steps = element("ol");
-      steps.start = 3;
-      const cert = element("li"); cert.append(element("p", c.certificate));
+      const steps = element("div", null, "oc-steps");
+      const cert = element("section", null, "oc-step"); cert.append(element("h4", "3. " + c.certificate));
       const prepare = button(c.prepare, () => perform(async token => {
         const id = d.id;
         const result = await apiRequest(path(id) + "/import", { method: "POST", timeoutMs: 30000 });
-        if (token === epoch && selectedId === id) grant = result;
+        if (token === epoch && selectedId === id) { grant = result; clearCopyNotice(); }
       }), true);
       prepare.disabled ||= capabilities?.issuance !== true; cert.append(prepare);
       if (grant?.deviceId === d.id) {
         cert.append(element("p", c.password));
         const passwordRow = element("div", null, "oc-password-row");
         passwordRow.append(element("span", grant.password, "oc-secret"));
-        const copyButton = button("", () => perform(async token => {
-          await copyText(grant.password); if (token === epoch) message = copy().copied;
-        }));
+        const copyButton = button("", copyPassword);
         copyButton.className = "oc-copy";
         copyButton.setAttribute("aria-label", c.copy);
         copyButton.title = c.copy;
         const glyph = element("span", null, "oc-copy-glyph");
         glyph.setAttribute("aria-hidden", "true"); copyButton.append(glyph);
-        passwordRow.append(copyButton);
+        const copyControl = element("span", null, "oc-copy-control");
+        copyControl.append(copyButton);
+        if (copyNotice) {
+          const feedback = element("span", copyNotice === "copied" ? c.copied : c.failed, "oc-copy-feedback");
+          feedback.setAttribute("role", "status");
+          feedback.setAttribute("aria-live", "polite");
+          copyControl.append(feedback);
+        }
+        passwordRow.append(copyControl);
         cert.append(passwordRow);
-        const importActions = element("div", null, "oc-actions");
+        if (mobile) cert.append(element("p", c.control));
+        const importActions = element("div", null, "oc-actions oc-import-actions");
         if (mobile) importActions.append(link(c.import, grant.importUri, true));
         importActions.append(link(c.download, grant.certificateUrl));
         cert.append(importActions, element("p", c.expires, "oc-note"));
       }
       cert.append(element("p", mobile ? c.manual : c.windows)); steps.append(cert);
-      const connect = element("li"); connect.append(element("p", c.connect), element("p", c.return));
-      if (mobile) connect.append(link(c.add, connectionUri(d), true));
+      const connect = element("section", null, "oc-step"); connect.append(element("h4", "4. " + c.connect), element("p", c.return));
+      if (mobile) connect.append(element("p", c.controlReminder), link(c.add, connectionUri(d), true));
       connect.append(element("p", c.host), element("p", d.username, "oc-note")); steps.append(connect);
-      const enable = element("li", c.enable); steps.append(enable); root.append(steps);
+      const enable = element("section", null, "oc-step");
+      enable.append(element("h4", "5. " + c.enableTitle), element("p", c.enable));
+      steps.append(enable); root.append(steps);
       root.append(button(c.revoke, () => {
         if (!window.confirm(c.confirm)) return;
         perform(async token => {
@@ -255,6 +286,7 @@
   window.setAnyConnectAccount = data => {
     if (account?.userId === data?.userId && account) return;
     epoch++; account = data?.authenticated ? data : null;
+    clearCopyNotice();
     devices = []; selectedId = null; grant = null; capabilities = null;
     deviceName = ""; creationRequest = null; addingDevice = false; busy = false; loading = false; message = ""; error = false;
     window.refreshAnyConnectTransport?.(); render();
@@ -263,9 +295,9 @@
   for (const event of ["vpntransportchange", "vpnplatformchange"]) window.addEventListener(event, render);
   new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
   setInterval(() => {
-    if (grant && Date.parse(grant.expiresAt) <= Date.now()) { grant = null; message = copy().expired; render(); }
+    if (grant && Date.parse(grant.expiresAt) <= Date.now()) { grant = null; clearCopyNotice(); message = copy().expired; render(); }
   }, 1000);
-  window.addEventListener("pagehide", () => { grant = null; });
+  window.addEventListener("pagehide", () => { grant = null; clearCopyNotice(); });
   window.addEventListener("pageshow", render);
   window.setAnyConnectAccount(window.tolfAccountState || null);
 })();

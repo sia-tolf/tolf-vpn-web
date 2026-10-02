@@ -145,17 +145,19 @@ lock until reboot or cleanup.
 
 ## User flow
 
-1. Install Cisco Secure Client (AnyConnect). On mobile, allow external links with
-   the application's External Control → Prompt setting.
+1. Install Cisco Secure Client (AnyConnect).
 2. Create separately named access for the device, or select its existing access.
    After creation the form closes; creating another device requires the explicit
    additional-access button. Routine refresh controls are hidden; recovery offers
    a retry button.
 3. Request certificate/links and copy the password using the adjacent copy icon.
+   On mobile, select External Control → Prompt in Cisco Secure Client before
+   using the import link. The copy confirmation appears above its icon.
    Import into AnyConnect or
    download/import the .p12 manually. Use one method per single-use grant.
 4. Return after successful import and add the connection. Manual address:
    `oc.tolf.is:4443`; use the displayed device CN as the client certificate.
+   A short External Control reminder appears immediately before the add button.
 5. Enable VPN with the default group. The website confirms that device's session
    before showing a green dot. Change Auto/RU/LV/YT on the website.
 
@@ -163,6 +165,8 @@ Windows uses manual PKCS12 import into Current User → Personal and manual
 connection setup. Mobile links do not confirm installation or a VPN session.
 Import passwords are never included in URIs. Connection names have a unique
 device suffix and at most 24 characters.
+All steps use the same content inset. Import/download actions share a full-width
+row with equal-width columns and inherit the site's standard button styles.
 
 Cisco URI reference:
 https://www.cisco.com/c/en/us/td/docs/security/vpn_client/anyconnect/Cisco-Secure-Client-5/admin/guide/cisco-secure-client-admin-guide-new/ac-on-mobile-devices-intro/t_automate_anyconnect_actions_using_the_uri_handler.html

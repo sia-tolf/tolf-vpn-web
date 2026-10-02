@@ -81,6 +81,9 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
     vm.runInContext(fs.readFileSync(path.join(root,'js',file),'utf8'),c);
   }
   ids.vpnTransportAnyConnect.click(); await settle();
+  assert(!descendants(ids.anyConnectAccess).some(n=>n.tagName==='ol'));
+  assert(descendants(ids.anyConnectAccess).some(n=>n.tagName==='a'&&n.textContent==='Установить Cisco Secure Client'));
+  assert(!ids.anyConnectAccess.textContent.includes('Перед импортом сертификата'));
   assert.equal(descendants(ids.anyConnectAccess).filter(n=>n.tagName==='input').length,0);
   assert(!descendants(ids.anyConnectAccess).some(n=>n.tagName==='button'&&n.textContent==='Обновить'));
   button(ids.anyConnectAccess,'Создать дополнительный доступ').click();
@@ -95,11 +98,21 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   const copyIcon = descendants(ids.anyConnectAccess).find(n=>n.tagName==='button'&&n.attributes['aria-label']==='Скопировать пароль');
   assert(copyIcon);copyIcon.click();await settle();
   assert.equal(c.copied,'private-import-password');
+  const copyControl = descendants(ids.anyConnectAccess).find(n=>n.className==='oc-copy-control');
+  assert(copyControl.children.some(n=>n.className==='oc-copy-feedback'&&n.textContent==='Пароль скопирован'));
+  assert(!descendants(ids.anyConnectAccess).find(n=>n.className==='oc-message').textContent.includes('Пароль скопирован'));
+  const certificateStep = descendants(ids.anyConnectAccess).find(n=>n.className==='oc-step'&&n.textContent.startsWith('3.'));
+  const importPosition = certificateStep.children.findIndex(n=>n.className==='oc-actions oc-import-actions');
+  assert(certificateStep.children[importPosition-1].textContent.includes('Перед импортом сертификата'));
+  const connectionStep = descendants(ids.anyConnectAccess).find(n=>n.className==='oc-step'&&n.textContent.startsWith('4.'));
+  const connectionPosition = connectionStep.children.findIndex(n=>n.tagName==='a');
+  assert(connectionStep.children[connectionPosition-1].textContent.includes('External Control → Prompt'));
   const importLink = descendants(ids.anyConnectAccess).find(n=>n.tagName==='a'&&n.textContent==='Импортировать в AnyConnect');
   assert(importLink.className.includes('button-link')&&importLink.className.includes('primary'));
   const select = descendants(ids.anyConnectAccess).find(n=>n.tagName==='select');
   select.value = second.id; select.events.change(); await settle();
   assert(!ids.anyConnectAccess.textContent.includes('private-import-password'));
+  assert(!descendants(ids.anyConnectAccess).some(n=>n.className==='oc-copy-feedback'));
   assert.equal(ids.vpnUsername.textContent,second.username);
   modes[1].click(); await settle();
   assert.equal(first.mode,'auto'); assert.equal(second.mode,'ru');
