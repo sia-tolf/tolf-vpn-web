@@ -12,7 +12,7 @@
       controlReminder: "Перед нажатием «Добавить соединение в AnyConnect» проверьте, что в приложении Cisco Secure Client выбрано External Control → Prompt.",
       enableTitle: "Включите VPN",
       certificate: "Импортируйте сертификат", prepare: "Получить сертификат",
-      connectionLinkHelp: "Ссылка на добавление соединения в AnyConnect находится в шаге 4.",
+      connectionLinkHelp: "После добавления соединения получите сертификат и импортируйте его в AnyConnect.",
       import: "Импортировать в AnyConnect", download: "Скачать сертификат .p12", password: "Пароль импорта",
       copy: "Скопировать пароль", copied: "Пароль скопирован",
       expires: "Ссылка одноразовая и действует 10 минут. Пароль понадобится при импорте. После обновления страницы получите новую ссылку.",
@@ -20,8 +20,8 @@
       manual: "Для ручного импорта сохраните файл .p12. На iPhone и iPad откройте его в «Файлах» и через «Поделиться» передайте в Cisco Secure Client. Используйте указанный пароль импорта.",
       windows: "Скачайте файл .p12. Откройте его и импортируйте с указанным паролем в хранилище сертификатов текущего пользователя → Личное.",
       connect: "Добавьте соединение", add: "Добавить соединение в AnyConnect",
-      return: "После успешного импорта вернитесь на эту страницу и нажмите кнопку добавления соединения.",
-      host: "Для ручного добавления: адрес oc.tolf.is:4443. Включите использование клиентского сертификата и выберите сертификат этого устройства.",
+      return: "Сначала добавьте соединение в AnyConnect. Затем вернитесь сюда и импортируйте сертификат в шаге 4. VPN включайте после импорта сертификата.",
+      host: "Для ручного добавления: адрес oc.tolf.is:4443. После импорта сертификата в шаге 4 выберите его в настройках этого соединения.",
       enable: "Включите VPN в приложении. Если предлагается группа, оставьте группу по умолчанию. Вернитесь на сайт: зелёная точка появится после подтверждения сессии выбранного устройства. Маршрутизацию меняйте здесь.",
       ready: "Доступ готов", pending: "Выдача не завершена", revoking: "Отзыв выполняется",
       unavailable: "Выдача пока недоступна. Обновите после активации сервера.", loading: "Загрузка…",
@@ -39,7 +39,7 @@
       controlReminder: "Before selecting “Add connection in AnyConnect”, check that Cisco Secure Client has External Control → Prompt selected.",
       enableTitle: "Enable VPN",
       certificate: "Import the certificate", prepare: "Get certificate",
-      connectionLinkHelp: "The link to add the AnyConnect connection is in step 4.",
+      connectionLinkHelp: "After adding the connection, get the certificate and import it into AnyConnect.",
       import: "Import into AnyConnect", download: "Download .p12 certificate", password: "Import password",
       copy: "Copy password", copied: "Password copied",
       expires: "The link works once and expires in 10 minutes. Use this password during import. After reloading the page, get a new link.",
@@ -47,8 +47,8 @@
       manual: "For manual import, save the .p12 file. On iPhone and iPad, open it in Files and use Share to send it to Cisco Secure Client. Use the displayed import password.",
       windows: "Download the .p12 file. Open it and import it with this password into Current User → Personal certificate store.",
       connect: "Add the connection", add: "Add connection in AnyConnect",
-      return: "After successful import, return to this page and add the connection.",
-      host: "For manual setup: server oc.tolf.is:4443. Enable client certificate authentication and select this device’s certificate.",
+      return: "First add the connection in AnyConnect. Then return here and import the certificate in step 4. Enable VPN after importing the certificate.",
+      host: "For manual setup: server oc.tolf.is:4443. After importing the certificate in step 4, select it in this connection’s settings.",
       enable: "Enable VPN in the app. Keep the default group if asked. Return here: the green dot appears after this device’s session is confirmed. Change routing here.",
       ready: "Access ready", pending: "Issuance incomplete", revoking: "Revocation in progress",
       unavailable: "Issuance is unavailable. Refresh after server activation.", loading: "Loading…",
@@ -66,7 +66,7 @@
       controlReminder: "Pirms nospiežat “Pievienot savienojumu AnyConnect”, pārbaudiet, vai Cisco Secure Client ir izvēlēts External Control → Prompt.",
       enableTitle: "Ieslēdziet VPN",
       certificate: "Importējiet sertifikātu", prepare: "Saņemt sertifikātu",
-      connectionLinkHelp: "Saite AnyConnect savienojuma pievienošanai ir 4. solī.",
+      connectionLinkHelp: "Pēc savienojuma pievienošanas saņemiet sertifikātu un importējiet to AnyConnect.",
       import: "Importēt AnyConnect", download: "Lejupielādēt .p12 sertifikātu", password: "Importēšanas parole",
       copy: "Kopēt paroli", copied: "Parole nokopēta",
       expires: "Saite ir vienreizēja un derīga 10 minūtes. Importēšanai izmantojiet šo paroli. Pēc lapas pārlādes saņemiet jaunu saiti.",
@@ -74,8 +74,8 @@
       manual: "Manuālai importēšanai saglabājiet .p12 failu. iPhone un iPad atveriet to lietotnē Files un ar Share nosūtiet uz Cisco Secure Client. Izmantojiet norādīto importēšanas paroli.",
       windows: "Lejupielādējiet .p12 failu. Atveriet to un importējiet ar norādīto paroli pašreizējā lietotāja personīgajā sertifikātu krātuvē.",
       connect: "Pievienojiet savienojumu", add: "Pievienot savienojumu AnyConnect",
-      return: "Pēc veiksmīgas importēšanas atgriezieties šajā lapā un pievienojiet savienojumu.",
-      host: "Manuālai pievienošanai: serveris oc.tolf.is:4443. Ieslēdziet klienta sertifikāta izmantošanu un izvēlieties šīs ierīces sertifikātu.",
+      return: "Vispirms pievienojiet savienojumu AnyConnect. Pēc tam atgriezieties šeit un importējiet sertifikātu 4. solī. Ieslēdziet VPN pēc sertifikāta importēšanas.",
+      host: "Manuālai pievienošanai: serveris oc.tolf.is:4443. Pēc sertifikāta importēšanas 4. solī izvēlieties to šī savienojuma iestatījumos.",
       enable: "Ieslēdziet VPN lietotnē. Ja tiek prasīta grupa, atstājiet noklusējuma grupu. Atgriezieties vietnē: zaļais punkts parādīsies pēc šīs ierīces sesijas apstiprināšanas. Maršrutēšanu mainiet šeit.",
       ready: "Piekļuve gatava", pending: "Izsniegšana nav pabeigta", revoking: "Notiek atsaukšana",
       unavailable: "Izsniegšana nav pieejama. Atjauniniet pēc servera aktivizēšanas.", loading: "Ielāde…",
@@ -277,12 +277,16 @@
     const d = selected();
     if (d) {
       const steps = element("div", null, "oc-steps");
-      const cert = element("section", null, "oc-step"); cert.append(element("h4", "3. " + c.certificate));
+      const connect = element("section", null, "oc-step"); connect.append(element("h4", "3. " + c.connect), element("p", c.return));
+      if (mobile) connect.append(element("p", c.controlReminder), link(c.add, connectionUri(d), true));
+      connect.append(element("p", c.host)); steps.append(connect);
+      const cert = element("section", null, "oc-step"); cert.append(element("h4", "4. " + c.certificate));
       const prepare = button(c.prepare, () => perform(async token => {
         const id = d.id;
         const result = await apiRequest(path(id) + "/import", { method: "POST", timeoutMs: 30000 });
         if (token === epoch && selectedId === id) { grant = result; clearCopyNotice(); clearDownloadedPackage(); }
       }), true);
+      prepare.className += " oc-prepare";
       prepare.disabled ||= capabilities?.issuance !== true; cert.append(prepare, element("p", c.connectionLinkHelp, "oc-note"));
       if (grant?.deviceId === d.id) {
         cert.append(element("p", c.password));
@@ -311,9 +315,6 @@
         cert.append(importActions, element("p", c.expires, "oc-note"));
       }
       cert.append(element("p", mobile ? c.manual : c.windows, "oc-note")); steps.append(cert);
-      const connect = element("section", null, "oc-step"); connect.append(element("h4", "4. " + c.connect), element("p", c.return));
-      if (mobile) connect.append(element("p", c.controlReminder), link(c.add, connectionUri(d), true));
-      connect.append(element("p", c.host)); steps.append(connect);
       const enable = element("section", null, "oc-step");
       enable.append(element("h4", "5. " + c.enableTitle), element("p", c.enable));
       steps.append(enable); root.append(steps);

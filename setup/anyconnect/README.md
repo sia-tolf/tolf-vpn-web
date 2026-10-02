@@ -150,21 +150,20 @@ lock until reboot or cleanup.
    After creation the form closes; creating another device requires the explicit
    additional-access button. Routine refresh controls are hidden; recovery offers
    a retry button. Revoke is next to the additional-access action.
-3. Request certificate/links and copy the password using the adjacent copy icon.
-   On mobile, select External Control → Prompt in Cisco Secure Client before
-   using the import link. The copy confirmation appears above its icon.
-   Import into AnyConnect or
+3. Select External Control → Prompt in Cisco Secure Client, then add the
+   connection using the AnyConnect link. Return to the website for step 4;
+   enable VPN only after importing the certificate. Manual server address:
+   `oc.tolf.is:4443`. A short External Control reminder precedes the add button.
+4. Get the certificate and copy the password using the adjacent copy icon.
+   The copy confirmation appears above its icon. Import into AnyConnect or
    download/import the .p12 manually. Use one method per single-use grant.
    The download action fetches the package and saves an octet-stream Blob with
    the .p12 filename instead of navigating Safari to the certificate URL.
    Repeat saves reuse the encrypted package in page memory; object URLs are
    cleared on device/account/grant change, expiry and page hide.
    On iPhone/iPad, share the saved file from Files to Cisco Secure Client.
-   The button is labelled “Get certificate”; connection links are explicitly
-   described in step 4.
-4. Return after successful import and add the connection. Manual address:
-   `oc.tolf.is:4443`; use the displayed device CN as the client certificate.
-   A short External Control reminder appears immediately before the add button.
+   For manual connection setup, select the imported certificate in the
+   connection's settings after import.
 5. Enable VPN with the default group. The website confirms that device's session
    before showing a green dot. Change Auto/RU/LV/YT on the website.
 
@@ -175,7 +174,8 @@ device suffix and at most 24 characters.
 All steps use the same content inset. Import/download actions share a full-width
 row with equal-width columns and inherit the site's standard button styles.
 Import expiration and manual-import instructions share the same secondary text
-style. The revoke action fills the space remaining beside additional access.
+style. Additional access and revoke share equal-width columns across the full row.
+The Get certificate button matches the width of the Import into AnyConnect button.
 The overview username comes from the authenticated account's `vpn.username`,
 as in IKEv2; it is hidden if that field is absent. Device certificate CNs remain
 in certificate selection, session checks and routing commands, and are not
