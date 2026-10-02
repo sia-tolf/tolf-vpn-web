@@ -34,6 +34,31 @@ installation. The pilot policy endpoints and UI remain in place at this stage.
 
 ## Required activation and next stages
 
+### Moscow public trust and CRL
+
+The confirmed node is OpenWrt; ocserv configuration is
+`/etc/ocserv-moscow/ocserv.conf`, control socket
+`/var/run/occtl-moscow.socket`, and gateway `oc.tolf.is:4443` on
+`92.243.66.32`. The server TLS certificate covers `oc.tolf.is`.
+
+After adding the UK CA to the existing pilot CA bundle, run the hash-verified
+`install-moscow-crl.sh <UK CA SHA256>` as root. The installer checks the pinned CA
+and its existing trust, verifies the CRL signature and time validity, installs
+`/usr/bin/tolf-oc-crl-sync`, adds `crl = /etc/ocserv-moscow/uk-client-ca.crl.pem`,
+and installs a tagged five-minute root cron entry. Existing cron jobs and the
+pilot CA remain in place. Installer failures restore prior files and reload
+ocserv. A successful reload schedules the update; device authentication and
+revocation rejection must still be tested before enabling issuance.
+
+The sync rejects lower CRL numbers, conflicting content with the same number,
+expired lists and foreign signatures. Unchanged lists do not rewrite flash or
+reload ocserv. Fetch/reload errors retain the prior list and cron reports failures
+under log tag `tolf-oc-crl`. The last successful fetch time is recorded in
+`/tmp/tolf-oc-crl-last-sync`. A killed sync can leave its temporary lock until
+reboot or operator cleanup; this must be monitored during node activation.
+The public CRL governs new authentication; disconnecting an already connected
+revoked device remains part of the subsequent account/device control stage.
+
 Before enabling issuance, Moscow must trust the additional public CA, enforce its
 CRL, and support account/device-specific session and routing control. Preserve the
 pilot CA. Confirm the server hostname/certificate and TCP/UDP port 4443 from the

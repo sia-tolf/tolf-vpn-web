@@ -17,3 +17,8 @@ output = template.replace("PAYLOAD = {}  # BUILD_PAYLOAD",
 compile(output, "install-uk-foundation.py", "exec")
 (directory / "install-uk-foundation.py").write_text(output)
 print(hashlib.sha256(output.encode()).hexdigest())
+template = (directory / "install-moscow-crl.template.sh").read_text()
+assert template.count("# BUILD_SYNC_SCRIPT") == 1
+output = template.replace("# BUILD_SYNC_SCRIPT", (directory / "sync-moscow-crl.sh").read_text().rstrip())
+(directory / "install-moscow-crl.sh").write_text(output)
+print("Moscow CRL:", hashlib.sha256(output.encode()).hexdigest())
