@@ -18,6 +18,13 @@ Endpoints installed at this stage:
 * `GET /oc/access/capabilities`: foundation version, public CA fingerprint,
   `issuance=false`, `nodeReady=false`.
 * `GET /oc/access/ca.pem`: public CA certificate only.
+* `GET /oc/access/crl.pem`: signed public revocation list. The UK registry's
+  revoked/revoking serials are added atomically under an interprocess lock.
+  Existing revocations are retained even if their database rows disappear.
+  The seven-day CRL renews on retrieval when less than one day remains; unchanged
+  requests return the cached signed list. Moscow must fetch it periodically
+  before issuance is enabled. Active-session disconnection still requires the
+  next node-control stage.
 * `GET /oc/access/devices`: authenticated, current account only.
 * `POST /oc/access/devices`: issuance deliberately unavailable until node activation.
 

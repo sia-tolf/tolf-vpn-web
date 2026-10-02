@@ -1,7 +1,12 @@
 """UK foundation for personal AnyConnect; issuance stays disabled until node activation."""
 from contextlib import closing
 from pathlib import Path
+import datetime as dt
+import fcntl
+import os
 import sqlite3
+import tempfile
+from cryptography import x509
 from fastapi import HTTPException, Request
 from fastapi.responses import JSONResponse, Response
 from tolf_oc_certificates import Authority
@@ -43,6 +48,44 @@ END;
 """
 
 
+def published_crl(authority, directory, db):
+    """Refresh signed public CRL under a process-wide lock; never undo a revocation."""
+    fd = os.open(directory / "crl.lock", os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
+    try:
+        fcntl.flock(fd, fcntl.LOCK_EX)
+        path = directory / "ca.crl.pem"
+        previous = path.read_bytes()
+        crl = x509.load_pem_x509_crl(previous)
+        if crl.issuer != authority.cert.subject or not crl.is_signature_valid(authority.cert.public_key()):
+            raise RuntimeError("Stored AnyConnect CRL signature is invalid")
+        revoked = {entry.serial_number: entry.revocation_date_utc for entry in crl}
+        with closing(sqlite3.connect(db, timeout=30)) as con:
+            rows = con.execute("SELECT serial,revoked_at FROM oc_devices WHERE state IN ('revoking','revoked')").fetchall()
+        for serial, revoked_at in rows:
+            when = dt.datetime.fromisoformat(revoked_at.replace("Z", "+00:00"))
+            if when.tzinfo is None:
+                raise RuntimeError("Revocation timestamp must include timezone")
+            revoked.setdefault(int(serial, 16), when)
+        now = dt.datetime.now(dt.timezone.utc)
+        if len(revoked) == len(crl) and crl.next_update_utc > now + dt.timedelta(days=1):
+            return previous
+        number = crl.extensions.get_extension_for_class(x509.CRLNumber).value.crl_number + 1
+        data = authority.crl([(format(serial, "x"), when) for serial, when in sorted(revoked.items())], number)
+        temporary_fd, temporary = tempfile.mkstemp(prefix=".crl-", dir=directory)
+        try:
+            with os.fdopen(temporary_fd, "wb") as handle:
+                handle.write(data)
+                handle.flush()
+                os.fsync(handle.fileno())
+            os.replace(temporary, path)
+        finally:
+            if os.path.exists(temporary):
+                os.unlink(temporary)
+        return data
+    finally:
+        os.close(fd)
+
+
 def install(app, context):
     for name in ("DB", "authenticated_user_id", "tolf_promos"):
         if name not in context:
@@ -68,6 +111,14 @@ def install(app, context):
         # This is a public CA certificate, never a key or a client identity.
         return Response((directory / "ca.pem").read_bytes(),
                         media_type="application/x-pem-file", headers=HEADERS)
+
+    @app.get("/oc/access/crl.pem")
+    def public_crl():
+        try:
+            data = published_crl(authority, directory, context["DB"])
+        except (OSError, ValueError, RuntimeError, sqlite3.Error):
+            raise HTTPException(503, "AnyConnect revocation list unavailable") from None
+        return Response(data, media_type="application/x-pem-file", headers=HEADERS)
 
     @app.get("/oc/access/devices")
     def devices(request: Request):

@@ -114,6 +114,14 @@ def main():
         if (not result or result.get("version") != 1 or result.get("caSha256") != fingerprint
                 or result.get("issuance") is not False or result.get("nodeReady") is not False):
             raise RuntimeError("AnyConnect API health check failed")
+        run(str(PYTHON), "-c",
+            "import sys,urllib.request; sys.path.insert(0,sys.argv[1]); "
+            "from cryptography import x509; from tolf_oc_certificates import Authority; "
+            "a=Authority(sys.argv[2]); "
+            "c=x509.load_pem_x509_crl(urllib.request.urlopen('http://127.0.0.1:8000/oc/access/crl.pem',timeout=10).read()); "
+            "assert c.issuer==a.cert.subject and c.is_signature_valid(a.cert.public_key()); "
+            "print('CRL signature: OK')",
+            str(API), str(directory))
     except Exception:
         atomic_write(API / "main.py", (backup / "main.py").read_bytes())
         for name in modules:
@@ -128,6 +136,7 @@ def main():
     print("CA SHA256:", fingerprint)
     print("Backup:", backup)
     print("Device issuance: disabled until Moscow node activation.")
+    print("Signed CRL endpoint: /oc/access/crl.pem")
     print(json.dumps(result))
 
 

@@ -5,6 +5,9 @@ import sqlite3
 import sys
 import tempfile
 import unittest
+import datetime as dt
+from cryptography import x509
+from cryptography.hazmat.primitives import hashes, serialization
 from fastapi import FastAPI, HTTPException
 from fastapi.testclient import TestClient
 
@@ -51,6 +54,49 @@ class ApiFoundation(unittest.TestCase):
         body = self.client.get("/oc/access/ca.pem").content
         self.assertIn(b"BEGIN CERTIFICATE", body)
         self.assertNotIn(b"PRIVATE KEY", body)
+
+    def test_crl_is_signed_cached_and_keeps_revocations(self):
+        response = self.client.get("/oc/access/crl.pem")
+        self.assertEqual(response.status_code, 200)
+        first = x509.load_pem_x509_crl(response.content)
+        authority = certificates.Authority(self.directory / "anyconnect")
+        self.assertTrue(first.is_signature_valid(authority.cert.public_key()))
+        self.assertEqual(self.client.get("/oc/access/crl.pem").content, response.content)
+        with sqlite3.connect(self.db) as con:
+            con.execute("""INSERT INTO oc_devices
+                (id,user_id,request_id,label,username,serial,certificate,encrypted_key,
+                 created_at,expires_at,state,revoked_at)
+                VALUES ('revoked','owner','request','iPad','tolf-oc-revoked','abc',X'01',X'02',
+                        '2026-10-02','2027-10-02','revoking','2026-10-02T00:00:00+00:00')""")
+        second_response = self.client.get("/oc/access/crl.pem")
+        second = x509.load_pem_x509_crl(second_response.content)
+        self.assertTrue(second.is_signature_valid(authority.cert.public_key()))
+        self.assertIsNotNone(second.get_revoked_certificate_by_serial_number(0xabc))
+        self.assertEqual(second.extensions.get_extension_for_class(x509.CRLNumber).value.crl_number,
+                         first.extensions.get_extension_for_class(x509.CRLNumber).value.crl_number + 1)
+        with sqlite3.connect(self.db) as con:
+            con.execute("DELETE FROM oc_devices")
+        self.assertEqual(self.client.get("/oc/access/crl.pem").content, second_response.content)
+        self.assertNotIn(b"PRIVATE KEY", second_response.content)
+
+    def test_corrupt_crl_is_not_replaced(self):
+        path = self.directory / "anyconnect/ca.crl.pem"
+        path.write_bytes(b"corrupt")
+        self.assertEqual(self.client.get("/oc/access/crl.pem").status_code, 503)
+        self.assertEqual(path.read_bytes(), b"corrupt")
+
+    def test_expired_crl_is_renewed(self):
+        authority = certificates.Authority(self.directory / "anyconnect")
+        now = certificates.now()
+        expired = (x509.CertificateRevocationListBuilder().issuer_name(authority.cert.subject)
+                   .last_update(now - dt.timedelta(days=8)).next_update(now - dt.timedelta(days=1))
+                   .add_extension(x509.CRLNumber(4), False).sign(authority.key, hashes.SHA256()))
+        (self.directory / "anyconnect/ca.crl.pem").write_bytes(expired.public_bytes(serialization.Encoding.PEM))
+        response = self.client.get("/oc/access/crl.pem")
+        self.assertEqual(response.status_code, 200)
+        renewed = x509.load_pem_x509_crl(response.content)
+        self.assertGreater(renewed.next_update_utc, now + dt.timedelta(days=6))
+        self.assertEqual(renewed.extensions.get_extension_for_class(x509.CRLNumber).value.crl_number, 5)
 
     def test_account_deletion_keeps_revocation_tombstone(self):
         with sqlite3.connect(self.db) as con:
