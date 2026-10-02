@@ -3,6 +3,8 @@ const LATENCY_TARGETS = {
   moscow: latencyMoscow
 };
 
+let entryPointLatencyRequest = 0;
+
 function renderLatency(target, value) {
   if (!target) return;
 
@@ -14,6 +16,8 @@ function renderLatency(target, value) {
 }
 
 function measureEntryPointLatencies() {
+  const request = ++entryPointLatencyRequest;
+  const isAnyConnect = window.getVpnTransport?.() === "anyconnect";
   if (typeof Speedtest !== "function") {
     renderLatency(LATENCY_TARGETS.riga, -1);
     renderLatency(LATENCY_TARGETS.moscow, -1);
@@ -34,7 +38,9 @@ function measureEntryPointLatencies() {
 
   const moscow = {
     name: "Moscow",
-    server: "https://ikev2.tolf.is:8443/",
+    server: isAnyConnect
+      ? "https://speedtest.vpn.tolf.is:8444/"
+      : "https://ikev2.tolf.is:8443/",
     dlURL: "garbage.php",
     ulURL: "empty.php",
     pingURL: "empty.php",
@@ -47,6 +53,7 @@ function measureEntryPointLatencies() {
     speedtest.addTestPoints([riga, moscow]);
 
     speedtest.selectServer(() => {
+      if (request !== entryPointLatencyRequest) return;
       renderLatency(LATENCY_TARGETS.riga, riga.pingT);
       renderLatency(LATENCY_TARGETS.moscow, moscow.pingT);
 
@@ -74,4 +81,5 @@ if (
     "tolf:network-context-changed",
     measureEntryPointLatencies
   );
+  window.addEventListener("vpntransportchange", measureEntryPointLatencies);
 }
