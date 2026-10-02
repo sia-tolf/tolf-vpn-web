@@ -52,7 +52,8 @@ gateway's client-side tunnel exclusion. Measurement fallbacks remain in place.
 
 * `tolf_oc_certificates.py`: create-once RSA CA, distinct RSA device keys,
   clientAuth certificates valid for at most one year, encrypted PKCS8 storage,
-  password-protected PKCS12 packaging, signed seven-day CRLs.
+  password-protected PKCS12 packaging, signed seven-day CRLs. Import passwords
+  have eight characters, with uppercase/lowercase Latin letters and digits.
 * `tolf_anyconnect.py`: ownership checks, bounded JSON, idempotent issuance,
   grants, node acknowledgements, routing/session APIs and revocation retry.
   It preserves the application's lifespan and reconciles every 60 seconds.
@@ -147,7 +148,11 @@ lock until reboot or cleanup.
 1. Install Cisco Secure Client (AnyConnect). On mobile, allow external links with
    the application's External Control → Prompt setting.
 2. Create separately named access for the device, or select its existing access.
-3. Request certificate/links and copy the password. Import into AnyConnect or
+   After creation the form closes; creating another device requires the explicit
+   additional-access button. Routine refresh controls are hidden; recovery offers
+   a retry button.
+3. Request certificate/links and copy the password using the adjacent copy icon.
+   Import into AnyConnect or
    download/import the .p12 manually. Use one method per single-use grant.
 4. Return after successful import and add the connection. Manual address:
    `oc.tolf.is:4443`; use the displayed device CN as the client certificate.

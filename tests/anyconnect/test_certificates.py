@@ -43,6 +43,10 @@ class Certificates(unittest.TestCase):
         self.assertIn(ExtendedKeyUsageOID.CLIENT_AUTH,
                       cert.extensions.get_extension_for_class(x509.ExtendedKeyUsage).value)
         data, password = self.ca.bundle(one)
+        self.assertRegex(password, r"^[A-Za-z0-9]{8}$")
+        self.assertTrue(any(c.isupper() for c in password))
+        self.assertTrue(any(c.islower() for c in password))
+        self.assertTrue(any(c.isdigit() for c in password))
         key, loaded, chain = pkcs12.load_key_and_certificates(data, password.encode())
         self.assertEqual(loaded.serial_number, cert.serial_number)
         self.assertEqual(key.public_key().public_numbers(), loaded.public_key().public_numbers())

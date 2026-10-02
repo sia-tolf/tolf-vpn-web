@@ -3,6 +3,7 @@ import datetime as dt
 import os
 from pathlib import Path
 import secrets
+import string
 import shutil
 import tempfile
 import uuid
@@ -125,7 +126,12 @@ class Authority:
         cert = x509.load_pem_x509_certificate(record["certificate"])
         if key.public_key().public_numbers() != cert.public_key().public_numbers():
             raise RuntimeError("Device certificate does not match its key")
-        password = secrets.token_urlsafe(18)
+        alphabet = string.ascii_letters + string.digits
+        while True:
+            password = "".join(secrets.choice(alphabet) for _ in range(8))
+            if (any(c.isupper() for c in password) and any(c.islower() for c in password)
+                    and any(c.isdigit() for c in password)):
+                break
         data = pkcs12.serialize_key_and_certificates(
             record["username"].encode("ascii"), key, cert, [self.cert],
             serialization.BestAvailableEncryption(password.encode("ascii")))

@@ -11,13 +11,21 @@ html[data-vpn-transport="anyconnect"] #legacyVpnPanel { display: block !importan
 #anyConnectAccess ol { padding-left: 24px; }
 #anyConnectAccess li { margin-bottom: 16px; }
 #anyConnectAccess label { display: block; margin: 12px 0 6px; font-size: 14px; }
-#anyConnectAccess input, #anyConnectAccess select { box-sizing: border-box; width: 100%; max-width: 100%; padding: 10px 12px; border: 1px solid #d6d6dc; border-radius: 9px; font: inherit; background: white; color: #222; }
+#anyConnectAccess input, #anyConnectAccess select { box-sizing: border-box; width: 100%; max-width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; font: inherit; background: var(--card); color: var(--text); }
 #anyConnectAccess .oc-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0; }
-#anyConnectAccess .oc-action { display: inline-block; border: 1px solid #d6d6dc; border-radius: 9px; padding: 9px 13px; background: white; color: #164579; font: inherit; font-size: 14px; text-decoration: none; cursor: pointer; }
-#anyConnectAccess .oc-action:disabled { opacity: .5; cursor: default; }
-#anyConnectAccess .oc-primary { background: #143f7d; color: white; border-color: #143f7d; }
-#anyConnectAccess .oc-secret { font: 16px ui-monospace, monospace; overflow-wrap: anywhere; background: #f3f4f6; padding: 12px; border-radius: 9px; user-select: all; }
-#anyConnectAccess .oc-message { min-height: 20px; color: #666; }
-#anyConnectAccess .oc-error { color: #a32929; }
-#anyConnectAccess .oc-note { color: #666; }
+#anyConnectAccess .oc-action { max-width: 100%; }
+#anyConnectAccess .oc-password-row { display: flex; align-items: center; gap: 12px; background: var(--code-background); color: var(--text); padding: 0 12px; border: 1px solid var(--border); border-radius: 12px; }
+#anyConnectAccess .oc-secret { flex: 1; min-width: 0; font: 16px ui-monospace, monospace; overflow-wrap: anywhere; padding: 12px 0; user-select: all; }
+#anyConnectAccess .oc-copy { flex: 0 0 44px; width: 44px; min-height: 44px; padding: 0; border: 0; border-radius: 8px; background: transparent; color: var(--tolf-action-text, var(--text)); }
+#anyConnectAccess .oc-copy:hover { background: var(--tolf-secondary-hover); }
+#anyConnectAccess .oc-copy-glyph { position: relative; display: block; width: 22px; height: 22px; }
+#anyConnectAccess .oc-copy-glyph::before, #anyConnectAccess .oc-copy-glyph::after { content: ""; position: absolute; width: 14px; height: 14px; border: 1.7px solid currentColor; border-radius: 3px; }
+#anyConnectAccess .oc-copy-glyph::before { left: 0; top: 0; }
+#anyConnectAccess .oc-copy-glyph::after { left: 5px; top: 5px; background: var(--code-background); }
+#anyConnectAccess .oc-message { min-height: 20px; color: var(--secondary); }
+#anyConnectAccess .oc-error { color: var(--error); }
+#anyConnectAccess .oc-note { color: var(--secondary); }
+@media (max-width: 600px) {
+  #anyConnectAccess .oc-actions > .oc-action { flex: 1 1 0; min-width: 0; }
+}
 html[data-vpn-transport="anyconnect"] #vpnUsername { overflow-wrap: anywhere; }

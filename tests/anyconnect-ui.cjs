@@ -49,7 +49,13 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   async function request(url, options = {}) {
     const p = url.replace('https://api.tolf.is',''); calls.push([options.method || 'GET',p,options.credentials]);
     if (p.endsWith('/capabilities')) return {issuance:true,nodeReady:true,version:2};
-    if (p === '/oc/access/devices') return {devices};
+    if (p === '/oc/access/devices') {
+      if (options.method === 'POST') {
+        const data=JSON.parse(options.body),device={id:'three',label:data.label,username:'tolf-oc-'+'3'.repeat(32),state:'active',mode:'auto'};
+        devices.push(device);return {device};
+      }
+      return {devices};
+    }
     const d = devices.find(d => p.includes('/'+d.id+'/'));
     if (p.endsWith('/session')) {
       if (heldSession) await heldSession;
@@ -75,16 +81,35 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
     vm.runInContext(fs.readFileSync(path.join(root,'js',file),'utf8'),c);
   }
   ids.vpnTransportAnyConnect.click(); await settle();
+  assert.equal(descendants(ids.anyConnectAccess).filter(n=>n.tagName==='input').length,0);
+  assert(!descendants(ids.anyConnectAccess).some(n=>n.tagName==='button'&&n.textContent==='Обновить'));
+  button(ids.anyConnectAccess,'Создать дополнительный доступ').click();
+  assert.equal(descendants(ids.anyConnectAccess).filter(n=>n.tagName==='input').length,1);
+  button(ids.anyConnectAccess,'Отмена').click();
+  assert.equal(descendants(ids.anyConnectAccess).filter(n=>n.tagName==='input').length,0);
   assert.equal(ids.vpnUsername.textContent,first.username);
   assert(ids.anyConnectModeSelector.classList.contains('policy-confirmed'));
   button(ids.anyConnectAccess,'Получить сертификат и ссылки').click(); await settle();
   assert(ids.anyConnectAccess.textContent.includes('private-import-password'));
+  assert(!descendants(ids.anyConnectAccess).some(n=>n.tagName==='button'&&n.textContent==='Скопировать пароль'));
+  const copyIcon = descendants(ids.anyConnectAccess).find(n=>n.tagName==='button'&&n.attributes['aria-label']==='Скопировать пароль');
+  assert(copyIcon);copyIcon.click();await settle();
+  assert.equal(c.copied,'private-import-password');
+  const importLink = descendants(ids.anyConnectAccess).find(n=>n.tagName==='a'&&n.textContent==='Импортировать в AnyConnect');
+  assert(importLink.className.includes('button-link')&&importLink.className.includes('primary'));
   const select = descendants(ids.anyConnectAccess).find(n=>n.tagName==='select');
   select.value = second.id; select.events.change(); await settle();
   assert(!ids.anyConnectAccess.textContent.includes('private-import-password'));
   assert.equal(ids.vpnUsername.textContent,second.username);
   modes[1].click(); await settle();
   assert.equal(first.mode,'auto'); assert.equal(second.mode,'ru');
+  button(ids.anyConnectAccess,'Создать дополнительный доступ').click();
+  const nameInput = descendants(ids.anyConnectAccess).find(n=>n.tagName==='input');
+  nameInput.value='New device';nameInput.events.input();
+  button(ids.anyConnectAccess,'Создать доступ').click();await settle();
+  assert.equal(descendants(ids.anyConnectAccess).filter(n=>n.tagName==='input').length,0);
+  assert.equal(ids.vpnUsername.textContent,'tolf-oc-'+'3'.repeat(32));
+  assert(!ids.anyConnectAccess.textContent.includes('private-import-password'));
   assert(calls.every(call => !call[1].includes('/oc-test')));
   assert(calls.filter(call=>call[1].endsWith('/policy')||call[1].endsWith('/session')).every(call=>call[2]==='include'));
   // A late session response must not restore the green indicator after logout.

@@ -6,7 +6,7 @@
   const COPY = {
     ru: {
       title: "Доступ AnyConnect", device: "Устройство", newDevice: "Название нового устройства",
-      create: "Создать доступ", resume: "Завершить выдачу", refresh: "Обновить", choose: "Выберите устройство",
+      create: "Создать доступ", additional: "Создать дополнительный доступ", cancel: "Отмена", resume: "Завершить выдачу", refresh: "Повторить попытку", choose: "Выберите устройство",
       install: "Установите Cisco Secure Client (AnyConnect).", app: "Открыть страницу приложения",
       control: "В настройках приложения выберите External Control → Prompt, чтобы разрешить ссылки с этой страницы.",
       certificate: "Импортируйте сертификат", prepare: "Получить сертификат и ссылки",
@@ -22,7 +22,7 @@
       enable: "Включите VPN в приложении. Если предлагается группа, оставьте группу по умолчанию. Вернитесь на сайт: зелёная точка появится после подтверждения сессии выбранного устройства. Маршрутизацию меняйте здесь.",
       ready: "Доступ готов", pending: "Выдача не завершена", revoking: "Отзыв выполняется",
       unavailable: "Выдача пока недоступна. Обновите после активации сервера.", loading: "Загрузка…",
-      failed: "Не удалось выполнить действие. Нажмите «Обновить» и повторите.",
+      failed: "Не удалось выполнить действие. Повторите попытку.",
       revoke: "Отозвать доступ", confirm: "Отозвать доступ этого устройства? Его VPN-соединение будет отключено.",
       revoked: "Доступ отозван.", revokePending: "Отзыв принят. Сервер завершит отключение после восстановления связи.",
       separate: "Создавайте отдельный доступ для каждого устройства. Сертификат и пароль предназначены только для вас.",
@@ -30,7 +30,7 @@
     },
     en: {
       title: "AnyConnect access", device: "Device", newDevice: "New device name",
-      create: "Create access", resume: "Complete issuance", refresh: "Refresh", choose: "Choose a device",
+      create: "Create access", additional: "Create additional access", cancel: "Cancel", resume: "Complete issuance", refresh: "Try again", choose: "Choose a device",
       install: "Install Cisco Secure Client (AnyConnect).", app: "Open application page",
       control: "In the application settings, select External Control → Prompt to allow links from this page.",
       certificate: "Import the certificate", prepare: "Get certificate and links",
@@ -54,7 +54,7 @@
     },
     lv: {
       title: "AnyConnect piekļuve", device: "Ierīce", newDevice: "Jaunās ierīces nosaukums",
-      create: "Izveidot piekļuvi", resume: "Pabeigt izsniegšanu", refresh: "Atjaunināt", choose: "Izvēlieties ierīci",
+      create: "Izveidot piekļuvi", additional: "Izveidot papildu piekļuvi", cancel: "Atcelt", resume: "Pabeigt izsniegšanu", refresh: "Mēģināt vēlreiz", choose: "Izvēlieties ierīci",
       install: "Instalējiet Cisco Secure Client (AnyConnect).", app: "Atvērt lietotnes lapu",
       control: "Lietotnes iestatījumos izvēlieties External Control → Prompt, lai atļautu saites no šīs lapas.",
       certificate: "Importējiet sertifikātu", prepare: "Saņemt sertifikātu un saites",
@@ -79,7 +79,7 @@
   };
   let account = null, devices = [], selectedId = null, capabilities = null;
   let grant = null, busy = false, loading = false, epoch = 0, message = "", error = false;
-  let deviceName = "", creationRequest = null;
+  let deviceName = "", creationRequest = null, addingDevice = false;
   const copy = () => COPY[document.documentElement.lang] || COPY.en;
   const selected = () => devices.find(d => d.id === selectedId && d.state === "active") || null;
   window.ocAccess = { selected };
@@ -97,12 +97,12 @@
     return node;
   }
   function button(text, action, primary = false) {
-    const node = element("button", text, "oc-action" + (primary ? " oc-primary" : ""));
+    const node = element("button", text, "oc-action " + (primary ? "primary" : "secondary"));
     node.type = "button"; node.disabled = busy || loading;
     node.addEventListener("click", action); return node;
   }
-  function link(text, url) {
-    const node = element("a", text, "oc-action");
+  function link(text, url, primary = false) {
+    const node = element("a", text, "button-link oc-action " + (primary ? "primary" : "secondary"));
     node.href = url; node.referrerPolicy = "no-referrer";
     if (url.startsWith("https://") && !url.startsWith(API)) { node.target = "_blank"; node.rel = "noopener noreferrer"; }
     return node;
@@ -144,7 +144,7 @@
       method: "POST", body: JSON.stringify({ requestId, label }), timeoutMs: 30000
     });
     if (token !== epoch) return;
-    creationRequest = null; deviceName = "";
+    creationRequest = null; deviceName = ""; addingDevice = false;
     devices = devices.filter(d => d.id !== result.device.id).concat(result.device);
     choose(result.device.id);
     message = copy().ready;
@@ -161,8 +161,6 @@
     root.append(link(c.app, appUrl));
     if (mobile) root.append(element("p", c.control));
     root.append(element("h4", "2. " + c.device));
-    const actions = element("div", null, "oc-actions");
-    actions.append(button(c.refresh, refresh)); root.append(actions);
     if (devices.length) {
       root.append(element("label", c.device));
       const select = element("select"); select.setAttribute("aria-label", c.device);
@@ -175,6 +173,12 @@
     }
     const pending = devices.find(d => d.id === selectedId && d.state === "pending");
     if (pending) root.append(button(c.resume, () => perform(token => create(pending.request_id, pending.label, token)), true));
+    if (devices.length && !addingDevice) {
+      const actions = element("div", null, "oc-actions");
+      actions.append(button(c.additional, () => { addingDevice = true; render(); }));
+      root.append(actions);
+    }
+    if (!devices.length || addingDevice) {
     root.append(element("label", c.newDevice));
     const name = element("input"); name.type = "text"; name.maxLength = 80; name.value = deviceName;
     name.placeholder = c.name; name.setAttribute("aria-label", c.newDevice); name.disabled = busy || loading;
@@ -187,7 +191,14 @@
       creationRequest ||= crypto.randomUUID();
       return create(creationRequest, deviceName.trim(), token);
     }), true);
-    createButton.disabled ||= capabilities?.issuance !== true || !deviceName.trim(); root.append(createButton);
+    createButton.disabled ||= capabilities?.issuance !== true || !deviceName.trim();
+    const createActions = element("div", null, "oc-actions");
+    createActions.append(createButton);
+    if (devices.length) createActions.append(button(c.cancel, () => {
+      addingDevice = false; deviceName = ""; creationRequest = null; render();
+    }));
+    root.append(createActions);
+    }
     if (!capabilities?.issuance) root.append(element("p", loading ? c.loading : c.unavailable, "oc-note"));
     const d = selected();
     if (d) {
@@ -202,18 +213,26 @@
       prepare.disabled ||= capabilities?.issuance !== true; cert.append(prepare);
       if (grant?.deviceId === d.id) {
         cert.append(element("p", c.password));
-        cert.append(element("div", grant.password, "oc-secret"));
-        const importActions = element("div", null, "oc-actions");
-        importActions.append(button(c.copy, () => perform(async token => {
+        const passwordRow = element("div", null, "oc-password-row");
+        passwordRow.append(element("span", grant.password, "oc-secret"));
+        const copyButton = button("", () => perform(async token => {
           await copyText(grant.password); if (token === epoch) message = copy().copied;
-        })));
-        if (mobile) importActions.append(link(c.import, grant.importUri));
+        }));
+        copyButton.className = "oc-copy";
+        copyButton.setAttribute("aria-label", c.copy);
+        copyButton.title = c.copy;
+        const glyph = element("span", null, "oc-copy-glyph");
+        glyph.setAttribute("aria-hidden", "true"); copyButton.append(glyph);
+        passwordRow.append(copyButton);
+        cert.append(passwordRow);
+        const importActions = element("div", null, "oc-actions");
+        if (mobile) importActions.append(link(c.import, grant.importUri, true));
         importActions.append(link(c.download, grant.certificateUrl));
         cert.append(importActions, element("p", c.expires, "oc-note"));
       }
       cert.append(element("p", mobile ? c.manual : c.windows)); steps.append(cert);
       const connect = element("li"); connect.append(element("p", c.connect), element("p", c.return));
-      if (mobile) connect.append(link(c.add, connectionUri(d)));
+      if (mobile) connect.append(link(c.add, connectionUri(d), true));
       connect.append(element("p", c.host), element("p", d.username, "oc-note")); steps.append(connect);
       const enable = element("li", c.enable); steps.append(enable); root.append(steps);
       root.append(button(c.revoke, () => {
@@ -228,13 +247,16 @@
     }
     const status = element("p", message, "oc-message" + (error ? " oc-error" : ""));
     status.setAttribute("role", "status"); status.setAttribute("aria-live", "polite"); root.append(status);
+    if (error || (!loading && capabilities?.issuance !== true)) {
+      root.append(button(c.refresh, () => { message = ""; error = false; refresh(); }));
+    }
     root.append(link(c.docs, GUIDE));
   }
   window.setAnyConnectAccount = data => {
     if (account?.userId === data?.userId && account) return;
     epoch++; account = data?.authenticated ? data : null;
     devices = []; selectedId = null; grant = null; capabilities = null;
-    deviceName = ""; creationRequest = null; busy = false; loading = false; message = ""; error = false;
+    deviceName = ""; creationRequest = null; addingDevice = false; busy = false; loading = false; message = ""; error = false;
     window.refreshAnyConnectTransport?.(); render();
     if (account) refresh();
   };
