@@ -2,9 +2,9 @@ name: AnyConnect certificate checks
 on:
   push:
     branches: ['main']
-    paths: ['setup/anyconnect/**', 'tests/anyconnect/**', '.github/workflows/anyconnect.yml']
+    paths: ['setup/anyconnect/**', 'tests/anyconnect/**', 'tests/anyconnect-ui.cjs', 'js/anyconnect-access.js', 'js/transport-selector.js', 'css/anyconnect-access.css', 'index.html', '.github/workflows/anyconnect.yml']
   pull_request:
-    paths: ['setup/anyconnect/**', 'tests/anyconnect/**', '.github/workflows/anyconnect.yml']
+    paths: ['setup/anyconnect/**', 'tests/anyconnect/**', 'tests/anyconnect-ui.cjs', 'js/anyconnect-access.js', 'js/transport-selector.js', 'css/anyconnect-access.css', 'index.html', '.github/workflows/anyconnect.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -18,6 +18,11 @@ jobs:
           python-version: '3.12'
       - run: python -m pip install cryptography fastapi httpx
       - run: python -m unittest discover -s tests/anyconnect -v
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node tests/anyconnect-ui.cjs
+      - run: node --check js/anyconnect-access.js && node --check js/transport-selector.js
       - run: python setup/anyconnect/build.py
       - run: for file in setup/anyconnect/*.sh; do sh -n "$file"; done
       - run: git diff --exit-code -- setup/anyconnect/install-uk-foundation.py setup/anyconnect/install-moscow-crl.sh setup/anyconnect/install-moscow-devices.sh

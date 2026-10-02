@@ -39,6 +39,9 @@ def atomic_write(path, data, mode=0o644):
 
 
 def main():
+    if sys.argv[1:] not in ([], ["--activate"]):
+        raise RuntimeError("Usage: install.py [--activate]")
+    activate = sys.argv[1:] == ["--activate"]
     if os.geteuid() != 0:
         raise RuntimeError("Run this installer as root on EDISUK")
     source = (API / "main.py").read_text()
@@ -79,6 +82,8 @@ def main():
     directory = db.parent / "anyconnect"
     if directory.is_symlink():
         raise RuntimeError("AnyConnect authority directory cannot be a symlink")
+    gate = directory / "activation.json"
+    old_gate = gate.read_bytes() if gate.exists() else None
     restarted = False
     try:
         for name, data in modules.items():
@@ -98,21 +103,29 @@ def main():
         run("runuser", "-u", user, "--", str(PYTHON), "-c",
             "import sys; sys.path.insert(0,sys.argv[1]); from tolf_oc_certificates import Authority; Authority(sys.argv[2])",
             str(API), str(directory))
+        if activate:
+            run("runuser", "-u", user, "--", str(PYTHON), "-c",
+                "import sys; sys.path.insert(0,sys.argv[1]); from tolf_anyconnect import Node; "
+                "assert Node(sys.argv[2]).health(fresh=True), 'Moscow node verification failed'",
+                str(API), fingerprint)
+            atomic_write(gate, json.dumps({"enabled": True, "caSha256": fingerprint}).encode(), 0o600)
+            os.chown(gate, owner.pw_uid, owner.pw_gid)
+        expected_enabled = gate.exists() and json.loads(gate.read_text()) == {"enabled": True, "caSha256": fingerprint}
         atomic_write(API / "main.py", updated.encode())
         restarted = True
         subprocess.run(["systemctl", "restart", "tolf-api"], check=True)
         result = None
         for _ in range(20):
             try:
-                with urllib.request.urlopen("http://127.0.0.1:8000/oc/access/capabilities", timeout=2) as response:
+                with urllib.request.urlopen("http://127.0.0.1:8000/oc/access/capabilities", timeout=30) as response:
                     result = json.load(response)
-                if result.get("version") == 1 and result.get("caSha256") == fingerprint:
+                if result.get("version") == 2 and result.get("caSha256") == fingerprint:
                     break
             except (OSError, ValueError):
                 pass
             time.sleep(1)
-        if (not result or result.get("version") != 1 or result.get("caSha256") != fingerprint
-                or result.get("issuance") is not False or result.get("nodeReady") is not False):
+        if (not result or result.get("version") != 2 or result.get("caSha256") != fingerprint
+                or result.get("issuance") is not expected_enabled or result.get("nodeReady") is not expected_enabled):
             raise RuntimeError("AnyConnect API health check failed")
         run(str(PYTHON), "-c",
             "import sys,urllib.request; sys.path.insert(0,sys.argv[1]); "
@@ -123,6 +136,11 @@ def main():
             "print('CRL signature: OK')",
             str(API), str(directory))
     except Exception:
+        if old_gate is None:
+            gate.unlink(missing_ok=True)
+        else:
+            atomic_write(gate, old_gate, 0o600)
+            os.chown(gate, owner.pw_uid, owner.pw_gid)
         atomic_write(API / "main.py", (backup / "main.py").read_bytes())
         for name in modules:
             if (backup / name).exists():
@@ -135,7 +153,7 @@ def main():
     print("OK: UK AnyConnect certificate foundation installed.")
     print("CA SHA256:", fingerprint)
     print("Backup:", backup)
-    print("Device issuance: disabled until Moscow node activation.")
+    print("Device issuance:", "enabled" if expected_enabled else "disabled until Moscow node activation")
     print("Signed CRL endpoint: /oc/access/crl.pem")
     print(json.dumps(result))
 

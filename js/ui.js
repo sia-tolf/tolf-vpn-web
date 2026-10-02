@@ -199,6 +199,8 @@ function setInstallLink(profileUrl) {
 }
 
 function showSignedOut() {
+  window.tolfAccountState = null;
+  window.setAnyConnectAccount?.(null);
   if (typeof setRoutingAccount === "function") setRoutingAccount(null);
   closeRegistrationPanel();
   if (typeof updateInvitationAccount === "function") updateInvitationAccount(null);

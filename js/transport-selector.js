@@ -12,8 +12,9 @@
 
   if (!selector || !ikev2 || !anyConnect || !overviewTitle) return;
 
-  const POLICY_URL = `${API}/oc-test/policy`;
-  const SESSION_URL = `${API}/oc-test/session`;
+  const device = () => window.ocAccess?.selected() || null;
+  const endpoint = (id, action) => `${API}/oc/access/devices/${encodeURIComponent(id)}/${action}`;
+  let selectionToken = 0;
   let transport = "ikev2";
   window.getVpnTransport = () => transport;
   let ikev2Server = null;
@@ -106,7 +107,7 @@
       const active = button.dataset.mode === anyConnectMode;
       button.classList.toggle("active", active);
       button.setAttribute("aria-checked", String(active));
-      button.disabled = policyBusy;
+      button.disabled = policyBusy || !device();
     }
     const controls = document.getElementById("anyConnectModeSelector");
     controls?.classList.toggle("policy-confirmed",
@@ -132,22 +133,24 @@
   }
 
   async function pollSession() {
+    const selected = device();
+    if (!selected) return;
     if (transport !== "anyconnect" || !policyLoaded || policyBusy ||
         document.hidden || sessionInFlight) return;
     sessionInFlight = true;
     const requestToken = ++sessionRequestToken;
     const selectedMode = anyConnectMode;
     try {
-      const response = await fetch(SESSION_URL, {
+      const response = await fetch(endpoint(selected.id, "session"), {
         method: "GET",
         cache: "no-store",
-        credentials: "omit",
+        credentials: "include",
         headers: { Accept: "application/json" }
       });
       if (!response.ok) throw new Error("HTTP " + response.status);
       const data = await response.json();
-      if (requestToken === sessionRequestToken) {
-        sessionConnected = data?.username === "pilot-tolf" &&
+      if (requestToken === sessionRequestToken && device()?.id === selected.id) {
+        sessionConnected = data?.username === selected.username &&
           data?.mode === selectedMode && data?.connected === true;
       }
     } catch {
@@ -159,36 +162,46 @@
   }
 
   async function loadPolicy() {
+    const selected = device();
+    if (!selected) return;
+    const token = selectionToken;
     if (policyLoaded || policyBusy) return;
     policyBusy = true;
     policyConfirmed = false;
     setModeStatus("");
     renderMode();
     try {
-      const response = await fetch(POLICY_URL, {
+      const response = await fetch(endpoint(selected.id, "policy"), {
         method: "GET",
         cache: "no-store",
-        credentials: "omit",
+        credentials: "include",
         headers: { Accept: "application/json" }
       });
       if (!response.ok) throw new Error("HTTP " + response.status);
       const data = await response.json();
+      if (token !== selectionToken) return;
       if (!["auto", "ru", "lv", "yt"].includes(data?.mode)) throw new Error("Invalid mode");
       anyConnectMode = data.mode;
       policyLoaded = true;
       policyConfirmed = true;
       setModeStatus("");
     } catch (error) {
+      if (token !== selectionToken) return;
       console.error("AnyConnect policy load failed:", error);
       setModeStatus(copy().failed, true);
     } finally {
-      policyBusy = false;
-      renderMode();
-      pollSession();
+      if (token === selectionToken) {
+        policyBusy = false;
+        renderMode();
+        pollSession();
+      }
     }
   }
 
   async function savePolicy(mode) {
+    const selected = device();
+    if (!selected) return;
+    const token = selectionToken;
     if (policyBusy || !["auto", "ru", "lv", "yt"].includes(mode)) return;
     const previous = anyConnectMode;
     anyConnectMode = mode;
@@ -200,10 +213,10 @@
     renderMode();
 
     try {
-      const response = await fetch(POLICY_URL, {
+      const response = await fetch(endpoint(selected.id, "policy"), {
         method: "POST",
         cache: "no-store",
-        credentials: "omit",
+        credentials: "include",
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json"
@@ -212,20 +225,24 @@
       });
       if (!response.ok) throw new Error("HTTP " + response.status);
       const data = await response.json();
+      if (token !== selectionToken) return;
       if (data?.mode !== mode || data?.applied !== true) throw new Error("Mode not applied");
       anyConnectMode = data.mode;
       policyLoaded = true;
       policyConfirmed = true;
       setModeStatus("");
     } catch (error) {
+      if (token !== selectionToken) return;
       console.error("AnyConnect policy save failed:", error);
       anyConnectMode = previous;
       policyConfirmed = false;
       setModeStatus(copy().failed, true);
     } finally {
-      policyBusy = false;
-      renderMode();
-      pollSession();
+      if (token === selectionToken) {
+        policyBusy = false;
+        renderMode();
+        pollSession();
+      }
     }
   }
 
@@ -237,9 +254,16 @@
       value.textContent = transport === "anyconnect" ? "AnyConnect" : "IKEv2";
       value.className = "vpn-overview-status";
     }
+    if (transport === "anyconnect") {
+      const selected = device();
+      document.getElementById("usernameRow")?.classList.toggle("hidden", !selected);
+      const username = document.getElementById("vpnUsername");
+      if (username) username.textContent = selected?.username || "";
+    }
   };
 
   function render() {
+    document.documentElement.dataset.vpnTransport = transport;
     window.renderVpnProtocol();
     setPressed();
     const riga = document.getElementById("serverRiga");
@@ -292,6 +316,17 @@
     if (policyLoaded) pollSession();
     else loadPolicy();
   }
+
+  window.refreshAnyConnectTransport = () => {
+    selectionToken++;
+    sessionRequestToken++;
+    policyLoaded = false;
+    policyBusy = false;
+    sessionConnected = false;
+    anyConnectMode = device()?.mode || "auto";
+    setModeStatus("");
+    render();
+  };
 
   ikev2.addEventListener("click", () => {
     if (transport === "ikev2") return;

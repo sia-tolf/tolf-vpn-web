@@ -68,6 +68,8 @@ async function loadAccount() {
 
     applyServerAccess(data);
     showVpn(data.vpn);
+    window.tolfAccountState = data;
+    window.setAnyConnectAccount?.(data);
 
 
 

@@ -57,6 +57,7 @@ function renderPlatform() {
   if (onDemandAndroidNote) {
     onDemandAndroidNote.classList.toggle("hidden", isIos);
   }
+  window.dispatchEvent(new Event("vpnplatformchange"));
 }
 
 function setPlatform(platform) {
