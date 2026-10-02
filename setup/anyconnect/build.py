@@ -22,3 +22,10 @@ assert template.count("# BUILD_SYNC_SCRIPT") == 1
 output = template.replace("# BUILD_SYNC_SCRIPT", (directory / "sync-moscow-crl.sh").read_text().rstrip())
 (directory / "install-moscow-crl.sh").write_text(output)
 print("Moscow CRL:", hashlib.sha256(output.encode()).hexdigest())
+template = (directory / "install-moscow-devices.template.sh").read_text()
+for marker, name in (("# BUILD_DEVICES_SCRIPT", "moscow-devices.sh"),
+                     ("# BUILD_REMOTE_SCRIPT", "moscow-remote.sh")):
+    assert template.count(marker) == 1
+    template = template.replace(marker, (directory / name).read_text().rstrip())
+(directory / "install-moscow-devices.sh").write_text(template)
+print("Moscow devices:", hashlib.sha256(template.encode()).hexdigest())

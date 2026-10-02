@@ -59,6 +59,47 @@ reboot or operator cleanup; this must be monitored during node activation.
 The public CRL governs new authentication; disconnecting an already connected
 revoked device remains part of the subsequent account/device control stage.
 
+### Moscow personal device control
+
+`install-moscow-devices.sh` installs a bounded SSH command handler and ocserv
+connect/disconnect hooks. Personal certificate CNs have the strict form
+`tolf-oc-` plus 32 lowercase hexadecimal characters. Their desired modes live in
+`/etc/ocserv-moscow/device-modes/<CN>`; live CN/session/IP bindings live in
+`/var/run/tolf-oc-devices`. The UK device registry remains authoritative.
+An unregistered personal CN is refused by the connect hook. One simultaneous
+session per personal certificate is configured in its per-user file.
+
+The `tolf_oc_devices` prerouting chain at `mangle + 5` assigns marks after the
+pilot chain at `mangle - 1`. RU sets `0x100`, LV sets `0x200`, Auto selects RU
+destinations through Moscow and others through Riga; YT additionally sends the
+YouTube set through Moscow. Bindings support the existing `10.21/22/23.0.0/24`
+pools. A mode change clears only the selected device's conntrack flows. The
+legacy mode script clears tracked legacy `10.21` leases rather than the entire
+pool. Legacy clients keep their previous routing. The firmware's current policy
+rules and live connections still require validation on the node.
+
+The firewall4 script include reapplies rules from live runtime bindings after a
+firewall reload. Rules are checked and replaced in a single nft transaction;
+failed policy changes restore their previous desired mode. Removed device IPs
+enter a drop set before their user session is disconnected. New connections for
+removed devices remain blocked by the hook. Lease reuse removes stale bindings,
+including when a legacy client takes an old personal address.
+
+Allowed additional forced SSH commands:
+
+* `tolf-oc-node-health`
+* `tolf-oc-crl-sync`
+* `tolf-oc-device <CN> <auto|ru|lv|yt>`
+* `tolf-oc-device-remove <CN>`
+* `tolf-oc-session <CN>`
+
+The historical pilot mode/session commands are retained. No command is evaluated
+as shell text. The installer checks existing hooks for conflicts, tests the
+ocserv configuration, backs up modified scripts/configuration and restores them
+on error. Installation does not enable UK issuance or issue a test credential;
+actual certificate login, all four modes, reconnection and revocation must be
+validated before public delivery is enabled.
+
 Before enabling issuance, Moscow must trust the additional public CA, enforce its
 CRL, and support account/device-specific session and routing control. Preserve the
 pilot CA. Confirm the server hostname/certificate and TCP/UDP port 4443 from the

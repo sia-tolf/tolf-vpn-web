@@ -19,5 +19,5 @@ jobs:
       - run: python -m pip install cryptography fastapi httpx
       - run: python -m unittest discover -s tests/anyconnect -v
       - run: python setup/anyconnect/build.py
-      - run: for file in setup/anyconnect/sync-moscow-crl.sh setup/anyconnect/install-moscow-crl.sh; do sh -n "$file"; done
-      - run: git diff --exit-code -- setup/anyconnect/install-uk-foundation.py setup/anyconnect/install-moscow-crl.sh
+      - run: for file in setup/anyconnect/*.sh; do sh -n "$file"; done
+      - run: git diff --exit-code -- setup/anyconnect/install-uk-foundation.py setup/anyconnect/install-moscow-crl.sh setup/anyconnect/install-moscow-devices.sh
