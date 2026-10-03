@@ -9,7 +9,7 @@
       create: "Создать доступ", additional: "Создать дополнительный доступ", cancel: "Отмена", resume: "Завершить выдачу", refresh: "Повторить попытку", choose: "Выберите устройство",
       install: "Установите Cisco Secure Client (AnyConnect).", app: "Установить Cisco Secure Client",
       control: "Перед импортом сертификата откройте настройки приложения Cisco Secure Client и выберите External Control → Prompt. Затем вернитесь сюда и нажмите «Импортировать в AnyConnect».",
-      controlReminder: "Перед нажатием «Добавить соединение в AnyConnect» проверьте, что в приложении Cisco Secure Client выбрано External Control → Prompt.",
+      controlReminder: "Перед нажатием «Добавить в AnyConnect» проверьте, что в приложении Cisco Secure Client выбрано External Control → Prompt.",
       enableTitle: "Включите VPN",
       certificate: "Импортируйте сертификат", prepare: "Получить сертификат",
       connectionLinkHelp: "После добавления соединения получите сертификат и импортируйте его в AnyConnect.",
@@ -19,7 +19,7 @@
       expired: "Ссылка истекла. Получите новый сертификат и ссылки.",
       manual: "Для ручного импорта сохраните файл .p12. На iPhone и iPad откройте его в «Файлах» и через «Поделиться» передайте в Cisco Secure Client. Используйте указанный пароль импорта.",
       windows: "Скачайте файл .p12. Откройте его и импортируйте с указанным паролем в хранилище сертификатов текущего пользователя → Личное.",
-      connect: "Добавьте соединение", add: "Добавить соединение в AnyConnect",
+      connect: "Добавьте соединение", add: "Добавить в AnyConnect",
       return: "Сначала добавьте соединение в AnyConnect. Затем вернитесь сюда и импортируйте сертификат в шаге 4. VPN включайте после импорта сертификата.",
       host: "Для ручного добавления: адрес oc.tolf.is:4443. После импорта сертификата в шаге 4 выберите его в настройках этого соединения.",
       enable: "Включите VPN в приложении. Если предлагается группа, оставьте группу по умолчанию. Вернитесь на сайт: зелёная точка появится после подтверждения сессии выбранного устройства. Маршрутизацию меняйте здесь.",
@@ -36,7 +36,7 @@
       create: "Create access", additional: "Create additional access", cancel: "Cancel", resume: "Complete issuance", refresh: "Try again", choose: "Choose a device",
       install: "Install Cisco Secure Client (AnyConnect).", app: "Install Cisco Secure Client",
       control: "Before importing the certificate, open Cisco Secure Client settings and select External Control → Prompt. Then return here and select “Import into AnyConnect”.",
-      controlReminder: "Before selecting “Add connection in AnyConnect”, check that Cisco Secure Client has External Control → Prompt selected.",
+      controlReminder: "Before selecting “Add to AnyConnect”, check that Cisco Secure Client has External Control → Prompt selected.",
       enableTitle: "Enable VPN",
       certificate: "Import the certificate", prepare: "Get certificate",
       connectionLinkHelp: "After adding the connection, get the certificate and import it into AnyConnect.",
@@ -46,7 +46,7 @@
       expired: "The link expired. Get a new certificate and links.",
       manual: "For manual import, save the .p12 file. On iPhone and iPad, open it in Files and use Share to send it to Cisco Secure Client. Use the displayed import password.",
       windows: "Download the .p12 file. Open it and import it with this password into Current User → Personal certificate store.",
-      connect: "Add the connection", add: "Add connection in AnyConnect",
+      connect: "Add the connection", add: "Add to AnyConnect",
       return: "First add the connection in AnyConnect. Then return here and import the certificate in step 4. Enable VPN after importing the certificate.",
       host: "For manual setup: server oc.tolf.is:4443. After importing the certificate in step 4, select it in this connection’s settings.",
       enable: "Enable VPN in the app. Keep the default group if asked. Return here: the green dot appears after this device’s session is confirmed. Change routing here.",
@@ -63,7 +63,7 @@
       create: "Izveidot piekļuvi", additional: "Izveidot papildu piekļuvi", cancel: "Atcelt", resume: "Pabeigt izsniegšanu", refresh: "Mēģināt vēlreiz", choose: "Izvēlieties ierīci",
       install: "Instalējiet Cisco Secure Client (AnyConnect).", app: "Instalēt Cisco Secure Client",
       control: "Pirms sertifikāta importēšanas atveriet Cisco Secure Client iestatījumus un izvēlieties External Control → Prompt. Pēc tam atgriezieties šeit un nospiediet “Importēt AnyConnect”.",
-      controlReminder: "Pirms nospiežat “Pievienot savienojumu AnyConnect”, pārbaudiet, vai Cisco Secure Client ir izvēlēts External Control → Prompt.",
+      controlReminder: "Pirms nospiežat “Pievienot AnyConnect”, pārbaudiet, vai Cisco Secure Client ir izvēlēts External Control → Prompt.",
       enableTitle: "Ieslēdziet VPN",
       certificate: "Importējiet sertifikātu", prepare: "Saņemt sertifikātu",
       connectionLinkHelp: "Pēc savienojuma pievienošanas saņemiet sertifikātu un importējiet to AnyConnect.",
@@ -73,7 +73,7 @@
       expired: "Saites derīgums beidzies. Saņemiet jaunu sertifikātu un saites.",
       manual: "Manuālai importēšanai saglabājiet .p12 failu. iPhone un iPad atveriet to lietotnē Files un ar Share nosūtiet uz Cisco Secure Client. Izmantojiet norādīto importēšanas paroli.",
       windows: "Lejupielādējiet .p12 failu. Atveriet to un importējiet ar norādīto paroli pašreizējā lietotāja personīgajā sertifikātu krātuvē.",
-      connect: "Pievienojiet savienojumu", add: "Pievienot savienojumu AnyConnect",
+      connect: "Pievienojiet savienojumu", add: "Pievienot AnyConnect",
       return: "Vispirms pievienojiet savienojumu AnyConnect. Pēc tam atgriezieties šeit un importējiet sertifikātu 4. solī. Ieslēdziet VPN pēc sertifikāta importēšanas.",
       host: "Manuālai pievienošanai: serveris oc.tolf.is:4443. Pēc sertifikāta importēšanas 4. solī izvēlieties to šī savienojuma iestatījumos.",
       enable: "Ieslēdziet VPN lietotnē. Ja tiek prasīta grupa, atstājiet noklusējuma grupu. Atgriezieties vietnē: zaļais punkts parādīsies pēc šīs ierīces sesijas apstiprināšanas. Maršrutēšanu mainiet šeit.",
@@ -96,9 +96,9 @@
   let setupDestination = null, transferNotice = "";
   let confirmedDeviceId = null;
   const STEP_COPY = {
-    ru: {confirm:"Соединение добавлено — продолжить", blocked:"Сначала добавьте соединение в AnyConnect и подтвердите завершение предыдущего шага."},
-    en: {confirm:"Connection added — continue", blocked:"First add the connection in AnyConnect and confirm completion of the previous step."},
-    lv: {confirm:"Savienojums pievienots — turpināt", blocked:"Vispirms pievienojiet savienojumu AnyConnect un apstipriniet iepriekšējā soļa pabeigšanu."}
+    ru: {confirm:"Соединение добавлено", blocked:"Сначала добавьте соединение в AnyConnect и подтвердите завершение предыдущего шага."},
+    en: {confirm:"Connection added", blocked:"First add the connection in AnyConnect and confirm completion of the previous step."},
+    lv: {confirm:"Savienojums pievienots", blocked:"Vispirms pievienojiet savienojumu AnyConnect un apstipriniet iepriekšējā soļa pabeigšanu."}
   };
   const stepCopy = () => STEP_COPY[document.documentElement.lang] || STEP_COPY.en;
   const completedCopy = () => ({ru:{done:"✓ Соединение добавлено",again:"Добавить заново"},en:{done:"✓ Connection added",again:"Add again"},lv:{done:"✓ Savienojums pievienots",again:"Pievienot vēlreiz"}}[document.documentElement.lang] || {done:"✓ Connection added",again:"Add again"});

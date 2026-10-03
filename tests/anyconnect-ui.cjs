@@ -140,13 +140,13 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   assert(button(ids.anyConnectAccess,'Получить сертификат').disabled);
   button(ids.anyConnectAccess,'Получить сертификат').events.click();await settle();
   assert.equal(calls.filter(call=>call[1].endsWith('/import')).length,beforeImport);
-  button(ids.anyConnectAccess,'Соединение добавлено — продолжить').click();
-  assert(!descendants(ids.anyConnectAccess).some(n=>n.textContent==='Соединение добавлено — продолжить'));
-  assert(!descendants(ids.anyConnectAccess).some(n=>n.tagName==='a'&&n.textContent==='Добавить соединение в AnyConnect'));
+  button(ids.anyConnectAccess,'Соединение добавлено').click();
+  assert(!descendants(ids.anyConnectAccess).some(n=>n.textContent==='Соединение добавлено'));
+  assert(!descendants(ids.anyConnectAccess).some(n=>n.tagName==='a'&&n.textContent==='Добавить в AnyConnect'));
   assert(ids.anyConnectAccess.textContent.includes('✓ Соединение добавлено'));
   button(ids.anyConnectAccess,'Добавить заново').click();
   assert(button(ids.anyConnectAccess,'Получить сертификат').disabled);
-  button(ids.anyConnectAccess,'Соединение добавлено — продолжить').click();
+  button(ids.anyConnectAccess,'Соединение добавлено').click();
   assert(!button(ids.anyConnectAccess,'Получить сертификат').disabled);
   button(ids.anyConnectAccess,'Получить сертификат').click(); await settle();
   assert(ids.anyConnectAccess.textContent.includes('private-import-password'));

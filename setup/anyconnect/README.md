@@ -211,13 +211,15 @@ The status has no frame or background and uses a nine-pixel colored dot.
 Narrow-screen layout refinement is deferred until the wide layout is accepted.
 The Get certificate button matches the width of the Import into AnyConnect button.
 Certificate preparation is disabled and dimmed until the user explicitly confirms
-"Connection added — continue" in the preceding step. Opening the Cisco URI alone
+"Connection added" in the preceding step. Opening the Cisco URI alone
 does not confirm completion. This gate applies both to account setup and guest
 setup links; confirmation is cleared when selecting another device, changing
 accounts or leaving the page. It records user confirmation, not verification
 that the connection was saved inside Cisco Secure Client.
 Before confirmation, mobile connection and Continue actions share one row with
 equal-width columns, with connection on the left and confirmation on the right.
+Short action labels keep the wide-layout buttons on one line at the site's
+standard height: "Add to AnyConnect" and "Connection added".
 After confirmation, the Continue control and Cisco connection link are replaced
 by a noninteractive completion panel. Add again restores the connection step and
 locks certificate actions until reconfirmation, retaining any unexpired bundle.

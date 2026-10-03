@@ -29,16 +29,16 @@ async function scenario(unavailable=false){
   if(unavailable){assert(root.textContent.includes('Ссылка истекла'));assert.equal(calls.length,1);return;}
   assert(root.textContent.includes('Guest iPad'));assert(root.textContent.includes('Вход в аккаунт не требуется'));
   assert.equal(calls.length,1,'opening a link only reads metadata');
-  const connection=all(root).find(n=>n.tagName==='a'&&n.textContent==='Добавить соединение в AnyConnect');assert.equal(connection.href,info.connectionUri);
+  const connection=all(root).find(n=>n.tagName==='a'&&n.textContent==='Добавить в AnyConnect');assert.equal(connection.href,info.connectionUri);
   assert(button('Получить сертификат').disabled);
   connection.click();button('Получить сертификат').click();await settle();
   assert.equal(calls.length,1,'opening the app does not unlock certificate issuance');
-  button('Соединение добавлено — продолжить').click();
-  assert(!all(root).some(n=>n.textContent==='Соединение добавлено — продолжить'));
-  assert(!all(root).some(n=>n.tagName==='a'&&n.textContent==='Добавить соединение в AnyConnect'));
+  button('Соединение добавлено').click();
+  assert(!all(root).some(n=>n.textContent==='Соединение добавлено'));
+  assert(!all(root).some(n=>n.tagName==='a'&&n.textContent==='Добавить в AnyConnect'));
   assert(root.textContent.includes('✓ Соединение добавлено'));
   button('Добавить заново').click();assert(button('Получить сертификат').disabled);
-  button('Соединение добавлено — продолжить').click();
+  button('Соединение добавлено').click();
   assert(!button('Получить сертификат').disabled);
   button('Получить сертификат').click();await settle();
   assert(calls[1][0].endsWith('/'+token+'/claim'));assert.equal(calls[1][1].method,'POST');
