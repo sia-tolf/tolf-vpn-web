@@ -94,6 +94,13 @@
   let statusBadge = null;
   const incomingDevice = new URLSearchParams(window.location?.search || "").get("ocDevice");
   let setupDestination = null, transferNotice = "";
+  let confirmedDeviceId = null;
+  const STEP_COPY = {
+    ru: {confirm:"Соединение добавлено — продолжить", blocked:"Сначала добавьте соединение в AnyConnect и подтвердите завершение предыдущего шага."},
+    en: {confirm:"Connection added — continue", blocked:"First add the connection in AnyConnect and confirm completion of the previous step."},
+    lv: {confirm:"Savienojums pievienots — turpināt", blocked:"Vispirms pievienojiet savienojumu AnyConnect un apstipriniet iepriekšējā soļa pabeigšanu."}
+  };
+  const stepCopy = () => STEP_COPY[document.documentElement.lang] || STEP_COPY.en;
   let transferGrant = null, transferTimer = null;
   const TRANSFER_COPY = {
     ru: {create:"Создать ссылку для установки", help:"Отправьте ссылку получателю. Вход в аккаунт для установки не требуется.", expires:"Ссылка действует 24 часа и используется один раз для получения сертификата.", update:"Передача без входа станет доступна после обновления API на UK."},
@@ -150,6 +157,7 @@
     return node;
   }
   function choose(id) {
+    confirmedDeviceId = null;
     transferGrant = null; clearTimeout(transferTimer);
     setupDestination = null; transferNotice = "";
     selectedId = id; grant = null; clearCopyNotice(); clearDownloadedPackage();
@@ -368,15 +376,20 @@
       const suffix = " " + sessionCopy().forDevice + " «" + d.label + "»";
       const connect = element("section", null, "oc-step"); connect.append(element("h4", "3. " + c.connect + suffix), element("p", c.return));
       if (mobile) connect.append(element("p", c.controlReminder), link(c.add, connectionUri(d), true));
-      connect.append(element("p", c.host)); steps.append(connect);
+      connect.append(element("p", c.host));
+      const confirm = button(stepCopy().confirm, () => { confirmedDeviceId = d.id; render(); });
+      confirm.disabled ||= confirmedDeviceId === d.id;
+      connect.append(confirm); steps.append(connect);
       const cert = element("section", null, "oc-step"); cert.append(element("h4", "4. " + c.certificate + suffix));
       const prepare = button(c.prepare, () => perform(async token => {
+        if (confirmedDeviceId !== d.id) return;
         const id = d.id;
         const result = await apiRequest(path(id) + "/import", { method: "POST", timeoutMs: 30000 });
         if (token === epoch && selectedId === id) { grant = result; clearCopyNotice(); clearDownloadedPackage(); }
       }), true);
       prepare.className += " oc-prepare";
-      prepare.disabled ||= capabilities?.issuance !== true; cert.append(prepare, element("p", c.connectionLinkHelp, "oc-note"));
+      prepare.disabled ||= capabilities?.issuance !== true || confirmedDeviceId !== d.id;
+      cert.append(prepare, element("p", confirmedDeviceId === d.id ? c.connectionLinkHelp : stepCopy().blocked, "oc-note"));
       if (grant?.deviceId === d.id) {
         cert.append(element("p", c.password));
         const passwordRow = element("div", null, "oc-password-row");
@@ -427,6 +440,7 @@
     clearDownloadedPackage();
     devices = []; selectedId = null; grant = null; capabilities = null;
     setupDestination = incomingDevice ? "local" : null; transferNotice = "";
+    confirmedDeviceId = null;
     transferGrant = null; clearTimeout(transferTimer);
     deviceName = ""; creationRequest = null; addingDevice = false; busy = false; loading = false; message = ""; error = false;
     window.refreshAnyConnectTransport?.(); render();
@@ -437,7 +451,7 @@
   setInterval(() => {
     if (grant && Date.parse(grant.expiresAt) <= Date.now()) { grant = null; clearCopyNotice(); clearDownloadedPackage(); message = copy().expired; render(); }
   }, 1000);
-  window.addEventListener("pagehide", () => { grant = null; transferGrant = null; transferNotice = ""; clearTimeout(transferTimer); clearCopyNotice(); clearDownloadedPackage(); });
+  window.addEventListener("pagehide", () => { grant = null; confirmedDeviceId = null; transferGrant = null; transferNotice = ""; clearTimeout(transferTimer); clearCopyNotice(); clearDownloadedPackage(); });
   window.addEventListener("pageshow", render);
   window.setAnyConnectAccount(window.tolfAccountState || null);
   if (incomingDevice) document.getElementById("vpnTransportAnyConnect")?.click();

@@ -136,6 +136,12 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   assert.equal(c.copied,setupUrl);
   assert(ids.anyConnectAccess.textContent.includes('Ссылка скопирована'));
   button(ids.anyConnectAccess,'Настроить на этом устройстве').click();
+  const beforeImport=calls.filter(call=>call[1].endsWith('/import')).length;
+  assert(button(ids.anyConnectAccess,'Получить сертификат').disabled);
+  button(ids.anyConnectAccess,'Получить сертификат').events.click();await settle();
+  assert.equal(calls.filter(call=>call[1].endsWith('/import')).length,beforeImport);
+  button(ids.anyConnectAccess,'Соединение добавлено — продолжить').click();
+  assert(!button(ids.anyConnectAccess,'Получить сертификат').disabled);
   button(ids.anyConnectAccess,'Получить сертификат').click(); await settle();
   assert(ids.anyConnectAccess.textContent.includes('private-import-password'));
   assert(!descendants(ids.anyConnectAccess).some(n=>n.tagName==='button'&&n.textContent==='Скопировать пароль'));
@@ -177,6 +183,7 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   assert.deepEqual(revokedUrls,['blob:test-package']);
   assert.equal(ids.vpnUsername.textContent,'user0_ipad');
   button(ids.anyConnectAccess,'Настроить на этом устройстве').click();
+  assert(button(ids.anyConnectAccess,'Получить сертификат').disabled,'a different device needs its own confirmation');
   assert(descendants(ids.anyConnectAccess).filter(n=>n.tagName==='h4').some(n=>n.textContent==='3. Добавьте соединение для «Phone»'));
   assert(descendants(ids.anyConnectAccess).filter(n=>n.tagName==='h4').some(n=>n.textContent==='4. Импортируйте сертификат для «Phone»'));
   modes[1].click(); await settle();

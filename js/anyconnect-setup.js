@@ -13,6 +13,12 @@
   const platform = /Android/i.test(ua) ? "android" : /Windows/i.test(ua) ? "windows" : "ios";
   let info = null, grant = null, busy = false, message = "", feedback = false, cached = null, timer = null;
   const c = () => TEXT[language.value] || TEXT.ru;
+  let connectionConfirmed = false;
+  const STEP_TEXT = {
+    ru:{confirm:"Соединение добавлено — продолжить", blocked:"Сначала добавьте соединение в AnyConnect и подтвердите завершение предыдущего шага."},
+    en:{confirm:"Connection added — continue", blocked:"First add the connection in AnyConnect and confirm completion of the previous step."},
+    lv:{confirm:"Savienojums pievienots — turpināt", blocked:"Vispirms pievienojiet savienojumu AnyConnect un apstipriniet iepriekšējā soļa pabeigšanu."}
+  };
   const el = (tag, text, cls) => { const node=document.createElement(tag); if(text!=null)node.textContent=text; if(cls)node.className=cls; return node; };
   function button(text, action, primary=false) { const node=el("button",text,"oc-action "+(primary?"primary":"secondary"));node.type="button";node.disabled=busy;node.addEventListener("click",action);return node; }
   function link(text, href) { const node=el("a",text,"button-link oc-action primary oc-full");node.href=href;node.referrerPolicy="no-referrer";return node; }
@@ -23,7 +29,7 @@
   }
   function clearPackage() { if(cached)URL.revokeObjectURL(cached);cached=null; }
   async function claim() {
-    if(busy||grant)return;busy=true;message="";render();
+    if(busy||grant||!connectionConfirmed)return;busy=true;message="";render();
     try { grant=await request(endpoint+"/claim","POST"); }
     catch(error) { message=error.status===410?c().failed:c().retry; }
     finally { busy=false;render(); }
@@ -52,8 +58,10 @@
     root.append(link(t.app,app));root.append(el("h4","2. "+t.connect));
     if(platform!=="windows")root.append(el("p",t.control),link(t.add,info.connectionUri));
     else root.append(el("p","oc.tolf.is:4443"));
-    root.append(el("h4","3. "+t.cert),el("p",t.before,"oc-note"));
-    if(!grant)root.append(button(t.prepare,claim,true));
+    const step=STEP_TEXT[language.value]||STEP_TEXT.ru;
+    const confirm=button(step.confirm,()=>{connectionConfirmed=true;render();});confirm.disabled ||= connectionConfirmed;root.append(confirm);
+    root.append(el("h4","3. "+t.cert),el("p",connectionConfirmed?t.before:step.blocked,"oc-note"));
+    if(!grant){const prepare=button(t.prepare,claim,true);prepare.className+=" oc-prepare";prepare.disabled ||= !connectionConfirmed;root.append(prepare);}
     else {
       root.append(el("p",t.password));const row=el("div",null,"oc-password-row");row.append(el("span",grant.password,"oc-secret"));
       const control=el("span",null,"oc-copy-control"),icon=button("",copyPassword);icon.className="oc-copy";icon.setAttribute("aria-label",t.copy);icon.title=t.copy;
@@ -68,7 +76,7 @@
   language.value=(navigator.language||"ru").slice(0,2);if(!TEXT[language.value])language.value="en";
   language.addEventListener("change",render);
   setInterval(()=>{if(grant&&Date.parse(grant.expiresAt)<=Date.now()){grant=null;info=null;clearPackage();message=c().expired;render();}},1000);
-  window.addEventListener("pagehide",()=>{grant=null;clearPackage();feedback=false;clearTimeout(timer);});
+  window.addEventListener("pagehide",()=>{grant=null;connectionConfirmed=false;clearPackage();feedback=false;clearTimeout(timer);});
   window.addEventListener("pageshow",render);
   load();
 })();

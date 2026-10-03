@@ -210,6 +210,12 @@ additional access is in the section header in the wide layout.
 The status has no frame or background and uses a nine-pixel colored dot.
 Narrow-screen layout refinement is deferred until the wide layout is accepted.
 The Get certificate button matches the width of the Import into AnyConnect button.
+Certificate preparation is disabled and dimmed until the user explicitly confirms
+"Connection added — continue" in the preceding step. Opening the Cisco URI alone
+does not confirm completion. This gate applies both to account setup and guest
+setup links; confirmation is cleared when selecting another device, changing
+accounts or leaving the page. It records user confirmation, not verification
+that the connection was saved inside Cisco Secure Client.
 The overview username comes from the authenticated account's `vpn.username`,
 as in IKEv2; it is hidden if that field is absent. Device certificate CNs remain
 in certificate selection, session checks and routing commands, and are not
