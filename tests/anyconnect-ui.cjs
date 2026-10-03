@@ -23,6 +23,7 @@ class Element {
   click() { assert.equal(this.disabled, false); this.clicked = true; return this.events.click?.(); }
   remove() { this.removed = true; }
   focus() {}
+  scrollIntoView(options) { this.scrolled = options; }
 }
 function descendants(node) { return node.children.flatMap(child => [child, ...descendants(child)]); }
 function button(panel, name) {
@@ -180,6 +181,8 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   assert.equal(calls.filter(call=>call[1].endsWith('/import')).length,beforeImport,'existing certificate does not issue a bundle');
   const ingressSelect=()=>descendants(ids.anyConnectAccess).find(n=>n.id==='ocIngress');
   ingressSelect().value='riga';ingressSelect().events.change();
+  button(ids.anyConnectAccess,'Настроить на этом устройстве').click();
+  assert.equal(descendants(ids.anyConnectAccess).find(n=>n.className==='oc-steps').scrolled.block,'start','repeated local setup opens the selected ingress steps');
   assert(button(ids.anyConnectAccess,'Получить сертификат').disabled,'a different ingress needs connection confirmation');
   button(ids.anyConnectAccess,'Соединение добавлено').click();
   assert(ids.anyConnectAccess.textContent.includes('✓ Сертификат уже импортирован'),'the certificate belongs to the device across ingress changes');
@@ -228,7 +231,7 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   assert.equal(ids.vpnUsername.textContent,'user0_ipad');
   button(ids.anyConnectAccess,'Настроить на этом устройстве').click();
   assert(button(ids.anyConnectAccess,'Получить сертификат').disabled,'a different device needs its own confirmation');
-  assert(descendants(ids.anyConnectAccess).filter(n=>n.tagName==='h4').some(n=>n.textContent==='3. Добавьте соединение для «Phone»'));
+  assert(descendants(ids.anyConnectAccess).filter(n=>n.tagName==='h4').some(n=>n.textContent==='3. Добавьте соединение для «Phone» — Москва'));
   assert(descendants(ids.anyConnectAccess).filter(n=>n.tagName==='h4').some(n=>n.textContent==='4. Получите сертификат для импорта в AnyConnect — «Phone»'));
   modes[1].click(); await settle();
   assert.equal(first.mode,'auto'); assert.equal(second.mode,'ru');

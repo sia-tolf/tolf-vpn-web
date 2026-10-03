@@ -97,6 +97,7 @@
   let statusBadge = null;
   const incomingDevice = new URLSearchParams(window.location?.search || "").get("ocDevice");
   let setupDestination = null, transferNotice = "";
+  let setupSteps = null;
   let confirmedDeviceId = null;
   let importedDeviceId = null;
   let ingressId = 'moscow';
@@ -293,6 +294,7 @@
   }
   function render() {
     statusBadge = null;
+    setupSteps = null;
     root.replaceChildren();
     if (!account) return;
     const c = copy(), mobile = currentPlatform !== "windows";
@@ -355,12 +357,24 @@
     const d = selected();
     if (d) {
       const delivery = deliveryCopy();
+      if (ingresses().length > 1) {
+        const field = element('div', null, 'oc-ingress-field');
+        const label = element('label', ingressCopy().label); label.htmlFor = 'ocIngress';
+        const select = element('select'); select.id = 'ocIngress'; select.disabled = busy || loading;
+        for (const point of ingresses()) { const option = element('option', ingressCopy()[point.id]); option.value = point.id; select.append(option); }
+        select.value = ingress().id; select.addEventListener('change', () => selectIngress(select.value));
+        field.append(label, select); root.append(field, element('p', ingressCopy().help));
+      }
       const destinations = element("div", null, "oc-actions oc-import-actions oc-destinations");
       for (const [destination, text] of [["local",delivery.local],["remote",delivery.remote]]) {
         const action = button(text, () => {
           setupDestination = destination; transferNotice = "";
           if (destination === "remote") { grant = null; clearCopyNotice(); clearDownloadedPackage(); }
           render();
+          if (destination === "local") {
+            setupSteps?.focus?.({preventScroll:true});
+            setupSteps?.scrollIntoView?.({behavior:"smooth", block:"start"});
+          }
         }, setupDestination === destination);
         action.setAttribute("aria-pressed", String(setupDestination === destination)); destinations.append(action);
       }
@@ -404,16 +418,9 @@
         root.append(transfer);
       } else if (setupDestination === "local") {
       const steps = element("div", null, "oc-steps");
+      setupSteps = steps; steps.setAttribute('tabindex', '-1');
       const suffix = " " + sessionCopy().forDevice + " «" + d.label + "»";
-      const connect = element("section", null, "oc-step"); connect.append(element("h4", "3. " + c.connect + suffix), element("p", c.return));
-      if (ingresses().length > 1) {
-        const field = element('div', null, 'oc-ingress-field');
-        const label = element('label', ingressCopy().label); label.htmlFor = 'ocIngress';
-        const select = element('select'); select.id = 'ocIngress'; select.disabled = busy || loading;
-        for (const point of ingresses()) { const option = element('option', ingressCopy()[point.id]); option.value = point.id; select.append(option); }
-        select.value = ingress().id; select.addEventListener('change', () => selectIngress(select.value));
-        field.append(label,select); connect.append(field,element('p',ingressCopy().help));
-      }
+      const connect = element("section", null, "oc-step"); connect.append(element("h4", "3. " + c.connect + suffix + " — " + ingressCopy()[ingress().id]), element("p", c.return));
       if (confirmedDeviceId === d.id) {
         const completed = element("div", null, "oc-connection-completed");
         const status = element("div", completedCopy().done, "oc-connection-done"); status.setAttribute("role", "status");
