@@ -28,6 +28,29 @@ revocation still require operator validation with a newly issued device.
 
 ## Interfaces and addresses
 
+### Riga expansion checkpoint, 3 October 2026
+
+Operator output confirms Debian ocserv 1.3.0, parallel plain password and
+certificate authentication (`enable-auth = certificate`). HAProxy accepts
+`oc-riga.tolf.is` SNI at 188.214.39.114:443 and forwards TCP to
+127.0.0.1:8443 with PROXY v2. ocserv DTLS listens at 188.214.39.114:443/UDP.
+The pool is 10.19.0.0/24, DNS 10.254.0.53. Riga main exits via ens3;
+tables 102/119 exit via gremoscow, peer 10.33.0.1. The existing
+`inet tolf_oc_sr` sets ru4/ru_domains4 mark RU destinations 0x190 to table 119.
+
+The authorized target is one UK-issued certificate per device accepted at every
+activated ingress, initially Moscow and Riga, with distinct Cisco connections.
+UK remains the only account, policy, signing and revocation control plane.
+
+`install-riga-foundation.py` installs public UK CA trust, CRL enforcement and a
+systemd five-minute signed CRL sync timer. It pins the CA DER fingerprint,
+retains existing CA certificates and auth/listener/routing settings, rejects
+unrelated existing CRL settings, validates ocserv config and restores files on
+failure. Public files are in /etc/ocserv/tolf-uk; backups are private directories
+under /etc/ocserv. Sync verifies signature, dates and nondecreasing CRL number.
+This foundation alone does not install the Riga personal device registry,
+policy/session APIs or the two-ingress UI; these are subsequent stages.
+
 | Component | Address or path | Function |
 | --- | --- | --- |
 | Website | https://vpn.tolf.is | Authenticated device creation and installation instructions |
