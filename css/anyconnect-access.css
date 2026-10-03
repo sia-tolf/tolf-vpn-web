@@ -21,7 +21,18 @@ html[data-vpn-transport="anyconnect"] #legacyVpnPanel { display: block !importan
 #anyConnectAccess .oc-connection-actions > .oc-action { width: 100%; min-width: 0; box-sizing: border-box; display: flex; align-items: center; justify-content: center; text-align: center; }
 #anyConnectAccess .oc-connection-actions > .oc-action:only-child { grid-column: 1 / -1; }
 #anyConnectAccess .oc-device-row { display: grid; grid-template-columns: calc((100% - 10px) / 2) minmax(0, 1fr) auto; gap: 10px; align-items: stretch; }
-#anyConnectAccess .oc-device-row > select { min-width: 0; height: 100%; }
+#anyConnectAccess .oc-device-row > select { min-width: 0; }
+#anyConnectAccess .oc-device-row > select,
+#anyConnectAccess .oc-ingress-field > select,
+#anyConnectAccess .oc-device-row > .oc-action,
+#anyConnectAccess .oc-destinations > .oc-action {
+  box-sizing: border-box;
+  height: 44px;
+  min-height: 44px;
+  max-height: 44px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
 #anyConnectAccess .oc-connection-settings { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; align-items: start; }
 #anyConnectAccess .oc-ingress-field { min-width: 0; }
 #anyConnectAccess .oc-device-routing {
@@ -36,14 +47,17 @@ html[data-vpn-transport="anyconnect"] #legacyVpnPanel { display: block !importan
   border: 0;
 }
 #anyConnectAccess .oc-device-routing.hidden { display: none; }
-#anyConnectAccess .oc-device-routing .row-label { grid-row: 1; color: var(--text); font-size: 14px; line-height: normal; }
+#anyConnectAccess .oc-device-routing .row-label { grid-row: 1; color: var(--text); font-size: 14px; line-height: normal; text-align: right; }
 #anyConnectAccess .oc-device-routing .anyconnect-mode-value { display: contents; }
-#anyConnectAccess .oc-device-routing .anyconnect-mode-controls { grid-row: 2; justify-content: flex-start; height: 46px; }
-#anyConnectAccess .oc-device-routing .anyconnect-mode-meta { grid-row: 3; margin-top: 8px; text-align: left; color: var(--text); font-size: 14px; line-height: 1.55; white-space: normal; }
-#anyConnectAccess .oc-device-routing #anyConnectModeHelp { align-items: flex-start; white-space: normal; }
+#anyConnectAccess .oc-device-routing .anyconnect-mode-controls { grid-row: 2; justify-content: flex-end; height: 44px; }
+#anyConnectAccess .oc-device-routing .anyconnect-auto-button,
+#anyConnectAccess .oc-device-routing .anyconnect-explicit-modes { height: 44px; min-height: 44px; max-height: 44px; }
+#anyConnectAccess .oc-device-routing .anyconnect-explicit-modes .anyconnect-mode-button { height: 36px; min-height: 36px; max-height: 36px; }
+#anyConnectAccess .oc-device-routing .anyconnect-mode-meta { grid-row: 3; margin-top: 8px; text-align: right; color: var(--text); font-size: 14px; line-height: 1.55; white-space: normal; }
+#anyConnectAccess .oc-device-routing #anyConnectModeHelp { align-items: flex-end; white-space: normal; }
 #anyConnectAccess .oc-device-routing #anyConnectModeStatus { position: static; font-size: 12px; line-height: 1.4; }
 #anyConnectAccess .oc-device-row > .oc-action { white-space: nowrap; }
-#anyConnectAccess .oc-device-status { display: flex; align-items: center; gap: 8px; box-sizing: border-box; min-height: 48px; padding: 6px 8px; font-size: 13px; font-weight: 500; line-height: 1.3; color: var(--secondary); }
+#anyConnectAccess .oc-device-status { display: flex; align-items: center; gap: 8px; box-sizing: border-box; min-height: 44px; padding: 6px 8px; font-size: 13px; font-weight: 500; line-height: 1.3; color: var(--secondary); }
 #anyConnectAccess .oc-device-status::before { content: ""; flex: 0 0 9px; width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
 #anyConnectAccess .oc-session-connected { color: #247a43; }
 #anyConnectAccess .oc-session-connected::before { background: #35c65a; }
