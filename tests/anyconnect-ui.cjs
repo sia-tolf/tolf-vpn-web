@@ -113,8 +113,10 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   const connectionLink=()=>descendants(ids.anyConnectAccess).find(n=>n.tagName==='a'&&n.textContent==='Добавить в AnyConnect');
   assert.equal(new URLSearchParams(connectionLink().href.split('?')[1]).get('host'),'oc-riga.tolf.is:443');
   assert.equal(new URLSearchParams(connectionLink().href.split('?')[1]).get('certcommonname'),first.username);
+  assert(new URLSearchParams(connectionLink().href.split('?')[1]).get('name').includes('Рига'));
   ids.serverMoscow.events.change();
   assert.equal(window.ocAccess.ingress().id,'moscow');
+  assert(new URLSearchParams(connectionLink().href.split('?')[1]).get('name').includes('Москва'));
   assert(descendants(ids.anyConnectAccess).some(n=>n.tagName==='button'&&n.textContent==='Получить сертификат'));
   assert.equal(descendants(ids.anyConnectAccess).filter(n=>n.tagName==='input').length,0);
   const deviceRow = ids.anyConnectAccess.children.find(n=>n.className==='oc-device-row');

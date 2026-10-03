@@ -1876,7 +1876,7 @@ html[data-tolf-ui] #vpnCard .vpn-account-actions > :is(#accountNavigation, #sign
   color:var(--text);
   font-size:15px;
   line-height:1.3;
-  font-weight:400;
+  font-weight:600;
 }
 
 /* AnyConnect routing mode row — 2026-10-01. */

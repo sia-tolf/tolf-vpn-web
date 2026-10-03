@@ -74,8 +74,10 @@ class MultiApiTests(unittest.TestCase):
         token = self.client.post('/oc/access/devices/' + device['id'] + '/setup-link', headers=self.headers).json()['setupUrl'].split('#')[1]
         info = self.client.get('/oc/access/setup/' + token).json()
         self.assertEqual([c['host'] for c in info['connections']], ['oc.tolf.is:4443', 'oc-riga.tolf.is:443'])
-        for connection in info['connections']:
+        for connection, city in zip(info['connections'], ('Москва', 'Рига')):
             self.assertIn(device['username'], connection['connectionUri'])
+            self.assertIn(city, connection['connectionName'])
+            self.assertLessEqual(len(connection['connectionName']), 24)
         self.assertNotIn('password', info)
 
     def test_failed_policy_keeps_database_and_moscow_mode_and_pending_flag(self):

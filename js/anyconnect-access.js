@@ -162,7 +162,8 @@
   const path = id => "/oc/access/devices/" + encodeURIComponent(id);
   function connectionUri(d) {
     const point = ingress();
-    const name = (point.id === 'riga' ? 'TOLF R ' : 'TOLF ') + Array.from(d.label).slice(0,point.id === 'riga' ? 8 : 10).join("") + " " + d.id.replaceAll("-", "").slice(-8);
+    const prefix = point.id === 'riga' ? 'TOLF Рига ' : 'TOLF Москва ';
+    const name = prefix + Array.from(d.label).slice(0,24 - Array.from(prefix).length - 9).join("") + " " + d.id.replaceAll("-", "").slice(-8);
     const params = {name, host:point.host, usecert:"true", certcommonname:d.username, netroam:"true"};
     return "anyconnect://create/?" + Object.entries(params).map(([key,value]) =>
       encodeURIComponent(key) + "=" + encodeURIComponent(value)).join("&");

@@ -434,11 +434,14 @@ def install(app, context):
 
     def package_response(row, package, password, token, expires):
         url = "https://api.tolf.is/oc/access/import/" + token + ".p12"
-        connection_name = "TOLF " + row["label"][:10] + " " + row["id"].replace("-", "")[-8:]
+        def title_for(name):
+            prefix = 'TOLF Рига ' if name == 'riga' else 'TOLF Москва '
+            return prefix + row['label'][:24 - len(prefix) - 9] + ' ' + row['id'].replace('-', '')[-8:]
+        connection_name = title_for('moscow')
         create = "anyconnect://create/?" + urlencode({"name":connection_name, "host":"oc.tolf.is:4443", "usecert":"true", "certcommonname":row["username"], "netroam":"true"}, quote_via=quote)
         connections = []
         for name in names:
-            title = connection_name if name == 'moscow' else 'TOLF R ' + row['label'][:8] + ' ' + row['id'].replace('-', '')[-8:]
+            title = title_for(name)
             uri = 'anyconnect://create/?' + urlencode({'name': title, 'host': INGRESSES[name]['host'], 'usecert': 'true', 'certcommonname': row['username'], 'netroam': 'true'}, quote_via=quote)
             connections.append({**INGRESSES[name], 'connectionName': title, 'connectionUri': uri})
         return {"deviceId":row["id"], "label":row["label"], "certificateUrl":url, "password":password, "expiresAt":expires,
