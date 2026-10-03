@@ -1,4 +1,7 @@
 function getSelectedServerKey() {
+  if (window.getVpnTransport?.() === 'anyconnect') {
+    return window.ocAccess?.ingress?.().id || 'moscow';
+  }
   const selected =
     document.querySelector('input[name="vpnServer"]:checked');
 

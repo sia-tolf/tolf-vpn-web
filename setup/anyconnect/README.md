@@ -1,7 +1,7 @@
 # Personal AnyConnect access
 
-UK owns accounts, device identities, signing and revocation. Moscow authenticates
-certificates and enforces each device's routing. The website provides separate
+UK owns accounts, device identities, signing and revocation. Moscow and Riga
+authenticate certificates and enforce each device's routing. The website provides separate
 access per device and ordered RU/LV/EN instructions. Personal access does not
 require an IKEv2 profile.
 
@@ -35,15 +35,15 @@ UK CA fingerprint unchanged, CRL number 2 dated 3 October, next update 10 Octobe
 Operator confirmed personal device enforcement installation and a successful
 UK-to-Riga health command as API user tolfa using the dedicated restricted SSH
 key. Riga backup: `/etc/ocserv/devices-backup.bed_882n`; SSH authorization backup:
-`/root/.ssh/tolf-oc-key-backup.y02qieev`. UK multi-ingress activation is next.
+`/root/.ssh/tolf-oc-key-backup.y02qieev`. UK multi-ingress activation is confirmed below.
 The operator identified /usr/local/sbin/tolf-openconnect-sr.sh as the Riga
 table creator, tolf-oc-dns-refresh.sh as the RU domain-set updater and
 tolf-oc-dns-watch.py as a watcher currently scoped to pilot IP 10.19.0.195.
 No yt_domains4 set is present in the observed Riga ruleset. The operator has now
 provided all three scripts. The pilot loader deletes and recreates its entire
 table, so personal routing uses a separate table and separate copies of RU and
-YouTube destination sets. The new installer is prepared and tested; installation
-on EDISLV and UK registration/activation remain operator checkpoints.
+YouTube destination sets. The new installer passed tests and operator installation
+on EDISLV; UK registration/activation also completed successfully.
 
 `tolf_oc_nodes.py` is included in the prepared UK installer. It requires all node acknowledgements for device
 registration/policy, compensates partial changes (including a lost reply),
@@ -51,7 +51,9 @@ attempts CRL refresh and disconnect at every node even if one is unavailable,
 and separates per-node session errors from disconnected states. Integration
 reconciles stored policies on all nodes after compensation failures, using
 persistent `oc_policy_retries` rows. A policy reports applied:false while a retry
-is pending. The installer/API changes still require deployment confirmation.
+is pending. Operator confirmed successful UK deployment: issuance:true,
+nodeReady:true, both ingress hosts and unchanged CA fingerprint. UK backup:
+`/opt/tolf-api/anyconnect-backup-lmf3vz_8`.
 
 Run the hash-verified UK installer with `--activate-riga` on EDISUK. Its internal
 hostname guard rejects another server. Before activation it verifies both nodes
@@ -77,8 +79,23 @@ CN, while retaining the original Moscow fields for existing website code.
 Session responses add per-node availability and connected states; an unknown
 node is never converted to disconnected. A confirmed session at either node
 reports connected:true. Without a confirmed session, an unavailable node returns
-503 rather than a false disconnected result. Website selection of the second
-connection remains a following deployment stage.
+503 rather than a false disconnected result. The website now enables both
+existing ingress tiles and adds a synchronized half-width entry-point selector
+in the connection-creation step. Guest setup uses the approved `connections`
+returned by the API. The manual host and mobile URI follow the selected entry
+point; routing modes remain per access across both nodes. The device badge names
+confirmed session locations independently of the entry point selected for
+installation. Switching the website selection does not switch a running Cisco
+tunnel; the page explains disconnect/select/reconnect in Cisco Secure Client.
+Adding Riga retains the existing Moscow name and uses a distinct Riga name,
+both with the same certificate CN.
+
+Changing ingress resets connection-creation confirmation and blocks certificate
+actions until the new connection is confirmed. A previous explicit
+certificate-imported confirmation and any still-valid package belong to the
+device, survive ingress changes, and clear on device/account change or page exit.
+Adding the other connection therefore needs no fresh issuance or repeated
+import. Legacy single-ingress metadata remains supported.
 
 Operator output confirms Debian ocserv 1.3.0, parallel plain password and
 certificate authentication (`enable-auth = certificate`). HAProxy accepts
@@ -217,8 +234,8 @@ existing per-account operation lock.
 | HEAD /oc/access/import/{token}.p12 | Availability check without consumption |
 | GET /oc/access/import/{token}.p12 | Bearer download; atomic consumption; 410 after expiry/use/revocation |
 | GET /oc/access/devices/{id}/policy | Stored acknowledged personal mode |
-| POST /oc/access/devices/{id}/policy | `mode`: auto/ru/lv/yt; update database after Moscow ACK |
-| GET /oc/access/devices/{id}/session | Actual Moscow session for this device CN |
+| POST /oc/access/devices/{id}/policy | `mode`: auto/ru/lv/yt; update database after every activated node ACK |
+| GET /oc/access/devices/{id}/session | Actual sessions for this CN at all activated nodes; includes per-node availability |
 | POST /oc/access/devices/{id}/revoke | Persist request, invalidate grants, sync CRL, remove/disconnect; 202 pending, 200 acknowledged |
 
 Creation proceeds `pending → active` after node registration. Retrying a request

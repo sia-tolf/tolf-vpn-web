@@ -11,7 +11,7 @@ const settle=async()=>{for(let i=0;i<10;i++)await new Promise(r=>setImmediate(r)
 async function scenario(unavailable=false){
   const root=new Element(),language=new Element('select'),body=new Element('body');
   const token='A'.repeat(43),calls=[],intervals=[],handlers={},revoked=[];
-  const info={label:'Guest iPad',connectionUri:'anyconnect://create/?host=oc.tolf.is%3A4443',expiresAt:new Date(Date.now()+86400000).toISOString()};
+  const info={label:'Guest iPad',connectionUri:'anyconnect://create/?host=oc.tolf.is%3A4443',expiresAt:new Date(Date.now()+86400000).toISOString(),connections:[{id:'moscow',host:'oc.tolf.is:4443',connectionUri:'anyconnect://create/?host=oc.tolf.is%3A4443'},{id:'riga',host:'oc-riga.tolf.is:443',connectionUri:'anyconnect://create/?host=oc-riga.tolf.is%3A443'}]};
   const grant={password:'Aa123456',certificateUrl:'https://api.tolf.is/oc/access/import/token.p12',importUri:'anyconnect://import/?type=pkcs12',expiresAt:new Date(Date.now()+600000).toISOString()};
   const document={documentElement:{lang:'ru'},body,getElementById:id=>id==='setupLanguage'?language:root,createElement:tag=>new Element(tag)};
   const window={location:{hash:'#'+token},addEventListener:(k,fn)=>handlers[k]=fn};
@@ -44,6 +44,13 @@ async function scenario(unavailable=false){
   button('Сертификат уже импортирован').click();await settle();
   assert(root.textContent.includes('✓ Сертификат уже импортирован'));
   assert.equal(calls.length,1,'existing certificate does not consume the setup link');
+  const ingress=()=>all(root).find(n=>n.id==='ocIngress');
+  ingress().value='riga';ingress().events.change();
+  assert(button('Получить сертификат').disabled);
+  assert.equal(all(root).find(n=>n.tagName==='a'&&n.textContent==='Добавить в AnyConnect').href,info.connections[1].connectionUri);
+  button('Соединение добавлено').click();
+  assert(root.textContent.includes('✓ Сертификат уже импортирован'));
+  assert.equal(calls.length,1,'adding the second connection does not issue another certificate');
   assert(!all(root).some(n=>n.attributes['aria-label']==='Скопировать пароль'));
   button('Получить сертификат').click();await settle();
   assert(calls[1][0].endsWith('/'+token+'/claim'));assert.equal(calls[1][1].method,'POST');

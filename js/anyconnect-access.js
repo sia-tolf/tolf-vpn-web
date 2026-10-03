@@ -99,6 +99,21 @@
   let setupDestination = null, transferNotice = "";
   let confirmedDeviceId = null;
   let importedDeviceId = null;
+  let ingressId = 'moscow';
+  const INGRESS_COPY = {
+    ru:{label:'Точка входа',moscow:'Москва',riga:'Рига',help:'Для Москвы и Риги используются разные соединения и один сертификат этого доступа. Чтобы сменить точку входа, выключите VPN в Cisco Secure Client, выберите другое соединение и включите VPN.'},
+    en:{label:'Entry point',moscow:'Moscow',riga:'Riga',help:'Moscow and Riga use separate connections and the same access certificate. To switch entry points, disconnect VPN in Cisco Secure Client, select the other connection and reconnect.'},
+    lv:{label:'Ieejas punkts',moscow:'Maskava',riga:'Rīga',help:'Maskavai un Rīgai ir atsevišķi savienojumi ar vienu šīs piekļuves sertifikātu. Lai mainītu ieejas punktu, Cisco Secure Client atvienojiet VPN, izvēlieties otru savienojumu un pievienojieties vēlreiz.'}
+  };
+  const ingressCopy = () => INGRESS_COPY[document.documentElement.lang] || INGRESS_COPY.en;
+  const ingresses = () => (capabilities?.ingresses || [{id:'moscow',host:'oc.tolf.is:4443'}])
+    .filter(item => item.id === 'moscow' && item.host === 'oc.tolf.is:4443' || item.id === 'riga' && item.host === 'oc-riga.tolf.is:443');
+  const ingress = () => ingresses().find(item => item.id === ingressId) || ingresses()[0] || {id:'moscow',host:'oc.tolf.is:4443'};
+  function selectIngress(id) {
+    if (busy || loading || !ingresses().some(item => item.id === id) || ingressId === id) return;
+    ingressId = id; confirmedDeviceId = null;
+    render(); window.refreshAnyConnectIngress?.();
+  }
   const CERTIFICATE_COPY = {
     ru:{already:"Сертификат уже импортирован", done:"✓ Сертификат уже импортирован", help:"Если сертификат этого доступа уже установлен в Cisco Secure Client, повторный импорт не нужен. Выберите его в настройках нового соединения."},
     en:{already:"Certificate already imported", done:"✓ Certificate already imported", help:"If this access certificate is already installed in Cisco Secure Client, no new import is needed. Select it in the new connection settings."},
@@ -137,16 +152,18 @@
     if (!d) return;
     const snapshot = window.getAnyConnectSessionStatus?.();
     const state = d.state !== "active" ? d.state : snapshot?.id === d.id ? snapshot.status : "checking";
-    statusBadge.textContent = d.state !== "active" ? (d.state === "pending" ? copy().pending : copy().revoking) : sessionCopy()[state];
+    const points = state === 'connected' ? Object.entries(snapshot?.nodes || {}).filter(([,value]) => value.connected === true).map(([name]) => ingressCopy()[name]).filter(Boolean) : [];
+    statusBadge.textContent = d.state !== "active" ? (d.state === "pending" ? copy().pending : copy().revoking) : sessionCopy()[state] + (points.length ? ' · ' + points.join(', ') : '');
     statusBadge.className = "oc-device-status oc-session-" + state;
   };
   const copy = () => COPY[document.documentElement.lang] || COPY.en;
   const selected = () => devices.find(d => d.id === selectedId && d.state === "active") || null;
-  window.ocAccess = { selected, accountUsername: () => account?.vpn?.username || "" };
+  window.ocAccess = { selected, accountUsername: () => account?.vpn?.username || "", ingress, ingresses, selectIngress };
   const path = id => "/oc/access/devices/" + encodeURIComponent(id);
   function connectionUri(d) {
-    const name = "TOLF " + Array.from(d.label).slice(0,10).join("") + " " + d.id.replaceAll("-", "").slice(-8);
-    const params = {name, host:"oc.tolf.is:4443", usecert:"true", certcommonname:d.username, netroam:"true"};
+    const point = ingress();
+    const name = (point.id === 'riga' ? 'TOLF R ' : 'TOLF ') + Array.from(d.label).slice(0,point.id === 'riga' ? 8 : 10).join("") + " " + d.id.replaceAll("-", "").slice(-8);
+    const params = {name, host:point.host, usecert:"true", certcommonname:d.username, netroam:"true"};
     return "anyconnect://create/?" + Object.entries(params).map(([key,value]) =>
       encodeURIComponent(key) + "=" + encodeURIComponent(value)).join("&");
   }
@@ -242,6 +259,7 @@
     ]);
     if (token !== epoch) return;
     capabilities = results[0].status === "fulfilled" ? results[0].value : null;
+    if (!ingresses().some(item => item.id === ingressId)) { ingressId = ingress().id; confirmedDeviceId = null; }
     if (results[1].status === "fulfilled") {
       devices = results[1].value.devices.filter(d => d.state !== "revoked");
       if (!devices.some(d => d.id === selectedId)) {
@@ -387,6 +405,14 @@
       const steps = element("div", null, "oc-steps");
       const suffix = " " + sessionCopy().forDevice + " «" + d.label + "»";
       const connect = element("section", null, "oc-step"); connect.append(element("h4", "3. " + c.connect + suffix), element("p", c.return));
+      if (ingresses().length > 1) {
+        const field = element('div', null, 'oc-ingress-field');
+        const label = element('label', ingressCopy().label); label.htmlFor = 'ocIngress';
+        const select = element('select'); select.id = 'ocIngress'; select.disabled = busy || loading;
+        for (const point of ingresses()) { const option = element('option', ingressCopy()[point.id]); option.value = point.id; select.append(option); }
+        select.value = ingress().id; select.addEventListener('change', () => selectIngress(select.value));
+        field.append(label,select); connect.append(field,element('p',ingressCopy().help));
+      }
       if (confirmedDeviceId === d.id) {
         const completed = element("div", null, "oc-connection-completed");
         const status = element("div", completedCopy().done, "oc-connection-done"); status.setAttribute("role", "status");
@@ -398,7 +424,7 @@
         actions.append(button(stepCopy().confirm, () => { confirmedDeviceId = d.id; render(); }));
         connect.append(actions);
       }
-      connect.append(element("p", c.host));
+      connect.append(element("p", c.host.replace('oc.tolf.is:4443', ingress().host)));
       steps.append(connect);
       const cert = element("section", null, "oc-step"); cert.append(element("h4", "4. " + c.certificate + " — «" + d.label + "»"));
       const prepare = button(c.prepare, () => perform(async token => {
@@ -470,7 +496,7 @@
     epoch++; account = data?.authenticated ? data : null;
     clearCopyNotice();
     clearDownloadedPackage();
-    devices = []; selectedId = null; grant = null; capabilities = null;
+    devices = []; selectedId = null; grant = null; capabilities = null; ingressId = 'moscow';
     setupDestination = incomingDevice ? "local" : null; transferNotice = "";
     confirmedDeviceId = null;
     importedDeviceId = null;

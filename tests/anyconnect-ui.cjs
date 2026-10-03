@@ -34,13 +34,15 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   const ids = {};
   for (const name of ['vpnTransportSelector','vpnTransportIkev2','vpnTransportAnyConnect','vpnOverviewTitle',
     'vpnStatus','usernameRow','vpnUsername','anyConnectModeRow','anyConnectModeLabel','anyConnectModeHelp',
-    'anyConnectModeStatus','anyConnectModeSelector','anyConnectAccess']) ids[name] = new Element();
+    'anyConnectModeStatus','anyConnectModeSelector','anyConnectAccess','serverRiga','serverMoscow']) ids[name] = new Element();
+  ids.serverRiga.value='riga';ids.serverRiga.checked=true;ids.serverMoscow.value='moscow';
   const modes = ['auto','ru','lv','yt'].map(mode => { const n = new Element('button'); n.dataset.mode = mode; return n; });
   ids.anyConnectModeAuto = modes[0];
   const document = {documentElement:{lang:'ru',dataset:{}}, hidden:false,
     body:new Element('body'),
     getElementById: id => ids[id], querySelectorAll: () => modes,
     createElement: tag => new Element(tag), addEventListener() {}};
+  document.querySelector=()=>[ids.serverRiga,ids.serverMoscow].find(input=>input.checked);
   const handlers = {}, window = {tolfAccountState:{authenticated:true,userId:'owner',vpn:{username:'user0_ipad'}},
     addEventListener(name, fn) { (handlers[name] ||= []).push(fn); },
     dispatchEvent(event) { for (const fn of handlers[event.type] || []) fn(event); },
@@ -49,10 +51,10 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   const second = {id:'two',label:'Phone',username:'tolf-oc-'+'2'.repeat(32),state:'active',mode:'lv'};
   const devices = [first,second], calls = [];
   const downloads = [], revokedUrls = [];
-  let heldSession = null, connected = true, sessionError = false;
+  let heldSession = null, connected = true, sessionError = false, sessionNodes = null, policyApplied = true;
   async function request(url, options = {}) {
     const p = url.replace('https://api.tolf.is',''); calls.push([options.method || 'GET',p,options.credentials]);
-    if (p.endsWith('/capabilities')) return {issuance:true,nodeReady:true,version:2,guestSetup:true};
+    if (p.endsWith('/capabilities')) return {issuance:true,nodeReady:true,version:2,guestSetup:true,ingresses:[{id:'moscow',host:'oc.tolf.is:4443'},{id:'riga',host:'oc-riga.tolf.is:443'}]};
     if (p === '/oc/access/devices') {
       if (options.method === 'POST') {
         const data=JSON.parse(options.body),device={id:'three',label:data.label,username:'tolf-oc-'+'3'.repeat(32),state:'active',mode:'auto'};
@@ -65,11 +67,11 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
     if (p.endsWith('/session')) {
       if (sessionError) throw Error('Session unavailable');
       if (heldSession) await heldSession;
-      return {username:d.username,mode:d.mode,connected};
+      return {username:d.username,mode:d.mode,connected,nodes:sessionNodes};
     }
     if (p.endsWith('/policy')) {
       if (options.method === 'POST') d.mode = JSON.parse(options.body).mode;
-      return {username:d.username,mode:d.mode,applied:true};
+      return {username:d.username,mode:d.mode,applied:policyApplied};
     }
     if (p.endsWith('/import')) return {deviceId:d.id,password:'private-import-password',
       expiresAt:new Date(Date.now()+600000).toISOString(),certificateUrl:'https://api.tolf.is/import/token.p12',
@@ -77,6 +79,8 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
     throw Error('Unexpected endpoint: '+p);
   }
   const c = vm.createContext({window,document,API:'https://api.tolf.is',currentPlatform:'ios',
+    serverInputs:[ids.serverRiga,ids.serverMoscow],
+    allowedServers:['riga','moscow'],
     console,crypto:require('node:crypto').webcrypto,Date,Promise,
     URLSearchParams,Event:class {constructor(type){this.type=type;}},
     MutationObserver:class {observe(){}},
@@ -90,6 +94,8 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
       }
       return {ok:true,json:async()=>request(url,options)};
     }});
+  const uiSource=fs.readFileSync(path.join(root,'js','ui.js'),'utf8');
+  vm.runInContext(uiSource.slice(0,uiSource.indexOf('function updateSelectedServerAddress')),c);
   for (const file of ['transport-selector.js','anyconnect-access.js']) {
     vm.runInContext(fs.readFileSync(path.join(root,'js',file),'utf8'),c);
   }
@@ -99,6 +105,16 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   assert(!ids.anyConnectAccess.textContent.includes('Перед импортом сертификата'));
   assert(!descendants(ids.anyConnectAccess).some(n=>n.tagName==='button'&&n.textContent==='Получить сертификат'));
   button(ids.anyConnectAccess,'Настроить на этом устройстве').click();
+  assert(!ids.serverRiga.disabled,'Riga is enabled for activated AnyConnect access');
+  ids.serverRiga.events.change();
+  assert.equal(window.ocAccess.ingress().id,'riga');
+  c.allowedServers=['moscow'];assert.equal(c.getSelectedServerKey(),'riga','AnyConnect ingress is independent of IKEv2 grants');c.allowedServers=['riga','moscow'];
+  assert(ids.serverRiga.checked&&!ids.serverMoscow.checked);
+  const connectionLink=()=>descendants(ids.anyConnectAccess).find(n=>n.tagName==='a'&&n.textContent==='Добавить в AnyConnect');
+  assert.equal(new URLSearchParams(connectionLink().href.split('?')[1]).get('host'),'oc-riga.tolf.is:443');
+  assert.equal(new URLSearchParams(connectionLink().href.split('?')[1]).get('certcommonname'),first.username);
+  ids.serverMoscow.events.change();
+  assert.equal(window.ocAccess.ingress().id,'moscow');
   assert(descendants(ids.anyConnectAccess).some(n=>n.tagName==='button'&&n.textContent==='Получить сертификат'));
   assert.equal(descendants(ids.anyConnectAccess).filter(n=>n.tagName==='input').length,0);
   const deviceRow = ids.anyConnectAccess.children.find(n=>n.className==='oc-device-row');
@@ -115,6 +131,14 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   const statusBadge=()=>descendants(ids.anyConnectAccess).find(n=>n.className?.startsWith('oc-device-status'));
   assert.equal(statusBadge().textContent,'Подключено');
   assert(statusBadge().className.includes('oc-session-connected'));
+  sessionNodes={moscow:{connected:false,available:true},riga:{connected:true,available:true}};
+  window.dispatchEvent(new c.Event('focus'));await settle();
+  assert.equal(statusBadge().textContent,'Подключено · Рига');
+  sessionNodes=null;window.dispatchEvent(new c.Event('focus'));await settle();
+  policyApplied=false;window.refreshAnyConnectTransport();await settle();
+  assert(!ids.anyConnectModeSelector.classList.contains('policy-confirmed'),'pending multi-node policy cannot show the green dot');
+  policyApplied=true;window.dispatchEvent(new c.Event('focus'));await settle();
+  assert(ids.anyConnectModeSelector.classList.contains('policy-confirmed'),'a confirmed retry restores the indicator');
   let finishPoll;heldSession=new Promise(resolve=>{finishPoll=resolve;});
   window.dispatchEvent(new c.Event('focus'));await settle();
   assert.equal(statusBadge().textContent,'Подключено','background polling retains the confirmed status');
@@ -152,6 +176,13 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   button(ids.anyConnectAccess,'Сертификат уже импортирован').click();await settle();
   assert(ids.anyConnectAccess.textContent.includes('✓ Сертификат уже импортирован'));
   assert.equal(calls.filter(call=>call[1].endsWith('/import')).length,beforeImport,'existing certificate does not issue a bundle');
+  const ingressSelect=()=>descendants(ids.anyConnectAccess).find(n=>n.id==='ocIngress');
+  ingressSelect().value='riga';ingressSelect().events.change();
+  assert(button(ids.anyConnectAccess,'Получить сертификат').disabled,'a different ingress needs connection confirmation');
+  button(ids.anyConnectAccess,'Соединение добавлено').click();
+  assert(ids.anyConnectAccess.textContent.includes('✓ Сертификат уже импортирован'),'the certificate belongs to the device across ingress changes');
+  assert.equal(calls.filter(call=>call[1].endsWith('/import')).length,beforeImport);
+  ingressSelect().value='moscow';ingressSelect().events.change();button(ids.anyConnectAccess,'Соединение добавлено').click();
   assert(!descendants(ids.anyConnectAccess).some(n=>n.attributes['aria-label']==='Скопировать пароль'));
   button(ids.anyConnectAccess,'Получить сертификат').click(); await settle();
   assert(ids.anyConnectAccess.textContent.includes('private-import-password'));

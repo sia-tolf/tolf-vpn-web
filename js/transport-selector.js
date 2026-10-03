@@ -27,7 +27,8 @@
   let sessionInFlight = false;
   let sessionRequestToken = 0;
   let sessionStatus = "checking";
-  window.getAnyConnectSessionStatus = () => ({id: device()?.id, status: sessionStatus});
+  let sessionNodes = null;
+  window.getAnyConnectSessionStatus = () => ({id: device()?.id, status: sessionStatus, nodes: sessionNodes});
   function setSessionStatus(status) {
     sessionStatus = status;
     window.updateAnyConnectSessionStatus?.();
@@ -36,12 +37,14 @@
   const COPY = {
     en: {
       country: "Russia",
+      rigaCountry: 'Latvia',
       protocol: "Protocol",
       mode: "Routing",
       saved: "Saved",
       saving: "Saving…",
       failed: "Could not save",
       loading: "Loading…",
+      pending: 'Waiting for routing to apply',
       autoLabel: "Auto",
       auto: ["RU → Moscow", "rest → Riga"],
       ru: ["All traffic", "→ Moscow"],
@@ -50,12 +53,14 @@
     },
     ru: {
       country: "Россия",
+      rigaCountry: 'Латвия',
       protocol: "Протокол",
       mode: "Маршрутизация",
       saved: "Сохранено",
       saving: "Сохранение…",
       failed: "Не удалось сохранить",
       loading: "Загрузка…",
+      pending: 'Ожидает применения маршрутизации',
       autoLabel: "Авто",
       auto: ["RU → Москва", "остальное → Рига"],
       ru: ["Весь трафик", "→ Москва"],
@@ -64,12 +69,14 @@
     },
     lv: {
       country: "Krievija",
+      rigaCountry: 'Latvija',
       protocol: "Protokols",
       mode: "Maršrutēšana",
       saved: "Saglabāts",
       saving: "Saglabāšana…",
       failed: "Neizdevās saglabāt",
       loading: "Ielāde…",
+      pending: 'Gaida maršrutēšanas piemērošanu',
       autoLabel: "Automātiski",
       auto: ["RU → Maskava", "pārējais → Rīga"],
       ru: ["Visa datplūsma", "→ Maskava"],
@@ -145,8 +152,18 @@
         document.hidden || sessionInFlight) return;
     sessionInFlight = true;
     const requestToken = ++sessionRequestToken;
-    const selectedMode = anyConnectMode;
+    let selectedMode = anyConnectMode;
     try {
+      if (!policyConfirmed) {
+        const response = await fetch(endpoint(selected.id, 'policy'), {method:'GET',cache:'no-store',credentials:'include',headers:{Accept:'application/json'}});
+        if (!response.ok) throw new Error('Policy unavailable');
+        const data = await response.json();
+        if (requestToken !== sessionRequestToken || device()?.id !== selected.id) return;
+        if (data.username !== selected.username || !['auto','ru','lv','yt'].includes(data.mode)) throw new Error('Invalid policy');
+        anyConnectMode = data.mode; selectedMode = data.mode; policyConfirmed = data.applied === true;
+        setModeStatus(policyConfirmed ? '' : copy().pending);
+        if (!policyConfirmed) { sessionConnected = false; return; }
+      }
       const response = await fetch(endpoint(selected.id, "session"), {
         method: "GET",
         cache: "no-store",
@@ -159,6 +176,7 @@
         if (data?.username !== selected.username || typeof data?.connected !== "boolean") throw new Error("Invalid session");
         sessionConnected = data?.username === selected.username &&
           data?.mode === selectedMode && data?.connected === true;
+        sessionNodes = data.nodes || null;
         setSessionStatus(data.connected ? "connected" : "disconnected");
       }
     } catch {
@@ -191,8 +209,8 @@
       if (!["auto", "ru", "lv", "yt"].includes(data?.mode)) throw new Error("Invalid mode");
       anyConnectMode = data.mode;
       policyLoaded = true;
-      policyConfirmed = true;
-      setModeStatus("");
+      policyConfirmed = data.applied === true;
+      setModeStatus(policyConfirmed ? '' : copy().pending);
     } catch (error) {
       if (token !== selectionToken) return;
       console.error("AnyConnect policy load failed:", error);
@@ -269,6 +287,18 @@
       document.getElementById("usernameRow")?.classList.toggle("hidden", !accountUsername);
       const username = document.getElementById("vpnUsername");
       if (username) username.textContent = accountUsername;
+      const point = window.ocAccess?.ingress?.().id || 'moscow';
+      const points = window.ocAccess?.ingresses?.() || [{id:'moscow'}];
+      for (const name of ['riga','moscow']) {
+        const input = document.getElementById(name === 'riga' ? 'serverRiga' : 'serverMoscow');
+        if (input) { input.disabled = !points.some(value => value.id === name); input.checked = point === name; }
+      }
+      if (typeof vpnServerName !== 'undefined' && vpnServerName) {
+        const city = typeof t === 'function' ? t(point === 'riga' ? 'cityRiga' : 'cityMoscow') : point === 'riga' ? 'Riga' : 'Moscow';
+        vpnServerName.textContent = city + ', ' + (point === 'riga' ? copy().rigaCountry : copy().country);
+      }
+      if (typeof vpnServerHost !== 'undefined' && vpnServerHost) vpnServerHost.textContent = '';
+      if (typeof serverRow !== 'undefined' && serverRow) serverRow.classList.remove('hidden');
     }
   };
 
@@ -300,26 +330,8 @@
     }
 
 
-    if (riga) riga.disabled = true;
-    if (moscow) {
-      moscow.disabled = false;
-      if (!moscow.checked) {
-        moscow.checked = true;
-        if (typeof updateSelectedServerAddress === "function") {
-          updateSelectedServerAddress();
-        }
-      }
-    }
-
-    if (typeof vpnServerName !== "undefined" && vpnServerName) {
-      const city = typeof t === "function" ? t("cityMoscow") : "Moscow";
-      vpnServerName.textContent = city + ", " + copy().country;
-    }
-    if (typeof vpnServerHost !== "undefined" && vpnServerHost) {
-      vpnServerHost.textContent = "";
-    }
-    if (typeof serverRow !== "undefined" && serverRow) {
-      serverRow.classList.remove("hidden");
+    if (typeof updateSelectedServerAddress === "function") {
+      updateSelectedServerAddress();
     }
 
     renderMode();
@@ -333,11 +345,23 @@
     policyLoaded = false;
     policyBusy = false;
     sessionConnected = false;
+    sessionNodes = null;
     setSessionStatus("checking");
     anyConnectMode = device()?.mode || "auto";
     setModeStatus("");
     render();
   };
+
+  window.refreshAnyConnectIngress = () => {
+    if (transport !== 'anyconnect') return;
+    render();
+    window.dispatchEvent(new Event('vpntransportchange'));
+  };
+  for (const input of typeof serverInputs !== 'undefined' ? serverInputs : []) {
+    input.addEventListener('change', () => {
+      if (transport === 'anyconnect') window.ocAccess?.selectIngress?.(input.value);
+    });
+  }
 
   ikev2.addEventListener("click", () => {
     if (transport === "ikev2") return;

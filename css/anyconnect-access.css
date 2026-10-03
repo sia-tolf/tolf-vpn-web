@@ -22,6 +22,7 @@ html[data-vpn-transport="anyconnect"] #legacyVpnPanel { display: block !importan
 #anyConnectAccess .oc-connection-actions > .oc-action:only-child { grid-column: 1 / -1; }
 #anyConnectAccess .oc-device-row { display: grid; grid-template-columns: calc((100% - 10px) / 2) minmax(0, 1fr) auto; gap: 10px; align-items: stretch; }
 #anyConnectAccess .oc-device-row > select { min-width: 0; height: 100%; }
+#anyConnectAccess .oc-ingress-field { width: calc((100% - 10px) / 2); }
 #anyConnectAccess .oc-device-row > .oc-action { white-space: nowrap; }
 #anyConnectAccess .oc-device-status { display: flex; align-items: center; gap: 8px; box-sizing: border-box; min-height: 48px; padding: 6px 8px; font-size: 13px; font-weight: 500; line-height: 1.3; color: var(--secondary); }
 #anyConnectAccess .oc-device-status::before { content: ""; flex: 0 0 9px; width: 9px; height: 9px; border-radius: 50%; background: currentColor; }

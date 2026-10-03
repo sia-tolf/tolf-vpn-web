@@ -15,6 +15,17 @@
   const c = () => TEXT[language.value] || TEXT.ru;
   let connectionConfirmed = false;
   let certificateImported = false;
+  let ingressId = 'moscow';
+  const INGRESS_TEXT = {
+    ru:{label:'Точка входа',moscow:'Москва',riga:'Рига',help:'Соединения Москвы и Риги используют один сертификат этого доступа. Для смены точки входа выключите VPN в Cisco Secure Client, выберите другое соединение и включите VPN.'},
+    en:{label:'Entry point',moscow:'Moscow',riga:'Riga',help:'Moscow and Riga connections use the same access certificate. To switch entry points, disconnect VPN in Cisco Secure Client, select the other connection and reconnect.'},
+    lv:{label:'Ieejas punkts',moscow:'Maskava',riga:'Rīga',help:'Maskavas un Rīgas savienojumi izmanto vienu šīs piekļuves sertifikātu. Lai mainītu ieejas punktu, Cisco Secure Client atvienojiet VPN, izvēlieties otru savienojumu un pievienojieties vēlreiz.'}
+  };
+  const connections = () => {
+    const points = Array.isArray(info?.connections) ? info.connections.filter(item => item.id === 'moscow' && item.host === 'oc.tolf.is:4443' || item.id === 'riga' && item.host === 'oc-riga.tolf.is:443') : [];
+    return points.length ? points : [{id:'moscow',host:info?.server || 'oc.tolf.is:4443',connectionUri:info?.connectionUri}];
+  };
+  const connection = () => connections().find(item => item.id === ingressId) || connections()[0];
   const CERTIFICATE_TEXT = {
     ru:{already:"Сертификат уже импортирован", done:"✓ Сертификат уже импортирован", help:"Если сертификат этого доступа уже установлен в Cisco Secure Client, повторный импорт не нужен. Выберите его в настройках нового соединения."},
     en:{already:"Certificate already imported", done:"✓ Certificate already imported", help:"If this access certificate is already installed in Cisco Secure Client, no new import is needed. Select it in the new connection settings."},
@@ -62,6 +73,13 @@
     root.append(el("h4","1. "+t.install));
     const app=platform==="ios"?"https://apps.apple.com/app/id1135064690":platform==="android"?"https://play.google.com/store/apps/details?id=com.cisco.anyconnect.vpn.android.avf":"https://www.cisco.com/c/en/us/support/security/secure-client-5/model.html";
     root.append(link(t.app,app,false));root.append(el("h4","2. "+t.connect));
+    if(connections().length>1){
+      const copy=INGRESS_TEXT[language.value]||INGRESS_TEXT.en,field=el('div',null,'oc-ingress-field'),label=el('label',copy.label),select=el('select');
+      label.htmlFor='ocIngress';select.id='ocIngress';select.disabled=busy;
+      for(const point of connections()){const option=el('option',copy[point.id]);option.value=point.id;select.append(option);}
+      select.value=connection().id;select.addEventListener('change',()=>{if(busy)return;ingressId=select.value;connectionConfirmed=false;render();});
+      field.append(label,select);root.append(field,el('p',copy.help));
+    }
     if(connectionConfirmed){
       const doneText={ru:["✓ Соединение добавлено","Добавить заново"],en:["✓ Connection added","Add again"],lv:["✓ Savienojums pievienots","Pievienot vēlreiz"]}[language.value]||["✓ Connection added","Add again"];
       const completed=el("div",null,"oc-connection-completed"),status=el("div",doneText[0],"oc-connection-done");status.setAttribute("role","status");
@@ -70,8 +88,8 @@
     const step=STEP_TEXT[language.value]||STEP_TEXT.ru;
     if(!connectionConfirmed){
       const actions=el("div",null,"oc-actions oc-connection-actions");
-      if(platform!=="windows"){root.append(el("p",t.control));actions.append(link(t.add,info.connectionUri));}
-      else root.append(el("p","oc.tolf.is:4443"));
+      if(platform!=="windows"){root.append(el("p",t.control));actions.append(link(t.add,connection().connectionUri));}
+      else root.append(el("p",connection().host));
       actions.append(button(step.confirm,()=>{connectionConfirmed=true;render();}));root.append(actions);
     }
     const certificateText=CERTIFICATE_TEXT[language.value]||CERTIFICATE_TEXT.en;
