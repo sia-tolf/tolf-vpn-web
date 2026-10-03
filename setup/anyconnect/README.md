@@ -150,7 +150,11 @@ lock until reboot or cleanup.
    After creation the form closes; creating another device requires the explicit
    additional-access button. Routine refresh controls are hidden; recovery offers
    a retry button. Revoke sits in the same row as the device selector and access state;
-   additional access sits below that row.
+   additional access sits below that row. A separate colored status badge shows
+   checking, connected, disconnected or verification failure from the existing
+   authenticated session poll. Pending issuance and revocation retain lifecycle
+   labels. The selector contains device names only; step 3 and 4 headings name
+   the selected device. Switching devices clears confirmation until rechecked.
 3. Select External Control → Prompt in Cisco Secure Client, then add the
    connection using the AnyConnect link. Return to the website for step 4;
    enable VPN only after importing the certificate. Manual server address:

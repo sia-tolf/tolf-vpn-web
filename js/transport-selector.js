@@ -26,6 +26,12 @@
   let sessionConnected = false;
   let sessionInFlight = false;
   let sessionRequestToken = 0;
+  let sessionStatus = "checking";
+  window.getAnyConnectSessionStatus = () => ({id: device()?.id, status: sessionStatus});
+  function setSessionStatus(status) {
+    sessionStatus = status;
+    window.updateAnyConnectSessionStatus?.();
+  }
 
   const COPY = {
     en: {
@@ -138,6 +144,7 @@
     if (transport !== "anyconnect" || !policyLoaded || policyBusy ||
         document.hidden || sessionInFlight) return;
     sessionInFlight = true;
+    setSessionStatus("checking");
     const requestToken = ++sessionRequestToken;
     const selectedMode = anyConnectMode;
     try {
@@ -150,11 +157,13 @@
       if (!response.ok) throw new Error("HTTP " + response.status);
       const data = await response.json();
       if (requestToken === sessionRequestToken && device()?.id === selected.id) {
+        if (data?.username !== selected.username || typeof data?.connected !== "boolean") throw new Error("Invalid session");
         sessionConnected = data?.username === selected.username &&
           data?.mode === selectedMode && data?.connected === true;
+        setSessionStatus(data.connected ? "connected" : "disconnected");
       }
     } catch {
-      if (requestToken === sessionRequestToken) sessionConnected = false;
+      if (requestToken === sessionRequestToken) { sessionConnected = false; setSessionStatus("failed"); }
     } finally {
       sessionInFlight = false;
       renderMode();
@@ -188,6 +197,7 @@
     } catch (error) {
       if (token !== selectionToken) return;
       console.error("AnyConnect policy load failed:", error);
+      setSessionStatus("failed");
       setModeStatus(copy().failed, true);
     } finally {
       if (token === selectionToken) {
@@ -208,6 +218,7 @@
     sessionRequestToken++;
     sessionConnected = false;
     policyBusy = true;
+    setSessionStatus("checking");
     policyConfirmed = false;
     setModeStatus("");
     renderMode();
@@ -323,6 +334,7 @@
     policyLoaded = false;
     policyBusy = false;
     sessionConnected = false;
+    setSessionStatus("checking");
     anyConnectMode = device()?.mode || "auto";
     setModeStatus("");
     render();

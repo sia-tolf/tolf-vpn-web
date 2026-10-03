@@ -14,9 +14,15 @@ html[data-vpn-transport="anyconnect"] #legacyVpnPanel { display: block !importan
 #anyConnectAccess input, #anyConnectAccess select { box-sizing: border-box; width: 100%; max-width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; font: inherit; background: var(--card); color: var(--text); }
 #anyConnectAccess .oc-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0; }
 #anyConnectAccess .oc-action { max-width: 100%; }
-#anyConnectAccess .oc-device-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: stretch; }
+#anyConnectAccess .oc-device-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, auto) auto; gap: 10px; align-items: stretch; }
 #anyConnectAccess .oc-device-row > select { min-width: 0; height: 100%; }
 #anyConnectAccess .oc-device-row > .oc-action { white-space: nowrap; }
+#anyConnectAccess .oc-device-status { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: 10px; font-size: 13px; font-weight: 500; line-height: 1.3; color: var(--secondary); background: var(--code-background); }
+#anyConnectAccess .oc-device-status::before { content: ""; flex: 0 0 6px; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+#anyConnectAccess .oc-session-connected { color: #247a43; background: #edf8f0; }
+#anyConnectAccess .oc-session-connected::before { background: #35c65a; }
+#anyConnectAccess .oc-session-checking { color: var(--tolf-action-text, #315780); }
+#anyConnectAccess .oc-session-failed, #anyConnectAccess .oc-session-revoking { color: var(--error); }
 #anyConnectAccess .oc-prepare { width: calc((100% - 10px) / 2); }
 #anyConnectAccess .oc-actions.oc-import-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 #anyConnectAccess .oc-import-actions > .oc-action { width: 100%; min-width: 0; overflow-wrap: anywhere; }
@@ -35,6 +41,9 @@ html[data-vpn-transport="anyconnect"] #legacyVpnPanel { display: block !importan
 #anyConnectAccess .oc-error { color: var(--error); }
 #anyConnectAccess .oc-note { color: var(--secondary); }
 @media (max-width: 600px) {
+  #anyConnectAccess .oc-device-row { grid-template-columns: minmax(0, 1fr) minmax(0, .85fr) minmax(0, 1.1fr); gap: 6px; }
+  #anyConnectAccess .oc-device-row > .oc-action { min-width: 0; white-space: normal; padding-left: 8px; padding-right: 8px; }
+  #anyConnectAccess .oc-device-status { font-size: 12px; padding: 6px; }
   #anyConnectAccess .oc-actions > .oc-action { flex: 1 1 0; min-width: 0; }
 }
 html[data-vpn-transport="anyconnect"] #vpnUsername { overflow-wrap: anywhere; }

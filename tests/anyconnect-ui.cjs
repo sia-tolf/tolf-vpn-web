@@ -49,7 +49,7 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   const second = {id:'two',label:'Phone',username:'tolf-oc-'+'2'.repeat(32),state:'active',mode:'lv'};
   const devices = [first,second], calls = [];
   const downloads = [], revokedUrls = [];
-  let heldSession = null;
+  let heldSession = null, connected = true, sessionError = false;
   async function request(url, options = {}) {
     const p = url.replace('https://api.tolf.is',''); calls.push([options.method || 'GET',p,options.credentials]);
     if (p.endsWith('/capabilities')) return {issuance:true,nodeReady:true,version:2};
@@ -62,8 +62,9 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
     }
     const d = devices.find(d => p.includes('/'+d.id+'/'));
     if (p.endsWith('/session')) {
+      if (sessionError) throw Error('Session unavailable');
       if (heldSession) await heldSession;
-      return {username:d.username,mode:d.mode,connected:true};
+      return {username:d.username,mode:d.mode,connected};
     }
     if (p.endsWith('/policy')) {
       if (options.method === 'POST') d.mode = JSON.parse(options.body).mode;
@@ -107,6 +108,14 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   button(ids.anyConnectAccess,'Отмена').click();
   assert.equal(descendants(ids.anyConnectAccess).filter(n=>n.tagName==='input').length,0);
   assert.equal(ids.vpnUsername.textContent,'user0_ipad');
+  const statusBadge=()=>descendants(ids.anyConnectAccess).find(n=>n.className?.startsWith('oc-device-status'));
+  assert.equal(statusBadge().textContent,'Подключено');
+  assert(statusBadge().className.includes('oc-session-connected'));
+  connected=false;window.dispatchEvent(new c.Event('focus'));await settle();
+  assert.equal(statusBadge().textContent,'Не подключено');
+  sessionError=true;window.dispatchEvent(new c.Event('focus'));await settle();
+  assert.equal(statusBadge().textContent,'Не удалось проверить');
+  sessionError=false;connected=true;window.dispatchEvent(new c.Event('focus'));await settle();
   assert(ids.anyConnectModeSelector.classList.contains('policy-confirmed'));
   button(ids.anyConnectAccess,'Получить сертификат').click(); await settle();
   assert(ids.anyConnectAccess.textContent.includes('private-import-password'));
@@ -127,6 +136,8 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   const steps = descendants(ids.anyConnectAccess).find(n=>n.className==='oc-steps');
   assert.equal(steps.children[0],connectionStep);
   assert.equal(steps.children[1],certificateStep);
+  assert(connectionStep.children[0].textContent.includes('«iPad»'));
+  assert(certificateStep.children[0].textContent.includes('«iPad»'));
   assert(connectionStep.textContent.includes('Сначала добавьте соединение'));
   assert(button(ids.anyConnectAccess,'Получить сертификат').className.includes('oc-prepare'));
   const connectionPosition = connectionStep.children.findIndex(n=>n.tagName==='a');
@@ -146,6 +157,8 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   assert(!descendants(ids.anyConnectAccess).some(n=>n.className==='oc-copy-feedback'));
   assert.deepEqual(revokedUrls,['blob:test-package']);
   assert.equal(ids.vpnUsername.textContent,'user0_ipad');
+  assert(descendants(ids.anyConnectAccess).filter(n=>n.tagName==='h4').some(n=>n.textContent==='3. Добавьте соединение для «Phone»'));
+  assert(descendants(ids.anyConnectAccess).filter(n=>n.tagName==='h4').some(n=>n.textContent==='4. Импортируйте сертификат для «Phone»'));
   modes[1].click(); await settle();
   assert.equal(first.mode,'auto'); assert.equal(second.mode,'ru');
   button(ids.anyConnectAccess,'Создать дополнительный доступ').click();

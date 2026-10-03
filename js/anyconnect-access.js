@@ -91,6 +91,22 @@
   let deviceName = "", creationRequest = null, addingDevice = false;
   let copyNotice = null, copyNoticeTimer = null;
   let downloadedPackage = null;
+  let statusBadge = null;
+  const SESSION_COPY = {
+    ru: {connected:"Подключено", disconnected:"Не подключено", checking:"Проверяем подключение…", failed:"Не удалось проверить", forDevice:"для"},
+    en: {connected:"Connected", disconnected:"Not connected", checking:"Checking connection…", failed:"Unable to check", forDevice:"for"},
+    lv: {connected:"Savienots", disconnected:"Nav savienots", checking:"Pārbauda savienojumu…", failed:"Neizdevās pārbaudīt", forDevice:"ierīcei"}
+  };
+  const sessionCopy = () => SESSION_COPY[document.documentElement.lang] || SESSION_COPY.en;
+  window.updateAnyConnectSessionStatus = () => {
+    if (!statusBadge) return;
+    const d = devices.find(d => d.id === selectedId);
+    if (!d) return;
+    const snapshot = window.getAnyConnectSessionStatus?.();
+    const state = d.state !== "active" ? d.state : snapshot?.id === d.id ? snapshot.status : "checking";
+    statusBadge.textContent = d.state !== "active" ? (d.state === "pending" ? copy().pending : copy().revoking) : sessionCopy()[state];
+    statusBadge.className = "oc-device-status oc-session-" + state;
+  };
   const copy = () => COPY[document.documentElement.lang] || COPY.en;
   const selected = () => devices.find(d => d.id === selectedId && d.state === "active") || null;
   window.ocAccess = { selected, accountUsername: () => account?.vpn?.username || "" };
@@ -219,6 +235,7 @@
     message = copy().ready;
   }
   function render() {
+    statusBadge = null;
     root.replaceChildren();
     if (!account) return;
     const c = copy(), mobile = currentPlatform !== "windows";
@@ -235,10 +252,13 @@
       const select = element("select"); select.id = "ocDeviceSelect"; select.setAttribute("aria-label", c.device);
       select.disabled = busy || loading;
       for (const d of devices) {
-        const opt = element("option", d.label + " — " + (d.state === "active" ? c.ready : d.state === "pending" ? c.pending : c.revoking));
+        const opt = element("option", d.label);
         opt.value = d.id; opt.selected = d.id === selectedId; select.append(opt);
       }
       select.addEventListener("change", () => choose(select.value)); row.append(select);
+      statusBadge = element("span", null, "oc-device-status");
+      statusBadge.setAttribute("role", "status"); statusBadge.setAttribute("aria-live", "polite");
+      row.append(statusBadge); window.updateAnyConnectSessionStatus();
       const current = devices.find(d => d.id === selectedId);
       if (current) {
         const revoke = button(c.revoke, () => revokeDevice(current));
@@ -279,10 +299,11 @@
     const d = selected();
     if (d) {
       const steps = element("div", null, "oc-steps");
-      const connect = element("section", null, "oc-step"); connect.append(element("h4", "3. " + c.connect), element("p", c.return));
+      const suffix = " " + sessionCopy().forDevice + " «" + d.label + "»";
+      const connect = element("section", null, "oc-step"); connect.append(element("h4", "3. " + c.connect + suffix), element("p", c.return));
       if (mobile) connect.append(element("p", c.controlReminder), link(c.add, connectionUri(d), true));
       connect.append(element("p", c.host)); steps.append(connect);
-      const cert = element("section", null, "oc-step"); cert.append(element("h4", "4. " + c.certificate));
+      const cert = element("section", null, "oc-step"); cert.append(element("h4", "4. " + c.certificate + suffix));
       const prepare = button(c.prepare, () => perform(async token => {
         const id = d.id;
         const result = await apiRequest(path(id) + "/import", { method: "POST", timeoutMs: 30000 });
