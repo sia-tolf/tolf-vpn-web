@@ -92,6 +92,14 @@
   let copyNotice = null, copyNoticeTimer = null;
   let downloadedPackage = null;
   let statusBadge = null;
+  const incomingDevice = new URLSearchParams(window.location?.search || "").get("ocDevice");
+  let setupDestination = "local", transferNotice = "";
+  const DELIVERY_COPY = {
+    ru: {local:"Настроить на этом устройстве", remote:"Передать на другое устройство", help:"Откройте эту ссылку на нужном устройстве и войдите в тот же аккаунт TOLF. Будет выбран этот доступ. Затем добавьте соединение и импортируйте сертификат.", copy:"Скопировать ссылку", share:"Поделиться ссылкой", copied:"Ссылка скопирована", missing:"Этот доступ недоступен в текущем аккаунте. Войдите в аккаунт, в котором он создан."},
+    en: {local:"Set up on this device", remote:"Transfer to another device", help:"Open this link on the target device and sign in to the same TOLF account. This access will be selected. Then add the connection and import the certificate.", copy:"Copy link", share:"Share link", copied:"Link copied", missing:"This access is unavailable in this account. Sign in to the account that created it."},
+    lv: {local:"Iestatīt šajā ierīcē", remote:"Pārsūtīt uz citu ierīci", help:"Atveriet saiti vajadzīgajā ierīcē un piesakieties tajā pašā TOLF kontā. Tiks izvēlēta šī piekļuve. Pēc tam pievienojiet savienojumu un importējiet sertifikātu.", copy:"Kopēt saiti", share:"Kopīgot saiti", copied:"Saite nokopēta", missing:"Šī piekļuve šajā kontā nav pieejama. Piesakieties kontā, kurā tā izveidota."}
+  };
+  const deliveryCopy = () => DELIVERY_COPY[document.documentElement.lang] || DELIVERY_COPY.en;
   const SESSION_COPY = {
     ru: {connected:"Подключено", disconnected:"Не подключено", checking:"Проверяем подключение…", failed:"Не удалось проверить", forDevice:"для"},
     en: {connected:"Connected", disconnected:"Not connected", checking:"Checking connection…", failed:"Unable to check", forDevice:"for"},
@@ -135,6 +143,7 @@
     return node;
   }
   function choose(id) {
+    setupDestination = "local"; transferNotice = "";
     selectedId = id; grant = null; clearCopyNotice(); clearDownloadedPackage();
     window.refreshAnyConnectTransport?.(); render();
   }
@@ -208,7 +217,8 @@
     if (results[1].status === "fulfilled") {
       devices = results[1].value.devices.filter(d => d.state !== "revoked");
       if (!devices.some(d => d.id === selectedId)) {
-        selectedId = devices.find(d => d.state === "active")?.id || devices[0]?.id || null;
+        selectedId = incomingDevice ? devices.find(d => d.id === incomingDevice)?.id || null : devices.find(d => d.state === "active")?.id || devices[0]?.id || null;
+        if (incomingDevice && !selectedId) { message = deliveryCopy().missing; error = true; }
         grant = null;
         clearDownloadedPackage();
       }
@@ -251,6 +261,7 @@
       const row = element("div", null, "oc-device-row");
       const select = element("select"); select.id = "ocDeviceSelect"; select.setAttribute("aria-label", c.device);
       select.disabled = busy || loading;
+      if (!selectedId) { const placeholder = element("option", c.choose); placeholder.value = ""; placeholder.selected = true; select.append(placeholder); }
       for (const d of devices) {
         const opt = element("option", d.label);
         opt.value = d.id; opt.selected = d.id === selectedId; select.append(opt);
@@ -298,6 +309,34 @@
     if (!capabilities?.issuance) root.append(element("p", loading ? c.loading : c.unavailable, "oc-note"));
     const d = selected();
     if (d) {
+      const delivery = deliveryCopy();
+      const destinations = element("div", null, "oc-actions oc-import-actions");
+      for (const [destination, text] of [["local",delivery.local],["remote",delivery.remote]]) {
+        const action = button(text, () => {
+          setupDestination = destination; transferNotice = "";
+          if (destination === "remote") { grant = null; clearCopyNotice(); clearDownloadedPackage(); }
+          render();
+        }, setupDestination === destination);
+        action.setAttribute("aria-pressed", String(setupDestination === destination)); destinations.append(action);
+      }
+      root.append(destinations);
+      if (setupDestination === "remote") {
+        const setupLink = "https://vpn.tolf.is/?ocDevice=" + encodeURIComponent(d.id);
+        const transfer = element("section", null, "oc-transfer");
+        transfer.append(element("h4", delivery.remote + " — «" + d.label + "»"), element("p", delivery.help, "oc-note"));
+        const field = element("input"); field.type = "text"; field.readOnly = true; field.value = setupLink; field.className = "oc-transfer-link"; field.setAttribute("aria-label", delivery.copy); transfer.append(field);
+        const actions = element("div", null, "oc-actions oc-import-actions");
+        actions.append(button(delivery.copy, async () => {
+          const token = epoch, id = d.id;
+          try { await copyText(setupLink); if (token === epoch && selectedId === id && setupDestination === "remote") { transferNotice = delivery.copied; render(); } }
+          catch { if (token === epoch && selectedId === id) { transferNotice = c.failed; render(); } }
+        }));
+        if (typeof navigator !== "undefined" && navigator.share) actions.append(button(delivery.share, async () => {
+          try { await navigator.share({title:"TOLF AnyConnect — " + d.label, url:setupLink}); } catch { }
+        }));
+        transfer.append(actions);
+        const notice = element("p", transferNotice, "oc-note"); notice.setAttribute("role", "status"); transfer.append(notice); root.append(transfer);
+      } else {
       const steps = element("div", null, "oc-steps");
       const suffix = " " + sessionCopy().forDevice + " «" + d.label + "»";
       const connect = element("section", null, "oc-step"); connect.append(element("h4", "3. " + c.connect + suffix), element("p", c.return));
@@ -341,6 +380,7 @@
       const enable = element("section", null, "oc-step");
       enable.append(element("h4", "5. " + c.enableTitle), element("p", c.enable));
       steps.append(enable); root.append(steps);
+      }
     }
     const status = element("p", message, "oc-message" + (error ? " oc-error" : ""));
     status.setAttribute("role", "status"); status.setAttribute("aria-live", "polite"); root.append(status);
@@ -359,6 +399,7 @@
     clearCopyNotice();
     clearDownloadedPackage();
     devices = []; selectedId = null; grant = null; capabilities = null;
+    setupDestination = "local"; transferNotice = "";
     deviceName = ""; creationRequest = null; addingDevice = false; busy = false; loading = false; message = ""; error = false;
     window.refreshAnyConnectTransport?.(); render();
     if (account) refresh();
@@ -371,4 +412,5 @@
   window.addEventListener("pagehide", () => { grant = null; clearCopyNotice(); clearDownloadedPackage(); });
   window.addEventListener("pageshow", render);
   window.setAnyConnectAccount(window.tolfAccountState || null);
+  if (incomingDevice) document.getElementById("vpnTransportAnyConnect")?.click();
 })();

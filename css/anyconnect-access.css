@@ -14,10 +14,10 @@ html[data-vpn-transport="anyconnect"] #legacyVpnPanel { display: block !importan
 #anyConnectAccess input, #anyConnectAccess select { box-sizing: border-box; width: 100%; max-width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; font: inherit; background: var(--card); color: var(--text); }
 #anyConnectAccess .oc-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0; }
 #anyConnectAccess .oc-action { max-width: 100%; }
-#anyConnectAccess .oc-device-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, auto) auto; gap: 10px; align-items: stretch; }
+#anyConnectAccess .oc-device-row { display: grid; grid-template-columns: minmax(0, 1fr) 180px auto; gap: 10px; align-items: stretch; }
 #anyConnectAccess .oc-device-row > select { min-width: 0; height: 100%; }
 #anyConnectAccess .oc-device-row > .oc-action { white-space: nowrap; }
-#anyConnectAccess .oc-device-status { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: 10px; font-size: 13px; font-weight: 500; line-height: 1.3; color: var(--secondary); background: var(--code-background); }
+#anyConnectAccess .oc-device-status { display: flex; align-items: center; gap: 6px; box-sizing: border-box; min-height: 48px; padding: 6px 8px; border: 1px solid var(--border); border-radius: 10px; font-size: 13px; font-weight: 500; line-height: 1.3; color: var(--secondary); background: var(--code-background); }
 #anyConnectAccess .oc-device-status::before { content: ""; flex: 0 0 6px; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 #anyConnectAccess .oc-session-connected { color: #247a43; background: #edf8f0; }
 #anyConnectAccess .oc-session-connected::before { background: #35c65a; }
@@ -27,6 +27,7 @@ html[data-vpn-transport="anyconnect"] #legacyVpnPanel { display: block !importan
 #anyConnectAccess .oc-actions.oc-import-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 #anyConnectAccess .oc-import-actions > .oc-action { width: 100%; min-width: 0; overflow-wrap: anywhere; }
 #anyConnectAccess .oc-import-actions > .oc-action:only-child { grid-column: 1 / -1; }
+#anyConnectAccess .oc-transfer-link { margin-top: 12px; }
 #anyConnectAccess .oc-password-row { display: flex; align-items: center; gap: 12px; background: var(--code-background); color: var(--text); padding: 0 12px; border: 1px solid var(--border); border-radius: 12px; }
 #anyConnectAccess .oc-secret { flex: 1; min-width: 0; font: 16px ui-monospace, monospace; overflow-wrap: anywhere; padding: 12px 0; user-select: all; }
 #anyConnectAccess .oc-copy { flex: 0 0 44px; width: 44px; min-height: 44px; padding: 0; border: 0; border-radius: 8px; background: transparent; color: var(--tolf-action-text, var(--text)); }

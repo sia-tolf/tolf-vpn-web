@@ -155,6 +155,13 @@ lock until reboot or cleanup.
    authenticated session poll. Pending issuance and revocation retain lifecycle
    labels. The selector contains device names only; step 3 and 4 headings name
    the selected device. Switching devices clears confirmation until rechecked.
+   Routine polls retain the last result until a new result arrives, so the
+   bordered, fixed-width status does not flash checking every ten seconds.
+   Every active access offers local setup or transfer to another device. Transfer
+   provides a shareable URL containing only the device ID, never import secrets.
+   The receiving browser opens AnyConnect and selects that access after login to
+   the same account. An unavailable ID shows an account error rather than
+   silently choosing a different device. No certificate is issued by this link.
 3. Select External Control → Prompt in Cisco Secure Client, then add the
    connection using the AnyConnect link. Return to the website for step 4;
    enable VPN only after importing the certificate. Manual server address:

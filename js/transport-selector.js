@@ -144,7 +144,6 @@
     if (transport !== "anyconnect" || !policyLoaded || policyBusy ||
         document.hidden || sessionInFlight) return;
     sessionInFlight = true;
-    setSessionStatus("checking");
     const requestToken = ++sessionRequestToken;
     const selectedMode = anyConnectMode;
     try {

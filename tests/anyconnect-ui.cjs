@@ -77,7 +77,7 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   }
   const c = vm.createContext({window,document,API:'https://api.tolf.is',currentPlatform:'ios',
     console,crypto:require('node:crypto').webcrypto,Date,Promise,
-    Event:class {constructor(type){this.type=type;}},
+    URLSearchParams,Event:class {constructor(type){this.type=type;}},
     MutationObserver:class {observe(){}},
     setInterval(){},setTimeout,clearTimeout,
     apiRequest:request,copyText:async value=>{c.copied=value;},Blob,AbortController,
@@ -111,12 +111,23 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   const statusBadge=()=>descendants(ids.anyConnectAccess).find(n=>n.className?.startsWith('oc-device-status'));
   assert.equal(statusBadge().textContent,'Подключено');
   assert(statusBadge().className.includes('oc-session-connected'));
+  let finishPoll;heldSession=new Promise(resolve=>{finishPoll=resolve;});
+  window.dispatchEvent(new c.Event('focus'));await settle();
+  assert.equal(statusBadge().textContent,'Подключено','background polling retains the confirmed status');
+  finishPoll();heldSession=null;await settle();
   connected=false;window.dispatchEvent(new c.Event('focus'));await settle();
   assert.equal(statusBadge().textContent,'Не подключено');
   sessionError=true;window.dispatchEvent(new c.Event('focus'));await settle();
   assert.equal(statusBadge().textContent,'Не удалось проверить');
   sessionError=false;connected=true;window.dispatchEvent(new c.Event('focus'));await settle();
   assert(ids.anyConnectModeSelector.classList.contains('policy-confirmed'));
+  button(ids.anyConnectAccess,'Передать на другое устройство').click();
+  assert(!descendants(ids.anyConnectAccess).some(n=>n.tagName==='button'&&n.textContent==='Получить сертификат'));
+  assert(descendants(ids.anyConnectAccess).some(n=>n.tagName==='input'&&n.readOnly&&n.value==='https://vpn.tolf.is/?ocDevice=one'));
+  button(ids.anyConnectAccess,'Скопировать ссылку').click();await settle();
+  assert.equal(c.copied,'https://vpn.tolf.is/?ocDevice=one');
+  assert(ids.anyConnectAccess.textContent.includes('Ссылка скопирована'));
+  button(ids.anyConnectAccess,'Настроить на этом устройстве').click();
   button(ids.anyConnectAccess,'Получить сертификат').click(); await settle();
   assert(ids.anyConnectAccess.textContent.includes('private-import-password'));
   assert(!descendants(ids.anyConnectAccess).some(n=>n.tagName==='button'&&n.textContent==='Скопировать пароль'));
@@ -182,5 +193,15 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   assert.equal(ids.anyConnectAccess.textContent,'');
   assert(!ids.anyConnectModeSelector.classList.contains('policy-confirmed'));
   assert(modes.every(n=>n.disabled));
+  window.location={search:'?ocDevice=two'};
+  window.tolfAccountState={authenticated:true,userId:'owner',vpn:{username:'user0_ipad'}};
+  vm.runInContext(fs.readFileSync(path.join(root,'js','anyconnect-access.js'),'utf8'),c);await settle();
+  assert.equal(window.ocAccess.selected().id,'two','receiving link selects its device');
+  window.setAnyConnectAccount(null);
+  devices.length=0;
+  window.setAnyConnectAccount({authenticated:true,userId:'different-owner'});await settle();
+  assert.equal(window.ocAccess.selected(),null);
+  assert(ids.anyConnectAccess.textContent.includes('Этот доступ недоступен в текущем аккаунте'));
+  assert(!descendants(ids.anyConnectAccess).some(n=>n.tagName==='button'&&n.textContent==='Получить сертификат'));
   console.log('PASS personal UI: device selection, import secret clearing, isolated routing, authenticated endpoints, stale session after logout');
 })().catch(error=>{console.error(error);process.exitCode=1;});
