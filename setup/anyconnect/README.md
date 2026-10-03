@@ -204,8 +204,10 @@ Import passwords are never included in URIs. Connection names have a unique
 device suffix and at most 24 characters.
 All steps use the same content inset. Import/download actions share a full-width
 row with equal-width columns and inherit the site's standard button styles.
-Import expiration and manual-import instructions share the same secondary text
-style. Device selection and revoke share one full-width row with equal heights;
+All explanatory paragraphs and list items use the same normal text color,
+inherited font family, 14px size, 400 weight and 1.55 line height on account and
+guest setup pages. Errors and connection statuses retain their semantic colors.
+Device selection and revoke share one full-width row with equal heights;
 additional access is in the section header in the wide layout.
 The status has no frame or background and uses a nine-pixel colored dot.
 Narrow-screen layout refinement is deferred until the wide layout is accepted.
