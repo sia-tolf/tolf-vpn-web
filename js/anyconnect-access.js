@@ -363,16 +363,18 @@
     const d = selected();
     if (d) {
       const delivery = deliveryCopy();
+      const connectionSettings = element('div', null, 'oc-connection-settings');
       if (ingresses().length > 1) {
         const field = element('div', null, 'oc-ingress-field');
         const label = element('label', ingressCopy().label); label.htmlFor = 'ocIngress';
         const select = element('select'); select.id = 'ocIngress'; select.disabled = busy || loading;
         for (const point of ingresses()) { const option = element('option', ingressCopy()[point.id]); option.value = point.id; select.append(option); }
         select.value = ingress().id; select.addEventListener('change', () => selectIngress(select.value));
-        field.append(label, select); root.append(field, element('p', ingressCopy().help));
+        field.append(label, select, element('p', ingressCopy().help)); connectionSettings.append(field);
       }
       const destinations = element("div", null, "oc-actions oc-import-actions oc-destinations");
-      if (routingControls) root.append(routingControls);
+      if (routingControls) connectionSettings.append(routingControls);
+      root.append(connectionSettings);
       for (const [destination, text] of [["local",delivery.local],["remote",delivery.remote]]) {
         const action = button(text, () => {
           setupDestination = destination; transferNotice = "";
