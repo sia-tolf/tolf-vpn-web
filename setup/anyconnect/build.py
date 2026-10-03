@@ -51,3 +51,8 @@ output = template.replace('PAYLOAD = {}  # BUILD_RIGA_DEVICES', 'PAYLOAD = ' + r
 compile(output, 'install-riga-devices.py', 'exec')
 (directory / 'install-riga-devices.py').write_text(output)
 print('Riga devices:', hashlib.sha256(output.encode()).hexdigest())
+template = (directory / 'install-moscow-riga-transit.template.sh').read_text()
+assert template.count('# BUILD_TRANSIT_SCRIPT') == 1
+output = template.replace('# BUILD_TRANSIT_SCRIPT', (directory / 'moscow-riga-transit.sh').read_text().rstrip())
+(directory / 'install-moscow-riga-transit.sh').write_text(output)
+print('Moscow Riga transit:', hashlib.sha256(output.encode()).hexdigest())

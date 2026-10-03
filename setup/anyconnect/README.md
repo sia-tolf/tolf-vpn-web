@@ -97,6 +97,26 @@ device, survive ingress changes, and clear on device/account change or page exit
 Adding the other connection therefore needs no fresh issuance or repeated
 import. Legacy single-ingress metadata remains supported.
 
+### Moscow transit prerequisite for Riga RU/YT
+
+The observed Moscow policy contains priority 10005, source 10.19.0.0/24,
+lookup 100 (default back to Riga). A Riga-selected Moscow route must take
+precedence over this legacy source policy to avoid returning packets to Riga.
+`install-moscow-riga-transit.sh` adds only priority 8983, source 10.19.0.0/24,
+input interface gre4-riga_gre, lookup main. The rule also precedes Moscow's
+0x200 lookup-100 rule. Traffic from Moscow's own AnyConnect pool 10.21.0.0/24
+is unaffected; the exception concerns packets already selected for Moscow by
+Riga, including the old Riga pilot's RU traffic.
+
+The installer rejects the wrong node by checking Moscow's br-lan address,
+ocserv config and GRE interface. It refuses conflicting priority 8983 and
+uncommitted firewall changes. An idempotent firewall4 script include reapplies
+the rule after boot or firewall reload. It backs up the helper and firewall
+config and restores them on error. Its route check uses a source in the Riga
+pool, GRE input and mark 0x200, and requires Moscow's WAN gateway rather than
+a return route through GRE. This final node prerequisite and live Riga client
+validation still require the operator's output.
+
 Operator output confirms Debian ocserv 1.3.0, parallel plain password and
 certificate authentication (`enable-auth = certificate`). HAProxy accepts
 `oc-riga.tolf.is` SNI at 188.214.39.114:443 and forwards TCP to
