@@ -119,12 +119,12 @@ def main():
             try:
                 with urllib.request.urlopen("http://127.0.0.1:8000/oc/access/capabilities", timeout=30) as response:
                     result = json.load(response)
-                if result.get("version") == 2 and result.get("caSha256") == fingerprint:
+                if result.get("version") == 2 and result.get("guestSetup") is True and result.get("caSha256") == fingerprint:
                     break
             except (OSError, ValueError):
                 pass
             time.sleep(1)
-        if (not result or result.get("version") != 2 or result.get("caSha256") != fingerprint
+        if (not result or result.get("version") != 2 or result.get("guestSetup") is not True or result.get("caSha256") != fingerprint
                 or result.get("issuance") is not expected_enabled or result.get("nodeReady") is not expected_enabled):
             raise RuntimeError("AnyConnect API health check failed")
         run(str(PYTHON), "-c",

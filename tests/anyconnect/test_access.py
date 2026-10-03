@@ -79,6 +79,62 @@ class PersonalAccess(unittest.TestCase):
     def grant(self,device):
         return self.client.post('/oc/access/devices/'+device['id']+'/import',headers=self.headers).json()
 
+    def setup_link(self,device):
+        result=self.client.post('/oc/access/devices/'+device['id']+'/setup-link',headers=self.headers)
+        self.assertEqual(result.status_code,200,result.text)
+        return urlparse(result.json()['setupUrl']).fragment
+
+    def test_guest_setup_metadata_does_not_consume_and_claim_needs_no_login(self):
+        device=self.create().json()['device'];token=self.setup_link(device)
+        self.client.cookies.clear()
+        path='/oc/access/setup/'+token
+        for _ in range(2):
+            info=self.client.get(path)
+            self.assertEqual(info.status_code,200,info.text)
+            self.assertEqual(info.json()['label'],'iPad')
+            self.assertNotIn('password',info.json())
+            self.assertNotIn('certificateUrl',info.json())
+        self.assertEqual(self.client.post(path+'/claim').status_code,403)
+        result=self.client.post(path+'/claim',headers=self.headers)
+        self.assertEqual(result.status_code,200,result.text)
+        grant=result.json()
+        self.assertEqual(self.client.get(path).status_code,410)
+        self.assertEqual(self.client.post(path+'/claim',headers=self.headers).status_code,410)
+        response=self.client.get(urlparse(grant['certificateUrl']).path)
+        self.assertEqual(response.status_code,200)
+        _,cert,_=pkcs12.load_key_and_certificates(response.content,grant['password'].encode())
+        self.assertEqual(cert.subject.get_attributes_for_oid(x509.oid.NameOID.COMMON_NAME)[0].value,device['username'])
+        self.assertEqual(self.client.get(urlparse(grant['certificateUrl']).path).status_code,410)
+        self.assertEqual(self.client.get('/oc/access/devices/'+device['id']+'/policy').status_code,401)
+
+    def test_setup_links_require_owner_and_expire_rotate_or_revoke(self):
+        device=self.create().json()['device'];token=self.setup_link(device)
+        self.client.cookies.set('test-session','other')
+        self.assertEqual(self.client.post('/oc/access/devices/'+device['id']+'/setup-link',headers=self.headers).status_code,404)
+        self.client.cookies.set('test-session','owner')
+        replacement=self.setup_link(device)
+        self.assertEqual(self.client.get('/oc/access/setup/'+token).status_code,410)
+        with sqlite3.connect(self.db) as con:
+            con.execute("UPDATE oc_setup_links SET expires_at='2000-01-01T00:00:00+00:00'")
+        self.assertEqual(self.client.post('/oc/access/setup/'+replacement+'/claim',headers=self.headers).status_code,410)
+        token=self.setup_link(device)
+        self.client.post('/oc/access/devices/'+device['id']+'/revoke',headers=self.headers)
+        self.assertEqual(self.client.get('/oc/access/setup/'+token).status_code,410)
+
+    def test_setup_link_is_invalid_after_account_deletion(self):
+        device=self.create().json()['device'];token=self.setup_link(device)
+        with sqlite3.connect(self.db) as con:con.execute("DELETE FROM users WHERE id='owner'")
+        self.assertEqual(self.client.post('/oc/access/setup/'+token+'/claim',headers=self.headers).status_code,410)
+
+    def test_setup_claim_is_atomic(self):
+        device=self.create().json()['device'];token=self.setup_link(device)
+        statuses=[]
+        def claim():statuses.append(self.client.post('/oc/access/setup/'+token+'/claim',headers=self.headers).status_code)
+        threads=[threading.Thread(target=claim) for _ in range(2)]
+        for thread in threads:thread.start()
+        for thread in threads:thread.join()
+        self.assertEqual(sorted(statuses),[200,410])
+
     def test_create_is_idempotent_and_contains_no_private_material(self):
         key=str(uuid.uuid4());one=self.create(key);two=self.create(key)
         self.assertEqual(one.status_code,200,one.text)

@@ -30,7 +30,10 @@ html[data-vpn-transport="anyconnect"] #legacyVpnPanel { display: block !importan
 #anyConnectAccess .oc-actions.oc-import-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 #anyConnectAccess .oc-import-actions > .oc-action { width: 100%; min-width: 0; overflow-wrap: anywhere; }
 #anyConnectAccess .oc-import-actions > .oc-action:only-child { grid-column: 1 / -1; }
-#anyConnectAccess .oc-transfer-link { margin-top: 12px; }
+#anyConnectAccess .oc-actions.oc-destinations { margin-top: 22px; }
+#anyConnectAccess .oc-transfer-field { display: flex; align-items: center; min-width: 0; padding-right: 10px; border: 1px solid var(--border); border-radius: 12px; background: var(--card); }
+#anyConnectAccess .oc-transfer-field > input { border: 0; min-width: 0; text-overflow: ellipsis; background: transparent; }
+#anyConnectAccess .oc-transfer-field .oc-copy-glyph::after { background: var(--card); }
 #anyConnectAccess .oc-password-row { display: flex; align-items: center; gap: 12px; background: var(--code-background); color: var(--text); padding: 0 12px; border: 1px solid var(--border); border-radius: 12px; }
 #anyConnectAccess .oc-secret { flex: 1; min-width: 0; font: 16px ui-monospace, monospace; overflow-wrap: anywhere; padding: 12px 0; user-select: all; }
 #anyConnectAccess .oc-copy { flex: 0 0 44px; width: 44px; min-height: 44px; padding: 0; border: 0; border-radius: 8px; background: transparent; color: var(--tolf-action-text, var(--text)); }

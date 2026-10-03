@@ -94,6 +94,13 @@
   let statusBadge = null;
   const incomingDevice = new URLSearchParams(window.location?.search || "").get("ocDevice");
   let setupDestination = "local", transferNotice = "";
+  let transferGrant = null, transferTimer = null;
+  const TRANSFER_COPY = {
+    ru: {create:"Создать ссылку для установки", help:"Отправьте ссылку получателю. Вход в аккаунт для установки не требуется.", expires:"Ссылка действует 24 часа и используется один раз для получения сертификата.", update:"Передача без входа станет доступна после обновления API на UK."},
+    en: {create:"Create installation link", help:"Send this link to the recipient. No account sign-in is needed for installation.", expires:"The link lasts 24 hours and can be used once to obtain the certificate.", update:"Guest transfer requires the UK API update."},
+    lv: {create:"Izveidot instalēšanas saiti", help:"Nosūtiet saiti saņēmējam. Instalēšanai nav jāpiesakās kontā.", expires:"Saite derīga 24 stundas un izmantojama vienu reizi sertifikāta saņemšanai.", update:"Pārsūtīšanai bez pieteikšanās nepieciešams UK API atjauninājums."}
+  };
+  const transferCopy = () => TRANSFER_COPY[document.documentElement.lang] || TRANSFER_COPY.en;
   const DELIVERY_COPY = {
     ru: {local:"Настроить на этом устройстве", remote:"Передать на другое устройство", help:"Откройте эту ссылку на нужном устройстве и войдите в тот же аккаунт TOLF. Будет выбран этот доступ. Затем добавьте соединение и импортируйте сертификат.", copy:"Скопировать ссылку", share:"Поделиться ссылкой", copied:"Ссылка скопирована", missing:"Этот доступ недоступен в текущем аккаунте. Войдите в аккаунт, в котором он создан."},
     en: {local:"Set up on this device", remote:"Transfer to another device", help:"Open this link on the target device and sign in to the same TOLF account. This access will be selected. Then add the connection and import the certificate.", copy:"Copy link", share:"Share link", copied:"Link copied", missing:"This access is unavailable in this account. Sign in to the account that created it."},
@@ -143,6 +150,7 @@
     return node;
   }
   function choose(id) {
+    transferGrant = null; clearTimeout(transferTimer);
     setupDestination = "local"; transferNotice = "";
     selectedId = id; grant = null; clearCopyNotice(); clearDownloadedPackage();
     window.refreshAnyConnectTransport?.(); render();
@@ -308,7 +316,7 @@
     const d = selected();
     if (d) {
       const delivery = deliveryCopy();
-      const destinations = element("div", null, "oc-actions oc-import-actions");
+      const destinations = element("div", null, "oc-actions oc-import-actions oc-destinations");
       for (const [destination, text] of [["local",delivery.local],["remote",delivery.remote]]) {
         const action = button(text, () => {
           setupDestination = destination; transferNotice = "";
@@ -319,21 +327,42 @@
       }
       root.append(destinations);
       if (setupDestination === "remote") {
-        const setupLink = "https://vpn.tolf.is/?ocDevice=" + encodeURIComponent(d.id);
         const transfer = element("section", null, "oc-transfer");
-        transfer.append(element("h4", delivery.remote + " — «" + d.label + "»"), element("p", delivery.help, "oc-note"));
-        const field = element("input"); field.type = "text"; field.readOnly = true; field.value = setupLink; field.className = "oc-transfer-link"; field.setAttribute("aria-label", delivery.copy); transfer.append(field);
-        const actions = element("div", null, "oc-actions oc-import-actions");
-        actions.append(button(delivery.copy, async () => {
-          const token = epoch, id = d.id;
-          try { await copyText(setupLink); if (token === epoch && selectedId === id && setupDestination === "remote") { transferNotice = delivery.copied; render(); } }
-          catch { if (token === epoch && selectedId === id) { transferNotice = c.failed; render(); } }
-        }));
-        if (typeof navigator !== "undefined" && navigator.share) actions.append(button(delivery.share, async () => {
-          try { await navigator.share({title:"TOLF AnyConnect — " + d.label, url:setupLink}); } catch { }
-        }));
-        transfer.append(actions);
-        const notice = element("p", transferNotice, "oc-note"); notice.setAttribute("role", "status"); transfer.append(notice); root.append(transfer);
+        const t = transferCopy();
+        transfer.append(element("h4", delivery.remote + " — «" + d.label + "»"), element("p", t.help, "oc-note"));
+        if (transferGrant?.deviceId === d.id && Date.parse(transferGrant.expiresAt) > Date.now()) {
+          const setupLink = transferGrant.setupUrl;
+          const actions = element("div", null, "oc-actions oc-import-actions oc-transfer-actions");
+          const fieldRow = element("div", null, "oc-transfer-field");
+          const field = element("input"); field.type = "text"; field.readOnly = true; field.value = setupLink; field.setAttribute("aria-label", delivery.copy); fieldRow.append(field);
+          const control = element("span", null, "oc-copy-control");
+          const icon = button("", async () => {
+            const token = epoch, current = transferGrant;
+            try { await copyText(setupLink); if (token !== epoch || transferGrant !== current || selectedId !== d.id) return; transferNotice = delivery.copied; }
+            catch { if (token !== epoch || transferGrant !== current) return; transferNotice = c.failed; }
+            clearTimeout(transferTimer); render(); transferTimer = setTimeout(() => { transferNotice = ""; render(); }, 2000);
+          });
+          icon.className = "oc-copy"; icon.setAttribute("aria-label", delivery.copy); icon.title = delivery.copy;
+          const glyph = element("span", null, "oc-copy-glyph"); glyph.setAttribute("aria-hidden", "true"); icon.append(glyph); control.append(icon);
+          if (transferNotice) { const notice = element("span", transferNotice, "oc-copy-feedback"); notice.setAttribute("role", "status"); control.append(notice); }
+          fieldRow.append(control); actions.append(fieldRow);
+          actions.append(button(delivery.share, async () => {
+            try {
+              if (typeof navigator !== "undefined" && navigator.share) await navigator.share({title:"TOLF AnyConnect — " + d.label, url:setupLink});
+              else icon.click();
+            } catch { }
+          }));
+          transfer.append(actions, element("p", t.expires + " " + new Date(transferGrant.expiresAt).toLocaleString(), "oc-note"));
+        } else {
+          const createLink = button(t.create, () => perform(async token => {
+            const result = await apiRequest(path(d.id) + "/setup-link", {method:"POST", timeoutMs:30000});
+            if (token === epoch && selectedId === d.id) { transferGrant = result; transferNotice = ""; }
+          }), true);
+          createLink.disabled ||= capabilities?.guestSetup !== true;
+          transfer.append(createLink);
+          if (capabilities?.guestSetup !== true) transfer.append(element("p", t.update, "oc-note"));
+        }
+        root.append(transfer);
       } else {
       const steps = element("div", null, "oc-steps");
       const suffix = " " + sessionCopy().forDevice + " «" + d.label + "»";
@@ -398,6 +427,7 @@
     clearDownloadedPackage();
     devices = []; selectedId = null; grant = null; capabilities = null;
     setupDestination = "local"; transferNotice = "";
+    transferGrant = null; clearTimeout(transferTimer);
     deviceName = ""; creationRequest = null; addingDevice = false; busy = false; loading = false; message = ""; error = false;
     window.refreshAnyConnectTransport?.(); render();
     if (account) refresh();
@@ -407,7 +437,7 @@
   setInterval(() => {
     if (grant && Date.parse(grant.expiresAt) <= Date.now()) { grant = null; clearCopyNotice(); clearDownloadedPackage(); message = copy().expired; render(); }
   }, 1000);
-  window.addEventListener("pagehide", () => { grant = null; clearCopyNotice(); clearDownloadedPackage(); });
+  window.addEventListener("pagehide", () => { grant = null; transferGrant = null; transferNotice = ""; clearTimeout(transferTimer); clearCopyNotice(); clearDownloadedPackage(); });
   window.addEventListener("pageshow", render);
   window.setAnyConnectAccount(window.tolfAccountState || null);
   if (incomingDevice) document.getElementById("vpnTransportAnyConnect")?.click();

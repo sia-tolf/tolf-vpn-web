@@ -158,6 +158,12 @@ CREATE TABLE IF NOT EXISTS oc_import_grants (
     expires_at TEXT NOT NULL,
     package BLOB NOT NULL
 );
+CREATE TABLE IF NOT EXISTS oc_setup_links (
+    token_hash BLOB PRIMARY KEY,
+    device_id TEXT NOT NULL REFERENCES oc_devices(id),
+    user_id TEXT NOT NULL,
+    expires_at TEXT NOT NULL
+);
 CREATE TRIGGER IF NOT EXISTS oc_after_account_delete AFTER DELETE ON users
 BEGIN
     UPDATE oc_devices SET state='revoking',
@@ -273,6 +279,7 @@ def install(app, context):
                 await run_in_threadpool(reconcile)
                 with closing(sqlite3.connect(db, timeout=30)) as con, con:
                     con.execute("DELETE FROM oc_import_grants WHERE expires_at<=?", (utc_now().isoformat(),))
+                    con.execute("DELETE FROM oc_setup_links WHERE expires_at<=? OR NOT EXISTS (SELECT 1 FROM users WHERE id=oc_setup_links.user_id)", (utc_now().isoformat(),))
             except Exception:
                 logging.getLogger(__name__).warning("AnyConnect revocation retry failed")
 
@@ -313,6 +320,7 @@ def install(app, context):
             "version": VERSION, "certificateAuthority": True,
             "caSha256": authority.fingerprint,
             "issuance": ready, "nodeReady": ready,
+            "guestSetup": True,
             "reason": "ready" if ready else ("node_unavailable" if enabled else "node_activation_required"),
         }, headers=HEADERS)
 
@@ -382,6 +390,66 @@ def install(app, context):
                 return JSONResponse({"device": device_public(record(user, row["id"]))}, headers=HEADERS)
         return await run_in_threadpool(operation)
 
+    def package_response(row, package, password, token, expires):
+        url = "https://api.tolf.is/oc/access/import/" + token + ".p12"
+        connection_name = "TOLF " + row["label"][:10] + " " + row["id"].replace("-", "")[-8:]
+        create = "anyconnect://create/?" + urlencode({"name":connection_name, "host":"oc.tolf.is:4443", "usecert":"true", "certcommonname":row["username"], "netroam":"true"}, quote_via=quote)
+        return {"deviceId":row["id"], "label":row["label"], "certificateUrl":url, "password":password, "expiresAt":expires,
+                "importUri":"anyconnect://import/?" + urlencode({"type":"pkcs12", "uri":url}, quote_via=quote),
+                "connectionUri":create, "connectionName":connection_name, "server":"oc.tolf.is:4443", "username":row["username"]}
+
+    def setup_record(con, token):
+        if not re.fullmatch(r"[A-Za-z0-9_-]{43}", token):
+            raise HTTPException(404, "Setup link not found")
+        con.row_factory = sqlite3.Row
+        row = con.execute("""SELECT d.*, s.expires_at AS setup_expires FROM oc_setup_links s
+            JOIN oc_devices d ON d.id=s.device_id AND d.user_id=s.user_id JOIN users u ON u.id=d.user_id
+            WHERE s.token_hash=? AND s.expires_at>? AND d.state='active' AND d.expires_at>?""",
+            (hashlib.sha256(token.encode()).digest(), utc_now().isoformat(), utc_now().isoformat())).fetchone()
+        if row is None:
+            raise HTTPException(410, "Setup link expired, revoked or already used")
+        return row
+
+    @app.post("/oc/access/devices/{device_id}/setup-link")
+    def create_setup_link(device_id: str, request: Request):
+        user = authenticate(request, True)
+        ensure_ready()
+        with context["tolf_promos"].account_operation(db, user):
+            row = record(user, device_id, True)
+            token = secrets.token_urlsafe(32)
+            expires = (utc_now() + dt.timedelta(hours=24)).isoformat()
+            with closing(sqlite3.connect(db, timeout=30)) as con, con:
+                con.execute("DELETE FROM oc_setup_links WHERE device_id=? OR expires_at<=?", (row["id"], utc_now().isoformat()))
+                con.execute("INSERT INTO oc_setup_links VALUES (?,?,?,?)", (hashlib.sha256(token.encode()).digest(), row["id"], user, expires))
+            return JSONResponse({"deviceId":row["id"], "expiresAt":expires,
+                                 "setupUrl":"https://vpn.tolf.is/anyconnect-setup.html#" + token}, headers=HEADERS)
+
+    @app.get("/oc/access/setup/{token}")
+    def setup_info(token: str):
+        with closing(sqlite3.connect(db, timeout=30)) as con:
+            row = setup_record(con, token)
+        info = package_response(row, None, None, "", row["setup_expires"])
+        return JSONResponse({key:info[key] for key in ("label", "connectionUri", "connectionName", "server", "expiresAt")}, headers=HEADERS)
+
+    @app.post("/oc/access/setup/{token}/claim")
+    def claim_setup(token: str, request: Request):
+        if request.headers.get("origin") != "https://vpn.tolf.is":
+            raise HTTPException(403, "Invalid origin")
+        with closing(sqlite3.connect(db, timeout=30)) as con:
+            owner = setup_record(con, token)["user_id"]
+        ensure_ready()
+        with context["tolf_promos"].account_operation(db, owner):
+            with closing(sqlite3.connect(db, timeout=30)) as con, con:
+                con.execute("BEGIN IMMEDIATE")
+                row = setup_record(con, token)
+                package, password = authority.bundle(row)
+                import_token = secrets.token_urlsafe(32)
+                expires = (utc_now() + dt.timedelta(minutes=10)).isoformat()
+                con.execute("DELETE FROM oc_setup_links WHERE token_hash=?", (hashlib.sha256(token.encode()).digest(),))
+                con.execute("DELETE FROM oc_import_grants WHERE device_id=? OR expires_at<=?", (row["id"], utc_now().isoformat()))
+                con.execute("INSERT INTO oc_import_grants VALUES (?,?,?,?,?)", (hashlib.sha256(import_token.encode()).digest(), row["id"], owner, expires, package))
+            return JSONResponse(package_response(row, package, password, import_token, expires), headers=HEADERS)
+
     @app.post("/oc/access/devices/{device_id}/import")
     def import_grant(device_id: str, request: Request):
         user = authenticate(request, True)
@@ -394,12 +462,7 @@ def install(app, context):
             with closing(sqlite3.connect(db, timeout=30)) as con, con:
                 con.execute("DELETE FROM oc_import_grants WHERE device_id=? OR expires_at<=?", (row["id"], utc_now().isoformat()))
                 con.execute("INSERT INTO oc_import_grants VALUES (?,?,?,?,?)", (hashlib.sha256(token.encode()).digest(), row["id"], user, expires, package))
-            url = "https://api.tolf.is/oc/access/import/" + token + ".p12"
-            connection_name = "TOLF " + row["label"][:10] + " " + row["id"].replace("-", "")[-8:]
-            create = "anyconnect://create/?" + urlencode({"name":connection_name, "host":"oc.tolf.is:4443", "usecert":"true", "certcommonname":row["username"], "netroam":"true"}, quote_via=quote)
-            return JSONResponse({"deviceId":row["id"], "certificateUrl":url, "password":password, "expiresAt":expires,
-                                 "importUri":"anyconnect://import/?" + urlencode({"type":"pkcs12", "uri":url}, quote_via=quote),
-                                 "connectionUri":create, "connectionName":connection_name, "server":"oc.tolf.is:4443", "username":row["username"]}, headers=HEADERS)
+            return JSONResponse(package_response(row, package, password, token, expires), headers=HEADERS)
 
     @app.get("/oc/access/import/{token}.p12")
     def download(token: str):
@@ -466,6 +529,7 @@ def install(app, context):
             with closing(sqlite3.connect(db, timeout=30)) as con, con:
                 con.execute("UPDATE oc_devices SET state='revoking',revoked_at=COALESCE(revoked_at,?) WHERE id=? AND state IN ('pending','active')", (utc_now().isoformat(),row["id"]))
                 con.execute("DELETE FROM oc_import_grants WHERE device_id=?", (row["id"],))
+                con.execute("DELETE FROM oc_setup_links WHERE device_id=?", (row["id"],))
             try:
                 reconcile()
             except HTTPException:

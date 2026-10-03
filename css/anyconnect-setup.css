@@ -1,0 +1,7 @@
+.oc-guest-container { max-width: 800px; margin: 32px auto; padding: 0 20px; }
+.oc-guest-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+.oc-guest-brand { font-size: 22px; font-weight: 700; letter-spacing: .18em; }
+.oc-guest-header h1 { margin: 0; font-size: 24px; }
+.oc-guest-header select { font: inherit; padding: 8px 12px; border: 1px solid var(--border); border-radius: 10px; color: var(--text); background: var(--card); }
+#anyConnectAccess.oc-guest-card { margin-top: 0; padding: 24px; border: 1px solid var(--border); border-radius: 18px; background: var(--card); }
+#anyConnectAccess.oc-guest-card .oc-full { display: block; width: 100%; box-sizing: border-box; }

@@ -93,6 +93,9 @@ existing per-account operation lock.
 | GET /oc/access/devices | Current account's summaries; no private material |
 | POST /oc/access/devices | `requestId` UUID and `label`; limit eight non-revoked unexpired devices |
 | POST /oc/access/devices/{id}/import | Active owned device; new one-time ten-minute grant and separately displayed password |
+| POST /oc/access/devices/{id}/setup-link | Active owned device; authenticated owner creates a 24-hour bearer setup link, replacing older setup links for that device |
+| GET /oc/access/setup/{token} | No login; valid link returns label and connection details; never consumes the link or returns a password/private key |
+| POST /oc/access/setup/{token}/claim | No login; vpn.tolf.is Origin required; atomically consumes setup link and returns a ten-minute PKCS12 import grant and password |
 | HEAD /oc/access/import/{token}.p12 | Availability check without consumption |
 | GET /oc/access/import/{token}.p12 | Bearer download; atomic consumption; 410 after expiry/use/revocation |
 | GET /oc/access/devices/{id}/policy | Stored acknowledged personal mode |
@@ -158,10 +161,23 @@ lock until reboot or cleanup.
    Routine polls retain the last result until a new result arrives, so the
    fixed-width status does not flash checking every ten seconds.
    Every active access offers local setup or transfer to another device. Transfer
-   provides a shareable URL containing only the device ID, never import secrets.
-   The receiving browser opens AnyConnect and selects that access after login to
-   the same account. An unavailable ID shows an account error rather than
-   silently choosing a different device. No certificate is issued by this link.
+   creates a 24-hour bearer installation URL. A half-width, ellipsized field has
+   the overlapping-square copy icon and local confirmation; the equal-width
+   Share link button is to its right. Destination controls have a 22px top gap.
+   The recipient opens `anyconnect-setup.html#<token>` without an account.
+   The fragment is read by local JavaScript; referrer policy is no-referrer and
+   requests omit account cookies. Metadata reads never consume the link.
+   Getting the certificate consumes the setup link exactly once and starts a
+   ten-minute single-use package download. The recipient follows installation,
+   connection creation, certificate import and VPN activation, with RU/EN/LV
+   instructions. Account management and routing remain with the owner.
+   Replacing a link, expiry, revocation, certificate expiry or account deletion
+   invalidate delivery. Existing installed VPN access survives link expiry.
+   Link hashes only are stored in `oc_setup_links`; plaintext tokens and import
+   passwords are not stored. New feature availability is `guestSetup: true`.
+   Existing `?ocDevice=` URLs still require owner sign-in; new transfer URLs do
+   not use that old mechanism. Ownership transfer to a recipient account is
+   outside this stage.
 3. Select External Control → Prompt in Cisco Secure Client, then add the
    connection using the AnyConnect link. Return to the website for step 4;
    enable VPN only after importing the certificate. Manual server address:
@@ -204,6 +220,7 @@ https://www.cisco.com/c/en/us/td/docs/security/vpn_client/anyconnect/Cisco-Secur
 ```sh
 python -m unittest discover -s tests/anyconnect -v
 node tests/anyconnect-ui.cjs
+node tests/anyconnect-guest-ui.cjs
 node tests/measurement-targets.cjs
 node tests/measurement-regression.cjs
 python setup/anyconnect/build.py

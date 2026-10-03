@@ -52,7 +52,7 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   let heldSession = null, connected = true, sessionError = false;
   async function request(url, options = {}) {
     const p = url.replace('https://api.tolf.is',''); calls.push([options.method || 'GET',p,options.credentials]);
-    if (p.endsWith('/capabilities')) return {issuance:true,nodeReady:true,version:2};
+    if (p.endsWith('/capabilities')) return {issuance:true,nodeReady:true,version:2,guestSetup:true};
     if (p === '/oc/access/devices') {
       if (options.method === 'POST') {
         const data=JSON.parse(options.body),device={id:'three',label:data.label,username:'tolf-oc-'+'3'.repeat(32),state:'active',mode:'auto'};
@@ -61,6 +61,7 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
       return {devices};
     }
     const d = devices.find(d => p.includes('/'+d.id+'/'));
+    if(p.endsWith('/setup-link'))return {deviceId:d.id,setupUrl:'https://vpn.tolf.is/anyconnect-setup.html#'+'A'.repeat(43),expiresAt:new Date(Date.now()+86400000).toISOString()};
     if (p.endsWith('/session')) {
       if (sessionError) throw Error('Session unavailable');
       if (heldSession) await heldSession;
@@ -123,9 +124,13 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   assert(ids.anyConnectModeSelector.classList.contains('policy-confirmed'));
   button(ids.anyConnectAccess,'Передать на другое устройство').click();
   assert(!descendants(ids.anyConnectAccess).some(n=>n.tagName==='button'&&n.textContent==='Получить сертификат'));
-  assert(descendants(ids.anyConnectAccess).some(n=>n.tagName==='input'&&n.readOnly&&n.value==='https://vpn.tolf.is/?ocDevice=one'));
-  button(ids.anyConnectAccess,'Скопировать ссылку').click();await settle();
-  assert.equal(c.copied,'https://vpn.tolf.is/?ocDevice=one');
+  button(ids.anyConnectAccess,'Создать ссылку для установки').click();await settle();
+  const setupUrl='https://vpn.tolf.is/anyconnect-setup.html#'+'A'.repeat(43);
+  assert(descendants(ids.anyConnectAccess).some(n=>n.tagName==='input'&&n.readOnly&&n.value===setupUrl));
+  assert(!descendants(ids.anyConnectAccess).some(n=>n.tagName==='button'&&n.textContent==='Скопировать ссылку'));
+  const copyLink=descendants(ids.anyConnectAccess).find(n=>n.tagName==='button'&&n.attributes['aria-label']==='Скопировать ссылку');
+  copyLink.click();await settle();
+  assert.equal(c.copied,setupUrl);
   assert(ids.anyConnectAccess.textContent.includes('Ссылка скопирована'));
   button(ids.anyConnectAccess,'Настроить на этом устройстве').click();
   button(ids.anyConnectAccess,'Получить сертификат').click(); await settle();
