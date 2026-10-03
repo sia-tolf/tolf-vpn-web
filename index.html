@@ -32,7 +32,7 @@
 
   <link
     rel="stylesheet"
-    href="css/styles.css?v=protocol-ingress-20261003-2"
+    href="css/styles.css?v=device-routing-20261003-1"
   >
   <link
     rel="stylesheet"
@@ -71,8 +71,8 @@
   <script defer src="js/app.js?v=calm-layout-20260926"></script>
   <script defer src="js/admin-entry.js?v=account-menu-width-20260928-1"></script>
   <script defer src="js/transport-selector.js?v=dual-anyconnect-20261003-4"></script>
-  <script defer src="js/anyconnect-access.js?v=dual-anyconnect-20261003-4"></script>
-  <link rel="stylesheet" href="css/anyconnect-access.css?v=dual-anyconnect-20261003-4">
+  <script defer src="js/anyconnect-access.js?v=device-routing-20261003-1"></script>
+  <link rel="stylesheet" href="css/anyconnect-access.css?v=device-routing-20261003-1">
 <link rel="stylesheet" href="tolf-buttons.20260917-3.css">
 <script defer src="tolf-wordmark.20260917-3.js"></script>
 <link rel="stylesheet" href="tolf-header.20260919-1.css?v=languages-2">
@@ -928,23 +928,6 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
                 ></div>
               </div>
 
-              <div id="anyConnectModeRow" class="row anyconnect-mode-row hidden">
-                <div id="anyConnectModeLabel" class="row-label">Mode</div>
-                <div class="row-value anyconnect-mode-value">
-                  <div class="anyconnect-mode-meta">
-                    <span id="anyConnectModeHelp"></span>
-                    <span id="anyConnectModeStatus" aria-live="polite"></span>
-                  </div>
-                  <div id="anyConnectModeSelector" class="anyconnect-mode-controls" role="radiogroup" aria-label="AnyConnect routing mode">
-                    <button id="anyConnectModeAuto" type="button" class="anyconnect-mode-button anyconnect-auto-button" data-mode="auto" role="radio" aria-checked="false">Auto</button>
-                    <div class="anyconnect-explicit-modes">
-                      <button type="button" class="anyconnect-mode-button" data-mode="ru" role="radio" aria-checked="false">RU</button>
-                      <button type="button" class="anyconnect-mode-button" data-mode="lv" role="radio" aria-checked="false">LV</button>
-                      <button type="button" class="anyconnect-mode-button" data-mode="yt" role="radio" aria-checked="false">YT</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
             </section>
 
@@ -1067,7 +1050,25 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
           </section>
         </div>
 
-        <section id="anyConnectAccess" aria-label="AnyConnect"></section>
+        <section id="anyConnectAccess" aria-label="AnyConnect">
+              <div id="anyConnectModeRow" class="row anyconnect-mode-row hidden">
+                <div id="anyConnectModeLabel" class="row-label">Mode</div>
+                <div class="row-value anyconnect-mode-value">
+                  <div class="anyconnect-mode-meta">
+                    <span id="anyConnectModeHelp"></span>
+                    <span id="anyConnectModeStatus" aria-live="polite"></span>
+                  </div>
+                  <div id="anyConnectModeSelector" class="anyconnect-mode-controls" role="radiogroup" aria-label="AnyConnect routing mode">
+                    <button id="anyConnectModeAuto" type="button" class="anyconnect-mode-button anyconnect-auto-button" data-mode="auto" role="radio" aria-checked="false">Auto</button>
+                    <div class="anyconnect-explicit-modes">
+                      <button type="button" class="anyconnect-mode-button" data-mode="ru" role="radio" aria-checked="false">RU</button>
+                      <button type="button" class="anyconnect-mode-button" data-mode="lv" role="radio" aria-checked="false">LV</button>
+                      <button type="button" class="anyconnect-mode-button" data-mode="yt" role="radio" aria-checked="false">YT</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+        </section>
 
         <div class="actions vpn-profile-actions">
           <button

@@ -101,6 +101,7 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
     vm.runInContext(fs.readFileSync(path.join(root,'js',file),'utf8'),c);
   }
   ids.vpnTransportAnyConnect.click(); await settle();
+  assert(descendants(ids.anyConnectAccess).includes(ids.anyConnectModeRow), 'routing is in the selected device section');
   assert(!descendants(ids.anyConnectAccess).some(n=>n.tagName==='ol'));
   assert(descendants(ids.anyConnectAccess).some(n=>n.tagName==='a'&&n.textContent==='Установить Cisco Secure Client'));
   assert(!ids.anyConnectAccess.textContent.includes('Перед импортом сертификата'));
@@ -225,6 +226,7 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   assert.equal(downloads.length,1,'repeat save reuses the one-time download in page memory');
   const select = descendants(ids.anyConnectAccess).find(n=>n.tagName==='select');
   select.value = second.id; select.events.change(); await settle();
+  assert(descendants(ids.anyConnectAccess).includes(ids.anyConnectModeRow), 'routing survives device changes');
   assert(!ids.anyConnectAccess.textContent.includes('private-import-password'));
   assert(!descendants(ids.anyConnectAccess).some(n=>n.className==='oc-copy-feedback'));
   assert.deepEqual(revokedUrls,['blob:test-package']);

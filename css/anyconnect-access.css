@@ -23,6 +23,22 @@ html[data-vpn-transport="anyconnect"] #legacyVpnPanel { display: block !importan
 #anyConnectAccess .oc-device-row { display: grid; grid-template-columns: calc((100% - 10px) / 2) minmax(0, 1fr) auto; gap: 10px; align-items: stretch; }
 #anyConnectAccess .oc-device-row > select { min-width: 0; height: 100%; }
 #anyConnectAccess .oc-ingress-field { width: calc((100% - 10px) / 2); }
+#anyConnectAccess .oc-device-routing {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px 16px;
+  margin: 18px 0 22px;
+  height: auto;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+}
+#anyConnectAccess .oc-device-routing.hidden { display: none; }
+#anyConnectAccess .oc-device-routing .row-label { grid-column: 1 / -1; color: var(--text); font-size: 14px; }
+#anyConnectAccess .oc-device-routing .anyconnect-mode-meta { text-align: left; color: var(--text); font-size: 14px; line-height: 1.55; }
+#anyConnectAccess .oc-device-routing #anyConnectModeHelp { align-items: flex-start; }
+#anyConnectAccess .oc-device-routing #anyConnectModeStatus { position: static; font-size: 12px; line-height: 1.4; }
 #anyConnectAccess .oc-device-row > .oc-action { white-space: nowrap; }
 #anyConnectAccess .oc-device-status { display: flex; align-items: center; gap: 8px; box-sizing: border-box; min-height: 48px; padding: 6px 8px; font-size: 13px; font-weight: 500; line-height: 1.3; color: var(--secondary); }
 #anyConnectAccess .oc-device-status::before { content: ""; flex: 0 0 9px; width: 9px; height: 9px; border-radius: 50%; background: currentColor; }

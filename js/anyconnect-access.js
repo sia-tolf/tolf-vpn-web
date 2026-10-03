@@ -2,6 +2,12 @@
 (() => {
   const root = document.getElementById("anyConnectAccess");
   if (!root) return;
+  // Keep the existing controls and their policy handlers when rebuilding the steps.
+  const routingControls = document.getElementById("anyConnectModeRow");
+  if (routingControls) {
+    routingControls.classList.add("oc-device-routing");
+    root.append(routingControls);
+  }
   const GUIDE = "https://www.cisco.com/c/en/us/td/docs/security/vpn_client/anyconnect/Cisco-Secure-Client-5/admin/guide/cisco-secure-client-admin-guide-new/ac-on-mobile-devices-intro/t_automate_anyconnect_actions_using_the_uri_handler.html";
   const COPY = {
     ru: {
@@ -366,6 +372,7 @@
         field.append(label, select); root.append(field, element('p', ingressCopy().help));
       }
       const destinations = element("div", null, "oc-actions oc-import-actions oc-destinations");
+      if (routingControls) root.append(routingControls);
       for (const [destination, text] of [["local",delivery.local],["remote",delivery.remote]]) {
         const action = button(text, () => {
           setupDestination = destination; transferNotice = "";
