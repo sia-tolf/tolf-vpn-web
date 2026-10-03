@@ -33,6 +33,19 @@ revocation still require operator validation with a newly issued device.
 Operator confirmed foundation installer success: /etc/ocserv/uk-foundation-backup.tbo71n6k,
 UK CA fingerprint unchanged, CRL number 2 dated 3 October, next update 10 October.
 Personal device enforcement and UK multi-ingress integration are still pending.
+The operator identified /usr/local/sbin/tolf-openconnect-sr.sh as the Riga
+table creator, tolf-oc-dns-refresh.sh as the RU domain-set updater and
+tolf-oc-dns-watch.py as a watcher currently scoped to pilot IP 10.19.0.195.
+No yt_domains4 set is present in the observed Riga ruleset. Their full sources
+are required before integration so a table rebuild cannot silently remove
+personal rules and YouTube mode cannot be acknowledged without enforcement.
+
+`tolf_oc_nodes.py` is a tested, staged coordinator, not yet included in the UK
+installer or installed API. It requires all node acknowledgements for device
+registration/policy, compensates partial changes (including a lost reply),
+attempts CRL refresh and disconnect at every node even if one is unavailable,
+and separates per-node session errors from disconnected states. Integration
+must reconcile stored policies on all nodes after compensation failures.
 
 Operator output confirms Debian ocserv 1.3.0, parallel plain password and
 certificate authentication (`enable-auth = certificate`). HAProxy accepts
