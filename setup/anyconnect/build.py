@@ -40,3 +40,14 @@ output = template.replace('SYNC = ""  # BUILD_RIGA_SYNC', 'SYNC = ' + repr(sync)
 compile(output, 'install-riga-foundation.py', 'exec')
 (directory / 'install-riga-foundation.py').write_text(output)
 print('Riga foundation:', hashlib.sha256(output.encode()).hexdigest())
+payload = {}
+for name in ('riga-devices.py', 'riga-remote.py'):
+    data = (directory / name).read_bytes()
+    payload[name] = {'sha256': hashlib.sha256(data).hexdigest(),
+                     'data': base64.b64encode(data).decode('ascii')}
+template = (directory / 'install-riga-devices.template.py').read_text()
+assert template.count('PAYLOAD = {}  # BUILD_RIGA_DEVICES') == 1
+output = template.replace('PAYLOAD = {}  # BUILD_RIGA_DEVICES', 'PAYLOAD = ' + repr(payload))
+compile(output, 'install-riga-devices.py', 'exec')
+(directory / 'install-riga-devices.py').write_text(output)
+print('Riga devices:', hashlib.sha256(output.encode()).hexdigest())

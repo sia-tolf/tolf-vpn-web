@@ -36,9 +36,11 @@ Personal device enforcement and UK multi-ingress integration are still pending.
 The operator identified /usr/local/sbin/tolf-openconnect-sr.sh as the Riga
 table creator, tolf-oc-dns-refresh.sh as the RU domain-set updater and
 tolf-oc-dns-watch.py as a watcher currently scoped to pilot IP 10.19.0.195.
-No yt_domains4 set is present in the observed Riga ruleset. Their full sources
-are required before integration so a table rebuild cannot silently remove
-personal rules and YouTube mode cannot be acknowledged without enforcement.
+No yt_domains4 set is present in the observed Riga ruleset. The operator has now
+provided all three scripts. The pilot loader deletes and recreates its entire
+table, so personal routing uses a separate table and separate copies of RU and
+YouTube destination sets. The new installer is prepared and tested; installation
+on EDISLV and UK registration/activation remain operator checkpoints.
 
 `tolf_oc_nodes.py` is a tested, staged coordinator, not yet included in the UK
 installer or installed API. It requires all node acknowledgements for device
@@ -67,6 +69,51 @@ failure. Public files are in /etc/ocserv/tolf-uk; backups are private directorie
 under /etc/ocserv. Sync verifies signature, dates and nondecreasing CRL number.
 This foundation alone does not install the Riga personal device registry,
 policy/session APIs or the two-ingress UI; these are subsequent stages.
+
+### Riga personal enforcement installer
+
+Run the hash-verified `install-riga-devices.py` as root on EDISLV after the
+foundation. It preserves password authentication, certificate authentication,
+HAProxy, listeners, DNS and legacy pilot routing. It validates the ocserv candidate
+configuration, backs up replaced files and restores them and the previous personal
+table/rules if installation fails. Existing personal sessions are disconnected
+so their next connection uses the new hook; pilot sessions are retained.
+An existing unrelated hook, per-user directory, table 118 or policy priority
+1017/1018 causes installation to stop rather than overwrite that configuration.
+
+| Riga component | Location | Purpose |
+| --- | --- | --- |
+| Device controller | `/usr/local/sbin/tolf-oc-riga-devices` | Register modes, bind sessions, enforce routing, query health/session and remove access |
+| SSH dispatcher | `/usr/local/sbin/tolf-oc-riga-remote` | Exact command allowlist; installing it does not yet authorize a UK SSH key |
+| ocserv hook | `/usr/local/sbin/tolf-oc-riga-device-hook` | Connect/disconnect bindings; deny unknown personal certificate identities |
+| Desired device modes | `/etc/ocserv/tolf-uk/device-modes/<CN>` | Persistent auto/ru/lv/yt state |
+| Per-user profile | `/etc/ocserv/tolf-device-config/<CN>` | Limit each personal certificate to one Riga session |
+| Runtime bindings and DNS cache | `/run/tolf-oc-riga-devices` | Session IDs, assigned IPs, answer expiry and last successful refresh |
+| Personal nftables table | `inet tolf_oc_riga_devices` | Prerouting priority -145, after the legacy pilot chain at -150 |
+| Moscow exit | mark `0x192`, rule 1017, table 118 | Default via `gremoscow` |
+| Riga exit | mark `0x191`, rule 1018, table main | Default via `ens3`; override the earlier pilot mark |
+| Boot enforcement | `tolf-oc-riga-devices.service` | Rebuild persistent policy before ocserv startup |
+| DNS refresh | `tolf-oc-riga-devices-refresh.timer` | Read existing dnstap captures and refresh personal sets every minute |
+
+RU sends all device traffic through Moscow; LV sends all through Riga. Auto
+sends RU networks and RU domain answers through Moscow, other traffic through
+Riga. YT additionally sends YouTube domain answers through Moscow. The DNS reader
+accepts all 10.19.0.0/24 clients rather than only pilot 10.19.0.195. RU network
+data comes from the existing `/etc/tolf/openconnect/ru.zone`; old refresh/update
+services remain intact. Domain answers expire after their TTL (capped at six
+hours); re-reading the same capture record does not renew its TTL. YouTube
+suffixes are boundary checked. Unregistered or removed personal sessions enter
+the deny set, and IP reuse clears obsolete bindings. Mode changes clear only
+the selected device's conntrack flows; if conntrack is unavailable, that device
+is disconnected to enforce the new route on reconnection.
+
+Node health checks CA pin, signed CRL, hook configuration, control socket,
+personal sets, both policy rules, Moscow route and DNS refresh freshness. The
+forced dispatcher exposes the same personal commands as Moscow and performs
+no shell evaluation. UK SSH authorization, registration of existing device
+identities at Riga, multi-node activation and website ingress selection follow
+this installation; a successful Riga health response alone does not advertise
+Riga to users or enable a second issuer.
 
 | Component | Address or path | Function |
 | --- | --- | --- |
