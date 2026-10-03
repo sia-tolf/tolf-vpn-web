@@ -19,12 +19,13 @@ spec.loader.exec_module(radius)
 SECRET = b'a-local-random-secret-of-at-least-32-bytes'
 
 
-def request(status=1, upload=0, download=0, identifier=3, delay=0, extra=b''):
+def request(status=1, upload=0, download=0, identifier=3, delay=0, extra=b'', timestamp=1791040000, elapsed=60):
     def attr(kind, value):
         value = struct.pack('!I', value) if isinstance(value, int) else value
         return bytes((kind, len(value) + 2)) + value
     attrs = (attr(1, b'user0') + attr(44, b'daemon-17') + attr(40, status) +
-             attr(55, 1791040000) + attr(41, delay) +
+             (attr(55, timestamp) if timestamp is not None else b'') + attr(41, delay) +
+             attr(46, elapsed) +
              attr(42, upload & 0xffffffff) + attr(52, upload >> 32) +
              attr(43, download & 0xffffffff) + attr(53, download >> 32) + extra)
     header = struct.pack('!BBH', 4, identifier, 20 + len(attrs))
@@ -44,6 +45,32 @@ class AccountingTests(unittest.TestCase):
         self.assertEqual(a, b)
         self.assertEqual(response[:4], struct.pack('!BBH', 5, 99, 20))
         self.assertEqual(response[4:20], hashlib.md5(response[:4] + packet[4:20] + SECRET).digest())
+
+    def test_native_strongswan_packet_without_event_timestamp(self):
+        packet = request(3, 17, 30, timestamp=None)
+        event, _ = radius.decode(packet, SECRET, received_at=1791040000)
+        retry, _ = radius.decode(request(3, 17, 30, timestamp=None, delay=5),
+                                 SECRET, received_at=1791040006)
+        self.assertEqual(event['eventId'], retry['eventId'])
+        self.assertNotEqual(event['observedAt'], retry['observedAt'])
+        spool = radius.Spool(':memory:')
+        spool.record(event)
+        spool.record(retry)
+        self.assertEqual(spool.pending(), [event])
+        spool.close()
+
+    def test_zero_traffic_interims_remain_distinct_by_session_time(self):
+        one, _ = radius.decode(request(3, timestamp=None, elapsed=60), SECRET)
+        two, _ = radius.decode(request(3, timestamp=None, elapsed=120), SECRET)
+        self.assertNotEqual(one['eventId'], two['eventId'])
+
+    def test_conflicting_retry_payload_is_rejected(self):
+        event, _ = radius.decode(request(timestamp=None), SECRET)
+        spool = radius.Spool(':memory:')
+        spool.record(event)
+        with self.assertRaises(ValueError):
+            spool.record(dict(event, username='different-user'))
+        spool.close()
 
     def test_wrong_secret_and_corruption_rejected(self):
         for packet, secret in ((request(), b'x' * 32), (request()[:-1], SECRET),
@@ -106,7 +133,7 @@ class AccountingTests(unittest.TestCase):
                 '--database', str(base / 'spool.db'), '--secret-file', str(key),
                 '--port', str(port)], stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
             try:
-                packet = request(2, 800, 1500)
+                packet = request(2, 800, 1500, timestamp=None)
                 event, expected = radius.decode(packet, SECRET)
                 with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
                     sock.settimeout(0.2)

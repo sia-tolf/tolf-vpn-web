@@ -75,6 +75,7 @@ def main():
     receiver = Path('/usr/libexec/tolf-radius-accounting.py')
     secret = directory / 'radius.secret'
     marker = directory / 'receiver-version'
+    upgrading = False
     for path in (service, receiver, secret, marker):
         checked_path(path)
     if directory.exists() or directory.is_symlink():
@@ -83,38 +84,56 @@ def main():
             raise SystemExit('ERROR: unsafe traffic directory')
         if not marker.exists() or marker.read_text() != 'TOLF_LOCAL_TRAFFIC_RECEIVER_V1\n':
             raise SystemExit('ERROR: unknown existing traffic installation')
-        raise SystemExit('ERROR: traffic directory already exists; use a versioned update installer')
-    if service.exists():
+        old_hash = '7dd020aa889407284ee663da95f0dacd3cabbdbd3c363ae3292bf6372dd47734'
+        if (not receiver.exists() or hashlib.sha256(receiver.read_bytes()).hexdigest() != old_hash or
+                not service.exists() or service.read_text() != SERVICE):
+            raise SystemExit('ERROR: unsupported receiver version; installation unchanged')
+        upgrading = True
+        # This compatibility update is only for the pre-activation stage.
+        configs = [Path('/etc/strongswan.conf')]
+        configs.extend(Path('/etc/strongswan.d').rglob('*.conf'))
+        for config in configs:
+            if config.is_file() and re.search(r'^\s*accounting\s*=\s*(yes|true|1)\b',
+                    config.read_text(errors='replace'), re.MULTILINE):
+                raise SystemExit('ERROR: accounting already enabled; requires a live update installer')
+    if service.exists() and not upgrading:
         if 'TOLF_LOCAL_TRAFFIC_RECEIVER_V1' not in service.read_text():
             raise SystemExit('ERROR: existing service needs manual integration')
         raise SystemExit('ERROR: receiver already installed; use a versioned update installer')
-    if receiver.exists():
+    if receiver.exists() and not upgrading:
         raise SystemExit('ERROR: existing receiver needs manual integration')
-    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as probe:
-        probe.bind(('127.0.0.1', 18130))
+    if not upgrading:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as probe:
+            probe.bind(('127.0.0.1', 18130))
     backup = Path(tempfile.mkdtemp(prefix='tolf-traffic-receiver-backup.', dir='/etc'))
     started = False
     try:
-        directory.mkdir(mode=0o700)
+        if upgrading:
+            shutil.copy2(receiver, backup / receiver.name)
+            subprocess.run([str(service), 'stop'], check=True)
+        else:
+            directory.mkdir(mode=0o700)
         Path('/usr/libexec').mkdir(mode=0o755, exist_ok=True)
-        write_atomic(secret, secrets.token_hex(32) + '\n', 0o600)
-        write_atomic(marker, 'TOLF_LOCAL_TRAFFIC_RECEIVER_V1\n', 0o600)
+        if not upgrading:
+            write_atomic(secret, secrets.token_hex(32) + '\n', 0o600)
+            write_atomic(marker, 'TOLF_LOCAL_TRAFFIC_RECEIVER_V1\n', 0o600)
         write_atomic(receiver, RECEIVER, 0o700)
-        write_atomic(service, SERVICE, 0o755)
+        if not upgrading:
+            write_atomic(service, SERVICE, 0o755)
         started = True
-        subprocess.run([str(service), 'enable'], check=True)
+        if not upgrading:
+            subprocess.run([str(service), 'enable'], check=True)
         subprocess.run([str(service), 'start'], check=True)
         # Signed real UDP probe must get an Accounting-Response. It uses a
         # reserved synthetic identity and is removed before UK delivery exists.
         import struct
-        timestamp = int(time.time())
         def attribute(kind, value):
             if isinstance(value, int):
                 value = struct.pack('!I', value)
             return bytes((kind, len(value) + 2)) + value
         attributes = (attribute(1, b'__tolf_receiver_install_test__') +
                       attribute(44, secrets.token_hex(16).encode()) +
-                      attribute(40, 1) + attribute(55, timestamp))
+                      attribute(40, 1))
         header = struct.pack('!BBH', 4, 211, 20 + len(attributes))
         key = secret.read_bytes().strip()
         packet = header + hashlib.md5(header + bytes(16) + attributes + key).digest() + attributes
@@ -153,7 +172,8 @@ def main():
                 raise RuntimeError('Receiver test was not durably stored')
             con.execute('DELETE FROM events WHERE event_id=?', (event['eventId'],))
         subprocess.run([str(service), 'start'], check=True)
-        print('OK: Moscow local accounting receiver installed and tested.')
+        print('OK: Moscow local accounting receiver updated and tested.' if upgrading else
+              'OK: Moscow local accounting receiver installed and tested.')
         print('Listener: 127.0.0.1:18130/UDP')
         print('Spool: /etc/tolf-traffic/spool.db')
         print('VPN accounting: not enabled; VPN configuration unchanged.')
@@ -161,12 +181,18 @@ def main():
     except BaseException:
         if started:
             subprocess.run([str(service), 'stop'], check=False)
-            subprocess.run([str(service), 'disable'], check=False)
-        for path in (service, receiver):
-            if path.exists():
-                path.unlink()
-        if directory.exists():
-            shutil.move(str(directory), str(backup / 'failed-installation'))
+            if not upgrading:
+                subprocess.run([str(service), 'disable'], check=False)
+        if upgrading:
+            if (backup / receiver.name).exists():
+                shutil.copy2(backup / receiver.name, receiver)
+                subprocess.run([str(service), 'start'], check=False)
+        else:
+            for path in (service, receiver):
+                if path.exists():
+                    path.unlink()
+            if directory.exists():
+                shutil.move(str(directory), str(backup / 'failed-installation'))
         print('ERROR: receiver installation rolled back; VPN configuration unchanged.')
         raise
 

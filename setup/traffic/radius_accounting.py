@@ -16,7 +16,7 @@ import stat
 import struct
 
 
-def decode(packet, secret):
+def decode(packet, secret, received_at=None):
     if not isinstance(secret, bytes) or len(secret) < 32:
         raise ValueError('Accounting secret must have at least 32 bytes')
     if len(packet) < 20 or len(packet) > 4096:
@@ -63,10 +63,17 @@ def decode(packet, secret):
     status = number(40)
     if status not in (1, 2, 3):
         raise ValueError('Unsupported accounting status')
-    # strongSwan emits Event-Timestamp. Requiring it preserves observation
-    # times and stable event IDs when Acct-Delay-Time changes on retransmission.
-    timestamp = number(55)
     zero = bytes(4)
+    # strongSwan 6.0.3 does not emit Event-Timestamp (FreeRADIUS examples may
+    # show receiver-added attributes). Use receipt time minus Acct-Delay-Time,
+    # and derive retry identity from session elapsed time instead of wall time.
+    source_timestamp = 55 in attrs
+    elapsed = number(46) if not source_timestamp and status != 1 else 0
+    if source_timestamp:
+        timestamp = number(55)
+    else:
+        now = datetime.now(timezone.utc).timestamp() if received_at is None else received_at
+        timestamp = now - number(41, zero)
     upload = number(42, zero) + (number(52, zero) << 32)
     download = number(43, zero) + (number(53, zero) << 32)
     if status != 1 and (42 not in attrs or 43 not in attrs):
@@ -80,7 +87,11 @@ def decode(packet, secret):
         'upload': upload, 'download': download,
         'kind': {1: 'start', 2: 'stop', 3: 'interim'}[status],
     }
-    canonical = json.dumps(event, sort_keys=True, separators=(',', ':')).encode()
+    identity = dict(event)
+    if not source_timestamp:
+        identity.pop('observedAt')
+        identity['sessionTime'] = elapsed
+    canonical = json.dumps(identity, sort_keys=True, separators=(',', ':')).encode()
     event['eventId'] = hashlib.sha256(canonical).hexdigest()
     # Preserve Proxy-State in order, per RFC 2866. The receiver otherwise
     # returns no attributes; request verification still covers all attributes.
@@ -107,7 +118,14 @@ class Spool:
                                    (event['eventId'],)).fetchone()
             if row:
                 if row[0] != payload:
-                    raise ValueError('Conflicting spool event')
+                    original = json.loads(row[0])
+                    incoming = dict(event)
+                    original.pop('observedAt')
+                    incoming.pop('observedAt')
+                    if original != incoming:
+                        raise ValueError('Conflicting spool event')
+                    # Missing source timestamps differ on retries. Preserve
+                    # the first committed observation for stable UK delivery.
             else:
                 self.con.execute('INSERT INTO events(event_id,payload) VALUES (?,?)',
                                  (event['eventId'], payload))
