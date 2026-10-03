@@ -96,9 +96,11 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   assert(descendants(ids.anyConnectAccess).some(n=>n.tagName==='a'&&n.textContent==='Установить Cisco Secure Client'));
   assert(!ids.anyConnectAccess.textContent.includes('Перед импортом сертификата'));
   assert.equal(descendants(ids.anyConnectAccess).filter(n=>n.tagName==='input').length,0);
-  assert(ids.anyConnectAccess.children.some(n=>n.className==='oc-actions oc-device-actions'&&
-    n.children.some(child=>child.textContent==='Создать дополнительный доступ')&&
-    n.children.some(child=>child.textContent==='Отозвать доступ')));
+  const deviceRow = ids.anyConnectAccess.children.find(n=>n.className==='oc-device-row');
+  assert(deviceRow.children.some(n=>n.tagName==='select'));
+  assert(deviceRow.children.some(n=>n.tagName==='button'&&n.textContent==='Отозвать доступ'));
+  assert(ids.anyConnectAccess.children.some(n=>n.className==='oc-actions'&&
+    n.children.some(child=>child.textContent==='Создать дополнительный доступ')));
   assert(!descendants(ids.anyConnectAccess).some(n=>n.tagName==='button'&&n.textContent==='Обновить'));
   button(ids.anyConnectAccess,'Создать дополнительный доступ').click();
   assert.equal(descendants(ids.anyConnectAccess).filter(n=>n.tagName==='input').length,1);

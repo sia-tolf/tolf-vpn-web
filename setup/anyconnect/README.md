@@ -149,7 +149,8 @@ lock until reboot or cleanup.
 2. Create separately named access for the device, or select its existing access.
    After creation the form closes; creating another device requires the explicit
    additional-access button. Routine refresh controls are hidden; recovery offers
-   a retry button. Revoke is next to the additional-access action.
+   a retry button. Revoke sits in the same row as the device selector and access state;
+   additional access sits below that row.
 3. Select External Control → Prompt in Cisco Secure Client, then add the
    connection using the AnyConnect link. Return to the website for step 4;
    enable VPN only after importing the certificate. Manual server address:
@@ -174,7 +175,8 @@ device suffix and at most 24 characters.
 All steps use the same content inset. Import/download actions share a full-width
 row with equal-width columns and inherit the site's standard button styles.
 Import expiration and manual-import instructions share the same secondary text
-style. Additional access and revoke share equal-width columns across the full row.
+style. Device selection and revoke share one full-width row with equal heights;
+additional access is below them.
 The Get certificate button matches the width of the Import into AnyConnect button.
 The overview username comes from the authenticated account's `vpn.username`,
 as in IKEv2; it is hidden if that field is absent. Device certificate CNs remain

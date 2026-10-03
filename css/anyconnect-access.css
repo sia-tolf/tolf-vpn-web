@@ -14,9 +14,9 @@ html[data-vpn-transport="anyconnect"] #legacyVpnPanel { display: block !importan
 #anyConnectAccess input, #anyConnectAccess select { box-sizing: border-box; width: 100%; max-width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; font: inherit; background: var(--card); color: var(--text); }
 #anyConnectAccess .oc-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0; }
 #anyConnectAccess .oc-action { max-width: 100%; }
-#anyConnectAccess .oc-actions.oc-device-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-#anyConnectAccess .oc-device-actions > .oc-action { width: 100%; min-width: 0; overflow-wrap: anywhere; }
-#anyConnectAccess .oc-device-actions > .oc-action:only-child { grid-column: 1 / -1; }
+#anyConnectAccess .oc-device-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: stretch; }
+#anyConnectAccess .oc-device-row > select { min-width: 0; height: 100%; }
+#anyConnectAccess .oc-device-row > .oc-action { white-space: nowrap; }
 #anyConnectAccess .oc-prepare { width: calc((100% - 10px) / 2); }
 #anyConnectAccess .oc-actions.oc-import-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 #anyConnectAccess .oc-import-actions > .oc-action { width: 100%; min-width: 0; overflow-wrap: anywhere; }

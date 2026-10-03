@@ -230,26 +230,28 @@
     root.append(link(c.app, appUrl));
     root.append(element("h4", "2. " + c.device));
     if (devices.length) {
-      root.append(element("label", c.device));
-      const select = element("select"); select.setAttribute("aria-label", c.device);
+      const label = element("label", c.device); label.setAttribute("for", "ocDeviceSelect"); root.append(label);
+      const row = element("div", null, "oc-device-row");
+      const select = element("select"); select.id = "ocDeviceSelect"; select.setAttribute("aria-label", c.device);
       select.disabled = busy || loading;
       for (const d of devices) {
         const opt = element("option", d.label + " — " + (d.state === "active" ? c.ready : d.state === "pending" ? c.pending : c.revoking));
         opt.value = d.id; opt.selected = d.id === selectedId; select.append(opt);
       }
-      select.addEventListener("change", () => choose(select.value)); root.append(select);
-    }
-    const pending = devices.find(d => d.id === selectedId && d.state === "pending");
-    if (pending) root.append(button(c.resume, () => perform(token => create(pending.request_id, pending.label, token)), true));
-    if (devices.length) {
-      const actions = element("div", null, "oc-actions oc-device-actions");
-      if (!addingDevice) actions.append(button(c.additional, () => { addingDevice = true; render(); }));
+      select.addEventListener("change", () => choose(select.value)); row.append(select);
       const current = devices.find(d => d.id === selectedId);
       if (current) {
         const revoke = button(c.revoke, () => revokeDevice(current));
         revoke.className = "oc-action danger";
-        actions.append(revoke);
+        row.append(revoke);
       }
+      root.append(row);
+    }
+    const pending = devices.find(d => d.id === selectedId && d.state === "pending");
+    if (pending) root.append(button(c.resume, () => perform(token => create(pending.request_id, pending.label, token)), true));
+    if (devices.length && !addingDevice) {
+      const actions = element("div", null, "oc-actions");
+      actions.append(button(c.additional, () => { addingDevice = true; render(); }));
       root.append(actions);
     }
     if (!devices.length || addingDevice) {
