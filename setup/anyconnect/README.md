@@ -30,6 +30,10 @@ revocation still require operator validation with a newly issued device.
 
 ### Riga expansion checkpoint, 3 October 2026
 
+Operator confirmed foundation installer success: /etc/ocserv/uk-foundation-backup.tbo71n6k,
+UK CA fingerprint unchanged, CRL number 2 dated 3 October, next update 10 October.
+Personal device enforcement and UK multi-ingress integration are still pending.
+
 Operator output confirms Debian ocserv 1.3.0, parallel plain password and
 certificate authentication (`enable-auth = certificate`). HAProxy accepts
 `oc-riga.tolf.is` SNI at 188.214.39.114:443 and forwards TCP to
@@ -241,6 +245,12 @@ does not confirm completion. This gate applies both to account setup and guest
 setup links; confirmation is cleared when selecting another device, changing
 accounts or leaving the page. It records user confirmation, not verification
 that the connection was saved inside Cisco Secure Client.
+After confirming connection creation, the user can select Certificate already
+imported for this device's existing access. This skips bundle issuance/import,
+does not consume guest setup links, and instructs selecting the same certificate
+in the new connection settings. Get certificate remains available for recovery.
+The site records a user confirmation; it does not inspect the Cisco certificate
+store. This choice resets on device/account changes, Add again and page exit.
 Before confirmation, mobile connection and Continue actions share one row with
 equal-width columns, with connection on the left and confirmation on the right.
 Short action labels keep the wide-layout buttons on one line at the site's

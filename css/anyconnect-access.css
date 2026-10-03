@@ -34,8 +34,8 @@ html[data-vpn-transport="anyconnect"] #legacyVpnPanel { display: block !importan
 #anyConnectAccess .oc-connection-completed { display: flex; align-items: center; gap: 16px; }
 #anyConnectAccess .oc-connection-done { flex: 1; padding: 14px 18px; border-radius: 12px; background: #edf8f0; color: #247a43; font-size: 16px; font-weight: 600; text-align: center; }
 #anyConnectAccess .oc-retry-link { padding: 6px 0; border: 0; background: transparent; color: var(--tolf-action-text, #315780); font: inherit; font-size: 14px; text-decoration: underline; cursor: pointer; }
-#anyConnectAccess .oc-actions.oc-import-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-#anyConnectAccess .oc-import-actions > .oc-action { width: 100%; min-width: 0; overflow-wrap: anywhere; }
+#anyConnectAccess .oc-actions.oc-import-actions, #anyConnectAccess .oc-actions.oc-certificate-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+#anyConnectAccess .oc-import-actions > .oc-action, #anyConnectAccess .oc-certificate-actions > .oc-action { width: 100%; min-width: 0; overflow-wrap: anywhere; }
 #anyConnectAccess .oc-import-actions > .oc-action:only-child { grid-column: 1 / -1; }
 #anyConnectAccess .oc-actions.oc-destinations { margin-top: 22px; }
 #anyConnectAccess .oc-transfer-field { display: flex; align-items: center; min-width: 0; padding-right: 10px; border: 1px solid var(--border); border-radius: 12px; background: var(--card); }
@@ -54,6 +54,7 @@ html[data-vpn-transport="anyconnect"] #legacyVpnPanel { display: block !importan
 #anyConnectAccess .oc-message { min-height: 20px; color: var(--text); }
 #anyConnectAccess .oc-error { color: var(--error); }
 #anyConnectAccess .oc-note { color: var(--text); }
+#anyConnectAccess p.oc-certificate-done { color: #247a43; }
 @media (max-width: 600px) {
   #anyConnectAccess .oc-device-row { grid-template-columns: minmax(0, 1fr) minmax(0, .85fr) minmax(0, 1.1fr); gap: 6px; }
   #anyConnectAccess .oc-device-row > .oc-action { min-width: 0; white-space: normal; padding-left: 8px; padding-right: 8px; }

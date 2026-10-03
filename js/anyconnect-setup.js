@@ -14,6 +14,12 @@
   let info = null, grant = null, busy = false, message = "", feedback = false, cached = null, timer = null;
   const c = () => TEXT[language.value] || TEXT.ru;
   let connectionConfirmed = false;
+  let certificateImported = false;
+  const CERTIFICATE_TEXT = {
+    ru:{already:"Сертификат уже импортирован", done:"✓ Сертификат уже импортирован", help:"Если сертификат этого доступа уже установлен в Cisco Secure Client, повторный импорт не нужен. Выберите его в настройках нового соединения."},
+    en:{already:"Certificate already imported", done:"✓ Certificate already imported", help:"If this access certificate is already installed in Cisco Secure Client, no new import is needed. Select it in the new connection settings."},
+    lv:{already:"Sertifikāts jau importēts", done:"✓ Sertifikāts jau importēts", help:"Ja šīs piekļuves sertifikāts jau ir instalēts Cisco Secure Client, atkārtota importēšana nav vajadzīga. Izvēlieties to jaunā savienojuma iestatījumos."}
+  };
   const STEP_TEXT = {
     ru:{confirm:"Соединение добавлено", blocked:"Сначала добавьте соединение в AnyConnect и подтвердите завершение предыдущего шага."},
     en:{confirm:"Connection added", blocked:"First add the connection in AnyConnect and confirm completion of the previous step."},
@@ -29,7 +35,7 @@
   }
   function clearPackage() { if(cached)URL.revokeObjectURL(cached);cached=null; }
   async function claim() {
-    if(busy||grant||!connectionConfirmed)return;busy=true;message="";render();
+    if(busy||grant||!connectionConfirmed)return;certificateImported=false;busy=true;message="";render();
     try { grant=await request(endpoint+"/claim","POST"); }
     catch(error) { message=error.status===410?c().failed:c().retry; }
     finally { busy=false;render(); }
@@ -59,7 +65,7 @@
     if(connectionConfirmed){
       const doneText={ru:["✓ Соединение добавлено","Добавить заново"],en:["✓ Connection added","Add again"],lv:["✓ Savienojums pievienots","Pievienot vēlreiz"]}[language.value]||["✓ Connection added","Add again"];
       const completed=el("div",null,"oc-connection-completed"),status=el("div",doneText[0],"oc-connection-done");status.setAttribute("role","status");
-      const again=button(doneText[1],()=>{connectionConfirmed=false;render();});again.className="oc-action oc-retry-link";completed.append(status,again);root.append(completed);
+      const again=button(doneText[1],()=>{connectionConfirmed=false;certificateImported=false;render();});again.className="oc-action oc-retry-link";completed.append(status,again);root.append(completed);
     }
     const step=STEP_TEXT[language.value]||STEP_TEXT.ru;
     if(!connectionConfirmed){
@@ -68,8 +74,13 @@
       else root.append(el("p","oc.tolf.is:4443"));
       actions.append(button(step.confirm,()=>{connectionConfirmed=true;render();}));root.append(actions);
     }
-    root.append(el("h4","3. "+t.cert+" — «"+info.label+"»"),el("p",connectionConfirmed?t.before:step.blocked,"oc-note"));
-    if(!grant||!connectionConfirmed){const prepare=button(t.prepare,claim,true);prepare.className+=" oc-prepare";prepare.disabled ||= !connectionConfirmed;root.append(prepare);}
+    const certificateText=CERTIFICATE_TEXT[language.value]||CERTIFICATE_TEXT.en;
+    root.append(el("h4","3. "+t.cert+" — «"+info.label+"»"),el("p",connectionConfirmed?certificateText.help:step.blocked,"oc-note"));
+    if(certificateImported&&connectionConfirmed){root.append(el("p",certificateText.done,"oc-certificate-done"));const prepare=button(t.prepare,claim,true);prepare.className+=" oc-prepare";root.append(prepare);}
+    else if(!grant||!connectionConfirmed){
+      const actions=el("div",null,"oc-actions oc-certificate-actions"),prepare=button(t.prepare,claim,true);prepare.className+=" oc-prepare";prepare.disabled ||= !connectionConfirmed;
+      const already=button(certificateText.already,()=>{if(!connectionConfirmed)return;certificateImported=true;grant=null;clearPackage();feedback=false;clearTimeout(timer);render();});already.disabled ||= !connectionConfirmed;actions.append(prepare,already);root.append(actions);
+    }
     else {
       root.append(el("p",t.password),el("p",t.passwordHelp));const row=el("div",null,"oc-password-row");row.append(el("span",grant.password,"oc-secret"));
       const control=el("span",null,"oc-copy-control"),icon=button("",copyPassword);icon.className="oc-copy";icon.setAttribute("aria-label",t.copy);icon.title=t.copy;
@@ -77,14 +88,14 @@
       if(feedback){const note=el("span",t.copied,"oc-copy-feedback");note.setAttribute("role","status");control.append(note);}row.append(control);root.append(row);
       const actions=el("div",null,"oc-actions oc-import-actions");if(platform!=="windows")actions.append(link(t.import,grant.importUri));actions.append(button(t.download,download));root.append(actions,el("p",t.expires,"oc-note"));
     }
-    root.append(el("p",t.manual,"oc-note"),el("h4","4. "+t.enable),el("p",t.finish));
+    if(!certificateImported)root.append(el("p",t.manual,"oc-note"));root.append(el("h4","4. "+t.enable),el("p",t.finish));
     if(message){const note=el("p",message,"oc-error");note.setAttribute("role","status");root.append(note);}
   }
   async function load() { if(!/^[A-Za-z0-9_-]{43}$/.test(token)){message=c().failed;render();return;}message="";render();try {info=await request(endpoint);}catch(error){message=error.status===410||error.status===404?c().failed:c().retry;}render(); }
   language.value=(navigator.language||"ru").slice(0,2);if(!TEXT[language.value])language.value="en";
   language.addEventListener("change",render);
   setInterval(()=>{if(grant&&Date.parse(grant.expiresAt)<=Date.now()){grant=null;info=null;clearPackage();message=c().expired;render();}},1000);
-  window.addEventListener("pagehide",()=>{grant=null;connectionConfirmed=false;clearPackage();feedback=false;clearTimeout(timer);});
+  window.addEventListener("pagehide",()=>{grant=null;connectionConfirmed=false;certificateImported=false;clearPackage();feedback=false;clearTimeout(timer);});
   window.addEventListener("pageshow",render);
   load();
 })();

@@ -138,6 +138,7 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   button(ids.anyConnectAccess,'Настроить на этом устройстве').click();
   const beforeImport=calls.filter(call=>call[1].endsWith('/import')).length;
   assert(button(ids.anyConnectAccess,'Получить сертификат').disabled);
+  assert(button(ids.anyConnectAccess,'Сертификат уже импортирован').disabled);
   button(ids.anyConnectAccess,'Получить сертификат').events.click();await settle();
   assert.equal(calls.filter(call=>call[1].endsWith('/import')).length,beforeImport);
   button(ids.anyConnectAccess,'Соединение добавлено').click();
@@ -148,6 +149,10 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   assert(button(ids.anyConnectAccess,'Получить сертификат').disabled);
   button(ids.anyConnectAccess,'Соединение добавлено').click();
   assert(!button(ids.anyConnectAccess,'Получить сертификат').disabled);
+  button(ids.anyConnectAccess,'Сертификат уже импортирован').click();await settle();
+  assert(ids.anyConnectAccess.textContent.includes('✓ Сертификат уже импортирован'));
+  assert.equal(calls.filter(call=>call[1].endsWith('/import')).length,beforeImport,'existing certificate does not issue a bundle');
+  assert(!descendants(ids.anyConnectAccess).some(n=>n.attributes['aria-label']==='Скопировать пароль'));
   button(ids.anyConnectAccess,'Получить сертификат').click(); await settle();
   assert(ids.anyConnectAccess.textContent.includes('private-import-password'));
   assert(!descendants(ids.anyConnectAccess).some(n=>n.tagName==='button'&&n.textContent==='Скопировать пароль'));

@@ -31,6 +31,7 @@ async function scenario(unavailable=false){
   assert.equal(calls.length,1,'opening a link only reads metadata');
   const connection=all(root).find(n=>n.tagName==='a'&&n.textContent==='Добавить в AnyConnect');assert.equal(connection.href,info.connectionUri);
   assert(button('Получить сертификат').disabled);
+  assert(button('Сертификат уже импортирован').disabled);
   connection.click();button('Получить сертификат').click();await settle();
   assert.equal(calls.length,1,'opening the app does not unlock certificate issuance');
   button('Соединение добавлено').click();
@@ -40,6 +41,10 @@ async function scenario(unavailable=false){
   button('Добавить заново').click();assert(button('Получить сертификат').disabled);
   button('Соединение добавлено').click();
   assert(!button('Получить сертификат').disabled);
+  button('Сертификат уже импортирован').click();await settle();
+  assert(root.textContent.includes('✓ Сертификат уже импортирован'));
+  assert.equal(calls.length,1,'existing certificate does not consume the setup link');
+  assert(!all(root).some(n=>n.attributes['aria-label']==='Скопировать пароль'));
   button('Получить сертификат').click();await settle();
   assert(calls[1][0].endsWith('/'+token+'/claim'));assert.equal(calls[1][1].method,'POST');
   assert(root.textContent.includes(grant.password));

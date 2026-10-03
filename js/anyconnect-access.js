@@ -98,6 +98,13 @@
   const incomingDevice = new URLSearchParams(window.location?.search || "").get("ocDevice");
   let setupDestination = null, transferNotice = "";
   let confirmedDeviceId = null;
+  let importedDeviceId = null;
+  const CERTIFICATE_COPY = {
+    ru:{already:"Сертификат уже импортирован", done:"✓ Сертификат уже импортирован", help:"Если сертификат этого доступа уже установлен в Cisco Secure Client, повторный импорт не нужен. Выберите его в настройках нового соединения."},
+    en:{already:"Certificate already imported", done:"✓ Certificate already imported", help:"If this access certificate is already installed in Cisco Secure Client, no new import is needed. Select it in the new connection settings."},
+    lv:{already:"Sertifikāts jau importēts", done:"✓ Sertifikāts jau importēts", help:"Ja šīs piekļuves sertifikāts jau ir instalēts Cisco Secure Client, atkārtota importēšana nav vajadzīga. Izvēlieties to jaunā savienojuma iestatījumos."}
+  };
+  const certificateCopy = () => CERTIFICATE_COPY[document.documentElement.lang] || CERTIFICATE_COPY.en;
   const STEP_COPY = {
     ru: {confirm:"Соединение добавлено", blocked:"Сначала добавьте соединение в AnyConnect и подтвердите завершение предыдущего шага."},
     en: {confirm:"Connection added", blocked:"First add the connection in AnyConnect and confirm completion of the previous step."},
@@ -162,6 +169,7 @@
   }
   function choose(id) {
     confirmedDeviceId = null;
+    importedDeviceId = null;
     transferGrant = null; clearTimeout(transferTimer);
     setupDestination = null; transferNotice = "";
     selectedId = id; grant = null; clearCopyNotice(); clearDownloadedPackage();
@@ -382,7 +390,7 @@
       if (confirmedDeviceId === d.id) {
         const completed = element("div", null, "oc-connection-completed");
         const status = element("div", completedCopy().done, "oc-connection-done"); status.setAttribute("role", "status");
-        const again = button(completedCopy().again, () => { confirmedDeviceId = null; render(); }); again.className = "oc-action oc-retry-link";
+        const again = button(completedCopy().again, () => { confirmedDeviceId = null; importedDeviceId = null; render(); }); again.className = "oc-action oc-retry-link";
         completed.append(status, again); connect.append(completed);
       } else {
         const actions = element("div", null, "oc-actions oc-connection-actions");
@@ -395,14 +403,26 @@
       const cert = element("section", null, "oc-step"); cert.append(element("h4", "4. " + c.certificate + " — «" + d.label + "»"));
       const prepare = button(c.prepare, () => perform(async token => {
         if (confirmedDeviceId !== d.id) return;
+        importedDeviceId = null;
         const id = d.id;
         const result = await apiRequest(path(id) + "/import", { method: "POST", timeoutMs: 30000 });
         if (token === epoch && selectedId === id) { grant = result; clearCopyNotice(); clearDownloadedPackage(); }
       }), true);
       prepare.className += " oc-prepare";
       prepare.disabled ||= capabilities?.issuance !== true || confirmedDeviceId !== d.id;
-      cert.append(prepare, element("p", confirmedDeviceId === d.id ? c.connectionLinkHelp : stepCopy().blocked, "oc-note"));
-      if (grant?.deviceId === d.id && confirmedDeviceId === d.id) {
+      if (importedDeviceId === d.id) {
+        cert.append(element("p", certificateCopy().done, "oc-certificate-done"), element("p", certificateCopy().help), prepare);
+      } else {
+        const actions = element("div", null, "oc-actions oc-certificate-actions");
+        const already = button(certificateCopy().already, () => {
+          if (confirmedDeviceId !== d.id) return;
+          importedDeviceId = d.id; grant = null; clearCopyNotice(); clearDownloadedPackage(); render();
+        });
+        already.disabled ||= confirmedDeviceId !== d.id;
+        actions.append(prepare, already);
+        cert.append(actions, element("p", confirmedDeviceId === d.id ? certificateCopy().help : stepCopy().blocked, "oc-note"));
+      }
+      if (grant?.deviceId === d.id && confirmedDeviceId === d.id && importedDeviceId !== d.id) {
         cert.append(element("p", c.password), element("p", c.passwordHelp));
         const passwordRow = element("div", null, "oc-password-row");
         passwordRow.append(element("span", grant.password, "oc-secret"));
@@ -428,7 +448,7 @@
         importActions.append(button(c.download, downloadCertificate));
         cert.append(importActions, element("p", c.expires, "oc-note"));
       }
-      cert.append(element("p", mobile ? c.manual : c.windows, "oc-note")); steps.append(cert);
+      if (importedDeviceId !== d.id) cert.append(element("p", mobile ? c.manual : c.windows, "oc-note")); steps.append(cert);
       const enable = element("section", null, "oc-step");
       enable.append(element("h4", "5. " + c.enableTitle), element("p", c.enable));
       steps.append(enable); root.append(steps);
@@ -453,6 +473,7 @@
     devices = []; selectedId = null; grant = null; capabilities = null;
     setupDestination = incomingDevice ? "local" : null; transferNotice = "";
     confirmedDeviceId = null;
+    importedDeviceId = null;
     transferGrant = null; clearTimeout(transferTimer);
     deviceName = ""; creationRequest = null; addingDevice = false; busy = false; loading = false; message = ""; error = false;
     window.refreshAnyConnectTransport?.(); render();
@@ -463,7 +484,7 @@
   setInterval(() => {
     if (grant && Date.parse(grant.expiresAt) <= Date.now()) { grant = null; clearCopyNotice(); clearDownloadedPackage(); message = copy().expired; render(); }
   }, 1000);
-  window.addEventListener("pagehide", () => { grant = null; confirmedDeviceId = null; transferGrant = null; transferNotice = ""; clearTimeout(transferTimer); clearCopyNotice(); clearDownloadedPackage(); });
+  window.addEventListener("pagehide", () => { grant = null; confirmedDeviceId = null; importedDeviceId = null; transferGrant = null; transferNotice = ""; clearTimeout(transferTimer); clearCopyNotice(); clearDownloadedPackage(); });
   window.addEventListener("pageshow", render);
   window.setAnyConnectAccount(window.tolfAccountState || null);
   if (incomingDevice) document.getElementById("vpnTransportAnyConnect")?.click();
