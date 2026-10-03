@@ -191,7 +191,7 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   button(ids.anyConnectAccess,'Настроить на этом устройстве').click();
   assert(button(ids.anyConnectAccess,'Получить сертификат').disabled,'a different device needs its own confirmation');
   assert(descendants(ids.anyConnectAccess).filter(n=>n.tagName==='h4').some(n=>n.textContent==='3. Добавьте соединение для «Phone»'));
-  assert(descendants(ids.anyConnectAccess).filter(n=>n.tagName==='h4').some(n=>n.textContent==='4. Импортируйте сертификат для «Phone»'));
+  assert(descendants(ids.anyConnectAccess).filter(n=>n.tagName==='h4').some(n=>n.textContent==='4. Получите сертификат для импорта в AnyConnect — «Phone»'));
   modes[1].click(); await settle();
   assert.equal(first.mode,'auto'); assert.equal(second.mode,'ru');
   button(ids.anyConnectAccess,'Создать дополнительный доступ').click();

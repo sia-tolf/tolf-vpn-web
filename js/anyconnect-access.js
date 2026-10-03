@@ -11,7 +11,8 @@
       control: "Перед импортом сертификата откройте настройки приложения Cisco Secure Client и выберите External Control → Prompt. Затем вернитесь сюда и нажмите «Импортировать в AnyConnect».",
       controlReminder: "Перед нажатием «Добавить в AnyConnect» проверьте, что в приложении Cisco Secure Client выбрано External Control → Prompt.",
       enableTitle: "Включите VPN",
-      certificate: "Импортируйте сертификат", prepare: "Получить сертификат",
+      certificate: "Получите сертификат для импорта в AnyConnect", prepare: "Получить сертификат",
+      passwordHelp: "Этот пароль понадобится при импорте данного сертификата в приложение Cisco Secure Client (AnyConnect).",
       connectionLinkHelp: "После добавления соединения получите сертификат и импортируйте его в AnyConnect.",
       import: "Импортировать в AnyConnect", download: "Скачать сертификат .p12", password: "Пароль импорта",
       copy: "Скопировать пароль", copied: "Пароль скопирован",
@@ -38,7 +39,8 @@
       control: "Before importing the certificate, open Cisco Secure Client settings and select External Control → Prompt. Then return here and select “Import into AnyConnect”.",
       controlReminder: "Before selecting “Add to AnyConnect”, check that Cisco Secure Client has External Control → Prompt selected.",
       enableTitle: "Enable VPN",
-      certificate: "Import the certificate", prepare: "Get certificate",
+      certificate: "Get the certificate for import into AnyConnect", prepare: "Get certificate",
+      passwordHelp: "Use this password when importing this certificate into Cisco Secure Client (AnyConnect).",
       connectionLinkHelp: "After adding the connection, get the certificate and import it into AnyConnect.",
       import: "Import into AnyConnect", download: "Download .p12 certificate", password: "Import password",
       copy: "Copy password", copied: "Password copied",
@@ -65,7 +67,8 @@
       control: "Pirms sertifikāta importēšanas atveriet Cisco Secure Client iestatījumus un izvēlieties External Control → Prompt. Pēc tam atgriezieties šeit un nospiediet “Importēt AnyConnect”.",
       controlReminder: "Pirms nospiežat “Pievienot AnyConnect”, pārbaudiet, vai Cisco Secure Client ir izvēlēts External Control → Prompt.",
       enableTitle: "Ieslēdziet VPN",
-      certificate: "Importējiet sertifikātu", prepare: "Saņemt sertifikātu",
+      certificate: "Saņemiet sertifikātu importēšanai AnyConnect", prepare: "Saņemt sertifikātu",
+      passwordHelp: "Šī parole būs vajadzīga, importējot šo sertifikātu lietotnē Cisco Secure Client (AnyConnect).",
       connectionLinkHelp: "Pēc savienojuma pievienošanas saņemiet sertifikātu un importējiet to AnyConnect.",
       import: "Importēt AnyConnect", download: "Lejupielādēt .p12 sertifikātu", password: "Importēšanas parole",
       copy: "Kopēt paroli", copied: "Parole nokopēta",
@@ -389,7 +392,7 @@
       }
       connect.append(element("p", c.host));
       steps.append(connect);
-      const cert = element("section", null, "oc-step"); cert.append(element("h4", "4. " + c.certificate + suffix));
+      const cert = element("section", null, "oc-step"); cert.append(element("h4", "4. " + c.certificate + " — «" + d.label + "»"));
       const prepare = button(c.prepare, () => perform(async token => {
         if (confirmedDeviceId !== d.id) return;
         const id = d.id;
@@ -400,7 +403,7 @@
       prepare.disabled ||= capabilities?.issuance !== true || confirmedDeviceId !== d.id;
       cert.append(prepare, element("p", confirmedDeviceId === d.id ? c.connectionLinkHelp : stepCopy().blocked, "oc-note"));
       if (grant?.deviceId === d.id && confirmedDeviceId === d.id) {
-        cert.append(element("p", c.password));
+        cert.append(element("p", c.password), element("p", c.passwordHelp));
         const passwordRow = element("div", null, "oc-password-row");
         passwordRow.append(element("span", grant.password, "oc-secret"));
         const copyButton = button("", copyPassword);
