@@ -1,7 +1,6 @@
 """Multi-ingress operations; activated nodes share one UK device identity.
 
-This coordinator is staged until Riga personal enforcement is installed. It does
-not activate nodes or change the currently deployed single-Moscow API.
+Activation is owned by the UK installer; nodes share the UK certificate identity.
 """
 from fastapi import HTTPException
 

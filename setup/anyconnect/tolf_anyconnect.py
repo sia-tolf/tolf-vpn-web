@@ -22,6 +22,7 @@ from cryptography import x509
 from fastapi import HTTPException, Request
 from fastapi.responses import JSONResponse, Response
 from tolf_oc_certificates import Authority
+from tolf_oc_nodes import Nodes
 
 VERSION = 2
 RECONCILE_INTERVAL = 60
@@ -31,12 +32,35 @@ SSH = ["/usr/bin/ssh", "-T", "-i", "/opt/tolf-api/provision_ed25519",
        "-o", "IdentitiesOnly=yes", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes",
        "-o", "UserKnownHostsFile=/opt/tolf-api/.ssh/known_hosts", "-o", "ConnectTimeout=10",
        "root@92.243.66.204"]
+RIGA_SSH = [value.replace('/opt/tolf-api/provision_ed25519', '/opt/tolf-api/anyconnect_nodes_ed25519')
+            .replace('root@92.243.66.204', 'root@188.214.39.114') for value in SSH]
+INGRESSES = {'moscow': {'id': 'moscow', 'host': 'oc.tolf.is:4443'},
+             'riga': {'id': 'riga', 'host': 'oc-riga.tolf.is:443'}}
+
+
+def activation_nodes(directory, fingerprint):
+    try:
+        value = json.loads((Path(directory) / 'activation.json').read_text())
+        if value == {'enabled': True, 'caSha256': fingerprint}:
+            return ['moscow']
+        if value == {'enabled': True, 'caSha256': fingerprint, 'nodes': ['moscow', 'riga']}:
+            return ['moscow', 'riga']
+    except (OSError, ValueError):
+        pass
+    return []
+
+
+def configured_nodes(fingerprint, names, runners=None):
+    runners = runners or {}
+    return Nodes({name: Node(fingerprint, runners.get(name), SSH if name == 'moscow' else RIGA_SSH)
+                  for name in names})
 
 
 class Node:
-    def __init__(self, fingerprint, runner=None):
+    def __init__(self, fingerprint, runner=None, ssh=None):
         self.fingerprint = fingerprint
         self.runner = runner
+        self.ssh = list(ssh if ssh is not None else SSH)
         self.lock = threading.Lock()
         self.checked = 0
         self.ready = False
@@ -46,7 +70,7 @@ class Node:
             if self.runner is not None:
                 data = self.runner(command)
             else:
-                result = subprocess.run(SSH + [command], capture_output=True, text=True, timeout=25)
+                result = subprocess.run(self.ssh + [command], capture_output=True, text=True, timeout=25)
                 if result.returncode or len(result.stdout) > 16384:
                     raise ValueError("Node operation failed")
                 data = json.loads(result.stdout)
@@ -218,15 +242,13 @@ def install(app, context):
             raise RuntimeError("Missing TOLF integration: " + name)
     directory = Path(context["DB"]).parent / "anyconnect"
     authority = Authority(directory)
-    node = Node(authority.fingerprint, context.get("OC_REMOTE"))
+    names = activation_nodes(directory, authority.fingerprint) or ['moscow']
+    runners = context.get('OC_REMOTES', {'moscow': context.get('OC_REMOTE')})
+    node = configured_nodes(authority.fingerprint, names, runners)
     db = context["DB"]
 
     def activated():
-        try:
-            value = json.loads((directory / "activation.json").read_text())
-            return value == {"enabled": True, "caSha256": authority.fingerprint}
-        except (OSError, ValueError):
-            return False
+        return activation_nodes(directory, authority.fingerprint) == names
 
     def ensure_ready():
         if not activated() or not node.health(fresh=True):
@@ -261,13 +283,30 @@ def install(app, context):
             if not rows:
                 return
             published_crl(authority, directory, db)
-            node.sync_crl()
+            failed = False
             for device_id, username in rows:
-                node.remove(username)
+                try:
+                    node.revoke(username)
+                except HTTPException:
+                    failed = True
+                    continue
                 with closing(sqlite3.connect(db, timeout=30)) as con, con:
                     con.execute("UPDATE oc_devices SET state='revoked' WHERE id=? AND state='revoking'", (device_id,))
+                    con.execute('DELETE FROM oc_policy_retries WHERE device_id=?', (device_id,))
+            if failed:
+                raise HTTPException(503, 'Ingress revocation pending')
         finally:
             os.close(fd)
+
+    def reconcile_policies():
+        with closing(sqlite3.connect(db, timeout=30)) as con:
+            rows = con.execute('SELECT d.user_id,d.id FROM oc_devices d JOIN oc_policy_retries r ON r.device_id=d.id WHERE d.state=\'active\' AND EXISTS (SELECT 1 FROM users WHERE id=d.user_id)').fetchall()
+        for user, device_id in rows:
+            with context['tolf_promos'].account_operation(db, user):
+                row = record(user, device_id, True)
+                node.set(row['username'], row['mode'], previous_mode=row['mode'])
+                with closing(sqlite3.connect(db, timeout=30)) as con, con:
+                    con.execute('DELETE FROM oc_policy_retries WHERE device_id=?', (device_id,))
 
     # Revocations caused by account deletion are retried, including after restart.
     periodic_task = None
@@ -277,6 +316,7 @@ def install(app, context):
             await asyncio.sleep(RECONCILE_INTERVAL)
             try:
                 await run_in_threadpool(reconcile)
+                await run_in_threadpool(reconcile_policies)
                 with closing(sqlite3.connect(db, timeout=30)) as con, con:
                     con.execute("DELETE FROM oc_import_grants WHERE expires_at<=?", (utc_now().isoformat(),))
                     con.execute("DELETE FROM oc_setup_links WHERE expires_at<=? OR NOT EXISTS (SELECT 1 FROM users WHERE id=oc_setup_links.user_id)", (utc_now().isoformat(),))
@@ -311,6 +351,7 @@ def install(app, context):
         if not con.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='users'").fetchone():
             raise RuntimeError("TOLF account database not found")
         con.executescript(SCHEMA)
+        con.execute('CREATE TABLE IF NOT EXISTS oc_policy_retries (device_id TEXT PRIMARY KEY)')
 
     @app.get("/oc/access/capabilities")
     def capabilities():
@@ -321,6 +362,7 @@ def install(app, context):
             "caSha256": authority.fingerprint,
             "issuance": ready, "nodeReady": ready,
             "guestSetup": True,
+            "ingresses": [INGRESSES[name] for name in names] if enabled else [],
             "reason": "ready" if ready else ("node_unavailable" if enabled else "node_activation_required"),
         }, headers=HEADERS)
 
@@ -385,7 +427,7 @@ def install(app, context):
                     with closing(sqlite3.connect(db, timeout=30)) as con, con:
                         updated = con.execute("UPDATE oc_devices SET state='active' WHERE id=? AND state='pending' AND EXISTS (SELECT 1 FROM users WHERE id=oc_devices.user_id)", (row["id"],)).rowcount
                     if updated != 1:
-                        node.remove(row["username"])
+                        node.revoke(row["username"])
                         raise HTTPException(409, "Account changed during issuance")
                 return JSONResponse({"device": device_public(record(user, row["id"]))}, headers=HEADERS)
         return await run_in_threadpool(operation)
@@ -394,9 +436,14 @@ def install(app, context):
         url = "https://api.tolf.is/oc/access/import/" + token + ".p12"
         connection_name = "TOLF " + row["label"][:10] + " " + row["id"].replace("-", "")[-8:]
         create = "anyconnect://create/?" + urlencode({"name":connection_name, "host":"oc.tolf.is:4443", "usecert":"true", "certcommonname":row["username"], "netroam":"true"}, quote_via=quote)
+        connections = []
+        for name in names:
+            title = connection_name if name == 'moscow' else 'TOLF R ' + row['label'][:8] + ' ' + row['id'].replace('-', '')[-8:]
+            uri = 'anyconnect://create/?' + urlencode({'name': title, 'host': INGRESSES[name]['host'], 'usecert': 'true', 'certcommonname': row['username'], 'netroam': 'true'}, quote_via=quote)
+            connections.append({**INGRESSES[name], 'connectionName': title, 'connectionUri': uri})
         return {"deviceId":row["id"], "label":row["label"], "certificateUrl":url, "password":password, "expiresAt":expires,
                 "importUri":"anyconnect://import/?" + urlencode({"type":"pkcs12", "uri":url}, quote_via=quote),
-                "connectionUri":create, "connectionName":connection_name, "server":"oc.tolf.is:4443", "username":row["username"]}
+                "connectionUri":create, "connectionName":connection_name, "server":"oc.tolf.is:4443", "username":row["username"], 'connections': connections}
 
     def setup_record(con, token):
         if not re.fullmatch(r"[A-Za-z0-9_-]{43}", token):
@@ -429,7 +476,7 @@ def install(app, context):
         with closing(sqlite3.connect(db, timeout=30)) as con:
             row = setup_record(con, token)
         info = package_response(row, None, None, "", row["setup_expires"])
-        return JSONResponse({key:info[key] for key in ("label", "connectionUri", "connectionName", "server", "expiresAt")}, headers=HEADERS)
+        return JSONResponse({key:info[key] for key in ("label", "connectionUri", "connectionName", "server", "expiresAt", 'connections')}, headers=HEADERS)
 
     @app.post("/oc/access/setup/{token}/claim")
     def claim_setup(token: str, request: Request):
@@ -496,7 +543,9 @@ def install(app, context):
     @app.get("/oc/access/devices/{device_id}/policy")
     def get_policy(device_id: str, request: Request):
         row = record(authenticate(request), device_id, True)
-        return JSONResponse({"username":row["username"],"mode":row["mode"],"applied":True}, headers=HEADERS)
+        with closing(sqlite3.connect(db, timeout=30)) as con:
+            pending = con.execute('SELECT 1 FROM oc_policy_retries WHERE device_id=?', (row['id'],)).fetchone()
+        return JSONResponse({"username":row["username"],"mode":row["mode"],"applied":not bool(pending)}, headers=HEADERS)
 
     @app.post("/oc/access/devices/{device_id}/policy")
     async def set_policy(device_id: str, request: Request):
@@ -507,11 +556,15 @@ def install(app, context):
         def operation():
             with context["tolf_promos"].account_operation(db, user):
                 row = record(user, device_id, True)
-                node.set(row["username"], data["mode"])
+                with closing(sqlite3.connect(db, timeout=30)) as con, con:
+                    con.execute('INSERT OR IGNORE INTO oc_policy_retries VALUES (?)', (row['id'],))
+                node.set(row["username"], data["mode"], previous_mode=row['mode'])
                 with closing(sqlite3.connect(db, timeout=30)) as con, con:
                     updated = con.execute("UPDATE oc_devices SET mode=? WHERE id=? AND state='active' AND EXISTS (SELECT 1 FROM users WHERE id=oc_devices.user_id)", (data["mode"],row["id"])).rowcount
+                    if updated == 1:
+                        con.execute('DELETE FROM oc_policy_retries WHERE device_id=?', (row['id'],))
                 if updated != 1:
-                    node.remove(row["username"])
+                    node.revoke(row["username"])
                     raise HTTPException(409, "Account changed during policy update")
                 return JSONResponse({"username":row["username"],"mode":data["mode"],"applied":True}, headers=HEADERS)
         return await run_in_threadpool(operation)
@@ -519,7 +572,10 @@ def install(app, context):
     @app.get("/oc/access/devices/{device_id}/session")
     def get_session(device_id: str, request: Request):
         row = record(authenticate(request), device_id, True)
-        return JSONResponse({"username":row["username"],"mode":row["mode"],"connected":node.session(row["username"])}, headers=HEADERS)
+        status = node.sessions(row['username'])
+        if not status['complete'] and not status['connected']:
+            raise HTTPException(503, 'Ingress session verification incomplete')
+        return JSONResponse({"username":row["username"],"mode":row["mode"], **status}, headers=HEADERS)
 
     @app.post("/oc/access/devices/{device_id}/revoke")
     def revoke(device_id: str, request: Request):

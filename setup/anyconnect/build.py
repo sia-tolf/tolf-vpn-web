@@ -6,7 +6,7 @@ from pathlib import Path
 
 directory = Path(__file__).resolve().parent
 payload = {}
-for name in ("tolf_oc_certificates.py", "tolf_anyconnect.py"):
+for name in ("tolf_oc_certificates.py", "tolf_anyconnect.py", "tolf_oc_nodes.py"):
     data = (directory / name).read_bytes()
     payload[name] = {"sha256": hashlib.sha256(data).hexdigest(),
                      "data": base64.b64encode(data).decode("ascii")}

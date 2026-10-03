@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import pwd
 import shutil
+import socket
 import subprocess
 import sys
 import tempfile
@@ -39,9 +40,12 @@ def atomic_write(path, data, mode=0o644):
 
 
 def main():
-    if sys.argv[1:] not in ([], ["--activate"]):
-        raise RuntimeError("Usage: install.py [--activate]")
+    if sys.argv[1:] not in ([], ["--activate"], ['--activate-riga']):
+        raise RuntimeError("Usage: install.py [--activate|--activate-riga]")
+    riga = sys.argv[1:] == ['--activate-riga']
     activate = sys.argv[1:] == ["--activate"]
+    if socket.gethostname().split('.')[0] != 'EDISUK':
+        raise RuntimeError('This installer must run on EDISUK')
     if os.geteuid() != 0:
         raise RuntimeError("Run this installer as root on EDISUK")
     source = (API / "main.py").read_text()
@@ -59,14 +63,14 @@ def main():
     owner = pwd.getpwnam(user)
     modules = {}
     for name, entry in PAYLOAD.items():
-        if name not in {"tolf_oc_certificates.py", "tolf_anyconnect.py"}:
+        if name not in {"tolf_oc_certificates.py", "tolf_anyconnect.py", 'tolf_oc_nodes.py'}:
             raise RuntimeError("Unexpected installer payload")
         data = base64.b64decode(entry["data"], validate=True)
         if hashlib.sha256(data).hexdigest() != entry["sha256"]:
             raise RuntimeError("Installer payload hash mismatch")
         compile(data, name, "exec")
         modules[name] = data
-    if len(modules) != 2:
+    if len(modules) != 3:
         raise RuntimeError("Installer payload is incomplete")
     if MARKER not in source and "tolf_anyconnect.install" in source:
         raise RuntimeError("An unrecognized AnyConnect module is already installed")
@@ -85,6 +89,9 @@ def main():
     gate = directory / "activation.json"
     old_gate = gate.read_bytes() if gate.exists() else None
     restarted = False
+    stopped = False
+    if riga and old_gate is None:
+        raise RuntimeError('Activate Moscow before adding Riga')
     try:
         for name, data in modules.items():
             atomic_write(API / name, data)
@@ -110,7 +117,36 @@ def main():
                 str(API), fingerprint)
             atomic_write(gate, json.dumps({"enabled": True, "caSha256": fingerprint}).encode(), 0o600)
             os.chown(gate, owner.pw_uid, owner.pw_gid)
-        expected_enabled = gate.exists() and json.loads(gate.read_text()) == {"enabled": True, "caSha256": fingerprint}
+        if riga:
+            if json.loads(old_gate) not in (
+                    {'enabled': True, 'caSha256': fingerprint},
+                    {'enabled': True, 'caSha256': fingerprint, 'nodes': ['moscow', 'riga']}):
+                raise RuntimeError('Existing activation gate does not match this CA')
+            # Public CRL downloads require the existing API to remain available.
+            run('runuser', '-u', user, '--', str(PYTHON), '-c',
+                'import sys; sys.path.insert(0,sys.argv[1]); from tolf_anyconnect import configured_nodes; '
+                'n=configured_nodes(sys.argv[2],["moscow","riga"]); '
+                'assert n.health(fresh=True), "Node verification failed"; '
+                '[node.sync_crl() for node in n.nodes.values()]', str(API), fingerprint)
+            stopped = True
+            subprocess.run(['systemctl', 'stop', 'tolf-api'], check=True)
+            # Freeze writes while registering the stored acknowledged policies.
+            run('runuser', '-u', user, '--', str(PYTHON), '-c',
+                'import sys,sqlite3,datetime; sys.path.insert(0,sys.argv[1]); '
+                'from tolf_anyconnect import configured_nodes; '
+                'n=configured_nodes(sys.argv[2],["moscow","riga"]); '
+                'con=sqlite3.connect(sys.argv[3]); '
+                'rows=con.execute("SELECT username,mode FROM oc_devices WHERE state=\'active\' AND expires_at>? '
+                'AND EXISTS (SELECT 1 FROM users WHERE id=oc_devices.user_id)",'
+                '(datetime.datetime.now(datetime.timezone.utc).isoformat(),)).fetchall(); '
+                '[n.nodes["riga"].set(username,mode) for username,mode in rows]; '
+                'print("Riga registered devices:",len(rows))', str(API), fingerprint, str(db))
+            atomic_write(gate, json.dumps({'enabled': True, 'caSha256': fingerprint,
+                                          'nodes': ['moscow', 'riga']}).encode(), 0o600)
+            os.chown(gate, owner.pw_uid, owner.pw_gid)
+        expected_enabled = gate.exists() and json.loads(gate.read_text()) in (
+            {"enabled": True, "caSha256": fingerprint},
+            {"enabled": True, "caSha256": fingerprint, 'nodes': ['moscow', 'riga']})
         atomic_write(API / "main.py", updated.encode())
         restarted = True
         subprocess.run(["systemctl", "restart", "tolf-api"], check=True)
@@ -127,6 +163,8 @@ def main():
         if (not result or result.get("version") != 2 or result.get("guestSetup") is not True or result.get("caSha256") != fingerprint
                 or result.get("issuance") is not expected_enabled or result.get("nodeReady") is not expected_enabled):
             raise RuntimeError("AnyConnect API health check failed")
+        if riga and [item['id'] for item in result.get('ingresses', [])] != ['moscow', 'riga']:
+            raise RuntimeError('Riga activation was not acknowledged by the API')
         run(str(PYTHON), "-c",
             "import sys,urllib.request; sys.path.insert(0,sys.argv[1]); "
             "from cryptography import x509; from tolf_oc_certificates import Authority; "
@@ -145,7 +183,9 @@ def main():
         for name in modules:
             if (backup / name).exists():
                 atomic_write(API / name, (backup / name).read_bytes())
-        if restarted:
+            else:
+                (API / name).unlink(missing_ok=True)
+        if restarted or stopped:
             subprocess.run(["systemctl", "restart", "tolf-api"], check=False)
         print("Existing API restored. Backup:", backup, file=sys.stderr)
         print("The new CA, if created, is preserved for a retry.", file=sys.stderr)

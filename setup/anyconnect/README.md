@@ -32,7 +32,10 @@ revocation still require operator validation with a newly issued device.
 
 Operator confirmed foundation installer success: /etc/ocserv/uk-foundation-backup.tbo71n6k,
 UK CA fingerprint unchanged, CRL number 2 dated 3 October, next update 10 October.
-Personal device enforcement and UK multi-ingress integration are still pending.
+Operator confirmed personal device enforcement installation and a successful
+UK-to-Riga health command as API user tolfa using the dedicated restricted SSH
+key. Riga backup: `/etc/ocserv/devices-backup.bed_882n`; SSH authorization backup:
+`/root/.ssh/tolf-oc-key-backup.y02qieev`. UK multi-ingress activation is next.
 The operator identified /usr/local/sbin/tolf-openconnect-sr.sh as the Riga
 table creator, tolf-oc-dns-refresh.sh as the RU domain-set updater and
 tolf-oc-dns-watch.py as a watcher currently scoped to pilot IP 10.19.0.195.
@@ -42,12 +45,40 @@ table, so personal routing uses a separate table and separate copies of RU and
 YouTube destination sets. The new installer is prepared and tested; installation
 on EDISLV and UK registration/activation remain operator checkpoints.
 
-`tolf_oc_nodes.py` is a tested, staged coordinator, not yet included in the UK
-installer or installed API. It requires all node acknowledgements for device
+`tolf_oc_nodes.py` is included in the prepared UK installer. It requires all node acknowledgements for device
 registration/policy, compensates partial changes (including a lost reply),
 attempts CRL refresh and disconnect at every node even if one is unavailable,
 and separates per-node session errors from disconnected states. Integration
-must reconcile stored policies on all nodes after compensation failures.
+reconciles stored policies on all nodes after compensation failures, using
+persistent `oc_policy_retries` rows. A policy reports applied:false while a retry
+is pending. The installer/API changes still require deployment confirmation.
+
+Run the hash-verified UK installer with `--activate-riga` on EDISUK. Its internal
+hostname guard rejects another server. Before activation it verifies both nodes
+and synchronizes their signed CRLs using the actual API service user. It briefly
+stops API writes while registering all existing active, unexpired, account-owned
+devices at Riga with their stored modes. It preserves certificates, device IDs
+and Moscow routing. It then writes the fingerprint-bound gate containing
+`nodes:["moscow","riga"]`, starts the API and verifies capabilities and CRL
+signature. On failure it restores the UK modules and gate and restarts the prior
+API. Registrations already acknowledged at Riga can remain for valid existing
+accesses; rerunning the installer reapplies the current stored modes.
+
+Moscow continues to use `/opt/tolf-api/provision_ed25519`. Riga uses
+`/opt/tolf-api/anyconnect_nodes_ed25519`, service-user ownership, with strict host
+verification through the existing `/opt/tolf-api/.ssh/known_hosts`. The Riga root
+authorized-key entry uses `restrict` and a forced
+`/usr/local/sbin/tolf-oc-riga-remote` command; existing provisioning keys remain
+unchanged. No private key is included in the installer or repository.
+
+Capabilities adds `ingresses` with the two approved host addresses. Import and
+guest metadata responses add `connections`, both referencing the same certificate
+CN, while retaining the original Moscow fields for existing website code.
+Session responses add per-node availability and connected states; an unknown
+node is never converted to disconnected. A confirmed session at either node
+reports connected:true. Without a confirmed session, an unavailable node returns
+503 rather than a false disconnected result. Website selection of the second
+connection remains a following deployment stage.
 
 Operator output confirms Debian ocserv 1.3.0, parallel plain password and
 certificate authentication (`enable-auth = certificate`). HAProxy accepts
