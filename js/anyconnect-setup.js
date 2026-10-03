@@ -21,7 +21,7 @@
   };
   const el = (tag, text, cls) => { const node=document.createElement(tag); if(text!=null)node.textContent=text; if(cls)node.className=cls; return node; };
   function button(text, action, primary=false) { const node=el("button",text,"oc-action "+(primary?"primary":"secondary"));node.type="button";node.disabled=busy;node.addEventListener("click",action);return node; }
-  function link(text, href) { const node=el("a",text,"button-link oc-action primary oc-full");node.href=href;node.referrerPolicy="no-referrer";return node; }
+  function link(text, href, primary=true) { const node=el("a",text,"button-link oc-action "+(primary?"primary":"secondary")+" oc-full");node.href=href;node.referrerPolicy="no-referrer";return node; }
   async function request(url, method="GET") {
     const controller=new AbortController(), timeout=setTimeout(()=>controller.abort(),30000);
     try { const response=await fetch(url,{method,credentials:"omit",cache:"no-store",signal:controller.signal,headers:{Accept:"application/json"}});if(!response.ok){const error=new Error("HTTP");error.status=response.status;throw error;}return await response.json(); }
@@ -55,7 +55,7 @@
     root.append(el("h3",t.title+" — «"+info.label+"»"),el("p",t.intro,"oc-note"));
     root.append(el("h4","1. "+t.install));
     const app=platform==="ios"?"https://apps.apple.com/app/id1135064690":platform==="android"?"https://play.google.com/store/apps/details?id=com.cisco.anyconnect.vpn.android.avf":"https://www.cisco.com/c/en/us/support/security/secure-client-5/model.html";
-    root.append(link(t.app,app));root.append(el("h4","2. "+t.connect));
+    root.append(link(t.app,app,false));root.append(el("h4","2. "+t.connect));
     if(connectionConfirmed){
       const doneText={ru:["✓ Соединение добавлено","Добавить заново"],en:["✓ Connection added","Add again"],lv:["✓ Savienojums pievienots","Pievienot vēlreiz"]}[language.value]||["✓ Connection added","Add again"];
       const completed=el("div",null,"oc-connection-completed"),status=el("div",doneText[0],"oc-connection-done");status.setAttribute("role","status");
