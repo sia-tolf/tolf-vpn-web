@@ -79,6 +79,24 @@ class MultiApiTests(unittest.TestCase):
             self.assertIn(city, connection['connectionName'])
             self.assertLessEqual(len(connection['connectionName']), 24)
         self.assertNotIn('password', info)
+        self.assertEqual([c['connectionName'] for c in info['connections']], ['TOLF Москва iPad', 'TOLF Рига iPad'])
+
+    def test_duplicate_device_titles_keep_readable_numbers_after_revocation(self):
+        first = self.create()
+        second = self.create()
+        self.assertEqual(first['connectionNames']['moscow'], 'TOLF Москва iPad')
+        self.assertEqual(second['connectionNames']['moscow'], 'TOLF Москва iPad 2')
+        self.client.post('/oc/access/devices/' + first['id'] + '/revoke', headers=self.headers)
+        listing = self.client.get('/oc/access/devices').json()['devices']
+        self.assertEqual(next(d for d in listing if d['id'] == second['id'])['connectionNames'], second['connectionNames'])
+
+    def test_truncated_labels_get_distinct_titles(self):
+        rows = [dict(id=str(n), label='Long device label that exceeds the connection limit') for n in range(3)]
+        titles = api.connection_titles(rows)
+        for ingress in ('moscow', 'riga'):
+            values = [titles[row['id']][ingress] for row in rows]
+            self.assertEqual(len(set(values)), 3)
+            self.assertTrue(all(len(title) <= 24 for title in values))
 
     def test_failed_policy_keeps_database_and_moscow_mode_and_pending_flag(self):
         device = self.create()

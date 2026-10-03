@@ -157,6 +157,25 @@ def utc_now():
 
 def device_public(row):
     return {key: row[key] for key in ("id", "request_id", "label", "username", "created_at", "expires_at", "state", "mode")}
+
+
+def connection_titles(rows):
+    titles = {}
+    used = {name: set() for name in INGRESSES}
+    for row in rows:
+        titles[row['id']] = {}
+        for name, city in (('moscow', 'Москва'), ('riga', 'Рига')):
+            base = 'TOLF ' + city + ' ' + row['label']
+            title = base[:24].rstrip()
+            number = 2
+            while title in used[name]:
+                suffix = ' ' + str(number)
+                title = base[:24 - len(suffix)].rstrip() + suffix
+                number += 1
+            used[name].add(title)
+            titles[row['id']][name] = title
+    return titles
+
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS oc_devices (
     id TEXT PRIMARY KEY,
@@ -269,6 +288,15 @@ def install(app, context):
         if active and (row["state"] != "active" or dt.datetime.fromisoformat(row["expires_at"]) <= utc_now()):
             raise HTTPException(409, "Device access is not active")
         return row
+
+    def titles_for(row):
+        with closing(sqlite3.connect(db, timeout=30)) as con:
+            con.row_factory = sqlite3.Row
+            rows = con.execute('SELECT id,label FROM oc_devices WHERE user_id=? ORDER BY rowid', (row['user_id'],)).fetchall()
+        return connection_titles(rows)[row['id']]
+
+    def public_device(row):
+        return {**device_public(row), 'connectionNames': titles_for(row)}
 
     def reconcile():
         fd = os.open(directory / "reconcile.lock", os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
@@ -387,9 +415,10 @@ def install(app, context):
             con.row_factory = sqlite3.Row
             rows = con.execute("""
                 SELECT id,request_id,label,username,created_at,expires_at,state,mode
-                FROM oc_devices WHERE user_id=? ORDER BY created_at
+                FROM oc_devices WHERE user_id=? ORDER BY rowid
             """, (user,)).fetchall()
-        return JSONResponse({"devices": [dict(row) for row in rows]}, headers=HEADERS)
+        titles = connection_titles(rows)
+        return JSONResponse({"devices": [{**dict(row), 'connectionNames': titles[row['id']]} for row in rows]}, headers=HEADERS)
 
     @app.post("/oc/access/devices")
     async def create_device(request: Request):
@@ -429,19 +458,17 @@ def install(app, context):
                     if updated != 1:
                         node.revoke(row["username"])
                         raise HTTPException(409, "Account changed during issuance")
-                return JSONResponse({"device": device_public(record(user, row["id"]))}, headers=HEADERS)
+                return JSONResponse({"device": public_device(record(user, row["id"]))}, headers=HEADERS)
         return await run_in_threadpool(operation)
 
     def package_response(row, package, password, token, expires):
         url = "https://api.tolf.is/oc/access/import/" + token + ".p12"
-        def title_for(name):
-            prefix = 'TOLF Рига ' if name == 'riga' else 'TOLF Москва '
-            return prefix + row['label'][:24 - len(prefix) - 9] + ' ' + row['id'].replace('-', '')[-8:]
-        connection_name = title_for('moscow')
+        titles = titles_for(row)
+        connection_name = titles['moscow']
         create = "anyconnect://create/?" + urlencode({"name":connection_name, "host":"oc.tolf.is:4443", "usecert":"true", "certcommonname":row["username"], "netroam":"true"}, quote_via=quote)
         connections = []
         for name in names:
-            title = title_for(name)
+            title = titles[name]
             uri = 'anyconnect://create/?' + urlencode({'name': title, 'host': INGRESSES[name]['host'], 'usecert': 'true', 'certcommonname': row['username'], 'netroam': 'true'}, quote_via=quote)
             connections.append({**INGRESSES[name], 'connectionName': title, 'connectionUri': uri})
         return {"deviceId":row["id"], "label":row["label"], "certificateUrl":url, "password":password, "expiresAt":expires,
@@ -594,4 +621,4 @@ def install(app, context):
             except HTTPException:
                 pass  # Persist the request; background retries it until acknowledged.
             row = record(user, row["id"])
-            return JSONResponse({"device":device_public(row)}, status_code=200 if row["state"] == "revoked" else 202, headers=HEADERS)
+            return JSONResponse({"device":public_device(row)}, status_code=200 if row["state"] == "revoked" else 202, headers=HEADERS)

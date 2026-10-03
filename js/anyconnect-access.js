@@ -164,7 +164,7 @@
   function connectionUri(d) {
     const point = ingress();
     const prefix = point.id === 'riga' ? 'TOLF Рига ' : 'TOLF Москва ';
-    const name = prefix + Array.from(d.label).slice(0,24 - Array.from(prefix).length - 9).join("") + " " + d.id.replaceAll("-", "").slice(-8);
+    const name = d.connectionNames?.[point.id] || Array.from(prefix + d.label).slice(0,24).join("").trimEnd();
     const params = {name, host:point.host, usecert:"true", certcommonname:d.username, netroam:"true"};
     return "anyconnect://create/?" + Object.entries(params).map(([key,value]) =>
       encodeURIComponent(key) + "=" + encodeURIComponent(value)).join("&");
