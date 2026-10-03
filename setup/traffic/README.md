@@ -1,6 +1,7 @@
 # VPN traffic accounting — implementation checkpoint
 
-Status: the UK ledger and its regression tests are prepared. No collector is
+Status: the UK ledger, local RADIUS decoder/durable spool and regression tests
+are prepared. No collector is
 installed or enabled on the production nodes. Admin UI integration and the
 guarded installers follow verification of the current node accounting setup.
 
@@ -90,9 +91,20 @@ https://github.com/openconnect/ocserv/blob/master/doc/sample.config
 
 ## Verification
 
+`radius_accounting.py` decodes authenticated strongSwan Accounting-Requests,
+combines Octets/Gigawords into 64-bit counters, retains Event-Timestamp and
+deduplicates semantic retransmissions despite changed packet IDs/delay fields.
+It acknowledges only after a FULL-synchronous SQLite transaction commits.
+The ordered spool survives receiver restarts; deletion requires a subsequent
+explicit UK acknowledgement. Deployment must use a dedicated loopback listener
+and a random local secret, never a public authentication listener. This module
+is not yet a running receiver or an installer. Existing active sessions still
+require an explicit baseline policy before activation.
+
 `python3 -m unittest discover -s tests/traffic -v`
 
-Twelve tests cover duplicates, retries, final counters, pre-existing baselines,
+Twenty tests cover packet authentication, 64-bit RADIUS counters, durable spooling,
+storage failure without acknowledgement, duplicates, retries, final counters, pre-existing baselines,
 reordered events, explicit counter resets, reconnects, persistence, atomic batch
 rollback, node/protocol separation, ambiguous attribution, frozen account mapping,
 global sorting and pagination, timezones and half-open period boundaries.
