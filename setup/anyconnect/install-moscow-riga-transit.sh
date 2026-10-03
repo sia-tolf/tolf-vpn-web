@@ -69,7 +69,7 @@ uci set firewall.tolf_oc_riga_transit='include'
 uci set firewall.tolf_oc_riga_transit.type='script'
 uci set firewall.tolf_oc_riga_transit.path="$HELPER"
 uci set firewall.tolf_oc_riga_transit.fw4_compatible='1'
-uci set firewall.tolf_oc_riga_transit.reload='1'
+uci -q delete firewall.tolf_oc_riga_transit.reload || true
 uci commit firewall
 /etc/init.d/firewall reload
 
