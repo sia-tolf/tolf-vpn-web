@@ -2,6 +2,11 @@ import hashlib
 import importlib.util
 from pathlib import Path
 import struct
+import socket
+import subprocess
+import sqlite3
+import os
+import runpy
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -86,6 +91,52 @@ class AccountingTests(unittest.TestCase):
                 spool.receive(request(), SECRET)
         self.assertEqual(spool.pending(), [])
         spool.close()
+
+    def test_loopback_service_persists_before_real_udp_reply(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            key = base / 'secret'
+            key.write_bytes(SECRET)
+            os.chmod(key, 0o600)
+            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+                sock.bind(('127.0.0.1', 0))
+                port = sock.getsockname()[1]
+            import sys
+            process = subprocess.Popen([sys.executable, spec.origin,
+                '--database', str(base / 'spool.db'), '--secret-file', str(key),
+                '--port', str(port)], stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+            try:
+                packet = request(2, 800, 1500)
+                event, expected = radius.decode(packet, SECRET)
+                with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+                    sock.settimeout(0.2)
+                    response = None
+                    for _ in range(25):
+                        sock.sendto(packet, ('127.0.0.1', port))
+                        try:
+                            response, peer = sock.recvfrom(4096)
+                            break
+                        except socket.timeout:
+                            if process.poll() is not None:
+                                self.fail(process.stderr.read().decode())
+                    self.assertEqual(response, expected)
+                with sqlite3.connect(base / 'spool.db') as con:
+                    self.assertEqual(con.execute('SELECT event_id FROM events').fetchall(),
+                                     [(event['eventId'],)])
+                self.assertEqual((base / 'spool.db').stat().st_mode & 0o077, 0)
+            finally:
+                process.terminate()
+                process.communicate(timeout=5)
+
+    def test_wrong_server_guard_precedes_any_mutation(self):
+        path = Path(__file__).resolve().parents[2] / 'setup/traffic/install-moscow-receiver-template.py'
+        installer = runpy.run_path(str(path))
+        fake = subprocess.CompletedProcess([], 1, stdout='', stderr='no br-lan')
+        with patch('os.geteuid', return_value=0), patch('shutil.which', return_value='/sbin/ip'), \
+             patch('subprocess.run', return_value=fake), \
+             patch('tempfile.mkdtemp', side_effect=AssertionError('mutation before guard')):
+            with self.assertRaisesRegex(SystemExit, 'only for Moscow OpenWrt'):
+                installer['main']()
 
 
 if __name__ == '__main__':

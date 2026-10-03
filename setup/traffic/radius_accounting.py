@@ -7,7 +7,12 @@ from datetime import datetime, timezone
 import hashlib
 import hmac
 import json
+import logging
+import os
+from pathlib import Path
+import socket
 import sqlite3
+import stat
 import struct
 
 
@@ -131,3 +136,59 @@ class Spool:
 
     def close(self):
         self.con.close()
+
+
+def serve(database, secret_file, port=18130):
+    directory = Path(database).parent
+    info = directory.lstat()
+    if not stat.S_ISDIR(info.st_mode) or info.st_uid != os.geteuid() or info.st_mode & 0o077:
+        raise ValueError('Spool directory must be private and owned by the service user')
+    path = Path(database)
+    if path.exists() or path.is_symlink():
+        info = path.lstat()
+        if not stat.S_ISREG(info.st_mode) or info.st_uid != os.geteuid() or info.st_mode & 0o077:
+            raise ValueError('Unsafe spool database')
+    fd = os.open(secret_file, os.O_RDONLY | os.O_NOFOLLOW)
+    try:
+        info = os.fstat(fd)
+        if not stat.S_ISREG(info.st_mode) or info.st_uid != os.geteuid() or info.st_mode & 0o077:
+            raise ValueError('Unsafe accounting secret file')
+        secret = os.read(fd, 256).strip()
+    finally:
+        os.close(fd)
+    if len(secret) < 32 or len(secret) > 128:
+        raise ValueError('Invalid accounting secret length')
+    os.umask(0o077)
+    spool = Spool(path)
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # No public listener, no reuse-port and no authentication service.
+        sock.bind(('127.0.0.1', port))
+        logging.info('Local accounting receiver ready')
+        while True:
+            packet, peer = sock.recvfrom(4097)
+            if peer[0] != '127.0.0.1':
+                continue
+            try:
+                response = spool.receive(packet, secret)
+                sock.sendto(response, peer)
+            except (ValueError, UnicodeError, OverflowError):
+                logging.warning('Rejected invalid accounting packet')
+            except (sqlite3.Error, OSError):
+                # No ACK on a storage failure. Never log packet contents or
+                # the shared secret; supervise the receiver separately.
+                logging.error('Accounting persistence or response failed')
+    finally:
+        sock.close()
+        spool.close()
+
+
+if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser(description='Loopback VPN accounting receiver')
+    parser.add_argument('--database', required=True)
+    parser.add_argument('--secret-file', required=True)
+    parser.add_argument('--port', type=int, default=18130)
+    args = parser.parse_args()
+    logging.basicConfig(level=logging.INFO, format='tolf-traffic: %(levelname)s: %(message)s')
+    serve(args.database, args.secret_file, args.port)
