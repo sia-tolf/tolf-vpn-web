@@ -7,6 +7,9 @@ html[data-vpn-transport="anyconnect"] #windowsPanel { display: none !important; 
 html[data-vpn-transport="anyconnect"] #legacyVpnPanel { display: block !important; }
 #anyConnectAccess { border-top: 1px solid var(--border, #dedee4); margin-top: 24px; padding-top: 22px; }
 #anyConnectAccess h3 { margin: 0 0 12px; font-size: 18px; }
+#anyConnectAccess .oc-access-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+#anyConnectAccess .oc-access-header h3 { margin: 0; }
+#anyConnectAccess .oc-access-header > .oc-action { flex: 0 0 auto; }
 #anyConnectAccess p, #anyConnectAccess li { font-size: 14px; line-height: 1.55; }
 #anyConnectAccess h4 { margin: 22px 0 12px; font-size: 16px; }
 #anyConnectAccess .oc-step { padding: 0; margin: 0; }
@@ -17,9 +20,9 @@ html[data-vpn-transport="anyconnect"] #legacyVpnPanel { display: block !importan
 #anyConnectAccess .oc-device-row { display: grid; grid-template-columns: minmax(0, 1fr) 180px auto; gap: 10px; align-items: stretch; }
 #anyConnectAccess .oc-device-row > select { min-width: 0; height: 100%; }
 #anyConnectAccess .oc-device-row > .oc-action { white-space: nowrap; }
-#anyConnectAccess .oc-device-status { display: flex; align-items: center; gap: 6px; box-sizing: border-box; min-height: 48px; padding: 6px 8px; border: 1px solid var(--border); border-radius: 10px; font-size: 13px; font-weight: 500; line-height: 1.3; color: var(--secondary); background: var(--code-background); }
-#anyConnectAccess .oc-device-status::before { content: ""; flex: 0 0 6px; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-#anyConnectAccess .oc-session-connected { color: #247a43; background: #edf8f0; }
+#anyConnectAccess .oc-device-status { display: flex; align-items: center; gap: 8px; box-sizing: border-box; min-height: 48px; padding: 6px 8px; font-size: 13px; font-weight: 500; line-height: 1.3; color: var(--secondary); }
+#anyConnectAccess .oc-device-status::before { content: ""; flex: 0 0 9px; width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
+#anyConnectAccess .oc-session-connected { color: #247a43; }
 #anyConnectAccess .oc-session-connected::before { background: #35c65a; }
 #anyConnectAccess .oc-session-checking { color: var(--tolf-action-text, #315780); }
 #anyConnectAccess .oc-session-failed, #anyConnectAccess .oc-session-revoking { color: var(--error); }

@@ -249,7 +249,10 @@
     root.replaceChildren();
     if (!account) return;
     const c = copy(), mobile = currentPlatform !== "windows";
-    root.append(element("h3", c.title), element("p", c.separate, "oc-note"));
+    const header = element("div", null, "oc-access-header");
+    header.append(element("h3", c.title));
+    if (devices.length && !addingDevice) header.append(button(c.additional, () => { addingDevice = true; render(); }));
+    root.append(header, element("p", c.separate, "oc-note"));
     root.append(element("h4", "1. " + c.install));
     const appUrl = currentPlatform === "ios" ? "https://apps.apple.com/app/id1135064690" :
       currentPlatform === "android" ? "https://play.google.com/store/apps/details?id=com.cisco.anyconnect.vpn.android.avf" :
@@ -280,11 +283,6 @@
     }
     const pending = devices.find(d => d.id === selectedId && d.state === "pending");
     if (pending) root.append(button(c.resume, () => perform(token => create(pending.request_id, pending.label, token)), true));
-    if (devices.length && !addingDevice) {
-      const actions = element("div", null, "oc-actions");
-      actions.append(button(c.additional, () => { addingDevice = true; render(); }));
-      root.append(actions);
-    }
     if (!devices.length || addingDevice) {
     root.append(element("label", c.newDevice));
     const name = element("input"); name.type = "text"; name.maxLength = 80; name.value = deviceName;

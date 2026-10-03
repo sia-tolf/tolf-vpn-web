@@ -100,7 +100,7 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   const deviceRow = ids.anyConnectAccess.children.find(n=>n.className==='oc-device-row');
   assert(deviceRow.children.some(n=>n.tagName==='select'));
   assert(deviceRow.children.some(n=>n.tagName==='button'&&n.textContent==='Отозвать доступ'));
-  assert(ids.anyConnectAccess.children.some(n=>n.className==='oc-actions'&&
+  assert(ids.anyConnectAccess.children.some(n=>n.className==='oc-access-header'&&
     n.children.some(child=>child.textContent==='Создать дополнительный доступ')));
   assert(!descendants(ids.anyConnectAccess).some(n=>n.tagName==='button'&&n.textContent==='Обновить'));
   button(ids.anyConnectAccess,'Создать дополнительный доступ').click();

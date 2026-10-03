@@ -150,13 +150,13 @@ lock until reboot or cleanup.
    After creation the form closes; creating another device requires the explicit
    additional-access button. Routine refresh controls are hidden; recovery offers
    a retry button. Revoke sits in the same row as the device selector and access state;
-   additional access sits below that row. A separate colored status badge shows
+   additional access sits on the right of the section title in the wide layout. A separate colored status badge shows
    checking, connected, disconnected or verification failure from the existing
    authenticated session poll. Pending issuance and revocation retain lifecycle
    labels. The selector contains device names only; step 3 and 4 headings name
    the selected device. Switching devices clears confirmation until rechecked.
    Routine polls retain the last result until a new result arrives, so the
-   bordered, fixed-width status does not flash checking every ten seconds.
+   fixed-width status does not flash checking every ten seconds.
    Every active access offers local setup or transfer to another device. Transfer
    provides a shareable URL containing only the device ID, never import secrets.
    The receiving browser opens AnyConnect and selects that access after login to
@@ -187,7 +187,9 @@ All steps use the same content inset. Import/download actions share a full-width
 row with equal-width columns and inherit the site's standard button styles.
 Import expiration and manual-import instructions share the same secondary text
 style. Device selection and revoke share one full-width row with equal heights;
-additional access is below them.
+additional access is in the section header in the wide layout.
+The status has no frame or background and uses a nine-pixel colored dot.
+Narrow-screen layout refinement is deferred until the wide layout is accepted.
 The Get certificate button matches the width of the Import into AnyConnect button.
 The overview username comes from the authenticated account's `vpn.username`,
 as in IKEv2; it is hidden if that field is absent. Device certificate CNs remain
