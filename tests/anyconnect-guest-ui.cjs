@@ -34,6 +34,11 @@ async function scenario(unavailable=false){
   connection.click();button('Получить сертификат').click();await settle();
   assert.equal(calls.length,1,'opening the app does not unlock certificate issuance');
   button('Соединение добавлено — продолжить').click();
+  assert(!all(root).some(n=>n.textContent==='Соединение добавлено — продолжить'));
+  assert(!all(root).some(n=>n.tagName==='a'&&n.textContent==='Добавить соединение в AnyConnect'));
+  assert(root.textContent.includes('✓ Соединение добавлено'));
+  button('Добавить заново').click();assert(button('Получить сертификат').disabled);
+  button('Соединение добавлено — продолжить').click();
   assert(!button('Получить сертификат').disabled);
   button('Получить сертификат').click();await settle();
   assert(calls[1][0].endsWith('/'+token+'/claim'));assert.equal(calls[1][1].method,'POST');

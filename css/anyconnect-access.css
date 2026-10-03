@@ -28,6 +28,9 @@ html[data-vpn-transport="anyconnect"] #legacyVpnPanel { display: block !importan
 #anyConnectAccess .oc-session-failed, #anyConnectAccess .oc-session-revoking { color: var(--error); }
 #anyConnectAccess .oc-prepare { width: calc((100% - 10px) / 2); }
 #anyConnectAccess .oc-prepare:disabled { opacity: .55; cursor: not-allowed; }
+#anyConnectAccess .oc-connection-completed { display: flex; align-items: center; gap: 16px; }
+#anyConnectAccess .oc-connection-done { flex: 1; padding: 14px 18px; border-radius: 12px; background: #edf8f0; color: #247a43; font-size: 16px; font-weight: 600; text-align: center; }
+#anyConnectAccess .oc-retry-link { padding: 6px 0; border: 0; background: transparent; color: var(--tolf-action-text, #315780); font: inherit; font-size: 14px; text-decoration: underline; cursor: pointer; }
 #anyConnectAccess .oc-actions.oc-import-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 #anyConnectAccess .oc-import-actions > .oc-action { width: 100%; min-width: 0; overflow-wrap: anywhere; }
 #anyConnectAccess .oc-import-actions > .oc-action:only-child { grid-column: 1 / -1; }

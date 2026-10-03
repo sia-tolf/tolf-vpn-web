@@ -141,6 +141,12 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   button(ids.anyConnectAccess,'Получить сертификат').events.click();await settle();
   assert.equal(calls.filter(call=>call[1].endsWith('/import')).length,beforeImport);
   button(ids.anyConnectAccess,'Соединение добавлено — продолжить').click();
+  assert(!descendants(ids.anyConnectAccess).some(n=>n.textContent==='Соединение добавлено — продолжить'));
+  assert(!descendants(ids.anyConnectAccess).some(n=>n.tagName==='a'&&n.textContent==='Добавить соединение в AnyConnect'));
+  assert(ids.anyConnectAccess.textContent.includes('✓ Соединение добавлено'));
+  button(ids.anyConnectAccess,'Добавить заново').click();
+  assert(button(ids.anyConnectAccess,'Получить сертификат').disabled);
+  button(ids.anyConnectAccess,'Соединение добавлено — продолжить').click();
   assert(!button(ids.anyConnectAccess,'Получить сертификат').disabled);
   button(ids.anyConnectAccess,'Получить сертификат').click(); await settle();
   assert(ids.anyConnectAccess.textContent.includes('private-import-password'));
@@ -165,8 +171,8 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   assert(certificateStep.children[0].textContent.includes('«iPad»'));
   assert(connectionStep.textContent.includes('Сначала добавьте соединение'));
   assert(button(ids.anyConnectAccess,'Получить сертификат').className.includes('oc-prepare'));
-  const connectionPosition = connectionStep.children.findIndex(n=>n.tagName==='a');
-  assert(connectionStep.children[connectionPosition-1].textContent.includes('External Control → Prompt'));
+  assert(!connectionStep.children.some(n=>n.tagName==='a'));
+  assert(connectionStep.textContent.includes('✓ Соединение добавлено'));
   const importLink = descendants(ids.anyConnectAccess).find(n=>n.tagName==='a'&&n.textContent==='Импортировать в AnyConnect');
   assert(importLink.className.includes('button-link')&&importLink.className.includes('primary'));
   button(ids.anyConnectAccess,'Скачать сертификат .p12').click();await settle();

@@ -101,6 +101,7 @@
     lv: {confirm:"Savienojums pievienots — turpināt", blocked:"Vispirms pievienojiet savienojumu AnyConnect un apstipriniet iepriekšējā soļa pabeigšanu."}
   };
   const stepCopy = () => STEP_COPY[document.documentElement.lang] || STEP_COPY.en;
+  const completedCopy = () => ({ru:{done:"✓ Соединение добавлено",again:"Добавить заново"},en:{done:"✓ Connection added",again:"Add again"},lv:{done:"✓ Savienojums pievienots",again:"Pievienot vēlreiz"}}[document.documentElement.lang] || {done:"✓ Connection added",again:"Add again"});
   let transferGrant = null, transferTimer = null;
   const TRANSFER_COPY = {
     ru: {create:"Создать ссылку для установки", help:"Отправьте ссылку получателю. Вход в аккаунт для установки не требуется.", expires:"Ссылка действует 24 часа и используется один раз для получения сертификата.", update:"Передача без входа станет доступна после обновления API на UK."},
@@ -375,11 +376,15 @@
       const steps = element("div", null, "oc-steps");
       const suffix = " " + sessionCopy().forDevice + " «" + d.label + "»";
       const connect = element("section", null, "oc-step"); connect.append(element("h4", "3. " + c.connect + suffix), element("p", c.return));
-      if (mobile) connect.append(element("p", c.controlReminder), link(c.add, connectionUri(d), true));
+      if (confirmedDeviceId === d.id) {
+        const completed = element("div", null, "oc-connection-completed");
+        const status = element("div", completedCopy().done, "oc-connection-done"); status.setAttribute("role", "status");
+        const again = button(completedCopy().again, () => { confirmedDeviceId = null; render(); }); again.className = "oc-action oc-retry-link";
+        completed.append(status, again); connect.append(completed);
+      } else if (mobile) connect.append(element("p", c.controlReminder), link(c.add, connectionUri(d), true));
       connect.append(element("p", c.host));
-      const confirm = button(stepCopy().confirm, () => { confirmedDeviceId = d.id; render(); });
-      confirm.disabled ||= confirmedDeviceId === d.id;
-      connect.append(confirm); steps.append(connect);
+      if (confirmedDeviceId !== d.id) connect.append(button(stepCopy().confirm, () => { confirmedDeviceId = d.id; render(); }));
+      steps.append(connect);
       const cert = element("section", null, "oc-step"); cert.append(element("h4", "4. " + c.certificate + suffix));
       const prepare = button(c.prepare, () => perform(async token => {
         if (confirmedDeviceId !== d.id) return;
@@ -390,7 +395,7 @@
       prepare.className += " oc-prepare";
       prepare.disabled ||= capabilities?.issuance !== true || confirmedDeviceId !== d.id;
       cert.append(prepare, element("p", confirmedDeviceId === d.id ? c.connectionLinkHelp : stepCopy().blocked, "oc-note"));
-      if (grant?.deviceId === d.id) {
+      if (grant?.deviceId === d.id && confirmedDeviceId === d.id) {
         cert.append(element("p", c.password));
         const passwordRow = element("div", null, "oc-password-row");
         passwordRow.append(element("span", grant.password, "oc-secret"));

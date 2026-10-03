@@ -56,12 +56,16 @@
     root.append(el("h4","1. "+t.install));
     const app=platform==="ios"?"https://apps.apple.com/app/id1135064690":platform==="android"?"https://play.google.com/store/apps/details?id=com.cisco.anyconnect.vpn.android.avf":"https://www.cisco.com/c/en/us/support/security/secure-client-5/model.html";
     root.append(link(t.app,app));root.append(el("h4","2. "+t.connect));
-    if(platform!=="windows")root.append(el("p",t.control),link(t.add,info.connectionUri));
+    if(connectionConfirmed){
+      const doneText={ru:["✓ Соединение добавлено","Добавить заново"],en:["✓ Connection added","Add again"],lv:["✓ Savienojums pievienots","Pievienot vēlreiz"]}[language.value]||["✓ Connection added","Add again"];
+      const completed=el("div",null,"oc-connection-completed"),status=el("div",doneText[0],"oc-connection-done");status.setAttribute("role","status");
+      const again=button(doneText[1],()=>{connectionConfirmed=false;render();});again.className="oc-action oc-retry-link";completed.append(status,again);root.append(completed);
+    }else if(platform!=="windows")root.append(el("p",t.control),link(t.add,info.connectionUri));
     else root.append(el("p","oc.tolf.is:4443"));
     const step=STEP_TEXT[language.value]||STEP_TEXT.ru;
-    const confirm=button(step.confirm,()=>{connectionConfirmed=true;render();});confirm.disabled ||= connectionConfirmed;root.append(confirm);
+    if(!connectionConfirmed)root.append(button(step.confirm,()=>{connectionConfirmed=true;render();}));
     root.append(el("h4","3. "+t.cert),el("p",connectionConfirmed?t.before:step.blocked,"oc-note"));
-    if(!grant){const prepare=button(t.prepare,claim,true);prepare.className+=" oc-prepare";prepare.disabled ||= !connectionConfirmed;root.append(prepare);}
+    if(!grant||!connectionConfirmed){const prepare=button(t.prepare,claim,true);prepare.className+=" oc-prepare";prepare.disabled ||= !connectionConfirmed;root.append(prepare);}
     else {
       root.append(el("p",t.password));const row=el("div",null,"oc-password-row");row.append(el("span",grant.password,"oc-secret"));
       const control=el("span",null,"oc-copy-control"),icon=button("",copyPassword);icon.className="oc-copy";icon.setAttribute("aria-label",t.copy);icon.title=t.copy;

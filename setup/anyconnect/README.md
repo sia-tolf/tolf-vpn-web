@@ -216,6 +216,9 @@ does not confirm completion. This gate applies both to account setup and guest
 setup links; confirmation is cleared when selecting another device, changing
 accounts or leaving the page. It records user confirmation, not verification
 that the connection was saved inside Cisco Secure Client.
+After confirmation, the Continue control and Cisco connection link are replaced
+by a noninteractive completion panel. Add again restores the connection step and
+locks certificate actions until reconfirmation, retaining any unexpired bundle.
 The overview username comes from the authenticated account's `vpn.username`,
 as in IKEv2; it is hidden if that field is absent. Device certificate CNs remain
 in certificate selection, session checks and routing commands, and are not
