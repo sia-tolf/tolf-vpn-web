@@ -60,10 +60,14 @@
       const doneText={ru:["✓ Соединение добавлено","Добавить заново"],en:["✓ Connection added","Add again"],lv:["✓ Savienojums pievienots","Pievienot vēlreiz"]}[language.value]||["✓ Connection added","Add again"];
       const completed=el("div",null,"oc-connection-completed"),status=el("div",doneText[0],"oc-connection-done");status.setAttribute("role","status");
       const again=button(doneText[1],()=>{connectionConfirmed=false;render();});again.className="oc-action oc-retry-link";completed.append(status,again);root.append(completed);
-    }else if(platform!=="windows")root.append(el("p",t.control),link(t.add,info.connectionUri));
-    else root.append(el("p","oc.tolf.is:4443"));
+    }
     const step=STEP_TEXT[language.value]||STEP_TEXT.ru;
-    if(!connectionConfirmed)root.append(button(step.confirm,()=>{connectionConfirmed=true;render();}));
+    if(!connectionConfirmed){
+      const actions=el("div",null,"oc-actions oc-connection-actions");
+      if(platform!=="windows"){root.append(el("p",t.control));actions.append(link(t.add,info.connectionUri));}
+      else root.append(el("p","oc.tolf.is:4443"));
+      actions.append(button(step.confirm,()=>{connectionConfirmed=true;render();}));root.append(actions);
+    }
     root.append(el("h4","3. "+t.cert),el("p",connectionConfirmed?t.before:step.blocked,"oc-note"));
     if(!grant||!connectionConfirmed){const prepare=button(t.prepare,claim,true);prepare.className+=" oc-prepare";prepare.disabled ||= !connectionConfirmed;root.append(prepare);}
     else {

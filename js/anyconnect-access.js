@@ -381,9 +381,13 @@
         const status = element("div", completedCopy().done, "oc-connection-done"); status.setAttribute("role", "status");
         const again = button(completedCopy().again, () => { confirmedDeviceId = null; render(); }); again.className = "oc-action oc-retry-link";
         completed.append(status, again); connect.append(completed);
-      } else if (mobile) connect.append(element("p", c.controlReminder), link(c.add, connectionUri(d), true));
+      } else {
+        const actions = element("div", null, "oc-actions oc-connection-actions");
+        if (mobile) { connect.append(element("p", c.controlReminder)); actions.append(link(c.add, connectionUri(d), true)); }
+        actions.append(button(stepCopy().confirm, () => { confirmedDeviceId = d.id; render(); }));
+        connect.append(actions);
+      }
       connect.append(element("p", c.host));
-      if (confirmedDeviceId !== d.id) connect.append(button(stepCopy().confirm, () => { confirmedDeviceId = d.id; render(); }));
       steps.append(connect);
       const cert = element("section", null, "oc-step"); cert.append(element("h4", "4. " + c.certificate + suffix));
       const prepare = button(c.prepare, () => perform(async token => {

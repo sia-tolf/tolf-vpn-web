@@ -216,6 +216,8 @@ does not confirm completion. This gate applies both to account setup and guest
 setup links; confirmation is cleared when selecting another device, changing
 accounts or leaving the page. It records user confirmation, not verification
 that the connection was saved inside Cisco Secure Client.
+Before confirmation, mobile connection and Continue actions share one row with
+equal-width columns, with connection on the left and confirmation on the right.
 After confirmation, the Continue control and Cisco connection link are replaced
 by a noninteractive completion panel. Add again restores the connection step and
 locks certificate actions until reconfirmation, retaining any unexpired bundle.
