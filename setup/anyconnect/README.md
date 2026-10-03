@@ -92,10 +92,10 @@ existing per-account operation lock.
 | GET /oc/access/crl.pem | Cached signed CRL; renew when less than one day remains |
 | GET /oc/access/devices | Current account's summaries; no private material |
 | POST /oc/access/devices | `requestId` UUID and `label`; limit eight non-revoked unexpired devices |
-| POST /oc/access/devices/{id}/import | Active owned device; new one-time ten-minute grant and separately displayed password |
+| POST /oc/access/devices/{id}/import | Active owned device; new one-time two-hour grant and separately displayed password |
 | POST /oc/access/devices/{id}/setup-link | Active owned device; authenticated owner creates a 24-hour bearer setup link, replacing older setup links for that device |
 | GET /oc/access/setup/{token} | No login; valid link returns label and connection details; never consumes the link or returns a password/private key |
-| POST /oc/access/setup/{token}/claim | No login; vpn.tolf.is Origin required; atomically consumes setup link and returns a ten-minute PKCS12 import grant and password |
+| POST /oc/access/setup/{token}/claim | No login; vpn.tolf.is Origin required; atomically consumes setup link and returns a two-hour PKCS12 import grant and password |
 | HEAD /oc/access/import/{token}.p12 | Availability check without consumption |
 | GET /oc/access/import/{token}.p12 | Bearer download; atomic consumption; 410 after expiry/use/revocation |
 | GET /oc/access/devices/{id}/policy | Stored acknowledged personal mode |
@@ -161,6 +161,9 @@ lock until reboot or cleanup.
    Routine polls retain the last result until a new result arrives, so the
    fixed-width status does not flash checking every ten seconds.
    Every active access offers local setup or transfer to another device. Transfer
+   destination is initially unselected; clicking local setup reveals its steps,
+   while transfer reveals the delivery controls. In the wide layout the device
+   selector has the same half-row width as the local setup button below it.
    creates a 24-hour bearer installation URL. A half-width, ellipsized field has
    the overlapping-square copy icon and local confirmation; the equal-width
    Share link button is to its right. Destination controls have a 22px top gap.
@@ -168,7 +171,7 @@ lock until reboot or cleanup.
    The fragment is read by local JavaScript; referrer policy is no-referrer and
    requests omit account cookies. Metadata reads never consume the link.
    Getting the certificate consumes the setup link exactly once and starts a
-   ten-minute single-use package download. The recipient follows installation,
+   two-hour single-use package download. The recipient follows installation,
    connection creation, certificate import and VPN activation, with RU/EN/LV
    instructions. Account management and routing remain with the owner.
    Replacing a link, expiry, revocation, certificate expiry or account deletion

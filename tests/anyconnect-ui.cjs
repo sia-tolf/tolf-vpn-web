@@ -97,6 +97,9 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   assert(!descendants(ids.anyConnectAccess).some(n=>n.tagName==='ol'));
   assert(descendants(ids.anyConnectAccess).some(n=>n.tagName==='a'&&n.textContent==='Установить Cisco Secure Client'));
   assert(!ids.anyConnectAccess.textContent.includes('Перед импортом сертификата'));
+  assert(!descendants(ids.anyConnectAccess).some(n=>n.tagName==='button'&&n.textContent==='Получить сертификат'));
+  button(ids.anyConnectAccess,'Настроить на этом устройстве').click();
+  assert(descendants(ids.anyConnectAccess).some(n=>n.tagName==='button'&&n.textContent==='Получить сертификат'));
   assert.equal(descendants(ids.anyConnectAccess).filter(n=>n.tagName==='input').length,0);
   const deviceRow = ids.anyConnectAccess.children.find(n=>n.className==='oc-device-row');
   assert(deviceRow.children.some(n=>n.tagName==='select'));
@@ -173,6 +176,7 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   assert(!descendants(ids.anyConnectAccess).some(n=>n.className==='oc-copy-feedback'));
   assert.deepEqual(revokedUrls,['blob:test-package']);
   assert.equal(ids.vpnUsername.textContent,'user0_ipad');
+  button(ids.anyConnectAccess,'Настроить на этом устройстве').click();
   assert(descendants(ids.anyConnectAccess).filter(n=>n.tagName==='h4').some(n=>n.textContent==='3. Добавьте соединение для «Phone»'));
   assert(descendants(ids.anyConnectAccess).filter(n=>n.tagName==='h4').some(n=>n.textContent==='4. Импортируйте сертификат для «Phone»'));
   modes[1].click(); await settle();

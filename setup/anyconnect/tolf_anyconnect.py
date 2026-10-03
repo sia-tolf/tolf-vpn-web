@@ -444,7 +444,7 @@ def install(app, context):
                 row = setup_record(con, token)
                 package, password = authority.bundle(row)
                 import_token = secrets.token_urlsafe(32)
-                expires = (utc_now() + dt.timedelta(minutes=10)).isoformat()
+                expires = (utc_now() + dt.timedelta(hours=2)).isoformat()
                 con.execute("DELETE FROM oc_setup_links WHERE token_hash=?", (hashlib.sha256(token.encode()).digest(),))
                 con.execute("DELETE FROM oc_import_grants WHERE device_id=? OR expires_at<=?", (row["id"], utc_now().isoformat()))
                 con.execute("INSERT INTO oc_import_grants VALUES (?,?,?,?,?)", (hashlib.sha256(import_token.encode()).digest(), row["id"], owner, expires, package))
@@ -458,7 +458,7 @@ def install(app, context):
             row = record(user, device_id, True)
             package, password = authority.bundle(row)
             token = secrets.token_urlsafe(32)
-            expires = (utc_now() + dt.timedelta(minutes=10)).isoformat()
+            expires = (utc_now() + dt.timedelta(hours=2)).isoformat()
             with closing(sqlite3.connect(db, timeout=30)) as con, con:
                 con.execute("DELETE FROM oc_import_grants WHERE device_id=? OR expires_at<=?", (row["id"], utc_now().isoformat()))
                 con.execute("INSERT INTO oc_import_grants VALUES (?,?,?,?,?)", (hashlib.sha256(token.encode()).digest(), row["id"], user, expires, package))

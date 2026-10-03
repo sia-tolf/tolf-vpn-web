@@ -98,6 +98,9 @@ class PersonalAccess(unittest.TestCase):
         result=self.client.post(path+'/claim',headers=self.headers)
         self.assertEqual(result.status_code,200,result.text)
         grant=result.json()
+        duration=api.dt.datetime.fromisoformat(grant['expiresAt'])-api.utc_now()
+        self.assertGreater(duration.total_seconds(),7100)
+        self.assertLessEqual(duration.total_seconds(),7200)
         self.assertEqual(self.client.get(path).status_code,410)
         self.assertEqual(self.client.post(path+'/claim',headers=self.headers).status_code,410)
         response=self.client.get(urlparse(grant['certificateUrl']).path)
@@ -169,6 +172,7 @@ class PersonalAccess(unittest.TestCase):
 
     def test_bundle_single_use_and_uri_encodings(self):
         device=self.create().json()['device'];grant=self.grant(device)
+        self.assertGreater((api.dt.datetime.fromisoformat(grant['expiresAt'])-api.utc_now()).total_seconds(),7100)
         path=urlparse(grant['certificateUrl']).path
         self.assertEqual(self.client.head(path).status_code,200)
         response=self.client.get(path)

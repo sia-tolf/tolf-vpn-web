@@ -15,7 +15,7 @@
       connectionLinkHelp: "После добавления соединения получите сертификат и импортируйте его в AnyConnect.",
       import: "Импортировать в AnyConnect", download: "Скачать сертификат .p12", password: "Пароль импорта",
       copy: "Скопировать пароль", copied: "Пароль скопирован",
-      expires: "Ссылка одноразовая и действует 10 минут. Пароль понадобится при импорте. После обновления страницы получите новую ссылку.",
+      expires: "Ссылка одноразовая и действует 2 часа. Пароль понадобится при импорте. После обновления страницы получите новую ссылку.",
       expired: "Ссылка истекла. Получите новый сертификат и ссылки.",
       manual: "Для ручного импорта сохраните файл .p12. На iPhone и iPad откройте его в «Файлах» и через «Поделиться» передайте в Cisco Secure Client. Используйте указанный пароль импорта.",
       windows: "Скачайте файл .p12. Откройте его и импортируйте с указанным паролем в хранилище сертификатов текущего пользователя → Личное.",
@@ -42,7 +42,7 @@
       connectionLinkHelp: "After adding the connection, get the certificate and import it into AnyConnect.",
       import: "Import into AnyConnect", download: "Download .p12 certificate", password: "Import password",
       copy: "Copy password", copied: "Password copied",
-      expires: "The link works once and expires in 10 minutes. Use this password during import. After reloading the page, get a new link.",
+      expires: "The link works once and expires in 2 hours. Use this password during import. After reloading the page, get a new link.",
       expired: "The link expired. Get a new certificate and links.",
       manual: "For manual import, save the .p12 file. On iPhone and iPad, open it in Files and use Share to send it to Cisco Secure Client. Use the displayed import password.",
       windows: "Download the .p12 file. Open it and import it with this password into Current User → Personal certificate store.",
@@ -69,7 +69,7 @@
       connectionLinkHelp: "Pēc savienojuma pievienošanas saņemiet sertifikātu un importējiet to AnyConnect.",
       import: "Importēt AnyConnect", download: "Lejupielādēt .p12 sertifikātu", password: "Importēšanas parole",
       copy: "Kopēt paroli", copied: "Parole nokopēta",
-      expires: "Saite ir vienreizēja un derīga 10 minūtes. Importēšanai izmantojiet šo paroli. Pēc lapas pārlādes saņemiet jaunu saiti.",
+      expires: "Saite ir vienreizēja un derīga 2 stundas. Importēšanai izmantojiet šo paroli. Pēc lapas pārlādes saņemiet jaunu saiti.",
       expired: "Saites derīgums beidzies. Saņemiet jaunu sertifikātu un saites.",
       manual: "Manuālai importēšanai saglabājiet .p12 failu. iPhone un iPad atveriet to lietotnē Files un ar Share nosūtiet uz Cisco Secure Client. Izmantojiet norādīto importēšanas paroli.",
       windows: "Lejupielādējiet .p12 failu. Atveriet to un importējiet ar norādīto paroli pašreizējā lietotāja personīgajā sertifikātu krātuvē.",
@@ -93,7 +93,7 @@
   let downloadedPackage = null;
   let statusBadge = null;
   const incomingDevice = new URLSearchParams(window.location?.search || "").get("ocDevice");
-  let setupDestination = "local", transferNotice = "";
+  let setupDestination = null, transferNotice = "";
   let transferGrant = null, transferTimer = null;
   const TRANSFER_COPY = {
     ru: {create:"Создать ссылку для установки", help:"Отправьте ссылку получателю. Вход в аккаунт для установки не требуется.", expires:"Ссылка действует 24 часа и используется один раз для получения сертификата.", update:"Передача без входа станет доступна после обновления API на UK."},
@@ -151,7 +151,7 @@
   }
   function choose(id) {
     transferGrant = null; clearTimeout(transferTimer);
-    setupDestination = "local"; transferNotice = "";
+    setupDestination = null; transferNotice = "";
     selectedId = id; grant = null; clearCopyNotice(); clearDownloadedPackage();
     window.refreshAnyConnectTransport?.(); render();
   }
@@ -363,7 +363,7 @@
           if (capabilities?.guestSetup !== true) transfer.append(element("p", t.update, "oc-note"));
         }
         root.append(transfer);
-      } else {
+      } else if (setupDestination === "local") {
       const steps = element("div", null, "oc-steps");
       const suffix = " " + sessionCopy().forDevice + " «" + d.label + "»";
       const connect = element("section", null, "oc-step"); connect.append(element("h4", "3. " + c.connect + suffix), element("p", c.return));
@@ -426,7 +426,7 @@
     clearCopyNotice();
     clearDownloadedPackage();
     devices = []; selectedId = null; grant = null; capabilities = null;
-    setupDestination = "local"; transferNotice = "";
+    setupDestination = incomingDevice ? "local" : null; transferNotice = "";
     transferGrant = null; clearTimeout(transferTimer);
     deviceName = ""; creationRequest = null; addingDevice = false; busy = false; loading = false; message = ""; error = false;
     window.refreshAnyConnectTransport?.(); render();
