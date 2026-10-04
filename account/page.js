@@ -5,6 +5,7 @@ const generateRecoveryButton=$('generateRecoveryButton'), accountRecoveryCode=$(
 for(const [lang,title] of Object.entries({en:'My account',ru:'Личный кабинет',lv:'Mans konts'})) Object.assign(I18N[lang],{accountTitle:title});
 function t(key,replacements={}){let value=I18N[currentLanguage]?.[key]??I18N.en[key]??key;for(const [k,v] of Object.entries(replacements))value=value.replaceAll('{'+k+'}',v);return value;}
 function confirmLocalized(title,body,replacements={}){return confirm(t(title)+'\n\n'+t(body,replacements));}
+function setAdminLabel(lang){const el=document.querySelector('[data-admin-label]');if(el)el.textContent=({en:'Admin panel',ru:'Панель администратора',lv:'Administratora panelis'}[lang]||'Admin panel');}
 function setLanguage(lang){
  if(!['en','ru','lv'].includes(lang))return;
  currentLanguage=lang;document.documentElement.lang=lang;
@@ -15,7 +16,7 @@ function setLanguage(lang){
  $('backHome').setAttribute('aria-label',{en:'TOLF home',ru:'На главную TOLF',lv:'Uz TOLF sākumlapu'}[lang]);
  $('vpnNavigation').href='../?lang='+lang;
  $('smartDnsNavigation').href='https://smartdns.tolf.is/?lang='+encodeURIComponent(lang);
- document.title=t('accountTitle');
+ document.title=t('accountTitle');setAdminLabel(lang);
  const url=new URL(location.href);url.searchParams.set('lang',lang);history.replaceState(null,'',url);
  if(lastPasskeys.length)renderPasskeys(lastPasskeys);
 }
@@ -35,7 +36,7 @@ function signIn(){location.replace('../auth/?mode=signin&next=account&lang='+cur
 async function loadSettings(){
  try{await apiRequest('/me');}
  catch(e){if(e.status===401){signIn();return;}$('accountStatus').textContent=e.message;return;}
- $('accountContent').classList.remove('hidden');
+ $('accountContent').classList.remove('hidden');\n try{const admin=await apiRequest('/admin/me');if(admin?.isAdmin===true)$('adminPanelCard')?.classList.remove('hidden');}catch{}
  await Promise.all([loadAccountPassword(),loadPasskeys(),apiRequest('/vpn/invitations/status').then(d=>{invitationProtected=d.protected===true;}).catch(()=>{})]);
 }
 $('accountSignOut').onclick=async()=>{
