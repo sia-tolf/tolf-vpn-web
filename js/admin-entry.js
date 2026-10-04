@@ -1,7 +1,7 @@
 // UI convenience only. Every admin API request independently checks the role.
 (() => {
   const card = document.getElementById("vpnCard");
-  const heading = card?.querySelector(".card-topline");
+  const heading = document.querySelector(".compact-header .header-navigation");
   const signOut = document.getElementById("signOutButton");
   if (!card || !heading || !signOut || document.getElementById("vpnAdminLink")) return;
 
@@ -30,7 +30,8 @@
   menu.addEventListener("toggle", alignAccountDropdown);
   window.addEventListener("resize", alignAccountDropdown);
 
-  heading.insertBefore(menu, signOut);
+  const languages = heading.querySelector(".language-switcher");
+  heading.insertBefore(menu, languages || signOut);
   const account = document.getElementById("accountNavigation");
   if (account) actions.append(account);
   const labels = { en: "Admin", ru: "Админ", lv: "Admin" };
@@ -62,7 +63,7 @@
   function label() {
     const lang = document.documentElement.lang;
     link.textContent = labels[lang] || labels.en;
-    title.textContent = {en:"Account",ru:"Аккаунт",lv:"Konts"}[lang] || "Account";
+    title.textContent = {en:"My account",ru:"Личный кабинет",lv:"Mans konts"}[lang] || "My account";
     for (const code of ["en","ru","lv"]) {
       document.getElementById("language" + code[0].toUpperCase() + code.slice(1))
         ?.setAttribute("aria-pressed", String(code === lang));
