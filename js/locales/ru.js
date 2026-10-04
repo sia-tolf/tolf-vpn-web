@@ -89,7 +89,7 @@ I18N.ru = {
   windowsBackIos: "← Вернуться к iOS",
   windowsBackAndroid: "← Вернуться к Android",
   additionalSettings: "Дополнительные настройки",
-  vpnSettings: "Настройки VPN",
+  vpnSettings: "Дополнительные настройки VPN",
   localId: "Local ID",
   localIdDefaultRiga: "sr (по умолчанию)",
   localIdDefaultMoscow: "Пустое поле (по умолчанию)",
