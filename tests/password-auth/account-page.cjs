@@ -16,7 +16,7 @@ for(const width of [390,1024]){
  page.once('dialog',d=>d.accept());await page.locator('#generateRecoveryButton').click();await page.locator('#accountRecoveryCode').waitFor({state:'visible'});assert.equal(await page.locator('#accountRecoveryCode').textContent(),'TEST-ONLY-RECOVERY');await page.locator('#savedAccountRecoveryButton').click();assert.equal(await page.locator('#accountRecoveryCode').textContent(),'');
  page.once('dialog',d=>d.dismiss());await page.locator('#deleteAccountButton').click();assert(!posts.includes('/account/delete'));
  await page.screenshot({path:'/tmp/tolf-password-account-page-'+width+'.png',fullPage:true});
- await page.goto(base+'/?lang=ru');await page.locator('.compact-header .vpn-header-account').click();await page.locator('#accountNavigation').waitFor({state:'visible'});assert.equal(await page.locator('#deleteAccountButton,#accountPasswordSection,#passkeysSection,#recoverySection').count(),0);
+ await page.goto(base+'/?lang=ru');await page.locator('.compact-header .vpn-header-account').waitFor({state:'visible'});assert((await page.locator('.compact-header .vpn-header-account').getAttribute('href')).includes('account/?lang=ru'));assert.equal(await page.locator('#deleteAccountButton,#accountPasswordSection,#passkeysSection,#recoverySection').count(),0);
  await page.evaluate(()=>setVpnBusy(true));await page.evaluate(()=>setVpnBusy(false));
  assert.deepEqual(errors,[]);await page.close();
 }
