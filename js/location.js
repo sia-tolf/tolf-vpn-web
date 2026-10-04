@@ -64,7 +64,6 @@ function updateRecommendedEntryPoint() {
   recommendedEntryPoint = nextRecommendation;
 
   renderEntryPointRecommendation();
-  selectRecommendedEntryPoint();
 }
 
 function setEntryPointLatencies(latencies) {
