@@ -8,9 +8,9 @@
 
   const lang=()=>((document.documentElement.lang||"en").toLowerCase());
   const COPY={
-    en:{protocol:"Protocol",entry:"VPN Entry Point",riga:"Riga",moscow:"Moscow"},
-    ru:{protocol:"Протокол",entry:"Точка входа VPN",riga:"Рига",moscow:"Москва"},
-    lv:{protocol:"Protokols",entry:"VPN ieejas punkts",riga:"Rīga",moscow:"Maskava"}
+    en:{protocol:"Protocol",entry:"VPN Entry Point",riga:"Riga",moscow:"Moscow",recommended:"Recommended",measuring:"Measuring…",unavailable:"—"},
+    ru:{protocol:"Протокол",entry:"Точка входа VPN",riga:"Рига",moscow:"Москва",recommended:"Рекомендуется",measuring:"Измерение…",unavailable:"—"},
+    lv:{protocol:"Protokols",entry:"VPN ieejas punkts",riga:"Rīga",moscow:"Maskava",recommended:"Ieteicams",measuring:"Mērīšana…",unavailable:"—"}
   };
   const tr=()=>COPY[lang()]||COPY.en;
 
@@ -33,12 +33,17 @@
       for(const item of options){
         const opt=document.createElement("button"); opt.type="button"; opt.className="vpn-dropdown-option"; opt.setAttribute("role","option"); opt.dataset.value=item.value;
         const active=item.value===selected;
-        const mark=document.createElement("span"); mark.className="vpn-dropdown-check"; mark.textContent=active?"✓":""; const txt=document.createElement("span"); txt.textContent=item.label; opt.append(mark,txt); opt.classList.toggle("selected",active); opt.setAttribute("aria-selected",String(active)); opt.disabled=!!item.disabled;
+        const mark=document.createElement("span"); mark.className="vpn-dropdown-check"; mark.textContent=active?"✓":"";
+        const txt=document.createElement("span"); txt.className="vpn-dropdown-option-label"; txt.textContent=item.label;
+        opt.append(mark,txt);
+        if(item.meta){const meta=document.createElement("span");meta.className="vpn-dropdown-option-meta";meta.textContent=item.meta;opt.append(meta);}
+        if(item.badge){const badge=document.createElement("span");badge.className="vpn-dropdown-option-badge";badge.textContent=item.badge;opt.append(badge);} opt.classList.toggle("selected",active); opt.setAttribute("aria-selected",String(active)); opt.disabled=!!item.disabled;
         opt.addEventListener("click",()=>{if(opt.disabled)return;selected=item.value;value.textContent=item.label;close();onChange(item.value);});
         menu.append(opt);
       }
       const current=options.find(x=>x.value===selected)||options.find(x=>!x.disabled);
       value.textContent=current?.label||"";
+      if(current?.meta){const m=document.createElement("span");m.className="vpn-dropdown-value-meta";m.textContent=current.meta;value.append(" ",m);}
     }
     document.addEventListener("pointerdown",e=>{if(!dd.contains(e.target))close();});
     document.addEventListener("keydown",e=>{if(e.key==="Escape")close();});
@@ -69,9 +74,18 @@
     ],transport);
     const current=transport==="anyconnect"?(window.ocAccess?.ingress?.().id||"moscow"):(document.querySelector('input[name="vpnServer"]:checked')?.value||"riga");
     const allowed=transport==="anyconnect"?(window.ocAccess?.ingresses?.()||[{id:"moscow"}]).map(x=>x.id):["riga","moscow"];
-    entryDD.render(["riga","moscow"].filter(x=>allowed.includes(x)).map(x=>({value:x,label:x==="riga"?tr().riga:tr().moscow})),current);
+    const recommended=(typeof recommendedEntryPoint!=="undefined"?recommendedEntryPoint:null);
+    const latency=(id)=>{
+      if(typeof entryPointLatencyMeasuring!=="undefined"&&entryPointLatencyMeasuring)return tr().measuring;
+      const v=(typeof entryPointLatencyValues!=="undefined"?entryPointLatencyValues[id]:null);
+      return Number.isFinite(v)&&v>=0?Math.round(v)+" ms":tr().unavailable;
+    };
+    entryDD.render(["riga","moscow"].filter(x=>allowed.includes(x)).map(x=>({value:x,label:x==="riga"?tr().riga:tr().moscow,meta:latency(x),badge:x===recommended?tr().recommended:""})),current);
   }
   window.addEventListener("vpntransportchange",sync);
+  window.addEventListener("tolf:measurement-target-resolved",()=>setTimeout(sync,0));
+  window.addEventListener("focus",()=>setTimeout(sync,0));
+  setInterval(sync,2000);
   new MutationObserver(sync).observe(document.documentElement,{attributes:true,attributeFilter:["lang","data-vpn-transport"]});
   new MutationObserver(sync).observe(oldTransport,{subtree:true,attributes:true,attributeFilter:["class","disabled"]});
   sync();
