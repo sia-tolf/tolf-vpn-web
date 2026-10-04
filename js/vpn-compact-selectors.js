@@ -80,7 +80,7 @@
       const v=(typeof entryPointLatencyValues!=="undefined"?entryPointLatencyValues[id]:null);
       return Number.isFinite(v)&&v>=0?Math.round(v)+" ms":tr().unavailable;
     };
-    entryDD.render(["riga","moscow"].filter(x=>allowed.includes(x)).map(x=>({value:x,label:x==="riga"?tr().riga:tr().moscow,meta:latency(x),badge:x===recommended?tr().recommended:""})),current);
+    entryDD.render(["riga","moscow"].filter(x=>allowed.includes(x)).map(x=>({value:x,label:x==="riga"?tr().riga:tr().moscow,meta:latency(x),badge:x===recommended?"("+tr().recommended+")":""})),current);
   }
   window.addEventListener("vpntransportchange",sync);
   window.addEventListener("tolf:measurement-target-resolved",()=>setTimeout(sync,0));
