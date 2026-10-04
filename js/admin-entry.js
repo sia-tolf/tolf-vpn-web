@@ -1,90 +1,52 @@
-// UI convenience only. Every admin API request independently checks the role.
+// Header account controls. Match the authenticated controls on the TOLF home page.
 (() => {
   const card = document.getElementById("vpnCard");
-  const heading = document.querySelector(".compact-header .header-navigation");
-  const signOut = document.getElementById("signOutButton");
-  if (!card || !heading || !signOut || document.getElementById("vpnAdminLink")) return;
-
-  const menu = document.createElement("details");
-  menu.className = "vpn-account-menu";
-  const toggle = document.createElement("summary");
-  const title = document.createElement("span");
-  toggle.append(title);
-  const actions = document.createElement("div");
-  actions.className = "vpn-account-actions";
-  menu.append(toggle, actions);
-
-  // On narrow screens extend the menu toward the center; on wide screens match the button.
-  function alignAccountDropdown() {
-    if (!menu.open) return;
-    if (window.matchMedia("(min-width:700px)").matches) {
-      actions.style.setProperty("width", menu.getBoundingClientRect().width + "px", "important");
-      return;
-    }
-    const center = document.documentElement.clientWidth / 2;
-    const width = menu.getBoundingClientRect().right - center;
-    if (width > 0) {
-      actions.style.setProperty("width", width + "px", "important");
-    }
-  }
-  menu.addEventListener("toggle", alignAccountDropdown);
-  window.addEventListener("resize", alignAccountDropdown);
-
-  const languages = heading.querySelector(".language-switcher");
-  heading.insertBefore(menu, languages || signOut);
+  const nav = document.querySelector(".compact-header .header-navigation");
+  const languages = nav?.querySelector(".language-switcher");
   const account = document.getElementById("accountNavigation");
-  if (account) actions.append(account);
-  const labels = { en: "Admin", ru: "Админ", lv: "Admin" };
-  const link = document.createElement("a");
-  link.id = "vpnAdminLink";
-  link.href = "/admin/v1.3.html";
-  link.className = "hidden";
-  actions.append(link, signOut);
-  function closeMenu(focus = false) {
-    if (!menu.open) return;
-    menu.open = false;
-    if (focus) toggle.focus();
-  }
-  document.addEventListener("pointerdown", event => {
-    if (!menu.contains(event.target)) closeMenu();
-  });
-  document.addEventListener("keydown", event => {
-    if (event.key === "Escape" && menu.open) { closeMenu(true); event.preventDefault(); }
-  });
-  document.addEventListener("focusin", event => {
-    if (!menu.contains(event.target)) closeMenu();
-  });
-  actions.addEventListener("click", event => {
-    if (event.target.closest("a, button")) closeMenu();
-  });
+  const signOut = document.getElementById("signOutButton");
+  if (!card || !nav || !languages || !account || !signOut) return;
 
-  let epoch = 0;
-  let visible = false;
+  account.classList.add("vpn-header-account");
+  nav.insertBefore(account, languages);
+
+  const admin = document.createElement("a");
+  admin.id = "vpnAdminLink";
+  admin.href = "/admin/v1.3.html";
+  admin.className = "vpn-header-admin hidden";
+  nav.insertBefore(admin, languages);
+
+  signOut.classList.add("vpn-header-signout");
+  languages.insertAdjacentElement("afterend", signOut);
+
+  const labels = {
+    en:{account:"My TOLF account",admin:"Admin"},
+    ru:{account:"Личный кабинет TOLF",admin:"Админ"},
+    lv:{account:"Mans TOLF konts",admin:"Admin"}
+  };
   function label() {
-    const lang = document.documentElement.lang;
-    link.textContent = labels[lang] || labels.en;
-    title.textContent = {en:"My account",ru:"Личный кабинет",lv:"Mans konts"}[lang] || "My account";
-    for (const code of ["en","ru","lv"]) {
-      document.getElementById("language" + code[0].toUpperCase() + code.slice(1))
-        ?.setAttribute("aria-pressed", String(code === lang));
-    }
+    const lang=document.documentElement.lang || "en";
+    const c=labels[lang] || labels.en;
+    account.textContent=c.account;
+    account.href="account/?lang="+lang;
+    admin.textContent=c.admin;
   }
-  function check() {
-    const now = !card.classList.contains("hidden");
-    if (now === visible) return;
-    visible = now;
-    const own = ++epoch;
-    link.classList.add("hidden");
-    if (!now) { closeMenu(); return; }
-    fetch("https://api.tolf.is/admin/me", {
-      credentials: "include", cache: "no-store", headers: { Accept: "application/json" }
-    }).then(response => response.ok ? response.json() : null).then(data => {
-      if (own === epoch && visible && data?.isAdmin === true) link.classList.remove("hidden");
-    }).catch(() => {});
-  }
-  new MutationObserver(check).observe(card, { attributes: true, attributeFilter: ["class"] });
-  new MutationObserver(label).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
-  label();
-  check();
-})();
 
+  let epoch=0, visible=false;
+  function check() {
+    const now=!card.classList.contains("hidden");
+    if (now===visible) return;
+    visible=now;
+    const own=++epoch;
+    admin.classList.add("hidden");
+    if (!now) return;
+    fetch("https://api.tolf.is/admin/me",{
+      credentials:"include",cache:"no-store",headers:{Accept:"application/json"}
+    }).then(r=>r.ok?r.json():null).then(data=>{
+      if (own===epoch && visible && data?.isAdmin===true) admin.classList.remove("hidden");
+    }).catch(()=>{});
+  }
+  new MutationObserver(check).observe(card,{attributes:true,attributeFilter:["class"]});
+  new MutationObserver(label).observe(document.documentElement,{attributes:true,attributeFilter:["lang"]});
+  label(); check();
+})();
