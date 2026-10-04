@@ -40,3 +40,6 @@ html[data-tolf-ui="vpn"] .vpn-header-title{grid-column:2!important;grid-row:1!im
 @media(max-width:699px){html[data-tolf-ui="vpn"] .vpn-header-title{display:none!important}}
 
 html[data-tolf-ui="vpn"] .compact-header > .brand-copy{display:none!important}\n
+#profileSettings .server-address{font-size:14px;line-height:1.4}
+#profileSettings .server-address-label{font-size:14px;font-weight:600;color:var(--text)}
+#profileSettings .server-address-value{font-size:14px;font-weight:400}
