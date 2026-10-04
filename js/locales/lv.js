@@ -89,7 +89,7 @@ I18N.lv = {
   windowsBackIos: "← Atpakaļ uz iOS",
   windowsBackAndroid: "← Atpakaļ uz Android",
   additionalSettings: "Papildu iestatījumi",
-  vpnSettings: "VPN iestatījumi",
+  vpnSettings: "VPN papildu iestatījumi",
   localId: "Local ID",
   localIdDefaultRiga: "sr (pēc noklusējuma)",
   localIdDefaultMoscow: "Tukšs lauks (pēc noklusējuma)",
