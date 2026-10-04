@@ -1,19 +1,26 @@
-// Header account controls. Match the TOLF home header; no Admin control in the VPN header.
+// Put authenticated account controls into the VPN top navigation.
 (() => {
-  const card=document.getElementById("vpnCard");
   const nav=document.querySelector(".compact-header .header-navigation");
   const languages=nav?.querySelector(".language-switcher");
   const account=document.getElementById("accountNavigation");
   const signOut=document.getElementById("signOutButton");
-  if(!card||!nav||!languages||!account||!signOut)return;
-  account.classList.add("vpn-header-account");
-  nav.insertBefore(account,languages);
+  if(!nav||!languages||!account||!signOut)return;
+  account.className="vpn-header-account";
   signOut.classList.add("vpn-header-signout");
+  nav.insertBefore(account,languages);
   languages.insertAdjacentElement("afterend",signOut);
   const labels={en:"My account",ru:"Личный кабинет",lv:"Mans konts"};
-  function positionTitle(){\n    if(!matchMedia("(min-width:700px)").matches)return;\n    const home=document.getElementById("homeNavigation");\n    const title=document.querySelector(".compact-header .brand-copy");\n    if(!home||!title)return;\n    const left=home.getBoundingClientRect().right;\n    const right=account.getBoundingClientRect().left;\n    const root=nav.getBoundingClientRect();\n    title.style.left=(((left+right)/2)-root.left)+"px";\n  }
-  function label(){const lang=document.documentElement.lang||"en";account.textContent=labels[lang]||labels.en;account.href="account/?lang="+lang;requestAnimationFrame(positionTitle);}
-  new MutationObserver(label).observe(document.documentElement,{attributes:true,attributeFilter:["lang"]});
-
-  window.addEventListener("resize",positionTitle);\n  label();
+  function lang(){return document.documentElement.lang||"en";}
+  function placeTitle(){
+    if(!matchMedia("(min-width:700px)").matches)return;
+    const home=document.getElementById("homeNavigation");
+    const title=document.querySelector(".compact-header .brand-copy");
+    if(!home||!title)return;
+    const n=nav.getBoundingClientRect(), h=home.getBoundingClientRect(), a=account.getBoundingClientRect();
+    title.style.left=(((h.right+a.left)/2)-n.left)+"px";
+  }
+  function refresh(){const l=lang();account.textContent=labels[l]||labels.en;account.href="account/?lang="+l;requestAnimationFrame(placeTitle);}
+  new MutationObserver(refresh).observe(document.documentElement,{attributes:true,attributeFilter:["lang"]});
+  window.addEventListener("resize",placeTitle);
+  refresh();
 })();
