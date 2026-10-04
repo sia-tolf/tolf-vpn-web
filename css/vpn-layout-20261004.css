@@ -46,12 +46,6 @@ html[data-tolf-ui="vpn"] #vpnCard .vpn-transport-selector {display:none!importan
 #vpnCard .server-heading {display:none!important;}
 #vpnCard .server-selector {display:none!important;}
 #vpnCard .server-section {margin-top:18px;}
-@media(min-width:700px) {
-  html[data-tolf-ui="vpn"] .compact-header .brand-copy {
-    /* center TOLF VPN in the free space between the left wordmark and right controls */
-    left:-18px;
-  }
-}
 @media(max-width:699px) {
   html[data-tolf-ui="vpn"] .compact-header .header-navigation {
     grid-template-columns:auto 1fr auto auto auto!important; column-gap:7px!important;
