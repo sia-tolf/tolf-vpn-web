@@ -10,7 +10,7 @@
   nav.insertBefore(account,languages);
   signOut.classList.add("vpn-header-signout");
   languages.insertAdjacentElement("afterend",signOut);
-  const labels={en:"My TOLF account",ru:"Личный кабинет TOLF",lv:"Mans TOLF konts"};
+  const labels={en:"My account",ru:"Личный кабинет",lv:"Mans konts"};
   function label(){const lang=document.documentElement.lang||"en";account.textContent=labels[lang]||labels.en;account.href="account/?lang="+lang;}
   new MutationObserver(label).observe(document.documentElement,{attributes:true,attributeFilter:["lang"]});
   label();
