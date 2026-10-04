@@ -89,7 +89,7 @@ I18N.en = {
   windowsBackIos: "← Back to iOS",
   windowsBackAndroid: "← Back to Android",
   additionalSettings: "Additional settings",
-  vpnSettings: "VPN Settings",
+  vpnSettings: "Additional VPN settings",
   localId: "Local ID",
   localIdDefaultRiga: "sr (default)",
   localIdDefaultMoscow: "Empty (default)",
