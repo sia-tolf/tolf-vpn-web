@@ -38,3 +38,5 @@ html[data-tolf-ui="vpn"] #vpnCard .vpn-transport-selector{display:none!important
 html[data-tolf-ui="vpn"] .vpn-old-title-hidden{display:none!important}
 html[data-tolf-ui="vpn"] .vpn-header-title{grid-column:2!important;grid-row:1!important;height:42px;display:flex;align-items:center;justify-content:center;align-self:center;justify-self:stretch;color:var(--text);font-family:inherit;font-size:24px;font-weight:650;line-height:1;white-space:nowrap}
 @media(max-width:699px){html[data-tolf-ui="vpn"] .vpn-header-title{display:none!important}}
+
+html[data-tolf-ui="vpn"] .compact-header > .brand-copy{display:none!important}\n
