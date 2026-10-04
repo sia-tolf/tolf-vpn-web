@@ -31,7 +31,7 @@
       options=nextItems; selected=nextSelected;
       menu.replaceChildren();
       for(const item of options){
-        const opt=document.createElement("button"); opt.type="button"; opt.className="vpn-dropdown-option"; opt.setAttribute("role","option"); opt.dataset.value=item.value; opt.textContent=item.label;
+        const opt=document.createElement("button"); opt.type="button"; opt.className="vpn-dropdown-option"; opt.setAttribute("role","option"); opt.dataset.value=item.value; const mark=document.createElement("span"); mark.className="vpn-dropdown-check"; mark.textContent=active?"✓":""; const txt=document.createElement("span"); txt.textContent=item.label; opt.append(mark,txt);
         const active=item.value===selected; opt.classList.toggle("selected",active); opt.setAttribute("aria-selected",String(active)); opt.disabled=!!item.disabled;
         opt.addEventListener("click",()=>{if(opt.disabled)return;selected=item.value;value.textContent=item.label;close();onChange(item.value);});
         menu.append(opt);
@@ -59,6 +59,7 @@
   heading.insertAdjacentElement("afterend",entryDD.field);
 
   function sync(){
+    document.getElementById("serverSection")?.classList.remove("hidden");
     protocolDD.label.textContent=tr().protocol; entryDD.label.textContent=tr().entry;
     const transport=window.getVpnTransport?.()||"ikev2";
     protocolDD.render([
