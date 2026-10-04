@@ -8,10 +8,10 @@ html[data-tolf-ui="vpn"] .compact-header .header-navigation>.language-switcher{g
 html[data-tolf-ui="vpn"] .vpn-header-signout{grid-column:5!important;align-self:center!important;box-sizing:border-box;display:inline-flex!important;align-items:center!important;justify-content:center;height:42px!important;min-height:42px!important;padding:0 10px!important;border:1px solid transparent!important;border-radius:10px!important;background:transparent!important;color:var(--tolf-action-text,var(--text))!important;font-family:inherit!important;font-size:14px!important;font-weight:600!important;white-space:nowrap!important}
 html[data-tolf-ui="vpn"] .vpn-header-signout svg{display:none!important}
 html[data-tolf-ui="vpn"] .compact-header .header-navigation>.help-navigation{grid-column:6!important;align-self:center!important;height:42px!important;min-height:42px!important}
-html[data-tolf-ui="vpn"] .compact-header .brand-copy{position:absolute!important;grid-column:2!important;left:0;top:0!important;height:42px!important;width:max-content!important;display:flex!important;align-items:center!important;justify-content:center!important;pointer-events:none!important;transform:translateX(-50%)!important;z-index:3}
-html[data-tolf-ui="vpn"] .compact-header .brand-title-row{position:static!important;width:auto!important;transform:none!important;display:flex!important;align-items:center!important;height:42px!important}
-html[data-tolf-ui="vpn"] .compact-header .brand-title-row>h1{margin:0!important;font-size:24px!important;font-weight:650!important;line-height:1.2!important}
-html[data-tolf-ui="vpn"] .compact-header .vpn-title-prefix{display:none!important}
+html[data-tolf-ui="vpn"] .compact-header .brand-copy{display:none!important}
+html[data-tolf-ui="vpn"] .compact-header .brand-title-row{display:none!important}
+
+
 @media(max-width:699px){html[data-tolf-ui="vpn"] .compact-header .brand-copy{display:none!important}}
 html[data-tolf-ui="vpn"] #vpnCard .card-topline{grid-template-columns:1fr!important}
 html[data-tolf-ui="vpn"] #vpnCard .vpn-transport-selector{display:none!important}
@@ -35,3 +35,6 @@ html[data-tolf-ui="vpn"] #vpnCard .vpn-transport-selector{display:none!important
 @media(max-width:699px){html[data-tolf-ui="vpn"] .compact-header .brand-copy{display:none!important}html[data-tolf-ui="vpn"] .compact-header .header-navigation{column-gap:6px!important}.vpn-header-account,.vpn-header-signout{padding-inline:7px!important;font-size:13px!important}}
 
 .vpn-dropdown-value{display:flex;align-items:center;width:100%;min-width:0}.vpn-dropdown-value-meta{margin-left:auto;padding-left:24px;padding-right:8px}\n
+html[data-tolf-ui="vpn"] .vpn-old-title-hidden{display:none!important}
+html[data-tolf-ui="vpn"] .vpn-header-title{grid-column:2!important;grid-row:1!important;height:42px;display:flex;align-items:center;justify-content:center;align-self:center;justify-self:stretch;color:var(--text);font-family:inherit;font-size:24px;font-weight:650;line-height:1;white-space:nowrap}
+@media(max-width:699px){html[data-tolf-ui="vpn"] .vpn-header-title{display:none!important}}
