@@ -31,8 +31,9 @@
       options=nextItems; selected=nextSelected;
       menu.replaceChildren();
       for(const item of options){
-        const opt=document.createElement("button"); opt.type="button"; opt.className="vpn-dropdown-option"; opt.setAttribute("role","option"); opt.dataset.value=item.value; const mark=document.createElement("span"); mark.className="vpn-dropdown-check"; mark.textContent=active?"✓":""; const txt=document.createElement("span"); txt.textContent=item.label; opt.append(mark,txt);
-        const active=item.value===selected; opt.classList.toggle("selected",active); opt.setAttribute("aria-selected",String(active)); opt.disabled=!!item.disabled;
+        const opt=document.createElement("button"); opt.type="button"; opt.className="vpn-dropdown-option"; opt.setAttribute("role","option"); opt.dataset.value=item.value;
+        const active=item.value===selected;
+        const mark=document.createElement("span"); mark.className="vpn-dropdown-check"; mark.textContent=active?"✓":""; const txt=document.createElement("span"); txt.textContent=item.label; opt.append(mark,txt); opt.classList.toggle("selected",active); opt.setAttribute("aria-selected",String(active)); opt.disabled=!!item.disabled;
         opt.addEventListener("click",()=>{if(opt.disabled)return;selected=item.value;value.textContent=item.label;close();onChange(item.value);});
         menu.append(opt);
       }
