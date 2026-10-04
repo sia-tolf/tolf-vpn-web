@@ -635,6 +635,78 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
               Additional VPN settings
             </summary>
 
+          <div class="server-address">
+            <span
+              class="server-address-label"
+              data-i18n="entryAddressCompact"
+            >Address:</span>
+
+            <span
+              id="selectedServerAddress"
+              class="server-address-value"
+            >ikev2-riga.tolf.is</span>
+          </div>
+
+
+            <div id="appleProfileNameSettings" class="hidden" style="margin-top:16px;margin-bottom:16px">
+              <label class="settings-label" for="profileNameInput">
+                <span data-i18n="profileNameLabel">Profile name</span>
+                <small class="section-description" style="font-size:12px;font-weight:400;margin-left:8px" data-i18n="profileNameHelp">Used for the installed profile and the downloaded file.</small>
+              </label>
+              <input id="profileNameInput" class="settings-input" type="text"
+                maxlength="80" autocomplete="off" spellcheck="false">
+            </div>
+
+            <label
+              class="local-id-label"
+              for="localIdInput"
+              data-i18n="localId"
+            >Local ID</label>
+
+            <input
+              id="localIdInput"
+              class="local-id-input"
+              type="text"
+              maxlength="32"
+              autocomplete="off"
+              autocapitalize="none"
+              spellcheck="false"
+              placeholder="sr (default)"
+              aria-describedby="localIdHelp localIdChoices localIdRoutingHint"
+            >
+
+            <p
+              id="localIdHelp"
+              class="section-description"
+              data-i18n="localIdHelp"
+            >
+              Local ID controls how the VPN server routes
+              traffic. Leave empty to use this server’s
+              default mode.
+            </p>
+
+            <p
+              id="localIdChoices"
+              class="section-description"
+            ></p>
+
+            <p
+              id="localIdRoutingHint"
+              class="local-id-routing"
+              role="status"
+            ></p>
+
+            <p
+              class="section-description"
+              data-i18n="localIdInstallNote"
+            >
+              After changing Local ID, generate and install
+              a new profile to apply the routing change.
+            </p>
+
+            <div class="settings-divider"></div>
+
+
             <div id="appleConnectionSettings" class="hidden">
 
 
@@ -754,77 +826,6 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
               <p class="section-description" data-i18n="androidServerMobike">MOBIKE supports network changes, such as Wi-Fi → mobile data. It is used when enabled on both the server and in strongSwan.</p>
               <p class="section-description" data-i18n="androidServerSettingsNote">DPD is configured on the server; MOBIKE use is negotiated when connecting. These parameters are not configured on this page. Their current settings on the selected server are not displayed here.</p>
             </section>
-            <div class="settings-divider"></div>
-
-          <div class="server-address">
-            <span
-              class="server-address-label"
-              data-i18n="entryAddressCompact"
-            >Address:</span>
-
-            <span
-              id="selectedServerAddress"
-              class="server-address-value"
-            >ikev2-riga.tolf.is</span>
-          </div>
-
-
-            <div id="appleProfileNameSettings" class="hidden" style="margin-top:16px;margin-bottom:16px">
-              <label class="settings-label" for="profileNameInput">
-                <span data-i18n="profileNameLabel">Profile name</span>
-                <small class="section-description" style="font-size:12px;font-weight:400;margin-left:8px" data-i18n="profileNameHelp">Used for the installed profile and the downloaded file.</small>
-              </label>
-              <input id="profileNameInput" class="settings-input" type="text"
-                maxlength="80" autocomplete="off" spellcheck="false">
-            </div>
-
-            <label
-              class="local-id-label"
-              for="localIdInput"
-              data-i18n="localId"
-            >Local ID</label>
-
-            <input
-              id="localIdInput"
-              class="local-id-input"
-              type="text"
-              maxlength="32"
-              autocomplete="off"
-              autocapitalize="none"
-              spellcheck="false"
-              placeholder="sr (default)"
-              aria-describedby="localIdHelp localIdChoices localIdRoutingHint"
-            >
-
-            <p
-              id="localIdHelp"
-              class="section-description"
-              data-i18n="localIdHelp"
-            >
-              Local ID controls how the VPN server routes
-              traffic. Leave empty to use this server’s
-              default mode.
-            </p>
-
-            <p
-              id="localIdChoices"
-              class="section-description"
-            ></p>
-
-            <p
-              id="localIdRoutingHint"
-              class="local-id-routing"
-              role="status"
-            ></p>
-
-            <p
-              class="section-description"
-              data-i18n="localIdInstallNote"
-            >
-              After changing Local ID, generate and install
-              a new profile to apply the routing change.
-            </p>
-
             <div class="settings-divider"></div>
 
             <label
