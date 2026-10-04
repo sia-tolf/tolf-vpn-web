@@ -571,6 +571,184 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
           ></p>
           <p id="rigaConnectionWarning" class="entry-point-note hidden"></p>
 
+
+
+            <div class="settings-divider"></div>
+
+            <div id="appleConnectionSettings" class="hidden">
+
+
+              <label class="settings-label" for="dpdRate" data-i18n="dpdRateLabel">DPD check frequency</label>
+              <select id="dpdRate" class="settings-select">
+                <option value="Low" data-i18n="dpdLow">Low</option>
+                <option value="Medium" data-i18n="dpdMedium" selected>Medium</option>
+                <option value="High" data-i18n="dpdHigh">High</option>
+              </select>
+              <p class="section-description" data-i18n="dpdHelp">Checks whether the VPN server responds. High means more frequent checks.</p>
+              <label class="settings-switch-row" for="mobikeEnabled">
+                <span class="settings-label">MOBIKE</span>
+                <input id="mobikeEnabled" class="ios-switch" type="checkbox" checked>
+              </label>
+              <p class="section-description" data-i18n="mobikeHelp">Allows the tunnel to follow network or IP address changes when supported by the server.</p>
+              <p class="section-description" data-i18n="connectionSettingsApply">Changes take effect after you generate and install an updated profile.</p>
+              <div class="settings-divider"></div>
+            </div>
+
+            <div id="onDemandSection">
+              <div class="settings-title-row">
+                <span class="settings-title" data-i18n="onDemand">
+                  On Demand
+                </span>
+              </div>
+
+              <label class="settings-switch-row" for="onDemandEnabled">
+                <span data-i18n="enableOnDemand">Enable On Demand</span>
+                <input
+                  id="onDemandEnabled"
+                  class="ios-switch"
+                  type="checkbox"
+                >
+              </label>
+
+              <div id="onDemandOptions" class="hidden">
+                <label class="settings-switch-row" for="alwaysOn">
+                  <span data-i18n="alwaysOn">Always On</span>
+                  <input
+                    id="alwaysOn"
+                    class="ios-switch"
+                    type="checkbox"
+                  >
+                </label>
+
+                <p
+                  id="alwaysOnHint"
+                  class="section-description hidden"
+                  data-i18n="alwaysOnHint"
+                >
+                  Connect automatically on all networks.
+                </p>
+
+                <div id="manualOnDemandRules">
+                  <div class="settings-subtitle" data-i18n="defaultActions">
+                    Default Actions
+                  </div>
+
+                  <div class="settings-grid">
+                    <label for="wifiAction" data-i18n="wifi">Wi-Fi</label>
+                    <select id="wifiAction" class="settings-select">
+                      <option value="Connect" data-i18n="onDemandConnect">Connect</option>
+                      <option value="Disconnect" data-i18n="onDemandDisconnect">Disconnect</option>
+                      <option value="Ignore" data-i18n="onDemandIgnore">Ignore</option>
+                    </select>
+
+                    <label for="cellularAction" data-i18n="cellular">Cellular</label>
+                    <select id="cellularAction" class="settings-select">
+                      <option value="Connect" data-i18n="onDemandConnect">Connect</option>
+                      <option value="Disconnect" data-i18n="onDemandDisconnect">Disconnect</option>
+                      <option value="Ignore" data-i18n="onDemandIgnore">Ignore</option>
+                    </select>
+
+                    <label for="ethernetAction" data-i18n="ethernet">Ethernet</label>
+                    <select id="ethernetAction" class="settings-select">
+                      <option value="Connect" data-i18n="onDemandConnect">Connect</option>
+                      <option value="Disconnect" data-i18n="onDemandDisconnect">Disconnect</option>
+                      <option value="Ignore" data-i18n="onDemandIgnore">Ignore</option>
+                    </select>
+                  </div>
+
+                  <div class="settings-subtitle" data-i18n="additionalRules">
+                    Additional Rules
+                  </div>
+
+                  <div id="onDemandRules" class="on-demand-rules">
+                    <button
+                      id="addOnDemandRule"
+                      class="add-on-demand-rule"
+                      type="button"
+                      data-i18n="addRule"
+                    >+ Add Rule</button>
+                  </div>
+
+                  <p
+                    class="section-description"
+                    data-i18n="additionalRulesHint"
+                  >
+                    Wi-Fi network rules are checked before
+                    the default actions.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <p
+              id="onDemandAndroidNote"
+              class="section-description hidden"
+              data-i18n="androidAlwaysOnNote"
+            >
+              On Android, Always-on VPN is configured
+              separately in system settings.
+            </p>
+            <section id="androidServerSettings" class="hidden" aria-labelledby="androidServerSettingsTitle">
+              <p id="androidServerSettingsTitle" class="section-description" data-i18n="androidServerSettingsTitle">strongSwan server settings</p>
+              <p class="section-description" data-i18n="androidServerDpd">DPD checks whether the VPN connection is alive. The server controls its interval and action when the connection is lost.</p>
+              <p class="section-description" data-i18n="androidServerMobike">MOBIKE supports network changes, such as Wi-Fi → mobile data. It is used when enabled on both the server and in strongSwan.</p>
+              <p class="section-description" data-i18n="androidServerSettingsNote">DPD is configured on the server; MOBIKE use is negotiated when connecting. These parameters are not configured on this page. Their current settings on the selected server are not displayed here.</p>
+            </section>
+          </details>
+        </div>
+
+        <div class="vpn-overview">
+          <div class="vpn-overview-top">
+            <section class="vpn-overview-card">
+            <div class="vpn-overview-header">
+              <div
+                id="vpnOverviewTitle"
+                class="vpn-overview-title"
+              >Protocol</div>
+
+              <div
+                id="vpnStatus"
+                class="vpn-overview-status"
+              >IKEv2</div>
+            </div>
+
+            <div class="status-table">
+              <div
+                id="serverRow"
+                class="row hidden"
+              >
+                <div
+                  class="row-label"
+                  data-i18n="server"
+                >Entry point</div>
+
+                <div class="row-value">
+                  <span
+                    id="vpnServerName"
+                    class="server-value-name"
+                  ></span>
+                  <span
+                    id="vpnServerHost"
+                    class="server-value-host hidden"
+                    aria-hidden="true"
+                  ></span>
+                </div>
+              </div>
+
+              <div
+                id="usernameRow"
+                class="row hidden"
+              >
+                <div
+                  class="row-label"
+                  data-i18n="username"
+                >Username</div>
+                <div
+                  id="vpnUsername"
+                  class="row-value"
+                ></div>
+              </div>
+
           <details
             id="profileSettings"
             class="profile-settings"
@@ -753,182 +931,6 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
               </div>
               <p id="routingPolicyStatus" class="settings-validation" role="status" aria-live="polite"></p>
             </details>
-
-            <div class="settings-divider"></div>
-
-            <div id="appleConnectionSettings" class="hidden">
-
-
-              <label class="settings-label" for="dpdRate" data-i18n="dpdRateLabel">DPD check frequency</label>
-              <select id="dpdRate" class="settings-select">
-                <option value="Low" data-i18n="dpdLow">Low</option>
-                <option value="Medium" data-i18n="dpdMedium" selected>Medium</option>
-                <option value="High" data-i18n="dpdHigh">High</option>
-              </select>
-              <p class="section-description" data-i18n="dpdHelp">Checks whether the VPN server responds. High means more frequent checks.</p>
-              <label class="settings-switch-row" for="mobikeEnabled">
-                <span class="settings-label">MOBIKE</span>
-                <input id="mobikeEnabled" class="ios-switch" type="checkbox" checked>
-              </label>
-              <p class="section-description" data-i18n="mobikeHelp">Allows the tunnel to follow network or IP address changes when supported by the server.</p>
-              <p class="section-description" data-i18n="connectionSettingsApply">Changes take effect after you generate and install an updated profile.</p>
-              <div class="settings-divider"></div>
-            </div>
-
-            <div id="onDemandSection">
-              <div class="settings-title-row">
-                <span class="settings-title" data-i18n="onDemand">
-                  On Demand
-                </span>
-              </div>
-
-              <label class="settings-switch-row" for="onDemandEnabled">
-                <span data-i18n="enableOnDemand">Enable On Demand</span>
-                <input
-                  id="onDemandEnabled"
-                  class="ios-switch"
-                  type="checkbox"
-                >
-              </label>
-
-              <div id="onDemandOptions" class="hidden">
-                <label class="settings-switch-row" for="alwaysOn">
-                  <span data-i18n="alwaysOn">Always On</span>
-                  <input
-                    id="alwaysOn"
-                    class="ios-switch"
-                    type="checkbox"
-                  >
-                </label>
-
-                <p
-                  id="alwaysOnHint"
-                  class="section-description hidden"
-                  data-i18n="alwaysOnHint"
-                >
-                  Connect automatically on all networks.
-                </p>
-
-                <div id="manualOnDemandRules">
-                  <div class="settings-subtitle" data-i18n="defaultActions">
-                    Default Actions
-                  </div>
-
-                  <div class="settings-grid">
-                    <label for="wifiAction" data-i18n="wifi">Wi-Fi</label>
-                    <select id="wifiAction" class="settings-select">
-                      <option value="Connect" data-i18n="onDemandConnect">Connect</option>
-                      <option value="Disconnect" data-i18n="onDemandDisconnect">Disconnect</option>
-                      <option value="Ignore" data-i18n="onDemandIgnore">Ignore</option>
-                    </select>
-
-                    <label for="cellularAction" data-i18n="cellular">Cellular</label>
-                    <select id="cellularAction" class="settings-select">
-                      <option value="Connect" data-i18n="onDemandConnect">Connect</option>
-                      <option value="Disconnect" data-i18n="onDemandDisconnect">Disconnect</option>
-                      <option value="Ignore" data-i18n="onDemandIgnore">Ignore</option>
-                    </select>
-
-                    <label for="ethernetAction" data-i18n="ethernet">Ethernet</label>
-                    <select id="ethernetAction" class="settings-select">
-                      <option value="Connect" data-i18n="onDemandConnect">Connect</option>
-                      <option value="Disconnect" data-i18n="onDemandDisconnect">Disconnect</option>
-                      <option value="Ignore" data-i18n="onDemandIgnore">Ignore</option>
-                    </select>
-                  </div>
-
-                  <div class="settings-subtitle" data-i18n="additionalRules">
-                    Additional Rules
-                  </div>
-
-                  <div id="onDemandRules" class="on-demand-rules">
-                    <button
-                      id="addOnDemandRule"
-                      class="add-on-demand-rule"
-                      type="button"
-                      data-i18n="addRule"
-                    >+ Add Rule</button>
-                  </div>
-
-                  <p
-                    class="section-description"
-                    data-i18n="additionalRulesHint"
-                  >
-                    Wi-Fi network rules are checked before
-                    the default actions.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <p
-              id="onDemandAndroidNote"
-              class="section-description hidden"
-              data-i18n="androidAlwaysOnNote"
-            >
-              On Android, Always-on VPN is configured
-              separately in system settings.
-            </p>
-            <section id="androidServerSettings" class="hidden" aria-labelledby="androidServerSettingsTitle">
-              <p id="androidServerSettingsTitle" class="section-description" data-i18n="androidServerSettingsTitle">strongSwan server settings</p>
-              <p class="section-description" data-i18n="androidServerDpd">DPD checks whether the VPN connection is alive. The server controls its interval and action when the connection is lost.</p>
-              <p class="section-description" data-i18n="androidServerMobike">MOBIKE supports network changes, such as Wi-Fi → mobile data. It is used when enabled on both the server and in strongSwan.</p>
-              <p class="section-description" data-i18n="androidServerSettingsNote">DPD is configured on the server; MOBIKE use is negotiated when connecting. These parameters are not configured on this page. Their current settings on the selected server are not displayed here.</p>
-            </section>
-          </details>
-        </div>
-
-        <div class="vpn-overview">
-          <div class="vpn-overview-top">
-            <section class="vpn-overview-card">
-            <div class="vpn-overview-header">
-              <div
-                id="vpnOverviewTitle"
-                class="vpn-overview-title"
-              >Protocol</div>
-
-              <div
-                id="vpnStatus"
-                class="vpn-overview-status"
-              >IKEv2</div>
-            </div>
-
-            <div class="status-table">
-              <div
-                id="serverRow"
-                class="row hidden"
-              >
-                <div
-                  class="row-label"
-                  data-i18n="server"
-                >Entry point</div>
-
-                <div class="row-value">
-                  <span
-                    id="vpnServerName"
-                    class="server-value-name"
-                  ></span>
-                  <span
-                    id="vpnServerHost"
-                    class="server-value-host hidden"
-                    aria-hidden="true"
-                  ></span>
-                </div>
-              </div>
-
-              <div
-                id="usernameRow"
-                class="row hidden"
-              >
-                <div
-                  class="row-label"
-                  data-i18n="username"
-                >Username</div>
-                <div
-                  id="vpnUsername"
-                  class="row-value"
-                ></div>
-              </div>
 
             </div>
             </section>
