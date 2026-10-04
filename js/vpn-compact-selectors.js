@@ -49,6 +49,16 @@
     }
     if ([...entry.options].some(o=>o.value===current)) entry.value=current;
   }
+  function centerTitle() {
+    if (!matchMedia("(min-width:700px)").matches) return;
+    const left=document.getElementById("homeNavigation");
+    const account=document.querySelector(".compact-header .vpn-account-menu");
+    const title=document.querySelector(".compact-header .brand-copy");
+    if (!left || !account || !title) return;
+    const a=left.getBoundingClientRect(), b=account.getBoundingClientRect();
+    const midpoint=(a.right+b.left)/2;
+    title.style.transform="translateX("+(midpoint-innerWidth/2)+"px)";
+  }
   function sync() {
     protocolLabel.textContent=tr().protocol;
     entryLabel.textContent=tr().entry;
@@ -59,6 +69,7 @@
       if (option) option.disabled=button.disabled || button.classList.contains("hidden");
     }
     rebuildEntry();
+    requestAnimationFrame(centerTitle);
   }
   protocol.addEventListener("change",()=>{
     (protocol.value==="anyconnect"?any:ike).click();
@@ -72,6 +83,7 @@
     setTimeout(sync,0);
   });
   window.addEventListener("vpntransportchange",sync);
+  window.addEventListener("resize",centerTitle);
   new MutationObserver(sync).observe(document.documentElement,{attributes:true,attributeFilter:["lang","data-vpn-transport"]});
   new MutationObserver(sync).observe(oldTransport,{subtree:true,attributes:true,attributeFilter:["class","disabled"]});
   sync();
