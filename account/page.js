@@ -36,7 +36,7 @@ function signIn(){location.replace('../auth/?mode=signin&next=account&lang='+cur
 async function loadSettings(){
  try{await apiRequest('/me');}
  catch(e){if(e.status===401){signIn();return;}$('accountStatus').textContent=e.message;return;}
- $('accountContent').classList.remove('hidden');\n try{const admin=await apiRequest('/admin/me');if(admin?.isAdmin===true)$('adminPanelCard')?.classList.remove('hidden');}catch{}
+ $('accountContent').classList.remove('hidden');\n try{const admin=await apiRequest('/admin/me');if(admin && (admin.isAdmin===true || admin.is_admin===true || admin.admin===true))$('adminPanelCard')?.classList.remove('hidden');}catch{}
  await Promise.all([loadAccountPassword(),loadPasskeys(),apiRequest('/vpn/invitations/status').then(d=>{invitationProtected=d.protected===true;}).catch(()=>{})]);
 }
 $('accountSignOut').onclick=async()=>{
