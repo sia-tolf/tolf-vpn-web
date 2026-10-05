@@ -22,6 +22,8 @@ function message(key, error = false) { messageKey = key; failed = error; render(
 function persist() { put('quickServer', server); put('quickPlatform', platform); }
 function render() {
  document.documentElement.lang = lang;
+ const back=document.getElementById('backHome');
+ if(back){back.href='/?lang='+lang;back.setAttribute('aria-label',({ru:'Назад в Мой VPN',en:'Back to My VPN',lv:'Atpakaļ uz Mans VPN'})[lang]);}
  document.querySelectorAll('[data-text]').forEach(el => el.textContent = t(el.dataset.text));
  $('passkeyHelp').textContent = accountText[lang][2];
  $('windowsPrep').hidden = true;

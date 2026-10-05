@@ -2054,3 +2054,7 @@ html[data-tolf-ui] #vpnCard .vpn-account-actions > :is(#accountNavigation, #sign
 .vpn-setup-actions{display:flex;flex-wrap:wrap;gap:12px}
 .vpn-setup-actions > a{box-sizing:border-box;flex:1 1 220px;min-height:42px;display:flex;align-items:center;justify-content:center;margin:0;text-align:center}
 #vpnCard,#signedOutCard{scroll-margin-top:100px}
+
+#quickSetupCard .vpn-setup-actions{margin-top:20px}
+html[data-tolf-ui="vpn"] body:not(.manual-setup-open) #vpnCard,
+html[data-tolf-ui="vpn"] body:not(.manual-setup-open) .header-switchers{display:none!important}

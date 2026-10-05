@@ -1,6 +1,17 @@
 // Show the simple onboarding entry only after the matching server API is installed.
 (() => {
  let enabled=false;
+ const manualLink=document.getElementById('manualSetupLink');
+ function openManual(){
+  document.body.classList.add('manual-setup-open');
+  manualLink.setAttribute('aria-expanded','true');
+ }
+ manualLink.setAttribute('aria-controls','vpnCard');
+ manualLink.setAttribute('aria-expanded','false');
+ manualLink.addEventListener('click',openManual);
+ function handleHash(){if(location.hash==='#vpnCard'||location.hash==='#signedOutCard')openManual();}
+ window.addEventListener('hashchange',handleHash);
+ handleHash();
  const card=document.getElementById('quickSetupCard');
  new MutationObserver(()=>render()).observe(document.getElementById('vpnCard'),{attributes:true,attributeFilter:['class']});
  const invitationCard=document.getElementById('invitationCard');
