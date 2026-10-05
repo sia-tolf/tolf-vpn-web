@@ -3,6 +3,21 @@ const $=id=>document.getElementById(id);
 const passkeyList=$('passkeyList'), passkeyMessage=$('passkeyMessage'), addPasskeyButton=$('addPasskeyButton'), deleteAccountButton=$('deleteAccountButton');
 const generateRecoveryButton=$('generateRecoveryButton'), accountRecoveryCode=$('accountRecoveryCode'), accountRecoveryBox=$('accountRecoveryBox'), copyAccountRecoveryButton=$('copyAccountRecoveryButton'), savedAccountRecoveryButton=$('savedAccountRecoveryButton'), recoveryMessage=$('recoveryMessage');
 for(const [lang,title] of Object.entries({en:'My account',ru:'Личный кабинет',lv:'Mans konts'})) Object.assign(I18N[lang],{accountTitle:title});
+for(const [lang,labels] of Object.entries({
+ en:{accountUserNumber:'User number',accountUsername:'Username',accountVpnUsername:'VPN username',accountUsernameUnset:'Not set'},
+ ru:{accountUserNumber:'Номер пользователя',accountUsername:'Имя пользователя',accountVpnUsername:'Имя пользователя VPN',accountUsernameUnset:'Не задано'},
+ lv:{accountUserNumber:'Lietotāja numurs',accountUsername:'Lietotājvārds',accountVpnUsername:'VPN lietotājvārds',accountUsernameUnset:'Nav iestatīts'}
+}))Object.assign(I18N[lang],labels);
+let accountIdentity=null;
+function renderAccountIdentity(){
+ if(!accountIdentity)return;
+ const login=accountIdentity.username, vpn=accountIdentity.vpn?.username;
+ $('accountUserNumber').textContent=accountIdentity.number??'—';
+ $('accountUsername').textContent=login||vpn||t('accountUsernameUnset');
+ $('accountVpnUsername').textContent=vpn||'—';
+ $('accountVpnIdentity').classList.toggle('hidden',!login||!vpn||login===vpn);
+}
+window.setAccountIdentityUsername=login=>{if(accountIdentity){accountIdentity.username=login;renderAccountIdentity();}};
 function t(key,replacements={}){let value=I18N[currentLanguage]?.[key]??I18N.en[key]??key;for(const [k,v] of Object.entries(replacements))value=value.replaceAll('{'+k+'}',v);return value;}
 function confirmLocalized(title,body,replacements={}){return confirm(t(title)+'\n\n'+t(body,replacements));}
 function setAdminLabel(lang){const el=document.querySelector('[data-admin-label]');if(el)el.textContent=({en:'Admin panel',ru:'Панель администратора',lv:'Administratora panelis'}[lang]||'Admin panel');}
@@ -16,7 +31,7 @@ function setLanguage(lang){
  $('backHome').setAttribute('aria-label',{en:'TOLF home',ru:'На главную TOLF',lv:'Uz TOLF sākumlapu'}[lang]);
  $('vpnNavigation').href='../?lang='+lang;
  $('smartDnsNavigation').href='https://smartdns.tolf.is/?lang='+encodeURIComponent(lang);
- document.title=t('accountTitle');setAdminLabel(lang);
+ document.title=t('accountTitle');setAdminLabel(lang);renderAccountIdentity();
  const url=new URL(location.href);url.searchParams.set('lang',lang);history.replaceState(null,'',url);
  if(lastPasskeys.length)renderPasskeys(lastPasskeys);
 }
@@ -34,7 +49,7 @@ function showAccountRecoveryCode(code){accountRecoveryCode.textContent=code;acco
 function hideAccountRecoveryCode(){accountRecoveryCode.textContent='';accountRecoveryBox.classList.add('hidden');}
 function signIn(){location.replace('../auth/?mode=signin&next=account&lang='+currentLanguage);}
 async function loadSettings(){
- try{await apiRequest('/me');}
+ try{accountIdentity=await apiRequest('/me');renderAccountIdentity();}
  catch(e){if(e.status===401){signIn();return;}$('accountStatus').textContent=e.message;return;}
  $('accountContent').classList.remove('hidden');
  try{const admin=await apiRequest('/admin/me');if(admin && (admin.isAdmin===true || admin.is_admin===true || admin.admin===true))$('adminPanelCard')?.classList.remove('hidden');}catch{}

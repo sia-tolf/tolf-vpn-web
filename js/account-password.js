@@ -37,6 +37,7 @@ window.loadAccountPassword=async()=>{
   if(request!==generation)return;
   login=data.enabled?data.username:null;
   $('apLogin').value=login||'';
+  window.setAccountIdentityUsername?.(login);
   $('apExisting').classList.toggle('hidden',!login);
   $('apNone').classList.toggle('hidden',Boolean(login));
   section.classList.remove('hidden');render();
@@ -103,6 +104,7 @@ $('apForm').onsubmit=async event=>{
   const data=await api('/password/set',{username:login||$('apNewLogin').value.toLowerCase(),password:value});
   if(request!==generation)return;
   login=data.username;details={username:login,password:value};
+  window.setAccountIdentityUsername?.(login);
   $('apLogin').value=login;$('apExisting').classList.remove('hidden');$('apNone').classList.add('hidden');
   $('apPassword').value='';$('apForm').classList.add('hidden');$('apResult').classList.remove('hidden');
   $('apSaveExisting').classList.add('hidden');$('apOpen').classList.add('hidden');render();message('created');
