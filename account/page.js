@@ -12,6 +12,7 @@ let accountIdentity=null;
 function renderAccountIdentity(){
  if(!accountIdentity)return;
  const login=accountIdentity.username, vpn=accountIdentity.vpn?.username;
+ $('accountUsernameLabel').textContent=t(!login&&vpn?'accountVpnUsername':'accountUsername');
  $('accountUserNumber').textContent=accountIdentity.number??'—';
  $('accountUsername').textContent=login||vpn||t('accountUsernameUnset');
  $('accountVpnUsername').textContent=vpn||'—';
