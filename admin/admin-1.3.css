@@ -71,3 +71,8 @@
 }
 
 .admin-resource-average { color: var(--secondary); font-size: 13px; line-height: 1.35; }
+
+.admin-traffic-controls{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:0 0 16px}
+.admin-traffic-controls>span{margin-right:4px}
+.admin-traffic-controls button{min-width:88px}
+@media(max-width:700px){.admin-traffic-controls{display:grid;grid-template-columns:repeat(3,1fr)}.admin-traffic-controls>span{grid-column:1/-1}.admin-traffic-controls button{min-width:0;width:100%}}
