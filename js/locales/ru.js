@@ -365,3 +365,5 @@ Object.assign(I18N.ru, {
 });
 
 Object.assign(I18N.ru, {"setupChoiceDescription": "Быстрая настройка — для этого устройства через рекомендуемую точку входа. Ручная — с выбором устройства и параметров.", "manualSetupTitle": "Ручная настройка"});
+
+Object.assign(I18N.ru,{"ikev2Summary": "IKEv2 — встроенный VPN на iPhone, iPad и Windows; на Android используется strongSwan.", "anyConnectSummary": "AnyConnect — VPN через приложение Cisco Secure Client, по TLS/HTTPS. Альтернатива, если IKEv2 не подключается.", "quickIkev2Only": "Быстрая настройка пока доступна для IKEv2. Для AnyConnect выберите ручную настройку."});

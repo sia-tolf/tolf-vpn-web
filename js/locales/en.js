@@ -365,3 +365,5 @@ Object.assign(I18N.en, {
 });
 
 Object.assign(I18N.en, {"setupChoiceDescription": "Quick setup uses this device and the recommended entry point. Manual setup lets you choose the device and settings.", "manualSetupTitle": "Manual setup"});
+
+Object.assign(I18N.en,{"ikev2Summary": "IKEv2 — built-in VPN on iPhone, iPad and Windows; Android uses strongSwan.", "anyConnectSummary": "AnyConnect — VPN through Cisco Secure Client, using TLS/HTTPS. An alternative if IKEv2 cannot connect.", "quickIkev2Only": "Quick setup currently supports IKEv2. For AnyConnect, use manual setup."});

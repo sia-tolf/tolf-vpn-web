@@ -54,7 +54,7 @@
     (value==="anyconnect"?any:ike).click(); setTimeout(sync,0);
   });
   protocolDD.field.classList.add("vpn-protocol-field");
-  oldTransport.insertAdjacentElement("afterend",protocolDD.field);
+  document.getElementById("myVpnProtocolField").append(protocolDD.field);
 
   const entryDD=makeDropdown("vpnEntryDropdown",tr().entry,[],value=>{
     const input=document.querySelector('input[name="vpnServer"][value="'+value+'"]');
@@ -68,6 +68,8 @@
     document.getElementById("serverSection")?.classList.remove("hidden");
     protocolDD.label.textContent=tr().protocol; entryDD.label.textContent=tr().entry;
     const transport=window.getVpnTransport?.()||"ikev2";
+    document.getElementById("quickSetupLink").classList.toggle("hidden",transport!=="ikev2");
+    document.getElementById("quickProtocolNote").classList.toggle("hidden",transport==="ikev2");
     protocolDD.render([
       {value:"ikev2",label:"IKEv2",disabled:ike.disabled||ike.classList.contains("hidden")},
       {value:"anyconnect",label:"AnyConnect",disabled:any.disabled||any.classList.contains("hidden")}
