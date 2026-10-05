@@ -2,9 +2,13 @@
 (() => {
  let enabled=false;
  const card=document.getElementById('quickSetupCard');
+ new MutationObserver(()=>render()).observe(document.getElementById('vpnCard'),{attributes:true,attributeFilter:['class']});
  const invitationCard=document.getElementById('invitationCard');
  function invitation(){return typeof vpnInvitation!=='undefined' && Boolean(vpnInvitation);}
- function render(){card.classList.toggle('hidden',!enabled || invitation());}
+ function render(){
+ card.classList.toggle('hidden',!enabled || invitation());
+ document.getElementById('manualSetupLink').href=document.getElementById('vpnCard').classList.contains('hidden')?'#signedOutCard':'#vpnCard';
+}
  new MutationObserver(render).observe(invitationCard,{attributes:true,attributeFilter:['class']});
  fetch('https://api.tolf.is/quick-setup/capabilities',{credentials:'omit',cache:'no-store'})
  .then(r=>r.ok?r.json():null).then(data=>{

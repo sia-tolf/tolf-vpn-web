@@ -363,3 +363,5 @@ Object.assign(I18N.en, {
   "windowsWorking": "Preparing Windows setup…",
   "windowsReady": "Windows setup is ready. Open the link on your computer or share it."
 });
+
+Object.assign(I18N.en, {"setupChoiceDescription": "Quick setup uses this device and the recommended entry point. Manual setup lets you choose the device and settings.", "manualSetupTitle": "Manual setup"});

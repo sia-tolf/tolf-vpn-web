@@ -363,3 +363,5 @@ Object.assign(I18N.lv, {
   "windowsWorking": "Tiek sagatavots Windows savienojums…",
   "windowsReady": "Windows iestatījumi ir gatavi. Atveriet saiti datorā vai kopīgojiet to."
 });
+
+Object.assign(I18N.lv, {"setupChoiceDescription": "Ātrā iestatīšana izmanto šo ierīci un ieteikto ieejas punktu. Manuāli var izvēlēties ierīci un parametrus.", "manualSetupTitle": "Manuāla iestatīšana"});
