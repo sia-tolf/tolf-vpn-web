@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en" data-tolf-ui="quick"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex"><title>TOLF VPN · Quick setup</title>
-<link rel="stylesheet" href="quick-1.css?v=quick-anyconnect-20261005"><link rel="stylesheet" href="selection-1.css?v=1"><link rel="stylesheet" href="windows-1.css?v=1"><script defer src="../passkey-session-label.20260917-1.js"></script><script defer src="../js/webauthn.js"></script><script defer src="strings-1.js?v=quick-anyconnect-20261005"></script><script defer src="windows-1.js?v=1"></script><script defer src="quick-1.js?v=quick-anyconnect-20261005"></script><link rel="stylesheet" href="../tolf-buttons.20260917-3.css">
+<link rel="stylesheet" href="quick-1.css?v=quick-anyconnect-steps-20261005"><link rel="stylesheet" href="selection-1.css?v=1"><link rel="stylesheet" href="windows-1.css?v=1"><script defer src="../passkey-session-label.20260917-1.js"></script><script defer src="../js/webauthn.js"></script><script defer src="strings-1.js?v=quick-anyconnect-steps-20261005"></script><script defer src="windows-1.js?v=1"></script><script defer src="quick-1.js?v=quick-anyconnect-steps-20261005"></script><link rel="stylesheet" href="../css/anyconnect-access.css?v=quick-steps-20261005"><link rel="stylesheet" href="../tolf-buttons.20260917-3.css">
 <script defer src="../tolf-wordmark.20260917-3.js"></script>
 <link rel="stylesheet" href="../tolf-header.20260919-1.css?v=languages-2">
 <link rel="stylesheet" href="/css/return-control.css?v=20261005"><script defer src="/js/return-control.js?v=20261005"></script></head>
@@ -12,12 +12,20 @@
 <div id="recovery" hidden><h2 data-text="recoveryTitle"></h2><p data-text="recoveryHelp"></p><input id="code" readonly autocomplete="off" aria-label="Recovery Code"><button id="copyCode" data-text="copy"></button><button id="saved" class="primary" data-text="saved"></button></div>
 <div id="preparePanel" hidden><button id="prepare" class="primary" data-text="prepare"></button><p class="note" data-text="defaults"></p></div>
 <div id="delivery" hidden><h2 data-text="ready"></h2><p id="deliveryHelp"></p><a id="download" class="button primary" rel="noreferrer"></a><div id="android" hidden><a href="https://play.google.com/store/apps/details?id=org.strongswan.android" target="_blank" rel="noopener noreferrer" data-text="androidApp"></a></div><div id="sharing" hidden><label for="profileLink" data-text="personal"></label><div class="copyrow"><input id="profileLink" readonly><button id="copyLink" data-text="copy"></button></div><button id="share" data-text="share"></button></div><p class="note" id="downloadHelp"></p></div>
-<div id="ocDelivery" hidden>
-<h2 data-text="ready"></h2>
-<section><h3 data-text="ocAppTitle"></h3><a id="ocApp" class="button" target="_blank" rel="noopener noreferrer" data-text="ocApp"></a><p id="ocControl" class="note" data-text="ocControl"></p></section>
-<section><h3 data-text="ocConnectionTitle"></h3><p id="ocServer"></p><a id="ocConnection" class="button primary" data-text="ocAdd"></a><p id="ocWindowsConnection" class="note" data-text="ocWindowsConnection"></p></section>
-<section><h3 data-text="ocCertificateTitle"></h3><label for="ocPassword" data-text="ocPassword"></label><div class="copyrow"><input id="ocPassword" readonly autocomplete="off"><button id="ocCopyPassword" data-text="copy"></button></div><p class="note" data-text="ocPasswordHelp"></p><a id="ocImport" class="button primary" data-text="ocImport"></a><button id="ocDownload" data-text="ocDownload"></button><p id="ocWindowsCertificate" class="note" data-text="ocWindowsCertificate"></p><p class="note" data-text="ocExpiry"></p><button id="ocRenew" data-text="ocRenew"></button></section>
-<section><h3 data-text="ocEnableTitle"></h3><p data-text="ocEnable"></p></section>
-</div>
+<div id="ocDelivery" hidden><div id="anyConnectAccess">
+<h3 data-text="ready"></h3>
+<section class="oc-step"><h4 data-text="ocAppTitle"></h4><div class="oc-actions"><a id="ocApp" class="button-link oc-action secondary" target="_blank" rel="noopener noreferrer" data-text="ocApp"></a></div><p id="ocControl" class="oc-note" data-text="ocControl"></p></section>
+<section class="oc-step"><h4 data-text="ocConnectionTitle"></h4><p data-text="ocReturn"></p><p id="ocWindowsConnection" class="oc-note" data-text="ocWindowsConnection"></p>
+<div id="ocConnectionActions" class="oc-actions oc-connection-actions"><a id="ocConnection" class="button-link oc-action primary" data-text="ocAdd"></a><button id="ocConfirmConnection" class="oc-action secondary" data-text="ocConfirmConnection"></button></div>
+<div id="ocConnectionCompleted" class="oc-connection-completed" hidden><div class="oc-connection-done" role="status" data-text="ocConnectionDone"></div><button id="ocAgain" class="oc-action oc-retry-link" data-text="ocAgain"></button></div><p id="ocServer"></p></section>
+<section class="oc-step"><h4 data-text="ocCertificateTitle"></h4>
+<p id="ocCertificateDone" class="oc-certificate-done" role="status" data-text="ocCertificateDone" hidden></p>
+<div class="oc-actions oc-certificate-actions"><button id="ocRenew" class="oc-action primary oc-prepare" data-text="ocPrepareCertificate"></button><button id="ocAlreadyImported" class="oc-action secondary" data-text="ocAlreadyImported"></button></div>
+<p id="ocCertificateHint" class="oc-note"></p>
+<div id="ocGrantPanel" hidden><label for="ocPassword" data-text="ocPassword"></label><p data-text="ocPasswordHelp"></p><div class="oc-password-row"><input id="ocPassword" class="oc-secret" readonly autocomplete="off"><button id="ocCopyPassword" class="oc-copy"><span class="oc-copy-glyph" aria-hidden="true"></span></button></div>
+<div class="oc-actions oc-import-actions"><a id="ocImport" class="button-link oc-action primary" data-text="ocImport"></a><button id="ocDownload" class="oc-action secondary" data-text="ocDownload"></button></div><p class="oc-note" data-text="ocExpiry"></p></div>
+<p id="ocWindowsCertificate" class="oc-note" data-text="ocWindowsCertificate"></p></section>
+<section class="oc-step"><h4 data-text="ocEnableTitle"></h4><p data-text="ocEnable"></p></section>
+</div></div>
 <p id="message" role="status" aria-live="polite"></p><button id="retry" hidden data-text="retry"></button><a class="back" href="/#vpnCard" data-text="advanced"></a></section></main></body></html>
 

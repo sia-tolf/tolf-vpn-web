@@ -7,7 +7,7 @@ const get = (key, fallback) => { try { return sessionStorage.getItem(key) || fal
 const put = (key, value) => { try { if(value) sessionStorage.setItem(key, value); else sessionStorage.removeItem(key); } catch {} };
 const requestedProtocol=new URL(location.href).searchParams.get('protocol');
 const protocol=requestedProtocol==='anyconnect' || (!requestedProtocol&&get('quickProtocol')==='anyconnect')?'anyconnect':'ikev2';
-let ocGrant=null,ocPoint=null,accountId=null,ocExpiryTimer=null;
+let ocGrant=null,ocPoint=null,ocDevice=null,ocConfirmed=false,ocImported=false,accountId=null,ocExpiryTimer=null;
 let lang; try { lang = localStorage.getItem('tolfLanguage'); } catch {}
 if (!QUICK_TEXT[lang]) lang = /^ru/i.test(navigator.language) ? 'ru' : /^lv/i.test(navigator.language) ? 'lv' : 'en';
 const t = key => QUICK_TEXT[lang][key] || key;
@@ -44,8 +44,8 @@ function render() {
  $('register').hidden = uncertain;
  $('login').hidden = false;
  if(profile) renderDelivery();
- if(ocGrant)renderOcDelivery();
- for(const id of ['ocCopyPassword','ocDownload','ocRenew'])$(id).disabled=busy || (id!=='ocRenew'&&ocGrant&&Date.parse(ocGrant.expiresAt)<=Date.now());
+ if(ocDevice)renderOcDelivery();
+
 }
 function panels(name) {
  for (const id of ['auth','recovery','preparePanel','delivery','ocDelivery']) $(id).hidden = id !== name;
@@ -97,7 +97,8 @@ async function initialize() {
   server=recommendation.entryPoint;platform=nativePlatform;ready=true;
   if(protocol==='anyconnect'){
    const oc=await api('/oc/access/capabilities');
-   if(oc.issuance!==true||!oc.ingresses?.some(p=>p.id===server))throw new Error('AnyConnect node unavailable');
+   ocPoint=oc.ingresses?.find(p=>p.id===server);
+   if(oc.issuance!==true||!ocPoint||!['oc.tolf.is:4443','oc-riga.tolf.is:443'].includes(ocPoint.host))throw new Error('AnyConnect node unavailable');
   }
   if(number!==loadNumber)return;
   persist();
@@ -144,7 +145,7 @@ $('copyCode').onclick=()=>copy('code');$('copyLink').onclick=()=>copy('profileLi
 $('copyChromeSettings').onclick=()=>copy('chromeSettings');
 $('share').onclick=async()=>{try{await navigator.share({title:'TOLF VPN',url:profile});}catch(e){if(e.name!=='AbortError')message('failed',true);}};
 window.addEventListener('pagehide',()=>{clearTimeout(ocExpiryTimer);ocGrant=null;$('ocPassword').value='';$('ocImport').removeAttribute('href');});
-window.addEventListener('pageshow',e=>{if(e.persisted){profile='';ocGrant=null;$('code').value='';initialize();}});
+window.addEventListener('pageshow',e=>{if(e.persisted){profile='';ocGrant=null;ocDevice=null;ocConfirmed=false;ocImported=false;$('code').value='';initialize();}});
 
 function ocKey(suffix){return 'quickOc:'+accountId+':'+nativePlatform+':'+suffix;}
 function validateOcGrant(grant){
@@ -162,7 +163,8 @@ async function prepareOc(){
  let deviceId=get(ocKey('device'));
  if(deviceId){
   const list=await api('/oc/access/devices');
-  if(!list.devices?.some(d=>d.id===deviceId&&d.state==='active'&&Date.parse(d.expires_at)>Date.now())){
+  ocDevice=list.devices?.find(d=>d.id===deviceId&&d.state==='active'&&Date.parse(d.expires_at)>Date.now());
+  if(!ocDevice){
    deviceId=null;put(ocKey('device'),'');put(ocKey('request'),'');
   }
  }
@@ -171,26 +173,56 @@ async function prepareOc(){
   if(!requestId){requestId=crypto.randomUUID();put(ocKey('request'),requestId);}
   const result=await api('/oc/access/devices',{method:'POST',body:JSON.stringify({requestId,label:suggestedPasskeyName})});
   if(result.device?.state!=='active'||!result.device?.id)throw Error('Device not ready');
-  deviceId=result.device.id;put(ocKey('device'),deviceId);
+  ocDevice=result.device;deviceId=ocDevice.id;put(ocKey('device'),deviceId);
  }
+ if(!ocDevice.username)throw Error('Device identity unavailable');
+ ocConfirmed=false;ocImported=false;ocGrant=null;
+ panels('ocDelivery');message('');
+}
+async function prepareOcImport(){
+ if(!ocDevice||!ocConfirmed)return;
+ ocImported=false;ocGrant=null;
+ const deviceId=ocDevice.id;
  const grant=await api('/oc/access/devices/'+encodeURIComponent(deviceId)+'/import',{method:'POST',body:'{}'});
  if(grant.deviceId!==deviceId)throw Error('Wrong certificate');
- ocPoint=validateOcGrant(grant);ocGrant=grant;
+ const point=validateOcGrant(grant);
+ if(point.host!==ocPoint.host||grant.username!==ocDevice.username)throw Error('Wrong connection identity');
+ ocGrant=grant;
  clearTimeout(ocExpiryTimer);ocExpiryTimer=setTimeout(()=>{if(ocGrant===grant)render();},Math.max(0,Date.parse(grant.expiresAt)-Date.now()));
  panels('ocDelivery');message('');
 }
 function renderOcDelivery(){
- const mobile=nativePlatform!=='windows',expired=Date.parse(ocGrant.expiresAt)<=Date.now();
+ const mobile=nativePlatform!=='windows',valid=ocGrant&&Date.parse(ocGrant.expiresAt)>Date.now()&&ocConfirmed&&!ocImported;
  $('ocApp').href=nativePlatform==='ios'?'https://apps.apple.com/app/id1135064690':nativePlatform==='android'?'https://play.google.com/store/apps/details?id=com.cisco.anyconnect.vpn.android.avf':'https://www.cisco.com/c/en/us/support/security/secure-client-5/model.html';
+ const prefix=server==='riga'?'TOLF Рига ':'TOLF Москва ';
+ const name=ocDevice.connectionNames?.[server]||Array.from(prefix+ocDevice.label).slice(0,24).join('').trimEnd();
+ $('ocConnection').href='anyconnect://create/?'+new URLSearchParams({name,host:ocPoint.host,usecert:'true',certcommonname:ocDevice.username,netroam:'true'});
  $('ocServer').textContent=t(server)+': '+ocPoint.host;
- $('ocConnection').href=ocPoint.connectionUri;$('ocConnection').hidden=!mobile;
- $('ocImport').href=ocGrant.importUri;$('ocImport').hidden=!mobile||expired;
- $('ocControl').hidden=!mobile;$('ocWindowsConnection').hidden=mobile;$('ocWindowsCertificate').hidden=mobile;
- $('ocPassword').value=expired?'':ocGrant.password;$('ocCopyPassword').disabled=busy||expired;$('ocDownload').disabled=busy||expired;
+ $('ocConnection').hidden=!mobile;
+ $('ocConnectionActions').hidden=ocConfirmed;$('ocConnectionCompleted').hidden=!ocConfirmed;
+ for(const id of ['ocConfirmConnection','ocAgain'])$(id).disabled=busy;
+ $('ocRenew').disabled=busy||!ocConfirmed;
+ $('ocAlreadyImported').disabled=busy||!ocConfirmed;
+ $('ocAlreadyImported').hidden=ocImported;
+ $('ocCertificateDone').hidden=!ocImported;
+ $('ocCertificateHint').textContent=t(!ocConfirmed?'ocBlocked':ocGrant&&!valid?'ocExpired':'ocCertificateHelp');
+ $('ocGrantPanel').hidden=!valid;
+ if(valid)$('ocImport').href=ocGrant.importUri;else $('ocImport').removeAttribute('href');
+ $('ocImport').hidden=!mobile||!valid;
+ $('ocControl').hidden=!mobile;$('ocWindowsConnection').hidden=mobile;$('ocWindowsCertificate').hidden=mobile||ocImported;
+ $('ocPassword').value=valid?ocGrant.password:'';
+ $('ocCopyPassword').setAttribute('aria-label',t('ocCopyPassword'));
+ $('ocCopyPassword').title=t('ocCopyPassword');
+ $('ocCopyPassword').disabled=busy||!valid;$('ocDownload').disabled=busy||!valid;
 }
+$('ocConfirmConnection').onclick=()=>{if(busy||!ocDevice)return;ocConfirmed=true;message('');};
+$('ocAgain').onclick=()=>{if(busy)return;ocConfirmed=false;ocImported=false;ocGrant=null;clearTimeout(ocExpiryTimer);message('');};
+$('ocAlreadyImported').onclick=()=>{if(busy||!ocConfirmed)return;ocImported=true;ocGrant=null;clearTimeout(ocExpiryTimer);message('');};
+$('ocConnection').onclick=event=>{if(busy||!ocDevice)event.preventDefault();};
+
 $('ocCopyPassword').onclick=()=>action(async()=>{if(!ocGrant||Date.parse(ocGrant.expiresAt)<=Date.now())throw Error('Expired');await navigator.clipboard.writeText(ocGrant.password);message('copied');});
 $('ocImport').onclick=event=>{if(!ocGrant||Date.parse(ocGrant.expiresAt)<=Date.now()){event.preventDefault();message('ocExpired',true);}};
-$('ocRenew').onclick=()=>action(prepareOc);
+$('ocRenew').onclick=()=>action(prepareOcImport);
 $('ocDownload').onclick=()=>action(async()=>{
  if(!ocGrant||Date.parse(ocGrant.expiresAt)<=Date.now())throw Error('Expired');
  const response=await fetch(ocGrant.certificateUrl,{credentials:'omit',cache:'no-store',signal:AbortSignal.timeout(20000)});

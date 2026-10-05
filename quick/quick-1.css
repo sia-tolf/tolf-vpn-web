@@ -5,9 +5,11 @@ header > #backHome .brand-emblem{display:block;width:22px;height:22px;flex:0 0 2
 header > #backHome .back-chevron{font-size:24px;color:#73737a}
 header > #backHome .tolf-wordmark{letter-spacing:.16em}
 
-#ocDelivery section{margin-top:24px}
-#ocDelivery h3{font-size:18px;margin:0 0 12px}
-#ocDelivery .button,#ocDelivery > section > button{display:block;width:100%;margin-top:12px}
-#ocPassword{font-family:inherit}
-#ocServer{overflow-wrap:anywhere}
+
 #quickProtocolName{color:#73737a;font-size:14px}
+#ocDelivery{--border:#dedee4;--card:#fff;--text:#252527;--code-background:#f5f5f7;--secondary:#73737a}
+#ocDelivery #anyConnectAccess .oc-secret{border:0;background:transparent;width:100%;border-radius:0}
+#ocDelivery #anyConnectAccess .oc-copy{display:flex;align-items:center;justify-content:center}
+#ocDelivery #anyConnectAccess .oc-action{min-height:44px;border-radius:12px}
+#ocDelivery #anyConnectAccess .oc-retry-link{min-height:0}
+#ocServer{overflow-wrap:anywhere}
