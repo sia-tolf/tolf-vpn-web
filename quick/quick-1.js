@@ -5,6 +5,9 @@ const API = 'https://api.tolf.is';
 const nativePlatform = /Android/i.test(navigator.userAgent) ? 'android' : /Windows NT/i.test(navigator.userAgent) ? 'windows' : /iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1) ? 'ios' : null;
 const get = (key, fallback) => { try { return sessionStorage.getItem(key) || fallback; } catch { return fallback; } };
 const put = (key, value) => { try { if(value) sessionStorage.setItem(key, value); else sessionStorage.removeItem(key); } catch {} };
+const requestedProtocol=new URL(location.href).searchParams.get('protocol');
+const protocol=requestedProtocol==='anyconnect' || (!requestedProtocol&&get('quickProtocol')==='anyconnect')?'anyconnect':'ikev2';
+let ocGrant=null,ocPoint=null,accountId=null,ocExpiryTimer=null;
 let lang; try { lang = localStorage.getItem('tolfLanguage'); } catch {}
 if (!QUICK_TEXT[lang]) lang = /^ru/i.test(navigator.language) ? 'ru' : /^lv/i.test(navigator.language) ? 'lv' : 'en';
 const t = key => QUICK_TEXT[lang][key] || key;
@@ -19,9 +22,10 @@ let loadNumber = 0;
 const suggestedPasskeyName = /iPad/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1) ? 'iPad' : nativePlatform==='ios'?'iPhone':nativePlatform==='windows'?'Windows':'Android';
 $('passkeyName').value = suggestedPasskeyName;
 function message(key, error = false) { messageKey = key; failed = error; render(); }
-function persist() { put('quickServer', server); put('quickPlatform', platform); }
+function persist() { put('quickServer', server); put('quickPlatform', platform);put('quickProtocol',protocol); }
 function render() {
  document.documentElement.lang = lang;
+ $('quickProtocolName').textContent=protocol==='anyconnect'?'AnyConnect':'IKEv2';
  const back=document.getElementById('backHome');
  if(back){back.href='/?lang='+lang;back.setAttribute('aria-label',({ru:'Назад в Мой VPN',en:'Back to My VPN',lv:'Atpakaļ uz Mans VPN'})[lang]);}
  document.querySelectorAll('[data-text]').forEach(el => el.textContent = t(el.dataset.text));
@@ -40,9 +44,11 @@ function render() {
  $('register').hidden = uncertain;
  $('login').hidden = false;
  if(profile) renderDelivery();
+ if(ocGrant)renderOcDelivery();
+ for(const id of ['ocCopyPassword','ocDownload','ocRenew'])$(id).disabled=busy || (id!=='ocRenew'&&ocGrant&&Date.parse(ocGrant.expiresAt)<=Date.now());
 }
 function panels(name) {
- for (const id of ['auth','recovery','preparePanel','delivery']) $(id).hidden = id !== name;
+ for (const id of ['auth','recovery','preparePanel','delivery','ocDelivery']) $(id).hidden = id !== name;
  $('retry').hidden = true;
  render();
 }
@@ -74,7 +80,7 @@ async function action(fn) {
 async function loadAccount() {
  const me = await api('/me');
  if(!me.authenticated) throw Object.assign(new Error('Sign in required'),{status:401});
- authenticated=true; uncertain=false; put('quickRegistration','');
+ accountId=me.userId;authenticated=true; uncertain=false; put('quickRegistration','');
  panels('preparePanel');
 }
 async function initialize() {
@@ -89,6 +95,10 @@ async function initialize() {
   const recommendation=await r.json();
   if(!['riga','moscow'].includes(recommendation.entryPoint))throw new Error('Invalid recommendation');
   server=recommendation.entryPoint;platform=nativePlatform;ready=true;
+  if(protocol==='anyconnect'){
+   const oc=await api('/oc/access/capabilities');
+   if(oc.issuance!==true||!oc.ingresses?.some(p=>p.id===server))throw new Error('AnyConnect node unavailable');
+  }
   if(number!==loadNumber)return;
   persist();
   try { await loadAccount(); if(!locked) message(''); }
@@ -103,6 +113,7 @@ $('login').onclick=()=>accountAuth('signin');
 async function prepare() {
  if(!authenticated||!ready||!nativePlatform)return;
  locked=true;$('choices').hidden=true; message('busy');
+ if(protocol==='anyconnect'){await prepareOc();return;}
  const data=await api('/quick-setup/prepare',{method:'POST',body:JSON.stringify({platform:nativePlatform,server,language:lang,currentDevice:true})});
  const url=new URL(data.profileUrl);
  const allowed=['api.tolf.is','config.tolf.is','install-ru.tolf.is'];
@@ -132,7 +143,63 @@ async function copy(id){
 $('copyCode').onclick=()=>copy('code');$('copyLink').onclick=()=>copy('profileLink');
 $('copyChromeSettings').onclick=()=>copy('chromeSettings');
 $('share').onclick=async()=>{try{await navigator.share({title:'TOLF VPN',url:profile});}catch(e){if(e.name!=='AbortError')message('failed',true);}};
-window.addEventListener('pageshow',e=>{if(e.persisted){profile='';$('code').value='';initialize();}});
+window.addEventListener('pagehide',()=>{clearTimeout(ocExpiryTimer);ocGrant=null;$('ocPassword').value='';$('ocImport').removeAttribute('href');});
+window.addEventListener('pageshow',e=>{if(e.persisted){profile='';ocGrant=null;$('code').value='';initialize();}});
+
+function ocKey(suffix){return 'quickOc:'+accountId+':'+nativePlatform+':'+suffix;}
+function validateOcGrant(grant){
+ const point=grant.connections?.find(p=>p.id===server);
+ if(!point||typeof grant.password!=='string'||!Number.isFinite(Date.parse(grant.expiresAt))||Date.parse(grant.expiresAt)<=Date.now())throw Error('Invalid certificate grant');
+ const certificate=new URL(grant.certificateUrl);
+ if(certificate.protocol!=='https:'||certificate.hostname!=='api.tolf.is'||certificate.username||certificate.password||!certificate.pathname.startsWith('/oc/access/import/'))throw Error('Invalid certificate URL');
+ const connect=new URL(point.connectionUri),importLink=new URL(grant.importUri);
+ if(connect.protocol!=='anyconnect:'||connect.hostname!=='create'||connect.searchParams.get('host')!==point.host||connect.searchParams.get('certcommonname')!==grant.username)throw Error('Invalid connection');
+ if(importLink.protocol!=='anyconnect:'||importLink.hostname!=='import'||importLink.searchParams.get('uri')!==grant.certificateUrl)throw Error('Invalid import');
+ return point;
+}
+async function prepareOc(){
+ if(!accountId)throw Error('Account unavailable');
+ let deviceId=get(ocKey('device'));
+ if(deviceId){
+  const list=await api('/oc/access/devices');
+  if(!list.devices?.some(d=>d.id===deviceId&&d.state==='active'&&Date.parse(d.expires_at)>Date.now())){
+   deviceId=null;put(ocKey('device'),'');put(ocKey('request'),'');
+  }
+ }
+ if(!deviceId){
+  let requestId=get(ocKey('request'));
+  if(!requestId){requestId=crypto.randomUUID();put(ocKey('request'),requestId);}
+  const result=await api('/oc/access/devices',{method:'POST',body:JSON.stringify({requestId,label:suggestedPasskeyName})});
+  if(result.device?.state!=='active'||!result.device?.id)throw Error('Device not ready');
+  deviceId=result.device.id;put(ocKey('device'),deviceId);
+ }
+ const grant=await api('/oc/access/devices/'+encodeURIComponent(deviceId)+'/import',{method:'POST',body:'{}'});
+ if(grant.deviceId!==deviceId)throw Error('Wrong certificate');
+ ocPoint=validateOcGrant(grant);ocGrant=grant;
+ clearTimeout(ocExpiryTimer);ocExpiryTimer=setTimeout(()=>{if(ocGrant===grant)render();},Math.max(0,Date.parse(grant.expiresAt)-Date.now()));
+ panels('ocDelivery');message('');
+}
+function renderOcDelivery(){
+ const mobile=nativePlatform!=='windows',expired=Date.parse(ocGrant.expiresAt)<=Date.now();
+ $('ocApp').href=nativePlatform==='ios'?'https://apps.apple.com/app/id1135064690':nativePlatform==='android'?'https://play.google.com/store/apps/details?id=com.cisco.anyconnect.vpn.android.avf':'https://www.cisco.com/c/en/us/support/security/secure-client-5/model.html';
+ $('ocServer').textContent=t(server)+': '+ocPoint.host;
+ $('ocConnection').href=ocPoint.connectionUri;$('ocConnection').hidden=!mobile;
+ $('ocImport').href=ocGrant.importUri;$('ocImport').hidden=!mobile||expired;
+ $('ocControl').hidden=!mobile;$('ocWindowsConnection').hidden=mobile;$('ocWindowsCertificate').hidden=mobile;
+ $('ocPassword').value=expired?'':ocGrant.password;$('ocCopyPassword').disabled=busy||expired;$('ocDownload').disabled=busy||expired;
+}
+$('ocCopyPassword').onclick=()=>action(async()=>{if(!ocGrant||Date.parse(ocGrant.expiresAt)<=Date.now())throw Error('Expired');await navigator.clipboard.writeText(ocGrant.password);message('copied');});
+$('ocImport').onclick=event=>{if(!ocGrant||Date.parse(ocGrant.expiresAt)<=Date.now()){event.preventDefault();message('ocExpired',true);}};
+$('ocRenew').onclick=()=>action(prepareOc);
+$('ocDownload').onclick=()=>action(async()=>{
+ if(!ocGrant||Date.parse(ocGrant.expiresAt)<=Date.now())throw Error('Expired');
+ const response=await fetch(ocGrant.certificateUrl,{credentials:'omit',cache:'no-store',signal:AbortSignal.timeout(20000)});
+ if(!response.ok)throw Error('Download failed');
+ const url=URL.createObjectURL(await response.blob()),a=document.createElement('a');
+ a.href=url;a.download='TOLF-AnyConnect.p12';document.body.append(a);a.click();a.remove();
+ setTimeout(()=>URL.revokeObjectURL(url),1000);message('started');
+});
+
 render();initialize();
 })();
 

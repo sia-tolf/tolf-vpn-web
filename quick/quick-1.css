@@ -4,3 +4,10 @@ header > #backHome{display:inline-flex;align-items:center;gap:8px;white-space:no
 header > #backHome .brand-emblem{display:block;width:22px;height:22px;flex:0 0 22px}
 header > #backHome .back-chevron{font-size:24px;color:#73737a}
 header > #backHome .tolf-wordmark{letter-spacing:.16em}
+
+#ocDelivery section{margin-top:24px}
+#ocDelivery h3{font-size:18px;margin:0 0 12px}
+#ocDelivery .button,#ocDelivery > section > button{display:block;width:100%;margin-top:12px}
+#ocPassword{font-family:inherit}
+#ocServer{overflow-wrap:anywhere}
+#quickProtocolName{color:#73737a;font-size:14px}
