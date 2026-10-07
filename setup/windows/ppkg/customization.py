@@ -6,17 +6,19 @@ from profile import profile_xml, text
 
 def customization():
     root = ET.Element("WindowsCustomizations")
-    package = ET.SubElement(root, "PackageConfig")
+    package = ET.SubElement(root, "PackageConfig", {"xmlns": "urn:schemas-Microsoft-com:Windows-ICD-Package-Config.v1.0"})
     for key, value in [
         ("ID", "{7b6e4279-f08e-4e80-b70c-1ea2d07d1083}"),
         ("Name", "TOLF PPKG compiler test"), ("Version", "1.0"),
         ("OwnerType", "ITAdmin"), ("Rank", "0"),
     ]:
         text(package, key, value)
-    common = ET.SubElement(ET.SubElement(ET.SubElement(root, "Settings"), "Customizations"), "Common")
+    common = ET.SubElement(ET.SubElement(ET.SubElement(root, "Settings", {"xmlns": "urn:schemas-microsoft-com:windows-provisioning"}), "Customizations"), "Common")
     profiles = ET.SubElement(common, "ConnectivityProfiles")
     vpn = ET.SubElement(profiles, "VPN")
-    settings = ET.SubElement(vpn, "VPNSetting", {"Name": "TOLF PPKG Test"})
+    collection = ET.SubElement(vpn, "VPNSetting")
+    config = ET.SubElement(collection, "VPNConfig", {"VPNProfileName": "TOLF PPKG Test"})
+    settings = ET.SubElement(config, "VPNSettings")
     source = ET.fromstring(profile_xml("riga", "7b6e4279-f08e-4e80-b70c-1ea2d07d1083", "Compiler test"))
     eap = source.find("NativeProfile/Authentication/Eap/Configuration")[0]
     for key, value in [

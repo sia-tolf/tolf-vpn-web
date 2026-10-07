@@ -30,7 +30,7 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Customization generation failed' }
     $store = $stores | Where-Object { $_.Name -eq 'Microsoft-Desktop-Provisioning.dat' } | Select-Object -First 1
     if (-not $store) { throw 'Desktop provisioning store not found' }
-    & $icd.FullName /Build-ProvisioningPackage "/CustomizationXML:$destination/customizations.xml" "/PackagePath:$destination/TOLF-PPKG-Test.ppkg" "/StoreFile:$($store.FullName)" +Overwrite 2>&1 | Tee-Object -FilePath "$destination/compiler-output.txt"
+    & $icd.FullName /Build-ProvisioningPackage "/CustomizationXML:$destination/customizations.xml" "/PackagePath:$destination/TOLF-PPKG-Test.ppkg" "/StoreFile:$($store.FullName)" "/CommonLogFolder:$destination" +Overwrite 2>&1 | Tee-Object -FilePath "$destination/compiler-output.txt"
     $code = $LASTEXITCODE
     "Compiler exit code: $code" | Add-Content $report
     if ($code -ne 0) { throw "ICD build failed: $code" }
