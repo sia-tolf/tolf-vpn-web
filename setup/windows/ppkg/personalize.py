@@ -46,7 +46,8 @@ def build(row, pfx, password, ca_der):
         raise ValueError('Certificate key mismatch')
     if not any(item.fingerprint(hashes.SHA256()) == ca.fingerprint(hashes.SHA256()) for item in chain or []):
         raise ValueError('Client PFX has the wrong CA')
-    profile = 'TOLF ' + row['name'].strip() + ' ' + identity
+    display = ''.join('-' if c in '<>:"/\\|?*%#' else c for c in row['name'].strip())
+    profile = 'TOLF ' + display + ' ' + identity
     certificate_name = 'TOLF Windows ' + uuid.UUID(identity).hex
     ca_hash = hashlib.sha1(ca_der).hexdigest().upper()  # Windows certificate thumbprint, not a signature.
     with tempfile.TemporaryDirectory(prefix='tolf-ppkg-') as tmp:
