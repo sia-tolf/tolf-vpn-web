@@ -1,3 +1,5 @@
+The certificate delivery implementation is described in [CERTIFICATE-DEPLOYMENT.md](CERTIFICATE-DEPLOYMENT.md). Personal PPKG delivery is enabled; actual Windows installation/connection still needs a client test.
+
 # Windows IKEv2 PPKG without EXE — 7 October 2026
 
 ## Verified build

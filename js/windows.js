@@ -5,6 +5,12 @@ let windowsRequestId = null;
 const windowsProfileLinks = new Map();
 let windowsReady = false;
 let windowsPasswordManagement = false;
+let windowsCertificatePackages = false;
+const windowsPackageFiles = new Map();
+function windowsCertificateCopy(key) {
+  const copy = {ru:{save:"Сохранить PPKG",share:"Поделиться PPKG",auth:"Авторизация сертификатом",help:"Откройте PPKG на компьютере Windows и подтвердите установку. Логин и пароль не требуются."},en:{save:"Save PPKG",share:"Share PPKG",auth:"Certificate authentication",help:"Open the PPKG on your Windows computer and confirm installation. No username or password is needed."},lv:{save:"Saglabāt PPKG",share:"Kopīgot PPKG",auth:"Sertifikāta autentifikācija",help:"Atveriet PPKG Windows datorā un apstipriniet instalēšanu. Lietotājvārds un parole nav vajadzīgi."}};
+  return (copy[currentLanguage] || copy.en)[key];
+}
 const windowsPasswords = new Map();
 let windowsPasswordEpoch = 0;
 function forgetWindowsPasswords() {
@@ -57,6 +63,7 @@ function clearWindowsDevices() {
   windowsAdding = false;
   windowsMessage.textContent = '';
   windowsProfileLinks.clear();
+  windowsPackageFiles.clear();
   renderWindowsDevices();
 }
 
@@ -93,7 +100,35 @@ function appendWindowsDelivery(card, device) {
     }
   });
   row.append(field, copy); delivery.append(label, row, feedback);
-  if (/Windows NT/i.test(navigator.userAgent || '')) {
+  if (device.authentication === 'certificate') {
+    const downloadUrl = url + '/download';
+    const save = document.createElement('a');
+    save.className = 'button-link constructive windows-device-open';
+    save.href = downloadUrl; save.textContent = windowsCertificateCopy('save');
+    delivery.append(save);
+    const hint = document.createElement('p'); hint.className = 'hint'; hint.textContent = windowsCertificateCopy('help');
+    delivery.append(hint);
+    if (navigator.share && navigator.canShare) {
+      const share = document.createElement('button'); share.type = 'button'; share.className = 'secondary';
+      share.textContent = windowsCertificateCopy('share'); share.disabled = true;
+      delivery.append(share);
+      let pending = windowsPackageFiles.get(url);
+      if (!pending) {
+        pending = fetch(downloadUrl, {cache:'no-store',credentials:'omit'}).then(async response => {
+          if (!response.ok) throw new Error('PPKG download failed');
+          return new File([await response.blob()], 'TOLF-Windows-' + device.id + '.ppkg', {type:'application/octet-stream'});
+        });
+        windowsPackageFiles.set(url, pending);
+      }
+      pending.then(file => {
+        share.disabled = vpnBusy || !navigator.canShare({files:[file]});
+        share.addEventListener('click', async () => {
+          try { await navigator.share({title:'TOLF VPN — Windows',files:[file]}); }
+          catch (error) { if (error.name !== 'AbortError') feedback.textContent = error.message; }
+        });
+      }).catch(error => { feedback.textContent = error.message; windowsPackageFiles.delete(url); });
+    }
+  } else if (/Windows NT/i.test(navigator.userAgent || '')) {
     const open = document.createElement('a');
     open.className = 'button-link primary windows-device-open';
     open.href = url; open.target = '_blank'; open.rel = 'noopener noreferrer';
@@ -103,7 +138,7 @@ function appendWindowsDelivery(card, device) {
 }
 
 function appendWindowsPassword(body, device) {
-  if (!windowsPasswordManagement || device.state !== 'active') return;
+  if (!windowsPasswordManagement || device.state !== 'active' || device.authentication === 'certificate') return;
   const section = document.createElement('section');
   section.className = 'windows-password';
   const title = document.createElement('h4'); title.textContent = t('windowsPasswordTitle');
@@ -195,7 +230,7 @@ function renderWindowsDevices() {
       }
     });
     const user = document.createElement('p');
-    user.textContent = t(device.server === 'moscow' ? 'windowsServerMoscow' : 'windowsServerRiga') + ' · ' + (device.username || t('windowsPreparing'));
+    user.textContent = t(device.server === 'moscow' ? 'windowsServerMoscow' : 'windowsServerRiga') + ' · ' + (device.authentication === 'certificate' ? windowsCertificateCopy('auth') : device.username || t('windowsPreparing'));
     user.className = 'windows-device-username';
     const actions = document.createElement('div'); actions.className = 'actions windows-device-links windows-link-create';
     const download = document.createElement('button'); download.type = 'button';
@@ -205,7 +240,7 @@ function renderWindowsDevices() {
     download.classList.toggle('hidden', !setupAllowed && device.state !== 'active');
     download.addEventListener('click', () => windowsAction(async epoch => {
       const data = await apiRequest(`/windows/devices/${encodeURIComponent(device.id)}/profile`, {
-        method: 'POST', body: JSON.stringify({language: currentLanguage})
+        method: 'POST', body: JSON.stringify({language: currentLanguage,...(windowsCertificatePackages ? {packageFormat:"ppkg"} : {})})
       });
       if (epoch !== windowsEpoch) return;
       windowsProfileLinks.set(device.id, data.profileUrl);
@@ -330,7 +365,7 @@ windowsForm.addEventListener('submit', event => {
   if (!windowsRequestId) windowsRequestId = crypto.randomUUID();
   windowsAction(async epoch => {
     const data = await apiRequest('/windows/devices', {
-      method:'POST', body:JSON.stringify({requestId:windowsRequestId,name,server:windowsServer.value,localId:windowsMode.value,language:currentLanguage})
+      method:'POST', body:JSON.stringify({requestId:windowsRequestId,name,server:windowsServer.value,localId:windowsMode.value,language:currentLanguage,...(windowsCertificatePackages ? {packageFormat:"ppkg"} : {})})
     });
     if (epoch !== windowsEpoch) return;
     windowsProfileLinks.set(data.device.id, data.profileUrl);
@@ -346,6 +381,7 @@ windowsForm.addEventListener('submit', event => {
     const capabilities = await apiRequest('/windows/capabilities', {method:'GET',cache:'no-store'});
     if (capabilities.version !== '1.0' || !capabilities.servers.includes('riga')) throw new Error('Windows unavailable');
     windowsPasswordManagement = capabilities.passwordManagement === true;
+    windowsCertificatePackages = capabilities.certificatePackages === true;
     windowsServers = new Set(capabilities.servers.filter(server => ['riga', 'moscow'].includes(server)));
     windowsRoutingModes = capabilities.routingModes || {riga: ['sr']};
     windowsReady = true;
@@ -363,4 +399,3 @@ windowsForm.addEventListener('submit', event => {
     if (currentPlatform === 'windows') setPlatform('ios');
   }
 })();
-

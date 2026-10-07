@@ -54,3 +54,8 @@ Object.assign(QUICK_TEXT.lv, {
   passkeyWindows: 'Pēc turpināšanas Chrome vai instalētais paroļu pārvaldnieks piedāvās saglabāt piekļuves atslēgu.',
   passkeyWindowsNotAllowed: 'Piekļuves atslēga netika izveidota. Iespējams, paroļu pārvaldnieks ir bloķēts, logs tika aizvērts vai Chrome nav sagatavots atslēgu glabāšanai. Pārbaudiet Chrome iestatījumus un mēģiniet vēlreiz.'
 });
+
+// Windows uses a native certificate provisioning package.
+Object.assign(QUICK_TEXT.ru, {windowsHelp:'Сохраните PPKG на этом компьютере Windows. Откройте файл и подтвердите установку пакета.',windowsDownload:'Сохранить PPKG',windowsSteps:'После установки: Параметры → Сеть и Интернет → VPN → TOLF → Подключиться. Логин и пароль не требуются.'});
+Object.assign(QUICK_TEXT.en, {windowsHelp:'Save the PPKG on this Windows computer. Open the file and confirm package installation.',windowsDownload:'Save PPKG',windowsSteps:'After installation: Settings → Network & Internet → VPN → TOLF → Connect. No username or password is needed.'});
+Object.assign(QUICK_TEXT.lv, {windowsHelp:'Saglabājiet PPKG šajā Windows datorā. Atveriet failu un apstipriniet pakotnes instalēšanu.',windowsDownload:'Saglabāt PPKG',windowsSteps:'Pēc instalēšanas: Iestatījumi → Tīkls un internets → VPN → TOLF → Savienot. Lietotājvārds un parole nav vajadzīgi.'});

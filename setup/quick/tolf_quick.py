@@ -99,13 +99,22 @@ def install(app, ns):
                             (user, platform, server, str(uuid.uuid4())))
                 row = con.execute('SELECT * FROM quick_setups WHERE user_id=?', (user,)).fetchone()
             if row['platform'] != platform or row['server'] != server:
-                raise HTTPException(409, 'Continue the saved setup')
+                if payload.get('currentDevice') is not True:
+                    raise HTTPException(409, 'Continue the saved setup')
+                # A completed setup must not force a different device or a stale
+                # entry point. Keep incomplete requests stable for safe retries.
+                if row['state'] != 'ready':
+                    raise HTTPException(409, 'Continue the saved setup')
+                with connect() as con:
+                    con.execute("UPDATE quick_setups SET platform=?,server=?,request_id=?,state='pending' WHERE user_id=?",
+                                (platform, server, str(uuid.uuid4()), user))
+                    row = con.execute('SELECT * FROM quick_setups WHERE user_id=?', (user,)).fetchone()
             selection = {'platform': platform, 'server': server, 'language': language,
                          'localId': 'sr' if server == 'riga' else '', 'dnsMode': 'tolf',
                          'dnsServers': [], 'onDemandEnabled': False, 'onDemandRules': []}
             if platform == 'windows':
                 data = windows_create(request, {'requestId': row['request_id'], 'name': 'Windows',
-                                                'server': server, 'language': language})
+                                                'server': server, 'language': language, 'packageFormat': 'ppkg'})
             else:
                 if ns['vpn_record'](user):
                     data = ns['vpn_profile'](request, selection)

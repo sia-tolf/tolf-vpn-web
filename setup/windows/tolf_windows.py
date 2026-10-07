@@ -13,15 +13,19 @@ import sqlite3
 import uuid
 import zipfile
 import tolf_windows_routes as routes
+import tolf_windows_certificates as certificates
+import tolf_windows_ppkg as ppkg
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from fastapi import HTTPException, Request
 from fastapi.responses import HTMLResponse, Response
 
 VERSION = '1.0'
+NODES = {'riga': ('ikev2-riga.tolf.is', 'sr'), 'moscow': ('ikev2.tolf.is', '')}
+ROUTING_REVISION = 'windows-routing-2.6-v1'
 INSTALLER = Path(__file__).with_name('TOLF-Setup.exe')
 CTX = None
-DEVICE_QUERY = "SELECT d.*, COALESCE(r.server,'riga') AS server, COALESCE(r.local_id,'sr') AS local_id, COALESCE(r.routing_managed,0) AS routing_managed FROM windows_devices d LEFT JOIN windows_device_routes r ON r.device_id=d.id"
+DEVICE_QUERY = "SELECT d.*, COALESCE(r.server,n.server,'riga') AS server, COALESCE(r.local_id,CASE WHEN COALESCE(n.server,'riga')='moscow' THEN '' ELSE 'sr' END) AS local_id, COALESCE(r.routing_managed,0) AS routing_managed FROM windows_devices d LEFT JOIN windows_device_nodes n ON n.device_id=d.id LEFT JOIN windows_device_routes r ON r.device_id=d.id"
 TOKEN = re.compile(r'[A-Za-z0-9_-]{32}')
 HEADERS = {'Cache-Control': 'private, no-store, max-age=0',
            'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer'}
@@ -47,10 +51,11 @@ def initialize():
         c.execute('''CREATE TABLE IF NOT EXISTS windows_devices (
             id TEXT PRIMARY KEY, user_id TEXT NOT NULL, name TEXT NOT NULL,
             username TEXT, state TEXT NOT NULL, created_at TEXT NOT NULL)''')
-        c.execute("""CREATE TABLE IF NOT EXISTS windows_device_routes (
-            device_id TEXT PRIMARY KEY, server TEXT NOT NULL, local_id TEXT NOT NULL,
-            routing_managed INTEGER NOT NULL DEFAULT 0)""")
         c.execute('CREATE INDEX IF NOT EXISTS windows_devices_owner ON windows_devices(user_id)')
+        # Separate table preserves compatibility with older API rollback versions.
+        c.execute('CREATE TABLE IF NOT EXISTS windows_device_nodes (device_id TEXT PRIMARY KEY, server TEXT NOT NULL)')
+        c.execute('CREATE TABLE IF NOT EXISTS windows_device_routes (device_id TEXT PRIMARY KEY, server TEXT NOT NULL, local_id TEXT NOT NULL, routing_managed INTEGER NOT NULL DEFAULT 0)')
+        c.execute('CREATE TABLE IF NOT EXISTS windows_password_changes (device_id TEXT NOT NULL, request_id TEXT NOT NULL, state TEXT NOT NULL, PRIMARY KEY(device_id,request_id))')
 
 
 def now():
@@ -76,7 +81,7 @@ def owned(user_id, device_id):
 
 
 def public(row):
-    return {**{k: row[k] for k in ('id', 'name', 'username', 'state', 'created_at', 'server')}, 'localId': row['local_id']}
+    return {**{k: row[k] for k in ('id', 'name', 'username', 'state', 'created_at', 'server')}, 'localId': row['local_id'], 'authentication': 'certificate' if certificates.exists(row['id']) else 'password'}
 
 
 def invalidate(device_id):
@@ -89,6 +94,7 @@ def invalidate(device_id):
             continue
         if data.get('platform') == 'windows' and data.get('deviceId') == device_id and TOKEN.fullmatch(path.stem):
             path.with_suffix('.windows.zip').unlink(missing_ok=True)
+            path.with_suffix('.windows.ppkg').unlink(missing_ok=True)
             path.unlink(missing_ok=True)
 
 
@@ -97,7 +103,9 @@ def remove(user_id, device_id):
     with db() as c:
         c.execute("UPDATE windows_devices SET state='deleting' WHERE id=? AND user_id=?", (row['id'], user_id))
     invalidate(row['id'])
-    CTX['remove_provisioned_vpn'](row['id'], row['username'])
+    certificates.revoke(CTX, row)
+    if row['username'] and row['username'].startswith('user_'):
+        CTX['remove_provisioned_vpn'](row['id'], row['username'])
     CTX['provision_on_riga']('revoke-moscow', row['id'])
     if row['routing_managed']:
         routes.rpc(CTX, 'remove', row['id'])
@@ -165,6 +173,44 @@ def package(row, credentials, lang):
     return 'https://api.tolf.is/windows/p/' + token
 
 
+def certificate_package(row, lang):
+    if not ppkg.available():
+        raise HTTPException(503, 'Native Windows certificate package is not ready')
+    issued = certificates.ensure(CTX, row)
+    pfx, password, ca = certificates.bundle(issued)
+    content = ppkg.build(row, pfx, password, ca)
+    profiles = CTX['tolf_profiles']; profiles.initialize()
+    token = secrets.token_urlsafe(24)
+    metadata = {'platform':'windows','format':'ppkg','deviceId':row['id'],'name':row['name'],
+                'username':issued['username'],'server':row['server'],'localId':row['local_id'],
+                'language':lang,'expiresAt':(now()+timedelta(hours=24)).isoformat(),
+                'sha256':hashlib.sha256(content).hexdigest()}
+    archive = profiles.PROFILE_DIR/(token+'.windows.ppkg')
+    meta = profiles.PROFILE_DIR/(token+'.json')
+    try:
+        profiles._atomic_write(archive, content)
+        profiles._atomic_write(meta, json.dumps(metadata).encode())
+    except Exception:
+        archive.unlink(missing_ok=True);meta.unlink(missing_ok=True);raise
+    if row.get('username') and row['username'].startswith('user_'):
+        # Explicit migration of this Windows device: revoke its former password access.
+        invalidate(row['id'])
+        CTX['remove_provisioned_vpn'](row['id'], row['username'])
+        CTX['provision_on_riga']('revoke-moscow', row['id'])
+        if row.get('routing_managed'):
+            routes.rpc(CTX, 'remove', row['id'])
+        # Invalidation also removes the just-created native package; rewrite it after cleanup.
+        profiles._atomic_write(archive, content)
+        profiles._atomic_write(meta, json.dumps(metadata).encode())
+    return 'https://api.tolf.is/windows/p/'+token, issued['username']
+
+
+def wants_certificate(payload, row=None):
+    value = payload.get('packageFormat')
+    if value not in (None, 'ppkg'): raise HTTPException(400, 'Unsupported Windows package format')
+    return value == 'ppkg' or (row and certificates.exists(row['id']))
+
+
 def load(token):
     if not TOKEN.fullmatch(token):
         raise HTTPException(404, 'Windows package not found')
@@ -183,7 +229,7 @@ def load(token):
     if not active:
         raise HTTPException(410, 'Windows device is not active')
     try:
-        content = (directory / (token + '.windows.zip')).read_bytes()
+        content = (directory / (token + ('.windows.ppkg' if metadata.get('format') == 'ppkg' else '.windows.zip'))).read_bytes()
     except OSError:
         raise HTTPException(404, 'Windows package not found')
     if hashlib.sha256(content).hexdigest() != metadata['sha256']:
@@ -199,7 +245,7 @@ def install(app, context):
     @app.get('/windows/capabilities')
     def capabilities():
         modes = routes.available(CTX)
-        return {'version': VERSION, 'servers': list(modes), 'routing': 'sr', 'routingModes': modes, 'installerVersion': '2.3.0'}
+        return {'version': VERSION, 'servers': list(NODES), 'routing': 'sr', 'routingModes': modes, 'routingRevision': ROUTING_REVISION, 'installerVersion': '2.6.1', 'profileLabels': True, 'passwordManagement': True, 'certificatePackages': ppkg.available()}
 
     @app.get('/windows/devices')
     def devices(request: Request):
@@ -238,10 +284,14 @@ def install(app, context):
             row = owned(user_id, device_id)
             if row['state'] == 'deleting':
                 raise HTTPException(409, 'Device deletion is pending')
-            CTX['provision_on_riga']('grant-moscow', device_id)
-            credentials = CTX['provision_on_riga']('create', device_id, row['server'], row['local_id'])
-            routes.apply(CTX, row)
-            url = package(row, credentials, lang)
+            if wants_certificate(payload, row):
+                url, username = certificate_package(row, lang)
+                credentials = {'username': username}
+            else:
+                CTX['provision_on_riga']('grant-moscow', device_id)
+                credentials = CTX['provision_on_riga']('create', device_id, row['server'], row['local_id'])
+                routes.apply(CTX, row)
+                url = package(row, credentials, lang)
             with db() as c:
                 c.execute("UPDATE windows_devices SET state='active',username=? WHERE id=? AND user_id=?", (credentials['username'], device_id, user_id))
             return {'device': public(owned(user_id, device_id)), 'profileUrl': url}
@@ -254,6 +304,11 @@ def install(app, context):
             row = owned(user_id, device_id)
             if row['state'] == 'deleting':
                 raise HTTPException(409, 'Device deletion is pending')
+            if wants_certificate(payload, row):
+                url, username = certificate_package(row, lang)
+                with db() as c:
+                    c.execute("UPDATE windows_devices SET state='active',username=? WHERE id=? AND user_id=?", (username,row['id'],user_id))
+                return {'profileUrl':url}
             action = 'profile' if row['state'] == 'active' else 'create'
             if action == 'create':
                 CTX['provision_on_riga']('grant-moscow', row['id'])
@@ -263,6 +318,44 @@ def install(app, context):
             with db() as c:
                 c.execute("UPDATE windows_devices SET state='active',username=? WHERE id=? AND user_id=?", (credentials['username'], row['id'], user_id))
             return {'profileUrl': url}
+
+    @app.post('/windows/devices/{device_id}/password')
+    def password(device_id: str, request: Request):
+        user_id = CTX['authenticated_user_id'](request)
+        with CTX['tolf_promos'].account_operation(CTX['DB'], user_id):
+            row = owned(user_id, device_id)
+            if certificates.exists(row['id']):
+                raise HTTPException(409, 'This Windows device uses a certificate and has no VPN password')
+            if row['state'] != 'active':
+                raise HTTPException(409, 'Windows device is not active')
+            credentials = CTX['provision_on_riga']('profile', row['id'], row['server'], row['local_id'])
+            return Response(json.dumps(validated_credentials(row, credentials)), media_type='application/json', headers=HEADERS)
+
+    @app.post('/windows/devices/{device_id}/password/rotate')
+    def rotate_password(device_id: str, request: Request, payload: dict):
+        user_id = CTX['authenticated_user_id'](request)
+        request_id = identity(payload.get('requestId'))
+        with CTX['tolf_promos'].account_operation(CTX['DB'], user_id):
+            row = owned(user_id, device_id)
+            if certificates.exists(row['id']):
+                raise HTTPException(409, 'This Windows device uses a certificate and has no VPN password')
+            if row['state'] != 'active':
+                raise HTTPException(409, 'Windows device is not active')
+            with db() as c:
+                previous = c.execute('SELECT state FROM windows_password_changes WHERE device_id=? AND request_id=?', (row['id'],request_id)).fetchone()
+                if previous and previous['state'] != 'done':
+                    raise HTTPException(409, 'Password change outcome is uncertain. Show the current password before trying again.')
+                if not previous:
+                    c.execute('INSERT INTO windows_password_changes VALUES (?,?,?)', (row['id'],request_id,'pending'))
+            # Invalidate old bearer packages before rotating, including uncertain outcomes.
+            if not previous:
+                invalidate(row['id'])
+            action = 'profile' if previous else 'rotate'
+            credentials = CTX['provision_on_riga'](action, row['id'], row['server'], row['local_id'])
+            result = validated_credentials(row, credentials)
+            with db() as c:
+                c.execute("UPDATE windows_password_changes SET state='done' WHERE device_id=? AND request_id=?", (row['id'],request_id))
+            return Response(json.dumps(result), media_type='application/json', headers=HEADERS)
 
     @app.post('/windows/devices/{device_id}/delete')
     def delete(device_id: str, request: Request):
@@ -277,17 +370,28 @@ def install(app, context):
         return {'status': 'ok'}
 
     @app.post('/windows/p/{token}/settings')
-    def settings(token: str):
+    def settings(token: str, labels: bool = False):
         metadata, content = load(token)
+        if metadata.get('format') == 'ppkg':
+            raise HTTPException(409, 'Native certificate packages do not use an executable installer')
         with zipfile.ZipFile(io.BytesIO(content)) as archive:
             config = json.loads(archive.read('connection.json'))
         if config.get('deviceId') != metadata['deviceId'] or config.get('username') != metadata['username']:
             raise HTTPException(500, 'Invalid Windows settings')
+        if labels:
+            with db() as c:
+                row = c.execute(DEVICE_QUERY + " WHERE d.id=? AND d.state='active'", (metadata['deviceId'],)).fetchone()
+            if not row:
+                raise HTTPException(410, 'Windows device is not active')
+            config['displayName'] = row['name']
+            config['routingMode'] = row['local_id']
         return Response(json.dumps(config), media_type='application/json', headers=HEADERS)
 
     @app.get('/windows/p/{token}/download')
     def download(token: str):
-        load(token)
+        metadata, content = load(token)
+        if metadata.get('format') == 'ppkg':
+            return Response(content, media_type='application/octet-stream', headers={**HEADERS, 'Content-Disposition':'attachment; filename="TOLF-Windows-'+metadata['deviceId']+'.ppkg"'})
         if not INSTALLER.is_file():
             raise HTTPException(503, 'Windows installer unavailable')
         return Response(INSTALLER.read_bytes(), media_type='application/octet-stream', headers={**HEADERS,
@@ -303,6 +407,14 @@ def install(app, context):
             'ru': ['Отправить на компьютер', 'Скопировать ссылку', 'Персональная ссылка настройки', 'Откройте эту ссылку на компьютере Windows, чтобы настроить TOLF VPN.', 'Установить для Windows', 'Откройте скачанный файл, загрузите настройки и при необходимости укажите сети вне VPN. Выберите «Сохранить без подключения» или «Сохранить и подключиться».', 'Ссылка скопирована', 'Скопируйте ссылку из поля ниже.', 'Не передавайте персональную ссылку посторонним.'],
             'lv': ['Nosūtīt uz datoru', 'Kopēt saiti', 'Personīgā iestatīšanas saite', 'Atveriet šo saiti Windows datorā, lai iestatītu TOLF VPN.', 'Instalēt Windows', 'Atveriet lejupielādēto failu, ielādējiet iestatījumus un pēc vajadzības norādiet tīklus ārpus VPN. Izvēlieties saglabāšanu bez savienošanās vai savienojumu.', 'Saite nokopēta', 'Kopējiet saiti no zemāk redzamā lauka.', 'Nekopīgojiet personīgo saiti ar svešiniekiem.']
         }[lang]
+        native = metadata.get('format') == 'ppkg'
+        if native:
+            copy[0],copy[4],copy[3],copy[5] = {
+                'ru': ['Поделиться PPKG','Сохранить PPKG','Сохраните PPKG или передайте его на компьютер Windows.','Откройте PPKG на Windows и подтвердите установку пакета. Затем откройте Параметры → Сеть и Интернет → VPN и подключите TOLF. Логин и пароль не требуются.'],
+                'en': ['Share PPKG','Save PPKG','Save the PPKG or send it to your Windows computer.','Open the PPKG on Windows and confirm package installation. Then open Settings → Network & Internet → VPN and connect TOLF. No username or password is needed.'],
+                'lv': ['Kopīgot PPKG','Saglabāt PPKG','Saglabājiet PPKG vai nosūtiet to Windows datoram.','Atveriet PPKG sistēmā Windows un apstipriniet instalēšanu. Pēc tam atveriet Iestatījumi → Tīkls un internets → VPN un izveidojiet TOLF savienojumu. Lietotājvārds un parole nav vajadzīgi.']
+            }[lang]
+            copy[8] = {'ru':'PPKG содержит персональный сертификат доступа.','en':'This PPKG contains your personal access certificate.','lv':'PPKG satur personīgo piekļuves sertifikātu.'}[lang]
         escape = html.escape
         server = metadata.get('server', 'riga')
         mode = metadata.get('localId', 'sr')
@@ -320,10 +432,19 @@ const url = document.getElementById('personal-link').value;
 const status = document.getElementById('status');
 const messages = {json.dumps(copy, ensure_ascii=True)};
 const win = /Windows NT/i.test(navigator.userAgent);
-document.getElementById('download').hidden = !win;
+const nativePackage = {json.dumps(native)};
+document.getElementById('download').hidden = !win && !nativePackage;
 document.getElementById('windows-help').hidden = !win;
 document.getElementById('mobile-help').hidden = win;
 if (win) document.getElementById('send').classList.remove('primary');
+let packageFile = null;
+if (nativePackage && navigator.share) {{
+ document.getElementById('send').disabled = true;
+ fetch('/windows/p/{token}/download',{{cache:'no-store'}}).then(async response=>{{
+   if (!response.ok) throw new Error('Download failed');
+   packageFile = new File([await response.blob()],'TOLF-Windows-{metadata['deviceId']}.ppkg',{{type:'application/octet-stream'}});
+ }}).catch(()=>{{}}).finally(()=>{{document.getElementById('send').disabled=false;}});
+}}
 async function copyLink() {{
  try {{ if (!navigator.clipboard) throw new Error(); await navigator.clipboard.writeText(url); status.textContent = messages[6]; }}
  catch {{ const field=document.getElementById('personal-link'); field.focus(); field.select(); status.textContent=messages[7]; }}
@@ -331,10 +452,9 @@ async function copyLink() {{
 document.getElementById('copy').addEventListener('click',copyLink);
 document.getElementById('send').addEventListener('click',async()=>{{
  if (!navigator.share) {{ await copyLink(); return; }}
- try {{ await navigator.share({{title:'TOLF VPN — Windows',url}}); }}
+ try {{ if (packageFile && navigator.canShare?.({{files:[packageFile]}})) await navigator.share({{title:'TOLF VPN — Windows',files:[packageFile]}}); else await navigator.share({{title:'TOLF VPN — Windows',url}}); }}
  catch(e) {{ if(e.name!=='AbortError') await copyLink(); }}
 }});
 </script></body></html>'''
         return HTMLResponse(body, headers={**HEADERS, 'X-Frame-Options': 'DENY',
             'Content-Security-Policy': f"default-src 'none'; style-src 'unsafe-inline'; script-src 'nonce-{nonce}'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"})
-

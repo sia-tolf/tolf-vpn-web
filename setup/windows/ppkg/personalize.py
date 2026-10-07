@@ -1,0 +1,124 @@
+"""Personalize a verified Microsoft-compiled certificate PPKG on UK.
+
+Native provisioning payload only. No executable or script is placed in the WIM.
+"""
+import base64
+import hashlib
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import tempfile
+import uuid
+from xml.etree import ElementTree as ET
+from cryptography import x509
+from cryptography.hazmat.primitives import serialization, hashes
+from cryptography.hazmat.primitives.serialization import pkcs12
+
+TEMPLATE = Path('/opt/tolf-api/windows-ppkg-template')
+WIMLIB = Path('/opt/tolf-api/wimtools/usr/bin/wimlib-imagex')
+LIBRARIES = Path('/opt/tolf-api/wimtools/usr/lib/x86_64-linux-gnu')
+HOSTS = {'riga': 'ikev2-riga.tolf.is', 'moscow': 'ikev2.tolf.is'}
+CRYPTO = {'AuthenticationTransformConstants':'SHA256128', 'CipherTransformConstants':'AES256',
+          'PfsGroup':'None', 'DHGroup':'Group14', 'IntegrityCheckMethod':'SHA256', 'EncryptionMethod':'AES256'}
+
+def available():
+    return TEMPLATE.is_dir() and WIMLIB.is_file()
+
+def run(args):
+    env = os.environ.copy()
+    env['LD_LIBRARY_PATH'] = str(LIBRARIES)
+    result = subprocess.run([str(WIMLIB), *args], capture_output=True, env=env, timeout=40)
+    if result.returncode:
+        raise RuntimeError('Native PPKG packaging failed')
+    return result.stdout
+
+def build(row, pfx, password, ca_der):
+    identity = str(uuid.UUID(row['id']))
+    if row['server'] not in HOSTS or not isinstance(row['name'], str) or not 1 <= len(row['name'].strip()) <= 64 or any(ord(c)<32 for c in row['name']):
+        raise ValueError('Invalid Windows package identity')
+    key, cert, chain = pkcs12.load_key_and_certificates(pfx, password.encode())
+    ca = x509.load_der_x509_certificate(ca_der)
+    expected = 'tolf-win-' + uuid.UUID(identity).hex + '.tolf.is'
+    if key is None or cert is None or cert.subject.rfc4514_string() != 'CN=' + expected or ca.subject != cert.issuer:
+        raise ValueError('Certificate does not belong to this Windows device')
+    if key.public_key().public_numbers() != cert.public_key().public_numbers():
+        raise ValueError('Certificate key mismatch')
+    if not any(item.fingerprint(hashes.SHA256()) == ca.fingerprint(hashes.SHA256()) for item in chain or []):
+        raise ValueError('Client PFX has the wrong CA')
+    profile = 'TOLF ' + row['name'].strip() + ' ' + identity
+    certificate_name = 'TOLF Windows ' + uuid.UUID(identity).hex
+    ca_hash = hashlib.sha1(ca_der).hexdigest().upper()  # Windows certificate thumbprint, not a signature.
+    with tempfile.TemporaryDirectory(prefix='tolf-ppkg-') as tmp:
+        directory = Path(tmp) / 'payload'
+        shutil.copytree(TEMPLATE, directory)
+        for path in directory.rglob('*'):
+            if path.is_file() and path.suffix.lower() not in {'.xml','.provxml'}:
+                raise ValueError('Unexpected PPKG template file')
+        runtimes = list(directory.rglob('*.provxml'))
+        if len(runtimes) != 3: raise ValueError('Unexpected certificate PPKG template')
+        providers = set()
+        for path in runtimes:
+            tree = ET.parse(path); root = tree.getroot()
+            for provider in root.findall('characteristic'):
+                kind = provider.get('type'); providers.add(kind)
+                if kind == 'VPNv2':
+                    provider.find('characteristic').set('type', profile)
+                    settings = {p.get('name'):p.get('value') for p in provider.iter('parm')}
+                    if settings.get('MachineMethod') != 'Certificate' or any(settings.get(k) != v for k,v in CRYPTO.items()) or 'UserMethod' in settings:
+                        raise ValueError('Unsafe native VPN template')
+                    for parm in provider.iter('parm'):
+                        if parm.get('name') == 'Servers': parm.set('value', HOSTS[row['server']])
+                elif kind == 'ClientCertificateInstall':
+                    if provider.get('scope') != 'Device': raise ValueError('Wrong certificate store')
+                    provider.find('characteristic/characteristic').set('type', certificate_name)
+                    settings = {p.get('name'):p.get('value') for p in provider.iter('parm')}
+                    if settings.get('KeyLocation') != '3' or settings.get('PFXKeyExportable') != 'false':
+                        raise ValueError('Unsafe certificate key template')
+                    for parm in provider.iter('parm'):
+                        if parm.get('name') == 'PFXCertBlob': parm.set('value', base64.b64encode(pfx).decode())
+                        if parm.get('name') == 'PFXCertPassword': parm.set('value', password)
+                elif kind == 'RootCATrustedCertificates':
+                    if provider.get('scope') != 'Device': raise ValueError('Wrong authority store')
+                    provider.find('characteristic/characteristic').set('type', ca_hash)
+                    for parm in provider.iter('parm'):
+                        if parm.get('name') != 'EncodedCertificate': raise ValueError('Unexpected authority setting')
+                        parm.set('value', base64.b64encode(ca_der).decode())
+                else: raise ValueError('Unexpected provisioning provider')
+            tree.write(path, encoding='utf-8', xml_declaration=True)
+        if providers != {'VPNv2','ClientCertificateInstall','RootCATrustedCertificates'}:
+            raise ValueError('Missing native certificate settings')
+        # Preserve the compiler's runtime ordering and atomic groups; namespace each group to the device.
+        runtime_index = directory/'Multivariant/0/Prov/RunTime.xml'
+        tree = ET.parse(runtime_index)
+        for element in tree.getroot():
+            element.set('SettingsGroup', str(uuid.uuid5(uuid.UUID(identity), element.get('SettingsGroup'))))
+        tree.write(runtime_index, encoding='utf-8', xml_declaration=True)
+        for path in directory.rglob('*.xml'):
+            if path == runtime_index: continue
+            tree = ET.parse(path)
+            for element in tree.iter():
+                local = element.tag.split('}')[-1]
+                if local == 'ID': element.text = '{' + identity + '}'
+                if local == 'Name' and element.text == 'TOLF PPKG native crypto test': element.text = profile
+                if local == 'Version': element.text = '2.0'
+                if local == 'Server': element.text = HOSTS[row['server']]
+                if local == 'CertificatePassword': element.text = password
+                if 'VPNProfileName' in element.attrib: element.set('VPNProfileName', profile)
+                if 'CertificateName' in element.attrib:
+                    element.set('CertificateName', certificate_name if local == 'ClientCertificate' else 'TOLF Windows IKEv2 Device CA')
+            tree.write(path, encoding='utf-8', xml_declaration=True)
+        package = Path(tmp)/'TOLF.ppkg'
+        run(['capture',str(directory),str(package),profile,'','--compress=LZX','--no-acls'])
+        run(['info',str(package),'1','--image-property','PACKAGEID={'+identity+'}',
+             '--image-property','VERSION=2.0','--image-property','ALTITUDE=5000',
+             '--image-property','RESETCLEAR=0','--image-property','NOTES=VERSION=10.0.26100.9457;Source=CLI;;TargetSkus=Invalid;EncryptPackage=False;SignPackage=False;PackageID='+identity+';'])
+        # Read the produced WIM back; verify the same exact payload was stored.
+        extracted = Path(tmp)/'verify'
+        run(['apply',str(package),'1',str(extracted),'--no-acls'])
+        for path in directory.rglob('*'):
+            if path.is_file() and (extracted/path.relative_to(directory)).read_bytes() != path.read_bytes():
+                raise ValueError('PPKG payload round trip failed')
+        result = package.read_bytes()
+        if not result.startswith(b'MSWIM'): raise ValueError('Invalid PPKG container')
+        return result
