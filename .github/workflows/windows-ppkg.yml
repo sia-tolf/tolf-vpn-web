@@ -1,0 +1,40 @@
+name: Windows PPKG prototype
+on:
+  push:
+    branches: [main]
+    paths: ['setup/windows/ppkg/**', '.github/workflows/windows-ppkg.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  compile:
+    runs-on: windows-2022
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Microsoft Configuration Designer
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Invoke-WebRequest 'https://go.microsoft.com/fwlink/?linkid=2289980' -OutFile "$env:RUNNER_TEMP/adksetup.exe"
+          $signature = Get-AuthenticodeSignature "$env:RUNNER_TEMP/adksetup.exe"
+          if ($signature.Status -ne 'Valid' -or $signature.SignerCertificate.Subject -notmatch 'Microsoft Corporation') { throw 'Invalid Microsoft installer signature' }
+          $process = Start-Process "$env:RUNNER_TEMP/adksetup.exe" -ArgumentList '/quiet /norestart /ceip off /features OptionId.ICDConfigurationDesigner' -Wait -PassThru
+          if ($process.ExitCode -notin @(0,3010)) { throw "ADK installation failed: $($process.ExitCode)" }
+      - name: Compile test VPN package
+        shell: pwsh
+        run: ./setup/windows/ppkg/build-prototype.ps1
+      - name: Publish prototype diagnostics
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: pwsh
+        run: |
+          $tag = "windows-ppkg-$env:GITHUB_SHA"
+          $files = @(Get-ChildItem setup/windows/ppkg/dist -File -ErrorAction SilentlyContinue | ForEach-Object { $_.FullName })
+          if ($files.Count -eq 0) { throw 'No PPKG diagnostics produced' }
+          gh release create $tag @files --prerelease --target $env:GITHUB_SHA --title 'TOLF PPKG compiler prototype' --notes 'Test profile only: no user credentials. Compilation does not establish successful installation or VPN connection. Not enabled on the VPN website.'
+          if ($LASTEXITCODE -ne 0) { throw 'Prototype upload failed' }
