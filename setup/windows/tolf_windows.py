@@ -191,14 +191,6 @@ def load(token):
     return metadata, content
 
 
-
-def require_windows_setup(request):
-    agent = request.headers.get('user-agent', '')
-    if (not re.search(r'Windows NT', agent, re.I)
-            or re.search(r'Android|iPhone|iPad|iPod|Windows Phone', agent, re.I)):
-        raise HTTPException(403, 'Open TOLF on your Windows computer to create VPN access.')
-
-
 def install(app, context):
     global CTX
     CTX = context
@@ -219,7 +211,6 @@ def install(app, context):
     @app.post('/windows/devices')
     def create(request: Request, payload: dict):
         user_id = CTX['authenticated_user_id'](request)
-        require_windows_setup(request)
         lang = language(payload)
         request_id = identity(payload.get('requestId'))
         server, mode = routes.selection(payload)
@@ -265,7 +256,6 @@ def install(app, context):
                 raise HTTPException(409, 'Device deletion is pending')
             action = 'profile' if row['state'] == 'active' else 'create'
             if action == 'create':
-                require_windows_setup(request)
                 CTX['provision_on_riga']('grant-moscow', row['id'])
             credentials = CTX['provision_on_riga'](action, row['id'], row['server'], row['local_id'])
             routes.apply(CTX, row)

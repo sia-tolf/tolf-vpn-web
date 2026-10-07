@@ -32,54 +32,6 @@ const windowsServer = document.getElementById('windowsDeviceServer');
 const windowsMode = document.getElementById('windowsDeviceMode');
 
 
-function windowsSetupAllowed() {
-  const agent = navigator.userAgent || '';
-  const ipadDesktop = /Mac/i.test(navigator.platform || '') && navigator.maxTouchPoints > 1;
-  return /Windows NT/i.test(agent)
-    && !/Android|iPhone|iPad|iPod|Windows Phone/i.test(agent)
-    && !ipadDesktop;
-}
-
-function renderWindowsSetupNotice(allowed) {
-  const translations = {
-    ru: ['Настройте VPN на компьютере Windows',
-         'На компьютере Windows откройте vpn.tolf.is.',
-         'Войдите в этот же аккаунт TOLF. Повторная регистрация не нужна.',
-         'Выберите Windows и нажмите «' + t('windowsAdd') + '».'],
-    en: ['Set up VPN on your Windows computer',
-         'Open vpn.tolf.is on your Windows computer.',
-         'Sign in to this same TOLF account. You do not need to register again.',
-         'Select Windows and choose “' + t('windowsAdd') + '”.'],
-    lv: ['Iestatiet VPN Windows datorā',
-         'Windows datorā atveriet vpn.tolf.is.',
-         'Pierakstieties tajā pašā TOLF kontā. Atkārtota reģistrācija nav nepieciešama.',
-         'Atlasiet Windows un nospiediet “' + t('windowsAdd') + '”.']
-  };
-  const words = translations[currentLanguage] || translations.en;
-  let notice = document.getElementById('windowsSetupNotice');
-  if (!notice) {
-    notice = document.createElement('aside');
-    notice.id = 'windowsSetupNotice';
-    notice.className = 'windows-setup-notice';
-    notice.setAttribute('role', 'note');
-    document.getElementById('windowsStartActions').before(notice);
-  }
-  notice.replaceChildren();
-  const heading = document.createElement('strong');
-  heading.textContent = words[0];
-  const steps = document.createElement('ol');
-  for (const text of words.slice(1)) {
-    const step = document.createElement('li');
-    step.textContent = text;
-    steps.append(step);
-  }
-  notice.append(heading, steps);
-  notice.classList.toggle('hidden', allowed);
-  document.getElementById('windowsAddButton').classList.toggle('hidden', !allowed);
-  document.querySelectorAll('#windowsPanel [data-i18n="windowsDescription"], #windowsPanel [data-i18n="windowsRoutingIntro"]')
-    .forEach(element => element.classList.toggle('hidden', !allowed));
-}
-
 function renderWindowsModes() {
   const previous = windowsMode.value;
   windowsMode.replaceChildren();
@@ -208,9 +160,7 @@ function appendWindowsPassword(body, device) {
 }
 
 function renderWindowsDevices() {
-  const setupAllowed = windowsSetupAllowed();
-  renderWindowsSetupNotice(setupAllowed);
-  if (!setupAllowed) windowsAdding = false;
+  const setupAllowed = true; // Manual preparation is available on any device.
   if (windowsName.validity && windowsName.validity.customError) {
     windowsName.setCustomValidity(t('windowsNameRequired'));
   }
@@ -253,7 +203,6 @@ function renderWindowsDevices() {
     download.disabled = vpnBusy || device.state === 'deleting' || (!setupAllowed && device.state !== 'active');
     download.classList.toggle('hidden', !setupAllowed && device.state !== 'active');
     download.addEventListener('click', () => windowsAction(async epoch => {
-      if (device.state !== 'active' && !windowsSetupAllowed()) return;
       const data = await apiRequest(`/windows/devices/${encodeURIComponent(device.id)}/profile`, {
         method: 'POST', body: JSON.stringify({language: currentLanguage})
       });
@@ -344,7 +293,7 @@ async function windowsAction(action) {
 }
 
 document.getElementById('windowsAddButton').addEventListener('click', () => {
-  if (!windowsSetupAllowed() || vpnBusy || !windowsReady || !lastVpnState) return;
+  if (vpnBusy || !windowsReady || !lastVpnState) return;
   windowsServer.value = 'riga';
   windowsAdding = true;
   renderWindowsDevices();
@@ -368,7 +317,7 @@ windowsName.addEventListener('input', () => windowsName.setCustomValidity(''));
 
 windowsForm.addEventListener('submit', event => {
   event.preventDefault();
-  if (!windowsSetupAllowed() || !windowsAdding || vpnBusy || !windowsReady || !lastVpnState) return;
+  if (!windowsAdding || vpnBusy || !windowsReady || !lastVpnState) return;
   if (!windowsServers.has(windowsServer.value)) return;
   const name = windowsName.value.trim();
   if (!name) {

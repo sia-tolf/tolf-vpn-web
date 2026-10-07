@@ -5,17 +5,24 @@ const API = 'https://api.tolf.is';
 const nativePlatform = /Android/i.test(navigator.userAgent) ? 'android' : /Windows NT/i.test(navigator.userAgent) ? 'windows' : /iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1) ? 'ios' : null;
 const get = (key, fallback) => { try { return sessionStorage.getItem(key) || fallback; } catch { return fallback; } };
 const put = (key, value) => { try { if(value) sessionStorage.setItem(key, value); else sessionStorage.removeItem(key); } catch {} };
+const requestedPlatform=new URL(location.href).searchParams.get('platform');
+const windowsQuickBlocked=requestedPlatform==='windows'&&nativePlatform!=='windows';
 const requestedProtocol=new URL(location.href).searchParams.get('protocol');
 const protocol=requestedProtocol==='anyconnect' || (!requestedProtocol&&get('quickProtocol')==='anyconnect')?'anyconnect':'ikev2';
 let ocGrant=null,ocPoint=null,ocDevice=null,ocConfirmed=false,ocImported=false,accountId=null,ocExpiryTimer=null;
 let lang; try { lang = localStorage.getItem('tolfLanguage'); } catch {}
 if (!QUICK_TEXT[lang]) lang = /^ru/i.test(navigator.language) ? 'ru' : /^lv/i.test(navigator.language) ? 'lv' : 'en';
+for(const [language,text] of Object.entries({
+ ru:'На компьютере Windows откройте vpn.tolf.is, выберите Windows, IKEv2 и «Быстрая настройка». Настройки устанавливаются на этом компьютере.',
+ en:'Open vpn.tolf.is on your Windows computer, select Windows, IKEv2 and “Quick setup”. The settings are installed on that computer.',
+ lv:'Windows datorā atveriet vpn.tolf.is, atlasiet Windows, IKEv2 un “Ātrā iestatīšana”. Iestatījumi tiek instalēti šajā datorā.'
+}))QUICK_TEXT[language].windowsQuickOnly=text;
 const t = key => QUICK_TEXT[lang][key] || key;
 const accountText = {en:['Create account','Sign in','Choose Passkey or username and password. No email address is required.'],ru:['Создать аккаунт','Войти','Выберите Passkey или логин и пароль. Электронная почта не нужна.'],lv:['Izveidot kontu','Pieteikties','Izvēlieties Passkey vai lietotājvārdu un paroli. E-pasts nav nepieciešams.']};
 function accountAuth(mode) { persist(); window.location.assign('/auth/?mode='+mode+'&next=quick&lang='+lang); }
 let busy = false, authenticated = false, ready = false, locked = false, choicesOpened = false, profile = '', messageKey = '', failed = false;
 let server = null;
-let platform = nativePlatform;
+let platform = windowsQuickBlocked?'windows':nativePlatform;
 
 let uncertain = get('quickRegistration') === 'pending';
 let loadNumber = 0;
@@ -87,6 +94,7 @@ async function initialize() {
  const number=++loadNumber;
  busy=true; panels(''); message('loading');
  try {
+  if(windowsQuickBlocked&&protocol==='ikev2'){ready=false;message('windowsQuickOnly');return;}
   const capabilities=await api('/quick-setup/capabilities');
   if(capabilities.version!==1) throw new Error('Unavailable');
   if(!nativePlatform){ready=false;message('unsupportedDevice',true);return;}
@@ -112,7 +120,7 @@ $('retry').onclick=()=>initialize();
 $('register').onclick=()=>accountAuth('signup');
 $('login').onclick=()=>accountAuth('signin');
 async function prepare() {
- if(!authenticated||!ready||!nativePlatform)return;
+ if(!authenticated||!ready||!nativePlatform||(windowsQuickBlocked&&protocol==='ikev2'))return;
  locked=true;$('choices').hidden=true; message('busy');
  if(protocol==='anyconnect'){await prepareOc();return;}
  const data=await api('/quick-setup/prepare',{method:'POST',body:JSON.stringify({platform:nativePlatform,server,language:lang,currentDevice:true})});
