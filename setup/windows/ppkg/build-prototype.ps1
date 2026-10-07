@@ -7,22 +7,24 @@ try {
     $icd = Get-ChildItem $root -Recurse -Filter ICD.exe | Select-Object -First 1
     if (-not $icd) { throw 'Microsoft ICD.exe not found' }
     "Compiler: $($icd.VersionInfo.FileVersion)" | Set-Content $report
-    $stores = @(Get-ChildItem $root -Recurse -Filter '*.dat')
-    foreach ($store in $stores) {
+    $toolDirectory = Join-Path $env:RUNNER_TEMP 'tolf-icd'
+    Copy-Item $icd.Directory.FullName $toolDirectory -Recurse -Force
+    $icd = Get-Item (Join-Path $toolDirectory 'ICD.exe')
+    $stores = @(Get-ChildItem $toolDirectory -Filter '*.dat')
+    foreach ($store in $stores | Where-Object { $_.Name -match 'Common|Desktop' }) {
         "Store: $($store.Name)" | Add-Content $report
+        $hive = 'HKLM\TolfPpkgCompilerStore'
+        & reg.exe load $hive $store.FullName | Add-Content $report
+        if ($LASTEXITCODE -ne 0) { throw 'Cannot inspect compiler settings store' }
         try {
-            [xml]$schema = Get-Content $store.FullName -Raw
-            foreach ($node in $schema.SelectNodes('//*')) {
-                if ($node.Attributes -and (($node.Attributes | ForEach-Object { $_.Value }) -join ' ') -match 'VPN|CryptographySuite|EapUserData|UserContext') {
-                    $ancestors = @(); $parent = $node
-                    while ($parent -and $parent.NodeType -eq 'Element') {
-                        $ancestors = @("$($parent.Name)[$(($parent.Attributes | ForEach-Object { "$($_.Name)=$($_.Value)" }) -join ',')]") + $ancestors
-                        $parent = $parent.ParentNode
-                    }
-                    ($ancestors -join '/') | Add-Content $report
-                }
+            foreach ($term in @('VPN', 'CryptographySuite', 'ProfileXML', 'ProvisioningCommands', 'UserContext')) {
+                "Schema search: $term" | Add-Content $report
+                & reg.exe query $hive /s /f $term 2>&1 | Add-Content $report
             }
-        } catch { "Schema read: $($_.Exception.Message.Substring(0,[Math]::Min(300,$_.Exception.Message.Length)))" | Add-Content $report }
+        } finally {
+            & reg.exe unload $hive | Add-Content $report
+            if ($LASTEXITCODE -ne 0) { throw 'Cannot release compiler settings store' }
+        }
     }
     & python "$PSScriptRoot/customization.py" --output "$destination/customizations.xml"
     if ($LASTEXITCODE -ne 0) { throw 'Customization generation failed' }
