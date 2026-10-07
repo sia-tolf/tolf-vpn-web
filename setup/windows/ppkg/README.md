@@ -1,37 +1,69 @@
-# Windows IKEv2 PPKG — prototype, 7 October 2026
+# Windows IKEv2 PPKG — compiler prototype, 7 October 2026
 
-Manual Windows setup must allow preparation from iPad and other platforms.
-Quick Windows setup runs only on the current Windows computer. Neither the
-manual device API nor the manual form may reject iOS User-Agent headers.
+Manual Windows setup can be prepared from iPad and other platforms.
+Quick Windows setup runs only on the current Windows computer.
 
-`profile.py` generates native VPNv2 ProfileXML for EAP-MSCHAPv2 with the
-existing AES256/SHA256/Group14 parameters. Routing mode remains assigned to
-the separate Windows identity on the VPN server; it is not an arbitrary
-Local ID setting on Windows.
+## Verified result
 
-This is a source payload, not a PPKG. Do not rename XML or ZIP to .ppkg.
-No working compiler is available on the current Linux control servers.
-No PPKG download button is enabled before a real Windows-built package
-passes installation and connection checks.
+Windows Configuration Designer 10.0.26100.9457 compiled a genuine WIM-based
+PPKG on the GitHub Windows Server 2022 build runner. The successful build:
+https://github.com/sia-tolf/tolf-vpn-web/actions/runs/37656724709
 
-Remaining work:
-1. Export and verify the applicable WCD customization schema on Windows,
-   including the user scope of the native VPNv2 profile.
-2. Compile the payload with Windows Configuration Designer (icd.exe).
-3. Verify installed profile, EAP, crypto, routing and connection on Windows
-   10/11 Pro. Home support is not established by VPNv2 documentation.
-4. Verify credential delivery separately: ProfileXML authentication
-   configuration is not RAS username/password storage. The prototype does
-   not inject credentials and must not claim password-free initial setup.
-5. Connect a Windows build worker to the UK control plane with per-device
-   package identity, expiry and revoke checks. Keep control on UK.
-6. Only then enable a .ppkg response and native iOS file sharing / Windows
-   file saving. File sharing must be initiated by a user gesture and reuse
-   a prepared File object so Web Share activation is not lost during fetch.
+Compiler prototype and diagnostics:
+https://github.com/sia-tolf/tolf-vpn-web/releases/tag/windows-ppkg-b743b23c23966b762473a034f39b2012e9fb6b8e
 
-Existing EXE delivery remains operational until PPKG passes these checks.
+The sample contains no production device identity, password, or activation
+token. Compilation alone is not successful client installation or connection.
+Do not expose this sample as a working TOLF profile on the VPN website.
 
-Primary references:
-- https://learn.microsoft.com/en-us/windows/client-management/mdm/vpnv2-csp
+## Source files
+
+- `profile.py`: full VPNv2 ProfileXML source with AES256/SHA256/Group14.
+  This is not a compiled PPKG and is not what the prototype compiler embeds.
+- `customization.py`: minimal WCD-native VPN test customization.
+  WCD requires separate PackageConfig and Settings XML namespaces and
+  ConnectivityProfiles/VPN/VPNSetting/VPNConfig[@VPNProfileName]/VPNSettings.
+- `build-prototype.ps1`: installs no components on an end-user computer.
+  Runs on the build machine, inspects temporary copies of WCD settings
+  stores, and invokes ICD using paths without spaces.
+- `.github/workflows/windows-ppkg.yml`: compiler prototype pipeline.
+  All published artifacts contain only synthetic test settings.
+
+## Limitations established by the compiler
+
+The shipped Common and Desktop settings stores expose native IKEv2, EAP
+configuration, server, routing and credential caching. They do not expose
+VPNv2 CryptographySuite or VPN ProfileXML in their VPN setting group.
+The generated basic package therefore does NOT include TOLF's required
+custom cryptographic policy.
+
+EAP configuration and RememberCredentials do not store the user's RAS
+username/password. Never insert a username/password into EapHostConfig
+and assume that credentials are installed.
+
+A complete portable package needs a separately verified method to apply
+the custom crypto and credentials: for example, a small statically linked
+native Win32 provisioning helper executed from the PPKG. This does not
+require installing .NET or a separate runtime, but it is executable setup
+code inside the package. Its execution identity and per-user credential
+scope must be tested before choosing the final implementation.
+
+## Delivery work still required
+
+1. Implement and verify full crypto and credential provisioning.
+2. Verify installation and VPN connection on actual Windows 10/11 clients.
+   The GitHub compiler runs Windows Server, not Windows 10/11. Home support
+   is not established by VPNv2 documentation.
+3. Keep per-device issuance, expiry, revocation and all control on UK.
+   Do not send real user credentials to public GitHub workflows/releases.
+4. Enable .ppkg download and iOS native file sharing only after the package
+   works. Reuse a prepared File object in a user-initiated sharing action.
+
+## Primary references
+
 - https://learn.microsoft.com/en-us/windows/configuration/provisioning-packages/provisioning-command-line
-- https://learn.microsoft.com/en-us/windows/configuration/provisioning-packages/provisioning-apply-package
+- https://learn.microsoft.com/en-us/windows/configuration/provisioning-packages/provisioning-multivariant
+- https://learn.microsoft.com/en-us/windows/configuration/wcd/wcd-connectivityprofiles
+- https://learn.microsoft.com/en-us/windows/configuration/provisioning-packages/provision-pcs-with-apps
+- https://learn.microsoft.com/en-us/windows/win32/api/ras/nf-ras-rassetcredentialsw
+- https://learn.microsoft.com/en-us/windows/client-management/mdm/vpnv2-csp
