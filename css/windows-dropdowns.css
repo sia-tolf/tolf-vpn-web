@@ -1,0 +1,8 @@
+.windows-dropdown-field{margin:0 0 12px;min-width:0}
+.windows-dropdown-field .vpn-dropdown{font-size:16px;font-weight:400}
+.windows-dropdown-field .vpn-dropdown-button{height:auto;min-height:50px;padding:12px;align-items:center}
+.windows-dropdown-field .vpn-dropdown-value{display:block;white-space:normal;overflow-wrap:anywhere}
+.windows-dropdown-field .vpn-dropdown-option{grid-template-columns:22px minmax(0,1fr);padding:10px 12px;font-weight:400;white-space:normal}
+.windows-dropdown-field .vpn-dropdown-option-label{grid-column:2;min-width:0;overflow-wrap:anywhere}
+.windows-dropdown-field .vpn-dropdown-menu{max-height:min(380px,55vh);overflow-y:auto}
+.windows-create-form select[hidden]{display:none!important}

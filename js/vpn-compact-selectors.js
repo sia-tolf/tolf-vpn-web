@@ -50,6 +50,9 @@
     return {field,label,render,close};
   }
 
+  // Expose the existing dropdown renderer for Windows manual fields.
+  window.makeVpnDropdown=makeDropdown;
+
   const protocolDD=makeDropdown("vpnProtocolDropdown",tr().protocol,[],value=>{
     (value==="anyconnect"?any:ike).click(); setTimeout(sync,0);
   });

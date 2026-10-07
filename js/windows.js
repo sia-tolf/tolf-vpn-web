@@ -43,6 +43,7 @@ function renderWindowsModes() {
   }
   if ((windowsRoutingModes[windowsServer.value] || []).includes(previous)) windowsMode.value = previous;
   windowsMode.disabled = vpnBusy;
+  window.syncWindowsDropdowns?.();
 }
 
 
@@ -250,6 +251,7 @@ function renderWindowsDevices() {
   moscowOption.textContent = t(windowsServers.has('moscow') ? 'windowsServerMoscow' : 'windowsServerMoscowUnavailable');
   document.getElementById('windowsServerHelp').textContent = t(windowsServers.has('moscow') ? 'windowsServerHelpReady' : 'windowsServerHelp');
   document.getElementById("windowsBackButton").disabled = vpnBusy;
+  window.syncWindowsDropdowns?.();
 }
 
 async function loadWindowsDevices() {
@@ -361,3 +363,4 @@ windowsForm.addEventListener('submit', event => {
     if (currentPlatform === 'windows') setPlatform('ios');
   }
 })();
+

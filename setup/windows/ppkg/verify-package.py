@@ -38,13 +38,15 @@ def verify(root):
             raise ValueError("Executable payload found: " + path.name)
     settings = runtime_settings(root)
     profiles = {key[:2] for key in settings if len(key) >= 2 and key[0] == "VPNv2"}
-    if len(profiles) != 1 or any(key[0] != "VPNv2" for key in settings):
+    machine = any(key[-1] == "MachineMethod" and value == "Certificate" for key, value in settings.items())
+    providers = {"VPNv2", "ClientCertificateInstall", "RootCATrustedCertificates", "CertificateStore"} if machine else {"VPNv2"}
+    if len(profiles) != 1 or any(key[0] not in providers for key in settings):
         raise ValueError("Expected exactly one native VPN profile and no other runtime providers")
     prefix = next(iter(profiles))
     expected = {("NativeProfile", "CryptographySuite", k): v for k, v in CRYPTO.items()}
     expected.update({
         ("NativeProfile", "NativeProtocolType"): "Ikev2",
-        ("NativeProfile", "Authentication", "UserMethod"): "Eap",
+        ("NativeProfile", "Authentication", "MachineMethod" if machine else "UserMethod"): "Certificate" if machine else "Eap",
         ("NativeProfile", "RoutingPolicyType"): "ForceTunnel",
         ("AlwaysOn",): "false",
         ("RememberCredentials",): "true",
@@ -54,6 +56,14 @@ def verify(root):
             raise ValueError("Wrong or missing runtime setting: " + "/".join(suffix))
     if settings.get(prefix + ("NativeProfile", "Servers")) not in {"ikev2-riga.tolf.is", "ikev2.tolf.is"}:
         raise ValueError("Unexpected VPN server")
+    if machine:
+        if any("UserMethod" in key or "EAP" in key for key in settings):
+            raise ValueError("Password authentication found in certificate package")
+        blob = [value for key, value in settings.items() if key[-1] == "PFXCertBlob"]
+        if len(blob) != 1:
+            raise ValueError("Expected exactly one client PFX")
+        print("PASS: native machine certificate, IKEv2, AES256/SHA256/Group14; no EXE or scripts")
+        return
     eap = settings.get(prefix + ("NativeProfile", "Authentication", "EAP", "Configuration"))
     if not eap:
         raise ValueError("Missing runtime EAP configuration")
@@ -70,3 +80,4 @@ def verify(root):
 
 if __name__ == "__main__":
     verify(Path(sys.argv[1]))
+
