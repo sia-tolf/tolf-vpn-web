@@ -39,7 +39,7 @@ def customization(certificate=None, root_certificate=None, password=None):
         certificates = ET.SubElement(common, "Certificates")
         clients = ET.SubElement(certificates, "ClientCertificates")
         client = ET.SubElement(clients, "ClientCertificate", {"CertificateName": "TOLF Windows Test"})
-        for key, value in [("CertificatePath", str(certificate)), ("CertificatePassword", password), ("ExportCertificate", "false"), ("KeyLocation", "SoftwareOnly")]:
+        for key, value in [("CertificatePath", str(certificate)), ("CertificatePassword", password), ("ExportCertificate", "false"), ("KeyLocation", "3")]:
             text(client, key, value)
         roots = ET.SubElement(certificates, "RootCertificates")
         ca = ET.SubElement(roots, "RootCertificate", {"CertificateName": "TOLF Windows Test CA"})
