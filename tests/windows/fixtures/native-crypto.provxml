@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<wap-provisioningdoc>
+  <characteristic type="VPNv2">
+    <characteristic type="TOLF PPKG Test">
+      <parm name="AlwaysOn" value="false" datatype="boolean" />
+      <characteristic type="NativeProfile">
+        <characteristic type="CryptographySuite">
+          <parm name="AuthenticationTransformConstants" value="SHA256128" datatype="string" />
+        </characteristic>
+        <characteristic type="Authentication">
+          <parm name="UserMethod" value="Eap" datatype="string" />
+        </characteristic>
+        <characteristic type="CryptographySuite">
+          <parm name="CipherTransformConstants" value="AES256" datatype="string" />
+          <parm name="DHGroup" value="Group14" datatype="string" />
+        </characteristic>
+        <characteristic type="Authentication">
+          <characteristic type="EAP">
+            <parm name="Configuration" value="&lt;ns0:EapHostConfig xmlns:ns0=&quot;http://www.microsoft.com/provisioning/EapHostConfig&quot; xmlns:ns1=&quot;http://www.microsoft.com/provisioning/EapCommon&quot; xmlns:ns2=&quot;http://www.microsoft.com/provisioning/BaseEapConnectionPropertiesV1&quot; xmlns:ns3=&quot;http://www.microsoft.com/provisioning/MsChapV2ConnectionPropertiesV1&quot;&gt;&lt;ns0:EapMethod&gt;&lt;ns1:Type&gt;26&lt;/ns1:Type&gt;&lt;ns1:VendorId&gt;0&lt;/ns1:VendorId&gt;&lt;ns1:VendorType&gt;0&lt;/ns1:VendorType&gt;&lt;ns1:AuthorId&gt;0&lt;/ns1:AuthorId&gt;&lt;/ns0:EapMethod&gt;&lt;ns0:Config&gt;&lt;ns2:Eap&gt;&lt;ns2:Type&gt;26&lt;/ns2:Type&gt;&lt;ns3:EapType&gt;&lt;ns3:UseWinLogonCredentials&gt;false&lt;/ns3:UseWinLogonCredentials&gt;&lt;/ns3:EapType&gt;&lt;/ns2:Eap&gt;&lt;/ns0:Config&gt;&lt;/ns0:EapHostConfig&gt;" datatype="string" />
+          </characteristic>
+        </characteristic>
+        <characteristic type="CryptographySuite">
+          <parm name="EncryptionMethod" value="AES256" datatype="string" />
+          <parm name="IntegrityCheckMethod" value="SHA256" datatype="string" />
+        </characteristic>
+        <parm name="NativeProtocolType" value="Ikev2" datatype="string" />
+        <characteristic type="CryptographySuite">
+          <parm name="PfsGroup" value="None" datatype="string" />
+        </characteristic>
+      </characteristic>
+      <parm name="RememberCredentials" value="true" datatype="boolean" />
+      <characteristic type="NativeProfile">
+        <parm name="RoutingPolicyType" value="ForceTunnel" datatype="string" />
+        <parm name="Servers" value="ikev2-riga.tolf.is" datatype="string" />
+      </characteristic>
+    </characteristic>
+  </characteristic>
+</wap-provisioningdoc>

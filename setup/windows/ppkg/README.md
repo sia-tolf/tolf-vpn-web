@@ -1,69 +1,70 @@
-# Windows IKEv2 PPKG — compiler prototype, 7 October 2026
+# Windows IKEv2 PPKG without EXE — 7 October 2026
 
-Manual Windows setup can be prepared from iPad and other platforms.
-Quick Windows setup runs only on the current Windows computer.
+## Verified build
 
-## Verified result
+Windows Configuration Designer 10.0.26100.9457 compiles a genuine PPKG with
+native IKEv2, EAP-MSCHAPv2, AES256/SHA256/Group14, PFS None, ForceTunnel,
+and credential caching. The package contains no EXE, DLL, script, or command
+payload. DISM extraction and independent Linux wimlib extraction verified
+the actual runtime provxml, not only the customization source.
 
-Windows Configuration Designer 10.0.26100.9457 compiled a genuine WIM-based
-PPKG on the GitHub Windows Server 2022 build runner. The successful build:
-https://github.com/sia-tolf/tolf-vpn-web/actions/runs/37656724709
+Successful build and full payload verification:
+https://github.com/sia-tolf/tolf-vpn-web/actions/runs/37659096949
 
-Compiler prototype and diagnostics:
-https://github.com/sia-tolf/tolf-vpn-web/releases/tag/windows-ppkg-b743b23c23966b762473a034f39b2012e9fb6b8e
+Test package:
+https://github.com/sia-tolf/tolf-vpn-web/releases/tag/windows-ppkg-33efcf4f690126a58e23f6aac02a1c4b536b7b46
 
-The sample contains no production device identity, password, or activation
-token. Compilation alone is not successful client installation or connection.
-Do not expose this sample as a working TOLF profile on the VPN website.
+This sample creates a profile named TOLF PPKG Test pointing to Riga. It
+contains no production identity, username, password or activation token.
+Windows 10/11 installation and VPN connection are NOT yet tested. The
+compiler runs on Windows Server 2022, which is not a Windows 10/11 client.
 
-## Source files
+## Compiler schema extension
 
-- `profile.py`: full VPNv2 ProfileXML source with AES256/SHA256/Group14.
-  This is not a compiled PPKG and is not what the prototype compiler embeds.
-- `customization.py`: minimal WCD-native VPN test customization.
-  WCD requires separate PackageConfig and Settings XML namespaces and
-  ConnectivityProfiles/VPN/VPNSetting/VPNConfig[@VPNProfileName]/VPNSettings.
-- `build-prototype.ps1`: installs no components on an end-user computer.
-  Runs on the build machine, inspects temporary copies of WCD settings
-  stores, and invokes ICD using paths without spaces.
-- `.github/workflows/windows-ppkg.yml`: compiler prototype pipeline.
-  All published artifacts contain only synthetic test settings.
+The default WCD VPN schema omits CryptographySuite. This is a compiler
+schema limitation, not evidence that native Windows provisioning cannot
+apply the settings. On the build machine only, the build copies the Desktop
+settings store, adds six string settings mapped to documented VPNv2 native
+CryptographySuite CSP paths, and compiles against the extended store.
 
-## Limitations established by the compiler
+The earlier proposal that an EXE was required for crypto was premature.
+No embedded executable implementation is used or planned in this workflow.
+The extended schema itself is not installed on the user's Windows device.
 
-The shipped Common and Desktop settings stores expose native IKEv2, EAP
-configuration, server, routing and credential caching. They do not expose
-VPNv2 CryptographySuite or VPN ProfileXML in their VPN setting group.
-The generated basic package therefore does NOT include TOLF's required
-custom cryptographic policy.
+## Credentials remain separate
 
-EAP configuration and RememberCredentials do not store the user's RAS
-username/password. Never insert a username/password into EapHostConfig
-and assume that credentials are installed.
+RememberCredentials means caching credentials after they have been
+provided; it does not inject a username/password. Automatic credential
+delivery in a settings-only PPKG remains unverified and unimplemented.
+Do not claim complete unattended VPN setup. In this prototype the user
+would supply valid VPN credentials separately when first connecting.
 
-A complete portable package needs a separately verified method to apply
-the custom crypto and credentials: for example, a small statically linked
-native Win32 provisioning helper executed from the PPKG. This does not
-require installing .NET or a separate runtime, but it is executable setup
-code inside the package. Its execution identity and per-user credential
-scope must be tested before choosing the final implementation.
+## Files
 
-## Delivery work still required
+- profile.py: native ProfileXML source.
+- customization.py: WCD namespaces, collection structure and crypto settings.
+- build-prototype.ps1: build-only compiler schema extension, ICD compilation,
+  DISM extraction and payload validation.
+- verify-package.py: validates exact runtime provider paths and values,
+  EAP type, server and absence of executable/command payload.
+- tests/windows/fixtures/native-crypto.provxml: actual compiled sample.
+- .github/workflows/windows-ppkg.yml: synthetic build only; no real credentials.
 
-1. Implement and verify full crypto and credential provisioning.
-2. Verify installation and VPN connection on actual Windows 10/11 clients.
-   The GitHub compiler runs Windows Server, not Windows 10/11. Home support
-   is not established by VPNv2 documentation.
-3. Keep per-device issuance, expiry, revocation and all control on UK.
-   Do not send real user credentials to public GitHub workflows/releases.
-4. Enable .ppkg download and iOS native file sharing only after the package
-   works. Reuse a prepared File object in a user-initiated sharing action.
+## Remaining delivery work
+
+1. Test actual Windows 10/11 installation, crypto, credential prompt and VPN
+   connection. Home edition support is not established by VPNv2 docs.
+2. Implement per-device package creation on the UK control plane; preserve
+   separate Windows identities, expiry and revocation checks.
+3. Resolve credential delivery without introducing an embedded EXE or script.
+4. Enable website download and native iOS sharing after client validation.
+   Reuse a prepared File object from a user-initiated sharing action.
+
+Manual Windows preparation is available from iPad/any platform. Quick
+Windows setup is restricted to the Windows computer where the site is open.
 
 ## Primary references
 
 - https://learn.microsoft.com/en-us/windows/configuration/provisioning-packages/provisioning-command-line
 - https://learn.microsoft.com/en-us/windows/configuration/provisioning-packages/provisioning-multivariant
-- https://learn.microsoft.com/en-us/windows/configuration/wcd/wcd-connectivityprofiles
-- https://learn.microsoft.com/en-us/windows/configuration/provisioning-packages/provision-pcs-with-apps
-- https://learn.microsoft.com/en-us/windows/win32/api/ras/nf-ras-rassetcredentialsw
 - https://learn.microsoft.com/en-us/windows/client-management/mdm/vpnv2-csp
