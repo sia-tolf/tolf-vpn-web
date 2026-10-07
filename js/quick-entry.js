@@ -5,13 +5,14 @@
  function openManual(){
   document.body.classList.add('manual-setup-open');
   manualLink.setAttribute('aria-expanded','true');
+  noticeOpen=false;
+  renderNotice();
  }
  manualLink.setAttribute('aria-controls','vpnCard');
  manualLink.setAttribute('aria-expanded','false');
  manualLink.addEventListener('click',openManual);
  function handleHash(){if(location.hash==='#vpnCard'||location.hash==='#signedOutCard')openManual();}
  window.addEventListener('hashchange',handleHash);
- handleHash();
  const quickLink=document.getElementById('quickSetupLink');
  const notice=document.createElement('aside');
  notice.className='windows-setup-notice hidden';
@@ -37,6 +38,7 @@
   for(const word of words.slice(1)){const li=document.createElement('li');li.textContent=word;steps.append(li);}
   notice.replaceChildren(title,steps);
  }
+ handleHash();
  quickLink.addEventListener('click',event=>{
   const transport=window.getVpnTransport?.()||'ikev2';
   if(currentPlatform==='windows'&&transport==='ikev2'&&!nativeWindows()){
