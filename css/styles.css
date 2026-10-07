@@ -2062,3 +2062,21 @@ html[data-tolf-ui="vpn"] body:not(.manual-setup-open) .header-switchers{display:
 #myVpnProtocolField .vpn-protocol-field{margin:20px 0 12px}
 .vpn-protocol-explanation p{margin:8px 0;color:var(--secondary);font-size:14px;line-height:1.5}
 .vpn-setup-actions > .hidden{display:none!important}
+
+/* Platform choice belongs to both setup modes in My VPN. */
+#myVpnPlatforms { width:100%; margin:20px 0 12px; }
+#myVpnPlatforms .platform-switcher {
+ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:4px;
+ width:100%; height:44px; padding:4px;
+ border:1px solid var(--border); border-radius:11px; background:var(--segment-background);
+}
+#myVpnPlatforms .platform-button {
+ display:inline-flex; align-items:center; justify-content:center; gap:6px;
+ width:100%; min-width:0; height:34px; min-height:34px; max-height:34px;
+ padding:0 4px; font-size:14px; font-weight:500; line-height:1.2;
+ border:1px solid transparent; border-radius:7px; color:var(--secondary); background:transparent;
+}
+#myVpnPlatforms .platform-button.active {
+ color:var(--text); background:var(--card); border-color:var(--border); box-shadow:none;
+}
+#myVpnPlatforms .platform-icon { width:16px; height:16px; flex:0 0 16px; fill:currentColor; }
