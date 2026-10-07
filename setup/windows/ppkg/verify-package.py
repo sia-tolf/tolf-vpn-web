@@ -19,12 +19,16 @@ def verify(root):
             raise ValueError("Executable payload found: " + path.name)
     found = set()
     for path in files:
-        if path.suffix.lower() != ".xml":
+        if path.is_file():
+            print("PAYLOAD:", path.relative_to(root), path.stat().st_size)
+    for path in files:
+        if path.suffix.lower() not in {".xml", ".provxml"}:
             continue
         try:
             document = ET.parse(path)
         except ET.ParseError:
             continue
+        print("XML:", path.relative_to(root), ET.tostring(document.getroot(), encoding="unicode")[:24000])
         for node in document.iter():
             # Windows provisioning payload contains characteristic type URIs
             # and parm name/value pairs; SyncML also uses LocURI/Data.
