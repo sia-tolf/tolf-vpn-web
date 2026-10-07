@@ -9,7 +9,7 @@ def customization():
     package = ET.SubElement(root, "PackageConfig", {"xmlns": "urn:schemas-Microsoft-com:Windows-ICD-Package-Config.v1.0"})
     for key, value in [
         ("ID", "{7b6e4279-f08e-4e80-b70c-1ea2d07d1083}"),
-        ("Name", "TOLF PPKG compiler test"), ("Version", "1.0"),
+        ("Name", "TOLF PPKG native crypto test"), ("Version", "1.1"),
         ("OwnerType", "ITAdmin"), ("Rank", "0"),
     ]:
         text(package, key, value)
@@ -29,6 +29,8 @@ def customization():
         ("Server", "ikev2-riga.tolf.is"),
     ]:
         text(settings, key, value)
+    for setting in source.find("NativeProfile/CryptographySuite"):
+        text(settings, setting.tag, setting.text)
     return ET.tostring(root, encoding="utf-8", xml_declaration=True)
 
 if __name__ == "__main__":
