@@ -50,7 +50,7 @@ function Read-Policy([string]$name) {
     foreach ($key in $expected.Keys) { $actual[$key] = [string]$vpn.IPsecCustomPolicy.$key }
     $matches = $true
     foreach ($key in $expected.Keys) { if ($actual[$key] -ne $expected[$key]) { $matches = $false } }
-    return [ordered]@{Name=$name;Actual=$actual;Matches=$matches;Authentication=[string]$vpn.AuthenticationMethod}
+    return [ordered]@{Name=$name;Actual=$actual;Matches=$matches;Authentication=[string]$vpn.AuthenticationMethod; SplitTunneling=[bool]$vpn.SplitTunneling; Routes=@($vpn.Routes | ForEach-Object { [string]$_.DestinationPrefix })}
 }
 $namespace = 'root\cimv2\mdm\dmmap'
 $started = Get-Date
@@ -111,8 +111,23 @@ try {
     [xml]$realHost = $minimalCrypto.OuterXml
     $realHost.SelectSingleNode('/VPNProfile/NativeProfile/Servers').InnerText = $fullDocument.SelectSingleNode('/VPNProfile/NativeProfile/Servers').InnerText
     $cases += @{Key='MinimalCryptoRealHost'; Name='TOLF-CI-REALHOST'; Xml=$realHost.OuterXml; Encoded=$true}
+    [xml]$lateDisable = $xml
+    $node = $lateDisable.SelectSingleNode('//DisableClassBasedDefaultRoute')
+    $null = $node.ParentNode.RemoveChild($node)
+    $null = $lateDisable.VPNProfile.NativeProfile.AppendChild($node)
+    $cases += @{Key='LateDisable'; Name='TOLF-CI-LATE-DISABLE'; Xml=$lateDisable.OuterXml; Encoded=$true}
+    [xml]$splitDefaults = $xml
+    $splitDefaults.SelectSingleNode('//RoutingPolicyType').InnerText = 'SplitTunnel'
+    foreach ($address in @('0.0.0.0','128.0.0.0')) {
+        $route = $splitDefaults.CreateElement('Route')
+        foreach ($pair in @(@('Address',$address),@('PrefixSize','1'),@('Metric','1'))) {
+            $child = $splitDefaults.CreateElement($pair[0]); $child.InnerText=$pair[1]; $null=$route.AppendChild($child)
+        }
+        $null=$splitDefaults.VPNProfile.AppendChild($route)
+    }
+    $cases += @{Key='SplitDefaultRoutes'; Name='TOLF-CI-SPLIT-DEFAULTS'; Xml=$splitDefaults.OuterXml; Encoded=$true}
     if ($env:TOLF_CI_SWEEP -ne 'true') {
-        $cases = @($cases | Where-Object { $_.Key -in @('CSP','CSPMinimal','MinimalCrypto','MinimalCryptoRealHost','Options15','Options12','Options3') })
+        $cases = @($cases | Where-Object { $_.Key -in @('CSP','CSPMinimal','MinimalCrypto','MinimalCryptoRealHost','Options15','Options12','Options3','Options4','Options8','LateDisable','SplitDefaultRoutes') })
     }
     foreach ($case in $cases) {
         ('START ' + $case.Key + ' ' + (Get-Date).ToString('o')) | Add-Content (Join-Path $OutputDirectory 'progress.txt')

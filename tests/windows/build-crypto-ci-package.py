@@ -43,7 +43,7 @@ def build(destination, wimlib="wimlib-imagex"):
             raise ValueError("CI runtime must contain only ProfileXML")
         (destination / "ProfileXML.xml").write_text(value, encoding="utf-8")
         # The native outer XML escapes the ProfileXML value once.
-        runtime.write_bytes(b'<?xml version="1.0" encoding="utf-8"?>\r\n' + ET.tostring(outer.getroot(), encoding="utf-8"))
+        runtime.write_bytes(b'\xef\xbb\xbf<?xml version="1.0" encoding="utf-8"?>\r\n' + ET.tostring(outer.getroot(), encoding="utf-8"))
         relative = "/" + runtime.relative_to(payload).as_posix()
         command = 'add "' + str(runtime) + '" "' + relative + '"\n'
         subprocess.run([wimlib, "update", str(package), "1"], input=command, text=True, check=True, capture_output=True)
@@ -76,17 +76,19 @@ def build(destination, wimlib="wimlib-imagex"):
             target = outer.getroot().find("characteristic/characteristic")
             target.set("type", profile_name)
             target.find("parm").set("value", minimal_value if level == 1 else html.escape(minimal_value, quote=False))
-            runtime.write_bytes(b'<?xml version="1.0" encoding="utf-8"?>\r\n' + ET.tostring(outer.getroot(), encoding="utf-8"))
+            runtime.write_bytes(b'\xef\xbb\xbf<?xml version="1.0" encoding="utf-8"?>\r\n' + ET.tostring(outer.getroot(), encoding="utf-8"))
             index_path = payload / "Multivariant/0/Prov/RunTime.xml"
             index = ET.parse(index_path)
             next(iter(index.getroot())).set("SettingsGroup", identity)
             index.write(index_path, encoding="utf-8", xml_declaration=True)
+            index_path.write_bytes(b"\xef\xbb\xbf" + index_path.read_bytes())
             config_path = payload / "Multivariant/0/customizations.xml"
             config = ET.parse(config_path)
             ns = "{urn:schemas-Microsoft-com:Windows-ICD-Package-Config.v1.0}"
             config.find(".//" + ns + "ID").text = "{" + identity + "}"
             config.find(".//" + ns + "Name").text = profile_name
             config.write(config_path, encoding="utf-8", xml_declaration=True)
+            config_path.write_bytes(b"\xef\xbb\xbf" + config_path.read_bytes())
             commands = "".join('add "' + str(item) + '" "/' + item.relative_to(payload).as_posix() + '"\n' for item in (runtime,index_path,config_path))
             subprocess.run([wimlib, "update", str(variant), "1"], input=commands, text=True, check=True, capture_output=True)
             subprocess.run([wimlib, "info", str(variant), "1", "--image-property=PACKAGEID={" + identity + "}", "--image-property=NAME=" + profile_name], check=True, capture_output=True)
