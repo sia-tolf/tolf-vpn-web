@@ -296,5 +296,37 @@ Set-VpnConnectionIPsecConfiguration step. This demonstrates that explicit
 PfsGroup=None interrupted later crypto application on this tested Windows 10.
 The generator now omits that field while retaining the validated template
 restriction PfsGroup=None. Machine certificate authentication and two /1 IPv4
-routes are unchanged. Connection and routing acceptance for this preview remain
-pending; readback alone does not prove end-to-end connectivity.
+routes are unchanged. The user subsequently confirmed successful connection and working traffic
+with the NoPFS preview after isolating its existing certificate. No login or
+password was added. This is end-to-end acceptance on this Windows 10 machine,
+not acceptance of multiple certificates or a universal Windows package.
+
+
+## Certificate selection follow-up and Windows 11 regression — 2026-10-08
+
+During the NoPFS connection attempt, Moscow logged the obsolete device
+3766f7b0-7e99-530b-8149-83e730ae6760 certificate instead of the active
+05b06800-7ffe-5636-850a-569604c4d7e7 certificate. The user confirmed both
+certificates were in LocalMachine/My with private keys. Moving the obsolete
+certificate to the existing archive left only the active certificate in My;
+the next attempt connected. The cause of the obsolete certificate returning
+is not established. Inventory retained provisioning packages before proposing
+removal; preserve the working profile, package and certificate. Do not treat
+profile deletion as proof that its provisioning package has been removed.
+
+Windows 11 ARM run 37756192604 for commit 87bbed7 failed. The native Add/Set
+baseline matched all six crypto values, but the generated full ProfileXML CSP
+case failed and the full PPKG profile was absent on readback. Provisioning
+reported 0x800705B9 at VPNv2/TOLF-CI-PPKG. Therefore omitting PfsGroup is
+confirmed on the user's Windows 10 only; this generator must not be deployed
+as a universal Windows 10/11 solution. Preserve the failing check and investigate
+OS-specific validation rather than weakening the success criteria.
+
+Run: https://github.com/sia-tolf/tolf-vpn-web/actions/runs/37756192604
+
+MachineCertificateEKUFilter is a VpnClient cmdlet option. VPNv2's native
+Certificate/Eku and Issuer nodes are documented as reserved for future use;
+no supported pure-ProfileXML per-device filter has been demonstrated. Do not
+issue new device certificates or change the working authentication based only
+on the existence of these nodes. Certificate-only authentication remains the
+requirement.
