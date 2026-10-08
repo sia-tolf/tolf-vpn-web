@@ -112,7 +112,7 @@ try {
     $realHost.SelectSingleNode('/VPNProfile/NativeProfile/Servers').InnerText = $fullDocument.SelectSingleNode('/VPNProfile/NativeProfile/Servers').InnerText
     $cases += @{Key='MinimalCryptoRealHost'; Name='TOLF-CI-REALHOST'; Xml=$realHost.OuterXml; Encoded=$true}
     if ($env:TOLF_CI_SWEEP -ne 'true') {
-        $cases = @($cases | Where-Object { $_.Key -in @('CSP','CSPMinimal','MinimalCrypto') })
+        $cases = @($cases | Where-Object { $_.Key -in @('CSP','CSPMinimal','MinimalCrypto','MinimalCryptoRealHost','Options15','Options12','Options3') })
     }
     foreach ($case in $cases) {
         ('START ' + $case.Key + ' ' + (Get-Date).ToString('o')) | Add-Content (Join-Path $OutputDirectory 'progress.txt')
@@ -168,7 +168,7 @@ try {
         foreach ($etl in Get-ChildItem $expanded -Filter '*.etl' -Recurse) {
             Get-WinEvent -Path $etl.FullName -Oldest -ErrorAction SilentlyContinue |
                 Where-Object { $_.Level -le 3 -or $_.Message -match 'TOLF|VPNv2|ProfileXML|error|failed' } |
-                Select-Object -First 40 TimeCreated,Id,LevelDisplayName,Message |
+                Select-Object -First 40 TimeCreated,Id,LevelDisplayName,Message,@{n='Values';e={@($_.Properties | ForEach-Object { [string]$_.Value })}},@{n='EventXML';e={$_.ToXml()}} |
                 Format-List | Out-File (Join-Path $OutputDirectory ($archive.BaseName + '-' + $etl.BaseName + '.txt'))
         }
     }
