@@ -120,7 +120,6 @@ try {
             $class = Get-CimClass -Namespace $namespace -ClassName 'MDM_VPNv2_01'
             $report.CspClass = $class.CimClassName
             $inputXml = $case.Xml
-            $report.Results[$case.Key] = @{InputXML=$case.Xml}
             if ($case.Encoded) { $inputXml = [System.Security.SecurityElement]::Escape($inputXml) }
             $created = New-CimInstance -Namespace $namespace -ClassName 'MDM_VPNv2_01' -Property @{
                 ParentID='./Vendor/MSFT/VPNv2'; InstanceID=$case.Name; ProfileXML=$inputXml
@@ -128,16 +127,19 @@ try {
             $report.Results[$case.Key] = Read-Policy $case.Name
             $report.Results[$case.Key].ProfileXML = $created.ProfileXML
             $report.Results[$case.Key].Created = $true
-            $report.Results[$case.Key].InputXML = $case.Xml
         } catch {
             $report.Results[$case.Key] = @{
-                InputXML=$case.Xml; Error=$_.Exception.Message; HResult=$_.Exception.HResult
+                Error=$_.Exception.Message; HResult=$_.Exception.HResult
                 Details=($_ | Format-List * -Force | Out-String)
                 Matches=$false
             }
         }
         ('END ' + $case.Key + ' ' + (Get-Date).ToString('o')) | Add-Content (Join-Path $OutputDirectory 'progress.txt')
-        $report | ConvertTo-Json -Depth 12 | Set-Content (Join-Path $OutputDirectory 'checkpoint.json') -Encoding UTF8
+        ('SERIALIZE ' + (Get-Date).ToString('o')) | Add-Content (Join-Path $OutputDirectory 'progress.txt')
+        $checkpoint = [ordered]@{Results=$report.Results; Expected=$expected}
+        $checkpointJson = ConvertTo-Json -InputObject $checkpoint -Depth 6
+        [System.IO.File]::WriteAllText((Join-Path $OutputDirectory 'checkpoint.json'),$checkpointJson)
+        ('SAVED ' + (Get-Date).ToString('o')) | Add-Content (Join-Path $OutputDirectory 'progress.txt')
     }
     $packageCases = @(
         @{Key='PPKG'; Name='TOLF-CI-PPKG'; File='TOLF-CI-Crypto.ppkg'},
@@ -154,7 +156,11 @@ try {
             $report.Results[$packageCase.Key] = Read-Policy $packageCase.Name
         } catch { $report.Results[$packageCase.Key] = @{Error=$_.Exception.Message;Matches=$false} }
         ('END ' + $packageCase.Key + ' ' + (Get-Date).ToString('o')) | Add-Content (Join-Path $OutputDirectory 'progress.txt')
-        $report | ConvertTo-Json -Depth 12 | Set-Content (Join-Path $OutputDirectory 'checkpoint.json') -Encoding UTF8
+        ('SERIALIZE ' + (Get-Date).ToString('o')) | Add-Content (Join-Path $OutputDirectory 'progress.txt')
+        $checkpoint = [ordered]@{Results=$report.Results; Expected=$expected}
+        $checkpointJson = ConvertTo-Json -InputObject $checkpoint -Depth 6
+        [System.IO.File]::WriteAllText((Join-Path $OutputDirectory 'checkpoint.json'),$checkpointJson)
+        ('SAVED ' + (Get-Date).ToString('o')) | Add-Content (Join-Path $OutputDirectory 'progress.txt')
     }
     foreach ($archive in Get-ChildItem $OutputDirectory -Filter 'Logs.*.zip') {
         $expanded = Join-Path $OutputDirectory $archive.BaseName
