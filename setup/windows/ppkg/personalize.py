@@ -131,7 +131,9 @@ def use_profile_xml(path):
             or settings['Servers'] not in HOSTS.values()
             or any(settings[k] != v for k, v in CRYPTO.items())):
         raise ValueError('Unsafe Windows ProfileXML settings')
-    # Match the VPNv2 ProfileXML XSD sequence, including the native IKEv2 enum.
+    # Windows 10 consumes CryptographySuite sequentially; putting PfsGroup
+    # before EncryptionMethod/IntegrityCheckMethod/DHGroup leaves those unset.
+    # Use the Windows 10 ProfileXML sequence, not the newer published XSD order.
     vpn = ET.Element('VPNProfile')
     for name in ('RememberCredentials', 'AlwaysOn'):
         ET.SubElement(vpn, name).text = settings[name]
@@ -139,7 +141,8 @@ def use_profile_xml(path):
     for name in ('Servers', 'RoutingPolicyType', 'NativeProtocolType', 'DisableClassBasedDefaultRoute'):
         ET.SubElement(native, name).text = 'IKEv2' if name == 'NativeProtocolType' else settings[name]
     crypto = ET.SubElement(native, 'CryptographySuite')
-    for name in CRYPTO:
+    for name in ('AuthenticationTransformConstants', 'CipherTransformConstants',
+                 'EncryptionMethod', 'IntegrityCheckMethod', 'DHGroup', 'PfsGroup'):
         ET.SubElement(crypto, name).text = settings[name]
     ET.SubElement(ET.SubElement(native, 'Authentication'), 'MachineMethod').text = 'Certificate'
     value = ET.tostring(vpn, encoding='unicode')
@@ -233,7 +236,7 @@ def build(row, pfx, password, ca_der):
                 local = element.tag.split('}')[-1]
                 if local == 'ID': element.text = '{' + identity + '}'
                 if local == 'Name' and element.text == 'TOLF PPKG native crypto test': element.text = profile
-                if local == 'Version': element.text = '2.3'
+                if local == 'Version': element.text = '2.4'
                 if local == 'Server': element.text = HOSTS[row['server']]
                 if local == 'CertificatePassword': element.text = password
                 if 'VPNProfileName' in element.attrib: element.set('VPNProfileName', profile)
@@ -245,7 +248,7 @@ def build(row, pfx, password, ca_der):
         shutil.copyfile(TEMPLATE_PACKAGE, package)
         run(['update',str(package),'1','--no-acls','--command', 'add "'+str(directory)+'" /'])
         run(['info',str(package),'1','--image-property','NAME='+profile,'--image-property','PACKAGEID={'+identity+'}',
-             '--image-property','VERSION=2.3','--image-property','ALTITUDE=5000',
+             '--image-property','VERSION=2.4','--image-property','ALTITUDE=5000',
              '--image-property','RESETCLEAR=0','--image-property','NOTES=VERSION=10.0.26100.9457;Source=CLI;;TargetSkus=Invalid;EncryptPackage=False;SignPackage=False;PackageID='+identity+';'])
         # Read the produced WIM back; verify the same exact payload was stored.
         extracted = Path(tmp)/'verify'

@@ -133,3 +133,20 @@ server and disabled class routes. Windows installation must be retried to
 confirm the client error is resolved.
 
 Reference: https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/vpn/vpn-profile-options
+
+## Windows 10 crypto readback, version 2.4
+
+The v2.3 profile installed and appeared in the all-user phonebook with IKEv2
+and MachineCertificate. Windows readback showed SHA256128/AES256 for ESP but
+DHGroup=None, EncryptionMethod=DES and IntegrityCheckMethod=MD5. The client
+reported an incompatible Diffie-Hellman policy and did not connect.
+
+The likely cause is the newer XSD crypto element sequence: PfsGroup appeared
+before DHGroup, IntegrityCheckMethod and EncryptionMethod. Version 2.4 uses
+the Windows 10 example order: AuthenticationTransformConstants,
+CipherTransformConstants, EncryptionMethod, IntegrityCheckMethod, DHGroup,
+PfsGroup. Values remain AES256/SHA256/Group14 with no PFS. This is a candidate
+client compatibility fix; successful Windows readback and handshake are
+required. Windows 11 compatibility with this sequence remains unverified.
+
+Reference: https://directaccess.richardhicks.com/2018/12/10/always-on-vpn-ikev2-security-configuration/
