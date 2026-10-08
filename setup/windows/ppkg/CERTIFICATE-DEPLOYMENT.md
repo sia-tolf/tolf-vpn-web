@@ -208,3 +208,21 @@ This is a schema-conformance correction, not a Windows provisioning fix.
 The earlier v2.3 output used this order and still produced zero IKE settings.
 The runtime API copy and downloadable packages are intentionally unchanged;
 the three-parameter installation failure remains unresolved.
+
+## Disposable Windows client readback test
+
+windows-crypto-ci.yml builds a credential-free package from the isolated WCD
+container and the repository's strict ProfileXML serializer. It extracts the
+result again and compares the runtime bytes. Only one VPN runtime group is
+present. No production certificate, key, account or API token is supplied.
+
+A Windows 11 ARM runner compares three paths without connecting a VPN:
+VpnClient Add/Set cmdlets, the VPNv2 WMI bridge under SYSTEM, and installation of
+the PPKG containing the identical ProfileXML. It records all six actual IPsec
+settings and provisioning errors, then removes only its three CI profile names.
+The scripts are CI harnesses, not executable commands included in the PPKG and
+not a proposed installer for users.
+
+This can separate provider, CSP and PPKG behavior on the hosted Windows client.
+A passing result on Windows 11 ARM does not establish Windows 10 x64 behavior
+or successful authentication/routing on the user's machine.

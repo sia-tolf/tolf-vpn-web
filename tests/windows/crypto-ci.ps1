@@ -20,6 +20,10 @@ if (-not $Worker) {
         if (!(Test-Path $resultPath)) { throw 'SYSTEM crypto test timed out.' }
         $json = Get-Content $resultPath -Raw
         Write-Output $json
+        Get-ChildItem $OutputDirectory -Filter '*.txt' | ForEach-Object {
+            Write-Output ('DIAGNOSTIC: ' + $_.Name)
+            Get-Content $_.FullName
+        }
         if (!(ConvertFrom-Json $json).Passed) { throw 'Windows crypto readback comparison failed; inspect result.json.' }
     } finally {
         if ((Get-ScheduledTask -TaskName $task -ErrorAction SilentlyContinue).State -eq 'Running') { Stop-ScheduledTask -TaskName $task }
@@ -56,27 +60,44 @@ try {
         Set-VpnConnectionIPsecConfiguration -ConnectionName 'TOLF-CI-BASE' -AllUserConnection -AuthenticationTransformConstants SHA256128 -CipherTransformConstants AES256 -EncryptionMethod AES256 -IntegrityCheckMethod SHA256 -DHGroup Group14 -PfsGroup None -Force | Out-Null
         $report.Results.Baseline = Read-Policy 'TOLF-CI-BASE'
     } catch { $report.Results.Baseline = @{Error=$_.Exception.Message;Matches=$false} }
-    try {
-        $class = Get-CimClass -Namespace $namespace -ClassName 'MDM_VPNv2_01'
-        $report.CspClass = $class.CimClassName
-        $xml = Get-Content (Join-Path $InputDirectory 'ProfileXML.xml') -Raw
-        # WMI bridge expects HTML-escaped ProfileXML, as in Microsoft's sample.
-        $encoded = [System.Security.SecurityElement]::Escape($xml)
-        $created = New-CimInstance -Namespace $namespace -ClassName 'MDM_VPNv2_01' -Property @{
-            ParentID='./Vendor/MSFT/VPNv2'; InstanceID='TOLF-CI-CSP'; ProfileXML=$encoded
+    $xml = Get-Content (Join-Path $InputDirectory 'ProfileXML.xml') -Raw
+    $minimal = '<VPNProfile><NativeProfile><Servers>vpn-ci.invalid</Servers><NativeProtocolType>IKEv2</NativeProtocolType><Authentication><MachineMethod>Certificate</MachineMethod></Authentication></NativeProfile></VPNProfile>'
+    $cases = @(
+        @{Key='CSP'; Name='TOLF-CI-CSP'; Xml=$xml; Encoded=$true},
+        @{Key='CSPRaw'; Name='TOLF-CI-CSP-RAW'; Xml=$xml; Encoded=$false},
+        @{Key='CSPMinimal'; Name='TOLF-CI-CSP-MIN'; Xml=$minimal; Encoded=$true},
+        @{Key='CSPMinimalRaw'; Name='TOLF-CI-CSP-MIN-RAW'; Xml=$minimal; Encoded=$false}
+    )
+    foreach ($case in $cases) {
+        try {
+            $class = Get-CimClass -Namespace $namespace -ClassName 'MDM_VPNv2_01'
+            $report.CspClass = $class.CimClassName
+            $inputXml = $case.Xml
+            if ($case.Encoded) { $inputXml = [System.Security.SecurityElement]::Escape($inputXml) }
+            $created = New-CimInstance -Namespace $namespace -ClassName 'MDM_VPNv2_01' -Property @{
+                ParentID='./Vendor/MSFT/VPNv2'; InstanceID=$case.Name; ProfileXML=$inputXml
+            }
+            $report.Results[$case.Key] = Read-Policy $case.Name
+            $report.Results[$case.Key].ProfileXML = $created.ProfileXML
+        } catch {
+            $report.Results[$case.Key] = @{
+                Error=$_.Exception.Message; HResult=$_.Exception.HResult
+                Details=($_ | Format-List * -Force | Out-String)
+                Matches=$false
+            }
         }
-        $report.Results.CSP = Read-Policy 'TOLF-CI-CSP'
-        $report.CspProfileXML = (Get-CimInstance -Namespace $namespace -ClassName 'MDM_VPNv2_01' | Where-Object InstanceID -eq 'TOLF-CI-CSP').ProfileXML
-    } catch { $report.Results.CSP = @{Error=$_.Exception.Message;Matches=$false} }
+    }
     try {
         Import-Module Provisioning
         $package = Join-Path $InputDirectory 'TOLF-CI-Crypto.ppkg'
-        Install-ProvisioningPackage -PackagePath $package -QuietInstall -ForceInstall -LogsDirectoryPath $OutputDirectory | Out-File (Join-Path $OutputDirectory 'provisioning-result.txt')
+        $install = Install-ProvisioningPackage -PackagePath $package -QuietInstall -ForceInstall -LogsDirectoryPath $OutputDirectory
+        $install | Format-List * -Force | Out-File (Join-Path $OutputDirectory 'provisioning-result.txt')
         $report.Results.PPKG = Read-Policy 'TOLF-CI-PPKG'
     } catch { $report.Results.PPKG = @{Error=$_.Exception.Message;Matches=$false} }
-    $report.Events = @(Get-WinEvent -FilterHashtable @{
-        LogName='Microsoft-Windows-Provisioning-Diagnostics-Provider/Admin'; StartTime=$started
-    } -ErrorAction SilentlyContinue | Where-Object Message -match 'TOLF-CI-' | Select-Object -First 10 TimeCreated,Id,Message)
+    $report.Events = @()
+    foreach ($log in @('Microsoft-Windows-Provisioning-Diagnostics-Provider/Admin', 'Microsoft-Windows-DeviceManagement-Enterprise-Diagnostics-Provider/Admin')) {
+        $report.Events += @(Get-WinEvent -FilterHashtable @{LogName=$log; StartTime=$started} -ErrorAction SilentlyContinue | Select-Object -First 20 TimeCreated,Id,Message)
+    }
     $report.Passed = $report.Results.Baseline.Matches -and $report.Results.CSP.Matches -and $report.Results.PPKG.Matches
 } catch {
     $report.Fatal = $_.Exception.Message
@@ -84,10 +105,10 @@ try {
     # Only names created by this disposable-runner test are removed.
     try {
         Get-CimInstance -Namespace $namespace -ClassName 'MDM_VPNv2_01' -ErrorAction Stop |
-            Where-Object { $_.InstanceID -in @('TOLF-CI-CSP','TOLF-CI-PPKG') } |
+            Where-Object { $_.InstanceID -in @('TOLF-CI-CSP','TOLF-CI-CSP-RAW','TOLF-CI-CSP-MIN','TOLF-CI-CSP-MIN-RAW','TOLF-CI-PPKG') } |
             Remove-CimInstance -ErrorAction Stop
     } catch { $report.CleanupCsp = $_.Exception.Message }
-    foreach ($name in @('TOLF-CI-BASE','TOLF-CI-CSP','TOLF-CI-PPKG')) {
+    foreach ($name in @('TOLF-CI-BASE','TOLF-CI-CSP','TOLF-CI-CSP-RAW','TOLF-CI-CSP-MIN','TOLF-CI-CSP-MIN-RAW','TOLF-CI-PPKG')) {
         Remove-VpnConnection -AllUserConnection -Name $name -Force -ErrorAction SilentlyContinue
     }
     $report | ConvertTo-Json -Depth 12 | Set-Content ($resultPath + '.tmp') -Encoding UTF8
