@@ -226,3 +226,25 @@ not a proposed installer for users.
 This can separate provider, CSP and PPKG behavior on the hosted Windows client.
 A passing result on Windows 11 ARM does not establish Windows 10 x64 behavior
 or successful authentication/routing on the user's machine.
+
+## Verified minimal crypto ProfileXML on Windows 11 ARM
+
+Run 37749673807 (commit 2e6e161fc08e63c91def95c603f58cc4171faa4a)
+created a SYSTEM/all-user IKEv2 MachineCertificate profile through the escaped
+WMI bridge using Servers, NativeProtocolType, the complete CryptographySuite
+and Authentication only. Actual native policy readback matched all six fields:
+SHA256128, AES256, None (PFS), Group14, SHA256 and AES256.
+
+The original full profile failed, including when its crypto suite was removed.
+Each of RememberCredentials, AlwaysOn, RoutingPolicyType and
+DisableClassBasedDefaultRoute succeeded individually. Incomplete crypto suites
+failed XML parsing. This proves the complete suite is supported on the test OS;
+it does not prove the root cause of the full-profile failure or PPKG transport.
+
+The optional-settings sweep exceeded its original three-minute deadline.
+Per-case checkpoints and timings now preserve completed evidence. Separate
+minimal PPKG variants test one versus two layers of ProfileXML escaping.
+No production generator deployment or client connection/reinstallation occurs
+as part of these tests. The user’s working profile must be preserved.
+
+Run: https://github.com/sia-tolf/tolf-vpn-web/actions/runs/37749673807
