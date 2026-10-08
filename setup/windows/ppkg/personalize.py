@@ -141,8 +141,10 @@ def use_profile_xml(path):
         ET.SubElement(native, name).text = ('IKEv2' if name == 'NativeProtocolType' else
                                                 'SplitTunnel' if name == 'RoutingPolicyType' else settings[name])
     crypto = ET.SubElement(native, 'CryptographySuite')
+    # Windows 10 stops applying later IKE fields when PfsGroup=None is explicit.
+    # Omit this optional field; installed policy retains PFS None.
     for name in ('AuthenticationTransformConstants', 'CipherTransformConstants',
-                 'PfsGroup', 'DHGroup', 'IntegrityCheckMethod', 'EncryptionMethod'):
+                 'DHGroup', 'IntegrityCheckMethod', 'EncryptionMethod'):
         ET.SubElement(crypto, name).text = settings[name]
     ET.SubElement(ET.SubElement(native, 'Authentication'), 'MachineMethod').text = 'Certificate'
     # ForceTunnel + DisableClassBasedDefaultRoute is rejected by VPNv2 on the

@@ -282,3 +282,19 @@ Private payloads and bearer URLs are deliberately excluded from Git.
 Production runtime/main have not been replaced. Acceptance on the user's
 Windows 10 remains pending installation and readback. These tests do not prove
 an end-to-end connection on Windows 10.
+
+## Windows 10 readback correction — 2026-10-08
+
+The user's Windows 10 installed the full SplitTunnel candidate but retained only
+SHA256128/AES256 for ESP; DHGroup/EncryptionMethod/IntegrityCheckMethod stayed
+None/DES/MD5. Windows 11 success was insufficient to accept this candidate.
+
+A controlled separate preview changed only one cryptography field: it omitted
+the optional PfsGroup=None element. Windows 10 readback then confirmed
+SHA256128, AES256, Group14, AES256, SHA256, and PfsGroup None without a manual
+Set-VpnConnectionIPsecConfiguration step. This demonstrates that explicit
+PfsGroup=None interrupted later crypto application on this tested Windows 10.
+The generator now omits that field while retaining the validated template
+restriction PfsGroup=None. Machine certificate authentication and two /1 IPv4
+routes are unchanged. Connection and routing acceptance for this preview remain
+pending; readback alone does not prove end-to-end connectivity.

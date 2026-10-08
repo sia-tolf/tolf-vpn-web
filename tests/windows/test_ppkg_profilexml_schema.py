@@ -28,7 +28,7 @@ def test_generated_machine_profile_conforms_to_published_xsd(tmp_path):
 @pytest.mark.parametrize("parent, child", [
     (".", "RememberCredentials"),
     ("NativeProfile", "Servers"),
-    ("NativeProfile/CryptographySuite", "PfsGroup"),
+    ("NativeProfile/CryptographySuite", "DHGroup"),
 ])
 def test_schema_rejects_out_of_sequence_payload(tmp_path, parent, child):
     profile = generated_profile(tmp_path)
