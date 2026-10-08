@@ -10,12 +10,14 @@ import shutil
 import subprocess
 import tempfile
 import uuid
+from xml.dom import minidom, Node
 from xml.etree import ElementTree as ET
 from cryptography import x509
 from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.primitives.serialization import pkcs12
 
 TEMPLATE = Path('/opt/tolf-api/windows-ppkg-template')
+TEMPLATE_PACKAGE = Path('/opt/tolf-api/windows-ppkg-template.ppkg')
 WIMLIB = Path('/opt/tolf-api/wimtools/usr/bin/wimlib-imagex')
 LIBRARIES = Path('/opt/tolf-api/wimtools/usr/lib/x86_64-linux-gnu')
 HOSTS = {'riga': 'ikev2-riga.tolf.is', 'moscow': 'ikev2.tolf.is'}
@@ -23,7 +25,40 @@ CRYPTO = {'AuthenticationTransformConstants':'SHA256128', 'CipherTransformConsta
           'PfsGroup':'None', 'DHGroup':'Group14', 'IntegrityCheckMethod':'SHA256', 'EncryptionMethod':'AES256'}
 
 def available():
-    return TEMPLATE.is_dir() and WIMLIB.is_file()
+    return TEMPLATE.is_dir() and TEMPLATE_PACKAGE.is_file() and WIMLIB.is_file()
+
+def write_xml(path, tree):
+    """Keep WCD namespace declarations, encoding, BOM and XML declaration.
+
+    ElementTree is used to validate and edit values, but must not rewrite the
+    compiler's document with generated ns0/ns1 prefixes.
+    """
+    original = path.read_bytes()
+    document = minidom.parseString(original)
+    elements = [document.documentElement, *document.documentElement.getElementsByTagName('*')]
+    edited = list(tree.iter())
+    if len(elements) != len(edited):
+        raise ValueError('PPKG XML structure changed')
+    for node, value in zip(elements, edited):
+        tag = ('{' + node.namespaceURI + '}' if node.namespaceURI else '') + node.localName
+        if tag != value.tag:
+            raise ValueError('PPKG XML namespace changed')
+        for name, attribute in value.attrib.items():
+            node.setAttribute(name, attribute)
+        texts = [child for child in node.childNodes if child.nodeType == Node.TEXT_NODE]
+        if not node.getElementsByTagName('*') and value.text is not None:
+            for child in texts: node.removeChild(child)
+            node.appendChild(document.createTextNode(value.text))
+    prefix = original[:original.index(b'?>') + 2]
+    result = prefix + b'\r\n' + document.documentElement.toxml(encoding='utf-8') + b'\r\n'
+    # Check that preserving the original namespace spelling changed no values.
+    if ET.tostring(ET.fromstring(result)) != ET.tostring(tree.getroot()):
+        # Whitespace-only tails are immaterial; compare the actual settings.
+        def settings(root):
+            return [(e.tag, e.attrib, (e.text or '').strip()) for e in root.iter()]
+        if settings(ET.fromstring(result)) != settings(tree.getroot()):
+            raise ValueError('PPKG XML serialization changed settings')
+    path.write_bytes(result)
 
 def run(args):
     env = os.environ.copy()
@@ -86,7 +121,7 @@ def build(row, pfx, password, ca_der):
                         if parm.get('name') != 'EncodedCertificate': raise ValueError('Unexpected authority setting')
                         parm.set('value', base64.b64encode(ca_der).decode())
                 else: raise ValueError('Unexpected provisioning provider')
-            tree.write(path, encoding='utf-8', xml_declaration=True)
+            write_xml(path, tree)
         if providers != {'VPNv2','ClientCertificateInstall','RootCATrustedCertificates'}:
             raise ValueError('Missing native certificate settings')
         # Preserve the compiler's runtime ordering and atomic groups; namespace each group to the device.
@@ -94,7 +129,7 @@ def build(row, pfx, password, ca_der):
         tree = ET.parse(runtime_index)
         for element in tree.getroot():
             element.set('SettingsGroup', str(uuid.uuid5(uuid.UUID(identity), element.get('SettingsGroup'))))
-        tree.write(runtime_index, encoding='utf-8', xml_declaration=True)
+        write_xml(runtime_index, tree)
         for path in directory.rglob('*.xml'):
             if path == runtime_index: continue
             tree = ET.parse(path)
@@ -102,17 +137,19 @@ def build(row, pfx, password, ca_der):
                 local = element.tag.split('}')[-1]
                 if local == 'ID': element.text = '{' + identity + '}'
                 if local == 'Name' and element.text == 'TOLF PPKG native crypto test': element.text = profile
-                if local == 'Version': element.text = '2.0'
+                if local == 'Version': element.text = '2.1'
                 if local == 'Server': element.text = HOSTS[row['server']]
                 if local == 'CertificatePassword': element.text = password
                 if 'VPNProfileName' in element.attrib: element.set('VPNProfileName', profile)
                 if 'CertificateName' in element.attrib:
                     element.set('CertificateName', certificate_name if local == 'ClientCertificate' else 'TOLF Windows IKEv2 Device CA')
-            tree.write(path, encoding='utf-8', xml_declaration=True)
+            write_xml(path, tree)
         package = Path(tmp)/'TOLF.ppkg'
-        run(['capture',str(directory),str(package),profile,'','--compress=LZX','--no-acls'])
-        run(['info',str(package),'1','--image-property','PACKAGEID={'+identity+'}',
-             '--image-property','VERSION=2.0','--image-property','ALTITUDE=5000',
+        # Update the genuine WCD container rather than constructing a new WIM.
+        shutil.copyfile(TEMPLATE_PACKAGE, package)
+        run(['update',str(package),'1','--no-acls','--command', 'add "'+str(directory)+'" /'])
+        run(['info',str(package),'1','--image-property','NAME='+profile,'--image-property','PACKAGEID={'+identity+'}',
+             '--image-property','VERSION=2.1','--image-property','ALTITUDE=5000',
              '--image-property','RESETCLEAR=0','--image-property','NOTES=VERSION=10.0.26100.9457;Source=CLI;;TargetSkus=Invalid;EncryptPackage=False;SignPackage=False;PackageID='+identity+';'])
         # Read the produced WIM back; verify the same exact payload was stored.
         extracted = Path(tmp)/'verify'
@@ -123,3 +160,4 @@ def build(row, pfx, password, ca_der):
         result = package.read_bytes()
         if not result.startswith(b'MSWIM'): raise ValueError('Invalid PPKG container')
         return result
+

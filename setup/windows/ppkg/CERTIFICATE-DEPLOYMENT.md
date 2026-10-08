@@ -43,8 +43,9 @@ The template PPKG SHA256 is
 
 `ppkg/personalize.py` replaces the compiler-generated native runtime certificate
 blob, password, CA thumbprint, VPN profile name and server. It namespaces package
-and runtime-group identities to each device and captures the result as a WIM
-with provisioning metadata. Every produced package is extracted again and its
+and runtime-group identities to each device. It preserves the compiler XML
+declarations, BOMs and default namespaces and updates the original Microsoft
+WIM container with provisioning metadata instead of capturing a new container. Every produced package is extracted again and its
 contents compared to the source payload. Only XML and native provisioning XML
 are accepted in the template.
 
@@ -55,6 +56,7 @@ UK runtime files:
 - `/opt/tolf-api/tolf_windows_certificates.py`
 - `/opt/tolf-api/tolf_windows_ppkg.py` (deployed copy of `ppkg/personalize.py`)
 - `/opt/tolf-api/windows-ppkg-template` (verified extracted Microsoft template)
+- `/opt/tolf-api/windows-ppkg-template.ppkg` (original Microsoft-compiled container)
 - `/opt/tolf-api/wimtools` (Debian wimtools and its library dependencies)
 
 Riga runtime: `/usr/local/lib/tolf-windows-certificates.py`, invoked through
@@ -76,3 +78,13 @@ Installation of the personalized package and a VPN handshake from actual Windows
 10/11 remain unverified. Native CSP documentation lists Pro, Enterprise and
 Education editions; Windows Home is not claimed as supported. Multiple client
 certificates installed on one Windows machine also need a selection test.
+
+## Windows installation diagnostic, 8 October 2026
+
+The first Windows client installation returned XML syntax error 0xC00CEE2D.
+Version 2.1 personalization preserves compiler XML declarations, encoding BOMs
+and namespace spelling, and updates the original WCD container. Two regression
+tests cover namespace and escaped-value preservation; 66 Windows/quick tests
+pass. A real personalized package passed WIM extraction and payload checks under
+the API service user. A Windows retry is still required; these server checks do
+not establish that the client error is resolved.
