@@ -15,8 +15,10 @@ if (-not $Worker) {
     try {
         Register-ScheduledTask -TaskName $task -Action $action -Principal $principal | Out-Null
         Start-ScheduledTask -TaskName $task
-        $deadline = (Get-Date).AddMinutes(3)
+        $deadline = (Get-Date).AddMinutes(7)
         while (!(Test-Path $resultPath) -and (Get-Date) -lt $deadline) { Start-Sleep -Seconds 2 }
+        if (!(Test-Path $resultPath) -and (Test-Path (Join-Path $OutputDirectory 'checkpoint.json'))) { Get-Content (Join-Path $OutputDirectory 'checkpoint.json') -Raw }
+        if (Test-Path (Join-Path $OutputDirectory 'progress.txt')) { Get-Content (Join-Path $OutputDirectory 'progress.txt') }
         if (!(Test-Path $resultPath)) { throw 'SYSTEM crypto test timed out.' }
         $json = Get-Content $resultPath -Raw
         Write-Output $json
@@ -110,6 +112,7 @@ try {
     $realHost.SelectSingleNode('/VPNProfile/NativeProfile/Servers').InnerText = $fullDocument.SelectSingleNode('/VPNProfile/NativeProfile/Servers').InnerText
     $cases += @{Key='MinimalCryptoRealHost'; Name='TOLF-CI-REALHOST'; Xml=$realHost.OuterXml; Encoded=$true}
     foreach ($case in $cases) {
+        ('START ' + $case.Key + ' ' + (Get-Date).ToString('o')) | Add-Content (Join-Path $OutputDirectory 'progress.txt')
         try {
             $class = Get-CimClass -Namespace $namespace -ClassName 'MDM_VPNv2_01'
             $report.CspClass = $class.CimClassName
@@ -130,6 +133,8 @@ try {
                 Matches=$false
             }
         }
+        ('END ' + $case.Key + ' ' + (Get-Date).ToString('o')) | Add-Content (Join-Path $OutputDirectory 'progress.txt')
+        $report | ConvertTo-Json -Depth 12 | Set-Content (Join-Path $OutputDirectory 'checkpoint.json') -Encoding UTF8
     }
     try {
         Import-Module Provisioning
