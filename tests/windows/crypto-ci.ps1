@@ -87,7 +87,7 @@ try {
         if ($source.ParentNode.Name -eq 'VPNProfile') {
             $null = $single.VPNProfile.InsertBefore($single.ImportNode($source,$true),$single.VPNProfile.NativeProfile)
         } elseif ($option -eq 'RoutingPolicyType') {
-            $null = $single.VPNProfile.NativeProfile.InsertBefore($single.ImportNode($source,$true),$single.VPNProfile.NativeProfile.NativeProtocolType)
+            $null = $single.VPNProfile.NativeProfile.InsertBefore($single.ImportNode($source,$true),$single.SelectSingleNode('/VPNProfile/NativeProfile/NativeProtocolType'))
         } else {
             $null = $single.VPNProfile.NativeProfile.InsertBefore($single.ImportNode($source,$true),$single.VPNProfile.NativeProfile.Authentication)
         }
