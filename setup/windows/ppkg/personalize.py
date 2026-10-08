@@ -138,12 +138,20 @@ def use_profile_xml(path):
         ET.SubElement(vpn, name).text = settings[name]
     native = ET.SubElement(vpn, 'NativeProfile')
     for name in ('Servers', 'RoutingPolicyType', 'NativeProtocolType', 'DisableClassBasedDefaultRoute'):
-        ET.SubElement(native, name).text = 'IKEv2' if name == 'NativeProtocolType' else settings[name]
+        ET.SubElement(native, name).text = ('IKEv2' if name == 'NativeProtocolType' else
+                                                'SplitTunnel' if name == 'RoutingPolicyType' else settings[name])
     crypto = ET.SubElement(native, 'CryptographySuite')
     for name in ('AuthenticationTransformConstants', 'CipherTransformConstants',
                  'PfsGroup', 'DHGroup', 'IntegrityCheckMethod', 'EncryptionMethod'):
         ET.SubElement(crypto, name).text = settings[name]
     ET.SubElement(ET.SubElement(native, 'Authentication'), 'MachineMethod').text = 'Certificate'
+    # ForceTunnel + DisableClassBasedDefaultRoute is rejected by VPNv2 on the
+    # tested Windows client. Two /1 routes carry all IPv4 Internet destinations
+    # while existing more-specific physical routes retain priority.
+    for address in ('0.0.0.0', '128.0.0.0'):
+        route = ET.SubElement(vpn, 'Route')
+        for name, value in (('Address', address), ('PrefixSize', '1'), ('Metric', '1')):
+            ET.SubElement(route, name).text = value
     value = ET.tostring(vpn, encoding='unicode')
     document = minidom.parseString(original)
     provider = next(n for n in document.documentElement.childNodes

@@ -50,7 +50,13 @@ function Read-Policy([string]$name) {
     foreach ($key in $expected.Keys) { $actual[$key] = [string]$vpn.IPsecCustomPolicy.$key }
     $matches = $true
     foreach ($key in $expected.Keys) { if ($actual[$key] -ne $expected[$key]) { $matches = $false } }
-    return [ordered]@{Name=$name;Actual=$actual;Matches=$matches;Authentication=[string]$vpn.AuthenticationMethod; SplitTunneling=[bool]$vpn.SplitTunneling; Routes=@($vpn.Routes | ForEach-Object { [string]$_.DestinationPrefix })}
+    $classRoutesDisabled = $false
+    try {
+        $csp = Get-CimInstance -Namespace 'root\cimv2\mdm\dmmap' -ClassName 'MDM_VPNv2_01' -Filter ("InstanceID='" + $name + "'") -ErrorAction Stop
+        [xml]$readback = $csp.ProfileXML
+        $classRoutesDisabled = $readback.SelectSingleNode('/VPNProfile/NativeProfile/DisableClassBasedDefaultRoute').InnerText -eq 'true'
+    } catch {}
+    return [ordered]@{Name=$name;ClassRoutesDisabled=$classRoutesDisabled;AutoTriggerEnabled=[bool]$vpn.IsAutoTriggerEnabled;Actual=$actual;Matches=$matches;Authentication=[string]$vpn.AuthenticationMethod; SplitTunneling=[bool]$vpn.SplitTunneling; Routes=@($vpn.Routes | ForEach-Object { [string]$_.DestinationPrefix })}
 }
 $namespace = 'root\cimv2\mdm\dmmap'
 $started = Get-Date
@@ -192,6 +198,10 @@ try {
         $report.Events += @(Get-WinEvent -FilterHashtable @{LogName=$log; StartTime=$started} -ErrorAction SilentlyContinue | Select-Object -First 20 TimeCreated,Id,Message)
     }
     $report.Passed = $report.Results.Baseline.Matches -and $report.Results.CSP.Matches -and $report.Results.PPKG.Matches
+    foreach ($key in @('CSP','PPKG')) {
+        $actualProfile = $report.Results[$key]
+        $report.Passed = $report.Passed -and $actualProfile.ClassRoutesDisabled -and !$actualProfile.AutoTriggerEnabled -and ($actualProfile.Authentication -eq 'MachineCertificate') -and ($actualProfile.Routes -contains '0.0.0.0/1') -and ($actualProfile.Routes -contains '128.0.0.0/1')
+    }
 } catch {
     $report.Fatal = $_.Exception.Message
 } finally {

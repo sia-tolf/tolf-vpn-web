@@ -92,7 +92,8 @@ def test_profile_xml_eliminates_duplicate_csp_nodes_and_preserves_settings(tmp_p
     assert len(native.findall('CryptographySuite')) == 1
     assert native.findtext('Authentication/MachineMethod') == 'Certificate'
     assert native.findtext('Servers') == 'ikev2-riga.tolf.is'
-    assert native.findtext('RoutingPolicyType') == 'ForceTunnel'
+    assert native.findtext('RoutingPolicyType') == 'SplitTunnel'
+    assert [(r.findtext('Address'), r.findtext('PrefixSize'), r.findtext('Metric')) for r in inner.findall('Route')] == [('0.0.0.0','1','1'),('128.0.0.0','1','1')]
     assert native.findtext('NativeProtocolType') == 'IKEv2'
     assert native.findtext('DisableClassBasedDefaultRoute') == 'true'
     assert [e.tag for e in native] == ['Servers','RoutingPolicyType','NativeProtocolType','DisableClassBasedDefaultRoute','CryptographySuite','Authentication']
