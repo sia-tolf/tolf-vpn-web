@@ -93,11 +93,28 @@ try {
         }
         $cases += @{Key=('Only'+$option); Name=('TOLF-CI-ONLY-'+$option); Xml=$single.OuterXml; Encoded=$true}
     }
+    # Test every combination of optional settings with the proven crypto block.
+    $options = @('RememberCredentials','AlwaysOn','RoutingPolicyType','DisableClassBasedDefaultRoute')
+    for ($mask=1; $mask -lt 16; $mask++) {
+        [xml]$combo = $xml
+        $combo.SelectSingleNode('/VPNProfile/NativeProfile/Servers').InnerText = 'vpn-ci.invalid'
+        for ($i=0; $i -lt $options.Count; $i++) {
+            if (($mask -band (1 -shl $i)) -eq 0) {
+                $node = $combo.SelectSingleNode('//' + $options[$i])
+                $null = $node.ParentNode.RemoveChild($node)
+            }
+        }
+        $cases += @{Key=('Options'+$mask); Name=('TOLF-CI-OPTIONS-'+$mask); Xml=$combo.OuterXml; Encoded=$true}
+    }
+    [xml]$realHost = $minimalCrypto.OuterXml
+    $realHost.SelectSingleNode('/VPNProfile/NativeProfile/Servers').InnerText = $fullDocument.SelectSingleNode('/VPNProfile/NativeProfile/Servers').InnerText
+    $cases += @{Key='MinimalCryptoRealHost'; Name='TOLF-CI-REALHOST'; Xml=$realHost.OuterXml; Encoded=$true}
     foreach ($case in $cases) {
         try {
             $class = Get-CimClass -Namespace $namespace -ClassName 'MDM_VPNv2_01'
             $report.CspClass = $class.CimClassName
             $inputXml = $case.Xml
+            $report.Results[$case.Key] = @{InputXML=$case.Xml}
             if ($case.Encoded) { $inputXml = [System.Security.SecurityElement]::Escape($inputXml) }
             $created = New-CimInstance -Namespace $namespace -ClassName 'MDM_VPNv2_01' -Property @{
                 ParentID='./Vendor/MSFT/VPNv2'; InstanceID=$case.Name; ProfileXML=$inputXml
@@ -105,9 +122,10 @@ try {
             $report.Results[$case.Key] = Read-Policy $case.Name
             $report.Results[$case.Key].ProfileXML = $created.ProfileXML
             $report.Results[$case.Key].Created = $true
+            $report.Results[$case.Key].InputXML = $case.Xml
         } catch {
             $report.Results[$case.Key] = @{
-                Error=$_.Exception.Message; HResult=$_.Exception.HResult
+                InputXML=$case.Xml; Error=$_.Exception.Message; HResult=$_.Exception.HResult
                 Details=($_ | Format-List * -Force | Out-String)
                 Matches=$false
             }
