@@ -2,7 +2,7 @@ name: Windows ProfileXML crypto readback
 on:
   push:
     branches: ['codex/windows-profilexml-schema-20261008']
-    paths: ['tests/windows/crypto-ci.ps1', 'tests/windows/build-crypto-ci-package.py', '.github/workflows/windows-crypto-ci.yml', 'setup/windows/ppkg/personalize.py']
+    paths: ['tests/windows/crypto-ci.ps1', 'tests/windows/package-admin-ci.ps1', 'tests/windows/build-crypto-ci-package.py', '.github/workflows/windows-crypto-ci.yml', 'setup/windows/ppkg/personalize.py']
   workflow_dispatch:
 permissions:
   contents: read
@@ -37,6 +37,11 @@ jobs:
         shell: powershell
         run: |
           ./tests/windows/crypto-ci.ps1 -InputDirectory "$env:GITHUB_WORKSPACE/ci-crypto-input" -OutputDirectory "$env:GITHUB_WORKSPACE/ci-crypto-results"
+      - name: Compare PPKG installation under the elevated runner account
+        if: always()
+        shell: powershell
+        run: |
+          ./tests/windows/package-admin-ci.ps1 -InputDirectory "$env:GITHUB_WORKSPACE/ci-crypto-input" -OutputDirectory "$env:GITHUB_WORKSPACE/ci-crypto-results/admin"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
