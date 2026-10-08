@@ -111,6 +111,9 @@ try {
     [xml]$realHost = $minimalCrypto.OuterXml
     $realHost.SelectSingleNode('/VPNProfile/NativeProfile/Servers').InnerText = $fullDocument.SelectSingleNode('/VPNProfile/NativeProfile/Servers').InnerText
     $cases += @{Key='MinimalCryptoRealHost'; Name='TOLF-CI-REALHOST'; Xml=$realHost.OuterXml; Encoded=$true}
+    if ($env:TOLF_CI_SWEEP -ne 'true') {
+        $cases = @($cases | Where-Object { $_.Key -in @('CSP','CSPMinimal','MinimalCrypto') })
+    }
     foreach ($case in $cases) {
         ('START ' + $case.Key + ' ' + (Get-Date).ToString('o')) | Add-Content (Join-Path $OutputDirectory 'progress.txt')
         try {
@@ -136,13 +139,33 @@ try {
         ('END ' + $case.Key + ' ' + (Get-Date).ToString('o')) | Add-Content (Join-Path $OutputDirectory 'progress.txt')
         $report | ConvertTo-Json -Depth 12 | Set-Content (Join-Path $OutputDirectory 'checkpoint.json') -Encoding UTF8
     }
-    try {
-        Import-Module Provisioning
-        $package = Join-Path $InputDirectory 'TOLF-CI-Crypto.ppkg'
-        $install = Install-ProvisioningPackage -PackagePath $package -QuietInstall -ForceInstall -LogsDirectoryPath $OutputDirectory
-        $install | Format-List * -Force | Out-File (Join-Path $OutputDirectory 'provisioning-result.txt')
-        $report.Results.PPKG = Read-Policy 'TOLF-CI-PPKG'
-    } catch { $report.Results.PPKG = @{Error=$_.Exception.Message;Matches=$false} }
+    $packageCases = @(
+        @{Key='PPKG'; Name='TOLF-CI-PPKG'; File='TOLF-CI-Crypto.ppkg'},
+        @{Key='PPKGMinimalSingle'; Name='TOLF-CI-PPKG-MIN-1'; File='TOLF-CI-PPKG-MIN-1.ppkg'},
+        @{Key='PPKGMinimalDouble'; Name='TOLF-CI-PPKG-MIN-2'; File='TOLF-CI-PPKG-MIN-2.ppkg'}
+    )
+    foreach ($packageCase in $packageCases) {
+        ('START ' + $packageCase.Key + ' ' + (Get-Date).ToString('o')) | Add-Content (Join-Path $OutputDirectory 'progress.txt')
+        try {
+            Import-Module Provisioning
+            $package = Join-Path $InputDirectory $packageCase.File
+            $install = Install-ProvisioningPackage -PackagePath $package -QuietInstall -ForceInstall -LogsDirectoryPath $OutputDirectory
+            $install | Format-List * -Force | Out-File (Join-Path $OutputDirectory ($packageCase.Key + '-provisioning-result.txt'))
+            $report.Results[$packageCase.Key] = Read-Policy $packageCase.Name
+        } catch { $report.Results[$packageCase.Key] = @{Error=$_.Exception.Message;Matches=$false} }
+        ('END ' + $packageCase.Key + ' ' + (Get-Date).ToString('o')) | Add-Content (Join-Path $OutputDirectory 'progress.txt')
+        $report | ConvertTo-Json -Depth 12 | Set-Content (Join-Path $OutputDirectory 'checkpoint.json') -Encoding UTF8
+    }
+    foreach ($archive in Get-ChildItem $OutputDirectory -Filter 'Logs.*.zip') {
+        $expanded = Join-Path $OutputDirectory $archive.BaseName
+        Expand-Archive -LiteralPath $archive.FullName -DestinationPath $expanded -Force
+        foreach ($etl in Get-ChildItem $expanded -Filter '*.etl' -Recurse) {
+            Get-WinEvent -Path $etl.FullName -Oldest -ErrorAction SilentlyContinue |
+                Where-Object { $_.Level -le 3 -or $_.Message -match 'TOLF|VPNv2|ProfileXML|error|failed' } |
+                Select-Object -First 40 TimeCreated,Id,LevelDisplayName,Message |
+                Format-List | Out-File (Join-Path $OutputDirectory ($archive.BaseName + '-' + $etl.BaseName + '.txt'))
+        }
+    }
     $report.Events = @()
     foreach ($log in @('Microsoft-Windows-Provisioning-Diagnostics-Provider/Admin', 'Microsoft-Windows-DeviceManagement-Enterprise-Diagnostics-Provider/Admin')) {
         $report.Events += @(Get-WinEvent -FilterHashtable @{LogName=$log; StartTime=$started} -ErrorAction SilentlyContinue | Select-Object -First 20 TimeCreated,Id,Message)
@@ -154,10 +177,10 @@ try {
     # Only names created by this disposable-runner test are removed.
     try {
         Get-CimInstance -Namespace $namespace -ClassName 'MDM_VPNv2_01' -ErrorAction Stop |
-            Where-Object { $_.InstanceID -in @($cases.Name) + @('TOLF-CI-PPKG') } |
+            Where-Object { $_.InstanceID -in @($cases.Name) + @($packageCases.Name) } |
             Remove-CimInstance -ErrorAction Stop
     } catch { $report.CleanupCsp = $_.Exception.Message }
-    foreach ($name in @('TOLF-CI-BASE','TOLF-CI-PPKG') + @($cases.Name)) {
+    foreach ($name in @('TOLF-CI-BASE') + @($cases.Name) + @($packageCases.Name)) {
         Remove-VpnConnection -AllUserConnection -Name $name -Force -ErrorAction SilentlyContinue
     }
     $report | ConvertTo-Json -Depth 12 | Set-Content ($resultPath + '.tmp') -Encoding UTF8
