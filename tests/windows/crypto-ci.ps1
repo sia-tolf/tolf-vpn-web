@@ -64,10 +64,35 @@ try {
     $minimal = '<VPNProfile><NativeProfile><Servers>vpn-ci.invalid</Servers><NativeProtocolType>IKEv2</NativeProtocolType><Authentication><MachineMethod>Certificate</MachineMethod></Authentication></NativeProfile></VPNProfile>'
     $cases = @(
         @{Key='CSP'; Name='TOLF-CI-CSP'; Xml=$xml; Encoded=$true},
-        @{Key='CSPRaw'; Name='TOLF-CI-CSP-RAW'; Xml=$xml; Encoded=$false},
-        @{Key='CSPMinimal'; Name='TOLF-CI-CSP-MIN'; Xml=$minimal; Encoded=$true},
-        @{Key='CSPMinimalRaw'; Name='TOLF-CI-CSP-MIN-RAW'; Xml=$minimal; Encoded=$false}
+        @{Key='CSPMinimal'; Name='TOLF-CI-CSP-MIN'; Xml=$minimal; Encoded=$true}
     )
+    [xml]$fullDocument = $xml
+    $cryptoNode = $fullDocument.VPNProfile.NativeProfile.CryptographySuite
+    $fullNoCrypto = $fullDocument.Clone()
+    $null = $fullNoCrypto.VPNProfile.NativeProfile.RemoveChild($fullNoCrypto.VPNProfile.NativeProfile.CryptographySuite)
+    $cases += @{Key='FullNoCrypto'; Name='TOLF-CI-NOCRYPTO'; Xml=$fullNoCrypto.OuterXml; Encoded=$true}
+    [xml]$minimalCrypto = $minimal
+    $null = $minimalCrypto.VPNProfile.NativeProfile.InsertBefore($minimalCrypto.ImportNode($cryptoNode,$true), $minimalCrypto.VPNProfile.NativeProfile.Authentication)
+    $cases += @{Key='MinimalCrypto'; Name='TOLF-CI-CRYPTO'; Xml=$minimalCrypto.OuterXml; Encoded=$true}
+    foreach ($child in $cryptoNode.ChildNodes) {
+        [xml]$single = $minimal
+        $suite = $single.CreateElement('CryptographySuite')
+        $null = $suite.AppendChild($single.ImportNode($child,$true))
+        $null = $single.VPNProfile.NativeProfile.InsertBefore($suite,$single.VPNProfile.NativeProfile.Authentication)
+        $cases += @{Key=('Only'+$child.Name); Name=('TOLF-CI-ONLY-'+$child.Name); Xml=$single.OuterXml; Encoded=$true}
+    }
+    foreach ($option in @('RememberCredentials','AlwaysOn','RoutingPolicyType','DisableClassBasedDefaultRoute')) {
+        [xml]$single = $minimal
+        $source = $fullDocument.SelectSingleNode('//' + $option)
+        if ($source.ParentNode.Name -eq 'VPNProfile') {
+            $null = $single.VPNProfile.InsertBefore($single.ImportNode($source,$true),$single.VPNProfile.NativeProfile)
+        } elseif ($option -eq 'RoutingPolicyType') {
+            $null = $single.VPNProfile.NativeProfile.InsertBefore($single.ImportNode($source,$true),$single.VPNProfile.NativeProfile.NativeProtocolType)
+        } else {
+            $null = $single.VPNProfile.NativeProfile.InsertBefore($single.ImportNode($source,$true),$single.VPNProfile.NativeProfile.Authentication)
+        }
+        $cases += @{Key=('Only'+$option); Name=('TOLF-CI-ONLY-'+$option); Xml=$single.OuterXml; Encoded=$true}
+    }
     foreach ($case in $cases) {
         try {
             $class = Get-CimClass -Namespace $namespace -ClassName 'MDM_VPNv2_01'
@@ -79,6 +104,7 @@ try {
             }
             $report.Results[$case.Key] = Read-Policy $case.Name
             $report.Results[$case.Key].ProfileXML = $created.ProfileXML
+            $report.Results[$case.Key].Created = $true
         } catch {
             $report.Results[$case.Key] = @{
                 Error=$_.Exception.Message; HResult=$_.Exception.HResult
@@ -105,10 +131,10 @@ try {
     # Only names created by this disposable-runner test are removed.
     try {
         Get-CimInstance -Namespace $namespace -ClassName 'MDM_VPNv2_01' -ErrorAction Stop |
-            Where-Object { $_.InstanceID -in @('TOLF-CI-CSP','TOLF-CI-CSP-RAW','TOLF-CI-CSP-MIN','TOLF-CI-CSP-MIN-RAW','TOLF-CI-PPKG') } |
+            Where-Object { $_.InstanceID -in @($cases.Name) + @('TOLF-CI-PPKG') } |
             Remove-CimInstance -ErrorAction Stop
     } catch { $report.CleanupCsp = $_.Exception.Message }
-    foreach ($name in @('TOLF-CI-BASE','TOLF-CI-CSP','TOLF-CI-CSP-RAW','TOLF-CI-CSP-MIN','TOLF-CI-CSP-MIN-RAW','TOLF-CI-PPKG')) {
+    foreach ($name in @('TOLF-CI-BASE','TOLF-CI-PPKG') + @($cases.Name)) {
         Remove-VpnConnection -AllUserConnection -Name $name -Force -ErrorAction SilentlyContinue
     }
     $report | ConvertTo-Json -Depth 12 | Set-Content ($resultPath + '.tmp') -Encoding UTF8

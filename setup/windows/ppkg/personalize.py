@@ -131,9 +131,8 @@ def use_profile_xml(path):
             or settings['Servers'] not in HOSTS.values()
             or any(settings[k] != v for k, v in CRYPTO.items())):
         raise ValueError('Unsafe Windows ProfileXML settings')
-    # Windows 10 consumes CryptographySuite sequentially; putting PfsGroup
-    # before EncryptionMethod/IntegrityCheckMethod/DHGroup leaves those unset.
-    # Use the Windows 10 ProfileXML sequence, not the newer published XSD order.
+    # Keep the sequence from Microsoft's published VPNv2 ProfileXML XSD.
+    # Runtime acceptance and policy readback are verified separately on Windows.
     vpn = ET.Element('VPNProfile')
     for name in ('RememberCredentials', 'AlwaysOn'):
         ET.SubElement(vpn, name).text = settings[name]
