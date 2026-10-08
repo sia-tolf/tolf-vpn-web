@@ -150,3 +150,35 @@ client compatibility fix; successful Windows readback and handshake are
 required. Windows 11 compatibility with this sequence remains unverified.
 
 Reference: https://directaccess.richardhicks.com/2018/12/10/always-on-vpn-ikev2-security-configuration/
+
+## Confirmed Windows result, 8 October 2026
+
+Version 2.4 did NOT fix the crypto readback. Changing the element order alone
+was disproved on the client. The all-user connection still had DHGroup=None,
+EncryptionMethod=DES and IntegrityCheckMethod=MD5.
+
+The real connection 05b06800-7ffe-5636-850a-569604c4d7e7 succeeded after an
+explicit Set-VpnConnectionIPsecConfiguration and moving obsolete test client
+certificates out of LocalMachine/My. Moscow confirmed the matching certificate,
+IKEv2 ESTABLISHED and CHILD_SA INSTALLED with AES256/SHA256/MODP2048. This does
+not establish that automated PPKG setup is complete.
+
+Windows selected an older certificate when several TOLF certificates were
+available. Archiving old certificates is a diagnostic workaround, not a
+production per-profile selection mechanism. VPNv2 Certificate/Eku and Issuer
+are documented as reserved for future use; do not claim they provide a working
+machine certificate filter. EAP-TLS with explicit certificate filtering needs
+a separate implementation and client-store validation.
+
+native_candidate.py is an isolated diagnostic builder adapter. It preserves
+strict template validation but emits one complete NativeProfile and one
+CryptographySuite through native CSP nodes instead of ProfileXML. It is NOT
+enabled in the production API. A Windows installation and actual readback of
+all six IPsec values must precede enabling it. No executable, script, connection
+trigger, local certificate cleanup or guessed physical route is added.
+
+The current-device Moscow authentication fix is also separate from the
+general provisioning helper, which remains unchanged. Do not assume newly
+created devices inherit the temporary server adjustment.
+
+Reference: https://learn.microsoft.com/en-us/windows/client-management/mdm/vpnv2-csp
