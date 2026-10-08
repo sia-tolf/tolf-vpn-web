@@ -142,7 +142,7 @@ def use_profile_xml(path):
         ET.SubElement(native, name).text = 'IKEv2' if name == 'NativeProtocolType' else settings[name]
     crypto = ET.SubElement(native, 'CryptographySuite')
     for name in ('AuthenticationTransformConstants', 'CipherTransformConstants',
-                 'EncryptionMethod', 'IntegrityCheckMethod', 'DHGroup', 'PfsGroup'):
+                 'PfsGroup', 'DHGroup', 'IntegrityCheckMethod', 'EncryptionMethod'):
         ET.SubElement(crypto, name).text = settings[name]
     ET.SubElement(ET.SubElement(native, 'Authentication'), 'MachineMethod').text = 'Certificate'
     value = ET.tostring(vpn, encoding='unicode')

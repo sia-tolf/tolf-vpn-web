@@ -186,3 +186,25 @@ Reference: https://learn.microsoft.com/en-us/windows/client-management/mdm/vpnv2
 ## Direct CSP candidate failed
 
 Windows client Event 12 at 12:20:53 returned 0x82AA0002 at VPNv2/TOLF Crypto Check 734b2c87-0b23-4786-a73d-4d7e4e311798/NativeProfile. Consolidating the characteristics did not resolve installation. This candidate is not a working alternative to ProfileXML. Do not deploy it in the API or ask users to remove working connections.
+
+## ProfileXML schema validation, 8 October 2026
+
+The local Windows schemas/VpnProfile/VpnProfileSchema.xsd describes the internal
+VpnProfile/VpnConfiguration representation. It is not the input
+VPNProfile/NativeProfile schema used by VPNv2 ProfileXML.
+
+A machine-certificate projection of Microsoft's published ProfileXML XSD now
+validates generated payloads with lxml. Only the external EAP schema import and
+Eap branch are removed; all applicable order, occurrence and type declarations
+are preserved. EAP-TLS is not covered by this fixture.
+
+The v2.4 output fails this independent schema check at IntegrityCheckMethod.
+The repository generator restores the published order:
+AuthenticationTransformConstants, CipherTransformConstants, PfsGroup, DHGroup,
+IntegrityCheckMethod, EncryptionMethod. Negative tests also check root, native
+and crypto sequence violations.
+
+This is a schema-conformance correction, not a Windows provisioning fix.
+The earlier v2.3 output used this order and still produced zero IKE settings.
+The runtime API copy and downloadable packages are intentionally unchanged;
+the three-parameter installation failure remains unresolved.
