@@ -1,3 +1,7 @@
+## Failed on Windows 10 — do not install
+
+Client Event 12 at 12:20:53 on 8 October 2026 returned 0x82AA0002 at the diagnostic NativeProfile node. The merged direct-CSP candidate did not create the VPN connection. It is retained solely as a failed diagnostic artifact. Production personalization was not changed.
+
 # Windows crypto diagnostic
 
 TOLF-Crypto-Check.ppkg is a diagnostic package, not a usable VPN account.

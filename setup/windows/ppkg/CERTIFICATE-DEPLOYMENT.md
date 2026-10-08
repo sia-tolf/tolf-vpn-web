@@ -182,3 +182,7 @@ general provisioning helper, which remains unchanged. Do not assume newly
 created devices inherit the temporary server adjustment.
 
 Reference: https://learn.microsoft.com/en-us/windows/client-management/mdm/vpnv2-csp
+
+## Direct CSP candidate failed
+
+Windows client Event 12 at 12:20:53 returned 0x82AA0002 at VPNv2/TOLF Crypto Check 734b2c87-0b23-4786-a73d-4d7e4e311798/NativeProfile. Consolidating the characteristics did not resolve installation. This candidate is not a working alternative to ProfileXML. Do not deploy it in the API or ask users to remove working connections.
