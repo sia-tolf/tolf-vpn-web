@@ -68,6 +68,45 @@ def run(args):
         raise RuntimeError('Native PPKG packaging failed')
     return result.stdout
 
+def preserve_local_routes(path):
+    """Avoid a class-wide VPN route without inventing physical gateways.
+
+    ForceTunnel changes default routes; existing more-specific physical routes
+    still win. Disabling the class route prevents an assigned 10.x VPN address
+    from additionally capturing all of 10/8. A static PPKG cannot enumerate the
+    destination computer's live routes or protect management over a default
+    gateway without an existing specific route.
+    """
+    original = path.read_bytes()
+    root = ET.fromstring(original)
+    profile = root.find("characteristic[@type='VPNv2']/characteristic")
+    if profile is None or root.tag != 'wap-provisioningdoc':
+        raise ValueError('Expected native Windows VPN provisioning XML')
+    policies = profile.findall("characteristic[@type='NativeProfile']/parm[@name='RoutingPolicyType']")
+    if len(policies) != 1 or policies[0].get('value') != 'ForceTunnel':
+        raise ValueError('Unexpected Windows routing policy')
+    document = minidom.parseString(original)
+    native = next(node for node in document.getElementsByTagName('characteristic')
+                  if node.getAttribute('type') == 'NativeProfile')
+    settings = [node for node in document.getElementsByTagName('parm')
+                if node.getAttribute('name') == 'DisableClassBasedDefaultRoute']
+    if len(settings) > 1:
+        raise ValueError('Conflicting Windows class route settings')
+    if settings:
+        setting = settings[0]
+        if setting.parentNode.getAttribute('type') != 'NativeProfile':
+            raise ValueError('Wrong Windows class route setting scope')
+    else:
+        setting = document.createElement('parm')
+        setting.setAttribute('name', 'DisableClassBasedDefaultRoute')
+        native.appendChild(setting)
+    setting.setAttribute('value', 'true')
+    setting.setAttribute('datatype', 'boolean')
+    prefix = original[:original.index(b'?>') + 2]
+    result = prefix + b'\r\n' + document.documentElement.toxml(encoding='utf-8') + b'\r\n'
+    ET.fromstring(result)
+    path.write_bytes(result)
+
 def build(row, pfx, password, ca_der):
     identity = str(uuid.UUID(row['id']))
     if row['server'] not in HOSTS or not isinstance(row['name'], str) or not 1 <= len(row['name'].strip()) <= 64 or any(ord(c)<32 for c in row['name']):
@@ -122,6 +161,8 @@ def build(row, pfx, password, ca_der):
                         parm.set('value', base64.b64encode(ca_der).decode())
                 else: raise ValueError('Unexpected provisioning provider')
             write_xml(path, tree)
+            if root.find("characteristic[@type='VPNv2']") is not None:
+                preserve_local_routes(path)
         if providers != {'VPNv2','ClientCertificateInstall','RootCATrustedCertificates'}:
             raise ValueError('Missing native certificate settings')
         # Preserve the compiler's runtime ordering and atomic groups; namespace each group to the device.
@@ -137,7 +178,7 @@ def build(row, pfx, password, ca_der):
                 local = element.tag.split('}')[-1]
                 if local == 'ID': element.text = '{' + identity + '}'
                 if local == 'Name' and element.text == 'TOLF PPKG native crypto test': element.text = profile
-                if local == 'Version': element.text = '2.1'
+                if local == 'Version': element.text = '2.2'
                 if local == 'Server': element.text = HOSTS[row['server']]
                 if local == 'CertificatePassword': element.text = password
                 if 'VPNProfileName' in element.attrib: element.set('VPNProfileName', profile)
@@ -149,7 +190,7 @@ def build(row, pfx, password, ca_der):
         shutil.copyfile(TEMPLATE_PACKAGE, package)
         run(['update',str(package),'1','--no-acls','--command', 'add "'+str(directory)+'" /'])
         run(['info',str(package),'1','--image-property','NAME='+profile,'--image-property','PACKAGEID={'+identity+'}',
-             '--image-property','VERSION=2.1','--image-property','ALTITUDE=5000',
+             '--image-property','VERSION=2.2','--image-property','ALTITUDE=5000',
              '--image-property','RESETCLEAR=0','--image-property','NOTES=VERSION=10.0.26100.9457;Source=CLI;;TargetSkus=Invalid;EncryptPackage=False;SignPackage=False;PackageID='+identity+';'])
         # Read the produced WIM back; verify the same exact payload was stored.
         extracted = Path(tmp)/'verify'
@@ -160,4 +201,5 @@ def build(row, pfx, password, ca_der):
         result = package.read_bytes()
         if not result.startswith(b'MSWIM'): raise ValueError('Invalid PPKG container')
         return result
+
 

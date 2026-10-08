@@ -88,3 +88,28 @@ tests cover namespace and escaped-value preservation; 66 Windows/quick tests
 pass. A real personalized package passed WIM extraction and payload checks under
 the API service user. A Windows retry is still required; these server checks do
 not establish that the client error is resolved.
+
+## Local access, PPKG version 2.2
+
+ForceTunnel installs a VPN default route, but Windows retains more-specific
+physical-interface routes. Runtime VPNv2 NativeProfile now sets
+DisableClassBasedDefaultRoute=true so assigning a 10.x VPN address does not
+also install a class-wide 10.0.0.0/8 route. No private address range is blindly
+excluded, and certificate authentication and server-side routing are unchanged.
+
+ByPassForLocal is documented as unsupported and is not used. A static PPKG
+cannot enumerate live routes, detect an active VNC/RDP peer or synthesize a
+route using the correct physical interface/gateway. Local connected subnets
+and existing specific physical routes are preserved by Windows routing.
+Management reachable only through the default route still needs a specific
+physical route; multi-adapter, overlap and remote-control behavior require
+client route inspection before a remote-only VPN test.
+
+69 Windows/quick tests passed, including idempotent class-route configuration,
+escaping and unchanged authentication/server settings. A real personalized
+package was extracted and the runtime routing settings verified on UK under
+the API service user. Windows route behavior remains to be checked on client.
+
+References:
+- https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/vpn/vpn-routing
+- https://learn.microsoft.com/en-us/windows/client-management/mdm/vpnv2-csp

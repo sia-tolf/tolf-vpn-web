@@ -29,3 +29,33 @@ def test_preserve_unqualified_runtime_scope(tmp_path):
     assert root.tag == 'wap-provisioningdoc'
     assert root.find('characteristic').get('scope') == 'Device'
     assert root.find('.//parm').get('value') == 'new'
+
+import pytest
+from ppkg.personalize import preserve_local_routes
+
+def routing_xml():
+    return b'\xef\xbb\xbf<?xml version="1.0" encoding="utf-8" standalone="yes"?>\r\n<wap-provisioningdoc><characteristic type="VPNv2"><characteristic type="Test"><characteristic type="NativeProfile"><characteristic type="Authentication"><parm name="MachineMethod" value="Certificate" datatype="string" /></characteristic></characteristic><characteristic type="NativeProfile"><parm name="RoutingPolicyType" value="ForceTunnel" datatype="string" /><parm name="Servers" value="ikev2-riga.tolf.is" datatype="string" /></characteristic></characteristic></characteristic></wap-provisioningdoc>'
+
+def test_preserve_local_routes_without_static_private_networks(tmp_path):
+    path = tmp_path/'vpn.provxml'; path.write_bytes(routing_xml())
+    before = ET.parse(path)
+    preserve_local_routes(path)
+    after = ET.parse(path)
+    settings = after.findall(".//characteristic[@type='NativeProfile']/parm[@name='DisableClassBasedDefaultRoute']")
+    assert len(settings) == 1
+    assert settings[0].attrib == {'name':'DisableClassBasedDefaultRoute','value':'true','datatype':'boolean'}
+    # Everything other than the class-route setting must be unchanged.
+    next(node for node in after.iter('characteristic') if settings[0] in list(node)).remove(settings[0])
+    assert ET.tostring(before.getroot()) == ET.tostring(after.getroot())
+    assert path.read_bytes().startswith(routing_xml()[:routing_xml().index(b'?>')+2])
+
+def test_local_route_setting_is_idempotent(tmp_path):
+    path = tmp_path/'vpn.provxml'; path.write_bytes(routing_xml())
+    preserve_local_routes(path); preserve_local_routes(path)
+    assert len(ET.parse(path).findall(".//parm[@name='DisableClassBasedDefaultRoute']")) == 1
+
+def test_local_route_setting_rejects_unexpected_policy(tmp_path):
+    path = tmp_path/'vpn.provxml'; path.write_bytes(routing_xml().replace(b'ForceTunnel',b'SplitTunnel'))
+    before=path.read_bytes()
+    with pytest.raises(ValueError,match='routing policy'): preserve_local_routes(path)
+    assert path.read_bytes() == before
