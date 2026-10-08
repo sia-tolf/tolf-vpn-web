@@ -107,6 +107,60 @@ def preserve_local_routes(path):
     ET.fromstring(result)
     path.write_bytes(result)
 
+def use_profile_xml(path):
+    """Configure VPNv2 in one ProfileXML value, not repeated CSP Add nodes."""
+    original = path.read_bytes()
+    root = ET.fromstring(original)
+    profile = root.find("characteristic[@type='VPNv2']/characteristic")
+    if profile is None:
+        raise ValueError('Missing Windows VPN profile')
+    settings = {}
+    for parm in profile.iter('parm'):
+        name, value = parm.get('name'), parm.get('value')
+        if name in settings and settings[name] != value:
+            raise ValueError('Conflicting native VPN settings')
+        settings[name] = value
+    expected = set(CRYPTO) | {'AlwaysOn', 'RememberCredentials', 'MachineMethod',
+                            'NativeProtocolType', 'RoutingPolicyType', 'Servers',
+                            'DisableClassBasedDefaultRoute'}
+    if (set(settings) != expected or settings['MachineMethod'] != 'Certificate'
+            or settings['RoutingPolicyType'] != 'ForceTunnel'
+            or settings['DisableClassBasedDefaultRoute'] != 'true'
+            or settings['AlwaysOn'] != 'false'
+            or settings['NativeProtocolType'].upper() != 'IKEV2'
+            or settings['Servers'] not in HOSTS.values()
+            or any(settings[k] != v for k, v in CRYPTO.items())):
+        raise ValueError('Unsafe Windows ProfileXML settings')
+    # Match the VPNv2 ProfileXML XSD sequence, including the native IKEv2 enum.
+    vpn = ET.Element('VPNProfile')
+    for name in ('RememberCredentials', 'AlwaysOn'):
+        ET.SubElement(vpn, name).text = settings[name]
+    native = ET.SubElement(vpn, 'NativeProfile')
+    for name in ('Servers', 'RoutingPolicyType', 'NativeProtocolType', 'DisableClassBasedDefaultRoute'):
+        ET.SubElement(native, name).text = 'IKEv2' if name == 'NativeProtocolType' else settings[name]
+    crypto = ET.SubElement(native, 'CryptographySuite')
+    for name in CRYPTO:
+        ET.SubElement(crypto, name).text = settings[name]
+    ET.SubElement(ET.SubElement(native, 'Authentication'), 'MachineMethod').text = 'Certificate'
+    value = ET.tostring(vpn, encoding='unicode')
+    document = minidom.parseString(original)
+    provider = next(n for n in document.documentElement.childNodes
+                    if n.nodeType == Node.ELEMENT_NODE and n.getAttribute('type') == 'VPNv2')
+    target = next(n for n in provider.childNodes if n.nodeType == Node.ELEMENT_NODE)
+    for child in list(target.childNodes):
+        target.removeChild(child)
+    parm = document.createElement('parm')
+    parm.setAttribute('name', 'ProfileXML')
+    parm.setAttribute('value', value)
+    parm.setAttribute('datatype', 'string')
+    target.appendChild(parm)
+    prefix = original[:original.index(b'?>') + 2]
+    result = prefix + b'\r\n' + document.documentElement.toxml(encoding='utf-8') + b'\r\n'
+    restored = ET.fromstring(result).find('.//parm')
+    if restored.get('name') != 'ProfileXML' or restored.get('value') != value:
+        raise ValueError('Windows ProfileXML escaping failed')
+    path.write_bytes(result)
+
 def build(row, pfx, password, ca_der):
     identity = str(uuid.UUID(row['id']))
     if row['server'] not in HOSTS or not isinstance(row['name'], str) or not 1 <= len(row['name'].strip()) <= 64 or any(ord(c)<32 for c in row['name']):
@@ -163,6 +217,7 @@ def build(row, pfx, password, ca_der):
             write_xml(path, tree)
             if root.find("characteristic[@type='VPNv2']") is not None:
                 preserve_local_routes(path)
+                use_profile_xml(path)
         if providers != {'VPNv2','ClientCertificateInstall','RootCATrustedCertificates'}:
             raise ValueError('Missing native certificate settings')
         # Preserve the compiler's runtime ordering and atomic groups; namespace each group to the device.
@@ -178,7 +233,7 @@ def build(row, pfx, password, ca_der):
                 local = element.tag.split('}')[-1]
                 if local == 'ID': element.text = '{' + identity + '}'
                 if local == 'Name' and element.text == 'TOLF PPKG native crypto test': element.text = profile
-                if local == 'Version': element.text = '2.2'
+                if local == 'Version': element.text = '2.3'
                 if local == 'Server': element.text = HOSTS[row['server']]
                 if local == 'CertificatePassword': element.text = password
                 if 'VPNProfileName' in element.attrib: element.set('VPNProfileName', profile)
@@ -190,7 +245,7 @@ def build(row, pfx, password, ca_der):
         shutil.copyfile(TEMPLATE_PACKAGE, package)
         run(['update',str(package),'1','--no-acls','--command', 'add "'+str(directory)+'" /'])
         run(['info',str(package),'1','--image-property','NAME='+profile,'--image-property','PACKAGEID={'+identity+'}',
-             '--image-property','VERSION=2.2','--image-property','ALTITUDE=5000',
+             '--image-property','VERSION=2.3','--image-property','ALTITUDE=5000',
              '--image-property','RESETCLEAR=0','--image-property','NOTES=VERSION=10.0.26100.9457;Source=CLI;;TargetSkus=Invalid;EncryptPackage=False;SignPackage=False;PackageID='+identity+';'])
         # Read the produced WIM back; verify the same exact payload was stored.
         extracted = Path(tmp)/'verify'
@@ -201,5 +256,6 @@ def build(row, pfx, password, ca_der):
         result = package.read_bytes()
         if not result.startswith(b'MSWIM'): raise ValueError('Invalid PPKG container')
         return result
+
 
 

@@ -59,3 +59,51 @@ def test_local_route_setting_rejects_unexpected_policy(tmp_path):
     before=path.read_bytes()
     with pytest.raises(ValueError,match='routing policy'): preserve_local_routes(path)
     assert path.read_bytes() == before
+
+from ppkg.personalize import use_profile_xml, CRYPTO
+
+def complete_routing_xml():
+    root = ET.fromstring(routing_xml())
+    profile = root.find('characteristic/characteristic')
+    for name, value in {'AlwaysOn':'false','RememberCredentials':'true'}.items():
+        ET.SubElement(profile,'parm',name=name,value=value,datatype='boolean')
+    native = profile.find("characteristic[@type='NativeProfile']")
+    ET.SubElement(native,'parm',name='NativeProtocolType',value='Ikev2',datatype='string')
+    # The compiler emitted crypto settings in two separate characteristics.
+    crypto = ET.SubElement(native,'characteristic',type='CryptographySuite')
+    for name, value in CRYPTO.items():
+        parent = ET.SubElement(native,'characteristic',type='CryptographySuite') if name == 'PfsGroup' else crypto
+        ET.SubElement(parent,'parm',name=name,value=value,datatype='string')
+    return b'\xef\xbb\xbf<?xml version="1.0" encoding="utf-8" standalone="yes"?>\r\n'+ET.tostring(root)
+
+def test_profile_xml_eliminates_duplicate_csp_nodes_and_preserves_settings(tmp_path):
+    path=tmp_path/'vpn.provxml'; path.write_bytes(complete_routing_xml())
+    preserve_local_routes(path)
+    use_profile_xml(path)
+    outer=ET.parse(path)
+    profile=outer.find('characteristic/characteristic')
+    assert len(list(profile)) == 1
+    assert profile[0].get('name') == 'ProfileXML'
+    assert not profile.findall('.//characteristic')
+    inner=ET.fromstring(profile[0].get('value'))
+    assert inner.tag == 'VPNProfile'
+    assert len(inner.findall('NativeProfile')) == 1
+    native=inner.find('NativeProfile')
+    assert len(native.findall('CryptographySuite')) == 1
+    assert native.findtext('Authentication/MachineMethod') == 'Certificate'
+    assert native.findtext('Servers') == 'ikev2-riga.tolf.is'
+    assert native.findtext('RoutingPolicyType') == 'ForceTunnel'
+    assert native.findtext('NativeProtocolType') == 'IKEv2'
+    assert native.findtext('DisableClassBasedDefaultRoute') == 'true'
+    assert [e.tag for e in native] == ['Servers','RoutingPolicyType','NativeProtocolType','DisableClassBasedDefaultRoute','CryptographySuite','Authentication']
+    assert {e.tag:e.text for e in native.find('CryptographySuite')} == CRYPTO
+    assert b'&lt;VPNProfile&gt;' in path.read_bytes()
+    assert path.read_bytes().startswith(b'\xef\xbb\xbf<?xml version="1.0" encoding="utf-8" standalone="yes"?>')
+
+def test_profile_xml_rejects_conflicting_duplicate_settings(tmp_path):
+    path=tmp_path/'vpn.provxml'; path.write_bytes(complete_routing_xml())
+    preserve_local_routes(path)
+    tree=ET.parse(path); native=tree.find('.//characteristic[@type="NativeProfile"]')
+    ET.SubElement(native,'parm',name='Servers',value='unapproved.example',datatype='string')
+    tree.write(path,encoding='utf-8',xml_declaration=True)
+    with pytest.raises(ValueError,match='Conflicting'): use_profile_xml(path)

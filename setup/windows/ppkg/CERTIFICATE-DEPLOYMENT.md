@@ -113,3 +113,23 @@ the API service user. Windows route behavior remains to be checked on client.
 References:
 - https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/vpn/vpn-routing
 - https://learn.microsoft.com/en-us/windows/client-management/mdm/vpnv2-csp
+
+## NativeProfile application error, PPKG version 2.3
+
+Windows client Event 12 returned 0x82AA0002 at VPNv2/profile/NativeProfile.
+The compiler runtime had two NativeProfile characteristics and two nested
+CryptographySuite characteristics. Version 2.3 converts the complete native
+settings into a single VPNv2 ProfileXML string value, avoiding repeated CSP
+node creation. The embedded XML follows the documented schema sequence and
+uses the IKEv2 protocol spelling. Certificate/CA provisioning still precedes
+the VPN group. No executable, script, automatic connection or guessed gateway
+is introduced. Existing specific physical routes remain required for remote
+management peers that are reached via a default route.
+
+71 Windows/quick tests passed. A personalized package from the actual active
+certificate was extracted and checked for one ProfileXML value, one native
+profile, one crypto suite, machine certificate authentication, the selected
+server and disabled class routes. Windows installation must be retried to
+confirm the client error is resolved.
+
+Reference: https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/vpn/vpn-profile-options
