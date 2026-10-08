@@ -248,3 +248,37 @@ No production generator deployment or client connection/reinstallation occurs
 as part of these tests. The user’s working profile must be preserved.
 
 Run: https://github.com/sia-tolf/tolf-vpn-web/actions/runs/37749673807
+
+## Verified package candidate — 2026-10-08
+
+Commit 4bf215747f779dd5154931a3c9f305710d141e3f passed Windows ProfileXML
+crypto readback run 37754098523 on Windows 11 Enterprise ARM64 build 26200:
+https://github.com/sia-tolf/tolf-vpn-web/actions/runs/37754098523
+
+The full PPKG installed through native provisioning. Readback confirmed
+MachineCertificate, SHA256128/AES256 for ESP, Group14/SHA256/AES256 for IKE,
+PfsGroup None, automatic connection disabled, class-based default routes disabled,
+and explicit IPv4 routes 0.0.0.0/1 and 128.0.0.0/1.
+
+The tested Windows provider rejects ForceTunnel combined with
+DisableClassBasedDefaultRoute true. SplitTunnel plus the two explicit /1 routes
+retains the desired IPv4 Internet routing while allowing more-specific physical
+routes to win. This does not automatically protect a remote-management peer
+reachable only through a physical default route: that peer needs its existing
+specific physical route. IPv6 full-tunnel routing is outside this candidate.
+
+The CI package writer also needed to preserve the compiled UTF-8 BOM.
+Without it the credential-free test package failed with C00CEE2D. The production
+serializer already preserved that BOM; it was not the production root cause.
+Single outer XML attribute escaping was verified; double escaping is a negative
+test and correctly fails.
+
+A private preview uses the existing active device
+05b06800-7ffe-5636-850a-569604c4d7e7 certificate, with profile display name
+'TOLF Test PPKG 05b06800-7ffe-5636-850a-569604c4d7e7' and a separate package ID.
+Its PPKG payload round trip and API download checksum were verified. No new
+certificate was issued and no server authentication configuration was changed.
+Private payloads and bearer URLs are deliberately excluded from Git.
+Production runtime/main have not been replaced. Acceptance on the user's
+Windows 10 remains pending installation and readback. These tests do not prove
+an end-to-end connection on Windows 10.
