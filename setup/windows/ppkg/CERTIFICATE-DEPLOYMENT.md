@@ -460,3 +460,28 @@ References:
 - https://learn.microsoft.com/en-us/windows/client-management/mdm/eap-configuration
 - https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-gpwl/65562521-4153-4e20-9c4a-612e190886ee
 - https://docs.strongswan.org/docs/6.0/interop/windowsUserServerConf.html
+
+## EAP-TLS filter transport verified on Windows 11 - 2026-10-09
+
+Run 37890724944 at e49ed6eedba71d07c3079f1622f7f01def979e50 passed both
+package and Windows 11 ARM readback jobs:
+https://github.com/sia-tolf/tolf-vpn-web/actions/runs/37890724944
+
+Two distinct native VPN entries retained their distinct custom EKU OIDs and
+enabled client-CA/client-auth filters. Full native PPKG installation retained
+EAP type 13, server CA/name validation, automatic certificate selection,
+client CA/custom EKU filtering, and all six accepted IPsec policy values,
+including Group14 and PFS2048.
+
+Earlier runs failed strict text comparison because Windows formats hash bytes
+with spaces and omits disabled optional fields. Raw readback confirmed the
+required filters were present. Hash comparisons now preserve exact bytes;
+only the documented false defaults for omitted AllPurposeEnabled and disabled
+AnyPurposeEKUList are treated as false. No enabled CA or client-auth filter may
+be omitted. Reference:
+https://learn.microsoft.com/en-us/windows/win32/eaphost/eaptlsconnectionpropertiesv3schema-filterinfoparams-complextype
+
+No certificate was installed and no connection was attempted in this CI gate.
+Thus this proves transport/readback, not actual multi-certificate selection,
+Windows 10 support, native user-certificate installation, or gateway EAP-TLS
+authentication. Production remains on the accepted MachineCertificate profile.
