@@ -56,7 +56,8 @@ def build(destination,wimlib):
                 device=uuid.uuid5(uuid.NAMESPACE_URL,"tolf-ci-cert-"+scope+str(number))
                 key=rsa.generate_private_key(public_exponent=65537,key_size=2048)
                 name="tolf-ci-"+scope.lower()+"-"+str(number)+".invalid"
-                custom_oid="2.25."+str(device.int)
+                # Documentation-only enterprise arc; bounded subidentifiers for Windows.
+                custom_oid="1.3.6.1.4.1.32473.1."+ ".".join(str(int.from_bytes(device.bytes[i:i+2],"big")) for i in range(0,16,2))
                 cert=(x509.CertificateBuilder().subject_name(x509.Name([x509.NameAttribute(NameOID.COMMON_NAME,name)]))
                     .issuer_name(ca_name).public_key(key.public_key()).serial_number(x509.random_serial_number())
                     .not_valid_before(now-timedelta(minutes=5)).not_valid_after(now+timedelta(days=1))

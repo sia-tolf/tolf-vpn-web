@@ -43,7 +43,7 @@ def eap_config(device):
     add(add(filters, "tls3", "CAHashList", Enabled="true"), "tls3", "IssuerHash", CLIENT_CA)
     mapping = add(add(filters, "tls3", "EKUMapping"), "tls3", "EKUMap")
     add(mapping, "tls3", "EKUName", "TOLF-CI-Device")
-    add(mapping, "tls3", "EKUOID", "2.25." + str(uuid.UUID(device).int))
+    add(mapping, "tls3", "EKUOID", "1.3.6.1.4.1.32473.1." + ".".join(str(int.from_bytes(uuid.UUID(device).bytes[i:i+2], "big")) for i in range(0,16,2)))
     allowed = add(filters, "tls3", "ClientAuthEKUList", Enabled="true")
     add(add(allowed, "tls3", "EKUMapInList"), "tls3", "EKUName", "TOLF-CI-Device")
     add(filters, "tls3", "AnyPurposeEKUList", Enabled="false")
