@@ -485,3 +485,28 @@ No certificate was installed and no connection was attempted in this CI gate.
 Thus this proves transport/readback, not actual multi-certificate selection,
 Windows 10 support, native user-certificate installation, or gateway EAP-TLS
 authentication. Production remains on the accepted MachineCertificate profile.
+
+## Native user-certificate PPKG gate - 2026-10-09
+
+Run 37891791610 passed package generation, EAP filter/crypto readback and
+native certificate-store provisioning on Windows 11 ARM:
+https://github.com/sia-tolf/tolf-vpn-web/actions/runs/37891791610
+
+Two synthetic User-scoped PFX credentials installed in CurrentUser/My, both
+with private keys, both absent from LocalMachine/My, and each preserving its
+distinct custom EKU. The Device-scoped control installed only in LocalMachine/My.
+These are disposable CI credentials, not production credentials.
+
+The preceding run 37891423900 successfully installed both scopes but returned
+an empty custom EKU OID value for the large 2.25 UUID-integer subidentifier in
+both stores. Changing synthetic identifiers to bounded 16-bit arcs under the
+documentation-only enterprise arc 1.3.6.1.4.1.32473 resolved readback. Both
+certificate and EAP profile tests now use this bounded format. Do not use that
+documentation enterprise arc for production issuance; an appropriate owned
+namespace is a remaining design gate. This test establishes observed decoding
+behavior, not a universal Windows OID limit.
+
+No connection was attempted. Windows 10 acceptance, actual certificate selection
+with two credentials, gateway EAP-TLS authorization/revocation and interactive
+PPKG installation context remain unverified. Current production MachineCertificate
+profiles, certificates, generator and gateway configuration were not changed.
