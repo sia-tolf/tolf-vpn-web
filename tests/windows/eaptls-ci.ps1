@@ -11,6 +11,8 @@ function Check-Eap([xml]$actual,[xml]$expected) {
     foreach ($field in $paths) {
         $a=@($actual.SelectNodes("//*[local-name()='$field']") | ForEach-Object {$_.InnerText})
         $e=@($expected.SelectNodes("//*[local-name()='$field']") | ForEach-Object {$_.InnerText})
+        # Microsoft documents absent AllPurposeEnabled as false.
+        if ($field -eq 'AllPurposeEnabled' -and $a.Count -eq 0) {$a=@('false')}
         if ($field -in @('TrustedRootCA','IssuerHash')) {
             $a=@($a | ForEach-Object {($_ -replace '\s','').ToUpperInvariant()})
             $e=@($e | ForEach-Object {($_ -replace '\s','').ToUpperInvariant()})
@@ -20,6 +22,8 @@ function Check-Eap([xml]$actual,[xml]$expected) {
     foreach ($field in @('CAHashList','ClientAuthEKUList','AnyPurposeEKUList')) {
         $a=$actual.SelectSingleNode("//*[local-name()='$field']")
         $e=$expected.SelectSingleNode("//*[local-name()='$field']")
+        # Optional disabled AnyPurposeEKUList has Enabled=false by schema default.
+        if (!$a -and $field -eq 'AnyPurposeEKUList' -and $e.GetAttribute('Enabled') -eq 'false') {continue}
         if (!$a -or $a.GetAttribute('Enabled') -ne $e.GetAttribute('Enabled')) {throw "Filter readback mismatch: $field"}
     }
     if ($actual.SelectSingleNode("//*[local-name()='UseWinLogonCredentials']")) {throw 'Password EAP method appeared.'}
