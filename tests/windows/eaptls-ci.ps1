@@ -11,7 +11,11 @@ function Check-Eap([xml]$actual,[xml]$expected) {
     foreach ($field in $paths) {
         $a=@($actual.SelectNodes("//*[local-name()='$field']") | ForEach-Object {$_.InnerText})
         $e=@($expected.SelectNodes("//*[local-name()='$field']") | ForEach-Object {$_.InnerText})
-        if (($a -join '|') -ne ($e -join '|') -or $a.Count -eq 0) { throw "EAP readback mismatch: $field" }
+        if ($field -in @('TrustedRootCA','IssuerHash')) {
+            $a=@($a | ForEach-Object {($_ -replace '\s','').ToUpperInvariant()})
+            $e=@($e | ForEach-Object {($_ -replace '\s','').ToUpperInvariant()})
+        }
+        if (($a -join '|') -ne ($e -join '|') -or $a.Count -eq 0) { throw "EAP readback mismatch: $field actual=$($a -join '|') expected=$($e -join '|')" }
     }
     foreach ($field in @('CAHashList','ClientAuthEKUList','AnyPurposeEKUList')) {
         $a=$actual.SelectSingleNode("//*[local-name()='$field']")
@@ -26,6 +30,7 @@ try {
         [xml]$xml=Get-Content (Join-Path $InputDirectory ("Eap-"+$index+".xml")) -Raw
         Add-VpnConnection -Name $name -ServerAddress 'vpn-ci.invalid' -TunnelType Ikev2 -AuthenticationMethod Eap -EapConfigXmlStream $xml -SplitTunneling -AllUserConnection -Force | Out-Null
         $vpn=Get-VpnConnection -Name $name -AllUserConnection
+        $vpn.EapConfigXmlStream.OuterXml | Set-Content (Join-Path $OutputDirectory ($name+'.xml'))
         Check-Eap $vpn.EapConfigXmlStream $xml
         $report.Cases[$name]=@{Passed=$true;Authentication=[string]$vpn.AuthenticationMethod}
         $vpn.EapConfigXmlStream.OuterXml | Set-Content (Join-Path $OutputDirectory ($name+'.xml'))
