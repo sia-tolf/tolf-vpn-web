@@ -587,3 +587,16 @@ overwrite it on a routing update. Integrate the controller only after acceptance
 Production issuance/generator is unchanged. Temporary custom EKU namespace must
 not be promoted to production; certificate selection and per-device authorization
 still require a production design and negative acceptance tests.
+
+### Moscow EAP dynamic activated — 2026-10-09 09:24:34 UTC
+
+User explicitly approved the restart. Activation checked all three active files
+against staged backups and restarted swanctl. A bounded startup readiness check
+was added before verifying the loaded plugin and policies.
+Runtime confirms eap-dynamic and eap-tls loaded; both identity-a and identity-b
+policies have remote id %any, exact EAP identity, the temporary client CA,
+and only 10.250.81.1/32 traffic selectors. The source-IP-specific policy is removed.
+Existing ikev2-yt password session recovered with IKE and CHILD established.
+A/B Windows reconnection and ping after this change are still pending.
+Production generator remains unchanged; temporary dispatcher update is not
+yet persistent across routing-controller rewrites.
