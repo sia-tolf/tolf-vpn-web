@@ -610,3 +610,15 @@ tolf-eaptls-moscow-identity-a. VIP 10.250.81.11; four packets in and out.
 The configured remote id is %any, so no source-IP constraint remains.
 Initial peer selection directly chose identity-a; this run does not prove
 negotiation through tolf-win-dispatch or switching to identity-b. B is pending.
+
+### Post-restart B acceptance — 2026-10-09 09:36:12–13 UTC
+
+Windows user confirmed B connected and ping passed. Initial selection chose
+identity-a, then the received B EAP identity failed the A identity constraint
+and charon switched to identity-b before TLS authentication.
+TLS peer certificate CN=tolf-eap-test-b-432b7001527b@tolf.is was verified against
+the temporary Moscow CA; EAP_TLS succeeded and IKE/CHILD established.
+VIP 10.250.81.12; four packets in and out. Thus both installed certificates
+selected their respective profiles without a configured client-IP constraint.
+This proves A-to-B peer-policy switching; it does not exercise generic dynamic
+dispatcher negotiation. Only the ping subnet was tested, not Internet routing.
