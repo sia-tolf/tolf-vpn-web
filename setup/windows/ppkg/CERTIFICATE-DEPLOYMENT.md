@@ -622,3 +622,21 @@ VIP 10.250.81.12; four packets in and out. Thus both installed certificates
 selected their respective profiles without a configured client-IP constraint.
 This proves A-to-B peer-policy switching; it does not exercise generic dynamic
 dispatcher negotiation. Only the ping subnet was tested, not Internet routing.
+
+### B Internet server-side preparation — 2026-10-09
+
+After user requested continuing with Internet routing, changed only identity-b
+to existing vpn-pool (10.10.10.0/24, DNS 10.254.0.53) and local_ts 0.0.0.0/0.
+A remains ping-only. Full standard configuration reload succeeded: 19 loaded,
+0 unloaded; no daemon restart. Backup is root-only
+/root/tolf-eaptls-dynamic-stage-20261009/test.before-b-internet.
+Existing B SA keeps the old selectors until reconnect.
+
+Read-only checks: Moscow source-pool route for 1.1.1.1 uses table 100 GRE Riga;
+RU-marked route for 77.88.55.80 uses Moscow br-lan. Riga has return route for
+10.10.10.0/24 through gremoscow and outbound NAT on ens3. Moscow DNS
+10.254.0.53 resolves whoer.net and yandex.ru. These are server-side checks,
+not live end-to-end Windows Internet acceptance.
+Windows profile still has only the ping route; read its scope/routes and the
+management-host 10.0.21.10 route before adding broad IPv4 VPN routes.
+IPv6/browser behavior and effective DNS remain to be checked separately.
