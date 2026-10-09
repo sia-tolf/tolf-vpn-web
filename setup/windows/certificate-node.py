@@ -46,7 +46,7 @@ def connection(device, node, mode):
         children {{ {name} {{
             local_ts = 0.0.0.0/0
             remote_ts = dynamic
-            esp_proposals = aes256-sha256
+            esp_proposals = aes256-sha256-modp2048-none
             rekey_time = 0
             dpd_action = clear
         }} }}

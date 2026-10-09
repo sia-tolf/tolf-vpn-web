@@ -141,11 +141,11 @@ def use_profile_xml(path):
         ET.SubElement(native, name).text = ('IKEv2' if name == 'NativeProtocolType' else
                                                 'SplitTunnel' if name == 'RoutingPolicyType' else settings[name])
     crypto = ET.SubElement(native, 'CryptographySuite')
-    # Windows 10 stops applying later IKE fields when PfsGroup=None is explicit.
-    # Omit this optional field; installed policy retains PFS None.
+    # Explicit None truncates crypto application on the tested Windows 10;
+    # omission is rejected by Windows 11. PFS2048 passed both readback paths.
     for name in ('AuthenticationTransformConstants', 'CipherTransformConstants',
-                 'DHGroup', 'IntegrityCheckMethod', 'EncryptionMethod'):
-        ET.SubElement(crypto, name).text = settings[name]
+                 'PfsGroup', 'DHGroup', 'IntegrityCheckMethod', 'EncryptionMethod'):
+        ET.SubElement(crypto, name).text = 'PFS2048' if name == 'PfsGroup' else settings[name]
     ET.SubElement(ET.SubElement(native, 'Authentication'), 'MachineMethod').text = 'Certificate'
     # ForceTunnel + DisableClassBasedDefaultRoute is rejected by VPNv2 on the
     # tested Windows client. Two /1 routes carry all IPv4 Internet destinations

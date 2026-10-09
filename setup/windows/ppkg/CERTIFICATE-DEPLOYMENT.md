@@ -347,3 +347,24 @@ Both passing packages retained MachineCertificate, disabled automatic connection
 The user confirmed another successful connection after package cleanup on 9 October. Inventory IsInstalled=False did not establish absence of VPN profiles or certificates. Multi-certificate selection remains unresolved. Certificate-only authentication remains required.
 
 The user explicitly authorized the private preview and repository publication on 9 October. A PFS2048 installation-only preview was built with the existing certificate/key, separate package and profile identities, and no server provisioning call. Extracted runtime bytes and the HTTPS download checksum matched. Private bearer URLs and sensitive payloads remain excluded from Git. Windows 10 readback remains pending; production configuration is unchanged.
+
+## Windows 10 PFS2048 acceptance - 2026-10-09
+
+The user installed the separate PFS2048 preview and confirmed native readback
+of SHA256128/AES256, Group14/AES256/SHA256 and PFS2048 without a manual policy
+repair. The connection succeeded using the existing device certificate.
+
+The isolated Moscow device ESP policy now accepts aes256-sha256-modp2048-none,
+retaining NoPFS compatibility. All 17 connections loaded with zero unloaded.
+Server SA readback confirmed the intended certificate, IKE ESTABLISHED,
+CHILD_SA INSTALLED, AES256/SHA256 and traffic in both directions. A targeted
+CHILD_SA rekey succeeded and installed a replacement SA with MODP_2048 while
+the IKE SA remained established. This verifies PFS beyond initial IKE_AUTH.
+
+The repository generator now emits explicit PFS2048 in the published XSD
+sequence, while keeping the compiled template's None validation separate.
+CI defaults to testing the unmodified generator output; explicit None and
+omitted-field diagnostics remain available in the package builder. Server
+provisioning source accepts optional MODP2048 for ESP. Deployment remains
+pending; the generic server certificate constraint and multi-certificate
+selection issues are separate and are not claimed resolved.

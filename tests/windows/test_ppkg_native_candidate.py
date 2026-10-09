@@ -23,7 +23,7 @@ def test_candidate_merges_native_csp_nodes_without_changing_values(tmp_path):
     assert len(native) == 1
     crypto = native[0].findall("characteristic[@type='CryptographySuite']")
     assert len(crypto) == 1
-    assert {p.get('name'):p.get('value') for p in crypto[0]} == {k:v for k,v in CRYPTO.items() if k != 'PfsGroup'}
+    assert {p.get('name'):p.get('value') for p in crypto[0]} == {**CRYPTO, 'PfsGroup':'PFS2048'}
     assert native[0].find("characteristic[@type='Authentication']/parm").attrib == {'name':'MachineMethod','value':'Certificate','datatype':'string'}
     assert native[0].find("parm[@name='DisableClassBasedDefaultRoute']").get('value') == 'true'
     assert not root.findall(".//parm[@name='ProfileXML']")

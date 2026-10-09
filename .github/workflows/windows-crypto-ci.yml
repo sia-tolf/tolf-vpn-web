@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pfs: ['omit', 'None', 'PFS2048']
+        pfs: ['generator']
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -31,7 +31,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pfs: ['omit', 'None', 'PFS2048']
+        pfs: ['generator']
     needs: package
     runs-on: windows-11-arm
     timeout-minutes: 10

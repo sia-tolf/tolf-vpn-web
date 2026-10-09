@@ -97,9 +97,9 @@ def test_profile_xml_eliminates_duplicate_csp_nodes_and_preserves_settings(tmp_p
     assert native.findtext('NativeProtocolType') == 'IKEv2'
     assert native.findtext('DisableClassBasedDefaultRoute') == 'true'
     assert [e.tag for e in native] == ['Servers','RoutingPolicyType','NativeProtocolType','DisableClassBasedDefaultRoute','CryptographySuite','Authentication']
-    assert [e.tag for e in native.find('CryptographySuite')] == ['AuthenticationTransformConstants','CipherTransformConstants','DHGroup','IntegrityCheckMethod','EncryptionMethod']
-    assert native.find('CryptographySuite/PfsGroup') is None
-    assert {e.tag:e.text for e in native.find('CryptographySuite')} == {k:v for k,v in CRYPTO.items() if k != 'PfsGroup'}
+    assert [e.tag for e in native.find('CryptographySuite')] == ['AuthenticationTransformConstants','CipherTransformConstants','PfsGroup','DHGroup','IntegrityCheckMethod','EncryptionMethod']
+    assert native.findtext('CryptographySuite/PfsGroup') == 'PFS2048'
+    assert {e.tag:e.text for e in native.find('CryptographySuite')} == {**CRYPTO, 'PfsGroup':'PFS2048'}
     assert b'&lt;VPNProfile&gt;' in path.read_bytes()
     assert path.read_bytes().startswith(b'\xef\xbb\xbf<?xml version="1.0" encoding="utf-8" standalone="yes"?>')
 
