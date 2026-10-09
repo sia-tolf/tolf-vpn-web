@@ -23,7 +23,7 @@ This is machine-certificate authentication, rather than password EAP or EAP-TLS.
 Riga's restricted `windows-certificate apply|remove UUID NODE MODE` operation
 receives only public certificate, public key and CA. `certificate-node.py` uses
 the existing routing controller to apply the assignment on Riga or Moscow.
-Each connection pins a specific device public key and identity, and uses the
+Each connection requires the pinned Windows CA and exact device identity, and uses the
 existing routing address pool selected by the owner. No catch-all certificate
 connection is installed. Deleting a device removes its authorization and
 terminates matching IKE sessions; a failed node operation leaves deletion
@@ -368,3 +368,58 @@ omitted-field diagnostics remain available in the package builder. Server
 provisioning source accepts optional MODP2048 for ESP. Deployment remains
 pending; the generic server certificate constraint and multi-certificate
 selection issues are separate and are not claimed resolved.
+
+## CA-chain authentication correction - 2026-10-09
+
+A fresh Windows 10 connection with the PFS2048 profile failed when raw public-key
+and CA constraints were mixed. A leaf-certificate-plus-CA candidate also failed
+while the previous raw public key remained loaded. Logs showed successful RSA
+signature verification, followed by a failed CA constraint.
+
+Moving only this device's raw public key and leaf certificate out of the
+auto-loaded credential directories and clearing/reloading credentials resolved
+the conflict. The per-device connection now requires the pinned CA and exact
+CN, without a raw-key or independently trusted leaf constraint. Existing IKE
+session 1564 survived credential reload. The user's next reconnect created
+session 1565; Moscow explicitly logged the trusted TOLF Windows IKEv2 Device CA,
+a completed root chain, RSA authentication success and installed CHILD_SA 1420.
+Traffic flowed in both directions. No username or password was added.
+
+The restricted provisioning helper now stores public audit material under
+/etc/swanctl/tolf-certificates, outside x509 and pubkey auto-load directories.
+Before modifying configuration it validates the pinned CA, signed leaf, exact
+device CN and equality of the supplied public key to the leaf's public key.
+Legacy imported trust files cause an explicit failure rather than silently
+retaining conflicting credential state. Existing legacy devices require an
+operator migration and one credential reload; no daemon restart is needed.
+
+Five isolated node-operation tests exercise real OpenSSL verification, retry,
+wrong-key rejection, wrong-device rejection, CA replacement rejection and the
+legacy migration guard. All 67 Windows Python tests pass. Windows 11 generator
+readback run 37886411707 also passed both SYSTEM and elevated package checks.
+https://github.com/sia-tolf/tolf-vpn-web/actions/runs/37886411707
+
+Multiple installed machine certificates remain a separate unresolved client
+selection issue. Do not represent this server correction as a per-profile
+Windows certificate selector. Production generator rollout is still pending.
+
+## Runtime rollout - 2026-10-09
+
+The corrected restricted helper was deployed on Riga with a preserved backup.
+A real restricted apply for the existing Moscow device succeeded. The final
+SA inventory no longer showed that device; the cause is not established and
+a post-rollout client reconnect remains required. Both nodes have no legacy TOLF leaf/raw-key trust imports
+in their auto-load directories. Public audit records remain outside those dirs.
+
+The verified ProfileXML generator was deployed on UK as PPKG version 2.5. The
+package metadata version was incremented from 2.4; payload crypto and routing
+match the accepted PFS2048 candidate. Before deployment, building with the
+existing certificate under the API service account and extracting the result
+confirmed version 2.5, MachineCertificate, Group14/PFS2048 and both /1 routes.
+After the atomic module update and API restart, certificatePackages health was
+true. Source SHA256: d696fbead33d36a3312663d35cf5814e76f23225c8170436c9e9a24d69bd7f65.
+
+The user's installed working profile is unchanged and does not need reinstall.
+Previously saved packages are not rewritten. Multiple machine certificates
+remain an unresolved client-selection limitation; deleting VPN profiles alone
+does not remove their certificates.

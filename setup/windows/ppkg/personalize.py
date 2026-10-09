@@ -245,7 +245,7 @@ def build(row, pfx, password, ca_der):
                 local = element.tag.split('}')[-1]
                 if local == 'ID': element.text = '{' + identity + '}'
                 if local == 'Name' and element.text == 'TOLF PPKG native crypto test': element.text = profile
-                if local == 'Version': element.text = '2.4'
+                if local == 'Version': element.text = '2.5'
                 if local == 'Server': element.text = HOSTS[row['server']]
                 if local == 'CertificatePassword': element.text = password
                 if 'VPNProfileName' in element.attrib: element.set('VPNProfileName', profile)
@@ -257,7 +257,7 @@ def build(row, pfx, password, ca_der):
         shutil.copyfile(TEMPLATE_PACKAGE, package)
         run(['update',str(package),'1','--no-acls','--command', 'add "'+str(directory)+'" /'])
         run(['info',str(package),'1','--image-property','NAME='+profile,'--image-property','PACKAGEID={'+identity+'}',
-             '--image-property','VERSION=2.4','--image-property','ALTITUDE=5000',
+             '--image-property','VERSION=2.5','--image-property','ALTITUDE=5000',
              '--image-property','RESETCLEAR=0','--image-property','NOTES=VERSION=10.0.26100.9457;Source=CLI;;TargetSkus=Invalid;EncryptPackage=False;SignPackage=False;PackageID='+identity+';'])
         # Read the produced WIM back; verify the same exact payload was stored.
         extracted = Path(tmp)/'verify'

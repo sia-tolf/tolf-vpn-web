@@ -41,7 +41,6 @@ def connection(device, node, mode):
             auth = pubkey
             id = "CN=tolf-win-{compact}.tolf.is"
             cacerts = tolf-windows-ca.pem
-            pubkeys = tolf-cert-{compact}.pem
         }}
         children {{ {name} {{
             local_ts = 0.0.0.0/0
@@ -72,11 +71,11 @@ def main(args):
         fcntl.flock(lock, fcntl.LOCK_EX)
         routing.preflight(node)
         conf = '/etc/swanctl/conf.d/tolf-cert-' + compact + '.conf'
-        pub = '/etc/swanctl/pubkey/tolf-cert-' + compact + '.pem'
-        cert = '/etc/swanctl/x509/tolf-cert-' + compact + '.pem'
+        pub = '/etc/swanctl/tolf-certificates/tolf-cert-' + compact + '.pub.pem'
+        cert = '/etc/swanctl/tolf-certificates/tolf-cert-' + compact + '.pem'
         ca = '/etc/swanctl/x509ca/tolf-windows-ca.pem'
         writes = {conf: connection(device, node, mode), pub: data.get('publicKey'), cert: data.get('certificate'), ca: data.get('ca')} if action == 'apply' else {}
-        body = 'set -eu\numask 077\nmkdir -p /etc/swanctl/pubkey /etc/swanctl/x509 /etc/swanctl/x509ca\n'
+        body = 'set -eu\numask 077\nmkdir -p /etc/swanctl/tolf-certificates /etc/swanctl/x509ca\n'
         # Pinned authority must never be replaced by a later issuance request.
         if action == 'apply':
             encoded = base64.b64encode(data['ca'].encode()).decode()
@@ -85,6 +84,23 @@ trap 'rm -f "$candidate"' EXIT
 '''
             body += f"printf '%s' '{encoded}' | base64 -d > \"$candidate\"\n"
             body += f'if [ -f {ca} ]; then cmp -s {ca} "$candidate"; fi\n'
+        # These files are audit records, not independently trusted credentials.
+        # Reject legacy trust imports: migration must clear the daemon's old
+        # credentials once, after moving the legacy files out of auto-load dirs.
+        if action == 'apply':
+            body += f'test ! -e /etc/swanctl/pubkey/tolf-cert-{compact}.pem\n'
+            body += f'test ! -e /etc/swanctl/x509/tolf-cert-{compact}.pem\n'
+            for key in ('certificate', 'publicKey'):
+                encoded = base64.b64encode(data[key].encode()).decode()
+                body += f"printf '%s' '{encoded}' | base64 -d > \"$candidate.{key}\"\n"
+            body = body.replace("trap 'rm -f \"$candidate\"' EXIT",
+                                "trap 'rm -f \"$candidate\" \"$candidate.certificate\" \"$candidate.publicKey\" \"$candidate.derived\" \"$candidate.normalized\"' EXIT")
+            body += 'openssl verify -CAfile "$candidate" "$candidate.certificate" >/dev/null\n'
+            body += f'test "$(openssl x509 -in \"$candidate.certificate\" -noout -subject -nameopt RFC2253)" = "subject=CN=tolf-win-{compact}.tolf.is"\n'
+            body += 'openssl x509 -in "$candidate.certificate" -pubkey -noout > "$candidate.derived"\n'
+            body += 'openssl pkey -pubin -in "$candidate.publicKey" -pubout > "$candidate.normalized"\n'
+            body += 'cmp -s "$candidate.derived" "$candidate.normalized"\n'
+
         # Restore the configuration if loading fails. Files outside this device are untouched.
         backup = conf + '.before-certificate-operation'
         body += f'if [ -f {conf} ]; then cp -p {conf} {backup}; fi\n'
