@@ -37,6 +37,9 @@ $expected = [ordered]@{
     AuthenticationTransformConstants='SHA256128'; CipherTransformConstants='AES256'
     EncryptionMethod='AES256'; IntegrityCheckMethod='SHA256'; DHGroup='Group14'; PfsGroup='None'
 }
+$metadata = Get-Content (Join-Path $InputDirectory 'metadata.json') -Raw | ConvertFrom-Json
+if ($metadata.pfsGroup -notin @('None','PFS2048')) { throw 'Invalid test PFS value.' }
+$expected.PfsGroup = [string]$metadata.pfsGroup
 $report = [ordered]@{
     OS = (Get-CimInstance Win32_OperatingSystem | Select-Object Caption,Version,BuildNumber,OSArchitecture)
     Identity = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
@@ -65,7 +68,7 @@ try {
     Import-Module VpnClient
     try {
         Add-VpnConnection -Name 'TOLF-CI-BASE' -ServerAddress 'vpn-ci.invalid' -TunnelType Ikev2 -AuthenticationMethod MachineCertificate -AllUserConnection -Force | Out-Null
-        Set-VpnConnectionIPsecConfiguration -ConnectionName 'TOLF-CI-BASE' -AllUserConnection -AuthenticationTransformConstants SHA256128 -CipherTransformConstants AES256 -EncryptionMethod AES256 -IntegrityCheckMethod SHA256 -DHGroup Group14 -PfsGroup None -Force | Out-Null
+        Set-VpnConnectionIPsecConfiguration -ConnectionName 'TOLF-CI-BASE' -AllUserConnection -AuthenticationTransformConstants SHA256128 -CipherTransformConstants AES256 -EncryptionMethod AES256 -IntegrityCheckMethod SHA256 -DHGroup Group14 -PfsGroup $expected.PfsGroup -Force | Out-Null
         $report.Results.Baseline = Read-Policy 'TOLF-CI-BASE'
     } catch { $report.Results.Baseline = @{Error=$_.Exception.Message;Matches=$false} }
     $xml = Get-Content (Join-Path $InputDirectory 'ProfileXML.xml') -Raw

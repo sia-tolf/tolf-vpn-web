@@ -15,7 +15,9 @@ spec = importlib.util.spec_from_file_location("ci_personalize", ROOT / "setup/wi
 personalize = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(personalize)
 
-def build(destination, wimlib="wimlib-imagex"):
+def build(destination, wimlib="wimlib-imagex", pfs_group=None):
+    if pfs_group not in (None, "None", "PFS2048"):
+        raise ValueError("Unsupported CI PFS candidate")
     destination = Path(destination)
     destination.mkdir(parents=True, exist_ok=True)
     package = destination / "TOLF-CI-Crypto.ppkg"
@@ -39,6 +41,16 @@ def build(destination, wimlib="wimlib-imagex"):
         target = provider.find("characteristic")
         target.set("type", "TOLF-CI-PPKG")
         value = target.find("parm").get("value")
+        if pfs_group is not None:
+            document = ET.fromstring(value)
+            suite = document.find("NativeProfile/CryptographySuite")
+            if suite.find("PfsGroup") is not None:
+                raise ValueError("Unexpected PfsGroup in base generator output")
+            pfs = ET.Element("PfsGroup")
+            pfs.text = pfs_group
+            suite.insert(list(suite).index(suite.find("DHGroup")), pfs)
+            value = ET.tostring(document, encoding="unicode")
+            target.find("parm").set("value", value)
         if target.find("parm").get("name") != "ProfileXML" or len(list(target)) != 1:
             raise ValueError("CI runtime must contain only ProfileXML")
         (destination / "ProfileXML.xml").write_text(value, encoding="utf-8")
@@ -98,9 +110,11 @@ def build(destination, wimlib="wimlib-imagex"):
                 assert (roundtrip / item.relative_to(payload)).read_bytes() == item.read_bytes()
     (destination / "metadata.json").write_text(json.dumps({
         "profileName": "TOLF-CI-PPKG", "credentials": False, "connect": False,
+        "pfsGroup": pfs_group or "None", "pfsElement": pfs_group,
         "scope": "CI only; not a user download or Windows 10 acceptance test"
     }, indent=2), encoding="utf-8")
     print("Credential-free CI PPKG and identical ProfileXML roundtrip verified")
 
 if __name__ == "__main__":
-    build(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else "wimlib-imagex")
+    build(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else "wimlib-imagex",
+          sys.argv[3] if len(sys.argv) > 3 and sys.argv[3] != "omit" else None)
