@@ -31,6 +31,7 @@ try {
         Add-VpnConnection -Name $name -ServerAddress 'vpn-ci.invalid' -TunnelType Ikev2 -AuthenticationMethod Eap -EapConfigXmlStream $xml -SplitTunneling -AllUserConnection -Force | Out-Null
         $vpn=Get-VpnConnection -Name $name -AllUserConnection
         $vpn.EapConfigXmlStream.OuterXml | Set-Content (Join-Path $OutputDirectory ($name+'.xml'))
+        Write-Output $vpn.EapConfigXmlStream.OuterXml
         Check-Eap $vpn.EapConfigXmlStream $xml
         $report.Cases[$name]=@{Passed=$true;Authentication=[string]$vpn.AuthenticationMethod}
         $vpn.EapConfigXmlStream.OuterXml | Set-Content (Join-Path $OutputDirectory ($name+'.xml'))
