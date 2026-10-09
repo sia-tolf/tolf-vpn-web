@@ -640,3 +640,16 @@ not live end-to-end Windows Internet acceptance.
 Windows profile still has only the ping route; read its scope/routes and the
 management-host 10.0.21.10 route before adding broad IPv4 VPN routes.
 IPv6/browser behavior and effective DNS remain to be checked separately.
+
+### B live IPv4 Internet acceptance — 2026-10-09 11:27–11:29 UTC
+
+Windows user added IPv4 profile routes 0.0.0.0/1 and 128.0.0.0/1, metric 1,
+to all-user TOLF EAP Moscow B; the old ping /32 remains. Management-host route
+10.0.21.10/32 uses Ethernet0 index 8 via 192.168.200.1, local 192.168.200.213.
+After reconnect, Moscow logs verified the B certificate, EAP identity, and
+IKE/CHILD under identity-b, VIP 10.10.10.3, selectors 0.0.0.0/0.
+Traffic counters showed 249115 bytes inbound and 1001501 bytes outbound.
+User explicitly confirmed browser results: Yandex 92.243.66.32 (Moscow),
+Whoer 188.214.39.114 (Riga). This is live IPv4 split-routing acceptance.
+Effective Windows DNS, IPv6, reboot, clean-install, wrong-certificate/revocation,
+and production generator integration remain pending.
