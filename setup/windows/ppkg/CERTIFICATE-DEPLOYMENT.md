@@ -423,3 +423,40 @@ The user's installed working profile is unchanged and does not need reinstall.
 Previously saved packages are not rewritten. Multiple machine certificates
 remain an unresolved client-selection limitation; deleting VPN profiles alone
 does not remove their certificates.
+
+## Post-rollout acceptance - 2026-10-09
+
+The user's reconnect after the restricted helper and generator rollout created
+IKE session 1568 and installed CHILD_SA 1424. Moscow's 05:26:58 UTC log explicitly
+recorded the intended 05b068 device certificate, trusted TOLF Windows IKEv2
+Device CA and successful RSA authentication. SA readback showed AES256/SHA256,
+MODP2048 for IKE, virtual address 10.10.10.14, and traffic in both directions.
+This closes the post-rollout reconnect gate above. It does not resolve multiple
+installed client certificates.
+
+## Isolated certificate-selection feasibility gate - 2026-10-09
+
+VPNv2 MachineCertificate Certificate/Eku and Certificate/Issuer remain documented
+as reserved for future use. A VpnClient cmdlet filter is not proof of pure-PPKG
+support. EAP-TLS has documented CA and custom-EKU certificate filters and remains
+certificate-only (EAP type 13, not password type 26).
+
+The new isolated CI builder substitutes EAP-TLS in the accepted crypto/routing
+payload, with automatic certificate selection, mandatory server CA/name
+validation, client CA filtering, a distinct UUID-derived custom EKU per test
+profile, and disabled all-purpose/any-purpose certificate fallback. It contains
+no client certificate, private key, password or live server target. WIM extraction
+roundtrip passed on UK. The Windows CI gate compares two distinct native EAP
+configurations and one full PPKG readback, including all six crypto settings.
+
+This is a feasibility test, not deployed authentication or connection acceptance.
+Production issuance and installed profiles are unchanged. The existing gateway
+does not have eap-tls loaded; server support, user-certificate provisioning,
+per-device authorization/revocation, Windows 10 readback and real selection with
+two installed certificates must be verified before any production conversion.
+
+References:
+- https://learn.microsoft.com/en-us/windows/client-management/mdm/vpnv2-csp
+- https://learn.microsoft.com/en-us/windows/client-management/mdm/eap-configuration
+- https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-gpwl/65562521-4153-4e20-9c4a-612e190886ee
+- https://docs.strongswan.org/docs/6.0/interop/windowsUserServerConf.html
