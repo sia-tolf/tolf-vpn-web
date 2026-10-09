@@ -510,3 +510,28 @@ No connection was attempted. Windows 10 acceptance, actual certificate selection
 with two credentials, gateway EAP-TLS authorization/revocation and interactive
 PPKG installation context remain unverified. Current production MachineCertificate
 profiles, certificates, generator and gateway configuration were not changed.
+
+## Windows 10 EAP-TLS A/B candidate staged - 2026-10-09
+
+The acceptance builder creates two seven-day user-certificate PPKGs under a
+private UK directory. Signing material stays on UK. Packages use a temporary
+dedicated CA, two different client certificates and bounded documentation-only
+custom EKU values (temporary test only). Each profile pins the Riga server name
+and ISRG Root X1, enables client-CA/custom-EKU filtering, and includes only a
+10.250.80.1/32 split route. Both certificate chains and four-provider WIM
+roundtrips passed. Package keys and blobs are not committed.
+
+Riga already had eap-tls loaded. Two narrow EAP_TLS connections and one-address
+pools were loaded (10 connections, 0 unloaded; 6 pools, 0 unloaded). The
+temporary CA was confirmed loaded. Test identities have distinct exact EAP IDs;
+actual TLS certificate identity/authorization binding remains an acceptance
+gate. The test address 10.250.80.1/32 is assigned to loopback temporarily.
+Existing connections and gateway credentials were not replaced; no daemon
+restart occurred.
+
+Delivery is blocked pending explicit credential-file transfer approval.
+Automatic review rejected public HTTPS publication of private-key-bearing
+packages, and also rejected extracting a chunk for private transfer as
+unauthorized credential disclosure. No public route or copy was created.
+Use authenticated private delivery after approval; do not retry public serving.
+No Windows installation or connection has yet been attempted.
