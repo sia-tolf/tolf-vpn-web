@@ -535,3 +535,15 @@ packages, and also rejected extracting a chunk for private transfer as
 unauthorized credential disclosure. No public route or copy was created.
 Use authenticated private delivery after approval; do not retry public serving.
 No Windows installation or connection has yet been attempted.
+
+## Authenticated candidate delivery - 2026-10-09
+
+The user explicitly approved receiving both private-key-bearing test packages
+and requested Windows download links. Automatic review still rejected
+unauthenticated URL serving. A materially safer delivery path was then accepted:
+two exact HTTPS paths protected by independent temporary HTTP Basic credentials.
+Caddy stores only a password hash, serving files are root-owned/caddy-readable,
+and the UK signing directory remains private. Both URLs return 401 without
+credentials and 200 with credentials; response bytes match the private originals.
+No URLs, download credentials, client private keys or PFX blobs are committed.
+Windows installation/selection/connection acceptance remains pending.
