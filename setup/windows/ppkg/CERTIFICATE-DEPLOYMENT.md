@@ -564,3 +564,26 @@ Cleanup: remove /etc/swanctl/conf.d/tolf-eaptls-moscow-test-20261009.conf and it
 Moscow first live attempt 2026-10-09 07:56:25 UTC: actual Windows IKE ID was 192.168.8.109, not the earlier VM IP. The client sent the expected A UPN; generic dispatch selected MSCHAPv2 and client replied EAP_NAK. Corrected temporary remote ID to the observed value and reloaded connections (18 loaded, 0 unloaded), without restart. TLS exchange and certificate selection still await retry. Anonymous HTTPS A/B rechecked: both 401.
 
 Live Windows acceptance 2026-10-09: A at 08:07:25–27 UTC sent TLS client CN=tolf-eap-test-a-cfe2a91a187a@tolf.is, verified temporary CA, EAP_TLS success, IKE/CHILD established, VIP 10.250.81.11. B at 08:08:33 UTC sent distinct TLS client CN=tolf-eap-test-b-432b7001527b@tolf.is, verified the same temporary CA, EAP_TLS success, IKE/CHILD established, VIP 10.250.81.12. User reported successful ping for both. A disconnected before B. Both installed profiles therefore selected their intended certificates in this live sequence. Reboot/reinstallation, missing/mismatched certificate negative tests, and production dispatch independent of changing IKE IP remain pending.
+
+### Moscow EAP dynamic stage — 2026-10-09 08:19 UTC
+
+After live A and B acceptance, installed strongswan-mod-eap-dynamic 6.0.3-r2
+without restarting charon. Runtime stats still exclude eap-dynamic.
+Prepared root-only /root/tolf-eaptls-dynamic-stage-20261009 on Moscow:
+- managed.candidate changes only the generic dispatcher from eap-mschapv2 to
+  eap-dynamic; keeps its deliberately unsatisfied group authorization constraint.
+- plugin.candidate enables peer negotiation with preferred TLS and MSCHAPv2.
+- test.candidate replaces the source-IP-specific test policy with exact A and B
+  EAP identities, each constrained to the temporary test CA and ping-only subnet.
+- activate.sh checks the active configuration still matches the backups,
+  restarts swanctl, checks plugin and both policies, and restores backups on
+  those checks failing. Shell syntax was checked; activation has not been run.
+
+Activation disconnects current SAs and requires a coordinated restart.
+Live checks must establish both test identities through the dispatcher, show
+their own certificate in the logs, and verify existing password clients recover.
+The managed dispatcher modification is temporary: the routing controller can
+overwrite it on a routing update. Integrate the controller only after acceptance.
+Production issuance/generator is unchanged. Temporary custom EKU namespace must
+not be promoted to production; certificate selection and per-device authorization
+still require a production design and negative acceptance tests.
