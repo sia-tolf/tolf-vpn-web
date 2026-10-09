@@ -22,7 +22,7 @@ def build(out,wim):
     work=out/"base";eap.build(work,wim)
     now=datetime.now(timezone.utc)
     cakey=rsa.generate_private_key(public_exponent=65537,key_size=3072)
-    caname=x509.Name([x509.NameAttribute(NameOID.COMMON_NAME,"TOLF Temporary EAP-TLS Acceptance CA 20261009")])
+    caname=x509.Name([x509.NameAttribute(NameOID.COMMON_NAME,os.environ.get("TOLF_ACCEPTANCE_CA_NAME","TOLF Temporary EAP-TLS Acceptance CA 20261009"))])
     ca=(x509.CertificateBuilder().subject_name(caname).issuer_name(caname).public_key(cakey.public_key())
         .serial_number(x509.random_serial_number()).not_valid_before(now-timedelta(minutes=10)).not_valid_after(now+timedelta(days=7))
         .add_extension(x509.BasicConstraints(ca=True,path_length=0),True)
@@ -31,9 +31,9 @@ def build(out,wim):
     (out/"test-ca.pem").write_bytes(ca.public_bytes(serialization.Encoding.PEM))
     (out/"test-ca-key.pem").write_bytes(cakey.private_bytes(serialization.Encoding.PEM,serialization.PrivateFormat.PKCS8,serialization.NoEncryption()))
     serverca=x509.load_pem_x509_certificate(Path("/usr/share/ca-certificates/mozilla/ISRG_Root_X1.crt").read_bytes())
-    manifest={"server":"ikev2-riga.tolf.is","testAddress":"10.250.80.1","clientCA":ca.fingerprint(hashes.SHA1()).hex().upper(),"serverCA":serverca.fingerprint(hashes.SHA1()).hex().upper(),"profiles":[],"expires":str(now+timedelta(days=7))}
+    manifest={"server":os.environ.get("TOLF_ACCEPTANCE_SERVER","ikev2-riga.tolf.is"),"testAddress":os.environ.get("TOLF_ACCEPTANCE_ADDRESS","10.250.80.1"),"clientCA":ca.fingerprint(hashes.SHA1()).hex().upper(),"serverCA":serverca.fingerprint(hashes.SHA1()).hex().upper(),"profiles":[],"expires":str(now+timedelta(days=7))}
     for n,label in enumerate(("A","B"),1):
-        identity=uuid.uuid4(); profile_name="TOLF EAP Test "+label
+        identity=uuid.uuid4(); profile_name=os.environ.get("TOLF_ACCEPTANCE_PROFILE_PREFIX","TOLF EAP Test ")+label
         upn="tolf-eap-test-"+label.lower()+"-"+identity.hex[:12]+"@tolf.is"
         oid="1.3.6.1.4.1.32473.2.20261009."+str(n) # Temporary documentation-namespace test only.
         key=rsa.generate_private_key(public_exponent=65537,key_size=2048)

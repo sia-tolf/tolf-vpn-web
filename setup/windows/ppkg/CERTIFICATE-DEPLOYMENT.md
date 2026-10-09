@@ -547,3 +547,16 @@ and the UK signing directory remains private. Both URLs return 401 without
 credentials and 200 with credentials; response bytes match the private originals.
 No URLs, download credentials, client private keys or PFX blobs are committed.
 Windows installation/selection/connection acceptance remains pending.
+
+
+### Moscow A/B acceptance staging — 2026-10-09
+
+Riga attempt reached the server via Moscow, but the generic dispatcher offered EAP-MSCHAPv2 after the client sent its certificate UPN. No client EAP-TLS exchange occurred. Server key loading was also repaired separately. These failures were not covered by build/installation CI.
+
+Moscow eap-tls 6.0.3-r2 installed; authorized swanctl service restart completed and plugin readback confirmed. Temporary Moscow A/B PPKGs target ikev2.tolf.is, pin ISRG Root X1 and distinct client CA/custom EKU filters. Private CA/key/PFX remain under the UK private acceptance directory; only public CA was sent to Moscow.
+
+Server test policy is restricted to this VM's initial IKE identity 192.168.200.213, EAP-TLS and the separate seven-day Moscow CA. This is a temporary dispatch workaround for the acceptance test, not a production selection design. Pool 10.250.81.11–12; only CHILD selector 10.250.81.1/32. Runtime loopback address and narrowly scoped ICMP input rule added. No extra daemon restart needed to load the test configuration.
+
+PPKG four-provider WIM roundtrip and both client sslclient chains verified. HTTPS anonymous requests returned 401; authenticated downloads returned 200 and exact package bytes. Runtime connection readback shows EAP_TLS and the temporary CA. Windows 10 installation, handshake, correct A/B certificate selection and ping remain UNVERIFIED until the user's live attempts and server logs.
+
+Cleanup: remove /etc/swanctl/conf.d/tolf-eaptls-moscow-test-20261009.conf and its public CA, reload normal credentials/connections/pools, remove test loopback and labeled nft ICMP rule, and remove authenticated download routes/files after acceptance. Do not remove production certificates or profiles.
