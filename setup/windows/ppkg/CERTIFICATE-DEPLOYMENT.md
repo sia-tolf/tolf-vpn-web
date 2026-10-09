@@ -600,3 +600,13 @@ Existing ikev2-yt password session recovered with IKE and CHILD established.
 A/B Windows reconnection and ping after this change are still pending.
 Production generator remains unchanged; temporary dispatcher update is not
 yet persistent across routing-controller rewrites.
+
+### Post-restart A acceptance — 2026-10-09 09:30:03–04 UTC
+
+Windows user confirmed A connected and ping passed. Moscow logs confirm TLS
+peer certificate CN=tolf-eap-test-a-cfe2a91a187a@tolf.is, trusted temporary
+Moscow test CA, EAP_TLS success, IKE and CHILD established under
+tolf-eaptls-moscow-identity-a. VIP 10.250.81.11; four packets in and out.
+The configured remote id is %any, so no source-IP constraint remains.
+Initial peer selection directly chose identity-a; this run does not prove
+negotiation through tolf-win-dispatch or switching to identity-b. B is pending.
