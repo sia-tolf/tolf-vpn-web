@@ -330,3 +330,20 @@ no supported pure-ProfileXML per-device filter has been demonstrated. Do not
 issue new device certificates or change the working authentication based only
 on the existence of these nodes. Certificate-only authentication remains the
 requirement.
+
+## Controlled PFS matrix - 2026-10-09
+
+Run 37883393931 at commit 2bb5fdc tested three otherwise identical payloads on separate Windows 11 Enterprise ARM64 build 26200 runners.
+https://github.com/sia-tolf/tolf-vpn-web/actions/runs/37883393931
+
+| PfsGroup XML | Full CSP | Full PPKG |
+| --- | --- | --- |
+| omitted | failed | failed, profile absent |
+| None | passed | passed, six policy fields matched |
+| PFS2048 | passed | passed, six policy fields matched |
+
+Both passing packages retained MachineCertificate, disabled automatic connection and class-based routes, and installed both IPv4 /1 routes. Windows 10 remains accepted only for the NoPFS preview with a single active certificate. PFS2048 installation and actual handshake/rekey on Windows 10 remain unverified. The server ESP proposal lacks a DH group; assess rekey compatibility before a PFS2048 connection test. Do not deploy either candidate universally.
+
+The user confirmed another successful connection after package cleanup on 9 October. Inventory IsInstalled=False did not establish absence of VPN profiles or certificates. Multi-certificate selection remains unresolved. Certificate-only authentication remains required.
+
+The user explicitly authorized the private preview and repository publication on 9 October. A PFS2048 installation-only preview was built with the existing certificate/key, separate package and profile identities, and no server provisioning call. Extracted runtime bytes and the HTTPS download checksum matched. Private bearer URLs and sensitive payloads remain excluded from Git. Windows 10 readback remains pending; production configuration is unchanged.
