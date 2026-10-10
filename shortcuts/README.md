@@ -33,3 +33,8 @@ replacement signed commands are available and verified.
 ## Return to the Home Screen
 
 Use --return-home with build.py or sign-native.py to append the native Go to Home Screen action after both VPN operations. URL launching still opens Shortcuts briefly; the final action returns Home. Names and VPN binding remain unchanged.
+
+## Website integration (pending iPhone validation)
+
+See [WEBSITE-INTEGRATION.md](WEBSITE-INTEGRATION.md) for the optional WebClips,
+portable candidate commands, exact names, deployment steps and release gate.

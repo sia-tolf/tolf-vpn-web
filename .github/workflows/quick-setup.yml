@@ -2,7 +2,7 @@ name: Quick setup checks
 on:
   push:
     branches: ['codex/quick-setup', 'main']
-    paths: ['quick/**', 'setup/quick/**', 'tests/quick/**', 'index.html', 'css/styles.css', 'js/locales/**', 'js/quick-entry.js', '.github/workflows/quick-setup.yml']
+    paths: ['quick/**', 'js/ios-vpn-buttons.js', 'css/ios-vpn-buttons.css', 'setup/quick/**', 'tests/quick/**', 'index.html', 'css/styles.css', 'js/locales/**', 'js/quick-entry.js', '.github/workflows/quick-setup.yml']
   workflow_dispatch:
 permissions:
   contents: read

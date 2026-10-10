@@ -1,0 +1,10 @@
+.ios-vpn-buttons { margin: 1rem 0; padding: 1rem; border: 1px solid #a0a0a04d; border-radius: 14px; }
+.ios-vpn-buttons-choice { display: flex; align-items: center; gap: .65rem; cursor: pointer; }
+.ios-vpn-buttons-choice input[type=checkbox] { width: 1.2rem; height: 1.2rem; flex: 0 0 auto; margin: 0; accent-color: #239668; }
+.ios-vpn-buttons-details[hidden] { display: none; }
+.ios-vpn-buttons-preview { display: flex; gap: 1.5rem; margin: 1rem 0; }
+.ios-vpn-buttons-preview > div { display: grid; gap: .5rem; justify-items: center; }
+.ios-vpn-icon { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 15px; color: white; font: 48px/1 system-ui, sans-serif; }
+.ios-vpn-icon.on { background: #239668; }
+.ios-vpn-icon.off { background: #d93838; font-size: 35px; }
+.ios-vpn-buttons .oc-actions { display: flex; flex-wrap: wrap; gap: .65rem; }

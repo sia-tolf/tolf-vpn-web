@@ -63,7 +63,7 @@ def main():
     owner = pwd.getpwnam(user)
     modules = {}
     for name, entry in PAYLOAD.items():
-        if name not in {"tolf_oc_certificates.py", "tolf_anyconnect.py", 'tolf_oc_nodes.py', "tolf_oc_mobileconfig.py"}:
+        if name not in {"tolf_oc_certificates.py", "tolf_anyconnect.py", 'tolf_oc_nodes.py', "tolf_oc_mobileconfig.py", "tolf_oc_webclips.py"}:
             raise RuntimeError("Unexpected installer payload")
         data = base64.b64decode(entry["data"], validate=True)
         if hashlib.sha256(data).hexdigest() != entry["sha256"]:

@@ -204,7 +204,9 @@
     if (url.startsWith("https://") && !url.startsWith(API)) { node.target = "_blank"; node.rel = "noopener noreferrer"; }
     return node;
   }
+  let iosButtons = false;
   function choose(id) {
+    iosButtons = false;
     confirmedDeviceId = null;
     importedDeviceId = null;
     transferGrant = null; clearTimeout(transferTimer);
@@ -392,7 +394,13 @@
         // MobileConfig with both the certificate and the Cisco VPN.
         const location = API + path(d.id) + "/ios.mobileconfig?ingress=" + encodeURIComponent(ingress().id);
         const actions = element("div", null, "oc-actions oc-ios-install");
-        actions.append(link(c.iosInstall, location, true));
+        const install = link(c.iosInstall, window.tolfIosButtons.profileUrl(location, iosButtons), true);
+        const options = window.tolfIosButtons.create({checked:iosButtons, disabled:busy || loading,
+          vpnName:"TOLF " + (ingress().id === "moscow" ? "Москва" : "Рига") + " " + Array.from(d.label).slice(0,36).join(""),
+          url:location, onChange:checked => { iosButtons = checked; install.href = window.tolfIosButtons.profileUrl(location, checked); }
+        });
+        root.append(options);
+        actions.append(install);
         root.append(actions, element("p", c.iosInstallHelp, "oc-note"));
       }
       for (const [destination, text] of [["local",delivery.local],["remote",delivery.remote]]) {

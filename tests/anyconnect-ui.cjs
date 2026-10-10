@@ -87,8 +87,8 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
     MutationObserver:class {observe(){}},
     setInterval(){},setTimeout,clearTimeout,
     apiRequest:request,copyText:async value=>{c.copied=value;},Blob,AbortController,
-    URL:{createObjectURL(blob){assert.equal(blob.type,'application/octet-stream');return 'blob:test-package';},
-      revokeObjectURL(url){revokedUrls.push(url);}},
+    URL:class extends URL {static createObjectURL(blob){assert.equal(blob.type,'application/octet-stream');return 'blob:test-package';}
+      static revokeObjectURL(url){revokedUrls.push(url);}},
     fetch:async (url,options)=>{
       if(url==='https://api.tolf.is/import/token.p12'){
         downloads.push(url);return {ok:true,arrayBuffer:async()=>new Uint8Array([48,2,1,0]).buffer};
@@ -97,7 +97,7 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
     }});
   const uiSource=fs.readFileSync(path.join(root,'js','ui.js'),'utf8');
   vm.runInContext(uiSource.slice(0,uiSource.indexOf('function updateSelectedServerAddress')),c);
-  for (const file of ['transport-selector.js','anyconnect-access.js']) {
+  for (const file of ['ios-vpn-buttons.js','transport-selector.js','anyconnect-access.js']) {
     vm.runInContext(fs.readFileSync(path.join(root,'js',file),'utf8'),c);
   }
   ids.vpnTransportAnyConnect.click(); await settle();
@@ -105,6 +105,18 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   const iosInstall=descendants(ids.anyConnectAccess).find(n=>n.tagName==='a'&&n.textContent==='Установить профиль AnyConnect');
   assert(iosInstall,'a single profile installation button is offered on iOS');
   assert(iosInstall.href.includes('/oc/access/devices/one/ios.mobileconfig?ingress=moscow'));
+  const option = descendants(ids.anyConnectAccess).find(n=>n.tagName==='input'&&n.type==='checkbox');
+  const details = descendants(ids.anyConnectAccess).find(n=>n.className==='ios-vpn-buttons-details');
+  assert.equal(option.checked, false);
+  assert.equal(details.hidden, true);
+  assert(!new URL(iosInstall.href).searchParams.has('buttons'));
+  option.checked = true; option.events.change();
+  assert.equal(details.hidden, false);
+  assert.equal(new URL(iosInstall.href).searchParams.get('buttons'), 'true');
+  assert(details.textContent.includes('TOLF Москва iPad'));
+  assert.deepEqual(descendants(details).filter(n=>n.tagName==='a').map(n=>n.textContent), ['Добавить TOLF ON', 'Добавить TOLF OFF']);
+  option.checked = false; option.events.change();
+  assert(!new URL(iosInstall.href).searchParams.has('buttons'));
   assert(!descendants(ids.anyConnectAccess).some(n=>n.tagName==='button'&&n.textContent==='Настроить на этом устройстве'));
   assert(!descendants(ids.anyConnectAccess).some(n=>n.tagName==='a'&&n.textContent==='Добавить в AnyConnect'));
   c.currentPlatform='android';

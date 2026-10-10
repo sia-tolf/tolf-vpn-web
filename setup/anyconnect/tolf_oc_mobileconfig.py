@@ -7,7 +7,7 @@ import plistlib
 import uuid
 
 
-def make_combined_profile(row, authority, ingress, entry_name, production=False):
+def make_combined_profile(row, authority, ingress, entry_name, production=False, include_buttons=False):
     if ingress not in ("oc.tolf.is:4443", "oc-riga.tolf.is:443"):
         raise ValueError("Unsupported ingress")
     pkcs12_bytes, pkcs12_password = authority.bundle(row)
@@ -74,6 +74,9 @@ def make_combined_profile(row, authority, ingress, entry_name, production=False)
         "PayloadRemovalDisallowed": False,
         "PayloadContent": [certificate, vpn],
     }
+    if include_buttons:
+        from tolf_oc_webclips import webclip_payloads
+        profile["PayloadContent"].extend(webclip_payloads(row["id"]))
     return plistlib.dumps(profile, fmt=plistlib.FMT_XML, sort_keys=False)
 
 
@@ -120,7 +123,7 @@ def register_combined_test(app, authenticate, record, authority, database, enabl
         return row
 
     @app.get("/oc/access/devices/{device_id}/ios.mobileconfig")
-    def download_ios_profile(device_id: str, request: Request, ingress: str = "moscow"):
+    def download_ios_profile(device_id: str, request: Request, ingress: str = "moscow", buttons: bool = False):
         # A direct HTTPS link from vpn.tolf.is; no bearer token or PKCS12 file
         # ever appears in the URL. The active TOLF session authorizes download.
         user = authenticate(request)
@@ -129,7 +132,7 @@ def register_combined_test(app, authenticate, record, authority, database, enabl
         row = record(user, device_id, True)
         name = "Москва" if ingress == "moscow" else "Рига"
         host = {"moscow": "oc.tolf.is:4443", "riga": "oc-riga.tolf.is:443"}[ingress]
-        unsigned = make_combined_profile(row, authority, host, name, production=True)
+        unsigned = make_combined_profile(row, authority, host, name, production=True, include_buttons=buttons)
         # Signing uses the same TOLF signing authority as iOS IKEv2 and DNS profiles.
         from tolf_profiles import _sign_apple_profile
         signed = _sign_apple_profile(unsigned)
