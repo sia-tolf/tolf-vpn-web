@@ -1,12 +1,12 @@
 #define name TOLF OFF
 #question vpnDemand "Выберите TOLF AnyConnect для On Demand" "TOLF Москва iPhone"
 #question vpnConnection "Выберите тот же TOLF AnyConnect для Disconnect" "TOLF Москва iPhone"
-rawAction("is.workflow.actions.vpn.set", {
+action 'is.workflow.actions.vpn.set' applyTolfOnDemand(text vpn: 'WFVPN') {
   "WFVPNOperation": "Set On Demand",
-  "WFOnDemandValue": false,
-  "WFVPN": vpnDemand
-})
-rawAction("is.workflow.actions.vpn.set", {
-  "WFVPNOperation": "Disconnect",
-  "WFVPN": vpnConnection
-})
+  "WFOnDemandValue": false
+}
+action 'is.workflow.actions.vpn.set' applyTolfConnection(text vpn: 'WFVPN') {
+  "WFVPNOperation": "Disconnect"
+}
+applyTolfOnDemand(vpnDemand)
+applyTolfConnection(vpnConnection)

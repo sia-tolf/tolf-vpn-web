@@ -14,6 +14,8 @@ for(const [id,op,desired] of [['on','Connect',true],['off','Disconnect',false]])
  assert(code.includes('"WFVPNOperation": "'+op+'"'));
  assert(code.includes('"WFOnDemandValue": '+(desired?'true':'false')));
  assert.equal((code.match(/#question /g)||[]).length,2);
+ assert(code.includes("applyTolfOnDemand(vpnDemand)"));
+ assert(code.includes("applyTolfConnection(vpnConnection)"));
  assert(code.includes('"TOLF Москва iPhone"'), 'Import questions need a default value');
  fs.writeFileSync(root+'/cherri-'+id+'.cherri',code+'\n');
  console.log('SOURCE_VALID',id,'chars',code.length);

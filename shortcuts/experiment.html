@@ -49,15 +49,15 @@ const workflow=(on)=> {
     "#define name "+name,
     "#question vpnDemand \"Выберите TOLF AnyConnect для On Demand\" \"TOLF Москва iPhone\"",
     "#question vpnConnection \"Выберите тот же TOLF AnyConnect для "+operation+"\" \"TOLF Москва iPhone\"",
-    'rawAction("is.workflow.actions.vpn.set", {',
+    "action 'is.workflow.actions.vpn.set' applyTolfOnDemand(text vpn: 'WFVPN') {",
     '  "WFVPNOperation": "Set On Demand",',
-    '  "WFOnDemandValue": '+v+',',
-    '  "WFVPN": vpnDemand',
-    '})',
-    'rawAction("is.workflow.actions.vpn.set", {',
-    '  "WFVPNOperation": "'+operation+'",',
-    '  "WFVPN": vpnConnection',
-    '})'
+    '  "WFOnDemandValue": '+v,
+    '}',
+    "action 'is.workflow.actions.vpn.set' applyTolfConnection(text vpn: 'WFVPN') {",
+    '  "WFVPNOperation": "'+operation+'"',
+    '}',
+    'applyTolfOnDemand(vpnDemand)',
+    'applyTolfConnection(vpnConnection)'
   ].join("\n");
 };
 for(const [id,on] of [["on",true],["off",false]]) {
