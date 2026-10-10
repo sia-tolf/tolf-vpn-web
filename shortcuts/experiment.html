@@ -23,18 +23,18 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}
 <body>
 <header><a href="/" style="text-decoration:none">← Возврат</a><strong>TOLF</strong></header>
 <h1>Эксперимент Shortcuts</h1>
-<p>Подписанные команды для управления установленным TOLF AnyConnect. Профиль VPN и сертификат не изменяются. Проверяем импорт на iPhone.</p>
+<p>Эксперимент временно приостановлен: приложение «Команды» аварийно завершилось при импорте TOLF ON на iPhone. VPN и MobileConfig не затронуты.</p>
 <section class="panel">
   <h2>TOLF ON</h2>
   <p>Включить On Demand, затем выполнить Connect для того же VPN.</p>
-  <a id="on" class="button" href="/shortcuts/signed/TOLF-ON.shortcut">Скачать TOLF ON</a>
+  <span id="on" class="button" aria-disabled="true">TOLF ON — временно недоступно</span>
 </section>
 <section class="panel">
   <h2>TOLF OFF</h2>
   <p>Выключить On Demand, затем выполнить Disconnect для того же VPN.</p>
-  <a id="off" class="button" href="/shortcuts/signed/TOLF-OFF.shortcut">Скачать TOLF OFF</a>
+  <span id="off" class="button" aria-disabled="true">TOLF OFF — временно недоступно</span>
 </section>
-<p class="muted">Откройте страницу в Safari. Сначала установите TOLF ON. Во время добавления команды iOS может дважды попросить выбрать VPN — оба раза выберите соединение TOLF AnyConnect. TOLF OFF пока не запускайте. Команды экспериментальные и ещё не испытаны на iPhone 26.</p>
+<p class="muted">Не пытайтесь повторно открыть экспериментальные файлы. Исправляем формат команды после изучения фактического сбоя iOS.</p>
 <details><summary>Что делают команды</summary>
 <pre>ON: Set On Demand = On → Connect
 OFF: Set On Demand = Off → Disconnect

@@ -8,7 +8,7 @@ on:
       - 'shortcuts/verify-cherri-source.cjs'
       - '.github/workflows/tolf-cherri-compile.yml'
 permissions:
-  contents: write
+  contents: read
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -63,17 +63,6 @@ jobs:
               shutil.copyfile(source,dest)
               print('SIGNED_PILOT_READY',name,len(data))
           PY
-      - name: Publish signed experiment artifacts to GitHub Pages source
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name "TOLF Shortcuts CI"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f shortcuts/signed/TOLF-ON.shortcut shortcuts/signed/TOLF-OFF.shortcut
-          if ! git diff --cached --quiet; then
-            git commit -m "Publish signed experimental TOLF VPN shortcuts"
-            git push origin HEAD:main
-          fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:
