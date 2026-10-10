@@ -1,38 +1,17 @@
 <!doctype html>
 <html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="referrer" content="no-referrer"><title>Установка команд TOLF</title>
+<meta name="referrer" content="no-referrer"><title>Команда TOLF</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f5f5f7;color:#202124;font:18px/1.5 system-ui,sans-serif}
-main{max-width:540px;margin:40px auto;padding:24px}h1{font-size:27px;font-weight:600}
-a{display:block;padding:15px 18px;margin:24px 0;background:#244b90;color:white;text-align:center;text-decoration:none;border-radius:16px}
-[hidden]{display:none!important}small{color:#62666e}#status{padding:18px;border-radius:16px;background:white}
+main{max-width:540px;margin:30px auto;padding:24px}h1{font-size:27px;font-weight:600}
+a{display:block;padding:15px 18px;margin:18px 0;background:#244b90;color:white;text-align:center;text-decoration:none;border-radius:16px}
+.on{background:#469a6b}.off{background:#c44942}small{color:#62666e}
 </style><main>
-<h1>Команды включения и выключения VPN</h1>
-<p id="intro">Один запуск установки. Подтвердите добавление TOLF ON, затем TOLF OFF. После второй команды ожидается автоматический возврат сюда.</p>
-<p id="status" hidden role="status"></p>
-<a id="start">Установить обе команды</a>
-<small id="note">Проверка автоматического перехода на вашем iPhone. Команды настроены на «TOLF Москва iPhone». Установка не запускает VPN.</small>
-<a id="back" hidden href="https://vpn.tolf.is/quick/?protocol=anyconnect">Вернуться к установке VPN</a>
-</main>
-<script src="../../js/ios-shortcut-import-chain.js"></script>
-<script>
-const base = new URL('./', location.href);
-base.search = ''; base.hash = '';
-const callback = state => { const url=new URL(base); url.searchParams.set('result',state); return url.href; };
-const start=document.getElementById('start'), status=document.getElementById('status');
-start.href=window.tolfShortcutImportChain.build({
- on:new URL('TOLF-ON.shortcut',base).href,
- off:new URL('TOLF-OFF.shortcut',base).href,
- success:callback('complete'),cancel:callback('cancelled'),error:callback('error')
-});
-const result=new URL(location.href).searchParams.get('result');
-if(['complete','cancelled','error'].includes(result)){
- status.hidden=false;
- document.getElementById('intro').hidden=true;
- status.textContent=result==='complete'
-  ?'Получен автоматический возврат после второй команды. Проверьте, что TOLF ON и TOLF OFF появились в «Командах».'
-  :result==='cancelled'?'Добавление отменено. Установка профиля не запускалась.'
-  :'Shortcuts вернул ошибку импорта. Установка профиля не запускалась.';
- if(result==='complete'){start.hidden=true;document.getElementById('back').hidden=false;}
-}
-</script></html>
+<h1>Одна команда — две кнопки</h1>
+<p>Добавьте команду TOLF в приложение «Команды». Она обслуживает обе кнопки: включение и выключение VPN «TOLF Москва iPhone».</p>
+<a href="TOLF.shortcut">Добавить команду TOLF</a>
+<p>После добавления вернитесь на эту страницу один раз и проверьте обе кнопки:</p>
+<a class="on" href="shortcuts://run-shortcut?name=TOLF&amp;input=text&amp;text=on">⏻ TOLF ON</a>
+<a class="off" href="shortcuts://run-shortcut?name=TOLF&amp;input=text&amp;text=off">■ TOLF OFF</a>
+<small>Проверочная версия общей команды. Основная установка VPN пока не изменена.</small>
+</main></html>

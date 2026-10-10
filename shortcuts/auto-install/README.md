@@ -12,3 +12,10 @@ No successful-install state is written to the production wizard by this probe.
 Sources:
 https://support.apple.com/en-nz/guide/shortcuts/apdcd7f20a6f/9.0/ios/26
 https://swiftrocks.com/running-other-apps-siri-shortcuts-through-deep-links-in-swift
+
+## Result and replacement
+The user's iPhone rejected the import callback URL with "Import Failed — The shortcut URL provided was invalid." The probe page no longer uses that route.
+It now links to one signed TOLF controller. Two independent equality conditions dispatch on input "on" / "off" to the verified Cisco intents. Missing or unrecognized input does not change the VPN.
+The controller and two run links still need iPhone validation before production integration.
+URL input reference: https://support.apple.com/en-ae/guide/shortcuts/apd624386f42/ios
+Conditional serialization reference: https://github.com/electrikmilk/cherri/blob/main/shortcutgen.go
