@@ -109,3 +109,22 @@ Sources inspected:
 - https://github.com/apple/device-management/blob/release/mdm/profiles/com.apple.vpn.managed.yaml
 - https://www.cisco.com/c/en/us/td/docs/security/vpn_client/anyconnect/Cisco-Secure-Client-5/admin/guide/cisco-secure-client-admin-guide-new/ac-on-mobile-devices-intro/t_automate_anyconnect_actions_using_the_uri_handler.html
 - https://www.cisco.com/c/en/us/td/docs/security/vpn_client/anyconnect/anyconnect410/administration/guide/b-anyconnect-admin-guide-4-10/b_AnyConnect_Administrator_Guide_4-4_chapter_01101.html
+
+## Cisco native export and isolated probes (2026-10-10)
+
+The owner supplied iCloud export 544664707519498cbc943cc4b1b8fdcd.
+It contains com.cisco.anyconnect.StartVpnIntent and
+com.cisco.anyconnect.StopVpnIntent. Each parameter dictionary contains only an
+action UUID; there is no VPN name, connection UUID, or On Demand parameter.
+This proves absence of explicit binding in this export, not how Cisco selects
+the connection at runtime or handles On Demand.
+
+build-cisco-probes.py creates separate TOLF-CISCO-ON and TOLF-CISCO-OFF
+one-action probes with green/red shortcut colors. They preserve the exported
+Cisco actions, remove action UUIDs, and add no invented parameters. Both are
+signed and hosted at separate exact private/no-store/noindex paths beneath
+the existing personal test prefix. HTTPS bytes match the signed output.
+The previously working system VPN commands and website/API remain unchanged.
+Runtime checks required: selected connection, successful connect/disconnect,
+and On Demand state before/after each individual action. No claim of portability
+or On Demand support is established by signing or export inspection.
