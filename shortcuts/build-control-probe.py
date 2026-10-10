@@ -67,7 +67,7 @@ def controller(name):
         {"WFWorkflowActionIdentifier":"is.workflow.actions.conditional",
          "WFWorkflowActionParameters":{"GroupingIdentifier":empty_group, "WFControlFlowMode":2}}
     ])
-    actions.append({"WFWorkflowActionIdentifier":"is.workflow.actions.returntohomescreen", "WFWorkflowActionParameters":{}})
+    # Diagnostic build: remain in Shortcuts to distinguish a crash from Home Screen navigation.
     doc["WFWorkflowActions"] = actions
     return doc
 
