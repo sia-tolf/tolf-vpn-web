@@ -21,8 +21,10 @@ function fixture() {
   return {c,e:elements,setGeo(value){vm.runInContext(`geographicEntryPoint = ${JSON.stringify(value)}; updateRecommendedEntryPoint();`,c);}};
 }
 
-test('Russia stays Moscow with faster Riga or a failed Moscow HTTP probe',()=>{
-  const f=fixture(); f.setGeo('moscow');
+test('Russia recommends Moscow without overriding the selected endpoint',()=>{
+  const f=fixture();
+  f.e.serverMoscow.checked=true;
+  f.setGeo('moscow');
   for(const latencies of [{moscow:150,riga:10},{moscow:null,riga:10},{moscow:10,riga:150}]) {
     f.c.setEntryPointLatencies(latencies);
     assert.equal(f.e.serverMoscow.checked,true);
@@ -30,13 +32,17 @@ test('Russia stays Moscow with faster Riga or a failed Moscow HTTP probe',()=>{
     assert.equal(f.e.serverRiga.disabled,false);
   }
 });
-test('foreign connection prefers Riga unless Moscow is clearly faster',()=>{
-  const f=fixture(); f.setGeo('riga');
-  assert.equal(f.e.serverRiga.checked,true);
+test('foreign recommendation responds to latency but never overrides selection',()=>{
+  const f=fixture();
+  f.e.serverRiga.checked=true;
+  f.setGeo('riga');
+  assert.equal(vm.runInContext('recommendedEntryPoint',f.c),'riga');
   f.c.setEntryPointLatencies({riga:50,moscow:10});
-  assert.equal(f.e.serverRiga.checked,true);
+  assert.equal(vm.runInContext('recommendedEntryPoint',f.c),'riga');
   f.c.setEntryPointLatencies({riga:90,moscow:10});
-  assert.equal(f.e.serverMoscow.checked,true);
+  assert.equal(vm.runInContext('recommendedEntryPoint',f.c),'moscow');
+  assert.equal(f.e.serverRiga.checked,true,'suggestion cannot change the user choice');
+  assert.equal(f.e.serverMoscow.checked,false);
   assert.equal(f.e.rigaConnectionWarning.classList.contains('hidden'),true);
 });
 test('manual Riga remains selected in Russia after new measurements',()=>{
@@ -48,7 +54,9 @@ test('manual Riga remains selected in Russia after new measurements',()=>{
   assert.equal(f.e.serverMoscow.checked,false);
 });
 test('country change clears Russia warning without overriding manual selection',()=>{
-  const f=fixture(); f.setGeo('moscow');
+  const f=fixture();
+  f.e.serverMoscow.checked=true;
+  f.setGeo('moscow');
   f.e.serverMoscow.listeners.change({isTrusted:true});
   f.setGeo('riga');
   assert.equal(f.e.serverRiga.classList.contains('server-caution'),false);

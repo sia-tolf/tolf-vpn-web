@@ -6,7 +6,7 @@ async function scenario(country,device='ios',credentialError=''){
  const elements=Object.fromEntries(ids.map(id=>[id,{hidden:false,disabled:false,value:'',textContent:'',dataset:{},setAttribute(){},focus(){},select(){}}]));
  const storage=new Map(),langs=['en','ru','lv'].map(lang=>({dataset:{lang},setAttribute(){}}));
  let auth=false,record=null,requests=0,registeredName='';
- const context={URL,AbortSignal,console,sessionStorage:{getItem:k=>storage.get(k),setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)},localStorage:{getItem:()=>null,setItem(){}},
+ const context={URL,AbortSignal,console,location:{href:'https://vpn.tolf.is/quick/?protocol=ikev2'},sessionStorage:{getItem:k=>storage.get(k),setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)},localStorage:{getItem:()=>null,setItem(){}},
  navigator:{userAgent:device==='windows'?'Windows NT':'iPhone',language:'ru',credentials:{create:async()=>{if(credentialError)throw Object.assign(new Error('credential failed'),{name:credentialError});return{id:'fake'};}}},
  document:{getElementById:id=>elements[id],documentElement:{lang:'ru'},querySelectorAll:s=>s==='[data-lang]'?langs:[]},window:{location:{assign:url=>{elements.destination={value:url};}},PublicKeyCredential:function(){},addEventListener(){}},
  prepareRegistrationOptions:x=>x,serializeCredential:x=>x,
@@ -24,7 +24,12 @@ async function scenario(country,device='ios',credentialError=''){
  }};
  vm.createContext(context);vm.runInContext(fs.readFileSync(path.join(root,'quick/strings-1.js'),'utf8'),context);vm.runInContext(fs.readFileSync(path.join(root,'quick/windows-1.js'),'utf8'),context);vm.runInContext(fs.readFileSync(path.join(root,'quick/quick-1.js'),'utf8'),context);
  for(let i=0;i<20;i++)await new Promise(setImmediate);
- assert.equal(elements.server.value,country==='moscow'?'moscow':'riga');
+ if(!country){
+   assert.equal(elements.server.textContent,'—');
+   assert.equal(elements.retry.hidden,false,'no recommendation offers retry');
+   return true;
+ }
+ assert.equal(elements.server.textContent,country==='moscow'?'Москва':'Рига');
  assert.equal(elements.register.disabled,false);
  assert.equal(elements.windowsPrep.hidden,true);
  assert.equal(elements.passkeyNameField.hidden,true);

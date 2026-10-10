@@ -101,6 +101,15 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
     vm.runInContext(fs.readFileSync(path.join(root,'js',file),'utf8'),c);
   }
   ids.vpnTransportAnyConnect.click(); await settle();
+  // iPhone now uses one authenticated MobileConfig with a linked certificate.
+  const iosInstall=descendants(ids.anyConnectAccess).find(n=>n.tagName==='a'&&n.textContent==='Установить профиль AnyConnect');
+  assert(iosInstall,'a single profile installation button is offered on iOS');
+  assert(iosInstall.href.includes('/oc/access/devices/one/ios.mobileconfig?ingress=moscow'));
+  assert(!descendants(ids.anyConnectAccess).some(n=>n.tagName==='button'&&n.textContent==='Настроить на этом устройстве'));
+  assert(!descendants(ids.anyConnectAccess).some(n=>n.tagName==='a'&&n.textContent==='Добавить в AnyConnect'));
+  c.currentPlatform='android';
+  window.dispatchEvent(new c.Event('vpnplatformchange'));await settle();
+  // Legacy Android/manual flow remains available; further tests cover it.
   assert(descendants(ids.anyConnectAccess).includes(ids.anyConnectModeRow), 'routing is in the selected device section');
   assert(!descendants(ids.anyConnectAccess).some(n=>n.tagName==='ol'));
   assert(descendants(ids.anyConnectAccess).some(n=>n.tagName==='a'&&n.textContent==='Установить Cisco Secure Client'));

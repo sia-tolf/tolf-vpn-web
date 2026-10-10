@@ -22,6 +22,7 @@ from cryptography import x509
 from fastapi import HTTPException, Request
 from fastapi.responses import JSONResponse, Response
 from tolf_oc_certificates import Authority
+from tolf_oc_mobileconfig import register_combined_test
 from tolf_oc_nodes import Nodes
 
 VERSION = 2
@@ -264,6 +265,7 @@ def install(app, context):
     names = activation_nodes(directory, authority.fingerprint) or ['moscow']
     runners = context.get('OC_REMOTES', {'moscow': context.get('OC_REMOTE')})
     node = configured_nodes(authority.fingerprint, names, runners)
+    context["oc_session_status"] = node.sessions
     db = context["DB"]
 
     def activated():
@@ -294,6 +296,8 @@ def install(app, context):
             con.row_factory = sqlite3.Row
             rows = con.execute('SELECT id,label FROM oc_devices WHERE user_id=? ORDER BY rowid', (row['user_id'],)).fetchall()
         return connection_titles(rows)[row['id']]
+
+    register_combined_test(app, authenticate, record, authority, db, names)
 
     def public_device(row):
         return {**device_public(row), 'connectionNames': titles_for(row)}
@@ -554,7 +558,13 @@ def install(app, context):
                 (token_hash,utc_now().isoformat(),utc_now().isoformat())).fetchone()
             if row is None:
                 raise HTTPException(410, "Import link expired or already used")
-            con.execute("DELETE FROM oc_import_grants WHERE token_hash=?", (token_hash,))
+            # iOS Secure Client can fetch the same URL more than once before
+            # its certificate import completes. Keep a 3-minute retry window
+            # after the first GET; never extend the original expiry time.
+            retry_expires = (utc_now() + dt.timedelta(minutes=3)).isoformat()
+            con.execute("""UPDATE oc_import_grants
+                SET expires_at=MIN(expires_at, ?)
+                WHERE token_hash=?""", (retry_expires,token_hash))
         return Response(row[0], media_type="application/x-pkcs12", headers={**HEADERS,"Content-Disposition":'attachment; filename="TOLF-AnyConnect.p12"'})
 
     @app.head("/oc/access/import/{token}.p12")
