@@ -24,7 +24,8 @@ jobs:
       - name: Compile and sign read-only inspection
         run: |
           set -e
-          /tmp/tolf-cherri/cherri shortcuts/cherri-probe.cherri
+          /tmp/tolf-cherri/cherri shortcuts/cherri-probe.cherri --debug
+          find shortcuts -maxdepth 1 -type f -name "TOLF VPN Check.*" -printf "%f\n"
       - name: Verify actions and signature before publication
         run: |
           python3 - <<'PY'
