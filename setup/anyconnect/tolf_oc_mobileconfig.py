@@ -159,7 +159,7 @@ def register_combined_test(app, authenticate, record, authority, database, enabl
             raise HTTPException(503, "Shortcut signing temporarily unavailable") from None
         return Response(signed, media_type="application/x-apple-shortcut", headers={
             "Cache-Control": "private, no-store, no-transform",
-            "Content-Disposition": 'attachment; filename="' + ("TOLF" if mode == "control" else "TOLF-" + mode.upper()) + '.shortcut"',
+            "Content-Disposition": 'inline; filename="' + ("TOLF" if mode == "control" else "TOLF-" + mode.upper()) + '.shortcut"',
             "Referrer-Policy": "no-referrer",
             "X-Content-Type-Options": "nosniff",
         })
