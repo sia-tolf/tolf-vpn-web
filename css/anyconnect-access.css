@@ -107,3 +107,24 @@ html[data-vpn-transport="anyconnect"] #vpnUsername { overflow-wrap: anywhere; }
   min-height: 44px;
   text-align: center;
 }
+
+/* Let controls fit their text; use separate rows on phones. */
+#anyConnectAccess .oc-access-header { flex-wrap:wrap; }
+#anyConnectAccess .oc-access-header > .oc-action { min-width:0; white-space:normal; }
+#anyConnectAccess .oc-device-status { min-width:0; overflow-wrap:anywhere; }
+@media (max-width:699px) {
+ #anyConnectAccess .oc-access-header { align-items:stretch; gap:12px; }
+ #anyConnectAccess .oc-access-header > .oc-action { width:100%; }
+ #anyConnectAccess .oc-device-row { grid-template-columns:minmax(0,1fr) auto; gap:8px; }
+ #anyConnectAccess .oc-device-row > select { grid-column:1 / -1; }
+ #anyConnectAccess .oc-device-row > .oc-action { height:auto; max-height:none; white-space:normal; }
+ #anyConnectAccess .oc-connection-settings { grid-template-columns:minmax(0,1fr); }
+ #anyConnectAccess .oc-device-routing .row-label,
+ #anyConnectAccess .oc-device-routing .anyconnect-mode-meta { text-align:left; }
+ #anyConnectAccess .oc-device-routing .anyconnect-mode-controls { justify-content:flex-start; }
+ #anyConnectAccess .oc-device-routing #anyConnectModeHelp { align-items:flex-start; }
+ #anyConnectAccess .oc-actions.oc-import-actions,
+ #anyConnectAccess .oc-actions.oc-certificate-actions { grid-template-columns:minmax(0,1fr); }
+ #anyConnectAccess .oc-destinations > .oc-action { height:auto; max-height:none; min-height:44px; padding:10px 12px; white-space:normal; }
+ #anyConnectAccess .oc-action { box-sizing:border-box; white-space:normal; }
+}

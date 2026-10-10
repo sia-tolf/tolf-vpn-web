@@ -66,7 +66,7 @@
     return state && state.expires > Date.now() && [0, 1].includes(state.step)
       ? state : {step:0, opened:false, expires:Date.now() + 2 * 60 * 60 * 1000};
   }
-  function create({checked = false, onChange, vpnName, url, includeInstall = false, disabled = false, lang = document.documentElement.lang}) {
+  function create({checked = false, onChange, vpnName, url, includeInstall = false, saveHost = null, disabled = false, lang = document.documentElement.lang}) {
     const text = TEXT[lang] || TEXT.en;
     const root = element('section', '', 'ios-vpn-buttons');
     const label = element('label', '', 'ios-vpn-buttons-choice');
@@ -159,7 +159,8 @@
           save.disabled = disabled || !allowed(); save.textContent = text.save;
         }
       });
-      root.append(save, status);
+      (saveHost || root).append(save);
+      root.append(status);
     }
     renderWizard();
     return root;

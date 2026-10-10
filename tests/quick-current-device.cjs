@@ -1,7 +1,7 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const source=fs.readFileSync('quick/quick-1.js','utf8'),strings=fs.readFileSync('quick/strings-1.js','utf8');
 async function check(ua,platform,node,unsupported=false,target=''){
- const elements=new Map();const el=id=>{if(!elements.has(id))elements.set(id,{hidden:false,value:'',dataset:{},textContent:'',disabled:false,classList:{add(){},remove(){}},setAttribute(){}});return elements.get(id);};
+ const elements=new Map();const el=id=>{if(!elements.has(id))elements.set(id,{hidden:false,value:'',dataset:{},textContent:'',disabled:false,classList:{add(){},remove(){}},setAttribute(){},replaceChildren(){}});return elements.get(id);};
  let posted;
  const context={location:{href:'https://vpn.tolf.is/quick/?protocol=ikev2'+(target?'&platform='+target:'')},document:{getElementById:el,documentElement:{lang:'en'},querySelectorAll:()=>[]},navigator:{userAgent:ua,platform:ua==='desktop-ipad'?'MacIntel':'',maxTouchPoints:ua==='desktop-ipad'?5:0,language:'ru'},localStorage:{getItem:()=>null,setItem(){}},sessionStorage:{getItem:k=>({quickPlatform:'windows',quickServer:'riga',quickManual:'yes'})[k],setItem(){},removeItem(){}},window:{addEventListener(){},location:{assign(){}}},URL,AbortSignal,
  fetch:async(url,opt={})=>{let data;if(url.endsWith('capabilities'))data={version:1};else if(url.endsWith('entry-point-recommendation'))data={entryPoint:node};else if(url.endsWith('/me'))data={authenticated:true};else if(url.endsWith('/prepare')){posted=JSON.parse(opt.body);data={profileUrl:'https://api.tolf.is/test/download'};}else throw Error('Unexpected '+url);return {ok:true,json:async()=>data};}};

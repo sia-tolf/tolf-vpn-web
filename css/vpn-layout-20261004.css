@@ -43,3 +43,17 @@ html[data-tolf-ui="vpn"] .compact-header > .brand-copy{display:none!important}\n
 #profileSettings .server-address{font-size:14px;line-height:1.4}
 #profileSettings .server-address-label{font-size:14px;font-weight:600;color:var(--text)}
 #profileSettings .server-address-value{font-size:14px;font-weight:400}
+
+/* Phone header: navigation first, language and secondary actions below. */
+@media(max-width:699px) {
+ html[data-tolf-ui="vpn"] .compact-header .header-navigation {
+  grid-template-columns:minmax(0,1fr) auto!important;
+  grid-template-rows:auto auto!important;
+  height:auto!important; gap:8px!important;
+ }
+ html[data-tolf-ui="vpn"] #homeNavigation { grid-column:1!important; grid-row:1!important; min-width:0; }
+ html[data-tolf-ui="vpn"] .vpn-header-account { grid-column:2!important; grid-row:1!important; }
+ html[data-tolf-ui="vpn"] .compact-header .header-navigation > .language-switcher { grid-column:1!important; grid-row:2!important; justify-self:start!important; }
+ html[data-tolf-ui="vpn"] .vpn-header-signout { grid-column:2!important; grid-row:2!important; justify-self:start!important; }
+ html[data-tolf-ui="vpn"] .compact-header .header-navigation > .help-navigation { grid-column:2!important; grid-row:2!important; justify-self:end!important; }
+}

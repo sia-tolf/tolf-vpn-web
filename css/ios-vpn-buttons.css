@@ -10,3 +10,18 @@
 .ios-vpn-buttons .oc-actions { display: flex; flex-wrap: wrap; gap: .65rem; }
 
 .ios-vpn-buttons [hidden], .oc-ios-install[hidden] { display: none !important; }
+
+/* Compact opt-in, shared by manual and quick setup. */
+.ios-vpn-buttons { padding: 0; border: 0; border-radius: 0; }
+.ios-vpn-buttons .ios-vpn-buttons-choice,
+#anyConnectAccess .ios-vpn-buttons-choice { display:flex; align-items:center; gap:10px; margin:12px 0; font-weight:400; }
+.ios-vpn-buttons .ios-vpn-buttons-choice input[type=checkbox],
+#anyConnectAccess .ios-vpn-buttons-choice input[type=checkbox] { appearance:auto; width:18px; height:18px; min-width:18px; padding:0; margin:0; border-radius:3px; flex:0 0 18px; }
+.ios-vpn-buttons-preview { gap:20px; margin:12px 0; }
+.ios-vpn-buttons-preview > div { display:flex; align-items:center; gap:8px; }
+.ios-vpn-buttons-preview strong { font-size:14px; font-weight:500; }
+.ios-vpn-icon { width:30px; height:30px; border-radius:7px; font-size:23px; }
+.ios-vpn-icon.off { font-size:17px; }
+#anyConnectAccess .oc-destinations > .oc-note { grid-column:1 / -1; margin:0; }
+#anyConnectAccess .oc-destinations > .oc-note:empty { display:none; }
+#iosProfileSave:empty { display:none; }

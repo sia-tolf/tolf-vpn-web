@@ -48,7 +48,7 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
    for(const mode of ['control']){
     let nodes=descendants(element('iosVpnButtons'));
     assert(!nodes.some(n=>n.href?.includes('/ios.mobileconfig?')));
-    const save=nodes.find(n=>n.textContent==='Сохранить MobileConfig');
+    const save=descendants(element('iosProfileSave')).find(n=>n.textContent==='Сохранить MobileConfig');
     assert(save.hidden && save.disabled,'save must not bypass shortcut steps');
     let confirm=nodes.find(n=>n.textContent==='Команда добавлена — продолжить');
     assert(confirm.disabled);
@@ -86,7 +86,7 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
    assert.equal(nodes.find(n=>n.type==='checkbox').checked,true);
    const install=nodes.find(n=>n.href?.includes('/ios.mobileconfig?'));
    assert(install,'profile appears only after the TOLF confirmation');
-   assert(!nodes.find(n=>n.textContent==='Сохранить MobileConfig').hidden);
+   assert(!descendants(element('iosProfileSave')).find(n=>n.textContent==='Сохранить MobileConfig').hidden);
    assigned=install.href;
    const other=ctx.window.tolfIosButtons.create({checked:true,includeInstall:true,lang:'ru',
      url:'https://api.tolf.is/oc/access/devices/other/ios.mobileconfig?ingress='+node,

@@ -34,13 +34,14 @@ function persist() { put('quickServer', server); put('quickPlatform', platform);
 function render() {
  $('prepare').hidden = protocol === 'anyconnect' && nativePlatform === 'ios' && iosButtons && !!ocDevice;
  const options = $('iosVpnButtons');
+ $('iosProfileSave').replaceChildren();
  options.hidden = !(protocol === 'anyconnect' && nativePlatform === 'ios');
  if (!options.hidden) {
    const url = ocDevice ? new URL(API+'/oc/access/devices/'+encodeURIComponent(ocDevice.id)+'/ios.mobileconfig') : null;
    if (url) url.searchParams.set('ingress', server);
    options.replaceChildren(window.tolfIosButtons.create({checked:iosButtons, disabled:busy, lang,
      vpnName:ocDevice ? 'TOLF '+(server==='moscow'?'Москва':'Рига')+' '+Array.from(ocDevice.label).slice(0,36).join('') : null,
-     url:url?.href, includeInstall:true, onChange:checked => {iosButtons = checked; saveIosSetup(); put('quickIosButtons', checked ? 'true' : ''); render();}
+     url:url?.href, includeInstall:true, saveHost:$('iosProfileSave'), onChange:checked => {iosButtons = checked; saveIosSetup(); put('quickIosButtons', checked ? 'true' : ''); render();}
    }));
  }
  document.documentElement.lang = lang;
