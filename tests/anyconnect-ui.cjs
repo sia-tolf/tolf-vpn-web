@@ -107,6 +107,12 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   assert(iosInstall.href.includes('/oc/access/devices/one/ios.mobileconfig?ingress=moscow'));
   const option = descendants(ids.anyConnectAccess).find(n=>n.tagName==='input'&&n.type==='checkbox');
   const details = descendants(ids.anyConnectAccess).find(n=>n.className==='ios-vpn-buttons-details');
+  for (const mode of ['ON', 'OFF']) {
+    const shortcut = descendants(ids.anyConnectAccess).find(n => n.tagName === 'a' && n.textContent === 'Добавить TOLF ' + mode);
+    assert(shortcut, 'shortcut download link exists');
+    assert.equal(new URL(shortcut.href).pathname, '/oc/access/devices/one/shortcuts/' + mode.toLowerCase() + '.shortcut');
+    assert.equal(new URL(shortcut.href).searchParams.get('ingress'), 'moscow');
+  }
   assert.equal(option.checked, false);
   assert.equal(details.hidden, true);
   assert(!new URL(iosInstall.href).searchParams.has('buttons'));

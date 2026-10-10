@@ -1,12 +1,29 @@
 # Optional iOS Home Screen buttons
 
-Status: implementation prepared on the feature branch; **not deployed to the
-production website or VPN API**. The two generic signed candidates are hosted
-at `https://config.tolf.is/ios-shortcuts/v1/TOLF-ON.shortcut` and
-`https://config.tolf.is/ios-shortcuts/v1/TOLF-OFF.shortcut` for iPhone validation.
-They are not the previously verified device-specific exports.
+Status: Cisco name-based implementation prepared for release. The owner verified
+StartVpnIntent with vpnConfig as a text name and StopVpnIntent disconnecting VPN
+with On Demand enabled. The agreed behavior leaves On Demand enabled in the profile;
+the shortcuts do not explicitly change that setting.
 
-## Behavior
+Current implementation:
+- Authenticated GET /oc/access/devices/{id}/shortcuts/{on|off}.shortcut derives the
+  exact name from the same function used by MobileConfig. Only the device owner
+  can download; invalid/disabled devices and unsupported entry points are rejected.
+- ON: com.cisco.anyconnect.StartVpnIntent with vpnConfig containing that name.
+- OFF: com.cisco.anyconnect.StopVpnIntent with no VPN parameter; disconnects the
+  active AnyConnect connection. Both finish with Go to Home Screen.
+- HubSign receives only shortcut metadata and the VPN display name, never VPN
+  credentials. Signed results are cached privately for seven days, with atomic writes.
+  Signing failures return 503, not an unsigned or incorrectly bound workflow.
+- Website uses device-specific links, no import questions or manual binding.
+  Switching entry point or profile name requires replacing TOLF ON on the device.
+- Checkbox remains optional and off by default; green ON/red OFF WebClips and
+  authenticated Save MobileConfig are included in both setup flows.
+
+The older /ios-shortcuts/v1 files and experiments below are historical failed
+candidates and are not linked by the current UI.
+
+## Historical behavior of the superseded system-action candidates
 
 - Main AnyConnect setup and Quick Setup show an unchecked optional checkbox.
 - `buttons=true` on the authenticated MobileConfig endpoint adds two removable

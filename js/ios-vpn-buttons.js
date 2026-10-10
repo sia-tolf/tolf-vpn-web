@@ -5,7 +5,7 @@
     ru: {
       option: 'Добавить кнопки VPN на главный экран',
       help: 'Зелёная TOLF ON включает VPN, красная TOLF OFF выключает. Кнопки установятся вместе с профилем.',
-      setup: 'После установки профиля добавьте обе команды по ссылкам ниже. Для работы обе команды должны быть привязаны к VPN «{vpn}». Сохраните названия TOLF ON и TOLF OFF.',
+      setup: 'После установки профиля добавьте обе команды по ссылкам ниже. TOLF ON уже настроена на VPN «{vpn}», TOLF OFF отключает активное подключение AnyConnect. Сохраните названия команд. При смене точки входа или имени профиля добавьте TOLF ON заново с заменой существующей команды.',
       add: 'Добавить ', save: 'Сохранить MobileConfig', saving: 'Сохраняем…',
       failed: 'Не удалось сохранить профиль. Попробуйте ещё раз.',
       note: 'Команды можно добавить позже. До этого значки не смогут управлять VPN. При запуске приложение «Команды» ненадолго откроется, затем команда вернёт вас на главный экран.'
@@ -13,7 +13,7 @@
     en: {
       option: 'Add VPN buttons to the Home Screen',
       help: 'Green TOLF ON connects VPN; red TOLF OFF disconnects it. The buttons are installed with the profile.',
-      setup: 'After installing the profile, add both shortcuts below. Both shortcuts must be bound to VPN “{vpn}” to work. Keep the names TOLF ON and TOLF OFF.',
+      setup: 'After installing the profile, add both shortcuts below. TOLF ON is configured for VPN “{vpn}”; TOLF OFF disconnects the active AnyConnect connection. Keep the shortcut names. After changing the entry point or profile name, add TOLF ON again and replace the existing shortcut.',
       add: 'Add ', save: 'Save MobileConfig', saving: 'Saving…',
       failed: 'Unable to save the profile. Please try again.',
       note: 'You can add the shortcuts later. The icons cannot control VPN until then. Shortcuts briefly opens when launched, then the shortcut returns to the Home Screen.'
@@ -21,7 +21,7 @@
     lv: {
       option: 'Pievienot VPN pogas sākuma ekrānam',
       help: 'Zaļā TOLF ON ieslēdz VPN, sarkanā TOLF OFF izslēdz. Pogas tiek instalētas kopā ar profilu.',
-      setup: 'Pēc profila instalēšanas pievienojiet abas tālāk norādītās komandas. Lai abas komandas darbotos, tām jābūt piesaistītām VPN “{vpn}”. Saglabājiet nosaukumus TOLF ON un TOLF OFF.',
+      setup: 'Pēc profila instalēšanas pievienojiet abas tālāk norādītās komandas. TOLF ON ir konfigurēta VPN “{vpn}”; TOLF OFF atvieno aktīvo AnyConnect savienojumu. Saglabājiet komandu nosaukumus. Mainot ieejas punktu vai profila nosaukumu, pievienojiet TOLF ON vēlreiz, aizstājot esošo komandu.',
       add: 'Pievienot ', save: 'Saglabāt MobileConfig', saving: 'Saglabā…',
       failed: 'Neizdevās saglabāt profilu. Mēģiniet vēlreiz.',
       note: 'Komandas var pievienot vēlāk. Līdz tam ikonas nevar vadīt VPN. Palaižot komandu, īslaicīgi atveras lietotne Shortcuts, pēc tam komanda atgriežas sākuma ekrānā.'
@@ -59,11 +59,14 @@
     // Quick Setup knows the final device label only after preparation.
     if (vpnName) details.append(element('p', text.setup.replace('{vpn}', vpnName)));
     else details.append(element('p', ({ru:'Ссылки на команды появятся после подготовки профиля.', en:'Shortcut links appear after the profile is prepared.', lv:'Komandu saites parādīsies pēc profila sagatavošanas.'})[lang] || 'Shortcut links appear after the profile is prepared.'));
-    if (vpnName) {
+    if (vpnName && url) {
       const links = element('div', '', 'oc-actions');
       for (const mode of ['ON', 'OFF']) {
         const a = element('a', text.add + 'TOLF ' + mode, 'button-link oc-action secondary');
-        a.href = 'https://config.tolf.is/ios-shortcuts/v1/TOLF-' + mode + '.shortcut';
+        const target = new URL(url);
+        target.pathname = target.pathname.replace(/\/ios\.mobileconfig$/, '/shortcuts/' + mode.toLowerCase() + '.shortcut');
+        target.searchParams.delete('buttons');
+        a.href = target.href;
         a.referrerPolicy = 'no-referrer'; links.append(a);
       }
       details.append(links, element('p', text.note, 'oc-note'));
