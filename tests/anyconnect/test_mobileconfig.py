@@ -76,7 +76,7 @@ class IosMobileConfig(unittest.TestCase):
         on, off = with_buttons["PayloadContent"][2:]
         for mode, clip in (("ON", on), ("OFF", off)):
             self.assertEqual(clip["Label"], "TOLF " + mode)
-            self.assertEqual(clip["URL"], "shortcuts://run-shortcut?name=TOLF%20" + mode)
+            self.assertEqual(clip["URL"], "shortcuts://run-shortcut?name=TOLF&input=text&text=" + mode.lower())
             self.assertEqual(clip["PayloadType"], "com.apple.webClip.managed")
             self.assertTrue(clip["IsRemovable"])
             self.assertFalse(clip["FullScreen"])

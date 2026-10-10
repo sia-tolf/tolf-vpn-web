@@ -27,6 +27,20 @@ class CiscoShortcuts(unittest.TestCase):
                 self.assertEqual(workflow["WFWorkflowName"], "TOLF " + mode.upper())
                 self.assertEqual(workflow["WFWorkflowImportQuestions"], [])
 
+    def test_controller_matches_verified_iphone_template(self):
+        # Preserve the exact structure imported and exercised on the owner's iPhone.
+        path = Path(__file__).resolve().parents[2] / "shortcuts/auto-install/TOLF.plist"
+        native = plistlib.loads(path.read_bytes())
+        self.assertEqual(shortcuts.controller("TOLF Москва iPhone"), native)
+        for city in ("Москва", "Рига"):
+            name = shortcuts.vpn_name({"label":"Phone <&>"}, city)
+            document = shortcuts.controller(name)
+            starts = [a for a in document["WFWorkflowActions"]
+                      if a["WFWorkflowActionIdentifier"].endswith(".StartVpnIntent")]
+            self.assertEqual(len(starts), 2)
+            self.assertTrue(all(a["WFWorkflowActionParameters"] == {"vpnConfig":name} for a in starts))
+            self.assertEqual(document["WFWorkflowName"], "TOLF")
+
     def test_cache_reuses_signature_and_changes_with_name(self):
         with tempfile.TemporaryDirectory() as directory:
             with patch.object(shortcuts, "sign", return_value=SIGNED) as signer:
@@ -59,17 +73,18 @@ class CiscoShortcuts(unittest.TestCase):
             profiles.register_combined_test(app, auth, record, None, str(Path(directory)/"test.db"), {"moscow", "riga"})
             client = TestClient(app)
             with patch.object(shortcuts, "signed_shortcut", return_value=SIGNED) as signer:
-                path = "/oc/access/devices/mine/shortcuts/on.shortcut"
+                path = "/oc/access/devices/mine/shortcuts/control.shortcut"
                 self.assertEqual(client.get(path).status_code, 401)
                 self.assertEqual(client.get(path.replace("mine", "other"), headers={"x-test-user":"owner"}).status_code, 404)
                 self.assertFalse(signer.called)
                 response = client.get(path+"?ingress=riga", headers={"x-test-user":"owner"})
                 self.assertEqual(response.status_code, 200)
                 self.assertEqual(response.content, SIGNED)
-                signer.assert_called_once_with("TOLF Рига iPhone", "on")
+                self.assertIn('filename="TOLF.shortcut"', response.headers["content-disposition"])
+                signer.assert_called_once_with("TOLF Рига iPhone", "control")
                 self.assertIn("no-store", response.headers["cache-control"])
                 self.assertEqual(client.get(path+"?ingress=invalid", headers={"x-test-user":"owner"}).status_code, 400)
-                self.assertEqual(client.get(path.replace("on.shortcut","bad.shortcut"), headers={"x-test-user":"owner"}).status_code, 400)
+                self.assertEqual(client.get(path.replace("control.shortcut","bad.shortcut"), headers={"x-test-user":"owner"}).status_code, 400)
             with patch.object(shortcuts, "signed_shortcut", side_effect=ValueError("private details")):
                 response = client.get(path, headers={"x-test-user":"owner"})
                 self.assertEqual(response.status_code, 503)

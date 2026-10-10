@@ -45,7 +45,7 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
    assert.equal(assigned,undefined,'button setup must not skip straight to MobileConfig');
    assert.equal(element('preparePanel').hidden,false);
    assert.equal(element('prepare').hidden,true);
-   for(const mode of ['on','off']){
+   for(const mode of ['control']){
     let nodes=descendants(element('iosVpnButtons'));
     assert(!nodes.some(n=>n.href?.includes('/ios.mobileconfig?')));
     const save=nodes.find(n=>n.textContent==='Сохранить MobileConfig');
@@ -74,7 +74,7 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
    }
    const nodes=descendants(element('iosVpnButtons'));
    const install=nodes.find(n=>n.href?.includes('/ios.mobileconfig?'));
-   assert(install,'profile appears only after both confirmations');
+   assert(install,'profile appears only after the TOLF confirmation');
    assert(!nodes.find(n=>n.textContent==='Сохранить MobileConfig').hidden);
    assigned=install.href;
    const other=ctx.window.tolfIosButtons.create({checked:true,includeInstall:true,lang:'ru',

@@ -148,7 +148,7 @@ def register_combined_test(app, authenticate, record, authority, database, enabl
     @app.get("/oc/access/devices/{device_id}/shortcuts/{mode}.shortcut")
     def download_ios_shortcut(device_id: str, mode: str, request: Request, ingress: str = "moscow"):
         user = authenticate(request)
-        if ingress not in enabled_nodes or mode not in ("on", "off"):
+        if ingress not in enabled_nodes or mode not in ("on", "off", "control"):
             raise HTTPException(400, "Unsupported shortcut or entry point")
         row = record(user, device_id, True)
         from tolf_oc_shortcuts import signed_shortcut, vpn_name
@@ -159,7 +159,7 @@ def register_combined_test(app, authenticate, record, authority, database, enabl
             raise HTTPException(503, "Shortcut signing temporarily unavailable") from None
         return Response(signed, media_type="application/x-apple-shortcut", headers={
             "Cache-Control": "private, no-store, no-transform",
-            "Content-Disposition": 'attachment; filename="TOLF-' + mode.upper() + '.shortcut"',
+            "Content-Disposition": 'attachment; filename="' + ("TOLF" if mode == "control" else "TOLF-" + mode.upper()) + '.shortcut"',
             "Referrer-Policy": "no-referrer",
             "X-Content-Type-Options": "nosniff",
         })

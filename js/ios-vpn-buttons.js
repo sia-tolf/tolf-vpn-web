@@ -3,37 +3,40 @@
   'use strict';
   const TEXT = {
     ru: {
-      option: "Установить команды и кнопки VPN",
+      option: "Установить управление VPN и кнопки на экран",
       help: 'Зелёная TOLF ON включает VPN, красная TOLF OFF выключает. Кнопки установятся вместе с профилем.',
-      setup: "Добавьте обе команды, затем установите профиль со значками. TOLF ON настроена на VPN «{vpn}», TOLF OFF отключает активное подключение AnyConnect. Сохраните названия команд.",
-      add: 'Добавить ', save: 'Сохранить MobileConfig', saving: 'Сохраняем…',
+      setup: "Настройка состоит из двух шагов: добавьте одну команду TOLF, затем установите VPN «{vpn}» со значками.",
+      add: "Добавить команду TOLF", save: 'Сохранить MobileConfig', saving: 'Сохраняем…',
       failed: 'Не удалось сохранить профиль. Попробуйте ещё раз.',
-      note: "После добавления каждой команды в приложении «Команды» вернитесь сюда и подтвердите добавление.",
+      note: "Подтвердите добавление в приложении «Команды», затем вернитесь на эту страницу в Safari. Если TOLF уже есть, выберите замену. Сохраните название TOLF.",
       confirm: "Команда добавлена — продолжить",
-      ready: "3. Установите профиль со значками TOLF ON и TOLF OFF.",
-      install: "Установить профиль с кнопками",
+      ready: "2. Установите VPN",
+      install: "Скачать профиль VPN",
+      instructions: "После скачивания откройте «Настройки» → «Профиль загружен» → «Установить» и подтвердите установку. На главном экране появятся TOLF ON и TOLF OFF. Возвращаться на сайт больше не нужно.",
     },
     en: {
-      option: "Install VPN shortcuts and Home Screen buttons",
+      option: "Install VPN controls and Home Screen buttons",
       help: 'Green TOLF ON connects VPN; red TOLF OFF disconnects it. The buttons are installed with the profile.',
-      setup: "Add both shortcuts, then install the profile with icons. TOLF ON is configured for VPN “{vpn}”; TOLF OFF disconnects the active AnyConnect connection. Keep the shortcut names.",
-      add: 'Add ', save: 'Save MobileConfig', saving: 'Saving…',
+      setup: "Two steps: add one TOLF shortcut, then install VPN “{vpn}” with its icons.",
+      add: "Add TOLF shortcut", save: 'Save MobileConfig', saving: 'Saving…',
       failed: 'Unable to save the profile. Please try again.',
-      note: "After adding each shortcut in Shortcuts, return here and confirm that it was added.",
+      note: "Confirm the addition in Shortcuts, then return to this page in Safari. If TOLF already exists, replace it. Keep the name TOLF.",
       confirm: "Shortcut added — continue",
-      ready: "3. Install the profile with TOLF ON and TOLF OFF icons.",
-      install: "Install profile with buttons",
+      ready: "2. Install VPN",
+      install: "Download VPN profile",
+      instructions: "After downloading, open Settings → Profile Downloaded → Install and confirm. TOLF ON and TOLF OFF will appear on the Home Screen. You do not need to return to this website.",
     },
     lv: {
-      option: "Instalēt VPN komandas un sākuma ekrāna pogas",
+      option: "Instalēt VPN vadību un sākuma ekrāna pogas",
       help: 'Zaļā TOLF ON ieslēdz VPN, sarkanā TOLF OFF izslēdz. Pogas tiek instalētas kopā ar profilu.',
-      setup: "Pievienojiet abas komandas, pēc tam instalējiet profilu ar ikonām. TOLF ON ir konfigurēta VPN “{vpn}”; TOLF OFF atvieno aktīvo AnyConnect savienojumu. Saglabājiet komandu nosaukumus.",
-      add: 'Pievienot ', save: 'Saglabāt MobileConfig', saving: 'Saglabā…',
+      setup: "Divi soļi: pievienojiet vienu komandu TOLF, pēc tam instalējiet VPN “{vpn}” ar ikonām.",
+      add: "Pievienot komandu TOLF", save: 'Saglabāt MobileConfig', saving: 'Saglabā…',
       failed: 'Neizdevās saglabāt profilu. Mēģiniet vēlreiz.',
-      note: "Pēc katras komandas pievienošanas lietotnē Shortcuts atgriezieties šeit un apstipriniet pievienošanu.",
+      note: "Apstipriniet pievienošanu lietotnē Shortcuts, pēc tam atgriezieties šajā lapā pārlūkā Safari. Ja TOLF jau ir pievienota, aizstājiet to. Saglabājiet nosaukumu TOLF.",
       confirm: "Komanda pievienota — turpināt",
-      ready: "3. Instalējiet profilu ar TOLF ON un TOLF OFF ikonām.",
-      install: "Instalēt profilu ar pogām",
+      ready: "2. Instalējiet VPN",
+      install: "Lejupielādēt VPN profilu",
+      instructions: "Pēc lejupielādes atveriet Iestatījumi → Lejupielādēts profils → Instalēt un apstipriniet. Sākuma ekrānā parādīsies TOLF ON un TOLF OFF. Šajā vietnē vairs nav jāatgriežas.",
     }
   };
   function element(tag, text, cls) {
@@ -57,7 +60,7 @@
     }
     let state = memory.get(key);
     try { state = state || JSON.parse(sessionStorage.getItem(key)); } catch {}
-    return state && state.expires > Date.now() && [0, 1, 2].includes(state.step)
+    return state && state.expires > Date.now() && [0, 1].includes(state.step)
       ? state : {step:0, opened:false, expires:Date.now() + 2 * 60 * 60 * 1000};
   }
   function create({checked = false, onChange, vpnName, url, includeInstall = false, disabled = false, lang = document.documentElement.lang}) {
@@ -79,23 +82,22 @@
     details.append(preview);
     // Quick Setup knows the final device label only after preparation.
     if (vpnName) details.append(element('p', text.setup.replace('{vpn}', vpnName)));
-    else details.append(element('p', ({ru:'Ссылки на команды появятся после подготовки профиля.', en:'Shortcut links appear after the profile is prepared.', lv:'Komandu saites parādīsies pēc profila sagatavošanas.'})[lang] || 'Shortcut links appear after the profile is prepared.'));
-    const key = 'tolfIosBundle:' + (url ? profileUrl(url, false) : '') + ':' + (vpnName || '');
+    else details.append(element('p', ({ru:'Сначала добавим команду TOLF, затем установим профиль VPN.', en:'First add the TOLF shortcut, then install the VPN profile.', lv:'Vispirms pievienosim komandu TOLF, pēc tam instalēsim VPN profilu.'})[lang] || 'First add the TOLF shortcut, then install the VPN profile.'));
+    const key = 'tolfIosControllerV2:' + (url ? profileUrl(url, false) : '') + ':' + (vpnName || '');
     let state = progress(key);
     let save;
     const wizard = element('div', '', 'ios-vpn-wizard');
     details.append(wizard);
-    const allowed = () => !checkbox.checked || state.step === 2;
+    const allowed = () => !checkbox.checked || state.step === 1;
     function renderWizard() {
       wizard.replaceChildren();
       if (save) { save.hidden = !allowed(); save.disabled = disabled || !allowed(); }
       if (!checkbox.checked || !vpnName || !url) return;
-      if (state.step < 2) {
-        const mode = state.step === 0 ? 'ON' : 'OFF';
-        wizard.append(element('p', (state.step + 1) + '. ' + text.add + 'TOLF ' + mode));
-        const a = element('a', text.add + 'TOLF ' + mode, 'button-link oc-action secondary');
+      if (state.step < 1) {
+        wizard.append(element('p', '1. ' + text.add));
+        const a = element('a', text.add, 'button-link oc-action secondary');
         const target = new URL(url);
-        target.pathname = target.pathname.replace(/\/ios\.mobileconfig$/, '/shortcuts/' + mode.toLowerCase() + '.shortcut');
+        target.pathname = target.pathname.replace(/\/ios\.mobileconfig$/, '/shortcuts/control.shortcut');
         target.searchParams.delete('buttons');
         a.href = target.href; a.referrerPolicy = 'no-referrer';
         const confirm = element('button', text.confirm, 'oc-action');
@@ -116,7 +118,7 @@
           const install = element('a', text.install, 'button-link oc-action');
           install.href = profileUrl(url, true); install.referrerPolicy = 'no-referrer';
           install.addEventListener('click', event => { if (disabled || !allowed()) event?.preventDefault(); });
-          wizard.append(install);
+          wizard.append(install, element('p', text.instructions, 'oc-note'));
         }
       }
     }

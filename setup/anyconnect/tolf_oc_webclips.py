@@ -21,7 +21,7 @@ def webclip_payloads(device_id):
             "PayloadUUID": str(uuid.uuid5(uuid.NAMESPACE_URL, identifier)).upper(),
             "PayloadDisplayName": name,
             "Label": name,
-            "URL": "shortcuts://run-shortcut?name=" + quote(name, safe=""),
+            "URL": "shortcuts://run-shortcut?name=TOLF&input=text&text=" + mode,
             "Icon": base64.b64decode(ICONS[mode]),
             "IsRemovable": True,
             "FullScreen": False,
