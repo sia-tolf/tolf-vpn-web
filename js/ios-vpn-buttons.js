@@ -101,7 +101,7 @@
         target.searchParams.delete('buttons');
         // Verified On Demand controller; its connection name must match exactly.
         const shared = vpnName === 'TOLF Москва iPhone';
-        a.href = shared ? 'https://www.icloud.com/shortcuts/b90c94e6121946d88558221f8a3f87cc' : target.href;
+        a.href = shared ? 'https://www.icloud.com/shortcuts/ac8daef5b6a94a4c9ac2daeaaa559945' : target.href;
         a.referrerPolicy = 'no-referrer';
         if (!shared) {
         a.textContent = ({ru:'Скачать команду TOLF',en:'Download TOLF shortcut',lv:'Lejupielādēt komandu TOLF'})[lang] || 'Download TOLF shortcut';

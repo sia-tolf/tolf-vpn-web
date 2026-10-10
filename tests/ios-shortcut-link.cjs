@@ -7,7 +7,7 @@ for(const [name,ingress] of [['TOLF Москва iPhone','moscow'],['TOLF Риг
  const nodes=flat(ctx.window.tolfIosButtons.create({checked:true,vpnName:name,url:'https://api.tolf.is/oc/access/devices/test/ios.mobileconfig?ingress='+ingress}));
  const a=nodes.find(n=>n.href);
  if(name==='TOLF Москва iPhone'){
-  assert.equal(a.href,'https://www.icloud.com/shortcuts/b90c94e6121946d88558221f8a3f87cc');
+  assert.equal(a.href,'https://www.icloud.com/shortcuts/ac8daef5b6a94a4c9ac2daeaaa559945');
   assert.equal(a.textContent,'Добавить команду TOLF');
  } else {
   assert(a.href.includes('control.shortcut?ingress='+ingress));
