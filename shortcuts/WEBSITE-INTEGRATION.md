@@ -68,3 +68,12 @@ isolated test environments (the isolated environment supplies the missing
 TestClient dependencies). Main AnyConnect UI, Quick AnyConnect, current-device
 selection, native/public shortcut checks and JavaScript syntax checks passed.
 The UK installer was rebuilt. iPhone import and visual browser QA remain unverified.
+
+## Name-variable experiment
+
+`build-name-probe.py` creates TOLF NAME TEST: Text with the exact VPN name,
+then the native Set On Demand and Connect actions referencing that text output
+as a Magic Variable. It has no import questions, native VPN ID, or invented
+Find VPNs action. Standard variable serialization is used; whether iOS resolves
+a text name into a VPN configuration is NOT established. Only iPhone execution
+can settle this experiment. Do not ship it as a supported automatic binding.
