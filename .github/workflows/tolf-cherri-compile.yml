@@ -8,7 +8,7 @@ on:
       - 'shortcuts/verify-cherri-source.cjs'
       - '.github/workflows/tolf-cherri-compile.yml'
 permissions:
-  contents: read
+  contents: write
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -35,6 +35,45 @@ jobs:
           for name in on off; do
             /tmp/cherri/cherri "shortcuts/cherri-$name.cherri" --debug
           done
+      - name: Verify two signed VPN actions and prepare experimental downloads
+        run: |
+          python3 - <<'PY'
+          import pathlib, plistlib, shutil
+          out=pathlib.Path('shortcuts/signed')
+          out.mkdir(parents=True,exist_ok=True)
+          for name,ops,on in [
+              ('TOLF ON',['Set On Demand','Connect'],True),
+              ('TOLF OFF',['Set On Demand','Disconnect'],False),
+          ]:
+              source=pathlib.Path('shortcuts')/(name+'.shortcut')
+              info=pathlib.Path('shortcuts')/(name+'.plist')
+              data=source.read_bytes()
+              assert data[:4]==b'AEA1' and len(data)>2000, name+' was not signed'
+              p=plistlib.loads(info.read_bytes())
+              acts=p['WFWorkflowActions']
+              assert len(acts)==2
+              assert all(a['WFWorkflowActionIdentifier']=='is.workflow.actions.vpn.set' for a in acts)
+              assert [a['WFWorkflowActionParameters']['WFVPNOperation'] for a in acts]==ops
+              assert acts[0]['WFWorkflowActionParameters']['WFOnDemandValue'] is on
+              assert len(p['WFWorkflowImportQuestions'])==2
+              assert {q['ParameterKey'] for q in p['WFWorkflowImportQuestions']}=={'WFVPN'}
+              assert {q.get('ActionIndex',0) for q in p['WFWorkflowImportQuestions']}=={0,1}
+              assert all(q['DefaultValue']=='TOLF Москва iPhone' for q in p['WFWorkflowImportQuestions'])
+              dest=out/(name.replace(' ','-')+'.shortcut')
+              shutil.copyfile(source,dest)
+              print('SIGNED_PILOT_READY',name,len(data))
+          PY
+      - name: Publish signed experiment artifacts to GitHub Pages source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "TOLF Shortcuts CI"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f shortcuts/signed/TOLF-ON.shortcut shortcuts/signed/TOLF-OFF.shortcut
+          if ! git diff --cached --quiet; then
+            git commit -m "Publish signed experimental TOLF VPN shortcuts"
+            git push origin HEAD:main
+          fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:
