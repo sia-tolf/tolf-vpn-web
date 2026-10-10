@@ -60,6 +60,21 @@ class CiscoShortcuts(unittest.TestCase):
                     self.assertNotIn("identifier", params["WFVPN"])
                     self.assertIs(action["WFWorkflowActionParameters"]["ShowWhenRun"], False)
 
+    def test_controller_clears_output_and_returns_home_after_all_branches(self):
+        actions = shortcuts.controller("TOLF Москва iPhone")["WFWorkflowActions"]
+        self.assertEqual([a["WFWorkflowActionIdentifier"] for a in actions[-3:]], [
+            "is.workflow.actions.nothing",
+            "is.workflow.actions.returntohomescreen",
+            "is.workflow.actions.nothing"])
+        depth = 0
+        for action in actions[:-3]:
+            params = action["WFWorkflowActionParameters"]
+            if "WFControlFlowMode" in params:
+                mode = params["WFControlFlowMode"]
+                depth += 1 if mode == 0 else -1 if mode == 2 else 0
+                self.assertGreaterEqual(depth, 0)
+        self.assertEqual(depth, 0)
+
     def test_cache_reuses_signature_and_changes_with_name(self):
         with tempfile.TemporaryDirectory() as directory:
             with patch.object(shortcuts, "sign", return_value=SIGNED) as signer:
