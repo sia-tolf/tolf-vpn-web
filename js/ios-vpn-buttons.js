@@ -5,7 +5,7 @@
     ru: {
       option: 'Добавить кнопки VPN на главный экран',
       help: 'Зелёная TOLF ON включает VPN, красная TOLF OFF выключает. Кнопки установятся вместе с профилем.',
-      setup: 'После установки профиля добавьте обе команды по ссылкам ниже. При настройке каждой команды выберите VPN «{vpn}» в обоих вопросах. Сохраните названия TOLF ON и TOLF OFF.',
+      setup: 'После установки профиля добавьте обе команды по ссылкам ниже. Для работы обе команды должны быть привязаны к VPN «{vpn}». Сохраните названия TOLF ON и TOLF OFF.',
       add: 'Добавить ', save: 'Сохранить MobileConfig', saving: 'Сохраняем…',
       failed: 'Не удалось сохранить профиль. Попробуйте ещё раз.',
       note: 'Команды можно добавить позже. До этого значки не смогут управлять VPN. При запуске приложение «Команды» ненадолго откроется, затем команда вернёт вас на главный экран.'
@@ -13,7 +13,7 @@
     en: {
       option: 'Add VPN buttons to the Home Screen',
       help: 'Green TOLF ON connects VPN; red TOLF OFF disconnects it. The buttons are installed with the profile.',
-      setup: 'After installing the profile, add both shortcuts below. When setting up each shortcut, select “{vpn}” for both questions. Keep the names TOLF ON and TOLF OFF.',
+      setup: 'After installing the profile, add both shortcuts below. Both shortcuts must be bound to VPN “{vpn}” to work. Keep the names TOLF ON and TOLF OFF.',
       add: 'Add ', save: 'Save MobileConfig', saving: 'Saving…',
       failed: 'Unable to save the profile. Please try again.',
       note: 'You can add the shortcuts later. The icons cannot control VPN until then. Shortcuts briefly opens when launched, then the shortcut returns to the Home Screen.'
@@ -21,7 +21,7 @@
     lv: {
       option: 'Pievienot VPN pogas sākuma ekrānam',
       help: 'Zaļā TOLF ON ieslēdz VPN, sarkanā TOLF OFF izslēdz. Pogas tiek instalētas kopā ar profilu.',
-      setup: 'Pēc profila instalēšanas pievienojiet abas tālāk norādītās komandas. Iestatot katru komandu, abos jautājumos izvēlieties VPN “{vpn}”. Saglabājiet nosaukumus TOLF ON un TOLF OFF.',
+      setup: 'Pēc profila instalēšanas pievienojiet abas tālāk norādītās komandas. Lai abas komandas darbotos, tām jābūt piesaistītām VPN “{vpn}”. Saglabājiet nosaukumus TOLF ON un TOLF OFF.',
       add: 'Pievienot ', save: 'Saglabāt MobileConfig', saving: 'Saglabā…',
       failed: 'Neizdevās saglabāt profilu. Mēģiniet vēlreiz.',
       note: 'Komandas var pievienot vēlāk. Līdz tam ikonas nevar vadīt VPN. Palaižot komandu, īslaicīgi atveras lietotne Shortcuts, pēc tam komanda atgriežas sākuma ekrānā.'

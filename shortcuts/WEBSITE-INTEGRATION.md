@@ -21,6 +21,16 @@ They are not the previously verified device-specific exports.
 - ON enables On Demand, then connects. OFF disables On Demand, then disconnects.
   Both finish with Go to Home Screen. The Shortcuts application may open briefly.
 
+## iPhone result: setup picker failed (2026-10-10)
+
+The owner tested the generic ON candidate. iOS shows Configure This Shortcut
+and the import-question text, but the VPN row is not tappable. Next simply
+continues installation without selecting a connection. Import questions do NOT
+provide a usable VPN picker in this tested workflow. The release gate failed.
+Do not publish the prepared website instructions or these candidates as working
+portable setup. The prior device-bound commands remain the verified baseline.
+A successful signature and a visible setup question did not validate selection.
+
 ## Binding limitation and release gate
 
 The verified native export includes an iOS-local VPN identifier. It did not match
