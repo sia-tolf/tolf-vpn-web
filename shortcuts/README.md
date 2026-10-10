@@ -1,37 +1,31 @@
-# TOLF iOS VPN Shortcuts — experimental
+# TOLF VPN Shortcuts — native-export builder
 
-Two deterministic commands for the same device-specific VPN connection:
+The working reference is the owner's Apple-exported ON shortcut, confirmed on
+iPhone on 2026-10-10. Keep this device-specific source outside the repository.
 
-- **TOLF ON:** Set On Demand = On, then Connect VPN.
-- **TOLF OFF:** Set On Demand = Off, then Disconnect VPN.
+`build.py --source /path/to/working-on.shortcut` builds unsigned commands:
+- ON preserves the native source workflow exactly.
+- OFF changes only WFOnDemandValue=false and WFVPNOperation=Disconnect.
+- Both steps retain the full native WFVPN object, including appDescriptor.
+- No text VPN placeholders, synthetic UUIDs, or import questions are generated.
 
-The original signed MobileConfig, client certificate, and existing Cisco
-connection are not modified by adding these Shortcuts.
+The source is an unsigned binary/XML plist (the shortcut asset in the iCloud
+record), not the encrypted signedShortcut asset.
 
-## Build and distribution
+## Signing
+Unsigned builds cannot be installed directly on iPhone.
+`sign-on-mac.sh /path/to/working-on.shortcut` signs locally with Apple Shortcuts.
+`sign-native.py --source /path/to/working-on.shortcut --output /path/to/output`
+uses RoutineHub HubSign and sends the workflow, including the VPN name, local
+identifier and app descriptor, to that external service. Obtain explicit owner
+authorization before using it with a real device export.
 
-The Cherri v2.3.0 source definitions are in cherri-on.cherri and
-cherri-off.cherri. GitHub Actions validates them and checks that each
-compiled workflow contains exactly two Apple Set VPN actions with the
-correct order, On Demand value and two setup questions for the VPN target.
+ON structural equality and OFF's exact two-parameter difference are checked
+offline by tests. A newly signed/imported OFF still requires an iPhone check.
 
-Cherri on Linux uses RoutineHub HubSign to create Apple-signed Shortcuts.
-Both experimental artifacts were successfully signed this way on
-October 10, 2026 without an interactive iCloud login.
-
-The signed files are staged under shortcuts/signed/ and exposed by the
-experiment page at /shortcuts/experiment.html.
-
-The user may have to choose the same installed TOLF AnyConnect VPN for
-each of the two Shortcuts import questions. This behavior and the correct
-handling of WFVPN by iOS 26 have NOT yet been tested on an actual iPhone.
-
-Do not merge this experiment into the production MobileConfig installer
-until the end-to-end iOS test succeeds. Keep the ability to roll back
-without affecting the working VPN profile.
-
-## Developer fallback
-
-The offline Python draft builder in build.py produces unsigned files,
-not installable on iOS. sign-on-mac.sh is retained as a Mac signing fallback
-but is not needed for the current Cherri + HubSign build pipeline.
+## Retired experiments
+cherri-on/off and the probe files are historical experiments, not the current
+distribution source. The earlier TOLF-VPN-Check contained filter.vpns, which the
+iPhone reported as Unknown Action. The earlier text-based WFVPN import binding
+does not match the native export. The experiment page remains paused until
+replacement signed commands are available and verified.
