@@ -11,7 +11,17 @@ def controller(name):
     doc["WFWorkflowName"] = "TOLF"
     doc["WFWorkflowHasShortcutInputVariables"] = True
     doc["WFWorkflowInputContentItemClasses"] = ["WFStringContentItem"]
-    actions = []
+    text_id = "4B5FF2D1-1B38-4D57-AD77-2C1B195ED02A"
+    # Materialize a Text action so If resolves a string operand during import.
+    # Raw Shortcut Input has no concrete content type when the editor validates it.
+    actions = [{"WFWorkflowActionIdentifier":"is.workflow.actions.gettext",
+                "WFWorkflowActionParameters":{
+                    "UUID":text_id,
+                    "WFTextActionText":{
+                        "Value":{"string":"\uFFFC", "attachmentsByRange":{
+                            "{0, 1}":{"Type":"ExtensionInput"}}},
+                        "WFSerializationType":"WFTextTokenString"}}}]
+
     for mode in ("on", "off"):
         group = str(uuid.uuid5(uuid.NAMESPACE_URL, "https://vpn.tolf.is/controller/" + mode)).upper()
         actions.extend([
@@ -19,7 +29,9 @@ def controller(name):
              "WFWorkflowActionParameters":{
                  "GroupingIdentifier":group, "WFControlFlowMode":0,
                  "WFInput":{"Type":"Variable", "Variable":{
-                     "Value":{"Type":"ExtensionInput", "VariableName":"Shortcut Input"},
+                     "Value":{"Type":"ActionOutput", "OutputUUID":text_id, "OutputName":"Text",
+                              "Aggrandizements":[{"Type":"WFCoercionVariableAggrandizement",
+                                                 "CoercionItemClass":"WFStringContentItem"}]},
                      "WFSerializationType":"WFTextTokenAttachment"}},
                  "WFCondition":4, "WFConditionalActionString":mode}},
             workflow(name, mode)["WFWorkflowActions"][0],
