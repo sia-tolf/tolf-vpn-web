@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>TOLF — Shortcuts experiment</title>
+<style>
+:root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color-scheme:light dark}
+body{margin:0 auto;max-width:540px;padding:24px 20px;line-height:1.5}
+header{display:flex;align-items:center;gap:12px}
+h1{font-size:22px;font-weight:600;margin:16px 0}
+h2{font-size:16px;font-weight:600;margin:0 0 6px}
+p{font-size:15px;margin:6px 0 14px}
+a{color:inherit}
+.button{display:flex;align-items:center;justify-content:center;min-height:44px;padding:3px 15px;border:1px solid #8b8b8b;border-radius:12px;text-decoration:none;font-size:16px;font-weight:500}
+.panel{border:1px solid #a0a0a055;border-radius:16px;padding:16px;margin:14px 0}
+.muted{color:gray;font-size:13px}
+details{margin-top:15px}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}
+</style>
+</head>
+<body>
+<header><a href="/" style="text-decoration:none">← Возврат</a><strong>TOLF</strong></header>
+<h1>Эксперимент Shortcuts</h1>
+<p>Проверяем готовые команды управления установленным TOLF AnyConnect. Профиль VPN и сертификат здесь не меняются.</p>
+<section class="panel">
+  <h2>TOLF ON</h2>
+  <p>Включить On Demand, затем выполнить Connect для того же VPN.</p>
+  <a id="on" class="button" href="#">Подготовить TOLF ON</a>
+</section>
+<section class="panel">
+  <h2>TOLF OFF</h2>
+  <p>Выключить On Demand, затем выполнить Disconnect для того же VPN.</p>
+  <a id="off" class="button" href="#">Подготовить TOLF OFF</a>
+</section>
+<p class="muted">Экспериментальная подготовка через Cherri Playground. После открытия воспользуйтесь сборкой и экспортом подписанного Shortcut. Если потребуется выбрать VPN дважды, оба раза выбирайте соединение TOLF AnyConnect. Пока не проверено на iPhone 26.</p>
+<details><summary>Что делают команды</summary>
+<pre>ON: Set On Demand = On → Connect
+OFF: Set On Demand = Off → Disconnect
+Обе операции должны применять настройки к одному и тому же локальному VPN-соединению.</pre>
+</details>
+<script>
+const workflow=(on)=> {
+  const name=on?"TOLF ON":"TOLF OFF";
+  const v=on?"true":"false";
+  const operation=on?"Connect":"Disconnect";
+  return [
+    "#define name "+name,
+    "#question vpnDemand \"Выберите TOLF AnyConnect для On Demand\"",
+    "#question vpnConnection \"Выберите тот же TOLF AnyConnect для "+operation+"\"",
+    'rawAction("is.workflow.actions.vpn.set", {',
+    '  "WFVPNOperation": "Set On Demand",',
+    '  "WFOnDemandValue": '+v+',',
+    '  "WFVPN": vpnDemand',
+    '})',
+    'rawAction("is.workflow.actions.vpn.set", {',
+    '  "WFVPNOperation": "'+operation+'",',
+    '  "WFVPN": vpnConnection',
+    '})'
+  ].join("\n");
+};
+for(const [id,on] of [["on",true],["off",false]]) {
+ const a=document.getElementById(id);
+ const url=new URL("https://playground.cherrilang.org/");
+ url.searchParams.set("code",workflow(on));
+ a.href=url.href;
+ a.rel="noreferrer noopener";
+}
+</script>
+</body>
+</html>
