@@ -99,11 +99,14 @@
         const target = new URL(url);
         target.pathname = target.pathname.replace(/\/ios\.mobileconfig$/, '/shortcuts/control.shortcut');
         target.searchParams.delete('buttons');
-        // The previous iCloud share has no On Demand control; do not reuse it.
-        a.href = target.href;
+        // Verified On Demand controller; its connection name must match exactly.
+        const shared = vpnName === 'TOLF Москва iPhone';
+        a.href = shared ? 'https://www.icloud.com/shortcuts/b90c94e6121946d88558221f8a3f87cc' : target.href;
         a.referrerPolicy = 'no-referrer';
+        if (!shared) {
         a.textContent = ({ru:'Скачать команду TOLF',en:'Download TOLF shortcut',lv:'Lejupielādēt komandu TOLF'})[lang] || 'Download TOLF shortcut';
         wizard.append(element('p', ({ru:'Откройте скачанный файл TOLF.shortcut из загрузок Safari и добавьте его в «Команды». Если TOLF уже установлена, замените её.',en:'Open TOLF.shortcut from Safari Downloads and add it to Shortcuts. Replace TOLF if already installed.',lv:'Atveriet TOLF.shortcut failu Safari lejupielādēs un pievienojiet to lietotnei Shortcuts. Ja TOLF jau ir instalēta, aizstājiet to.'})[lang] || 'Open TOLF.shortcut from Safari Downloads and add it to Shortcuts.', 'oc-note'));
+        }
         const confirm = element('button', text.confirm, 'oc-action');
         confirm.type = 'button'; confirm.disabled = disabled || !state.opened;
         a.addEventListener('click', event => {

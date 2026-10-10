@@ -6,8 +6,12 @@ const flat=n=>n.children.flatMap(c=>[c,...flat(c)]);
 for(const [name,ingress] of [['TOLF Москва iPhone','moscow'],['TOLF Рига iPhone','riga'],['TOLF Москва iPad','moscow']]){
  const nodes=flat(ctx.window.tolfIosButtons.create({checked:true,vpnName:name,url:'https://api.tolf.is/oc/access/devices/test/ios.mobileconfig?ingress='+ingress}));
  const a=nodes.find(n=>n.href);
- assert(!a.href.includes('icloud.com'),'old iCloud controller lacks On Demand support');
- assert(a.href.includes('control.shortcut?ingress='+ingress));
- assert.equal(a.textContent,'Скачать команду TOLF');
+ if(name==='TOLF Москва iPhone'){
+  assert.equal(a.href,'https://www.icloud.com/shortcuts/b90c94e6121946d88558221f8a3f87cc');
+  assert.equal(a.textContent,'Добавить команду TOLF');
+ } else {
+  assert(a.href.includes('control.shortcut?ingress='+ingress));
+  assert.equal(a.textContent,'Скачать команду TOLF');
+ }
 }
 console.log('PASS: all installation links use updated per-device controller');
