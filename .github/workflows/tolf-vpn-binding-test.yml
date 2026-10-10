@@ -1,0 +1,64 @@
+name: TOLF iOS VPN picker binding test
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'shortcuts/cherri-vpn-binding.cherri'
+      - '.github/workflows/tolf-vpn-binding-test.yml'
+permissions:
+  contents: write
+jobs:
+  compile-sign:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch Cherri v2.3.0 Linux
+        run: |
+          set -e
+          curl -fsSL --retry 2 --max-time 30 -o /tmp/tolf-cherri.zip https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip
+          mkdir -p /tmp/tolf-cherri
+          unzip -q /tmp/tolf-cherri.zip -d /tmp/tolf-cherri
+          chmod +x /tmp/tolf-cherri/cherri
+      - name: Compile and sign
+        run: /tmp/tolf-cherri/cherri shortcuts/cherri-vpn-binding.cherri --debug
+      - name: Verify actual Apple object and no import questions
+        run: |
+          python3 - <<'PY'
+          import pathlib, plistlib
+          d=pathlib.Path('shortcuts/TOLF VPN Binding Test.plist')
+          p=plistlib.loads(d.read_bytes())
+          actions=p['WFWorkflowActions']
+          assert len(actions)==1, actions
+          a=actions[0]
+          assert a['WFWorkflowActionIdentifier']=='is.workflow.actions.vpn.set'
+          params=a['WFWorkflowActionParameters']
+          assert params['WFVPNOperation']=='Set On Demand'
+          assert params['WFOnDemandValue'] is True
+          assert params['WFVPN']=={
+              'identifier':'00000000-0000-0000-0000-000000000000',
+              'title':'TOLF Москва iPhone',
+          }, params
+          assert not p.get('WFWorkflowImportQuestions'),p.get('WFWorkflowImportQuestions')
+          data=pathlib.Path('shortcuts/TOLF VPN Binding Test.shortcut').read_bytes()
+          assert data[:4]==b'AEA1' and len(data)>2000
+          print('ONE_SET_VPN_ACTION_VALID:',len(data),'bytes')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: tolf-vpn-binding-test
+          path: |
+            shortcuts/TOLF VPN Binding Test.plist
+            shortcuts/TOLF VPN Binding Test.shortcut
+      - name: Publish verified diagnostic only
+        run: |
+          set -e
+          mkdir -p shortcuts/probe
+          cp 'shortcuts/TOLF VPN Binding Test.shortcut' shortcuts/probe/TOLF-VPN-Binding-Test.shortcut
+          git config user.name "TOLF Shortcuts CI"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f shortcuts/probe/TOLF-VPN-Binding-Test.shortcut
+          git commit -m "Publish verified single-action VPN binding test"
+          git push origin HEAD:main

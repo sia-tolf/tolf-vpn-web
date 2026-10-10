@@ -1,0 +1,10 @@
+#define name TOLF VPN Binding Test
+#define color blue
+rawAction("is.workflow.actions.vpn.set", {
+  "WFVPNOperation": "Set On Demand",
+  "WFOnDemandValue": true,
+  "WFVPN": {
+    "identifier": "00000000-0000-0000-0000-000000000000",
+    "title": "TOLF Москва iPhone"
+  }
+})
