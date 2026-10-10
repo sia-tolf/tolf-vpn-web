@@ -67,13 +67,45 @@ Validation completed: 67 AnyConnect backend tests passed across the base and
 isolated test environments (the isolated environment supplies the missing
 TestClient dependencies). Main AnyConnect UI, Quick AnyConnect, current-device
 selection, native/public shortcut checks and JavaScript syntax checks passed.
-The UK installer was rebuilt. iPhone import and visual browser QA remain unverified.
+The UK installer was rebuilt. The iPhone setup picker and text-name execution
+failed as recorded here; visual browser QA remains unverified.
 
 ## Name-variable experiment
 
 `build-name-probe.py` creates TOLF NAME TEST: Text with the exact VPN name,
 then the native Set On Demand and Connect actions referencing that text output
 as a Magic Variable. It has no import questions, native VPN ID, or invented
-Find VPNs action. Standard variable serialization is used; whether iOS resolves
-a text name into a VPN configuration is NOT established. Only iPhone execution
-can settle this experiment. Do not ship it as a supported automatic binding.
+Find VPNs action.
+
+The owner executed it on 2026-10-10 (IMG_8848): the first VPN action failed with
+"Set VPN failed because Shortcuts couldn’t convert from Text to the required type."
+Text-to-VPN coercion is disproven for this workflow. Do not repeat this probe or
+ship it as an automatic binding.
+
+## Further binding investigation (2026-10-10)
+
+Read-only comparison of the native export identifier against generated certificate,
+VPN and profile UUIDs for all eight currently active oc_devices found no match.
+This does not establish which installed profile version the export came from,
+and does not prove that all automatic binding mechanisms are impossible.
+The current Apple com.apple.vpn.managed schema documents UserDefinedName as
+the displayed description; no field explicitly links a Set VPN Shortcuts object
+identifier to that name. Do not equate it with VPNUUID from per-app VPN.
+
+Cisco documents an independent name-based path: anyconnect://connect/?name=
+followed by the URL-encoded connection name. It also documents anyconnect:disconnect
+and a connect success callback anyconnect://close. URI handling requires External
+Control enabled or prompting. The useondemand option is documented under create,
+not as a standalone toggle for an installed managed configuration. Therefore the
+URI path is not yet a verified replacement for the required On Demand + connection
+pair, and no production UI or profile was changed for it.
+
+Cisco also documents native Start VPN and Stop VPN donated intents. Both appeared
+in the owner's earlier action-list screenshots, but their exported parameter
+structure and On Demand behavior are not known. A native sample export can settle
+the structure without inventing action names or parameter identifiers.
+
+Sources inspected:
+- https://github.com/apple/device-management/blob/release/mdm/profiles/com.apple.vpn.managed.yaml
+- https://www.cisco.com/c/en/us/td/docs/security/vpn_client/anyconnect/Cisco-Secure-Client-5/admin/guide/cisco-secure-client-admin-guide-new/ac-on-mobile-devices-intro/t_automate_anyconnect_actions_using_the_uri_handler.html
+- https://www.cisco.com/c/en/us/td/docs/security/vpn_client/anyconnect/anyconnect410/administration/guide/b-anyconnect-admin-guide-4-10/b_AnyConnect_Administrator_Guide_4-4_chapter_01101.html
