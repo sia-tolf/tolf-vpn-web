@@ -1,0 +1,44 @@
+name: TOLF Cherri shortcut syntax
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'shortcuts/experiment.html'
+      - 'shortcuts/verify-cherri-source.cjs'
+      - '.github/workflows/tolf-cherri-compile.yml'
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node shortcuts/verify-cherri-source.cjs
+      - name: Fetch Cherri v2.3.0 Linux binary
+        run: |
+          set -e
+          curl -fsSL --retry 2 --max-time 30 -o /tmp/cherri.zip \
+            https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip
+          mkdir -p /tmp/cherri
+          unzip -q /tmp/cherri.zip -d /tmp/cherri
+          find /tmp/cherri -maxdepth 2 -type f -printf '%p\n'
+          chmod +x /tmp/cherri/cherri
+          /tmp/cherri/cherri --help | head -35
+      - name: Compile both workflows (syntax and plist)
+        run: |
+          set -e
+          for name in on off; do
+            /tmp/cherri/cherri "shortcuts/cherri-$name.cherri" --debug
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: tolf-cherri-compile-debug
+          path: |
+            shortcuts/*.plist
+            shortcuts/*.shortcut

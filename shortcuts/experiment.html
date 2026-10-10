@@ -47,8 +47,8 @@ const workflow=(on)=> {
   const operation=on?"Connect":"Disconnect";
   return [
     "#define name "+name,
-    "#question vpnDemand \"Выберите TOLF AnyConnect для On Demand\"",
-    "#question vpnConnection \"Выберите тот же TOLF AnyConnect для "+operation+"\"",
+    "#question vpnDemand \"Выберите TOLF AnyConnect для On Demand\" \"TOLF Москва iPhone\"",
+    "#question vpnConnection \"Выберите тот же TOLF AnyConnect для "+operation+"\" \"TOLF Москва iPhone\"",
     'rawAction("is.workflow.actions.vpn.set", {',
     '  "WFVPNOperation": "Set On Demand",',
     '  "WFOnDemandValue": '+v+',',
