@@ -95,6 +95,18 @@
       docs: "Cisco instrukcija", name: "Mana ierīce"
     }
   };
+  Object.assign(COPY.ru, {
+    iosInstall: "Установить профиль AnyConnect",
+    iosInstallHelp: "Одним MobileConfig устанавливаются соединение, сертификат и автоматическое подключение. После загрузки подтвердите установку в настройках iPhone или iPad.",
+  });
+  Object.assign(COPY.en, {
+    iosInstall: "Install AnyConnect profile",
+    iosInstallHelp: "One MobileConfig installs the connection, certificate and automatic On Demand. Confirm the profile in iPhone or iPad Settings.",
+  });
+  Object.assign(COPY.lv, {
+    iosInstall: "Instalēt AnyConnect profilu",
+    iosInstallHelp: "Viens MobileConfig instalē savienojumu, sertifikātu un automātisku pieslēgšanos. Apstipriniet profilu iPhone vai iPad iestatījumos.",
+  });
   let account = null, devices = [], selectedId = null, capabilities = null;
   let grant = null, busy = false, loading = false, epoch = 0, message = "", error = false;
   let deviceName = "", creationRequest = null, addingDevice = false;
@@ -375,7 +387,16 @@
       const destinations = element("div", null, "oc-actions oc-import-actions oc-destinations");
       if (routingControls) connectionSettings.append(routingControls);
       root.append(connectionSettings);
+      if (currentPlatform === "ios") {
+        // Direct authenticated GET: Safari receives an installable CMS-signed
+        // MobileConfig with both the certificate and the Cisco VPN.
+        const location = API + path(d.id) + "/ios.mobileconfig?ingress=" + encodeURIComponent(ingress().id);
+        const actions = element("div", null, "oc-actions oc-ios-install");
+        actions.append(link(c.iosInstall, location, true));
+        root.append(actions, element("p", c.iosInstallHelp, "oc-note"));
+      }
       for (const [destination, text] of [["local",delivery.local],["remote",delivery.remote]]) {
+        if (currentPlatform === "ios" && destination === "local") continue;
         const action = button(text, () => {
           setupDestination = destination; transferNotice = "";
           if (destination === "remote") { grant = null; clearCopyNotice(); clearDownloadedPackage(); }
@@ -425,7 +446,7 @@
           if (capabilities?.guestSetup !== true) transfer.append(element("p", t.update, "oc-note"));
         }
         root.append(transfer);
-      } else if (setupDestination === "local") {
+      } else if (setupDestination === "local" && currentPlatform !== "ios") {
       const steps = element("div", null, "oc-steps");
       setupSteps = steps; steps.setAttribute('tabindex', '-1');
       const suffix = " " + sessionCopy().forDevice + " «" + d.label + "»";

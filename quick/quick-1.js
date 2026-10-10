@@ -37,6 +37,11 @@ function render() {
  if(back){back.href='/?lang='+lang;back.setAttribute('aria-label',({ru:'Назад в Мой VPN',en:'Back to My VPN',lv:'Atpakaļ uz Mans VPN'})[lang]);}
  document.querySelectorAll('[data-text]').forEach(el => el.textContent = t(el.dataset.text));
  $('passkeyHelp').textContent = accountText[lang][2];
+ if (protocol === 'anyconnect' && platform === 'ios') {
+   $('prepare').textContent = t('ocIosInstall');
+   const hint=document.querySelector('[data-text="defaults"]');
+   if(hint)hint.textContent=t('ocIosInstallHelp');
+ }
  $('windowsPrep').hidden = true;
  $('passkeyNameField').hidden = true;
  $('register').textContent = accountText[lang][0];
@@ -184,6 +189,17 @@ async function prepareOc(){
   ocDevice=result.device;deviceId=ocDevice.id;put(ocKey('device'),deviceId);
  }
  if(!ocDevice.username)throw Error('Device identity unavailable');
+ if(nativePlatform==='ios'){
+  const url=new URL(API+'/oc/access/devices/'+encodeURIComponent(ocDevice.id)+'/ios.mobileconfig');
+  url.searchParams.set('ingress',server);
+  locked=false;
+  // Single real user click on the Quick Setup primary action:
+  // prepare/reuse device identity, then navigate to authenticated
+  // HTTPS MobileConfig directly. No extra page or PKCS12 import.
+  window.location.assign(url.href);
+  message('started');
+  return;
+ }
  ocConfirmed=false;ocImported=false;ocGrant=null;
  panels('ocDelivery');message('');
 }

@@ -21,3 +21,17 @@ Object.assign(QUICK_TEXT.lv,{ocExpired:'Importēšanas termiņš beidzies. Izvē
 Object.assign(QUICK_TEXT.ru,{"ocConfirmConnection":"Соединение добавлено","ocConnectionDone":"✓ Соединение добавлено","ocAgain":"Добавить заново","ocPrepareCertificate":"Получить сертификат","ocAlreadyImported":"Сертификат уже импортирован","ocCertificateDone":"✓ Сертификат уже импортирован","ocBlocked":"Сначала добавьте соединение в AnyConnect и подтвердите завершение предыдущего шага.","ocCertificateHelp":"Если сертификат этого доступа уже установлен в Cisco Secure Client, повторный импорт не нужен. Выберите его в настройках нового соединения.","ocReturn":"Сначала добавьте соединение в AnyConnect. Затем вернитесь сюда и импортируйте сертификат в шаге 3. VPN включайте после импорта сертификата.","ocCopyPassword":"Скопировать пароль","ocAdd":"Добавить в AnyConnect","ocImport":"Импортировать в AnyConnect","ocDownload":"Скачать сертификат .p12","ocPassword":"Пароль импорта"});
 Object.assign(QUICK_TEXT.en,{"ocConfirmConnection":"Connection added","ocConnectionDone":"✓ Connection added","ocAgain":"Add again","ocPrepareCertificate":"Get certificate","ocAlreadyImported":"Certificate already imported","ocCertificateDone":"✓ Certificate already imported","ocBlocked":"First add the connection in AnyConnect and confirm completion of the previous step.","ocCertificateHelp":"If this access certificate is already installed in Cisco Secure Client, no new import is needed. Select it in the new connection settings.","ocReturn":"First add the connection in AnyConnect. Then return here and import the certificate in step 3. Enable VPN after importing the certificate.","ocCopyPassword":"Copy password","ocAdd":"Add to AnyConnect","ocImport":"Import into AnyConnect","ocDownload":"Download .p12 certificate","ocPassword":"Import password"});
 Object.assign(QUICK_TEXT.lv,{"ocConfirmConnection":"Savienojums pievienots","ocConnectionDone":"✓ Savienojums pievienots","ocAgain":"Pievienot vēlreiz","ocPrepareCertificate":"Saņemt sertifikātu","ocAlreadyImported":"Sertifikāts jau importēts","ocCertificateDone":"✓ Sertifikāts jau importēts","ocBlocked":"Vispirms pievienojiet savienojumu AnyConnect un apstipriniet iepriekšējā soļa pabeigšanu.","ocCertificateHelp":"Ja šīs piekļuves sertifikāts jau ir instalēts Cisco Secure Client, atkārtota importēšana nav vajadzīga. Izvēlieties to jaunā savienojuma iestatījumos.","ocReturn":"Vispirms pievienojiet savienojumu AnyConnect. Tad atgriezieties šeit un importējiet sertifikātu 3. solī. Ieslēdziet VPN pēc sertifikāta importēšanas.","ocCopyPassword":"Kopēt paroli","ocAdd":"Pievienot AnyConnect","ocImport":"Importēt AnyConnect","ocDownload":"Lejupielādēt .p12 sertifikātu","ocPassword":"Importēšanas parole"});
+
+
+Object.assign(QUICK_TEXT.ru, {
+  ocIosInstall: "Установить профиль AnyConnect",
+  ocIosInstallHelp: "Если Cisco Secure Client уже установлен, MobileConfig добавит сертификат и соединение с рекомендуемой точкой входа. Подтвердите установку профиля в настройках iPhone.",
+});
+Object.assign(QUICK_TEXT.en, {
+  ocIosInstall: "Install AnyConnect profile",
+  ocIosInstallHelp: "With Cisco Secure Client installed, the MobileConfig adds the certificate and recommended server connection. Confirm profile installation in iPhone Settings.",
+});
+Object.assign(QUICK_TEXT.lv, {
+  ocIosInstall: "Instalēt AnyConnect profilu",
+  ocIosInstallHelp: "Ja Cisco Secure Client jau ir instalēts, MobileConfig pievieno sertifikātu un ieteikto serveri. Apstipriniet profilu iPhone iestatījumos.",
+});

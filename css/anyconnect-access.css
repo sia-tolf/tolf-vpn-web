@@ -96,3 +96,14 @@ html[data-vpn-transport="anyconnect"] #legacyVpnPanel { display: block !importan
   #anyConnectAccess .oc-actions > .oc-action { flex: 1 1 0; min-width: 0; }
 }
 html[data-vpn-transport="anyconnect"] #vpnUsername { overflow-wrap: anywhere; }
+
+#anyConnectAccess .oc-ios-install { margin: 14px 0 8px; }
+#anyConnectAccess .oc-ios-install > .oc-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 44px;
+  text-align: center;
+}
