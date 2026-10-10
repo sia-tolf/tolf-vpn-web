@@ -79,7 +79,8 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
       importUri:'anyconnect://import/?type=pkcs12',connectionUri:'anyconnect://create/?host=oc.tolf.is'};
     throw Error('Unexpected endpoint: '+p);
   }
-  const c = vm.createContext({window,document,API:'https://api.tolf.is',currentPlatform:'ios',
+  const storage = new Map();
+  const c = vm.createContext({sessionStorage:{getItem:k=>storage.get(k),setItem:(k,v)=>storage.set(k,v)},window,document,API:'https://api.tolf.is',currentPlatform:'ios',
     serverInputs:[ids.serverRiga,ids.serverMoscow],
     allowedServers:['riga','moscow'],
     console,crypto:require('node:crypto').webcrypto,Date,Promise,
@@ -282,6 +283,31 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   assert(ids.usernameRow.classList.contains('hidden'));
   window.setAnyConnectAccount({authenticated:true,userId:'owner',vpn:{username:'user0_ipad'}});
   assert.equal(ids.vpnUsername.textContent,'user0_ipad');
+  // Full script reload, not merely rerender: retain non-default device and bundle step.
+  c.currentPlatform='ios';
+  ids.vpnTransportAnyConnect.click();
+  window.ocAccess.selectIngress('riga');
+  window.ocAccess.selectIngress('moscow');
+  window.dispatchEvent(new c.Event('vpnplatformchange')); await settle();
+  let bundle=descendants(ids.anyConnectAccess);
+  let checkbox=bundle.find(n=>n.type==='checkbox');
+  checkbox.checked=true; checkbox.events.change();
+  bundle=descendants(ids.anyConnectAccess);
+  bundle.find(n=>n.href?.includes('/shortcuts/control.shortcut')).events.click();
+  const selectedBefore=window.ocAccess.selected().id;
+  for(const file of ['ios-vpn-buttons.js','transport-selector.js','anyconnect-access.js'])
+    vm.runInContext(fs.readFileSync(path.join(root,'js',file),'utf8'),c);
+  await settle();
+  assert.equal(window.getVpnTransport(),'anyconnect');
+  assert.equal(window.ocAccess.ingress().id,'moscow');
+  assert.equal(window.ocAccess.selected().id,selectedBefore);
+  bundle=descendants(ids.anyConnectAccess);
+  assert.equal(bundle.find(n=>n.type==='checkbox').checked,true);
+  assert.equal(bundle.find(n=>n.textContent==='Команда добавлена — продолжить').disabled,false);
+  bundle.find(n=>n.textContent==='Команда добавлена — продолжить').events.click();
+  vm.runInContext(fs.readFileSync(path.join(root,'js','anyconnect-access.js'),'utf8'),c);
+  await settle();
+  assert(descendants(ids.anyConnectAccess).some(n=>n.href?.includes('ios.mobileconfig?ingress=moscow&buttons=true')));
   // A late session response must not restore the green indicator after logout.
   let release; heldSession = new Promise(resolve=>{release=resolve;});
   window.dispatchEvent(new c.Event('focus')); await settle();

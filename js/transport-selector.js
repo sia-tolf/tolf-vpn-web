@@ -15,9 +15,11 @@
   const device = () => window.ocAccess?.selected() || null;
   const endpoint = (id, action) => `${API}/oc/access/devices/${encodeURIComponent(id)}/${action}`;
   let selectionToken = 0;
-  let transport = "ikev2";
+  const readChoice = key => { try { return sessionStorage.getItem(key); } catch { return null; } };
+  const saveChoice = (key,value) => { try { sessionStorage.setItem(key,value); } catch {} };
+  let transport = readChoice("tolfTransport") === "anyconnect" ? "anyconnect" : "ikev2";
   window.getVpnTransport = () => transport;
-  let ikev2Server = null;
+  let ikev2Server = readChoice("tolfIkev2Server");
   let anyConnectMode = "auto";
   let policyLoaded = false;
   let policyBusy = false;
@@ -360,12 +362,14 @@
   for (const input of typeof serverInputs !== 'undefined' ? serverInputs : []) {
     input.addEventListener('change', () => {
       if (transport === 'anyconnect') window.ocAccess?.selectIngress?.(input.value);
+      else { ikev2Server = input.value; saveChoice("tolfIkev2Server", input.value); }
     });
   }
 
   ikev2.addEventListener("click", () => {
     if (transport === "ikev2") return;
     transport = "ikev2";
+    saveChoice("tolfTransport", transport);
     sessionRequestToken++;
     sessionConnected = false;
     render();
@@ -378,6 +382,7 @@
       ikev2Server = selectedServer();
     }
     transport = "anyconnect";
+    saveChoice("tolfTransport", transport);
     render();
     window.dispatchEvent(new Event("vpntransportchange"));
   });

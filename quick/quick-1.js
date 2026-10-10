@@ -40,7 +40,7 @@ function render() {
    if (url) url.searchParams.set('ingress', server);
    options.replaceChildren(window.tolfIosButtons.create({checked:iosButtons, disabled:busy, lang,
      vpnName:ocDevice ? 'TOLF '+(server==='moscow'?'Москва':'Рига')+' '+Array.from(ocDevice.label).slice(0,36).join('') : null,
-     url:url?.href, includeInstall:true, onChange:checked => {iosButtons = checked; put('quickIosButtons', checked ? 'true' : ''); render();}
+     url:url?.href, includeInstall:true, onChange:checked => {iosButtons = checked; saveIosSetup(); put('quickIosButtons', checked ? 'true' : ''); render();}
    }));
  }
  document.documentElement.lang = lang;
@@ -105,7 +105,22 @@ async function loadAccount() {
  const me = await api('/me');
  if(!me.authenticated) throw Object.assign(new Error('Sign in required'),{status:401});
  accountId=me.userId;authenticated=true; uncertain=false; put('quickRegistration','');
+ if(protocol==='anyconnect' && nativePlatform==='ios'){
+  let saved; try { saved=JSON.parse(get(ocKey('setup'),'null')); } catch {}
+  if(saved && saved.expires>Date.now() && ['moscow','riga'].includes(saved.server)){
+   const caps=await api('/oc/access/capabilities');
+   const point=caps.ingresses?.find(p=>p.id===saved.server);
+   const list=await api('/oc/access/devices');
+   const device=list.devices?.find(d=>d.id===saved.device && d.state==='active' && Date.parse(d.expires_at)>Date.now());
+   if(point && device){server=saved.server;ocPoint=point;ocDevice=device;iosButtons=saved.buttons===true;persist();}
+   else put(ocKey('setup'),'');
+  }
+ }
  panels('preparePanel');
+}
+function saveIosSetup(){
+ if(accountId && ocDevice && nativePlatform==='ios')
+  put(ocKey('setup'),JSON.stringify({server,device:ocDevice.id,buttons:iosButtons,expires:Date.now()+7200000}));
 }
 async function initialize() {
  const number=++loadNumber;
@@ -202,6 +217,7 @@ async function prepareOc(){
  }
  if(!ocDevice.username)throw Error('Device identity unavailable');
  if(nativePlatform==='ios'){
+  saveIosSetup();
   const url=new URL(API+'/oc/access/devices/'+encodeURIComponent(ocDevice.id)+'/ios.mobileconfig');
   url.searchParams.set('ingress',server);
   locked=false;

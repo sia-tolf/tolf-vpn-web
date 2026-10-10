@@ -130,7 +130,7 @@
   const ingress = () => ingresses().find(item => item.id === ingressId) || ingresses()[0] || {id:'moscow',host:'oc.tolf.is:4443'};
   function selectIngress(id) {
     if (busy || loading || !ingresses().some(item => item.id === id) || ingressId === id) return;
-    ingressId = id; confirmedDeviceId = null;
+    ingressId = id; confirmedDeviceId = null; saveSetup();
     render(); window.refreshAnyConnectIngress?.();
   }
   const CERTIFICATE_COPY = {
@@ -205,13 +205,21 @@
     return node;
   }
   let iosButtons = false;
+  const setupKey = () => "tolfOcSetup:" + account?.userId;
+  function savedSetup() {
+    try { return JSON.parse(sessionStorage.getItem(setupKey())) || {}; } catch { return {}; }
+  }
+  function saveSetup() {
+    if (!account || loading) return;
+    try { sessionStorage.setItem(setupKey(), JSON.stringify({selectedId, ingressId, iosButtons})); } catch {}
+  }
   function choose(id) {
     iosButtons = false;
     confirmedDeviceId = null;
     importedDeviceId = null;
     transferGrant = null; clearTimeout(transferTimer);
     setupDestination = null; transferNotice = "";
-    selectedId = id; grant = null; clearCopyNotice(); clearDownloadedPackage();
+    selectedId = id; saveSetup(); grant = null; clearCopyNotice(); clearDownloadedPackage();
     window.refreshAnyConnectTransport?.(); render();
   }
   function clearDownloadedPackage() {
@@ -285,6 +293,7 @@
     if (results[1].status === "fulfilled") {
       devices = results[1].value.devices.filter(d => d.state !== "revoked");
       if (!devices.some(d => d.id === selectedId)) {
+        iosButtons = false;
         selectedId = incomingDevice ? devices.find(d => d.id === incomingDevice)?.id || null : devices.find(d => d.state === "active")?.id || devices[0]?.id || null;
         if (incomingDevice && !selectedId) { message = deliveryCopy().missing; error = true; }
         grant = null;
@@ -292,6 +301,7 @@
       }
     } else { message = copy().failed; error = true; }
     loading = false;
+    saveSetup();
     window.refreshAnyConnectTransport?.(); render();
   }
   async function perform(action) {
@@ -397,7 +407,7 @@
         const install = link(c.iosInstall, window.tolfIosButtons.profileUrl(location, iosButtons), true);
         const options = window.tolfIosButtons.create({checked:iosButtons, disabled:busy || loading,
           vpnName:"TOLF " + (ingress().id === "moscow" ? "Москва" : "Рига") + " " + Array.from(d.label).slice(0,36).join(""),
-          url:location, includeInstall:true, onChange:checked => { iosButtons = checked; actions.hidden = checked; install.hidden = checked; install.href = window.tolfIosButtons.profileUrl(location, checked); }
+          url:location, includeInstall:true, onChange:checked => { iosButtons = checked; saveSetup(); actions.hidden = checked; install.hidden = checked; install.href = window.tolfIosButtons.profileUrl(location, checked); }
         });
         root.append(options);
         actions.hidden = iosButtons; install.hidden = iosButtons;
@@ -544,6 +554,10 @@
     clearCopyNotice();
     clearDownloadedPackage();
     devices = []; selectedId = null; grant = null; capabilities = null; ingressId = 'moscow';
+    const saved = account ? savedSetup() : {};
+    selectedId = incomingDevice || saved.selectedId || null;
+    ingressId = ['moscow','riga'].includes(saved.ingressId) ? saved.ingressId : 'moscow';
+    iosButtons = saved.iosButtons === true && (!incomingDevice || incomingDevice === saved.selectedId);
     setupDestination = incomingDevice ? "local" : null; transferNotice = "";
     confirmedDeviceId = null;
     importedDeviceId = null;

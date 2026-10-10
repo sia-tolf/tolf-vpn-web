@@ -2,7 +2,7 @@ const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/st
 const source=fs.readFileSync('quick/quick-1.js','utf8'),strings=fs.readFileSync('quick/strings-1.js','utf8');
 async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=false,buttons=false}={}){
  const map=new Map(),store=new Map(),posts=[],created=[],user='test-account',device='test-device';
- let lost=loseReply;
+ let lost=loseReply, recommendation=node;
  const makeElement=()=>({children:[],events:{},hidden:false,value:'',dataset:{},textContent:'',disabled:false,
    classList:{add(){},remove(){}},setAttribute(){},removeAttribute(){},
    append(...nodes){this.children.push(...nodes);},replaceChildren(...nodes){this.children=nodes;},
@@ -17,7 +17,7 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
  fetch:async(url,opt={})=>{
  let data;
  if(url.endsWith('/quick-setup/capabilities'))data={version:1};
- else if(url.endsWith('/entry-point-recommendation'))data={entryPoint:node};
+ else if(url.endsWith('/entry-point-recommendation'))data={entryPoint:recommendation};
  else if(url.endsWith('/oc/access/capabilities'))data={issuance:true,ingresses:missingNode?[]:[{id:node,host}]};
  else if(url.endsWith('/me'))data={authenticated:true,userId:user};
  else if(url.endsWith('/oc/access/devices')&&opt.method==='POST'){
@@ -72,7 +72,18 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
     assert(nodes.some(n=>n.href===shortcut.href));
     confirm.events.click();
    }
+   // Reload all controller code after recommendation changes while away in Shortcuts.
+   recommendation=node==='moscow'?'riga':'moscow';
+   // Both nodes remain available; the active setup must win over the new recommendation.
+   const originalFetch=ctx.fetch;
+   ctx.fetch=async(url,opt)=>url.endsWith('/oc/access/capabilities')?{ok:true,json:async()=>({issuance:true,ingresses:[{id:'moscow',host:'oc.tolf.is:4443'},{id:'riga',host:'oc-riga.tolf.is:443'}]})}:originalFetch(url,opt);
+   vm.runInContext(fs.readFileSync('js/ios-vpn-buttons.js','utf8'),ctx);
+   vm.runInContext(source,ctx);
+   for(let i=0;i<80;i++)await Promise.resolve();
+   assert.equal(element('prepare').hidden,true,'reload restores prepared device');
+   assert.equal(created.length,loseReply?2:1,'reload must not create another device');
    const nodes=descendants(element('iosVpnButtons'));
+   assert.equal(nodes.find(n=>n.type==='checkbox').checked,true);
    const install=nodes.find(n=>n.href?.includes('/ios.mobileconfig?'));
    assert(install,'profile appears only after the TOLF confirmation');
    assert(!nodes.find(n=>n.textContent==='Сохранить MobileConfig').hidden);
