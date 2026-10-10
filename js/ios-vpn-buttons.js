@@ -5,7 +5,7 @@
     ru: {
       option: 'Добавить кнопки VPN на главный экран',
       help: 'Зелёная TOLF ON включает VPN, красная TOLF OFF выключает. Кнопки установятся вместе с профилем.',
-      setup: 'После установки профиля добавьте обе команды по ссылкам ниже. TOLF ON уже настроена на VPN «{vpn}», TOLF OFF отключает активное подключение AnyConnect. Сохраните названия команд. При смене точки входа или имени профиля добавьте TOLF ON заново с заменой существующей команды.',
+      setup: '1. Добавьте TOLF ON и TOLF OFF по двум ссылкам ниже. В приложении «Команды» подтвердите добавление каждой команды и вернитесь на эту страницу. TOLF ON уже настроена на VPN «{vpn}», TOLF OFF отключает активное подключение AnyConnect. Сохраните названия команд. При смене точки входа или имени профиля добавьте TOLF ON заново с заменой существующей команды.',
       add: 'Добавить ', save: 'Сохранить MobileConfig', saving: 'Сохраняем…',
       failed: 'Не удалось сохранить профиль. Попробуйте ещё раз.',
       note: 'Команды можно добавить позже. До этого значки не смогут управлять VPN. При запуске приложение «Команды» ненадолго откроется, затем команда вернёт вас на главный экран.'
@@ -13,7 +13,7 @@
     en: {
       option: 'Add VPN buttons to the Home Screen',
       help: 'Green TOLF ON connects VPN; red TOLF OFF disconnects it. The buttons are installed with the profile.',
-      setup: 'After installing the profile, add both shortcuts below. TOLF ON is configured for VPN “{vpn}”; TOLF OFF disconnects the active AnyConnect connection. Keep the shortcut names. After changing the entry point or profile name, add TOLF ON again and replace the existing shortcut.',
+      setup: '1. Add TOLF ON and TOLF OFF using both links below. Confirm each addition in Shortcuts and return to this page. TOLF ON is configured for VPN “{vpn}”; TOLF OFF disconnects the active AnyConnect connection. Keep the shortcut names. After changing the entry point or profile name, add TOLF ON again and replace the existing shortcut.',
       add: 'Add ', save: 'Save MobileConfig', saving: 'Saving…',
       failed: 'Unable to save the profile. Please try again.',
       note: 'You can add the shortcuts later. The icons cannot control VPN until then. Shortcuts briefly opens when launched, then the shortcut returns to the Home Screen.'
@@ -21,7 +21,7 @@
     lv: {
       option: 'Pievienot VPN pogas sākuma ekrānam',
       help: 'Zaļā TOLF ON ieslēdz VPN, sarkanā TOLF OFF izslēdz. Pogas tiek instalētas kopā ar profilu.',
-      setup: 'Pēc profila instalēšanas pievienojiet abas tālāk norādītās komandas. TOLF ON ir konfigurēta VPN “{vpn}”; TOLF OFF atvieno aktīvo AnyConnect savienojumu. Saglabājiet komandu nosaukumus. Mainot ieejas punktu vai profila nosaukumu, pievienojiet TOLF ON vēlreiz, aizstājot esošo komandu.',
+      setup: '1. Pievienojiet TOLF ON un TOLF OFF, izmantojot abas saites. Apstipriniet katras komandas pievienošanu lietotnē Shortcuts un atgriezieties šajā lapā. TOLF ON ir konfigurēta VPN “{vpn}”; TOLF OFF atvieno aktīvo AnyConnect savienojumu. Saglabājiet komandu nosaukumus. Mainot ieejas punktu vai profila nosaukumu, pievienojiet TOLF ON vēlreiz, aizstājot esošo komandu.',
       add: 'Pievienot ', save: 'Saglabāt MobileConfig', saving: 'Saglabā…',
       failed: 'Neizdevās saglabāt profilu. Mēģiniet vēlreiz.',
       note: 'Komandas var pievienot vēlāk. Līdz tam ikonas nevar vadīt VPN. Palaižot komandu, īslaicīgi atveras lietotne Shortcuts, pēc tam komanda atgriežas sākuma ekrānā.'
@@ -39,7 +39,7 @@
     else result.searchParams.delete('buttons');
     return result.href;
   }
-  function create({checked = false, onChange, vpnName, url, disabled = false, lang = document.documentElement.lang}) {
+  function create({checked = false, onChange, vpnName, url, includeInstall = false, disabled = false, lang = document.documentElement.lang}) {
     const text = TEXT[lang] || TEXT.en;
     const root = element('section', '', 'ios-vpn-buttons');
     const label = element('label', '', 'ios-vpn-buttons-choice');
@@ -70,6 +70,13 @@
         a.referrerPolicy = 'no-referrer'; links.append(a);
       }
       details.append(links, element('p', text.note, 'oc-note'));
+      details.append(element('p', ({ru:'2. Установите профиль с кнопками. Если профиль уже установлен, повторная установка не нужна.', en:'2. Install the profile with buttons. If it is already installed, you do not need to install it again.', lv:'2. Instalējiet profilu ar pogām. Ja profils jau ir instalēts, atkārtota instalēšana nav nepieciešama.'})[lang] || '2. Install the profile with buttons.'));
+      if (includeInstall) {
+        const install = element('a', ({ru:'Установить профиль с кнопками',en:'Install profile with buttons',lv:'Instalēt profilu ar pogām'})[lang] || 'Install profile with buttons', 'button-link oc-action');
+        install.href = profileUrl(url, true);
+        install.referrerPolicy = 'no-referrer';
+        details.append(install);
+      }
     }
     checkbox.addEventListener('change', () => { details.hidden = !checkbox.checked; onChange(checkbox.checked); });
     root.append(label, details);

@@ -22,7 +22,7 @@ const accountText = {en:['Create account','Sign in','Choose Passkey or username 
 function accountAuth(mode) { persist(); window.location.assign('/auth/?mode='+mode+'&next=quick&lang='+lang); }
 let busy = false, authenticated = false, ready = false, locked = false, choicesOpened = false, profile = '', messageKey = '', failed = false;
 let server = null;
-let iosButtons = false;
+let iosButtons = get('quickIosButtons') === 'true';
 let platform = windowsQuickBlocked?'windows':nativePlatform;
 
 let uncertain = get('quickRegistration') === 'pending';
@@ -32,6 +32,7 @@ $('passkeyName').value = suggestedPasskeyName;
 function message(key, error = false) { messageKey = key; failed = error; render(); }
 function persist() { put('quickServer', server); put('quickPlatform', platform);put('quickProtocol',protocol); }
 function render() {
+ $('prepare').hidden = protocol === 'anyconnect' && nativePlatform === 'ios' && iosButtons && !!ocDevice;
  const options = $('iosVpnButtons');
  options.hidden = !(protocol === 'anyconnect' && nativePlatform === 'ios');
  if (!options.hidden) {
@@ -39,7 +40,7 @@ function render() {
    if (url) url.searchParams.set('ingress', server);
    options.replaceChildren(window.tolfIosButtons.create({checked:iosButtons, disabled:busy, lang,
      vpnName:ocDevice ? 'TOLF '+(server==='moscow'?'Москва':'Рига')+' '+Array.from(ocDevice.label).slice(0,36).join('') : null,
-     url:url?.href, onChange:checked => {iosButtons = checked;}
+     url:url?.href, includeInstall:true, onChange:checked => {iosButtons = checked; put('quickIosButtons', checked ? 'true' : ''); render();}
    }));
  }
  document.documentElement.lang = lang;
@@ -169,7 +170,7 @@ $('copyCode').onclick=()=>copy('code');$('copyLink').onclick=()=>copy('profileLi
 $('copyChromeSettings').onclick=()=>copy('chromeSettings');
 $('share').onclick=async()=>{try{await navigator.share({title:'TOLF VPN',url:profile});}catch(e){if(e.name!=='AbortError')message('failed',true);}};
 window.addEventListener('pagehide',()=>{clearTimeout(ocExpiryTimer);ocGrant=null;$('ocPassword').value='';$('ocImport').removeAttribute('href');});
-window.addEventListener('pageshow',e=>{if(e.persisted){profile='';ocGrant=null;ocDevice=null;ocConfirmed=false;ocImported=false;$('code').value='';initialize();}});
+window.addEventListener('pageshow',e=>{if(e.persisted && nativePlatform==='ios' && iosButtons && ocDevice){render();return;}if(e.persisted){profile='';ocGrant=null;ocDevice=null;ocConfirmed=false;ocImported=false;$('code').value='';initialize();}});
 
 function ocKey(suffix){return 'quickOc:'+accountId+':'+nativePlatform+':'+suffix;}
 function validateOcGrant(grant){
@@ -207,7 +208,12 @@ async function prepareOc(){
   // Single real user click on the Quick Setup primary action:
   // prepare/reuse device identity, then navigate to authenticated
   // HTTPS MobileConfig directly. No extra page or PKCS12 import.
-  window.location.assign(window.tolfIosButtons.profileUrl(url.href, iosButtons));
+  if (iosButtons) {
+    panels('preparePanel');
+    message('');
+    return;
+  }
+  window.location.assign(window.tolfIosButtons.profileUrl(url.href, false));
   message('started');
   return;
  }

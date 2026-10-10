@@ -41,6 +41,16 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
  await element('prepare').onclick();
  if(loseReply){await element('prepare').onclick();assert.equal(created[0].requestId,created[1].requestId);}
  if(platform==='ios'){
+  if(buttons){
+   assert.equal(assigned,undefined,'button setup must not skip straight to MobileConfig');
+   assert.equal(element('preparePanel').hidden,false);
+   assert.equal(element('prepare').hidden,true);
+   const nodes=descendants(element('iosVpnButtons'));
+   for(const mode of ['on','off'])assert(nodes.some(n=>n.href?.includes('/shortcuts/'+mode+'.shortcut?ingress='+node)));
+   const install=nodes.find(n=>n.href?.includes('/ios.mobileconfig?'));
+   assert(install,'explicit profile installation link');
+   assigned=install.href;
+  }
   const url=new URL(assigned);
   assert.equal(url.pathname,'/oc/access/devices/'+device+'/ios.mobileconfig');
   assert.equal(url.searchParams.get('ingress'),node);
