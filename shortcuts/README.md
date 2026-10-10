@@ -1,45 +1,37 @@
-# TOLF iOS VPN Shortcuts
+# TOLF iOS VPN Shortcuts — experimental
 
-Two fixed, non-toggle shortcuts. All actions target the same locally selected
-TOLF AnyConnect VPN configuration.
+Two deterministic commands for the same device-specific VPN connection:
 
-- TOLF ON: Set On Demand = On, then Connect VPN.
-- TOLF OFF: Set On Demand = Off, then Disconnect VPN.
+- **TOLF ON:** Set On Demand = On, then Connect VPN.
+- **TOLF OFF:** Set On Demand = Off, then Disconnect VPN.
 
-The native iOS Set VPN action handles both steps. No web request, private
-key or TOLF API token is embedded in the shortcut.
+The original signed MobileConfig, client certificate, and existing Cisco
+connection are not modified by adding these Shortcuts.
 
-## Build
+## Build and distribution
 
-Run on any computer:
+The Cherri v2.3.0 source definitions are in cherri-on.cherri and
+cherri-off.cherri. GitHub Actions validates them and checks that each
+compiled workflow contains exactly two Apple Set VPN actions with the
+correct order, On Demand value and two setup questions for the VPN target.
 
-    python3 shortcuts/build.py
+Cherri on Linux uses RoutineHub HubSign to create Apple-signed Shortcuts.
+Both experimental artifacts were successfully signed this way on
+October 10, 2026 without an interactive iCloud login.
 
-This creates unsigned drafts only. iOS 15+ cannot import those drafts.
+The signed files are staged under shortcuts/signed/ and exposed by the
+experiment page at /shortcuts/experiment.html.
 
-## Sign once as the publisher
+The user may have to choose the same installed TOLF AnyConnect VPN for
+each of the two Shortcuts import questions. This behavior and the correct
+handling of WFVPN by iOS 26 have NOT yet been tested on an actual iPhone.
 
-On a Mac logged into an Apple Account in iCloud, execute from the repo root:
+Do not merge this experiment into the production MobileConfig installer
+until the end-to-end iOS test succeeds. Keep the ability to roll back
+without affecting the working VPN profile.
 
-    bash shortcuts/sign-on-mac.sh
+## Developer fallback
 
-Apple's Shortcuts CLI signs both files with the anyone mode.
-Apple validates the signed workflow and may require network access. Signed
-files appear under shortcuts/signed/; they can be hosted by TOLF for
-all users. End users do not need the publisher's Apple Account.
-
-## Device-specific VPN selection
-
-TOLF MobileConfig installs a VPN with a per-device identifier and label.
-The installer therefore must resolve the two VPN-target parameters locally.
-Two import questions per shortcut ask the user to select the same TOLF VPN.
-Do not claim the selection is automatic until confirmed on iOS 26.
-
-Until signed shortcuts pass an actual iPhone test, do not publish download
-buttons on the production TOLF website.
-
-## Current CI blocker
-
-A macOS GitHub Actions runner has the shortcuts tool but no iCloud login.
-Apple returns: In order to do this, you must be signed into iCloud.
-Do not put Apple Account passwords or tokens in GitHub Actions secrets.
+The offline Python draft builder in build.py produces unsigned files,
+not installable on iOS. sign-on-mac.sh is retained as a Mac signing fallback
+but is not needed for the current Cherri + HubSign build pipeline.

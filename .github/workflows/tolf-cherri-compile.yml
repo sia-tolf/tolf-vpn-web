@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'shortcuts/experiment.html'
+      - 'shortcuts/cherri-*.cherri'
       - 'shortcuts/verify-cherri-source.cjs'
       - '.github/workflows/tolf-cherri-compile.yml'
 permissions:
