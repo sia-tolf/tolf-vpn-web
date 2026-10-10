@@ -12,7 +12,7 @@ from urllib.request import Request, urlopen
 
 _LOCK = threading.Lock()
 CACHE = Path("/var/lib/tolf-api/ios-shortcuts")
-VERSION = "cisco-controller-v2"
+VERSION = "cisco-controller-v3-ondemand"
 
 def vpn_name(row, entry_name):
     return "TOLF " + entry_name + " " + str(row["label"])[:36]
@@ -106,7 +106,27 @@ def controller(name):
         off_end, on_end
     ])
     # Diagnostic build: remain in Shortcuts to distinguish a crash from Home Screen navigation.
-    doc["WFWorkflowActions"] = actions
+    # iPhone-tested name binding: retain the native object and Cisco descriptor,
+    # omit its device-local identifier so reinstalling the profile still resolves.
+    expanded = []
+    for action in actions:
+        identifier = action["WFWorkflowActionIdentifier"]
+        if identifier in ("com.cisco.anyconnect.StartVpnIntent", "com.cisco.anyconnect.StopVpnIntent"):
+            expanded.append({
+                "WFWorkflowActionIdentifier": "is.workflow.actions.vpn.set",
+                "WFWorkflowActionParameters": {
+                    "WFVPNOperation": "Set On Demand",
+                    "WFOnDemandValue": 1 if identifier.endswith("StartVpnIntent") else 0,
+                    "WFVPN": {
+                        "title": name,
+                        "appDescriptor": {"BundleIdentifier": "com.cisco.anyconnect",
+                                          "Name": "AnyConnect", "TeamIdentifier": "DE8Y96K9QP"}
+                    }
+                }
+            })
+            action["WFWorkflowActionParameters"]["ShowWhenRun"] = False
+        expanded.append(action)
+    doc["WFWorkflowActions"] = expanded
     return doc
 
 def sign(raw, title):

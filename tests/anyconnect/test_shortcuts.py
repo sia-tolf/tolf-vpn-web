@@ -27,8 +27,8 @@ class CiscoShortcuts(unittest.TestCase):
                 self.assertEqual(workflow["WFWorkflowName"], "TOLF " + mode.upper())
                 self.assertEqual(workflow["WFWorkflowImportQuestions"], [])
 
-    def test_controller_matches_verified_iphone_template(self):
-        # Preserve the exact structure imported and exercised on the owner's iPhone.
+    def test_controller_matches_distributed_template(self):
+        # The distributed file and API must carry the same controller.
         path = Path(__file__).resolve().parents[2] / "shortcuts/auto-install/TOLF.plist"
         native = plistlib.loads(path.read_bytes())
         self.assertEqual(shortcuts.controller("TOLF Москва iPhone"), native)
@@ -38,8 +38,27 @@ class CiscoShortcuts(unittest.TestCase):
             starts = [a for a in document["WFWorkflowActions"]
                       if a["WFWorkflowActionIdentifier"].endswith(".StartVpnIntent")]
             self.assertEqual(len(starts), 2)
-            self.assertTrue(all(a["WFWorkflowActionParameters"] == {"vpnConfig":name} for a in starts))
+            self.assertTrue(all(a["WFWorkflowActionParameters"] == {"vpnConfig":name, "ShowWhenRun":False} for a in starts))
             self.assertEqual(document["WFWorkflowName"], "TOLF")
+
+    def test_on_demand_precedes_each_start_stop_without_device_uuid(self):
+        probe = Path(__file__).resolve().parents[2] / "shortcuts/name-binding/TOLF-Name-Binding-Test.plist"
+        proven = plistlib.loads(probe.read_bytes())["WFWorkflowActions"][0]["WFWorkflowActionParameters"]["WFVPN"]
+        for name in ("TOLF Москва iPhone", "TOLF Рига iPad"):
+            actions = shortcuts.controller(name)["WFWorkflowActions"]
+            native = [a for a in actions if a["WFWorkflowActionIdentifier"] == "is.workflow.actions.vpn.set"]
+            self.assertEqual(len(native), 4)
+            for i, action in enumerate(actions):
+                kind = action["WFWorkflowActionIdentifier"]
+                if kind.startswith("com.cisco.anyconnect."):
+                    before = actions[i - 1]
+                    self.assertEqual(before["WFWorkflowActionIdentifier"], "is.workflow.actions.vpn.set")
+                    params = before["WFWorkflowActionParameters"]
+                    self.assertEqual(params["WFVPNOperation"], "Set On Demand")
+                    self.assertEqual(params["WFOnDemandValue"], int(kind.endswith("StartVpnIntent")))
+                    self.assertEqual(params["WFVPN"], {**proven, "title": name})
+                    self.assertNotIn("identifier", params["WFVPN"])
+                    self.assertIs(action["WFWorkflowActionParameters"]["ShowWhenRun"], False)
 
     def test_cache_reuses_signature_and_changes_with_name(self):
         with tempfile.TemporaryDirectory() as directory:

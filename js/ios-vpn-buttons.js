@@ -83,7 +83,7 @@
     // Quick Setup knows the final device label only after preparation.
     if (vpnName) details.append(element('p', text.setup.replace('{vpn}', vpnName)));
     else details.append(element('p', ({ru:'Сначала добавим команду TOLF, затем установим профиль VPN.', en:'First add the TOLF shortcut, then install the VPN profile.', lv:'Vispirms pievienosim komandu TOLF, pēc tam instalēsim VPN profilu.'})[lang] || 'First add the TOLF shortcut, then install the VPN profile.'));
-    const key = 'tolfIosControllerV2:' + (url ? profileUrl(url, false) : '') + ':' + (vpnName || '');
+    const key = 'tolfIosControllerV3:' + (url ? profileUrl(url, false) : '') + ':' + (vpnName || '');
     let state = progress(key);
     let save;
     const wizard = element('div', '', 'ios-vpn-wizard');
@@ -99,15 +99,11 @@
         const target = new URL(url);
         target.pathname = target.pathname.replace(/\/ios\.mobileconfig$/, '/shortcuts/control.shortcut');
         target.searchParams.delete('buttons');
-        // This shared controller contains an exact Cisco connection name.
-        // Never offer it for a different device label or entry point.
-        const shared = vpnName === 'TOLF Москва iPhone';
-        a.href = shared ? 'https://www.icloud.com/shortcuts/3a9772ebbb5d4b179138784da39fca4e' : target.href;
+        // The previous iCloud share has no On Demand control; do not reuse it.
+        a.href = target.href;
         a.referrerPolicy = 'no-referrer';
-        if (!shared) {
-          a.textContent = ({ru:'Скачать команду TOLF',en:'Download TOLF shortcut',lv:'Lejupielādēt komandu TOLF'})[lang] || 'Download TOLF shortcut';
-          wizard.append(element('p', ({ru:'Откройте скачанный файл TOLF.shortcut из загрузок Safari и добавьте его в «Команды».',en:'Open the downloaded TOLF.shortcut file from Safari Downloads and add it to Shortcuts.',lv:'Atveriet lejupielādēto TOLF.shortcut failu Safari lejupielādēs un pievienojiet to lietotnei Shortcuts.'})[lang] || 'Open TOLF.shortcut from Safari Downloads and add it to Shortcuts.', 'oc-note'));
-        }
+        a.textContent = ({ru:'Скачать команду TOLF',en:'Download TOLF shortcut',lv:'Lejupielādēt komandu TOLF'})[lang] || 'Download TOLF shortcut';
+        wizard.append(element('p', ({ru:'Откройте скачанный файл TOLF.shortcut из загрузок Safari и добавьте его в «Команды». Если TOLF уже установлена, замените её.',en:'Open TOLF.shortcut from Safari Downloads and add it to Shortcuts. Replace TOLF if already installed.',lv:'Atveriet TOLF.shortcut failu Safari lejupielādēs un pievienojiet to lietotnei Shortcuts. Ja TOLF jau ir instalēta, aizstājiet to.'})[lang] || 'Open TOLF.shortcut from Safari Downloads and add it to Shortcuts.', 'oc-note'));
         const confirm = element('button', text.confirm, 'oc-action');
         confirm.type = 'button'; confirm.disabled = disabled || !state.opened;
         a.addEventListener('click', event => {
