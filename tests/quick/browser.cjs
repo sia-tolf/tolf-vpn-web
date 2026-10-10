@@ -34,7 +34,8 @@ const root=path.resolve(__dirname,'../..');
    });
    await page.goto('https://vpn.tolf.is/quick/');
    await page.locator('#register:not([disabled])').waitFor();
-   assert.equal(await page.locator('#server').inputValue(),'moscow');
+   assert.equal((await page.locator('#server').textContent()).trim(),
+     {ru:'Москва',en:'Moscow',lv:'Maskava'}[locale]);
    assert.equal(await page.locator('#passkeyNameField').isVisible(),false);
    // Shared auth page is covered by password-auth/browser.cjs; emulate return
    // with a valid session, retaining the user's selection in sessionStorage.
@@ -55,28 +56,42 @@ const root=path.resolve(__dirname,'../..');
    await page.locator('#prepare').click();await page.locator('#download').waitFor();assert.equal(prepares,2);
    assert.deepEqual(errors,[]);await context.close();
   }
-  // Unknown country and manual override; cross-device delivery is a personal link.
-  const page=await browser.newPage({viewport:{width:900,height:900}});let sends=0;
-  await page.route('https://api.tolf.is/**',r=>{
-   const url=new URL(r.request().url());const headers={'Access-Control-Allow-Origin':'https://vpn.tolf.is','Access-Control-Allow-Credentials':'true','Access-Control-Allow-Headers':'content-type','Access-Control-Allow-Methods':'GET,POST'};
-   if(r.request().method()==='OPTIONS')return r.fulfill({status:204,headers});
-   let body={};
-   if(url.pathname.endsWith('/capabilities'))body={version:1};
-   if(url.pathname==='/me')body={authenticated:true};
-   if(url.pathname.endsWith('/status'))body={setup:null};
-   if(url.pathname.endsWith('/prepare')){sends++;assert.equal(r.request().postDataJSON().server,'moscow');assert.equal(r.request().postDataJSON().platform,'windows');body={profileUrl:'https://api.tolf.is/windows/p/test'};}
-   return r.fulfill({headers,contentType:'application/json',body:JSON.stringify(body)});
+  // Quick setup intentionally has no manual entry-point switch. An
+  // unavailable recommendation must offer retry, not silently choose one.
+  const context=await browser.newContext({
+    viewport:{width:390,height:844},
+    locale:'ru',
+    userAgent:'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)'
   });
-  await page.route('https://vpn.tolf.is/**',r=>{let f=new URL(r.request().url()).pathname.slice(1);if(f.endsWith('/'))f+='index.html';return r.fulfill({contentType:f.endsWith('.js')?'text/javascript':f.endsWith('.css')?'text/css':'text/html',body:fs.readFileSync(path.join(root,f))});});
-  await page.goto('https://vpn.tolf.is/quick/');await page.locator('#prepare:not([disabled])').waitFor();
-  assert.equal(await page.locator('#server').inputValue(),'riga');
-  await page.locator('#server').selectOption('moscow');
+  const page=await context.newPage();
+  await page.route('https://api.tolf.is/**',r=>{
+    const url=new URL(r.request().url());
+    const headers={
+      'Access-Control-Allow-Origin':'https://vpn.tolf.is',
+      'Access-Control-Allow-Credentials':'true',
+      'Access-Control-Allow-Headers':'content-type',
+      'Access-Control-Allow-Methods':'GET,POST'
+    };
+    if(r.request().method()==='OPTIONS')return r.fulfill({status:204,headers});
+    const body=url.pathname==='/entry-point-recommendation'?{entryPoint:null}:{version:1};
+    return r.fulfill({headers,contentType:'application/json',body:JSON.stringify(body)});
+  });
+  await page.route('https://vpn.tolf.is/**',r=>{
+    let f=new URL(r.request().url()).pathname.slice(1);
+    if(f.endsWith('/'))f+='index.html';
+    return r.fulfill({
+      contentType:f.endsWith('.js')?'text/javascript':f.endsWith('.css')?'text/css':'text/html',
+      body:fs.readFileSync(path.join(root,f))
+    });
+  });
+  await page.goto('https://vpn.tolf.is/quick/');
+  await page.locator('#retry:visible').waitFor();
+  assert.equal((await page.locator('#server').textContent()).trim(),'—');
+  assert.equal(await page.locator('#change').isVisible(),false);
   assert.equal(await page.locator('#choices').isVisible(),false);
-  await page.locator('#change').click();await page.locator('#platform').selectOption('windows');
-  await page.locator('#prepare').click();await page.locator('#profileLink').waitFor();assert.equal(sends,1);assert.equal(await page.locator('#download').isVisible(),false);
-  assert.equal(await page.locator('#profileLink').inputValue(),'https://api.tolf.is/windows/p/test');
-  await page.screenshot({path:'/tmp/tolf-quick-share.png',fullPage:true});
-  console.log('PASS: three locales, shared auth return, IP default/fallback, manual choice, resume, cross-device delivery');
+  await page.screenshot({path:'/tmp/tolf-quick-retry.png',fullPage:true});
+  await context.close();
+  console.log('PASS: three locales, shared auth return, recommended entry, no manual override, unavailable recommendation retry');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exit(1)});
 
