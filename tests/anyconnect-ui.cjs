@@ -107,12 +107,6 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   assert(iosInstall.href.includes('/oc/access/devices/one/ios.mobileconfig?ingress=moscow'));
   const option = descendants(ids.anyConnectAccess).find(n=>n.tagName==='input'&&n.type==='checkbox');
   const details = descendants(ids.anyConnectAccess).find(n=>n.className==='ios-vpn-buttons-details');
-  for (const mode of ['ON', 'OFF']) {
-    const shortcut = descendants(ids.anyConnectAccess).find(n => n.tagName === 'a' && n.textContent === 'Добавить TOLF ' + mode);
-    assert(shortcut, 'shortcut download link exists');
-    assert.equal(new URL(shortcut.href).pathname, '/oc/access/devices/one/shortcuts/' + mode.toLowerCase() + '.shortcut');
-    assert.equal(new URL(shortcut.href).searchParams.get('ingress'), 'moscow');
-  }
   assert.equal(option.checked, false);
   assert.equal(details.hidden, true);
   assert(!new URL(iosInstall.href).searchParams.has('buttons'));
@@ -120,9 +114,19 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   assert.equal(details.hidden, false);
   assert.equal(new URL(iosInstall.href).searchParams.get('buttons'), 'true');
   assert(details.textContent.includes('TOLF Москва iPad'));
-  assert.deepEqual(descendants(details).filter(n=>n.tagName==='a').map(n=>n.textContent), ['Добавить TOLF ON', 'Добавить TOLF OFF']);
+  assert(iosInstall.hidden, 'ordinary installation hidden while bundle selected');
+  assert.deepEqual(descendants(details).filter(n=>n.tagName==='a').map(n=>n.textContent), ['Добавить TOLF ON']);
+  for (const mode of ['ON', 'OFF']) {
+    const shortcut=descendants(details).find(n=>n.tagName==='a'&&n.textContent==='Добавить TOLF '+mode);
+    assert(shortcut);
+    assert.equal(new URL(shortcut.href).pathname, '/oc/access/devices/one/shortcuts/'+mode.toLowerCase()+'.shortcut');
+    shortcut.click();
+    button(details,'Команда добавлена — продолжить').click();
+  }
+  assert(descendants(details).some(n=>n.tagName==='a'&&n.textContent==='Установить профиль с кнопками'));
   option.checked = false; option.events.change();
   assert(!new URL(iosInstall.href).searchParams.has('buttons'));
+  assert(!iosInstall.hidden);
   assert(!descendants(ids.anyConnectAccess).some(n=>n.tagName==='button'&&n.textContent==='Настроить на этом устройстве'));
   assert(!descendants(ids.anyConnectAccess).some(n=>n.tagName==='a'&&n.textContent==='Добавить в AnyConnect'));
   c.currentPlatform='android';

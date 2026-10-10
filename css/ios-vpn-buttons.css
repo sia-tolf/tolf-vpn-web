@@ -8,3 +8,5 @@
 .ios-vpn-icon.on { background: #239668; }
 .ios-vpn-icon.off { background: #d93838; font-size: 35px; }
 .ios-vpn-buttons .oc-actions { display: flex; flex-wrap: wrap; gap: .65rem; }
+
+.ios-vpn-buttons [hidden], .oc-ios-install[hidden] { display: none !important; }

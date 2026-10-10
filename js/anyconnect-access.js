@@ -397,9 +397,10 @@
         const install = link(c.iosInstall, window.tolfIosButtons.profileUrl(location, iosButtons), true);
         const options = window.tolfIosButtons.create({checked:iosButtons, disabled:busy || loading,
           vpnName:"TOLF " + (ingress().id === "moscow" ? "Москва" : "Рига") + " " + Array.from(d.label).slice(0,36).join(""),
-          url:location, onChange:checked => { iosButtons = checked; install.href = window.tolfIosButtons.profileUrl(location, checked); }
+          url:location, includeInstall:true, onChange:checked => { iosButtons = checked; actions.hidden = checked; install.hidden = checked; install.href = window.tolfIosButtons.profileUrl(location, checked); }
         });
         root.append(options);
+        actions.hidden = iosButtons; install.hidden = iosButtons;
         actions.append(install);
         root.append(actions, element("p", c.iosInstallHelp, "oc-note"));
       }

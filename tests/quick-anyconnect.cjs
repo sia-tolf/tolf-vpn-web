@@ -45,11 +45,49 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
    assert.equal(assigned,undefined,'button setup must not skip straight to MobileConfig');
    assert.equal(element('preparePanel').hidden,false);
    assert.equal(element('prepare').hidden,true);
+   for(const mode of ['on','off']){
+    let nodes=descendants(element('iosVpnButtons'));
+    assert(!nodes.some(n=>n.href?.includes('/ios.mobileconfig?')));
+    const save=nodes.find(n=>n.textContent==='Сохранить MobileConfig');
+    assert(save.hidden && save.disabled,'save must not bypass shortcut steps');
+    let confirm=nodes.find(n=>n.textContent==='Команда добавлена — продолжить');
+    assert(confirm.disabled);
+    confirm.events.click();
+    assert(!descendants(element('iosVpnButtons')).some(n=>n.href?.includes('/ios.mobileconfig?')));
+    const shortcut=nodes.find(n=>n.href?.includes('/shortcuts/'+mode+'.shortcut?ingress='+node));
+    assert(shortcut);
+    if(mode==='on')assert(!nodes.some(n=>n.href?.includes('/shortcuts/off.shortcut')));
+    shortcut.events.click();
+    assert(!confirm.disabled);
+    // Re-entering the page must restore the opened step, including after a reload.
+    vm.runInContext(fs.readFileSync('js/ios-vpn-buttons.js','utf8'),ctx);
+    const profile='https://api.tolf.is/oc/access/devices/'+device+'/ios.mobileconfig?ingress='+node;
+    element('iosVpnButtons').replaceChildren(ctx.window.tolfIosButtons.create({
+      checked:true,includeInstall:true,lang:'ru',url:profile,
+      vpnName:'TOLF '+(node==='moscow'?'Москва':'Рига')+' Test device'
+    }));
+    nodes=descendants(element('iosVpnButtons'));
+    confirm=nodes.find(n=>n.textContent==='Команда добавлена — продолжить');
+    assert(!confirm.disabled,'opened step persists across reload');
+    assert(nodes.some(n=>n.href===shortcut.href));
+    confirm.events.click();
+   }
    const nodes=descendants(element('iosVpnButtons'));
-   for(const mode of ['on','off'])assert(nodes.some(n=>n.href?.includes('/shortcuts/'+mode+'.shortcut?ingress='+node)));
    const install=nodes.find(n=>n.href?.includes('/ios.mobileconfig?'));
-   assert(install,'explicit profile installation link');
+   assert(install,'profile appears only after both confirmations');
+   assert(!nodes.find(n=>n.textContent==='Сохранить MobileConfig').hidden);
    assigned=install.href;
+   const other=ctx.window.tolfIosButtons.create({checked:true,includeInstall:true,lang:'ru',
+     url:'https://api.tolf.is/oc/access/devices/other/ios.mobileconfig?ingress='+node,
+     vpnName:'TOLF '+(node==='moscow'?'Москва':'Рига')+' Test device'});
+   assert(!descendants(other).some(n=>n.href?.includes('/ios.mobileconfig?')),
+     'completion must not carry into a different device');
+   const option=nodes.find(n=>n.type==='checkbox');
+   option.checked=false;option.events.change();
+   option.checked=true;option.events.change();
+   assert(!descendants(element('iosVpnButtons')).some(n=>n.href?.includes('/ios.mobileconfig?')),
+     'unchecking resets the bundle');
+
   }
   const url=new URL(assigned);
   assert.equal(url.pathname,'/oc/access/devices/'+device+'/ios.mobileconfig');
