@@ -116,9 +116,9 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   assert.equal(new URL(iosInstall.href).searchParams.get('buttons'), 'true');
   assert(details.textContent.includes('TOLF Москва iPad'));
   assert(iosInstall.hidden, 'ordinary installation hidden while bundle selected');
-  assert.deepEqual(descendants(details).filter(n=>n.tagName==='a').map(n=>n.textContent), ['Добавить команду TOLF']);
+  assert.deepEqual(descendants(details).filter(n=>n.tagName==='a').map(n=>n.textContent), ['Скачать команду TOLF']);
   for (const mode of ['control']) {
-    const shortcut=descendants(details).find(n=>n.tagName==='a'&&n.textContent==='Добавить команду TOLF');
+    const shortcut=descendants(details).find(n=>n.tagName==='a'&&n.textContent==='Скачать команду TOLF');
     assert(shortcut);
     assert.equal(new URL(shortcut.href).pathname, '/oc/access/devices/one/shortcuts/'+mode.toLowerCase()+'.shortcut');
     shortcut.click();

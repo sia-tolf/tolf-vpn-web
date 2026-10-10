@@ -99,7 +99,15 @@
         const target = new URL(url);
         target.pathname = target.pathname.replace(/\/ios\.mobileconfig$/, '/shortcuts/control.shortcut');
         target.searchParams.delete('buttons');
-        a.href = target.href; a.referrerPolicy = 'no-referrer';
+        // This shared controller contains an exact Cisco connection name.
+        // Never offer it for a different device label or entry point.
+        const shared = vpnName === 'TOLF Москва iPhone';
+        a.href = shared ? 'https://www.icloud.com/shortcuts/3a9772ebbb5d4b179138784da39fca4e' : target.href;
+        a.referrerPolicy = 'no-referrer';
+        if (!shared) {
+          a.textContent = ({ru:'Скачать команду TOLF',en:'Download TOLF shortcut',lv:'Lejupielādēt komandu TOLF'})[lang] || 'Download TOLF shortcut';
+          wizard.append(element('p', ({ru:'Откройте скачанный файл TOLF.shortcut из загрузок Safari и добавьте его в «Команды».',en:'Open the downloaded TOLF.shortcut file from Safari Downloads and add it to Shortcuts.',lv:'Atveriet lejupielādēto TOLF.shortcut failu Safari lejupielādēs un pievienojiet to lietotnei Shortcuts.'})[lang] || 'Open TOLF.shortcut from Safari Downloads and add it to Shortcuts.', 'oc-note'));
+        }
         const confirm = element('button', text.confirm, 'oc-action');
         confirm.type = 'button'; confirm.disabled = disabled || !state.opened;
         a.addEventListener('click', event => {
