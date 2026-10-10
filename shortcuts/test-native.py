@@ -20,3 +20,10 @@ for invalid in ["Text instead of VPN object",{"title":"Missing identifier"}]:
  except ValueError: pass
  else: raise AssertionError("Invalid VPN binding accepted")
 print("PASS: native binding preserved; exact OFF delta; malformed bindings rejected")
+
+for on in (True,False):
+    extended=builder.make_shortcut(source,on,return_home=True)
+    home=extended["WFWorkflowActions"].pop()
+    assert home=={"WFWorkflowActionIdentifier":"is.workflow.actions.returntohomescreen","WFWorkflowActionParameters":{}}
+    assert extended==builder.make_shortcut(source,on)
+print("PASS: return-home appends one final action, preserving all VPN operations")

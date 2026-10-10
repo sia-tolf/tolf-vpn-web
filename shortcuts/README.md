@@ -29,3 +29,7 @@ distribution source. The earlier TOLF-VPN-Check contained filter.vpns, which the
 iPhone reported as Unknown Action. The earlier text-based WFVPN import binding
 does not match the native export. The experiment page remains paused until
 replacement signed commands are available and verified.
+
+## Return to the Home Screen
+
+Use --return-home with build.py or sign-native.py to append the native Go to Home Screen action after both VPN operations. URL launching still opens Shortcuts briefly; the final action returns Home. Names and VPN binding remain unchanged.

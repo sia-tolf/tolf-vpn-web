@@ -9,11 +9,12 @@ def main():
     p=argparse.ArgumentParser()
     p.add_argument("--source",type=Path,required=True)
     p.add_argument("--output",type=Path,required=True)
+    p.add_argument("--return-home",action="store_true")
     args=p.parse_args()
     source=plistlib.loads(args.source.read_bytes())
     args.output.mkdir(parents=True,exist_ok=True)
     for on,name in [(True,"TOLF ON"),(False,"TOLF OFF")]:
-        workflow=make_shortcut(source,on)
+        workflow=make_shortcut(source,on,return_home=args.return_home)
         body=json.dumps({"shortcutName":name,"shortcut":plistlib.dumps(workflow,fmt=plistlib.FMT_XML,sort_keys=False).decode()}).encode()
         req=Request("https://hubsign.routinehub.services/sign",data=body,headers={"Content-Type":"application/json","User-Agent":"cherri/2.3.0"},method="POST")
         with urlopen(req,timeout=40) as response:

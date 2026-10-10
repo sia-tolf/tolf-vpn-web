@@ -5,7 +5,7 @@ import copy
 import plistlib
 from pathlib import Path
 
-def make_shortcut(source, on):
+def make_shortcut(source, on, return_home=False):
     data = copy.deepcopy(source)
     actions = data.get("WFWorkflowActions", [])
     if len(actions) != 2 or any(a.get("WFWorkflowActionIdentifier") != "is.workflow.actions.vpn.set" for a in actions):
@@ -24,17 +24,20 @@ def make_shortcut(source, on):
     if not on:
         first["WFOnDemandValue"] = False
         second["WFVPNOperation"] = "Disconnect"
+    if return_home:
+        actions.append({"WFWorkflowActionIdentifier": "is.workflow.actions.returntohomescreen", "WFWorkflowActionParameters": {}})
     return data
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", type=Path, required=True, help="Unsigned plist from a working native ON export")
     parser.add_argument("--output", type=Path, default=Path(__file__).resolve().parent / "unsigned")
+    parser.add_argument("--return-home", action="store_true")
     args = parser.parse_args()
     source = plistlib.loads(args.source.read_bytes())
     args.output.mkdir(parents=True, exist_ok=True)
     for on, name in [(True, "TOLF ON"), (False, "TOLF OFF")]:
-        data = make_shortcut(source, on)
+        data = make_shortcut(source, on, return_home=args.return_home)
         path = args.output / (name + ".shortcut")
         path.write_bytes(plistlib.dumps(data, fmt=plistlib.FMT_BINARY, sort_keys=False))
         print(name, "validated, unsigned", path.stat().st_size)
