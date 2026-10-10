@@ -1,0 +1,60 @@
+name: TOLF iOS VPN import read-only probe
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'shortcuts/cherri-probe.cherri'
+      - '.github/workflows/tolf-vpn-import-probe.yml'
+permissions:
+  contents: write
+jobs:
+  compile-sign:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Obtain Cherri v2.3.0
+        run: |
+          set -e
+          curl -fsSL --retry 2 --max-time 30 -o /tmp/tolf-cherri.zip             https://github.com/electrikmilk/cherri/releases/download/v2.3.0/cherri_linux-x86_64.zip
+          mkdir -p /tmp/tolf-cherri
+          unzip -q /tmp/tolf-cherri.zip -d /tmp/tolf-cherri
+          chmod +x /tmp/tolf-cherri/cherri
+      - name: Compile and sign read-only inspection
+        run: |
+          set -e
+          /tmp/tolf-cherri/cherri shortcuts/cherri-probe.cherri
+      - name: Verify actions and signature before publication
+        run: |
+          python3 - <<'PY'
+          import pathlib,plistlib
+          p=plistlib.loads(pathlib.Path('shortcuts/TOLF VPN Check.plist').read_bytes())
+          actions=p['WFWorkflowActions']
+          assert len(actions)==1,actions
+          a=actions[0]
+          assert a['WFWorkflowActionIdentifier']=='is.workflow.actions.filter.vpns'
+          assert a['WFWorkflowActionParameters'].get('WFContentItemInputParameter')=='Library'
+          assert len(p.get('WFWorkflowImportQuestions',[]))==0
+          data=pathlib.Path('shortcuts/TOLF VPN Check.shortcut').read_bytes()
+          assert data[:4]==b'AEA1' and len(data)>2000
+          output=pathlib.Path('shortcuts/probe')
+          output.mkdir(exist_ok=True)
+          dest=output/'TOLF-VPN-Check.shortcut'
+          dest.write_bytes(data)
+          print('READ_ONLY_SIGNED_SHORTCUT_OK',len(data),'bytes')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tolf-vpn-probe
+          path: |
+            shortcuts/TOLF VPN Check.plist
+            shortcuts/probe/TOLF-VPN-Check.shortcut
+      - name: Publish only verified non-mutating diagnostic
+        run: |
+          set -e
+          git config user.name "TOLF Shortcuts CI"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f shortcuts/probe/TOLF-VPN-Check.shortcut
+          git commit -m "Stage read-only signed VPN import diagnostic"
+          git push origin HEAD:main

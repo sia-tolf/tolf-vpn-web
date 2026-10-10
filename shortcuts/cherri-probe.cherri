@@ -1,0 +1,5 @@
+#define name TOLF VPN Check
+#define color blue
+rawAction("is.workflow.actions.filter.vpns", {
+  "WFContentItemInputParameter": "Library"
+})
