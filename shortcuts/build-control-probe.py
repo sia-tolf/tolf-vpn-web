@@ -38,14 +38,16 @@ def controller(name):
             {"WFWorkflowActionIdentifier":"is.workflow.actions.conditional",
              "WFWorkflowActionParameters":{"GroupingIdentifier":group, "WFControlFlowMode":2}}
         ])
-    empty_group = "A54D911C-7E31-482F-ACB0-77C79CE70FD1"
+    # Nest both recognized values; all other input reaches the menu.
+    text_action, on_if, on_action, on_end, off_if, off_action, off_end = actions
+    def otherwise(begin):
+        return {"WFWorkflowActionIdentifier":"is.workflow.actions.conditional",
+                "WFWorkflowActionParameters":{
+                    "GroupingIdentifier":begin["WFWorkflowActionParameters"]["GroupingIdentifier"],
+                    "WFControlFlowMode":1}}
+    actions = [text_action, on_if, on_action, otherwise(on_if),
+               off_if, off_action, otherwise(off_if)]
     menu_group = "30F28665-D168-4D0E-9E7A-349B067D39C9"
-    text_input = actions[1]["WFWorkflowActionParameters"]["WFInput"]
-    actions.append({
-        "WFWorkflowActionIdentifier":"is.workflow.actions.conditional",
-        "WFWorkflowActionParameters":{
-            "GroupingIdentifier":empty_group, "WFControlFlowMode":0,
-            "WFInput":text_input, "WFCondition":101}})
     actions.append({
         "WFWorkflowActionIdentifier":"is.workflow.actions.choosefrommenu",
         "WFWorkflowActionParameters":{
@@ -64,8 +66,7 @@ def controller(name):
     actions.extend([
         {"WFWorkflowActionIdentifier":"is.workflow.actions.choosefrommenu",
          "WFWorkflowActionParameters":{"GroupingIdentifier":menu_group, "WFControlFlowMode":2}},
-        {"WFWorkflowActionIdentifier":"is.workflow.actions.conditional",
-         "WFWorkflowActionParameters":{"GroupingIdentifier":empty_group, "WFControlFlowMode":2}}
+        off_end, on_end
     ])
     # Diagnostic build: remain in Shortcuts to distinguish a crash from Home Screen navigation.
     doc["WFWorkflowActions"] = actions
