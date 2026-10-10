@@ -19,3 +19,6 @@ It now links to one signed TOLF controller. Two independent equality conditions 
 The controller and two run links still need iPhone validation before production integration.
 URL input reference: https://support.apple.com/en-ae/guide/shortcuts/apd624386f42/ios
 Conditional serialization reference: https://github.com/electrikmilk/cherri/blob/main/shortcutgen.go
+
+## Direct launch menu
+After the user confirmed that text comparisons now render, direct launch without URL input was found to skip both conditions and execute Go to Home Screen. Added a no-value condition on the materialized Text output containing a Choose from Menu action, with direct Cisco ON/OFF branches. URL input on/off continues to bypass the menu. The final Home Screen action remains intentional.

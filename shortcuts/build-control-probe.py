@@ -38,6 +38,35 @@ def controller(name):
             {"WFWorkflowActionIdentifier":"is.workflow.actions.conditional",
              "WFWorkflowActionParameters":{"GroupingIdentifier":group, "WFControlFlowMode":2}}
         ])
+    empty_group = "A54D911C-7E31-482F-ACB0-77C79CE70FD1"
+    menu_group = "30F28665-D168-4D0E-9E7A-349B067D39C9"
+    text_input = actions[1]["WFWorkflowActionParameters"]["WFInput"]
+    actions.append({
+        "WFWorkflowActionIdentifier":"is.workflow.actions.conditional",
+        "WFWorkflowActionParameters":{
+            "GroupingIdentifier":empty_group, "WFControlFlowMode":0,
+            "WFInput":text_input, "WFCondition":101}})
+    actions.append({
+        "WFWorkflowActionIdentifier":"is.workflow.actions.choosefrommenu",
+        "WFWorkflowActionParameters":{
+            "GroupingIdentifier":menu_group, "WFControlFlowMode":0,
+            "WFMenuPrompt":"Управление VPN",
+            "WFMenuItems":[
+                {"WFItemType":0, "WFValue":"Включить VPN"},
+                {"WFItemType":0, "WFValue":"Выключить VPN"}]}})
+    for mode, title in (("on", "Включить VPN"), ("off", "Выключить VPN")):
+        actions.append({
+            "WFWorkflowActionIdentifier":"is.workflow.actions.choosefrommenu",
+            "WFWorkflowActionParameters":{
+                "GroupingIdentifier":menu_group, "WFControlFlowMode":1,
+                "WFMenuItemTitle":title, "WFMenuItemAttributedTitle":title}})
+        actions.append(workflow(name, mode)["WFWorkflowActions"][0])
+    actions.extend([
+        {"WFWorkflowActionIdentifier":"is.workflow.actions.choosefrommenu",
+         "WFWorkflowActionParameters":{"GroupingIdentifier":menu_group, "WFControlFlowMode":2}},
+        {"WFWorkflowActionIdentifier":"is.workflow.actions.conditional",
+         "WFWorkflowActionParameters":{"GroupingIdentifier":empty_group, "WFControlFlowMode":2}}
+    ])
     actions.append({"WFWorkflowActionIdentifier":"is.workflow.actions.returntohomescreen", "WFWorkflowActionParameters":{}})
     doc["WFWorkflowActions"] = actions
     return doc
