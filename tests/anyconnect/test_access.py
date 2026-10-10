@@ -107,7 +107,15 @@ class PersonalAccess(unittest.TestCase):
         self.assertEqual(response.status_code,200)
         _,cert,_=pkcs12.load_key_and_certificates(response.content,grant['password'].encode())
         self.assertEqual(cert.subject.get_attributes_for_oid(x509.oid.NameOID.COMMON_NAME)[0].value,device['username'])
-        self.assertEqual(self.client.get(urlparse(grant['certificateUrl']).path).status_code,410)
+        # iOS may request the PKCS#12 twice during its certificate import.
+        # The short retry window must return identical bytes, then expire.
+        download_path=urlparse(grant['certificateUrl']).path
+        retry=self.client.get(download_path)
+        self.assertEqual(retry.status_code,200)
+        self.assertEqual(retry.content,response.content)
+        with sqlite3.connect(self.db) as con:
+            con.execute("UPDATE oc_import_grants SET expires_at='2000-01-01T00:00:00+00:00'")
+        self.assertEqual(self.client.get(download_path).status_code,410)
         self.assertEqual(self.client.get('/oc/access/devices/'+device['id']+'/policy').status_code,401)
 
     def test_setup_links_require_owner_and_expire_rotate_or_revoke(self):
@@ -180,6 +188,11 @@ class PersonalAccess(unittest.TestCase):
         key,cert,chain=pkcs12.load_key_and_certificates(response.content,grant['password'].encode())
         self.assertEqual(cert.subject.get_attributes_for_oid(x509.oid.NameOID.COMMON_NAME)[0].value,device['username'])
         self.assertEqual(key.public_key().public_numbers(),cert.public_key().public_numbers())
+        retry=self.client.get(path)
+        self.assertEqual(retry.status_code,200,'iOS gets a brief import retry window')
+        self.assertEqual(retry.content,response.content)
+        with sqlite3.connect(self.db) as con:
+            con.execute("UPDATE oc_import_grants SET expires_at='2000-01-01T00:00:00+00:00'")
         self.assertEqual(self.client.get(path).status_code,410)
         import_values=parse_qs(urlparse(grant['importUri']).query)
         self.assertEqual(import_values['uri'],[grant['certificateUrl']])
