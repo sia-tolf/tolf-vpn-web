@@ -3,6 +3,7 @@
   'use strict';
   const TEXT = {
     ru: {
+      permission: 'При первом запуске нажмите «Разрешить» (Allow) для доступа к AnyConnect.',
       option: "Установить управление VPN и кнопки на экран",
       help: 'Зелёная TOLF ON включает VPN, красная TOLF OFF выключает. Кнопки установятся вместе с профилем.',
       setup: "Настройка состоит из двух шагов: добавьте одну команду TOLF, затем установите VPN «{vpn}» со значками.",
@@ -15,6 +16,7 @@
       instructions: "После скачивания откройте «Настройки» → «Профиль загружен» → «Установить» и подтвердите установку. На главном экране появятся TOLF ON и TOLF OFF. Возвращаться на сайт больше не нужно.",
     },
     en: {
+      permission: 'On first launch, tap “Allow” to give TOLF access to AnyConnect.',
       option: "Install VPN controls and Home Screen buttons",
       help: 'Green TOLF ON connects VPN; red TOLF OFF disconnects it. The buttons are installed with the profile.',
       setup: "Two steps: add one TOLF shortcut, then install VPN “{vpn}” with its icons.",
@@ -27,6 +29,7 @@
       instructions: "After downloading, open Settings → Profile Downloaded → Install and confirm. TOLF ON and TOLF OFF will appear on the Home Screen. You do not need to return to this website.",
     },
     lv: {
+      permission: 'Pirmajā palaišanas reizē pieskarieties “Atļaut” (Allow), lai TOLF varētu piekļūt AnyConnect.',
       option: "Instalēt VPN vadību un sākuma ekrāna pogas",
       help: 'Zaļā TOLF ON ieslēdz VPN, sarkanā TOLF OFF izslēdz. Pogas tiek instalētas kopā ar profilu.',
       setup: "Divi soļi: pievienojiet vienu komandu TOLF, pēc tam instalējiet VPN “{vpn}” ar ikonām.",
@@ -79,7 +82,7 @@
       icon.setAttribute('aria-hidden', 'true');
       item.append(icon, element('strong', 'TOLF ' + mode.toUpperCase())); preview.append(item);
     }
-    details.append(preview);
+    details.append(preview, element('p', text.permission, 'oc-note'));
     // Quick Setup knows the final device label only after preparation.
     if (vpnName) details.append(element('p', text.setup.replace('{vpn}', vpnName)));
     else details.append(element('p', ({ru:'Сначала добавим команду TOLF, затем установим профиль VPN.', en:'First add the TOLF shortcut, then install the VPN profile.', lv:'Vispirms pievienosim komandu TOLF, pēc tam instalēsim VPN profilu.'})[lang] || 'First add the TOLF shortcut, then install the VPN profile.'));
