@@ -12,7 +12,7 @@
       note: "Подтвердите добавление в приложении «Команды», затем вернитесь на эту страницу в Safari. Если TOLF уже есть, выберите замену. Сохраните название TOLF.",
       confirm: "Команда добавлена — продолжить",
       ready: "2. Установите VPN",
-      install: "Скачать профиль VPN",
+      install: "Установить профиль",
       instructions: "После скачивания откройте «Настройки» → «Профиль загружен» → «Установить» и подтвердите установку. На главном экране появятся TOLF ON и TOLF OFF. Возвращаться на сайт больше не нужно.",
     },
     en: {
@@ -25,7 +25,7 @@
       note: "Confirm the addition in Shortcuts, then return to this page in Safari. If TOLF already exists, replace it. Keep the name TOLF.",
       confirm: "Shortcut added — continue",
       ready: "2. Install VPN",
-      install: "Download VPN profile",
+      install: "Install profile",
       instructions: "After downloading, open Settings → Profile Downloaded → Install and confirm. TOLF ON and TOLF OFF will appear on the Home Screen. You do not need to return to this website.",
     },
     lv: {
@@ -38,7 +38,7 @@
       note: "Apstipriniet pievienošanu lietotnē Shortcuts, pēc tam atgriezieties šajā lapā pārlūkā Safari. Ja TOLF jau ir pievienota, aizstājiet to. Saglabājiet nosaukumu TOLF.",
       confirm: "Komanda pievienota — turpināt",
       ready: "2. Instalējiet VPN",
-      install: "Lejupielādēt VPN profilu",
+      install: "Instalēt profilu",
       instructions: "Pēc lejupielādes atveriet Iestatījumi → Lejupielādēts profils → Instalēt un apstipriniet. Sākuma ekrānā parādīsies TOLF ON un TOLF OFF. Šajā vietnē vairs nav jāatgriežas.",
     }
   };
@@ -125,7 +125,7 @@
       } else {
         wizard.append(element('p', text.ready));
         if (includeInstall) {
-          const install = element('a', text.install, 'button-link oc-action');
+          const install = element('a', text.install, 'button-link oc-action primary');
           install.href = profileUrl(url, true); install.referrerPolicy = 'no-referrer';
           install.addEventListener('click', event => { if (disabled || !allowed()) event?.preventDefault(); });
           wizard.append(install, element('p', text.instructions, 'oc-note'));
