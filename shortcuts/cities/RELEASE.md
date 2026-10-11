@@ -1,12 +1,12 @@
 # English city controllers — published shares
 
-- Moscow: TOLF-Moscow — 82816eb2f56b4917ae4f92632bd9eba4
-- Riga: TOLF-Riga — 17c48eff2d4f460eb9455cc6948fc93c
+- Moscow: TOLF-Moscow — f480fd5427e6404aa122684df1aee6fb
+- Riga: TOLF-Riga — 54c7236b5b2d4812a7fae50f387b75dd
 
 Both iCloud records were checked against the full actions and icons of the en/
 artifacts. File import assigned hyphenated shortcut names; launchers must use
 those exact shared names. VPN bindings remain TOLF Moscow / TOLF Riga.
-Menus are English for all users; website and instructions remain RU/EN/LV.
+Menus use 🟢 for ON and 🔴 for OFF and are English for all users; website and instructions remain RU/EN/LV.
 Each user imports the same public city share, with no account credentials.
 
 ON enables the target's On Demand, then starts its Cisco connection.

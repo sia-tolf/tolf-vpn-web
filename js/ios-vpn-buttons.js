@@ -3,8 +3,8 @@
   'use strict';
   // Shared English controllers, verified against their published iCloud records.
   const CITY_SHARES = {
-    moscow: "82816eb2f56b4917ae4f92632bd9eba4",
-    riga: "17c48eff2d4f460eb9455cc6948fc93c",
+    moscow: "f480fd5427e6404aa122684df1aee6fb",
+    riga: "54c7236b5b2d4812a7fae50f387b75dd",
   };
   function shortcutLink(city) {
     const id = CITY_SHARES[city];
