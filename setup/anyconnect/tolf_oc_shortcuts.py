@@ -12,7 +12,7 @@ from urllib.request import Request, urlopen
 
 _LOCK = threading.Lock()
 CACHE = Path("/var/lib/tolf-api/ios-shortcuts")
-VERSION = "cisco-controller-v6-english-names"
+VERSION = "cisco-controller-v7-colored-menu"
 
 def vpn_name(row, entry_name):
     return "TOLF " + {"Москва": "Moscow", "Рига": "Riga", "moscow": "Moscow", "riga": "Riga", "Rīga": "Riga", "Maskava": "Moscow"}.get(entry_name, entry_name)
@@ -144,7 +144,7 @@ def controller(name, lang="en"):
     city = name.split(" ", 2)[1]
     localized = {
         "ru": ({"Moscow": "Москва", "Riga": "Рига"}, "Включить VPN", "Выключить VPN"),
-        "en": ({}, "Turn VPN on", "Turn VPN off"),
+        "en": ({}, "🟢 Turn VPN on", "🔴 Turn VPN off"),
         "lv": ({"Moscow": "Maskava", "Riga": "Rīga"}, "Ieslēgt VPN", "Izslēgt VPN"),
     }
     cities, on_title, off_title = localized.get(lang, localized["en"])

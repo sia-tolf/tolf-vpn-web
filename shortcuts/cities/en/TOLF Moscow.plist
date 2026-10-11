@@ -36,13 +36,13 @@
 						<key>WFItemType</key>
 						<integer>0</integer>
 						<key>WFValue</key>
-						<string>Turn VPN on — Moscow</string>
+						<string>🟢 Turn VPN on — Moscow</string>
 					</dict>
 					<dict>
 						<key>WFItemType</key>
 						<integer>0</integer>
 						<key>WFValue</key>
-						<string>Turn VPN off — Moscow</string>
+						<string>🔴 Turn VPN off — Moscow</string>
 					</dict>
 				</array>
 			</dict>
@@ -57,9 +57,9 @@
 				<key>WFControlFlowMode</key>
 				<integer>1</integer>
 				<key>WFMenuItemTitle</key>
-				<string>Turn VPN on — Moscow</string>
+				<string>🟢 Turn VPN on — Moscow</string>
 				<key>WFMenuItemAttributedTitle</key>
-				<string>Turn VPN on — Moscow</string>
+				<string>🟢 Turn VPN on — Moscow</string>
 			</dict>
 		</dict>
 		<dict>
@@ -108,9 +108,9 @@
 				<key>WFControlFlowMode</key>
 				<integer>1</integer>
 				<key>WFMenuItemTitle</key>
-				<string>Turn VPN off — Moscow</string>
+				<string>🔴 Turn VPN off — Moscow</string>
 				<key>WFMenuItemAttributedTitle</key>
-				<string>Turn VPN off — Moscow</string>
+				<string>🔴 Turn VPN off — Moscow</string>
 			</dict>
 		</dict>
 		<dict>

@@ -78,7 +78,7 @@ class CiscoShortcuts(unittest.TestCase):
     def test_city_artifacts_keep_english_menu_and_binding(self):
         for city in ("Moscow", "Riga"):
             name = "TOLF " + city
-            for lang, action in (("en", "Turn VPN on"),):
+            for lang, action in (("en", "🟢 Turn VPN on"),):
                 path = Path(__file__).resolve().parents[2] / "shortcuts/cities" / lang / (name + ".plist")
                 artifact = plistlib.loads(path.read_bytes())
                 doc = shortcuts.controller(name)

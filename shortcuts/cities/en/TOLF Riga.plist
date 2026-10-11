@@ -36,13 +36,13 @@
 						<key>WFItemType</key>
 						<integer>0</integer>
 						<key>WFValue</key>
-						<string>Turn VPN on — Riga</string>
+						<string>🟢 Turn VPN on — Riga</string>
 					</dict>
 					<dict>
 						<key>WFItemType</key>
 						<integer>0</integer>
 						<key>WFValue</key>
-						<string>Turn VPN off — Riga</string>
+						<string>🔴 Turn VPN off — Riga</string>
 					</dict>
 				</array>
 			</dict>
@@ -57,9 +57,9 @@
 				<key>WFControlFlowMode</key>
 				<integer>1</integer>
 				<key>WFMenuItemTitle</key>
-				<string>Turn VPN on — Riga</string>
+				<string>🟢 Turn VPN on — Riga</string>
 				<key>WFMenuItemAttributedTitle</key>
-				<string>Turn VPN on — Riga</string>
+				<string>🟢 Turn VPN on — Riga</string>
 			</dict>
 		</dict>
 		<dict>
@@ -108,9 +108,9 @@
 				<key>WFControlFlowMode</key>
 				<integer>1</integer>
 				<key>WFMenuItemTitle</key>
-				<string>Turn VPN off — Riga</string>
+				<string>🔴 Turn VPN off — Riga</string>
 				<key>WFMenuItemAttributedTitle</key>
-				<string>Turn VPN off — Riga</string>
+				<string>🔴 Turn VPN off — Riga</string>
 			</dict>
 		</dict>
 		<dict>
