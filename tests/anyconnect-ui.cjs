@@ -114,13 +114,13 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   option.checked = true; option.events.change();
   assert.equal(details.hidden, false);
   assert.equal(new URL(iosInstall.href).searchParams.get('buttons'), 'true');
-  assert(details.textContent.includes('TOLF Москва iPad'));
+  assert(details.textContent.includes('TOLF Москва'));
   assert(iosInstall.hidden, 'ordinary installation hidden while bundle selected');
-  assert.deepEqual(descendants(details).filter(n=>n.tagName==='a').map(n=>n.textContent), ['Добавить команду «TOLF Москва iPad»']);
+  assert.deepEqual(descendants(details).filter(n=>n.tagName==='a').map(n=>n.textContent), ['Добавить команду TOLF']);
   for (const mode of ['control']) {
-    const shortcut=descendants(details).find(n=>n.tagName==='a'&&n.textContent==='Добавить команду «TOLF Москва iPad»');
+    const shortcut=descendants(details).find(n=>n.tagName==='a'&&n.textContent==='Добавить команду TOLF');
     assert(shortcut);
-    assert.equal(new URL(shortcut.href).pathname, '/oc/access/devices/one/shortcuts/'+mode.toLowerCase()+'.shortcut');
+    assert.equal(shortcut.href, 'https://www.icloud.com/shortcuts/ea018dbb07d245449437ecae45175e49');
     shortcut.click();
     button(details,'Команда добавлена — продолжить').click();
   }
@@ -293,7 +293,7 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   let checkbox=bundle.find(n=>n.type==='checkbox');
   checkbox.checked=true; checkbox.events.change();
   bundle=descendants(ids.anyConnectAccess);
-  bundle.find(n=>n.href?.includes('/shortcuts/control.shortcut')).events.click();
+  bundle.find(n=>n.href?.includes('/shortcuts/ea018dbb07d245449437ecae45175e49')).events.click();
   const selectedBefore=window.ocAccess.selected().id;
   for(const file of ['ios-vpn-buttons.js','transport-selector.js','anyconnect-access.js'])
     vm.runInContext(fs.readFileSync(path.join(root,'js',file),'utf8'),c);

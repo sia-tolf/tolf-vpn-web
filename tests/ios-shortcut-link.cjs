@@ -6,14 +6,11 @@ const flat=n=>n.children.flatMap(c=>[c,...flat(c)]);
 for(const [name,ingress] of [['TOLF Москва iPhone','moscow'],['TOLF Рига iPhone','riga'],['TOLF Москва iPad','moscow']]){
  const nodes=flat(ctx.window.tolfIosButtons.create({checked:true,vpnName:name,url:'https://api.tolf.is/oc/access/devices/test/ios.mobileconfig?ingress='+ingress}));
  const a=nodes.find(n=>n.href);
- if(name === 'TOLF Москва iPhone') {
-  assert.equal(a.href,'https://www.icloud.com/shortcuts/9cb69f3d95934343a7bb81dabbac2bb6');
-  assert(!nodes.some(n => n.textContent?.includes('Откройте скачанный')));
- } else if(name === 'TOLF Рига iPhone') {
-  assert.equal(a.href,'https://www.icloud.com/shortcuts/87b41c1919cc465897a6ced9dd591bce');
- } else assert(a.href.includes('control.shortcut?ingress='+ingress));
- assert.equal(a.textContent,'Добавить команду «'+name+'»');
+ assert.equal(a.href,'https://www.icloud.com/shortcuts/ea018dbb07d245449437ecae45175e49');
+ assert.equal(a.textContent,'Добавить команду TOLF');
+ assert(!nodes.some(n => n.textContent?.includes('Откройте скачанный')));
+
 
 
 }
-console.log('PASS: Moscow and Riga iPhone use verified iCloud shares; other profiles retain generated controller');
+console.log('PASS: All device names use one shared iCloud command');

@@ -20,7 +20,7 @@ def webclip_payloads(device_id, entry_id=None, vpn_name=None):
         "PayloadUUID": str(uuid.uuid5(uuid.NAMESPACE_URL, identifier)).upper(),
         "PayloadDisplayName": name,
         "Label": ("TOLF " + city).strip(),
-        "URL": "shortcuts://run-shortcut?name=" + quote(name, safe=""),
+        "URL": "shortcuts://run-shortcut?name=TOLF&input=text&text=" + quote(entry_id or "", safe=""),
         "Icon": base64.b64decode(ICONS.get(entry_id, ICONS["moscow"])),
         "IsRemovable": True,
         "FullScreen": False,

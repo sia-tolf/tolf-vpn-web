@@ -6,7 +6,7 @@
       permission: 'При первом запуске нажмите «Разрешить» (Allow) для доступа к AnyConnect.',
       option: "Добавить значок управления VPN на экран",
       help: 'Один значок для этого подключения. Он открывает меню включения и выключения VPN с названием города.',
-      setup: "Настройка состоит из двух шагов: добавьте команду «{vpn}», затем установите профиль VPN со значком.",
+      setup: "Настройка состоит из двух шагов: добавьте общую команду TOLF, затем установите профиль «{vpn}» со значком.",
       add: "Добавить команду TOLF", save: 'Сохранить MobileConfig', saving: 'Сохраняем…',
       failed: 'Не удалось сохранить профиль. Попробуйте ещё раз.',
       note: "Подтвердите добавление в приложении «Команды», затем вернитесь на эту страницу в Safari. Заменяйте только одноимённую команду. Сохраните её название.",
@@ -19,7 +19,7 @@
       permission: 'On first launch, tap “Allow” to give TOLF access to AnyConnect.',
       option: "Add a VPN control icon to the Home Screen",
       help: 'One icon for this connection opens a VPN on/off menu showing the city.',
-      setup: "Two steps: add the “{vpn}” shortcut, then install its VPN profile and icon.",
+      setup: "Two steps: add the shared TOLF shortcut, then install the “{vpn}” VPN profile and icon.",
       add: "Add TOLF shortcut", save: 'Save MobileConfig', saving: 'Saving…',
       failed: 'Unable to save the profile. Please try again.',
       note: "Confirm the addition in Shortcuts, then return to this page in Safari. Replace only the shortcut with the same name. Keep its name.",
@@ -32,7 +32,7 @@
       permission: 'Pirmajā palaišanas reizē pieskarieties “Atļaut” (Allow), lai TOLF varētu piekļūt AnyConnect.',
       option: "Pievienot VPN vadības ikonu sākuma ekrānam",
       help: 'Viena ikona šim savienojumam atver VPN ieslēgšanas un izslēgšanas izvēlni ar pilsētas nosaukumu.',
-      setup: "Divi soļi: pievienojiet komandu “{vpn}”, pēc tam instalējiet VPN profilu ar ikonu.",
+      setup: "Divi soļi: pievienojiet kopīgo komandu TOLF, pēc tam instalējiet VPN profilu “{vpn}” ar ikonu.",
       add: "Pievienot komandu TOLF", save: 'Saglabāt MobileConfig', saving: 'Saglabā…',
       failed: 'Neizdevās saglabāt profilu. Mēģiniet vēlreiz.',
       note: "Apstipriniet pievienošanu lietotnē Shortcuts, pēc tam atgriezieties šajā lapā pārlūkā Safari. Aizstājiet tikai komandu ar tādu pašu nosaukumu. Saglabājiet tās nosaukumu.",
@@ -86,7 +86,7 @@
     // Quick Setup knows the final device label only after preparation.
     if (vpnName) details.append(element('p', text.setup.replace('{vpn}', vpnName)));
     else details.append(element('p', ({ru:'Сначала добавим команду TOLF, затем установим профиль VPN.', en:'First add the TOLF shortcut, then install the VPN profile.', lv:'Vispirms pievienosim komandu TOLF, pēc tam instalēsim VPN profilu.'})[lang] || 'First add the TOLF shortcut, then install the VPN profile.'));
-    const key = 'tolfIosControllerV5:' + (url ? profileUrl(url, false) : '') + ':' + (vpnName || '');
+    const key = 'tolfIosSharedV1:' + (url ? profileUrl(url, false) : '') + ':' + (vpnName || '');
     let state = progress(key);
     let save;
     const wizard = element('div', '', 'ios-vpn-wizard');
@@ -99,21 +99,9 @@
       if (state.step < 1) {
         wizard.append(element('p', '1. ' + text.add));
         const a = element('a', text.add, 'button-link oc-action secondary');
-        const target = new URL(url);
-        target.pathname = target.pathname.replace(/\/ios\.mobileconfig$/, '/shortcuts/control.shortcut');
-        target.searchParams.delete('buttons');
-        const sharedShortcut = vpnName === 'TOLF Москва iPhone' && target.searchParams.get('ingress') === 'moscow'
-          ? 'https://www.icloud.com/shortcuts/9cb69f3d95934343a7bb81dabbac2bb6'
-          : vpnName === 'TOLF Рига iPhone' && target.searchParams.get('ingress') === 'riga'
-            ? 'https://www.icloud.com/shortcuts/87b41c1919cc465897a6ced9dd591bce' : '';
-        a.href = sharedShortcut || target.href;
+        a.href = 'https://www.icloud.com/shortcuts/ea018dbb07d245449437ecae45175e49';
         a.referrerPolicy = 'no-referrer';
-        a.textContent = ({ru:'Добавить команду «',en:'Add shortcut “',lv:'Pievienot komandu “'}[lang] || 'Add shortcut “') + vpnName + (lang === 'ru' ? '»' : '”');
-        if (!sharedShortcut) wizard.append(element('p', ({
-          ru:'Откройте скачанный файл из загрузок Safari и добавьте команду «'+vpnName+'». Команды других подключений оставьте.',
-          en:'Open the downloaded file in Safari Downloads and add “'+vpnName+'”. Keep shortcuts for other connections.',
-          lv:'Atveriet failu Safari lejupielādēs un pievienojiet “'+vpnName+'”. Saglabājiet citu savienojumu komandas.'
-        })[lang] || 'Open the downloaded file in Shortcuts.', 'oc-note'));
+        a.textContent = text.add;
         const confirm = element('button', text.confirm, 'oc-action');
         confirm.type = 'button'; confirm.disabled = disabled || !state.opened;
         a.addEventListener('click', event => {

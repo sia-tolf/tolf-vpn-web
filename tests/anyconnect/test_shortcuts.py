@@ -17,7 +17,7 @@ class CiscoShortcuts(unittest.TestCase):
         for city in ("Москва", "Рига"):
             row = {"label": "iPhone <&> " + "😀" * 40}
             name = shortcuts.vpn_name(row, city)
-            self.assertEqual(name, "TOLF " + city + " " + row["label"][:36])
+            self.assertEqual(name, "TOLF " + city)
             for mode in ("on", "off"):
                 workflow = plistlib.loads(plistlib.dumps(shortcuts.workflow(name, mode)))
                 action = workflow["WFWorkflowActions"][0]
@@ -116,7 +116,7 @@ class CiscoShortcuts(unittest.TestCase):
                 self.assertEqual(response.content, SIGNED)
                 self.assertEqual('inline; filename="TOLF.shortcut"', response.headers["content-disposition"])
                 self.assertEqual("application/x-apple-shortcut", response.headers["content-type"])
-                signer.assert_called_once_with("TOLF Рига iPhone", "control")
+                signer.assert_called_once_with("TOLF Рига", "control")
                 self.assertIn("no-store", response.headers["cache-control"])
                 self.assertEqual(client.get(path+"?ingress=invalid", headers={"x-test-user":"owner"}).status_code, 400)
                 self.assertEqual(client.get(path.replace("control.shortcut","bad.shortcut"), headers={"x-test-user":"owner"}).status_code, 400)

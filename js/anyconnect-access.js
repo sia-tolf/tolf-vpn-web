@@ -406,7 +406,7 @@
         const actions = element("div", null, "oc-actions oc-ios-install");
         const install = link(c.iosInstall, window.tolfIosButtons.profileUrl(location, iosButtons), true);
         const options = window.tolfIosButtons.create({checked:iosButtons, disabled:busy || loading,
-          vpnName:"TOLF " + (ingress().id === "moscow" ? "Москва" : "Рига") + " " + Array.from(d.label).slice(0,36).join(""),
+          vpnName:"TOLF " + (ingress().id === "moscow" ? "Москва" : "Рига"),
           url:location, includeInstall:true, saveHost:destinations, onChange:checked => { iosButtons = checked; saveSetup(); actions.hidden = checked; install.hidden = checked; install.href = window.tolfIosButtons.profileUrl(location, checked); }
         });
         root.append(options);

@@ -54,7 +54,7 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
     assert(confirm.disabled);
     confirm.events.click();
     assert(!descendants(element('iosVpnButtons')).some(n=>n.href?.includes('/ios.mobileconfig?')));
-    const shortcut=nodes.find(n=>n.href?.includes('/shortcuts/'+mode+'.shortcut?ingress='+node));
+    const shortcut=nodes.find(n=>n.href?.includes('/shortcuts/ea018dbb07d245449437ecae45175e49'));
     assert(shortcut);
     if(mode==='on')assert(!nodes.some(n=>n.href?.includes('/shortcuts/off.shortcut')));
     shortcut.events.click();
@@ -64,7 +64,7 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
     const profile='https://api.tolf.is/oc/access/devices/'+device+'/ios.mobileconfig?ingress='+node;
     element('iosVpnButtons').replaceChildren(ctx.window.tolfIosButtons.create({
       checked:true,includeInstall:true,lang:'ru',url:profile,
-      vpnName:'TOLF '+(node==='moscow'?'Москва':'Рига')+' Test device'
+      vpnName:'TOLF '+(node==='moscow'?'Москва':'Рига')
     }));
     nodes=descendants(element('iosVpnButtons'));
     confirm=nodes.find(n=>n.textContent==='Команда добавлена — продолжить');
@@ -90,7 +90,7 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
    assigned=install.href;
    const other=ctx.window.tolfIosButtons.create({checked:true,includeInstall:true,lang:'ru',
      url:'https://api.tolf.is/oc/access/devices/other/ios.mobileconfig?ingress='+node,
-     vpnName:'TOLF '+(node==='moscow'?'Москва':'Рига')+' Test device'});
+     vpnName:'TOLF '+(node==='moscow'?'Москва':'Рига')});
    assert(!descendants(other).some(n=>n.href?.includes('/ios.mobileconfig?')),
      'completion must not carry into a different device');
    const option=nodes.find(n=>n.type==='checkbox');
@@ -105,7 +105,7 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
   assert.equal(url.searchParams.get('ingress'),node);
   assert.equal(url.searchParams.get('buttons'),buttons?'true':null);
   assert.equal(posts.filter(p=>p.endsWith('/import')).length,0);
-  assert(descendants(element('iosVpnButtons')).some(n=>n.textContent.includes('TOLF '+(node==='moscow'?'Москва':'Рига')+' Test device')));
+  assert(descendants(element('iosVpnButtons')).some(n=>n.textContent.includes('TOLF '+(node==='moscow'?'Москва':'Рига'))));
   return;
  }
  assert.equal(element('ocRenew').disabled,true);

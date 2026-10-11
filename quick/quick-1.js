@@ -40,7 +40,7 @@ function render() {
    const url = ocDevice ? new URL(API+'/oc/access/devices/'+encodeURIComponent(ocDevice.id)+'/ios.mobileconfig') : null;
    if (url) url.searchParams.set('ingress', server);
    options.replaceChildren(window.tolfIosButtons.create({checked:iosButtons, disabled:busy, lang,
-     vpnName:ocDevice ? 'TOLF '+(server==='moscow'?'Москва':'Рига')+' '+Array.from(ocDevice.label).slice(0,36).join('') : null,
+     vpnName:ocDevice ? 'TOLF '+(server==='moscow'?'Москва':'Рига') : null,
      url:url?.href, includeInstall:true, saveHost:$('iosProfileSave'), onChange:checked => {iosButtons = checked; saveIosSetup(); put('quickIosButtons', checked ? 'true' : ''); render();}
    }));
  }

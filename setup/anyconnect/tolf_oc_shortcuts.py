@@ -15,7 +15,7 @@ CACHE = Path("/var/lib/tolf-api/ios-shortcuts")
 VERSION = "cisco-controller-v5-per-profile-menu"
 
 def vpn_name(row, entry_name):
-    return "TOLF " + entry_name + " " + str(row["label"])[:36]
+    return "TOLF " + entry_name
 
 def workflow(name, mode):
     if mode not in ("on", "off"):
