@@ -77,7 +77,8 @@
     details.append(element('p', text.help));
     const preview = element('div', '', 'ios-vpn-buttons-preview');
     const item = element('div');
-    const icon = element('span', '⏻', 'ios-vpn-icon on');
+    const city = url ? new URL(url).searchParams.get('ingress') : '';
+    const icon = element('span', '⏻', 'ios-vpn-icon ' + (city === 'riga' ? 'riga' : 'moscow'));
     icon.setAttribute('aria-hidden', 'true');
     item.append(icon, element('strong', vpnName ? vpnName.split(' ').slice(0,2).join(' ') : 'TOLF'));
     preview.append(item);
@@ -102,7 +103,9 @@
         target.pathname = target.pathname.replace(/\/ios\.mobileconfig$/, '/shortcuts/control.shortcut');
         target.searchParams.delete('buttons');
         const sharedShortcut = vpnName === 'TOLF Москва iPhone' && target.searchParams.get('ingress') === 'moscow'
-          ? 'https://www.icloud.com/shortcuts/9cb69f3d95934343a7bb81dabbac2bb6' : '';
+          ? 'https://www.icloud.com/shortcuts/9cb69f3d95934343a7bb81dabbac2bb6'
+          : vpnName === 'TOLF Рига iPhone' && target.searchParams.get('ingress') === 'riga'
+            ? 'https://www.icloud.com/shortcuts/87b41c1919cc465897a6ced9dd591bce' : '';
         a.href = sharedShortcut || target.href;
         a.referrerPolicy = 'no-referrer';
         a.textContent = ({ru:'Добавить команду «',en:'Add shortcut “',lv:'Pievienot komandu “'}[lang] || 'Add shortcut “') + vpnName + (lang === 'ru' ? '»' : '”');

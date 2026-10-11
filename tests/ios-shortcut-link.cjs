@@ -9,9 +9,11 @@ for(const [name,ingress] of [['TOLF Москва iPhone','moscow'],['TOLF Риг
  if(name === 'TOLF Москва iPhone') {
   assert.equal(a.href,'https://www.icloud.com/shortcuts/9cb69f3d95934343a7bb81dabbac2bb6');
   assert(!nodes.some(n => n.textContent?.includes('Откройте скачанный')));
+ } else if(name === 'TOLF Рига iPhone') {
+  assert.equal(a.href,'https://www.icloud.com/shortcuts/87b41c1919cc465897a6ced9dd591bce');
  } else assert(a.href.includes('control.shortcut?ingress='+ingress));
  assert.equal(a.textContent,'Добавить команду «'+name+'»');
 
 
 }
-console.log('PASS: Moscow iPhone uses verified iCloud share; other profiles retain generated controller');
+console.log('PASS: Moscow and Riga iPhone use verified iCloud shares; other profiles retain generated controller');

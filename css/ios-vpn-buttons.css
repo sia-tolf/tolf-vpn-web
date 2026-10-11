@@ -25,3 +25,6 @@
 #anyConnectAccess .oc-destinations > .oc-note { grid-column:1 / -1; margin:0; }
 #anyConnectAccess .oc-destinations > .oc-note:empty { display:none; }
 #iosProfileSave:empty { display:none; }
+
+.ios-vpn-icon.moscow { background: #AD5555; }
+.ios-vpn-icon.riga { background: #793D52; }
