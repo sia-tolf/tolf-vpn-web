@@ -144,7 +144,7 @@ def controller(name):
     city = name.split(" ", 2)[1]
     titles = ["Включить VPN — " + city, "Выключить VPN — " + city]
     params = menu[0]["WFWorkflowActionParameters"]
-    params["WFMenuPrompt"] = "TOLF VPN — " + city + "\n" + name
+    params["WFMenuPrompt"] = name
     params["WFMenuItems"] = [{"WFItemType": 0, "WFValue": t} for t in titles]
     branch = 0
     for action in menu[1:]:

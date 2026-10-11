@@ -46,7 +46,7 @@ class CiscoShortcuts(unittest.TestCase):
             actions = shortcuts.controller(name)["WFWorkflowActions"]
             self.assertEqual(actions[0]["WFWorkflowActionIdentifier"], "is.workflow.actions.choosefrommenu")
             city = name.split(" ", 2)[1]
-            self.assertIn("TOLF VPN — " + city, actions[0]["WFWorkflowActionParameters"]["WFMenuPrompt"])
+            self.assertEqual(name, actions[0]["WFWorkflowActionParameters"]["WFMenuPrompt"])
             native = [a["WFWorkflowActionParameters"] for a in actions if a["WFWorkflowActionIdentifier"] == "is.workflow.actions.vpn.set"]
             self.assertEqual([p["WFVPNOperation"] for p in native], ["Set On Demand", "Set On Demand", "Disconnect"])
             self.assertEqual([p["WFOnDemandValue"] for p in native[:2]], [1, 0])

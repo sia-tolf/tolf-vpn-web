@@ -29,8 +29,7 @@
 				<key>WFControlFlowMode</key>
 				<integer>0</integer>
 				<key>WFMenuPrompt</key>
-				<string>TOLF VPN — Москва
-TOLF Москва iPhone</string>
+				<string>TOLF Москва iPhone</string>
 				<key>WFMenuItems</key>
 				<array>
 					<dict>
