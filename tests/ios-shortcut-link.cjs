@@ -6,9 +6,12 @@ const flat=n=>n.children.flatMap(c=>[c,...flat(c)]);
 for(const [name,ingress] of [['TOLF Москва iPhone','moscow'],['TOLF Рига iPhone','riga'],['TOLF Москва iPad','moscow']]){
  const nodes=flat(ctx.window.tolfIosButtons.create({checked:true,vpnName:name,url:'https://api.tolf.is/oc/access/devices/test/ios.mobileconfig?ingress='+ingress}));
  const a=nodes.find(n=>n.href);
- assert(a.href.includes('control.shortcut?ingress='+ingress));
+ if(name === 'TOLF Москва iPhone') {
+  assert.equal(a.href,'https://www.icloud.com/shortcuts/9cb69f3d95934343a7bb81dabbac2bb6');
+  assert(!nodes.some(n => n.textContent?.includes('Откройте скачанный')));
+ } else assert(a.href.includes('control.shortcut?ingress='+ingress));
  assert.equal(a.textContent,'Добавить команду «'+name+'»');
- assert(!nodes.some(n => n.href?.includes('icloud.com')));
+
 
 }
-console.log('PASS: all installation links use updated per-device controller');
+console.log('PASS: Moscow iPhone uses verified iCloud share; other profiles retain generated controller');

@@ -101,10 +101,12 @@
         const target = new URL(url);
         target.pathname = target.pathname.replace(/\/ios\.mobileconfig$/, '/shortcuts/control.shortcut');
         target.searchParams.delete('buttons');
-        a.href = target.href;
+        const sharedShortcut = vpnName === 'TOLF Москва iPhone' && target.searchParams.get('ingress') === 'moscow'
+          ? 'https://www.icloud.com/shortcuts/9cb69f3d95934343a7bb81dabbac2bb6' : '';
+        a.href = sharedShortcut || target.href;
         a.referrerPolicy = 'no-referrer';
         a.textContent = ({ru:'Добавить команду «',en:'Add shortcut “',lv:'Pievienot komandu “'}[lang] || 'Add shortcut “') + vpnName + (lang === 'ru' ? '»' : '”');
-        wizard.append(element('p', ({
+        if (!sharedShortcut) wizard.append(element('p', ({
           ru:'Откройте скачанный файл из загрузок Safari и добавьте команду «'+vpnName+'». Команды других подключений оставьте.',
           en:'Open the downloaded file in Safari Downloads and add “'+vpnName+'”. Keep shortcuts for other connections.',
           lv:'Atveriet failu Safari lejupielādēs un pievienojiet “'+vpnName+'”. Saglabājiet citu savienojumu komandas.'
