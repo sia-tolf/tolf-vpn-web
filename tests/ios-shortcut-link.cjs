@@ -12,10 +12,10 @@ for(const configured of [false,true]){
    const nodes=flat(ctx.window.tolfIosButtons.create({checked:true,vpnName:name,lang,url:'https://api.tolf.is/oc/access/devices/test/ios.mobileconfig?ingress='+city}));
    const a=nodes.find(n=>n.href);
    if(!configured){assert.equal(a,undefined);continue;}
-   assert.equal(a.href,'https://www.icloud.com/shortcuts/'+ids[city][lang]);
+   assert.equal(a.href,'https://www.icloud.com/shortcuts/'+ids[city]);
    assert(a.textContent.includes(name));
    assert(!nodes.some(n=>n.textContent?.includes('Откройте скачанный')));
   }
  }
 }
-console.log('PASS: city/language routes are distinct; missing shares cannot fall back to generic TOLF');
+console.log('PASS: each city uses the same English shortcut across all site languages; missing shares cannot fall back to generic TOLF');

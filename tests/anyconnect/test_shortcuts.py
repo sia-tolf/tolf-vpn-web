@@ -31,7 +31,7 @@ class CiscoShortcuts(unittest.TestCase):
         # The distributed file and API must carry the same controller.
         path = Path(__file__).resolve().parents[2] / "shortcuts/auto-install/TOLF.plist"
         native = plistlib.loads(path.read_bytes())
-        self.assertEqual(shortcuts.controller("TOLF Москва iPhone"), native)
+        self.assertEqual(shortcuts.controller("TOLF Москва iPhone", "ru"), native)
         for city in ("Москва", "Рига"):
             name = shortcuts.vpn_name({"label":"Phone <&>"}, city)
             document = shortcuts.controller(name)
@@ -75,13 +75,13 @@ class CiscoShortcuts(unittest.TestCase):
                 self.assertGreaterEqual(depth, 0)
         self.assertEqual(depth, 0)
 
-    def test_localized_city_artifacts_keep_english_binding(self):
+    def test_city_artifacts_keep_english_menu_and_binding(self):
         for city in ("Moscow", "Riga"):
             name = "TOLF " + city
-            for lang, action in (("ru", "Включить VPN"), ("en", "Turn VPN on"), ("lv", "Ieslēgt VPN")):
+            for lang, action in (("en", "Turn VPN on"),):
                 path = Path(__file__).resolve().parents[2] / "shortcuts/cities" / lang / (name + ".plist")
                 artifact = plistlib.loads(path.read_bytes())
-                doc = shortcuts.controller(name, lang)
+                doc = shortcuts.controller(name)
                 self.assertEqual(artifact["WFWorkflowActions"], doc["WFWorkflowActions"])
                 self.assertEqual(doc["WFWorkflowName"], name)
                 self.assertEqual(doc["WFWorkflowActions"][0]["WFWorkflowActionParameters"]["WFMenuPrompt"], name)

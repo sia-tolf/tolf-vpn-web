@@ -3,11 +3,11 @@
   'use strict';
   // Populate with verified iCloud shares before deploying this release.
   const CITY_SHARES = {
-    moscow: {ru: null, en: null, lv: null},
-    riga: {ru: null, en: null, lv: null},
+    moscow: null,
+    riga: null,
   };
-  function shortcutLink(city, lang) {
-    const id = CITY_SHARES[city]?.[lang] || CITY_SHARES[city]?.en;
+  function shortcutLink(city) {
+    const id = CITY_SHARES[city];
     return /^[a-f0-9]{32}$/.test(id || '') ? 'https://www.icloud.com/shortcuts/' + id : null;
   }
   const TEXT = {
@@ -107,7 +107,7 @@
       if (!checkbox.checked || !vpnName || !url) return;
       if (state.step < 1) {
         const addLabel = text.add.replace('{vpn}', vpnName);
-        const link = shortcutLink(city, lang);
+        const link = shortcutLink(city);
         if (!link) {
           wizard.append(element('p', ({ru:'Команда пока недоступна.', en:'The shortcut is not available yet.', lv:'Komanda vēl nav pieejama.'})[lang] || 'The shortcut is not available yet.', 'oc-note'));
           return;

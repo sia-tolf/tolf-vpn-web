@@ -43,7 +43,7 @@ def workflow(name, mode):
         "WFQuickActionSurfaces": []
     }
 
-def controller(name, lang="ru"):
+def controller(name, lang="en"):
     doc = workflow(name, "on")
     doc["WFWorkflowName"] = "TOLF"
     doc["WFWorkflowHasShortcutInputVariables"] = True
