@@ -1,29 +1,19 @@
-# English city names: release pending iCloud shares
+# English city controllers — published shares
 
-Public artifacts are in ru/, en/, lv/. Import names and VPN titles are always
-TOLF Moscow and TOLF Riga. Menus are always English; website instructions remain RU/EN/LV.
+- Moscow: TOLF-Moscow — 82816eb2f56b4917ae4f92632bd9eba4
+- Riga: TOLF-Riga — 17c48eff2d4f460eb9455cc6948fc93c
 
-The two AEA1-signed files contain no account credentials or certificates.
-Share each city command from Apple's Shortcuts app and record its iCloud ID in
-CITY_SHARES in js/ios-vpn-buttons.js. The published shares must each be
-checked by downloading the iCloud record and comparing menu actions and VPN
-bindings against the corresponding plist.
+Both iCloud records were checked against the full actions and icons of the en/
+artifacts. File import assigned hyphenated shortcut names; launchers must use
+those exact shared names. VPN bindings remain TOLF Moscow / TOLF Riga.
+Menus are English for all users; website and instructions remain RU/EN/LV.
+Each user imports the same public city share, with no account credentials.
 
-Do not deploy the English-name UI/backend until both links have been verified.
-Missing links deliberately do not fall back to the old generic TOLF shortcut.
+ON enables the target's On Demand, then starts its Cisco connection.
+OFF disables the target's On Demand, then disconnects that specific target.
+Both branches clear output and return to the Home Screen.
+A first-time Cisco access consent is provided by iOS.
 
-After both shares exist:
-1. Verify name, menu language, native VPN titles, Cisco target, and terminal
-   Nothing / Home Screen / Nothing actions of each shared record.
-2. Run Python test_mobileconfig.py and test_shortcuts.py and Node
-   ios-shortcut-link.cjs, anyconnect-ui.cjs, quick-anyconnect.cjs.
-   The UI tests use synthetic IDs from ios-city-share-fixture.cjs.
-3. Back up and deploy the changed tolf_oc_shortcuts, tolf_oc_webclips,
-   and tolf_oc_mobileconfig modules to /opt/tolf-api, restart and check health.
-4. Publish the matching frontend with the two real iCloud links.
-5. Verify clean installation and both cities on a real iPhone/iPad.
-   Existing installed Russian-named profiles/shortcuts are not renamed remotely;
-   reinstall the profile and add its English-named command.
-
-Shared MobileConfig payload IDs remain stable per device and entry point,
-so reinstalling a city replaces that city's profile, not the other city.
+Profile identities remain stable per device and entry point, so reinstalling
+one city replaces only that city's profile. Installed Russian-name profiles
+need reinstalling for the English bindings; shortcuts are imported separately.

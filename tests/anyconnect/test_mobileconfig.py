@@ -85,7 +85,7 @@ class IosMobileConfig(unittest.TestCase):
             self.assertEqual(normal["PayloadUUID"], profile["PayloadUUID"])
             clip = profile["PayloadContent"][2]
             self.assertEqual(clip["Label"], "TOLF " + {"Москва":"Moscow", "Рига":"Riga"}[city])
-            self.assertEqual(parse_qs(urlparse(clip["URL"]).query), {"name": ["TOLF " + {"Москва":"Moscow", "Рига":"Riga"}[city]]})
+            self.assertEqual(parse_qs(urlparse(clip["URL"]).query), {"name": ["TOLF-" + {"Москва":"Moscow", "Рига":"Riga"}[city]]})
             self.assertEqual(clip["PayloadType"], "com.apple.webClip.managed")
             self.assertTrue(clip["Icon"].startswith(b"\x89PNG"))
             self.assertTrue(clip["IsRemovable"])

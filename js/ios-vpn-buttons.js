@@ -1,10 +1,10 @@
 /* Shared iOS setup controls. Names must match the WebClip URLs and signed files. */
 (() => {
   'use strict';
-  // Populate with verified iCloud shares before deploying this release.
+  // Shared English controllers, verified against their published iCloud records.
   const CITY_SHARES = {
-    moscow: null,
-    riga: null,
+    moscow: "82816eb2f56b4917ae4f92632bd9eba4",
+    riga: "17c48eff2d4f460eb9455cc6948fc93c",
   };
   function shortcutLink(city) {
     const id = CITY_SHARES[city];
@@ -15,7 +15,7 @@
       permission: 'При первом запуске нажмите «Разрешить» (Allow) для доступа к AnyConnect.',
       option: "Добавить значок управления VPN на экран",
       help: 'Один значок для этого подключения. Он открывает меню включения и выключения VPN с названием города.',
-      setup: "Настройка состоит из двух шагов: добавьте команду «{vpn}», затем установите профиль «{vpn}» со значком.",
+      setup: "Настройка состоит из двух шагов: добавьте команду «{shortcut}», затем установите профиль «{vpn}» со значком.",
       add: "Добавить команду «{vpn}»", save: 'Сохранить MobileConfig', saving: 'Сохраняем…',
       failed: 'Не удалось сохранить профиль. Попробуйте ещё раз.',
       note: "Подтвердите добавление в приложении «Команды», затем вернитесь на эту страницу в Safari. Заменяйте только одноимённую команду. Сохраните её название.",
@@ -28,7 +28,7 @@
       permission: 'On first launch, tap “Allow” to give TOLF access to AnyConnect.',
       option: "Add a VPN control icon to the Home Screen",
       help: 'One icon for this connection opens a VPN on/off menu showing the city.',
-      setup: "Two steps: add the “{vpn}” shortcut, then install the “{vpn}” VPN profile and icon.",
+      setup: "Two steps: add the “{shortcut}” shortcut, then install the “{vpn}” VPN profile and icon.",
       add: "Add “{vpn}” shortcut", save: 'Save MobileConfig', saving: 'Saving…',
       failed: 'Unable to save the profile. Please try again.',
       note: "Confirm the addition in Shortcuts, then return to this page in Safari. Replace only the shortcut with the same name. Keep its name.",
@@ -41,7 +41,7 @@
       permission: 'Pirmajā palaišanas reizē pieskarieties “Atļaut” (Allow), lai TOLF varētu piekļūt AnyConnect.',
       option: "Pievienot VPN vadības ikonu sākuma ekrānam",
       help: 'Viena ikona šim savienojumam atver VPN ieslēgšanas un izslēgšanas izvēlni ar pilsētas nosaukumu.',
-      setup: "Divi soļi: pievienojiet komandu “{vpn}”, pēc tam instalējiet VPN profilu “{vpn}” ar ikonu.",
+      setup: "Divi soļi: pievienojiet komandu “{shortcut}”, pēc tam instalējiet VPN profilu “{vpn}” ar ikonu.",
       add: "Pievienot komandu “{vpn}”", save: 'Saglabāt MobileConfig', saving: 'Saglabā…',
       failed: 'Neizdevās saglabāt profilu. Mēģiniet vēlreiz.',
       note: "Apstipriniet pievienošanu lietotnē Shortcuts, pēc tam atgriezieties šajā lapā pārlūkā Safari. Aizstājiet tikai komandu ar tādu pašu nosaukumu. Saglabājiet tās nosaukumu.",
@@ -93,7 +93,7 @@
     preview.append(item);
     details.append(preview, element('p', text.permission, 'oc-note'));
     // Quick Setup supplies the invariant city name after preparation.
-    if (vpnName) details.append(element('p', text.setup.replaceAll('{vpn}', vpnName)));
+    if (vpnName) details.append(element('p', text.setup.replaceAll('{vpn}', vpnName).replace('{shortcut}', vpnName.replace('TOLF ', 'TOLF-'))));
     else details.append(element('p', ({ru:'Сначала добавим команду TOLF, затем установим профиль VPN.', en:'First add the TOLF shortcut, then install the VPN profile.', lv:'Vispirms pievienosim komandu TOLF, pēc tam instalēsim VPN profilu.'})[lang] || 'First add the TOLF shortcut, then install the VPN profile.'));
     const key = 'tolfIosCityV2:' + (url ? profileUrl(url, false) : '') + ':' + (vpnName || '');
     let state = progress(key);
@@ -106,7 +106,7 @@
       if (save) { save.hidden = !allowed(); save.disabled = disabled || !allowed(); }
       if (!checkbox.checked || !vpnName || !url) return;
       if (state.step < 1) {
-        const addLabel = text.add.replace('{vpn}', vpnName);
+        const addLabel = text.add.replace('{vpn}', vpnName.replace('TOLF ', 'TOLF-'));
         const link = shortcutLink(city);
         if (!link) {
           wizard.append(element('p', ({ru:'Команда пока недоступна.', en:'The shortcut is not available yet.', lv:'Komanda vēl nav pieejama.'})[lang] || 'The shortcut is not available yet.', 'oc-note'));
