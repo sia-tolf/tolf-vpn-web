@@ -37,28 +37,28 @@ class CiscoShortcuts(unittest.TestCase):
             document = shortcuts.controller(name)
             starts = [a for a in document["WFWorkflowActions"]
                       if a["WFWorkflowActionIdentifier"].endswith(".StartVpnIntent")]
-            self.assertEqual(len(starts), 2)
+            self.assertEqual(len(starts), 1)
             self.assertTrue(all(a["WFWorkflowActionParameters"] == {"vpnConfig":name, "ShowWhenRun":False} for a in starts))
-            self.assertEqual(document["WFWorkflowName"], "TOLF")
+            self.assertEqual(document["WFWorkflowName"], name)
 
-    def test_on_demand_precedes_each_start_stop_without_device_uuid(self):
-        probe = Path(__file__).resolve().parents[2] / "shortcuts/name-binding/TOLF-Name-Binding-Test.plist"
-        proven = plistlib.loads(probe.read_bytes())["WFWorkflowActions"][0]["WFWorkflowActionParameters"]["WFVPN"]
+    def test_menu_and_vpn_actions_are_profile_scoped(self):
         for name in ("TOLF Москва iPhone", "TOLF Рига iPad"):
             actions = shortcuts.controller(name)["WFWorkflowActions"]
-            native = [a for a in actions if a["WFWorkflowActionIdentifier"] == "is.workflow.actions.vpn.set"]
-            self.assertEqual(len(native), 4)
-            for i, action in enumerate(actions):
-                kind = action["WFWorkflowActionIdentifier"]
-                if kind.startswith("com.cisco.anyconnect."):
-                    before = actions[i - 1]
-                    self.assertEqual(before["WFWorkflowActionIdentifier"], "is.workflow.actions.vpn.set")
-                    params = before["WFWorkflowActionParameters"]
-                    self.assertEqual(params["WFVPNOperation"], "Set On Demand")
-                    self.assertEqual(params["WFOnDemandValue"], int(kind.endswith("StartVpnIntent")))
-                    self.assertEqual(params["WFVPN"], {**proven, "title": name})
-                    self.assertNotIn("identifier", params["WFVPN"])
-                    self.assertIs(action["WFWorkflowActionParameters"]["ShowWhenRun"], False)
+            self.assertEqual(actions[0]["WFWorkflowActionIdentifier"], "is.workflow.actions.choosefrommenu")
+            city = name.split(" ", 2)[1]
+            self.assertIn("TOLF VPN — " + city, actions[0]["WFWorkflowActionParameters"]["WFMenuPrompt"])
+            native = [a["WFWorkflowActionParameters"] for a in actions if a["WFWorkflowActionIdentifier"] == "is.workflow.actions.vpn.set"]
+            self.assertEqual([p["WFVPNOperation"] for p in native], ["Set On Demand", "Set On Demand", "Disconnect"])
+            self.assertEqual([p["WFOnDemandValue"] for p in native[:2]], [1, 0])
+            for p in native:
+                self.assertEqual(p["WFVPN"]["title"], name)
+                self.assertNotIn("identifier", p["WFVPN"])
+            self.assertFalse(any(a["WFWorkflowActionIdentifier"] == "com.cisco.anyconnect.StopVpnIntent" for a in actions))
+            self.assertFalse(any(a["WFWorkflowActionIdentifier"] == "is.workflow.actions.conditional" for a in actions))
+            for i, a in enumerate(actions):
+                if a["WFWorkflowActionIdentifier"] == "com.cisco.anyconnect.StartVpnIntent":
+                    self.assertEqual(actions[i-1]["WFWorkflowActionParameters"]["WFOnDemandValue"], 1)
+                    self.assertIs(a["WFWorkflowActionParameters"]["ShowWhenRun"], False)
 
     def test_controller_clears_output_and_returns_home_after_all_branches(self):
         actions = shortcuts.controller("TOLF Москва iPhone")["WFWorkflowActions"]

@@ -63,7 +63,7 @@ class IosMobileConfig(unittest.TestCase):
                 return {p[field] for p in [profile, *profile["PayloadContent"]]}
             for field in ("PayloadUUID", "PayloadIdentifier"):
                 self.assertEqual(identities(first, field), identities(second, field))
-                self.assertEqual(len(identities(first, field)), 5)
+                self.assertEqual(len(identities(first, field)), 4)
             cert, vpn = first["PayloadContent"][:2]
             self.assertEqual(vpn["VPN"]["PayloadCertificateUUID"], cert["PayloadUUID"])
             self.assertEqual(vpn["VPN"]["RemoteAddress"], host)
@@ -75,27 +75,20 @@ class IosMobileConfig(unittest.TestCase):
             "https://tolf.is/ios/anyconnect/" + self.device_id + "/profile")).upper()
         self.assertNotIn(legacy, [p["PayloadUUID"] for p in profiles])
 
-    def test_optional_buttons_have_matching_names_and_different_icons(self):
-        normal = self.profile("oc.tolf.is:4443")
-        with_buttons = plistlib.loads(tolf_oc_mobileconfig.make_combined_profile(
-            self.device, self.ca, "oc.tolf.is:4443", "Москва", production=True, include_buttons=True))
-        self.assertEqual(len(normal["PayloadContent"]), 2)
-        self.assertEqual(len(with_buttons["PayloadContent"]), 4)
-        self.assertEqual(normal["PayloadUUID"], with_buttons["PayloadUUID"])
-        # PKCS12 encryption is randomized, so compare the actual certificate above,
-        # and verify that adding buttons preserves the VPN and both payload IDs here.
-        self.assertEqual(normal["PayloadContent"][1], with_buttons["PayloadContent"][1])
-        self.assertEqual(normal["PayloadContent"][0]["PayloadUUID"], with_buttons["PayloadContent"][0]["PayloadUUID"])
-        on, off = with_buttons["PayloadContent"][2:]
-        for mode, clip in (("ON", on), ("OFF", off)):
-            self.assertEqual(clip["Label"], "TOLF " + mode)
-            self.assertEqual(clip["URL"], "shortcuts://run-shortcut?name=TOLF&input=text&text=" + mode.lower())
+    def test_single_icon_targets_its_own_shortcut(self):
+        from urllib.parse import urlparse, parse_qs
+        for host, city in (("oc.tolf.is:4443", "Москва"), ("oc-riga.tolf.is:443", "Рига")):
+            normal = self.profile(host)
+            profile = plistlib.loads(tolf_oc_mobileconfig.make_combined_profile(
+                self.device, self.ca, host, city, production=True, include_buttons=True))
+            self.assertEqual(len(profile["PayloadContent"]), 3)
+            self.assertEqual(normal["PayloadUUID"], profile["PayloadUUID"])
+            clip = profile["PayloadContent"][2]
+            self.assertEqual(clip["Label"], "TOLF " + city)
+            self.assertEqual(parse_qs(urlparse(clip["URL"]).query), {"name": ["TOLF " + city + " iPhone"]})
             self.assertEqual(clip["PayloadType"], "com.apple.webClip.managed")
+            self.assertTrue(clip["Icon"].startswith(b"\x89PNG"))
             self.assertTrue(clip["IsRemovable"])
-            self.assertFalse(clip["FullScreen"])
-            self.assertTrue(clip["Icon"].startswith(b"\x89PNG\r\n\x1a\n"))
-        self.assertNotEqual(on["Icon"], off["Icon"])
-        self.assertEqual(len({payload["PayloadUUID"] for payload in with_buttons["PayloadContent"]}), 4)
 
     def test_webclip_identity_is_stable_and_device_scoped(self):
         from tolf_oc_webclips import webclip_payloads

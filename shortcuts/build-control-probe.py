@@ -10,5 +10,5 @@ if __name__ == "__main__":
     raw = plistlib.dumps(doc, fmt=plistlib.FMT_XML, sort_keys=False)
     target = Path(__file__).parent / "auto-install"
     (target / "TOLF.plist").write_bytes(raw)
-    (target / "TOLF.shortcut").write_bytes(sign(raw, "TOLF"))
+    (target / "TOLF.shortcut").write_bytes(sign(raw, doc["WFWorkflowName"]))
     print("Signed controller TOLF")

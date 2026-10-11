@@ -12,7 +12,7 @@ from urllib.request import Request, urlopen
 
 _LOCK = threading.Lock()
 CACHE = Path("/var/lib/tolf-api/ios-shortcuts")
-VERSION = "cisco-controller-v4-home-no-output"
+VERSION = "cisco-controller-v5-per-profile-menu"
 
 def vpn_name(row, entry_name):
     return "TOLF " + entry_name + " " + str(row["label"])[:36]
@@ -135,7 +135,37 @@ def controller(name):
         {"WFWorkflowActionIdentifier": "is.workflow.actions.nothing",
          "WFWorkflowActionParameters": {}}
     ])
-    doc["WFWorkflowActions"] = expanded
+    menu_start = next(i for i, a in enumerate(expanded)
+        if a["WFWorkflowActionIdentifier"] == "is.workflow.actions.choosefrommenu")
+    menu_end = next(i for i in range(menu_start, len(expanded))
+        if expanded[i]["WFWorkflowActionIdentifier"] == "is.workflow.actions.choosefrommenu"
+        and expanded[i]["WFWorkflowActionParameters"]["WFControlFlowMode"] == 2)
+    menu = expanded[menu_start:menu_end + 1]
+    city = name.split(" ", 2)[1]
+    titles = ["Включить VPN — " + city, "Выключить VPN — " + city]
+    params = menu[0]["WFWorkflowActionParameters"]
+    params["WFMenuPrompt"] = "TOLF VPN — " + city + "\n" + name
+    params["WFMenuItems"] = [{"WFItemType": 0, "WFValue": t} for t in titles]
+    branch = 0
+    for action in menu[1:]:
+        params = action["WFWorkflowActionParameters"]
+        if action["WFWorkflowActionIdentifier"] == "is.workflow.actions.choosefrommenu" and params["WFControlFlowMode"] == 1:
+            params["WFMenuItemTitle"] = titles[branch]
+            params["WFMenuItemAttributedTitle"] = titles[branch]
+            branch += 1
+        elif action["WFWorkflowActionIdentifier"] == "com.cisco.anyconnect.StopVpnIntent":
+            # Target this VPN, rather than stopping another active Cisco connection.
+            action["WFWorkflowActionIdentifier"] = "is.workflow.actions.vpn.set"
+            action["WFWorkflowActionParameters"] = {
+                "WFVPNOperation": "Disconnect",
+                "WFVPN": {"title": name, "appDescriptor": {
+                    "BundleIdentifier": "com.cisco.anyconnect",
+                    "Name": "AnyConnect", "TeamIdentifier": "DE8Y96K9QP"}}
+            }
+    doc["WFWorkflowName"] = name
+    doc["WFWorkflowHasShortcutInputVariables"] = False
+    doc["WFWorkflowInputContentItemClasses"] = []
+    doc["WFWorkflowActions"] = menu + expanded[-3:]
     return doc
 
 def sign(raw, title):

@@ -77,7 +77,7 @@ def make_combined_profile(row, authority, ingress, entry_name, production=False,
     }
     if include_buttons:
         from tolf_oc_webclips import webclip_payloads
-        profile["PayloadContent"].extend(webclip_payloads(row["id"], entry_id=entry_id))
+        profile["PayloadContent"].extend(webclip_payloads(row["id"], entry_id=entry_id, vpn_name=vpn_name(row, entry_name)))
     return plistlib.dumps(profile, fmt=plistlib.FMT_XML, sort_keys=False)
 
 

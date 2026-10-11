@@ -116,15 +116,15 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   assert.equal(new URL(iosInstall.href).searchParams.get('buttons'), 'true');
   assert(details.textContent.includes('TOLF Москва iPad'));
   assert(iosInstall.hidden, 'ordinary installation hidden while bundle selected');
-  assert.deepEqual(descendants(details).filter(n=>n.tagName==='a').map(n=>n.textContent), ['Скачать команду TOLF']);
+  assert.deepEqual(descendants(details).filter(n=>n.tagName==='a').map(n=>n.textContent), ['Добавить команду «TOLF Москва iPad»']);
   for (const mode of ['control']) {
-    const shortcut=descendants(details).find(n=>n.tagName==='a'&&n.textContent==='Скачать команду TOLF');
+    const shortcut=descendants(details).find(n=>n.tagName==='a'&&n.textContent==='Добавить команду «TOLF Москва iPad»');
     assert(shortcut);
     assert.equal(new URL(shortcut.href).pathname, '/oc/access/devices/one/shortcuts/'+mode.toLowerCase()+'.shortcut');
     shortcut.click();
     button(details,'Команда добавлена — продолжить').click();
   }
-  assert(descendants(details).some(n=>n.tagName==='a'&&n.textContent==='Скачать профиль VPN'));
+  assert(descendants(details).some(n=>n.tagName==='a'&&n.textContent==='Установить профиль'));
   option.checked = false; option.events.change();
   assert(!new URL(iosInstall.href).searchParams.has('buttons'));
   assert(!iosInstall.hidden);
