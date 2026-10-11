@@ -1,3 +1,4 @@
+const {withShares}=require('./ios-city-share-fixture.cjs');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const path = require('node:path');
@@ -99,7 +100,7 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   const uiSource=fs.readFileSync(path.join(root,'js','ui.js'),'utf8');
   vm.runInContext(uiSource.slice(0,uiSource.indexOf('function updateSelectedServerAddress')),c);
   for (const file of ['ios-vpn-buttons.js','transport-selector.js','anyconnect-access.js']) {
-    vm.runInContext(fs.readFileSync(path.join(root,'js',file),'utf8'),c);
+    vm.runInContext(withShares(fs.readFileSync(path.join(root,'js',file),'utf8')),c);
   }
   ids.vpnTransportAnyConnect.click(); await settle();
   // iPhone now uses one authenticated MobileConfig with a linked certificate.
@@ -114,13 +115,13 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   option.checked = true; option.events.change();
   assert.equal(details.hidden, false);
   assert.equal(new URL(iosInstall.href).searchParams.get('buttons'), 'true');
-  assert(details.textContent.includes('TOLF Москва'));
+  assert(details.textContent.includes('TOLF Moscow'));
   assert(iosInstall.hidden, 'ordinary installation hidden while bundle selected');
-  assert.deepEqual(descendants(details).filter(n=>n.tagName==='a').map(n=>n.textContent), ['Добавить команду TOLF']);
+  assert.deepEqual(descendants(details).filter(n=>n.tagName==='a').map(n=>n.textContent), ['Добавить команду «TOLF Moscow»']);
   for (const mode of ['control']) {
-    const shortcut=descendants(details).find(n=>n.tagName==='a'&&n.textContent==='Добавить команду TOLF');
+    const shortcut=descendants(details).find(n=>n.tagName==='a'&&n.textContent==='Добавить команду «TOLF Moscow»');
     assert(shortcut);
-    assert.equal(shortcut.href, 'https://www.icloud.com/shortcuts/ea018dbb07d245449437ecae45175e49');
+    assert.equal(shortcut.href, 'https://www.icloud.com/shortcuts/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
     shortcut.click();
     button(details,'Команда добавлена — продолжить').click();
   }
@@ -147,10 +148,10 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   const connectionLink=()=>descendants(ids.anyConnectAccess).find(n=>n.tagName==='a'&&n.textContent==='Добавить в AnyConnect');
   assert.equal(new URLSearchParams(connectionLink().href.split('?')[1]).get('host'),'oc-riga.tolf.is:443');
   assert.equal(new URLSearchParams(connectionLink().href.split('?')[1]).get('certcommonname'),first.username);
-  assert.equal(new URLSearchParams(connectionLink().href.split('?')[1]).get('name'),'TOLF Рига iPad');
+  assert.equal(new URLSearchParams(connectionLink().href.split('?')[1]).get('name'),'TOLF Riga iPad');
   ids.serverMoscow.events.change();
   assert.equal(window.ocAccess.ingress().id,'moscow');
-  assert.equal(new URLSearchParams(connectionLink().href.split('?')[1]).get('name'),'TOLF Москва iPad');
+  assert.equal(new URLSearchParams(connectionLink().href.split('?')[1]).get('name'),'TOLF Moscow iPad');
   assert(descendants(ids.anyConnectAccess).some(n=>n.tagName==='button'&&n.textContent==='Получить сертификат'));
   assert.equal(descendants(ids.anyConnectAccess).filter(n=>n.tagName==='input').length,0);
   const deviceRow = ids.anyConnectAccess.children.find(n=>n.className==='oc-device-row');
@@ -293,10 +294,10 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   let checkbox=bundle.find(n=>n.type==='checkbox');
   checkbox.checked=true; checkbox.events.change();
   bundle=descendants(ids.anyConnectAccess);
-  bundle.find(n=>n.href?.includes('/shortcuts/ea018dbb07d245449437ecae45175e49')).events.click();
+  bundle.find(n=>n.href?.includes('/shortcuts/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')).events.click();
   const selectedBefore=window.ocAccess.selected().id;
   for(const file of ['ios-vpn-buttons.js','transport-selector.js','anyconnect-access.js'])
-    vm.runInContext(fs.readFileSync(path.join(root,'js',file),'utf8'),c);
+    vm.runInContext(withShares(fs.readFileSync(path.join(root,'js',file),'utf8')),c);
   await settle();
   assert.equal(window.getVpnTransport(),'anyconnect');
   assert.equal(window.ocAccess.ingress().id,'moscow');

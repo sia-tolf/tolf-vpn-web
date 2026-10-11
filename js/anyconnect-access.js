@@ -181,7 +181,7 @@
   const path = id => "/oc/access/devices/" + encodeURIComponent(id);
   function connectionUri(d) {
     const point = ingress();
-    const prefix = point.id === 'riga' ? 'TOLF Рига ' : 'TOLF Москва ';
+    const prefix = point.id === 'riga' ? 'TOLF Riga ' : 'TOLF Moscow ';
     const name = d.connectionNames?.[point.id] || Array.from(prefix + d.label).slice(0,24).join("").trimEnd();
     const params = {name, host:point.host, usecert:"true", certcommonname:d.username, netroam:"true"};
     return "anyconnect://create/?" + Object.entries(params).map(([key,value]) =>
@@ -406,7 +406,7 @@
         const actions = element("div", null, "oc-actions oc-ios-install");
         const install = link(c.iosInstall, window.tolfIosButtons.profileUrl(location, iosButtons), true);
         const options = window.tolfIosButtons.create({checked:iosButtons, disabled:busy || loading,
-          vpnName:"TOLF " + (ingress().id === "moscow" ? "Москва" : "Рига"),
+          vpnName:"TOLF " + (ingress().id === "moscow" ? "Moscow" : "Riga"),
           url:location, includeInstall:true, saveHost:destinations, onChange:checked => { iosButtons = checked; saveSetup(); actions.hidden = checked; install.hidden = checked; install.href = window.tolfIosButtons.profileUrl(location, checked); }
         });
         root.append(options);

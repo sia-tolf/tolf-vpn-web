@@ -40,7 +40,7 @@ function render() {
    const url = ocDevice ? new URL(API+'/oc/access/devices/'+encodeURIComponent(ocDevice.id)+'/ios.mobileconfig') : null;
    if (url) url.searchParams.set('ingress', server);
    options.replaceChildren(window.tolfIosButtons.create({checked:iosButtons, disabled:busy, lang,
-     vpnName:ocDevice ? 'TOLF '+(server==='moscow'?'Москва':'Рига') : null,
+     vpnName:ocDevice ? 'TOLF '+(server==='moscow'?'Moscow':'Riga') : null,
      url:url?.href, includeInstall:true, saveHost:$('iosProfileSave'), onChange:checked => {iosButtons = checked; saveIosSetup(); put('quickIosButtons', checked ? 'true' : ''); render();}
    }));
  }
@@ -252,7 +252,7 @@ async function prepareOcImport(){
 function renderOcDelivery(){
  const mobile=nativePlatform!=='windows',valid=ocGrant&&Date.parse(ocGrant.expiresAt)>Date.now()&&ocConfirmed&&!ocImported;
  $('ocApp').href=nativePlatform==='ios'?'https://apps.apple.com/app/id1135064690':nativePlatform==='android'?'https://play.google.com/store/apps/details?id=com.cisco.anyconnect.vpn.android.avf':'https://www.cisco.com/c/en/us/support/security/secure-client-5/model.html';
- const prefix=server==='riga'?'TOLF Рига ':'TOLF Москва ';
+ const prefix=server==='riga'?'TOLF Riga ':'TOLF Moscow ';
  const name=ocDevice.connectionNames?.[server]||Array.from(prefix+ocDevice.label).slice(0,24).join('').trimEnd();
  $('ocConnection').href='anyconnect://create/?'+new URLSearchParams({name,host:ocPoint.host,usecert:'true',certcommonname:ocDevice.username,netroam:'true'});
  $('ocServer').textContent=t(server)+': '+ocPoint.host;

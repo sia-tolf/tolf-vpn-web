@@ -1,3 +1,4 @@
+const {withShares}=require('./ios-city-share-fixture.cjs');
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const source=fs.readFileSync('quick/quick-1.js','utf8'),strings=fs.readFileSync('quick/strings-1.js','utf8');
 async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=false,buttons=false}={}){
@@ -30,7 +31,7 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
  else throw Error('Unexpected API '+url);
  posts.push(url);return {ok:true,json:async()=>data};
  }};
- vm.createContext(ctx);vm.runInContext(strings,ctx);vm.runInContext(fs.readFileSync('js/ios-vpn-buttons.js','utf8'),ctx);vm.runInContext(source,ctx);
+ vm.createContext(ctx);vm.runInContext(strings,ctx);vm.runInContext(withShares(fs.readFileSync('js/ios-vpn-buttons.js','utf8')),ctx);vm.runInContext(source,ctx);
  for(let i=0;i<40;i++)await Promise.resolve();
  if(missingNode){assert.equal(element('prepare').disabled,true);assert.equal(created.length,0);return;}
  if(platform==='ios'){
@@ -54,17 +55,17 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
     assert(confirm.disabled);
     confirm.events.click();
     assert(!descendants(element('iosVpnButtons')).some(n=>n.href?.includes('/ios.mobileconfig?')));
-    const shortcut=nodes.find(n=>n.href?.includes('/shortcuts/ea018dbb07d245449437ecae45175e49'));
+    const shortcut=nodes.find(n=>n.href?.includes('/shortcuts/'+(node==='moscow'?'a':'b').repeat(32)));
     assert(shortcut);
     if(mode==='on')assert(!nodes.some(n=>n.href?.includes('/shortcuts/off.shortcut')));
     shortcut.events.click();
     assert(!confirm.disabled);
     // Re-entering the page must restore the opened step, including after a reload.
-    vm.runInContext(fs.readFileSync('js/ios-vpn-buttons.js','utf8'),ctx);
+    vm.runInContext(withShares(fs.readFileSync('js/ios-vpn-buttons.js','utf8')),ctx);
     const profile='https://api.tolf.is/oc/access/devices/'+device+'/ios.mobileconfig?ingress='+node;
     element('iosVpnButtons').replaceChildren(ctx.window.tolfIosButtons.create({
       checked:true,includeInstall:true,lang:'ru',url:profile,
-      vpnName:'TOLF '+(node==='moscow'?'Москва':'Рига')
+      vpnName:'TOLF '+(node==='moscow'?'Moscow':'Riga')
     }));
     nodes=descendants(element('iosVpnButtons'));
     confirm=nodes.find(n=>n.textContent==='Команда добавлена — продолжить');
@@ -77,7 +78,7 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
    // Both nodes remain available; the active setup must win over the new recommendation.
    const originalFetch=ctx.fetch;
    ctx.fetch=async(url,opt)=>url.endsWith('/oc/access/capabilities')?{ok:true,json:async()=>({issuance:true,ingresses:[{id:'moscow',host:'oc.tolf.is:4443'},{id:'riga',host:'oc-riga.tolf.is:443'}]})}:originalFetch(url,opt);
-   vm.runInContext(fs.readFileSync('js/ios-vpn-buttons.js','utf8'),ctx);
+   vm.runInContext(withShares(fs.readFileSync('js/ios-vpn-buttons.js','utf8')),ctx);
    vm.runInContext(source,ctx);
    for(let i=0;i<80;i++)await Promise.resolve();
    assert.equal(element('prepare').hidden,true,'reload restores prepared device');
@@ -90,7 +91,7 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
    assigned=install.href;
    const other=ctx.window.tolfIosButtons.create({checked:true,includeInstall:true,lang:'ru',
      url:'https://api.tolf.is/oc/access/devices/other/ios.mobileconfig?ingress='+node,
-     vpnName:'TOLF '+(node==='moscow'?'Москва':'Рига')});
+     vpnName:'TOLF '+(node==='moscow'?'Moscow':'Riga')});
    assert(!descendants(other).some(n=>n.href?.includes('/ios.mobileconfig?')),
      'completion must not carry into a different device');
    const option=nodes.find(n=>n.type==='checkbox');
@@ -105,7 +106,7 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
   assert.equal(url.searchParams.get('ingress'),node);
   assert.equal(url.searchParams.get('buttons'),buttons?'true':null);
   assert.equal(posts.filter(p=>p.endsWith('/import')).length,0);
-  assert(descendants(element('iosVpnButtons')).some(n=>n.textContent.includes('TOLF '+(node==='moscow'?'Москва':'Рига'))));
+  assert(descendants(element('iosVpnButtons')).some(n=>n.textContent.includes('TOLF '+(node==='moscow'?'Moscow':'Riga'))));
   return;
  }
  assert.equal(element('ocRenew').disabled,true);

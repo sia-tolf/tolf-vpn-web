@@ -12,10 +12,10 @@ from urllib.request import Request, urlopen
 
 _LOCK = threading.Lock()
 CACHE = Path("/var/lib/tolf-api/ios-shortcuts")
-VERSION = "cisco-controller-v5-per-profile-menu"
+VERSION = "cisco-controller-v6-english-names"
 
 def vpn_name(row, entry_name):
-    return "TOLF " + entry_name
+    return "TOLF " + {"Москва": "Moscow", "Рига": "Riga", "moscow": "Moscow", "riga": "Riga", "Rīga": "Riga", "Maskava": "Moscow"}.get(entry_name, entry_name)
 
 def workflow(name, mode):
     if mode not in ("on", "off"):
@@ -43,7 +43,7 @@ def workflow(name, mode):
         "WFQuickActionSurfaces": []
     }
 
-def controller(name):
+def controller(name, lang="ru"):
     doc = workflow(name, "on")
     doc["WFWorkflowName"] = "TOLF"
     doc["WFWorkflowHasShortcutInputVariables"] = True
@@ -142,7 +142,13 @@ def controller(name):
         and expanded[i]["WFWorkflowActionParameters"]["WFControlFlowMode"] == 2)
     menu = expanded[menu_start:menu_end + 1]
     city = name.split(" ", 2)[1]
-    titles = ["Включить VPN — " + city, "Выключить VPN — " + city]
+    localized = {
+        "ru": ({"Moscow": "Москва", "Riga": "Рига"}, "Включить VPN", "Выключить VPN"),
+        "en": ({}, "Turn VPN on", "Turn VPN off"),
+        "lv": ({"Moscow": "Maskava", "Riga": "Rīga"}, "Ieslēgt VPN", "Izslēgt VPN"),
+    }
+    cities, on_title, off_title = localized.get(lang, localized["en"])
+    titles = [title + " — " + cities.get(city, city) for title in (on_title, off_title)]
     params = menu[0]["WFWorkflowActionParameters"]
     params["WFMenuPrompt"] = name
     params["WFMenuItems"] = [{"WFItemType": 0, "WFValue": t} for t in titles]

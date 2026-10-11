@@ -17,7 +17,7 @@ class CiscoShortcuts(unittest.TestCase):
         for city in ("Москва", "Рига"):
             row = {"label": "iPhone <&> " + "😀" * 40}
             name = shortcuts.vpn_name(row, city)
-            self.assertEqual(name, "TOLF " + city)
+            self.assertEqual(name, "TOLF " + {"Москва":"Moscow", "Рига":"Riga"}[city])
             for mode in ("on", "off"):
                 workflow = plistlib.loads(plistlib.dumps(shortcuts.workflow(name, mode)))
                 action = workflow["WFWorkflowActions"][0]
@@ -75,6 +75,23 @@ class CiscoShortcuts(unittest.TestCase):
                 self.assertGreaterEqual(depth, 0)
         self.assertEqual(depth, 0)
 
+    def test_localized_city_artifacts_keep_english_binding(self):
+        for city in ("Moscow", "Riga"):
+            name = "TOLF " + city
+            for lang, action in (("ru", "Включить VPN"), ("en", "Turn VPN on"), ("lv", "Ieslēgt VPN")):
+                path = Path(__file__).resolve().parents[2] / "shortcuts/cities" / lang / (name + ".plist")
+                artifact = plistlib.loads(path.read_bytes())
+                doc = shortcuts.controller(name, lang)
+                self.assertEqual(artifact["WFWorkflowActions"], doc["WFWorkflowActions"])
+                self.assertEqual(doc["WFWorkflowName"], name)
+                self.assertEqual(doc["WFWorkflowActions"][0]["WFWorkflowActionParameters"]["WFMenuPrompt"], name)
+                self.assertTrue(doc["WFWorkflowActions"][0]["WFWorkflowActionParameters"]["WFMenuItems"][0]["WFValue"].startswith(action))
+                self.assertTrue(shortcuts.valid_signed(path.with_suffix(".shortcut").read_bytes()))
+                for item in doc["WFWorkflowActions"]:
+                    params = item["WFWorkflowActionParameters"]
+                    if "WFVPN" in params:
+                        self.assertEqual(params["WFVPN"]["title"], name)
+
     def test_cache_reuses_signature_and_changes_with_name(self):
         with tempfile.TemporaryDirectory() as directory:
             with patch.object(shortcuts, "sign", return_value=SIGNED) as signer:
@@ -114,9 +131,9 @@ class CiscoShortcuts(unittest.TestCase):
                 response = client.get(path+"?ingress=riga", headers={"x-test-user":"owner"})
                 self.assertEqual(response.status_code, 200)
                 self.assertEqual(response.content, SIGNED)
-                self.assertEqual('inline; filename="TOLF.shortcut"', response.headers["content-disposition"])
+                self.assertEqual('inline; filename="TOLF Riga.shortcut"', response.headers["content-disposition"])
                 self.assertEqual("application/x-apple-shortcut", response.headers["content-type"])
-                signer.assert_called_once_with("TOLF Рига", "control")
+                signer.assert_called_once_with("TOLF Riga", "control")
                 self.assertIn("no-store", response.headers["cache-control"])
                 self.assertEqual(client.get(path+"?ingress=invalid", headers={"x-test-user":"owner"}).status_code, 400)
                 self.assertEqual(client.get(path.replace("control.shortcut","bad.shortcut"), headers={"x-test-user":"owner"}).status_code, 400)

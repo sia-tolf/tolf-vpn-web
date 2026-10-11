@@ -10,7 +10,7 @@ ICONS = {"moscow": "iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAAGUElEQVR42u2d
 
 
 def webclip_payloads(device_id, entry_id=None, vpn_name=None):
-    city = {"moscow": "Москва", "riga": "Рига"}.get(entry_id, "")
+    city = {"moscow": "Moscow", "riga": "Riga"}.get(entry_id, "")
     name = vpn_name or ("TOLF " + city).strip()
     identifier = "is.tolf.anyconnect.launcher." + str(device_id) + "." + (entry_id or "default") + ".menu"
     return [{
@@ -20,7 +20,7 @@ def webclip_payloads(device_id, entry_id=None, vpn_name=None):
         "PayloadUUID": str(uuid.uuid5(uuid.NAMESPACE_URL, identifier)).upper(),
         "PayloadDisplayName": name,
         "Label": ("TOLF " + city).strip(),
-        "URL": "shortcuts://run-shortcut?name=TOLF&input=text&text=" + quote(entry_id or "", safe=""),
+        "URL": "shortcuts://run-shortcut?name=" + quote(name, safe=""),
         "Icon": base64.b64decode(ICONS.get(entry_id, ICONS["moscow"])),
         "IsRemovable": True,
         "FullScreen": False,
