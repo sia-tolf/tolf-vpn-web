@@ -11,12 +11,12 @@ from tolf_oc_shortcuts import vpn_name
 def make_combined_profile(row, authority, ingress, entry_name, production=False, include_buttons=False):
     if ingress not in ("oc.tolf.is:4443", "oc-riga.tolf.is:443"):
         raise ValueError("Unsupported ingress")
+    entry_id = {"oc.tolf.is:4443": "moscow", "oc-riga.tolf.is:443": "riga"}[ingress]
     pkcs12_bytes, pkcs12_password = authority.bundle(row)
     if production:
-        # Stable identity for reinstallation: update the same profile,
-        # rather than accumulate additional keychain items.
+        # Stable per-device, per-entry identity: reinstall updates only this entry.
         def stable(kind):
-            return str(uuid.uuid5(uuid.NAMESPACE_URL, "https://tolf.is/ios/anyconnect/" + row["id"] + "/" + kind)).upper()
+            return str(uuid.uuid5(uuid.NAMESPACE_URL, "https://tolf.is/ios/anyconnect/" + row["id"] + "/" + entry_id + "/" + kind)).upper()
         cert_uuid = stable("certificate")
         vpn_uuid = stable("vpn")
         profile_uuid = stable("profile")
@@ -65,7 +65,7 @@ def make_combined_profile(row, authority, ingress, entry_name, production=False,
         "PayloadVersion": 1,
         "PayloadIdentifier": prefix + "config." + device_suffix + "." + profile_uuid.lower(),
         "PayloadUUID": profile_uuid,
-        "PayloadDisplayName": "TOLF AnyConnect" if production else "TOLF AnyConnect — combined test",
+        "PayloadDisplayName": vpn_name(row, entry_name) if production else "TOLF AnyConnect — combined test",
         "PayloadDescription": (
             "TOLF Cisco Secure Client: device certificate, VPN connection and automatic On Demand."
             if production else
@@ -77,7 +77,7 @@ def make_combined_profile(row, authority, ingress, entry_name, production=False,
     }
     if include_buttons:
         from tolf_oc_webclips import webclip_payloads
-        profile["PayloadContent"].extend(webclip_payloads(row["id"]))
+        profile["PayloadContent"].extend(webclip_payloads(row["id"], entry_id=entry_id))
     return plistlib.dumps(profile, fmt=plistlib.FMT_XML, sort_keys=False)
 
 

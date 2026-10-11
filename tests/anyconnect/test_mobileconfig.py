@@ -52,15 +52,28 @@ class IosMobileConfig(unittest.TestCase):
         self.assertEqual(vpn["VPN"]["RemoteAddress"], "oc.tolf.is:4443")
         self.assertEqual(profile["PayloadRemovalDisallowed"], False)
 
-    def test_profile_reinstall_updates_same_identity_and_entry(self):
-        moscow = self.profile("oc.tolf.is:4443")
-        riga = self.profile("oc-riga.tolf.is:443")
-        self.assertEqual(moscow["PayloadUUID"], riga["PayloadUUID"])
-        self.assertEqual(
-            [p["PayloadUUID"] for p in moscow["PayloadContent"]],
-            [p["PayloadUUID"] for p in riga["PayloadContent"]],
-        )
-        self.assertEqual(riga["PayloadContent"][1]["VPN"]["RemoteAddress"], "oc-riga.tolf.is:443")
+    def test_profile_reinstall_is_stable_but_entries_are_independent(self):
+        profiles = []
+        for host, city in (("oc.tolf.is:4443", "Москва"), ("oc-riga.tolf.is:443", "Рига")):
+            def build():
+                return plistlib.loads(tolf_oc_mobileconfig.make_combined_profile(
+                    self.device, self.ca, host, city, production=True, include_buttons=True))
+            first, second = build(), build()
+            def identities(profile, field):
+                return {p[field] for p in [profile, *profile["PayloadContent"]]}
+            for field in ("PayloadUUID", "PayloadIdentifier"):
+                self.assertEqual(identities(first, field), identities(second, field))
+                self.assertEqual(len(identities(first, field)), 5)
+            cert, vpn = first["PayloadContent"][:2]
+            self.assertEqual(vpn["VPN"]["PayloadCertificateUUID"], cert["PayloadUUID"])
+            self.assertEqual(vpn["VPN"]["RemoteAddress"], host)
+            self.assertEqual(first["PayloadDisplayName"], "TOLF " + city + " iPhone")
+            profiles.append(first)
+        for field in ("PayloadUUID", "PayloadIdentifier"):
+            self.assertTrue(identities(profiles[0], field).isdisjoint(identities(profiles[1], field)))
+        legacy = str(uuid.uuid5(uuid.NAMESPACE_URL,
+            "https://tolf.is/ios/anyconnect/" + self.device_id + "/profile")).upper()
+        self.assertNotIn(legacy, [p["PayloadUUID"] for p in profiles])
 
     def test_optional_buttons_have_matching_names_and_different_icons(self):
         normal = self.profile("oc.tolf.is:4443")
