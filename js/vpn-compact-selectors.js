@@ -8,9 +8,9 @@
 
   const lang=()=>((document.documentElement.lang||"en").toLowerCase());
   const COPY={
-    en:{protocol:"Protocol",entry:"VPN Entry Point",riga:"Riga",moscow:"Moscow",us:"USA",recommended:"Recommended",measuring:"Measuring…",unavailable:"—"},
-    ru:{protocol:"Протокол",entry:"Точка входа VPN",riga:"Рига",moscow:"Москва",us:"США",recommended:"Рекомендуется",measuring:"Измерение…",unavailable:"—"},
-    lv:{protocol:"Protokols",entry:"VPN ieejas punkts",riga:"Rīga",moscow:"Maskava",us:"ASV",recommended:"Ieteicams",measuring:"Mērīšana…",unavailable:"—"}
+    en:{protocol:"Protocol",entry:"VPN Entry Point",riga:"Riga",moscow:"Moscow",us:"New York",recommended:"Recommended",measuring:"Measuring…",unavailable:"—"},
+    ru:{protocol:"Протокол",entry:"Точка входа VPN",riga:"Рига",moscow:"Москва",us:"Нью-Йорк",recommended:"Рекомендуется",measuring:"Измерение…",unavailable:"—"},
+    lv:{protocol:"Protokols",entry:"VPN ieejas punkts",riga:"Rīga",moscow:"Maskava",us:"Ņujorka",recommended:"Ieteicams",measuring:"Mērīšana…",unavailable:"—"}
   };
   const tr=()=>COPY[lang()]||COPY.en;
 

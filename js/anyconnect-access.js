@@ -120,9 +120,9 @@
   let importedDeviceId = null;
   let ingressId = 'moscow';
   const INGRESS_COPY = {
-    ru:{label:'Точка входа',moscow:'Москва',riga:'Рига',us:'США',help:'Для Москвы, Риги и США используются разные соединения и один сертификат этого доступа. Чтобы сменить точку входа, выключите VPN в Cisco Secure Client, выберите другое соединение и включите VPN.'},
-    en:{label:'Entry point',moscow:'Moscow',riga:'Riga',us:'USA',help:'Moscow, Riga and USA use separate connections and the same access certificate. To switch entry points, disconnect VPN in Cisco Secure Client, select the other connection and reconnect.'},
-    lv:{label:'Ieejas punkts',moscow:'Maskava',riga:'Rīga',us:'ASV',help:'Maskavai, Rīgai un ASV ir atsevišķi savienojumi ar vienu šīs piekļuves sertifikātu. Lai mainītu ieejas punktu, Cisco Secure Client atvienojiet VPN, izvēlieties otru savienojumu un pievienojieties vēlreiz.'}
+    ru:{label:'Точка входа',moscow:'Москва',riga:'Рига',us:'Нью-Йорк',help:'Для Москвы, Риги и Нью-Йорка используются разные соединения и один сертификат этого доступа. Чтобы сменить точку входа, выключите VPN в Cisco Secure Client, выберите другое соединение и включите VPN.'},
+    en:{label:'Entry point',moscow:'Moscow',riga:'Riga',us:'New York',help:'Moscow, Riga and New York use separate connections and the same access certificate. To switch entry points, disconnect VPN in Cisco Secure Client, select the other connection and reconnect.'},
+    lv:{label:'Ieejas punkts',moscow:'Maskava',riga:'Rīga',us:'Ņujorka',help:'Maskavai, Rīgai un Ņujorkai ir atsevišķi savienojumi ar vienu šīs piekļuves sertifikātu. Lai mainītu ieejas punktu, Cisco Secure Client atvienojiet VPN, izvēlieties otru savienojumu un pievienojieties vēlreiz.'}
   };
   const ingressCopy = () => INGRESS_COPY[document.documentElement.lang] || INGRESS_COPY.en;
   const ingresses = () => (capabilities?.ingresses || [{id:'moscow',host:'oc.tolf.is:4443'}])
@@ -181,7 +181,7 @@
   const path = id => "/oc/access/devices/" + encodeURIComponent(id);
   function connectionUri(d) {
     const point = ingress();
-    const prefix = 'TOLF ' + ({moscow:'Moscow',riga:'Riga',us:'USA'}[point.id]) + ' ';
+    const prefix = 'TOLF ' + ({moscow:'Moscow',riga:'Riga',us:'New York'}[point.id]) + ' ';
     const name = d.connectionNames?.[point.id] || Array.from(prefix + d.label).slice(0,24).join("").trimEnd();
     const params = {name, host:point.host, usecert:"true", certcommonname:d.username, netroam:"true"};
     return "anyconnect://create/?" + Object.entries(params).map(([key,value]) =>

@@ -95,7 +95,7 @@
   function copy() {
     const c = COPY[lang()];
     if (window.ocAccess?.ingress?.().id !== 'us') return c;
-    const rest = {ru:'остальное → США',en:'rest → USA',lv:'pārējais → ASV'}[lang()];
+    const rest = {ru:'остальное → Нью-Йорк',en:'rest → New York',lv:'pārējais → Ņujorka'}[lang()];
     return {...c, auto:[c.auto[0],rest], yt:[c.yt[0],rest]};
   }
 
@@ -300,7 +300,7 @@
       }
       if (typeof vpnServerName !== 'undefined' && vpnServerName) {
         const city = typeof t === 'function' ? t(point === 'riga' ? 'cityRiga' : 'cityMoscow') : point === 'riga' ? 'Riga' : 'Moscow';
-        vpnServerName.textContent = point === 'us' ? ({ru:'США',en:'USA',lv:'ASV'}[lang()]) : city + ', ' + (point === 'riga' ? copy().rigaCountry : copy().country);
+        vpnServerName.textContent = point === 'us' ? ({ru:'Нью-Йорк',en:'New York',lv:'Ņujorka'}[lang()]) : city + ', ' + (point === 'riga' ? copy().rigaCountry : copy().country);
       }
       if (typeof vpnServerHost !== 'undefined' && vpnServerHost) vpnServerHost.textContent = '';
       if (typeof serverRow !== 'undefined' && serverRow) serverRow.classList.remove('hidden');

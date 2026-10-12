@@ -321,7 +321,7 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   const usUri=descendants(ids.anyConnectAccess).find(n=>n.textContent==='Добавить в AnyConnect').href;
   const usParams=new URLSearchParams(usUri.split('?')[1]);
   assert.equal(usParams.get('host'),'oc-us.tolf.is:4443');
-  assert(usParams.get('name').startsWith('TOLF USA '));
+  assert(usParams.get('name').startsWith('TOLF New York '));
   await settle();
   // A late session response must not restore the green indicator after logout.
   let release; heldSession = new Promise(resolve=>{release=resolve;});

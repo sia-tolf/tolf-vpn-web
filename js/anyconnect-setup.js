@@ -17,9 +17,9 @@
   let certificateImported = false;
   let ingressId = 'moscow';
   const INGRESS_TEXT = {
-    ru:{label:'Точка входа',moscow:'Москва',riga:'Рига',us:'США',help:'Соединения Москвы, Риги и США используют один сертификат этого доступа. Для смены точки входа выключите VPN в Cisco Secure Client, выберите другое соединение и включите VPN.'},
-    en:{label:'Entry point',moscow:'Moscow',riga:'Riga',us:'USA',help:'Moscow, Riga and USA connections use the same access certificate. To switch entry points, disconnect VPN in Cisco Secure Client, select the other connection and reconnect.'},
-    lv:{label:'Ieejas punkts',moscow:'Maskava',riga:'Rīga',us:'ASV',help:'Maskavas, Rīgas un ASV savienojumi izmanto vienu šīs piekļuves sertifikātu. Lai mainītu ieejas punktu, Cisco Secure Client atvienojiet VPN, izvēlieties otru savienojumu un pievienojieties vēlreiz.'}
+    ru:{label:'Точка входа',moscow:'Москва',riga:'Рига',us:'Нью-Йорк',help:'Соединения Москвы, Риги и Нью-Йорка используют один сертификат этого доступа. Для смены точки входа выключите VPN в Cisco Secure Client, выберите другое соединение и включите VPN.'},
+    en:{label:'Entry point',moscow:'Moscow',riga:'Riga',us:'New York',help:'Moscow, Riga and New York connections use the same access certificate. To switch entry points, disconnect VPN in Cisco Secure Client, select the other connection and reconnect.'},
+    lv:{label:'Ieejas punkts',moscow:'Maskava',riga:'Rīga',us:'Ņujorka',help:'Maskavas, Rīgas un Ņujorkas savienojumi izmanto vienu šīs piekļuves sertifikātu. Lai mainītu ieejas punktu, Cisco Secure Client atvienojiet VPN, izvēlieties otru savienojumu un pievienojieties vēlreiz.'}
   };
   const connections = () => {
     const points = Array.isArray(info?.connections) ? info.connections.filter(item => item.id === 'moscow' && item.host === 'oc.tolf.is:4443' || item.id === 'riga' && item.host === 'oc-riga.tolf.is:443' || item.id === 'us' && item.host === 'oc-us.tolf.is:4443') : [];
