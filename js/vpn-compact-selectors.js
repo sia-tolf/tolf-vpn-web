@@ -8,9 +8,9 @@
 
   const lang=()=>((document.documentElement.lang||"en").toLowerCase());
   const COPY={
-    en:{protocol:"Protocol",entry:"VPN Entry Point",riga:"Riga",moscow:"Moscow",us:"New York",recommended:"Recommended",measuring:"Measuring…",unavailable:"—"},
-    ru:{protocol:"Протокол",entry:"Точка входа VPN",riga:"Рига",moscow:"Москва",us:"Нью-Йорк",recommended:"Рекомендуется",measuring:"Измерение…",unavailable:"—"},
-    lv:{protocol:"Protokols",entry:"VPN ieejas punkts",riga:"Rīga",moscow:"Maskava",us:"Ņujorka",recommended:"Ieteicams",measuring:"Mērīšana…",unavailable:"—"}
+    en:{protocol:"Protocol",entry:"VPN Entry Point",riga:"Riga",moscow:"Moscow",us:"New York",recommended:"Recommended",measuring:"Measuring…",unavailable:"—",unsupported:"Available with AnyConnect or Windows",notReady:"Not available"},
+    ru:{protocol:"Протокол",entry:"Точка входа VPN",riga:"Рига",moscow:"Москва",us:"Нью-Йорк",recommended:"Рекомендуется",measuring:"Измерение…",unavailable:"—",unsupported:"Доступен в AnyConnect или Windows",notReady:"Недоступен"},
+    lv:{protocol:"Protokols",entry:"VPN ieejas punkts",riga:"Rīga",moscow:"Maskava",us:"Ņujorka",recommended:"Ieteicams",measuring:"Mērīšana…",unavailable:"—",unsupported:"Pieejams ar AnyConnect vai Windows",notReady:"Nav pieejams"}
   };
   const tr=()=>COPY[lang()]||COPY.en;
 
@@ -61,6 +61,12 @@
 
   const entryDD=makeDropdown("vpnEntryDropdown",tr().entry,[],value=>{
     if(window.getVpnTransport?.()==="anyconnect"){window.ocAccess?.selectIngress?.(value);setTimeout(sync,0);return;}
+    if(typeof currentPlatform!=="undefined" && currentPlatform==="windows"){
+      const select=document.getElementById("windowsDeviceServer");
+      const option=[...select.options].find(item=>item.value===value);
+      if(!option||option.disabled||select.disabled)return;
+      select.value=value;select.dispatchEvent(new Event("change",{bubbles:true}));setTimeout(sync,0);return;
+    }
     const input=document.querySelector('input[name="vpnServer"][value="'+value+'"]');
     if(!input||input.disabled)return;
     input.checked=true; input.dispatchEvent(new Event("change",{bubbles:true})); setTimeout(sync,0);
@@ -79,17 +85,26 @@
       {value:"ikev2",label:"IKEv2",disabled:ike.disabled||ike.classList.contains("hidden")},
       {value:"anyconnect",label:"AnyConnect",disabled:any.disabled||any.classList.contains("hidden")}
     ],transport);
-    const current=transport==="anyconnect"?(window.ocAccess?.ingress?.().id||"moscow"):(document.querySelector('input[name="vpnServer"]:checked')?.value||"riga");
-    const allowed=transport==="anyconnect"?(window.ocAccess?.ingresses?.()||[{id:"moscow"}]).map(x=>x.id):["riga","moscow"];
+    const windowsIke=transport==="ikev2" && typeof currentPlatform!=="undefined" && currentPlatform==="windows";
+    const winSelect=document.getElementById("windowsDeviceServer");
+    const current=windowsIke?winSelect.value:transport==="anyconnect"?(window.ocAccess?.ingress?.().id||"moscow"):(document.querySelector('input[name="vpnServer"]:checked')?.value||"riga");
+    const allowed=transport==="anyconnect"?(window.ocAccess?.ingresses?.()||[{id:"moscow"}]).map(x=>x.id):windowsIke?[...winSelect.options].filter(x=>!x.disabled).map(x=>x.value):["riga","moscow"];
     const recommended=(typeof recommendedEntryPoint!=="undefined"?recommendedEntryPoint:null);
     const latency=(id)=>{
       if(typeof entryPointLatencyMeasuring!=="undefined"&&entryPointLatencyMeasuring)return tr().measuring;
       const v=(typeof entryPointLatencyValues!=="undefined"?entryPointLatencyValues[id]:null);
       return Number.isFinite(v)&&v>=0?Math.round(v)+" ms":tr().unavailable;
     };
-    entryDD.render(["riga","moscow","us"].filter(x=>allowed.includes(x)).map(x=>({value:x,label:tr()[x],meta:latency(x),badge:x===recommended?"("+tr().recommended+")":""})),current);
+    entryDD.render(["riga","moscow","us"].map(x=>({
+      value:x,label:tr()[x],disabled:!allowed.includes(x),
+      meta:allowed.includes(x)?latency(x):(x==="us"&&transport==="ikev2"&&!windowsIke?tr().unsupported:tr().notReady),
+      badge:allowed.includes(x)&&x===recommended?"("+tr().recommended+")":""
+    })),current);
+    if(transport==="anyconnect")document.getElementById("quickSetupLink").href="/quick/?protocol=anyconnect&ingress="+encodeURIComponent(current);
   }
   window.addEventListener("vpntransportchange",sync);
+  window.addEventListener("vpnplatformchange",sync);
+  document.getElementById("windowsDeviceServer")?.addEventListener("change",sync);
   window.addEventListener("tolf:measurement-target-resolved",()=>setTimeout(sync,0));
   window.addEventListener("focus",()=>setTimeout(sync,0));
   setInterval(sync,2000);

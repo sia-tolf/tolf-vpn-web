@@ -9,6 +9,8 @@ const requestedPlatform=new URL(location.href).searchParams.get('platform');
 const windowsQuickBlocked=requestedPlatform==='windows'&&nativePlatform!=='windows';
 const requestedProtocol=new URL(location.href).searchParams.get('protocol');
 const protocol=requestedProtocol==='anyconnect' || (!requestedProtocol&&get('quickProtocol')==='anyconnect')?'anyconnect':'ikev2';
+const requestedIngress=new URL(location.href).searchParams.get('ingress') || get('quickIngress', null);
+const OC_HOSTS={riga:'oc-riga.tolf.is:443',moscow:'oc.tolf.is:4443',us:'oc-us.tolf.is:4443'};
 let ocGrant=null,ocPoint=null,ocDevice=null,ocConfirmed=false,ocImported=false,accountId=null,ocExpiryTimer=null;
 let lang; try { lang = localStorage.getItem('tolfLanguage'); } catch {}
 if (!QUICK_TEXT[lang]) lang = /^ru/i.test(navigator.language) ? 'ru' : /^lv/i.test(navigator.language) ? 'lv' : 'en';
@@ -17,6 +19,7 @@ for(const [language,text] of Object.entries({
  en:'Open vpn.tolf.is on your Windows computer, select Windows, IKEv2 and “Quick setup”. The settings are installed on that computer.',
  lv:'Windows datorā atveriet vpn.tolf.is, atlasiet Windows, IKEv2 un “Ātrā iestatīšana”. Iestatījumi tiek instalēti šajā datorā.'
 }))QUICK_TEXT[language].windowsQuickOnly=text;
+for(const [language,city] of Object.entries({ru:'Нью-Йорк',en:'New York',lv:'Ņujorka'}))QUICK_TEXT[language].us=city;
 const t = key => QUICK_TEXT[lang][key] || key;
 const accountText = {en:['Create account','Sign in','Choose Passkey or username and password. No email address is required.'],ru:['Создать аккаунт','Войти','Выберите Passkey или логин и пароль. Электронная почта не нужна.'],lv:['Izveidot kontu','Pieteikties','Izvēlieties Passkey vai lietotājvārdu un paroli. E-pasts nav nepieciešams.']};
 function accountAuth(mode) { persist(); window.location.assign('/auth/?mode='+mode+'&next=quick&lang='+lang); }
@@ -30,12 +33,13 @@ let loadNumber = 0;
 const suggestedPasskeyName = /iPad/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1) ? 'iPad' : nativePlatform==='ios'?'iPhone':nativePlatform==='windows'?'Windows':'Android';
 $('passkeyName').value = suggestedPasskeyName;
 function message(key, error = false) { messageKey = key; failed = error; render(); }
-function persist() { put('quickServer', server); put('quickPlatform', platform);put('quickProtocol',protocol); }
+function persist() { if(protocol==='anyconnect')put('quickIngress',requestedIngress); put('quickServer', server); put('quickPlatform', platform);put('quickProtocol',protocol); }
 function render() {
+ if(server==='us')iosButtons=false;
  $('prepare').hidden = protocol === 'anyconnect' && nativePlatform === 'ios' && iosButtons && !!ocDevice;
  const options = $('iosVpnButtons');
  $('iosProfileSave').replaceChildren();
- options.hidden = !(protocol === 'anyconnect' && nativePlatform === 'ios');
+ options.hidden = !(protocol === 'anyconnect' && nativePlatform === 'ios') || server==='us';
  if (!options.hidden) {
    const url = ocDevice ? new URL(API+'/oc/access/devices/'+encodeURIComponent(ocDevice.id)+'/ios.mobileconfig') : null;
    if (url) url.searchParams.set('ingress', server);
@@ -108,12 +112,12 @@ async function loadAccount() {
  accountId=me.userId;authenticated=true; uncertain=false; put('quickRegistration','');
  if(protocol==='anyconnect' && nativePlatform==='ios'){
   let saved; try { saved=JSON.parse(get(ocKey('setup'),'null')); } catch {}
-  if(saved && saved.expires>Date.now() && ['moscow','riga'].includes(saved.server)){
+  if(saved && saved.expires>Date.now() && Object.hasOwn(OC_HOSTS,saved.server) && (!requestedIngress || requestedIngress===saved.server)){
    const caps=await api('/oc/access/capabilities');
    const point=caps.ingresses?.find(p=>p.id===saved.server);
    const list=await api('/oc/access/devices');
    const device=list.devices?.find(d=>d.id===saved.device && d.state==='active' && Date.parse(d.expires_at)>Date.now());
-   if(point && device){server=saved.server;ocPoint=point;ocDevice=device;iosButtons=saved.buttons===true;persist();}
+   if(point && point.host===OC_HOSTS[saved.server] && device){server=saved.server;ocPoint=point;ocDevice=device;iosButtons=saved.server!=='us' && saved.buttons===true;persist();}
    else put(ocKey('setup'),'');
   }
  }
@@ -134,12 +138,13 @@ async function initialize() {
   const r=await fetch(API+'/entry-point-recommendation',{credentials:'omit',cache:'no-store',signal:AbortSignal.timeout(6000)});
   if(!r.ok)throw new Error('Recommendation unavailable');
   const recommendation=await r.json();
-  if(!['riga','moscow'].includes(recommendation.entryPoint))throw new Error('Invalid recommendation');
-  server=recommendation.entryPoint;platform=nativePlatform;ready=true;
+  server=protocol==='anyconnect'&&requestedIngress?requestedIngress:recommendation.entryPoint;
+  if(!(protocol==='anyconnect'?Object.hasOwn(OC_HOSTS,server):['riga','moscow'].includes(server)))throw new Error('Invalid recommendation');
+  platform=nativePlatform;ready=true;
   if(protocol==='anyconnect'){
    const oc=await api('/oc/access/capabilities');
    ocPoint=oc.ingresses?.find(p=>p.id===server);
-   if(oc.issuance!==true||!ocPoint||!['oc.tolf.is:4443','oc-riga.tolf.is:443'].includes(ocPoint.host))throw new Error('AnyConnect node unavailable');
+   if(oc.issuance!==true||!ocPoint||ocPoint.host!==OC_HOSTS[server])throw new Error('AnyConnect node unavailable');
   }
   if(number!==loadNumber)return;
   persist();
@@ -252,7 +257,7 @@ async function prepareOcImport(){
 function renderOcDelivery(){
  const mobile=nativePlatform!=='windows',valid=ocGrant&&Date.parse(ocGrant.expiresAt)>Date.now()&&ocConfirmed&&!ocImported;
  $('ocApp').href=nativePlatform==='ios'?'https://apps.apple.com/app/id1135064690':nativePlatform==='android'?'https://play.google.com/store/apps/details?id=com.cisco.anyconnect.vpn.android.avf':'https://www.cisco.com/c/en/us/support/security/secure-client-5/model.html';
- const prefix=server==='riga'?'TOLF Riga ':'TOLF Moscow ';
+ const prefix='TOLF '+({riga:'Riga',moscow:'Moscow',us:'New York'}[server])+' ';
  const name=ocDevice.connectionNames?.[server]||Array.from(prefix+ocDevice.label).slice(0,24).join('').trimEnd();
  $('ocConnection').href='anyconnect://create/?'+new URLSearchParams({name,host:ocPoint.host,usecert:'true',certcommonname:ocDevice.username,netroam:'true'});
  $('ocServer').textContent=t(server)+': '+ocPoint.host;

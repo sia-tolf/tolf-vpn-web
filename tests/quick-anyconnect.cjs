@@ -3,7 +3,7 @@ const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/st
 const source=fs.readFileSync('quick/quick-1.js','utf8'),strings=fs.readFileSync('quick/strings-1.js','utf8');
 async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=false,buttons=false}={}){
  const map=new Map(),store=new Map(),posts=[],created=[],user='test-account',device='test-device';
- let lost=loseReply, recommendation=node;
+ let lost=loseReply, recommendation=node==='us'?'riga':node;
  const makeElement=()=>({children:[],events:{},hidden:false,value:'',dataset:{},textContent:'',disabled:false,
    classList:{add(){},remove(){}},setAttribute(){},removeAttribute(){},
    append(...nodes){this.children.push(...nodes);},replaceChildren(...nodes){this.children=nodes;},
@@ -11,10 +11,10 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
  const element=id=>{if(!map.has(id))map.set(id,makeElement());return map.get(id);};
  let assigned;
  const descendants=node=>node.children.flatMap(n=>[n,...descendants(n)]);
- const host=node==='riga'?'oc-riga.tolf.is:443':'oc.tolf.is:4443';
+ const host=node==='us'?'oc-us.tolf.is:4443':node==='riga'?'oc-riga.tolf.is:443':'oc.tolf.is:4443';
  const cert='https://api.tolf.is/oc/access/import/TEST.p12';
  const grant={deviceId:device,password:'TEST-ONLY-PASSWORD',expiresAt:new Date(Date.now()+7200000).toISOString(),certificateUrl:tamper?'https://example.invalid/test.p12':cert,username:'test-certificate-user',importUri:'anyconnect://import/?type=pkcs12&uri='+encodeURIComponent(cert),connections:[{id:node,host,connectionUri:'anyconnect://create/?host='+encodeURIComponent(host)+'&certcommonname=test-certificate-user'}]};
- const ctx={URL,URLSearchParams,AbortSignal,location:{href:'https://vpn.tolf.is/quick/?protocol=anyconnect'},navigator:{userAgent:ua,platform:ua==='desktop-ipad'?'MacIntel':'',maxTouchPoints:ua==='desktop-ipad'?5:0,language:'ru',clipboard:{writeText:async()=>{}}},crypto:{randomUUID:()=> 'test-request-id'},localStorage:{getItem:()=>null,setItem(){}},sessionStorage:{getItem:k=>store.get(k),setItem:(k,v)=>store.set(k,v),removeItem:k=>store.delete(k)},document:{getElementById:element,documentElement:{lang:'ru'},querySelectorAll:()=>[],querySelector:()=>element('defaults'),body:{append(){}},createElement:()=>makeElement()},window:{addEventListener(){},location:{assign(url){assigned=url;}}},setTimeout:()=>0,clearTimeout(){},
+ const ctx={URL,URLSearchParams,AbortSignal,location:{href:'https://vpn.tolf.is/quick/?protocol=anyconnect'+(node==='us'?'&ingress=us':'')},navigator:{userAgent:ua,platform:ua==='desktop-ipad'?'MacIntel':'',maxTouchPoints:ua==='desktop-ipad'?5:0,language:'ru',clipboard:{writeText:async()=>{}}},crypto:{randomUUID:()=> 'test-request-id'},localStorage:{getItem:()=>null,setItem(){}},sessionStorage:{getItem:k=>store.get(k),setItem:(k,v)=>store.set(k,v),removeItem:k=>store.delete(k)},document:{getElementById:element,documentElement:{lang:'ru'},querySelectorAll:()=>[],querySelector:()=>element('defaults'),body:{append(){}},createElement:()=>makeElement()},window:{addEventListener(){},location:{assign(url){assigned=url;}}},setTimeout:()=>0,clearTimeout(){},
  fetch:async(url,opt={})=>{
  let data;
  if(url.endsWith('/quick-setup/capabilities'))data={version:1};
@@ -34,7 +34,7 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
  vm.createContext(ctx);vm.runInContext(strings,ctx);vm.runInContext(withShares(fs.readFileSync('js/ios-vpn-buttons.js','utf8')),ctx);vm.runInContext(source,ctx);
  for(let i=0;i<40;i++)await Promise.resolve();
  if(missingNode){assert.equal(element('prepare').disabled,true);assert.equal(created.length,0);return;}
- if(platform==='ios'){
+ if(platform==='ios' && node!=='us'){
   const option=descendants(element('iosVpnButtons')).find(n=>n.type==='checkbox');
   assert.equal(option.checked,false);
   if(buttons){option.checked=true;option.events.change();}
@@ -106,7 +106,8 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
   assert.equal(url.searchParams.get('ingress'),node);
   assert.equal(url.searchParams.get('buttons'),buttons?'true':null);
   assert.equal(posts.filter(p=>p.endsWith('/import')).length,0);
-  assert(descendants(element('iosVpnButtons')).some(n=>n.textContent.includes('TOLF '+(node==='moscow'?'Moscow':'Riga'))));
+  if(node==='us')assert.equal(element('iosVpnButtons').hidden,true);
+  else assert(descendants(element('iosVpnButtons')).some(n=>n.textContent.includes('TOLF '+(node==='moscow'?'Moscow':'Riga'))));
   return;
  }
  assert.equal(element('ocRenew').disabled,true);
@@ -119,7 +120,7 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
  assert.equal(element('ocConnectionCompleted').hidden,false);
  await element('ocRenew').onclick();
  if(tamper){assert.equal(element('ocGrantPanel').hidden,true);assert.equal(element('ocPassword').value,'');return;}
- assert.equal(element('ocDelivery').hidden,false);assert.equal(element('ocServer').textContent,(node==='riga'?'Рига':'Москва')+': '+host);
+ assert.equal(element('ocDelivery').hidden,false);assert.equal(element('ocServer').textContent,({riga:'Рига',moscow:'Москва',us:'Нью-Йорк'}[node])+': '+host);
  assert.equal(element('ocPassword').value,'TEST-ONLY-PASSWORD');
  assert.equal(element('ocConnection').hidden,platform==='windows');assert.equal(element('ocImport').hidden,platform==='windows');
  assert.equal(element('change').hidden,true);assert.equal(element('choices').hidden,true);
@@ -132,4 +133,4 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
  assert.equal(element('ocCertificateDone').hidden,false);
  await element('ocRenew').onclick();assert.equal(created.length,before);assert.equal(element('ocGrantPanel').hidden,false);
 }
-(async()=>{for(const [ua,p]of[['iPhone','ios'],['desktop-ipad','ios'],['Android','android'],['Windows NT','windows']])for(const node of ['riga','moscow'])await run(ua,p,node);await run('iPhone','ios','riga',{buttons:true});await run('iPhone','ios','moscow',{missingNode:true});await run('Android','android','moscow',{loseReply:true});console.log('PASS: AnyConnect device/node selection, reusable device, lost reply, certificate URL validation, node availability, mobile/Windows steps, blocked import, confirmation, reset and certificate reuse');})().catch(e=>{console.error(e);process.exit(1)});
+(async()=>{for(const [ua,p]of[['iPhone','ios'],['desktop-ipad','ios'],['Android','android'],['Windows NT','windows']])for(const node of ['riga','moscow','us'])await run(ua,p,node);await run('iPhone','ios','riga',{buttons:true});await run('iPhone','ios','moscow',{missingNode:true});await run('Android','android','moscow',{loseReply:true});console.log('PASS: AnyConnect device/node selection, reusable device, lost reply, certificate URL validation, node availability, mobile/Windows steps, blocked import, confirmation, reset and certificate reuse');})().catch(e=>{console.error(e);process.exit(1)});

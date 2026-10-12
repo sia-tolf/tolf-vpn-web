@@ -336,7 +336,7 @@ async function windowsAction(action) {
 
 document.getElementById('windowsAddButton').addEventListener('click', () => {
   if (vpnBusy || !windowsReady || !lastVpnState) return;
-  windowsServer.value = 'riga';
+  if (!windowsServers.has(windowsServer.value)) windowsServer.value = 'riga';
   windowsAdding = true;
   renderWindowsDevices();
   windowsName.focus();
