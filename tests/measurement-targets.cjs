@@ -27,7 +27,7 @@ function setup() {
       instances.push(this);
       this.worker = {terminate: () => {this.terminated = true;}};
     }
-    setParameter() {}
+    setParameter(k,v) { (this.settings ||= {})[k]=v; }
     setSelectedServer(target) { this.target = target; }
     start() { this.started = true; }
     abort() { this.aborted = true; }
@@ -38,6 +38,7 @@ function setup() {
       constructor(type, options) { this.type = type; this.detail = options?.detail; }
     },
     Speedtest, console, Map, Date, Math, performance,
+    measureConfirmedUpload:async(server,{onprogress})=>{onprogress({mbps:24,acknowledgedBytes:3000000});return {mbps:24};},
     AbortController, setTimeout: (fn, ms) => setTimeout(fn, Math.min(ms, 20)),
     clearTimeout, clearInterval,
     getSelectedServerKey: () => selected, t: key => key, serverInputs: [],
@@ -84,7 +85,8 @@ function setup() {
   instances[0].onupdate({pingStatus: '999'});
   assert.equal(c.connectionTestLatency.textContent, '—', 'ignore an old worker');
   instances[1].onupdate({pingStatus: '36', jitterStatus: '2', dlStatus: '158', ulStatus: '24'});
-  instances[1].onend(false);
+  assert.equal(instances[1].settings.test_order, 'P_D');
+  await instances[1].onend(false);
   assert.equal(c.connectionTestStatus.textContent, 'connectionTestComplete');
 
   s.setSelected('riga');

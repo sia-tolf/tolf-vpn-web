@@ -1,10 +1,15 @@
-<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>TOLF — проверка замера</title><style>body{font:16px system-ui;max-width:800px;margin:30px auto;padding:16px}button,select{font:inherit;padding:12px}pre{white-space:pre-wrap;overflow-wrap:anywhere}</style><h1>Проверка замера</h1><p>Тест соединения с Нью-Йорком. Диагностика отображается только на этой странице.</p><select id="order"><option value="P_D_U">Задержка, загрузка и отдача</option value="U">Только отдача</option></select> <button id="run">Начать</button><pre id="result">Готово к проверке</pre><script src="js/librespeed.js?v=1"></script><script>
-let test; const out=document.getElementById('result'),button=document.getElementById('run');
-window.addEventListener('error',e=>{out.textContent+='\nJS: '+e.message;button.disabled=false});
-button.onclick=()=>{button.disabled=true;out.textContent='Запуск';test=new Speedtest();
-for(const [key,value] of Object.entries({test_order:document.getElementById('order').value,count_ping:10,time_dl_max:15,time_ul_max:15,time_auto:false,time_ulGraceTime:0,xhr_dlMultistream:8,xhr_ulMultistream:4,xhr_ul_blob_megabytes:4,telemetry_level:0,overheadCompensationFactor:1,xhr_ignoreErrors:0,forceIE11Workaround:true}))test.setParameter(key,value);
+<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>TOLF — проверка замера</title><style>body{font:16px system-ui;max-width:800px;margin:30px auto;padding:16px}button,select{font:inherit;padding:12px}pre{white-space:pre-wrap;overflow-wrap:anywhere}</style><h1>Проверка замера</h1><p>Соединение с Нью-Йорком. Диагностика остаётся на этой странице.</p><select id="order"><option value="P_D">Новый полный замер</option><option value="U">Только отдача — новый способ</option><option value="P_D_U">Прежний полный замер</option></select> <button id="run">Начать</button><pre id="result">Готово к проверке</pre><script src="js/librespeed.js?v=1"></script><script src="js/confirmed-upload.js?v=page-upload-20261012"></script><script>
+let test,deadline,controller;const out=document.getElementById('result'),button=document.getElementById('run');
+function done(){clearTimeout(deadline);button.disabled=false;test?.worker?.terminate();}
+window.addEventListener('error',e=>{out.textContent+='\nJS: '+e.message;controller?.abort();done()});
+button.onclick=()=>{button.disabled=true;out.textContent='Запуск';controller=new AbortController();let last={};const order=document.getElementById('order').value;
+deadline=setTimeout(()=>{out.textContent+='\nТайм-аут теста';controller.abort();done()},90000);
+async function upload(){try{last.upload=await measureConfirmedUpload('https://ikev2-us.tolf.is:8443/',{signal:controller.signal,onprogress:data=>{out.textContent=JSON.stringify({...last,upload:data},null,2)}});out.textContent=JSON.stringify(last,null,2)+'\nЗавершён'}catch(e){out.textContent+='\nОшибка: '+e.message}finally{done()}}
+if(order==='U'){upload();return}
+test=new Speedtest();
+for(const [key,value] of Object.entries({test_order:order,count_ping:10,time_dl_max:15,time_ul_max:15,time_auto:false,time_ulGraceTime:0,xhr_dlMultistream:8,xhr_ulMultistream:4,xhr_ul_blob_megabytes:4,telemetry_level:0,overheadCompensationFactor:1,xhr_ignoreErrors:0,forceIE11Workaround:true}))test.setParameter(key,value);
 test.setSelectedServer({name:'New York',server:'https://ikev2-us.tolf.is:8443/',dlURL:'garbage.php',ulURL:'empty.php',pingURL:'empty.php',getIpURL:'getIP.php'});
-test.onupdate=data=>{out.textContent=JSON.stringify(data,null,2)};
-test.onend=aborted=>{out.textContent+='\n'+(aborted?'Прерван':'Завершён');button.disabled=false;test.worker.terminate()};
-test.start();test.worker.addEventListener('error',e=>{out.textContent+='\nWORKER: '+e.message+' line '+e.lineno;button.disabled=false;test.abort()});
+test.onupdate=data=>{last=data;out.textContent=JSON.stringify(data,null,2)};
+test.onend=aborted=>{test.worker.terminate();if(order==='P_D'&&!aborted)upload();else{out.textContent+='\n'+(aborted?'Прерван':'Завершён');done()}};
+test.start();test.worker.addEventListener('error',e=>{out.textContent+='\nWORKER: '+e.message+' line '+e.lineno;done()});
 };</script></html>

@@ -1,3 +1,5 @@
+let connectionUploadController = null;
+let connectionTestFailureDetail = "";
 let activeConnectionTest = null;
 let activeConnectionTestServer = null;
 let connectionTestWatchdog = null;
@@ -33,13 +35,14 @@ function renderConnectionTestTarget() {
   connectionTestTitle.textContent = t("connectionTo", {
     city: t(server?.nameKey || "cityRiga")
   });
-  if (connectionTestStatus) connectionTestStatus.textContent = t(connectionTestStatusKey);
+  if (connectionTestStatus) connectionTestStatus.textContent = t(connectionTestStatusKey) + (connectionTestFailureDetail ? " (" + connectionTestFailureDetail + ")" : "");
   setConnectionTestButtonLabel(
     activeConnectionTest || connectionTestPreparing ? "measuringConnection" : "measureConnection"
   );
 }
 
 function resetConnectionTestResults() {
+  connectionTestFailureDetail = "";
   for (const target of [
     connectionTestLatency,
     connectionTestJitter,
@@ -105,6 +108,8 @@ function connectionTestHasResult() {
 }
 
 function finishConnectionTest(aborted) {
+  connectionUploadController?.abort();
+  connectionUploadController = null;
   const completed = !aborted && connectionTestHasResult();
   if (activeConnectionTest) {
     clearInterval(activeConnectionTest.updater);
@@ -170,7 +175,7 @@ async function startConnectionTest() {
     const speedtest = new Speedtest();
     activeConnectionTest = speedtest;
 
-    speedtest.setParameter("test_order", "P_D_U");
+    speedtest.setParameter("test_order", "P_D");
     speedtest.setParameter("count_ping", 10);
     speedtest.setParameter("time_dl_max", 15);
     speedtest.setParameter("time_ul_max", 15);
@@ -198,8 +203,29 @@ async function startConnectionTest() {
     speedtest.onupdate = data => {
       if (activeConnectionTest === speedtest) updateConnectionTestResults(data);
     };
-    speedtest.onend = aborted => {
-      if (activeConnectionTest === speedtest) finishConnectionTest(aborted);
+    speedtest.onend = async aborted => {
+      if (activeConnectionTest !== speedtest) return;
+      clearInterval(speedtest.updater);
+      speedtest.worker?.terminate();
+      if (aborted) { finishConnectionTest(true); return; }
+      connectionUploadController = new AbortController();
+      try {
+        await measureConfirmedUpload(target.server, {
+          signal: connectionUploadController.signal,
+          onprogress: result => {
+            if (request !== connectionTestRequest || activeConnectionTest !== speedtest) return;
+            if (connectionTestUpload && result.acknowledgedBytes > 0) {
+              connectionTestUpload.textContent = connectionMetric(result.mbps, "Mbps");
+            }
+          }
+        });
+        if (request === connectionTestRequest && activeConnectionTest === speedtest) finishConnectionTest(false);
+      } catch (error) {
+        if (request !== connectionTestRequest || activeConnectionTest !== speedtest) return;
+        connectionTestFailureDetail = /^upload_[a-z_0-9]+$/.test(error.message) ? error.message : "upload_error";
+        if (connectionTestUpload) connectionTestUpload.textContent = "—";
+        finishConnectionTest(true);
+      }
     };
     speedtest.start();
     speedtest.worker.onerror = error => {
