@@ -1,8 +1,16 @@
-<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>TOLF — проверка замера</title><style>body{font:16px system-ui;max-width:800px;margin:30px auto;padding:16px}button,select{font:inherit;padding:12px}pre{white-space:pre-wrap;overflow-wrap:anywhere}</style><h1>Проверка замера</h1><p>Соединение с Нью-Йорком. Диагностика остаётся на этой странице.</p><select id="order"><option value="P_D">Новый полный замер</option><option value="U">Только отдача — новый способ</option><option value="P_D_U">Прежний полный замер</option></select> <button id="run">Начать</button><pre id="result">Готово к проверке</pre><script src="js/librespeed.js?v=1"></script><script src="js/confirmed-upload.js?v=page-upload-20261012"></script><script>
+<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>TOLF — проверка замера</title><style>body{font:16px system-ui;max-width:800px;margin:30px auto;padding:16px}button,select{font:inherit;padding:12px}pre{white-space:pre-wrap;overflow-wrap:anywhere}</style><h1>Проверка замера</h1><p>Соединение с Нью-Йорком. Диагностика остаётся на этой странице.</p><select id="order"><option value="PATH">Проверка остановки отдачи</option><option value="P_D">Новый полный замер</option><option value="U">Только отдача — новый способ</option><option value="P_D_U">Прежний полный замер</option></select> <button id="run">Начать</button><pre id="result">Готово к проверке</pre><script src="js/upload-path-check.js?v=path-20261013"></script><script src="js/librespeed.js?v=1"></script><script src="js/confirmed-upload.js?v=page-upload-20261012"></script><script>
 let test,deadline,controller;const out=document.getElementById('result'),button=document.getElementById('run');
 function done(){clearTimeout(deadline);button.disabled=false;test?.worker?.terminate();}
 window.addEventListener('error',e=>{out.textContent+='\nJS: '+e.message;controller?.abort();done()});
 button.onclick=()=>{button.disabled=true;out.textContent='Запуск';controller=new AbortController();let last={};const order=document.getElementById('order').value;
+if(order==='PATH'){
+out.textContent='Проверка отправки без скачивания. Это не замер скорости.\n';
+checkUploadPath(row=>{
+if(row.pending){out.textContent+='\n'+row.step+'. '+row.city+' · '+(row.bytes/1024)+' КБ: ';return}
+out.textContent+=row.result+(row.status?' (HTTP '+row.status+')':'')+' · '+row.ms+' мс';
+}).then(()=>{out.textContent+='\n\nПроверка завершена. Отправьте снимок результатов.'}).catch(e=>{out.textContent+='\nОшибка: '+e.message}).finally(done);
+return;
+}
 deadline=setTimeout(()=>{out.textContent+='\nТайм-аут теста';controller.abort();done()},90000);
 async function upload(){try{last.upload=await measureConfirmedUpload('https://ikev2-us.tolf.is:8443/',{signal:controller.signal,onprogress:data=>{out.textContent=JSON.stringify({...last,upload:data},null,2)}});out.textContent=JSON.stringify(last,null,2)+'\nЗавершён'}catch(e){out.textContent+='\nОшибка: '+e.message}finally{done()}}
 if(order==='U'){upload();return}
