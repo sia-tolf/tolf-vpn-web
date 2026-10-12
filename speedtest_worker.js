@@ -8,6 +8,8 @@
 // data reported to main thread
 var testState = -1; // -1=not started, 0=starting, 1=download test, 2=ping+jitter test, 3=upload test, 4=finished, 5=abort
 var dlStatus = ""; // download speed in megabit/s with 2 decimal digits
+var uploadError = "";
+var uploadAcknowledgedBytes = 0;
 var ulStatus = ""; // upload speed in megabit/s with 2 decimal digits
 var pingStatus = ""; // ping in milliseconds with 2 decimal digits
 var jitterStatus = ""; // jitter in milliseconds with 2 decimal digits
@@ -96,6 +98,8 @@ this.addEventListener("message", function(e) {
 				testState: testState,
 				dlStatus: dlStatus,
 				ulStatus: ulStatus,
+                uploadError: uploadError,
+                uploadAcknowledgedBytes: uploadAcknowledgedBytes,
 				pingStatus: pingStatus,
 				clientIp: clientIp,
 				jitterStatus: jitterStatus,
@@ -486,16 +490,19 @@ function ulTest(done) {
 						// Start small on slow uplinks; grow only after server acknowledgement.
 						var body = req.slice(0, chunkSizes[i] || 65536);
 						var sentAt = new Date().getTime();
-						xhr[i].onerror = xhr[i].ontimeout = function() {
+						xhr[i].onerror = xhr[i].ontimeout = function(event) {
+                            uploadError = "upload_" + (event ? event.type : "network") + "_http_" + x.status;
 							failed = true;
 						};
 						xhr[i].onload = function() {
 							if (testState !== 3) return;
 							if (x.status < 200 || x.status >= 300) {
+                                uploadError = "upload_http_" + x.status;
 								failed = true;
 								return;
 							}
 							totLoaded += body.size;
+                            uploadAcknowledgedBytes += body.size;
 							var elapsed = new Date().getTime() - sentAt;
 							chunkSizes[i] = Math.min(req.size, Math.max(16384, elapsed < 750 ? body.size * 2 : elapsed > 2000 ? body.size / 2 : body.size));
 							testStream(i, 0);
