@@ -9,6 +9,7 @@ const SERVERS = {
 const I18N = {};
 
 const LOCAL_ID_OPTIONS = {
+  us: { auto: "routingUsAuto", ru: "routingRu", lv: "routingLv", yt: "routingUsYt" },
   riga: { sr: "routingRigaSr", ru: "routingRu", yt: "routingYt" },
   moscow: {
     "": "routingMoscowDefault",

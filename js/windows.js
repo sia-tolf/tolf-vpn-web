@@ -230,7 +230,7 @@ function renderWindowsDevices() {
       }
     });
     const user = document.createElement('p');
-    user.textContent = t(device.server === 'moscow' ? 'windowsServerMoscow' : 'windowsServerRiga') + ' · ' + (device.authentication === 'certificate' ? windowsCertificateCopy('auth') : device.username || t('windowsPreparing'));
+    user.textContent = t(device.server === 'us' ? 'windowsServerUs' : device.server === 'moscow' ? 'windowsServerMoscow' : 'windowsServerRiga') + ' · ' + (device.authentication === 'certificate' ? windowsCertificateCopy('auth') : device.username || t('windowsPreparing'));
     user.className = 'windows-device-username';
     const actions = document.createElement('div'); actions.className = 'actions windows-device-links windows-link-create';
     const download = document.createElement('button'); download.type = 'button';
@@ -281,6 +281,11 @@ function renderWindowsDevices() {
   windowsServer.disabled = vpnBusy || !setupAllowed;
   renderWindowsModes();
   windowsMode.disabled = vpnBusy || !setupAllowed;
+  const usOption = windowsServer.querySelector('option[value="us"]');
+  usOption.disabled = !windowsServers.has('us');
+  const usKey = windowsServers.has('us') ? 'windowsServerUs' : 'windowsServerUsUnavailable';
+  usOption.dataset.i18n = usKey;
+  usOption.textContent = t(usKey);
   const moscowOption = windowsServer.querySelector('option[value="moscow"]');
   moscowOption.disabled = !windowsServers.has('moscow');
   moscowOption.textContent = t(windowsServers.has('moscow') ? 'windowsServerMoscow' : 'windowsServerMoscowUnavailable');
@@ -382,7 +387,7 @@ windowsForm.addEventListener('submit', event => {
     if (capabilities.version !== '1.0' || !capabilities.servers.includes('riga')) throw new Error('Windows unavailable');
     windowsPasswordManagement = capabilities.passwordManagement === true;
     windowsCertificatePackages = capabilities.certificatePackages === true;
-    windowsServers = new Set(capabilities.servers.filter(server => ['riga', 'moscow'].includes(server)));
+    windowsServers = new Set(capabilities.servers.filter(server => ['riga', 'moscow', 'us'].includes(server)));
     windowsRoutingModes = capabilities.routingModes || {riga: ['sr']};
     windowsReady = true;
     const windowsPlatformButton = document.getElementById('platformWindows');
