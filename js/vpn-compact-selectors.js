@@ -8,9 +8,9 @@
 
   const lang=()=>((document.documentElement.lang||"en").toLowerCase());
   const COPY={
-    en:{protocol:"Protocol",entry:"VPN Entry Point",riga:"Riga",moscow:"Moscow",recommended:"Recommended",measuring:"Measuring…",unavailable:"—"},
-    ru:{protocol:"Протокол",entry:"Точка входа VPN",riga:"Рига",moscow:"Москва",recommended:"Рекомендуется",measuring:"Измерение…",unavailable:"—"},
-    lv:{protocol:"Protokols",entry:"VPN ieejas punkts",riga:"Rīga",moscow:"Maskava",recommended:"Ieteicams",measuring:"Mērīšana…",unavailable:"—"}
+    en:{protocol:"Protocol",entry:"VPN Entry Point",riga:"Riga",moscow:"Moscow",us:"USA",recommended:"Recommended",measuring:"Measuring…",unavailable:"—"},
+    ru:{protocol:"Протокол",entry:"Точка входа VPN",riga:"Рига",moscow:"Москва",us:"США",recommended:"Рекомендуется",measuring:"Измерение…",unavailable:"—"},
+    lv:{protocol:"Protokols",entry:"VPN ieejas punkts",riga:"Rīga",moscow:"Maskava",us:"ASV",recommended:"Ieteicams",measuring:"Mērīšana…",unavailable:"—"}
   };
   const tr=()=>COPY[lang()]||COPY.en;
 
@@ -60,6 +60,7 @@
   document.getElementById("myVpnProtocolField").append(protocolDD.field);
 
   const entryDD=makeDropdown("vpnEntryDropdown",tr().entry,[],value=>{
+    if(window.getVpnTransport?.()==="anyconnect"){window.ocAccess?.selectIngress?.(value);setTimeout(sync,0);return;}
     const input=document.querySelector('input[name="vpnServer"][value="'+value+'"]');
     if(!input||input.disabled)return;
     input.checked=true; input.dispatchEvent(new Event("change",{bubbles:true})); setTimeout(sync,0);
@@ -86,7 +87,7 @@
       const v=(typeof entryPointLatencyValues!=="undefined"?entryPointLatencyValues[id]:null);
       return Number.isFinite(v)&&v>=0?Math.round(v)+" ms":tr().unavailable;
     };
-    entryDD.render(["riga","moscow"].filter(x=>allowed.includes(x)).map(x=>({value:x,label:x==="riga"?tr().riga:tr().moscow,meta:latency(x),badge:x===recommended?"("+tr().recommended+")":""})),current);
+    entryDD.render(["riga","moscow","us"].filter(x=>allowed.includes(x)).map(x=>({value:x,label:tr()[x],meta:latency(x),badge:x===recommended?"("+tr().recommended+")":""})),current);
   }
   window.addEventListener("vpntransportchange",sync);
   window.addEventListener("tolf:measurement-target-resolved",()=>setTimeout(sync,0));

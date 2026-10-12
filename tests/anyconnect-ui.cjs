@@ -56,7 +56,7 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   let heldSession = null, connected = true, sessionError = false, sessionNodes = null, policyApplied = true;
   async function request(url, options = {}) {
     const p = url.replace('https://api.tolf.is',''); calls.push([options.method || 'GET',p,options.credentials]);
-    if (p.endsWith('/capabilities')) return {issuance:true,nodeReady:true,version:2,guestSetup:true,ingresses:[{id:'moscow',host:'oc.tolf.is:4443'},{id:'riga',host:'oc-riga.tolf.is:443'}]};
+    if (p.endsWith('/capabilities')) return {issuance:true,nodeReady:true,version:2,guestSetup:true,ingresses:[{id:'moscow',host:'oc.tolf.is:4443'},{id:'riga',host:'oc-riga.tolf.is:443'},{id:'us',host:'oc-us.tolf.is:4443'}]};
     if (p === '/oc/access/devices') {
       if (options.method === 'POST') {
         const data=JSON.parse(options.body),device={id:'three',label:data.label,username:'tolf-oc-'+'3'.repeat(32),state:'active',mode:'auto'};
@@ -309,6 +309,20 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   vm.runInContext(fs.readFileSync(path.join(root,'js','anyconnect-access.js'),'utf8'),c);
   await settle();
   assert(descendants(ids.anyConnectAccess).some(n=>n.href?.includes('ios.mobileconfig?ingress=moscow&buttons=true')));
+  window.ocAccess.selectIngress('us');
+  assert.equal(window.ocAccess.ingress().host,'oc-us.tolf.is:4443');
+  let usPanel=descendants(ids.anyConnectAccess);
+  assert(!usPanel.some(n=>n.type==='checkbox'),'US must not install another city shortcut');
+  const usInstall=usPanel.find(n=>n.href?.includes('ios.mobileconfig?ingress=us'));
+  assert(usInstall && !usInstall.hidden);
+  assert(!new URL(usInstall.href).searchParams.has('buttons'));
+  c.currentPlatform='android'; window.dispatchEvent(new c.Event('vpnplatformchange'));
+  button(ids.anyConnectAccess,'Настроить на этом устройстве').click();
+  const usUri=descendants(ids.anyConnectAccess).find(n=>n.textContent==='Добавить в AnyConnect').href;
+  const usParams=new URLSearchParams(usUri.split('?')[1]);
+  assert.equal(usParams.get('host'),'oc-us.tolf.is:4443');
+  assert(usParams.get('name').startsWith('TOLF USA '));
+  await settle();
   // A late session response must not restore the green indicator after logout.
   let release; heldSession = new Promise(resolve=>{release=resolve;});
   window.dispatchEvent(new c.Event('focus')); await settle();
