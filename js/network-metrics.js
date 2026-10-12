@@ -49,7 +49,7 @@ function networkPairsForIngress(pairs, ingress) {
         cell.appendChild(node('strong', '', value)); values.appendChild(cell);
       }
       section.appendChild(values);
-      section.appendChild(node('div', 'network-pair-time', `${c.latency}: ${stamp(p.measured_at, 15*60000)} · ${c.speed}: ${stamp(p.throughput_measured_at, 2*3600000)}`));
+      section.appendChild(node('div', 'network-pair-time', `${c.latency}: ${stamp(p.measured_at, 15*60000)} · ${c.speed}: ${stamp(p.throughput_measured_at, (p.source === 'us' || p.target === 'us' ? 12 : 2)*3600000)}`));
       container.appendChild(section);
     }
     container.classList.remove('hidden');
