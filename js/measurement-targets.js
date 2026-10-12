@@ -1,5 +1,6 @@
 // Measurement addresses describe a destination, independently of the UI protocol.
 const MEASUREMENT_TARGETS = {
+  us: { nameKey: "cityNewYork", servers: ["https://ikev2-us.tolf.is:8443/"] },
   riga: {
     nameKey: "cityRiga",
     servers: ["https://ikev2-riga.tolf.is:8443/"]

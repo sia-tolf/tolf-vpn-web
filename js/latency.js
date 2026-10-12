@@ -1,10 +1,11 @@
 const LATENCY_TARGETS = {
   riga: latencyRiga,
-  moscow: latencyMoscow
+  moscow: latencyMoscow,
+  us: null
 };
 
 let entryPointLatencyRequest = 0;
-const entryPointLatencyValues = { riga: null, moscow: null };
+const entryPointLatencyValues = { riga: null, moscow: null, us: null };
 let entryPointLatencyMeasuring = false;
 
 function renderLatency(target, value) {
@@ -15,7 +16,7 @@ function renderLatency(target, value) {
 }
 
 function renderEntryPointLatencyLabels() {
-  for (const key of ["riga", "moscow"]) {
+  for (const key of Object.keys(LATENCY_TARGETS)) {
     if (entryPointLatencyMeasuring) {
       if (LATENCY_TARGETS[key]) LATENCY_TARGETS[key].textContent = t("measuringConnection");
     } else {
@@ -29,12 +30,13 @@ async function measureEntryPointLatencies() {
   entryPointLatencyMeasuring = true;
   renderEntryPointLatencyLabels();
   const results = await Promise.all(
-    ["riga", "moscow"].map(key => resolveMeasurementTarget(key, { refresh: true }))
+    Object.keys(LATENCY_TARGETS).map(key => resolveMeasurementTarget(key, { refresh: true }))
   );
   if (request !== entryPointLatencyRequest) return;
   entryPointLatencyMeasuring = false;
   entryPointLatencyValues.riga = results[0]?.pingT ?? null;
   entryPointLatencyValues.moscow = results[1]?.pingT ?? null;
+  entryPointLatencyValues.us = results[2]?.pingT ?? null;
   renderEntryPointLatencyLabels();
   if (typeof setEntryPointLatencies === "function") {
     setEntryPointLatencies(entryPointLatencyValues);

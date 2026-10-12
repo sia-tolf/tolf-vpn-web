@@ -119,5 +119,15 @@ function setup() {
   assert.equal(p1, p2, 'badge and full test share an in-flight selection');
   await p1;
   assert.equal(parallel.requests.length, 3);
+  const ny=setup();
+  ny.setSelected('us');await ny.c.startConnectionTest();
+  assert.equal(ny.instances[0].target.server,'https://ikev2-us.tolf.is:8443/');
+  assert.equal(ny.instances[0].target.name,'cityNewYork');
+  ny.c.resetConnectionTestContext();
+  ny.c.currentPlatform='windows';
+  ny.c.document.getElementById=id=>id==='windowsDeviceServer'?{value:'us'}:null;
+  ny.setSelected('riga');await ny.c.startConnectionTest();
+  assert.equal(ny.instances[1].target.server,'https://ikev2-us.tolf.is:8443/','Windows selector must determine destination');
+  ny.c.resetConnectionTestContext();
   console.log('PASS measurement addresses, shared badges, fallback, unavailable, cancellation, timeouts');
 })().catch(error => { console.error(error); process.exitCode = 1; });

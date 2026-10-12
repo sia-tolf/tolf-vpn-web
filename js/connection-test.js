@@ -6,6 +6,9 @@ let connectionTestRequest = 0;
 let connectionTestStatusKey = "connectionTestReady";
 
 function getConnectionTestServerKey() {
+  if (window.getVpnTransport?.() !== "anyconnect" && typeof currentPlatform !== "undefined" && currentPlatform === "windows") {
+    return document.getElementById("windowsDeviceServer")?.value || "riga";
+  }
   return getSelectedServerKey();
 }
 
@@ -234,6 +237,8 @@ function resetConnectionTestContext() {
 }
 
 window.addEventListener("vpntransportchange", resetConnectionTestContext);
+window.addEventListener("vpnplatformchange", resetConnectionTestContext);
+if (typeof document !== "undefined") document.getElementById?.("windowsDeviceServer")?.addEventListener("change", resetConnectionTestContext);
 window.addEventListener("tolf:network-context-changed", resetConnectionTestContext);
 window.addEventListener("online", resetConnectionTestContext);
 
