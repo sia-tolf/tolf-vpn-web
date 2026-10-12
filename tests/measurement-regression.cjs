@@ -4,7 +4,7 @@ const assert = require('node:assert/strict');
 const path = require('node:path');
 const root = path.resolve(__dirname, '..');
 
-function simulate(kind, outcome) {
+function simulate(kind, outcome, mpot = false) {
   let now = 0, id = 0, finished = false;
   const jobs = new Map(), requests = [];
   function schedule(fn, ms, repeat = false) {
@@ -14,19 +14,20 @@ function simulate(kind, outcome) {
   }
   class XHR {
     constructor() { this.upload = {}; this.status = 0; requests.push(this); }
-    open(method) { this.method = method; }
+    open(method, url) { this.method = method; this.url = url; }
     setRequestHeader() {}
     abort() { this.aborted = true; }
     send(body) {
       this.bytes = body?.size || 0;
       schedule(() => {
         if (this.aborted) return;
+        if (outcome === 'warmup-timeout' && !body) return this.ontimeout?.();
         if (outcome === 'network') return this.onerror?.();
         if (outcome === 'timeout') return this.ontimeout?.();
         this.status = outcome === 'http' ? 500 : 200;
         this.onprogress?.({loaded: 1048576});
         this.onload?.();
-      }, 100);
+      }, outcome === 'slow' && body ? body.size / 32768 * 1000 : 100);
     }
   }
   const context = vm.createContext({
@@ -41,10 +42,10 @@ function simulate(kind, outcome) {
   });
   vm.runInContext(fs.readFileSync(path.join(root, 'speedtest_worker.js'), 'utf8'), context);
   Object.assign(context.settings, {
-    forceIE11Workaround: true, xhr_ignoreErrors: 0,
+    forceIE11Workaround: true, xhr_ignoreErrors: 0, mpot,
     xhr_ul_blob_megabytes: 4, xhr_ulMultistream: 4, xhr_dlMultistream: 4,
     time_ulGraceTime: 0, time_dlGraceTime: 0,
-    time_ul_max: 1, time_dl_max: 1, time_auto: false,
+    time_ul_max: outcome === 'slow' ? 15 : 1, time_dl_max: 1, time_auto: false,
     overheadCompensationFactor: 1, count_ping: 3
   });
   context.testState = {upload: 3, download: 1, ping: 2}[kind];
@@ -59,10 +60,12 @@ function simulate(kind, outcome) {
   }
   assert.ok(finished);
   const result = context[{upload: 'ulStatus', download: 'dlStatus', ping: 'pingStatus'}[kind]];
-  if (outcome === 'success') assert.ok(Number(result) > 0, result);
+  if (['success','slow','warmup-timeout'].includes(outcome)) assert.ok(Number(result) > 0, result);
   else assert.equal(result, 'Fail');
   if (kind === 'upload') {
-    assert.ok(requests.every(r => r.bytes === 4 * 1048576));
+    assert.ok(requests.filter(r => r.bytes).every(r => r.bytes >= 16384 && r.bytes <= 4 * 1048576));
+    assert.equal(requests.find(r => r.bytes)?.bytes, 65536);
+    if (mpot) { assert.equal(requests[0].timeout, 3000); assert.ok(requests[0].url.includes('cors=true')); }
     if (outcome === 'success') assert.ok(requests.length >= 4);
   }
 }
@@ -95,3 +98,8 @@ c.connectionTestUpload.textContent = '—';
 c.finishConnectionTest(false);
 assert.equal(c.connectionTestStatus.textContent, 'connectionTestFailed');
 console.log('PASS completion requires all measurements');
+
+
+simulate('upload', 'slow', true);
+simulate('upload', 'warmup-timeout', true);
+console.log('PASS slow upload and bounded cross-origin warmup');

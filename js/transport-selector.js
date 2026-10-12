@@ -42,7 +42,7 @@
       rigaCountry: 'Latvia',
       protocol: "Protocol",
       mode: "Routing",
-      saved: "Saved",
+      saved: "Applied",
       saving: "Saving…",
       failed: "Could not save",
       loading: "Loading…",
@@ -58,7 +58,7 @@
       rigaCountry: 'Латвия',
       protocol: "Протокол",
       mode: "Маршрутизация",
-      saved: "Сохранено",
+      saved: "Применено",
       saving: "Сохранение…",
       failed: "Не удалось сохранить",
       loading: "Загрузка…",
@@ -74,7 +74,7 @@
       rigaCountry: 'Latvija',
       protocol: "Protokols",
       mode: "Maršrutēšana",
-      saved: "Saglabāts",
+      saved: "Piemērots",
       saving: "Saglabāšana…",
       failed: "Neizdevās saglabāt",
       loading: "Ielāde…",
@@ -166,7 +166,7 @@
         if (requestToken !== sessionRequestToken || device()?.id !== selected.id) return;
         if (data.username !== selected.username || !['auto','ru','lv','yt'].includes(data.mode)) throw new Error('Invalid policy');
         anyConnectMode = data.mode; selectedMode = data.mode; policyConfirmed = data.applied === true;
-        setModeStatus(policyConfirmed ? '' : copy().pending);
+        setModeStatus(policyConfirmed ? copy().saved : copy().pending);
         if (!policyConfirmed) { sessionConnected = false; return; }
       }
       const response = await fetch(endpoint(selected.id, "session"), {
@@ -199,7 +199,7 @@
     if (policyLoaded || policyBusy) return;
     policyBusy = true;
     policyConfirmed = false;
-    setModeStatus("");
+    setModeStatus(copy().loading);
     renderMode();
     try {
       const response = await fetch(endpoint(selected.id, "policy"), {
@@ -215,7 +215,7 @@
       anyConnectMode = data.mode;
       policyLoaded = true;
       policyConfirmed = data.applied === true;
-      setModeStatus(policyConfirmed ? '' : copy().pending);
+      setModeStatus(policyConfirmed ? copy().saved : copy().pending);
     } catch (error) {
       if (token !== selectionToken) return;
       console.error("AnyConnect policy load failed:", error);
@@ -242,7 +242,7 @@
     policyBusy = true;
     setSessionStatus("checking");
     policyConfirmed = false;
-    setModeStatus("");
+    setModeStatus(copy().saving);
     renderMode();
 
     try {
@@ -263,7 +263,7 @@
       anyConnectMode = data.mode;
       policyLoaded = true;
       policyConfirmed = true;
-      setModeStatus("");
+      setModeStatus(copy().saved);
     } catch (error) {
       if (token !== selectionToken) return;
       console.error("AnyConnect policy save failed:", error);

@@ -462,6 +462,7 @@ function ulTest(done) {
 			failed = false; // set to true if a stream fails
 		xhr = [];
 		// function to create an upload stream. streams are slightly delayed so that they will not end at the same time
+		var chunkSizes = [];
 		var testStream = function(i, delay) {
 			setTimeout(
 				function() {
@@ -482,7 +483,9 @@ function ulTest(done) {
 					}
 					if (ie11workaround) {
 						// Count only complete requests acknowledged with HTTP success.
-						// Use the configured payload, not a fixed 256 KiB Safari payload.
+						// Start small on slow uplinks; grow only after server acknowledgement.
+						var body = req.slice(0, chunkSizes[i] || 65536);
+						var sentAt = new Date().getTime();
 						xhr[i].onerror = xhr[i].ontimeout = function() {
 							failed = true;
 						};
@@ -492,13 +495,15 @@ function ulTest(done) {
 								failed = true;
 								return;
 							}
-							totLoaded += req.size;
+							totLoaded += body.size;
+							var elapsed = new Date().getTime() - sentAt;
+							chunkSizes[i] = Math.min(req.size, Math.max(16384, elapsed < 750 ? body.size * 2 : elapsed > 2000 ? body.size / 2 : body.size));
 							testStream(i, 0);
 						};
 						xhr[i].open("POST", settings.url_ul + url_sep(settings.url_ul) + (settings.mpot ? "cors=true&" : "") + "r=" + Math.random(), true); // random string to prevent caching
 						xhr[i].timeout = 30000;
 						//No Content-Type header in MPOT branch because it triggers bugs in some browsers
-						xhr[i].send(req);
+						xhr[i].send(body);
 					} else {
 						// REGULAR version, no workaround
 						xhr[i].upload.onprogress = function(event) {
@@ -585,15 +590,18 @@ function ulTest(done) {
 		);
 	}.bind(this);
 	if (settings.mpot) {
-		tverb("Sending POST request before performing upload test");
 		xhr = [];
-		xhr[0] = new XMLHttpRequest();
-		xhr[0].onload = xhr[0].onerror = function() {
-			tverb("POST request sent, starting upload test");
+		var warmup = new XMLHttpRequest();
+		xhr[0] = warmup;
+		var warmupFinished = false;
+		warmup.onload = warmup.onerror = warmup.ontimeout = function() {
+			if (warmupFinished || testState !== 3) return;
+			warmupFinished = true;
 			testFunction();
-		}.bind(this);
-		xhr[0].open("POST", settings.url_ul);
-		xhr[0].send();
+		};
+		warmup.open("POST", settings.url_ul + url_sep(settings.url_ul) + "cors=true&r=" + Math.random(), true);
+		warmup.timeout = 3000;
+		warmup.send();
 	} else testFunction();
 }
 // ping+jitter test, function done is called when it's over

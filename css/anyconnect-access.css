@@ -128,3 +128,53 @@ html[data-vpn-transport="anyconnect"] #vpnUsername { overflow-wrap: anywhere; }
  #anyConnectAccess .oc-destinations > .oc-action { height:auto; max-height:none; min-height:44px; padding:10px 12px; white-space:normal; }
  #anyConnectAccess .oc-action { box-sizing:border-box; white-space:normal; }
 }
+
+
+/* A single routing segment group. Selection is independent of session health. */
+#anyConnectModeSelector,
+#anyConnectAccess .oc-device-routing #anyConnectModeSelector {
+  display:grid;
+  grid-template-columns:minmax(72px,auto) repeat(3,48px);
+  gap:3px;
+  padding:3px;
+  height:44px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:var(--segment-background);
+  box-sizing:border-box;
+  width:max-content;
+  max-width:100%;
+}
+#anyConnectModeSelector .anyconnect-explicit-modes { display:contents; }
+#anyConnectModeSelector .anyconnect-mode-button,
+#anyConnectAccess .oc-device-routing #anyConnectModeSelector .anyconnect-mode-button {
+  height:36px;min-height:36px;max-height:36px;
+  min-width:0;padding:0 10px;margin:0;
+  border:1px solid transparent;border-radius:7px;
+  background:transparent;color:var(--secondary);
+}
+#anyConnectModeSelector .anyconnect-mode-button.active {
+  background:var(--card)!important;color:var(--text)!important;
+  border-color:var(--border)!important;
+}
+#anyConnectModeSelector .anyconnect-mode-button.active::before { content:none; }
+#anyConnectModeSelector #anyConnectModeAuto { margin-right:7px; }
+#anyConnectModeSelector #anyConnectModeAuto::after {
+  content:"";position:absolute;right:-6px;top:6px;bottom:6px;
+  width:1px;background:var(--border);pointer-events:none;
+}
+#anyConnectModeSelector .anyconnect-mode-button:disabled { opacity:1;cursor:wait; }
+#anyConnectModeSelector .anyconnect-mode-button:focus-visible { outline:2px solid var(--text);outline-offset:1px; }
+
+.network-pair { padding:16px 0; }
+.network-pair + .network-pair { border-top:1px solid var(--border); }
+.network-pair-title { font-size:14px;font-weight:600;margin-bottom:12px; }
+.network-pair-values { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px; }
+.network-pair-value { display:flex;flex-direction:column;gap:6px;min-width:0; }
+.network-pair-label,.network-pair-time { color:var(--secondary);font-size:12px;line-height:1.5; }
+.network-pair-value strong { font-size:15px;font-weight:500;font-variant-numeric:tabular-nums; }
+.network-pair-time { margin-top:12px; }
+@media(max-width:520px) {
+  .network-pair-values { grid-template-columns:1fr;gap:9px; }
+  .network-pair-value { flex-direction:row;justify-content:space-between;gap:10px; }
+}
