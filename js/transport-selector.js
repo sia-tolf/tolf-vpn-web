@@ -355,6 +355,7 @@
     anyConnectMode = device()?.mode || "auto";
     setModeStatus("");
     render();
+    window.dispatchEvent(new Event('tolf:ingress-changed'));
   };
 
   window.refreshAnyConnectIngress = () => {

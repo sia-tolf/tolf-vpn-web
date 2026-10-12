@@ -20,7 +20,7 @@ class Element {
   replaceChildren(...items) { this._text = ''; this.children = items; }
   setAttribute(name, value) { this.attributes[name] = value; }
   removeAttribute(name) { delete this.attributes[name]; }
-  addEventListener(name, fn) { this.events[name] = fn; }
+  addEventListener(name, fn) { const previous=this.events[name]; this.events[name]=(...args)=>{previous?.(...args); return fn(...args);}; }
   click() { assert.equal(this.disabled, false); this.clicked = true; return this.events.click?.(); }
   remove() { this.removed = true; }
   focus() {}
@@ -36,7 +36,7 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   const ids = {};
   for (const name of ['vpnTransportSelector','vpnTransportIkev2','vpnTransportAnyConnect','vpnOverviewTitle',
     'vpnStatus','usernameRow','vpnUsername','anyConnectModeRow','anyConnectModeLabel','anyConnectModeHelp',
-    'anyConnectModeStatus','anyConnectModeSelector','anyConnectAccess','serverRiga','serverMoscow']) ids[name] = new Element();
+    'anyConnectModeStatus','anyConnectModeSelector','anyConnectAccess','serverRiga','serverMoscow','networkMetrics','networkMetricMeasuredAt']) ids[name] = new Element();
   ids.serverRiga.value='riga';ids.serverRiga.checked=true;ids.serverMoscow.value='moscow';
   const modes = ['auto','ru','lv','yt'].map(mode => { const n = new Element('button'); n.dataset.mode = mode; return n; });
   ids.anyConnectModeAuto = modes[0];
@@ -48,7 +48,7 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   const handlers = {}, window = {tolfAccountState:{authenticated:true,userId:'owner',vpn:{username:'user0_ipad'}},
     addEventListener(name, fn) { (handlers[name] ||= []).push(fn); },
     dispatchEvent(event) { for (const fn of handlers[event.type] || []) fn(event); },
-    confirm: () => true};
+    confirm: () => true, setInterval(){}};
   const first = {id:'one',label:'iPad',username:'tolf-oc-'+'1'.repeat(32),state:'active',mode:'auto'};
   const second = {id:'two',label:'Phone',username:'tolf-oc-'+'2'.repeat(32),state:'active',mode:'lv'};
   const devices = [first,second], calls = [];
@@ -92,6 +92,7 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
     URL:class extends URL {static createObjectURL(blob){assert.equal(blob.type,'application/octet-stream');return 'blob:test-package';}
       static revokeObjectURL(url){revokedUrls.push(url);}},
     fetch:async (url,options)=>{
+      if(url==='https://api.tolf.is/network-metrics') return {ok:true,json:async()=>({pairs:[{source:'riga',target:'moscow'},{source:'riga',target:'us'},{source:'moscow',target:'us'}]})};
       if(url==='https://api.tolf.is/import/token.p12'){
         downloads.push(url);return {ok:true,arrayBuffer:async()=>new Uint8Array([48,2,1,0]).buffer};
       }
@@ -102,6 +103,8 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   for (const file of ['ios-vpn-buttons.js','transport-selector.js','anyconnect-access.js']) {
     vm.runInContext(withShares(fs.readFileSync(path.join(root,'js',file),'utf8')),c);
   }
+  c.getConnectionTestServerKey=()=>c.getSelectedServerKey();
+  vm.runInContext(fs.readFileSync(path.join(root,'js/network-metrics.js'),'utf8'),c);
   ids.vpnTransportAnyConnect.click(); await settle();
   // iPhone now uses one authenticated MobileConfig with a linked certificate.
   const iosInstall=descendants(ids.anyConnectAccess).find(n=>n.tagName==='a'&&n.textContent==='Установить профиль AnyConnect');
@@ -311,6 +314,14 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   assert(descendants(ids.anyConnectAccess).some(n=>n.href?.includes('ios.mobileconfig?ingress=moscow&buttons=true')));
   window.ocAccess.selectIngress('us');
   assert.equal(window.ocAccess.ingress().host,'oc-us.tolf.is:4443');
+  // Simulate a reload: saved New York precedes asynchronous capabilities.
+  vm.runInContext(fs.readFileSync(path.join(root,'js/anyconnect-access.js'),'utf8'),c);
+  window.dispatchEvent(new c.Event('tolf:network-context-changed'));
+  await settle();
+  assert.equal(window.ocAccess.ingress().id,'us');
+  assert.equal(ids.networkMetrics.children[0].children[0].textContent,'Нью-Йорк ↔ Рига');
+  assert.equal(ids.networkMetrics.children[1].children[0].textContent,'Нью-Йорк ↔ Москва');
+
   let usPanel=descendants(ids.anyConnectAccess);
   assert(!usPanel.some(n=>n.type==='checkbox'),'US must not install another city shortcut');
   const usInstall=usPanel.find(n=>n.href?.includes('ios.mobileconfig?ingress=us'));

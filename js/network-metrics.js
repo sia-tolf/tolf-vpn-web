@@ -69,7 +69,7 @@ function networkPairsForIngress(pairs, ingress) {
     finally { clearTimeout(timer); render(); }
   }
   function start() {
-    for (const event of ['vpntransportchange','vpnplatformchange','tolf:network-context-changed']) window.addEventListener(event, render);
+    for (const event of ['vpntransportchange','vpnplatformchange','tolf:network-context-changed','tolf:ingress-changed']) window.addEventListener(event, render);
     document.getElementById('windowsDeviceServer')?.addEventListener('change', render);
     for (const input of typeof serverInputs !== 'undefined' ? serverInputs : []) input.addEventListener('change', render);
     new MutationObserver(render).observe(document.documentElement, {attributes:true, attributeFilter:['lang']});
