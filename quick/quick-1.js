@@ -28,6 +28,25 @@ let server = null;
 let iosButtons = get('quickIosButtons') === 'true';
 let platform = windowsQuickBlocked?'windows':nativePlatform;
 
+const clientKey=(nativePlatform==='windows'?'tolfOpenConnectInstalled:':'tolfCiscoInstalled:')+nativePlatform;
+let clientInstalled=false;
+try { clientInstalled=localStorage.getItem(clientKey)==='true'; } catch {}
+const clientReady=()=>protocol!=='anyconnect'||clientInstalled;
+const clientCopy=()=>{
+ const name=nativePlatform==='windows'?'OpenConnect GUI':'Cisco Secure Client';
+ return {
+ ru:{install:'Установить '+name,confirmed:name+' установлен',required:'Подтвердите установку клиента, чтобы продолжить.'},
+ en:{install:'Install '+name,confirmed:name+' is installed',required:'Confirm client installation to continue.'},
+ lv:{install:'Instalēt '+name,confirmed:name+' ir instalēts',required:'Lai turpinātu, apstipriniet klienta instalēšanu.'}
+ }[lang];
+};
+$('quickClientConfirmed').onchange=()=>{
+ clientInstalled=$('quickClientConfirmed').checked;
+ try { localStorage.setItem(clientKey,String(clientInstalled)); } catch {}
+ if(!clientInstalled){ocGrant=null;ocConfirmed=false;ocImported=false;clearTimeout(ocExpiryTimer);}
+ if(ocDevice && nativePlatform!=='ios' && clientInstalled)panels('ocDelivery');else render();
+};
+
 let uncertain = get('quickRegistration') === 'pending';
 let loadNumber = 0;
 const suggestedPasskeyName = /iPad/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1) ? 'iPad' : nativePlatform==='ios'?'iPhone':nativePlatform==='windows'?'Windows':'Android';
@@ -39,7 +58,7 @@ function render() {
  $('prepare').hidden = protocol === 'anyconnect' && nativePlatform === 'ios' && iosButtons && !!ocDevice;
  const options = $('iosVpnButtons');
  $('iosProfileSave').replaceChildren();
- options.hidden = !(protocol === 'anyconnect' && nativePlatform === 'ios') || server==='us';
+ options.hidden = !(protocol === 'anyconnect' && nativePlatform === 'ios') || server==='us' || !clientReady();
  if (!options.hidden) {
    const url = ocDevice ? new URL(API+'/oc/access/devices/'+encodeURIComponent(ocDevice.id)+'/ios.mobileconfig') : null;
    if (url) url.searchParams.set('ingress', server);
@@ -54,6 +73,14 @@ function render() {
  if(back){back.href='/?lang='+lang;back.setAttribute('aria-label',({ru:'Назад в Мой VPN',en:'Back to My VPN',lv:'Atpakaļ uz Mans VPN'})[lang]);}
  document.querySelectorAll('[data-text]').forEach(el => el.textContent = t(el.dataset.text));
  $('passkeyHelp').textContent = accountText[lang][2];
+ if(protocol==='anyconnect' && nativePlatform==='windows'){
+   $('ocWindowsConnection').textContent=t('ocWindowsConnection').replace('Cisco Secure Client','OpenConnect GUI');
+   $('ocWindowsCertificate').textContent={
+     ru:'Скачайте файл .p12. Укажите его как клиентский сертификат в профиле OpenConnect GUI и используйте указанный пароль.',
+     en:'Download the .p12 file. Select it as the client certificate in the OpenConnect GUI profile and use the displayed password.',
+     lv:'Lejupielādējiet .p12 failu. Atlasiet to kā klienta sertifikātu OpenConnect GUI profilā un izmantojiet norādīto paroli.'
+   }[lang];
+ }
  if (protocol === 'anyconnect' && platform === 'ios') {
    $('prepare').textContent = t('ocIosInstall');
    const hint=document.querySelector('[data-text="defaults"]');
@@ -74,6 +101,18 @@ function render() {
  $('login').hidden = false;
  if(profile) renderDelivery();
  if(ocDevice)renderOcDelivery();
+ const cc=clientCopy();
+ $('quickClientInstall').hidden=protocol!=='anyconnect';
+ $('quickClientConfirmed').checked=clientInstalled;
+ $('quickClientConfirmed').disabled=busy;
+ $('quickClientConfirmedLabel').textContent=cc.confirmed;
+ $('quickClientRequired').textContent=clientInstalled?'':cc.required;
+ $('ocApp').textContent=cc.install;
+ $('ocApp').href=nativePlatform==='ios'?'https://apps.apple.com/app/id1135064690':nativePlatform==='android'?'https://play.google.com/store/apps/details?id=com.cisco.anyconnect.vpn.android.avf':'https://gui.openconnect-vpn.net/';
+ $('ocControl').hidden=nativePlatform==='windows';
+ $('prepare').disabled ||= !clientReady();
+ if(!clientReady()){$('ocDelivery').hidden=true;$('iosProfileSave').replaceChildren();}
+
 
 }
 function panels(name) {
@@ -158,7 +197,7 @@ $('retry').onclick=()=>initialize();
 $('register').onclick=()=>accountAuth('signup');
 $('login').onclick=()=>accountAuth('signin');
 async function prepare() {
- if(!authenticated||!ready||!nativePlatform||(windowsQuickBlocked&&protocol==='ikev2'))return;
+ if(!clientReady()||!authenticated||!ready||!nativePlatform||(windowsQuickBlocked&&protocol==='ikev2'))return;
  locked=true;$('choices').hidden=true; message('busy');
  if(protocol==='anyconnect'){await prepareOc();return;}
  const data=await api('/quick-setup/prepare',{method:'POST',body:JSON.stringify({platform:nativePlatform,server,language:lang,currentDevice:true})});
@@ -205,6 +244,7 @@ function validateOcGrant(grant){
  return point;
 }
 async function prepareOc(){
+ if(!clientReady())return;
  if(!accountId)throw Error('Account unavailable');
  let deviceId=get(ocKey('device'));
  if(deviceId){
@@ -243,7 +283,7 @@ async function prepareOc(){
  panels('ocDelivery');message('');
 }
 async function prepareOcImport(){
- if(!ocDevice||!ocConfirmed)return;
+ if(!clientReady()||!ocDevice||!ocConfirmed)return;
  ocImported=false;ocGrant=null;
  const deviceId=ocDevice.id;
  const grant=await api('/oc/access/devices/'+encodeURIComponent(deviceId)+'/import',{method:'POST',body:'{}'});
@@ -256,7 +296,7 @@ async function prepareOcImport(){
 }
 function renderOcDelivery(){
  const mobile=nativePlatform!=='windows',valid=ocGrant&&Date.parse(ocGrant.expiresAt)>Date.now()&&ocConfirmed&&!ocImported;
- $('ocApp').href=nativePlatform==='ios'?'https://apps.apple.com/app/id1135064690':nativePlatform==='android'?'https://play.google.com/store/apps/details?id=com.cisco.anyconnect.vpn.android.avf':'https://www.cisco.com/c/en/us/support/security/secure-client-5/model.html';
+ $('ocApp').href=nativePlatform==='ios'?'https://apps.apple.com/app/id1135064690':nativePlatform==='android'?'https://play.google.com/store/apps/details?id=com.cisco.anyconnect.vpn.android.avf':'https://gui.openconnect-vpn.net/';
  const prefix='TOLF '+({riga:'Riga',moscow:'Moscow',us:'New York'}[server])+' ';
  const name=ocDevice.connectionNames?.[server]||Array.from(prefix+ocDevice.label).slice(0,24).join('').trimEnd();
  $('ocConnection').href='anyconnect://create/?'+new URLSearchParams({name,host:ocPoint.host,usecert:'true',certcommonname:ocDevice.username,netroam:'true'});
@@ -278,16 +318,16 @@ function renderOcDelivery(){
  $('ocCopyPassword').title=t('ocCopyPassword');
  $('ocCopyPassword').disabled=busy||!valid;$('ocDownload').disabled=busy||!valid;
 }
-$('ocConfirmConnection').onclick=()=>{if(busy||!ocDevice)return;ocConfirmed=true;message('');};
+$('ocConfirmConnection').onclick=()=>{if(!clientReady()||busy||!ocDevice)return;ocConfirmed=true;message('');};
 $('ocAgain').onclick=()=>{if(busy)return;ocConfirmed=false;ocImported=false;ocGrant=null;clearTimeout(ocExpiryTimer);message('');};
-$('ocAlreadyImported').onclick=()=>{if(busy||!ocConfirmed)return;ocImported=true;ocGrant=null;clearTimeout(ocExpiryTimer);message('');};
-$('ocConnection').onclick=event=>{if(busy||!ocDevice)event.preventDefault();};
+$('ocAlreadyImported').onclick=()=>{if(!clientReady()||busy||!ocConfirmed)return;ocImported=true;ocGrant=null;clearTimeout(ocExpiryTimer);message('');};
+$('ocConnection').onclick=event=>{if(!clientReady()||busy||!ocDevice)event.preventDefault();};
 
-$('ocCopyPassword').onclick=()=>action(async()=>{if(!ocGrant||Date.parse(ocGrant.expiresAt)<=Date.now())throw Error('Expired');await navigator.clipboard.writeText(ocGrant.password);message('copied');});
-$('ocImport').onclick=event=>{if(!ocGrant||Date.parse(ocGrant.expiresAt)<=Date.now()){event.preventDefault();message('ocExpired',true);}};
+$('ocCopyPassword').onclick=()=>action(async()=>{if(!clientReady()||!ocGrant||Date.parse(ocGrant.expiresAt)<=Date.now())throw Error('Expired');await navigator.clipboard.writeText(ocGrant.password);message('copied');});
+$('ocImport').onclick=event=>{if(!clientReady()||!ocGrant||Date.parse(ocGrant.expiresAt)<=Date.now()){event.preventDefault();message('ocExpired',true);}};
 $('ocRenew').onclick=()=>action(prepareOcImport);
 $('ocDownload').onclick=()=>action(async()=>{
- if(!ocGrant||Date.parse(ocGrant.expiresAt)<=Date.now())throw Error('Expired');
+ if(!clientReady()||!ocGrant||Date.parse(ocGrant.expiresAt)<=Date.now())throw Error('Expired');
  const response=await fetch(ocGrant.certificateUrl,{credentials:'omit',cache:'no-store',signal:AbortSignal.timeout(20000)});
  if(!response.ok)throw Error('Download failed');
  const url=URL.createObjectURL(await response.blob()),a=document.createElement('a');

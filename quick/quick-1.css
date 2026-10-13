@@ -23,3 +23,7 @@ header > #backHome .tolf-wordmark{letter-spacing:.16em}
 @media(max-width:500px){
  #ocDelivery #anyConnectAccess .oc-action:not(.oc-retry-link){font-size:14px!important;padding-inline:8px!important}
 }
+
+.quick-client-confirm{display:flex;align-items:center;gap:10px;font-weight:400}
+.quick-client-confirm input{width:20px;height:20px;min-height:20px;padding:0;flex:0 0 20px}
+#quickClientInstall #ocApp{width:100%;box-sizing:border-box}

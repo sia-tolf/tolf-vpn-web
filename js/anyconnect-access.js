@@ -175,7 +175,20 @@
     statusBadge.textContent = d.state !== "active" ? (d.state === "pending" ? copy().pending : copy().revoking) : sessionCopy()[state] + (points.length ? ' · ' + points.join(', ') : '');
     statusBadge.className = "oc-device-status oc-session-" + state;
   };
-  const copy = () => COPY[document.documentElement.lang] || COPY.en;
+  const copy = () => {
+    const base=COPY[document.documentElement.lang] || COPY.en;
+    if(currentPlatform!=="windows")return base;
+    const extra={
+      ru:{return:"Создайте профиль подключения в OpenConnect GUI с адресом выбранной точки входа. Затем получите сертификат в шаге 4.",windows:"Скачайте файл .p12. В настройках профиля OpenConnect GUI укажите этот файл как клиентский сертификат и используйте указанный пароль.",passwordHelp:"Этот пароль понадобится для открытия файла сертификата .p12 в OpenConnect GUI."},
+      en:{return:"Create a connection profile in OpenConnect GUI using the selected entry point address. Then get the certificate in step 4.",windows:"Download the .p12 file. Select this file as the client certificate in the OpenConnect GUI profile and use the displayed password.",passwordHelp:"Use this password to open the .p12 certificate file in OpenConnect GUI."},
+      lv:{return:"Izveidojiet savienojuma profilu OpenConnect GUI ar atlasītā ieejas punkta adresi. Pēc tam saņemiet sertifikātu 4. solī.",windows:"Lejupielādējiet .p12 failu. OpenConnect GUI profilā atlasiet šo failu kā klienta sertifikātu un izmantojiet norādīto paroli.",passwordHelp:"Izmantojiet šo paroli, lai OpenConnect GUI atvērtu .p12 sertifikāta failu."}
+    }[document.documentElement.lang] || {
+      return:"Create a connection profile in OpenConnect GUI, then get the certificate in step 4.",
+      windows:"Select the downloaded .p12 file as the client certificate in OpenConnect GUI.",
+      passwordHelp:"Use this password with the .p12 certificate in OpenConnect GUI."
+    };
+    return {...base,...extra};
+  };
   const selected = () => window.isCiscoClientConfirmed?.(currentPlatform) ? devices.find(d => d.id === selectedId && d.state === "active") || null : null;
   window.ocAccess = { selected, accountUsername: () => account?.vpn?.username || "", ingress, ingresses, selectIngress };
   const path = id => "/oc/access/devices/" + encodeURIComponent(id);
@@ -571,7 +584,7 @@
     if (error || (!loading && capabilities?.issuance !== true)) {
       root.append(button(c.refresh, () => { message = ""; error = false; refresh(); }));
     }
-    root.append(link(c.docs, GUIDE));
+    root.append(link(currentPlatform === "windows" ? "OpenConnect GUI" : c.docs, currentPlatform === "windows" ? "https://gui.openconnect-vpn.net/" : GUIDE));
   }
   window.setAnyConnectAccount = data => {
     if (account?.userId === data?.userId && account) {

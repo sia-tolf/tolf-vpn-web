@@ -8,10 +8,14 @@
   en:{title:'1. Install Cisco Secure Client (AnyConnect).',install:'Install Cisco Secure Client',confirmed:'Cisco Secure Client is installed',blocked:'Confirm Cisco Secure Client installation in My VPN to continue.',back:'Confirm installation'},
   lv:{title:'1. Instalējiet Cisco Secure Client (AnyConnect).',install:'Instalēt Cisco Secure Client',confirmed:'Cisco Secure Client ir instalēts',blocked:'Lai turpinātu, sadaļā Mans VPN apstipriniet Cisco Secure Client instalēšanu.',back:'Apstiprināt instalēšanu'}
  };
- const copy=()=>texts[document.documentElement.lang]||texts.en;
+ const copy=()=>{
+  const c={...(texts[document.documentElement.lang]||texts.en)};
+  if(platform()==='windows')for(const key of ['title','install','confirmed','blocked'])c[key]=c[key].replaceAll('Cisco Secure Client','OpenConnect GUI');
+  return c;
+ };
  const platform=()=>typeof currentPlatform!=='undefined'?currentPlatform:'ios';
  const transport=()=>window.getVpnTransport?.()||(()=>{try{return sessionStorage.getItem('tolfTransport')||'ikev2';}catch{return 'ikev2';}})();
- const key=p=>'tolfCiscoInstalled:'+p;
+ const key=p=>(p==='windows'?'tolfOpenConnectInstalled:':'tolfCiscoInstalled:')+p;
  window.isCiscoClientConfirmed=p=>{
   p=p||platform();if(!['ios','android','windows'].includes(p))return false;
   try{return localStorage.getItem(key(p))==='true';}catch{return remembered.has(p);}
@@ -28,7 +32,7 @@
   const title=document.createElement('h3');title.textContent=c.title;
   const app=document.createElement('a');app.className='button-link secondary';
   app.textContent=c.install;app.target='_blank';app.rel='noopener noreferrer';
-  app.href=p==='ios'?'https://apps.apple.com/app/id1135064690':p==='android'?'https://play.google.com/store/apps/details?id=com.cisco.anyconnect.vpn.android.avf':'https://www.cisco.com/c/en/us/support/security/secure-client-5/model.html';
+  app.href=p==='ios'?'https://apps.apple.com/app/id1135064690':p==='android'?'https://play.google.com/store/apps/details?id=com.cisco.anyconnect.vpn.android.avf':'https://gui.openconnect-vpn.net/';
   const label=document.createElement('label');label.className='cisco-install-confirm';
   const check=document.createElement('input');check.type='checkbox';check.checked=window.isCiscoClientConfirmed(p);
   check.addEventListener('change',()=>{

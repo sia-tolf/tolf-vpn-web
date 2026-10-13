@@ -48,4 +48,7 @@ c.currentPlatform='android';window.dispatchEvent(new c.Event('vpnplatformchange'
 assert.equal(ids.manualSetupLink.attributes['aria-disabled'],'true');
 transport='ikev2';window.dispatchEvent(new c.Event('vpntransportchange'));assert.equal(ids.manualSetupLink.attributes['aria-disabled'],'false');
 assert(ids.ciscoClientInstall.classList.contains('hidden'));
+c.currentPlatform='windows';transport='anyconnect';window.dispatchEvent(new c.Event('vpnplatformchange'));
+assert.equal(descendants(ids.ciscoClientInstall).find(n=>n.tagName==='a').href,'https://gui.openconnect-vpn.net/');
+assert(ids.ciscoClientInstall.textContent.includes('OpenConnect GUI'));
 console.log('PASS Cisco installation confirmation: navigation blocked, persisted per platform, IKEv2 unaffected');

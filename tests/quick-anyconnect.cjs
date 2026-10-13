@@ -14,7 +14,7 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
  const host=node==='us'?'oc-us.tolf.is:4443':node==='riga'?'oc-riga.tolf.is:443':'oc.tolf.is:4443';
  const cert='https://api.tolf.is/oc/access/import/TEST.p12';
  const grant={deviceId:device,password:'TEST-ONLY-PASSWORD',expiresAt:new Date(Date.now()+7200000).toISOString(),certificateUrl:tamper?'https://example.invalid/test.p12':cert,username:'test-certificate-user',importUri:'anyconnect://import/?type=pkcs12&uri='+encodeURIComponent(cert),connections:[{id:node,host,connectionUri:'anyconnect://create/?host='+encodeURIComponent(host)+'&certcommonname=test-certificate-user'}]};
- const ctx={URL,URLSearchParams,AbortSignal,location:{href:'https://vpn.tolf.is/quick/?protocol=anyconnect'+(node==='us'?'&ingress=us':'')},navigator:{userAgent:ua,platform:ua==='desktop-ipad'?'MacIntel':'',maxTouchPoints:ua==='desktop-ipad'?5:0,language:'ru',clipboard:{writeText:async()=>{}}},crypto:{randomUUID:()=> 'test-request-id'},localStorage:{getItem:()=>null,setItem(){}},sessionStorage:{getItem:k=>store.get(k),setItem:(k,v)=>store.set(k,v),removeItem:k=>store.delete(k)},document:{getElementById:element,documentElement:{lang:'ru'},querySelectorAll:()=>[],querySelector:()=>element('defaults'),body:{append(){}},createElement:()=>makeElement()},window:{addEventListener(){},location:{assign(url){assigned=url;}}},setTimeout:()=>0,clearTimeout(){},
+ const ctx={URL,URLSearchParams,AbortSignal,location:{href:'https://vpn.tolf.is/quick/?protocol=anyconnect'+(node==='us'?'&ingress=us':'')},navigator:{userAgent:ua,platform:ua==='desktop-ipad'?'MacIntel':'',maxTouchPoints:ua==='desktop-ipad'?5:0,language:'ru',clipboard:{writeText:async()=>{}}},crypto:{randomUUID:()=> 'test-request-id'},localStorage:{getItem:k=>map.get('storage:'+k),setItem(k,v){map.set('storage:'+k,v)}},sessionStorage:{getItem:k=>store.get(k),setItem:(k,v)=>store.set(k,v),removeItem:k=>store.delete(k)},document:{getElementById:element,documentElement:{lang:'ru'},querySelectorAll:()=>[],querySelector:()=>element('defaults'),body:{append(){}},createElement:()=>makeElement()},window:{addEventListener(){},location:{assign(url){assigned=url;}}},setTimeout:()=>0,clearTimeout(){},
  fetch:async(url,opt={})=>{
  let data;
  if(url.endsWith('/quick-setup/capabilities'))data={version:1};
@@ -34,6 +34,14 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
  vm.createContext(ctx);vm.runInContext(strings,ctx);vm.runInContext(withShares(fs.readFileSync('js/ios-vpn-buttons.js','utf8')),ctx);vm.runInContext(source,ctx);
  for(let i=0;i<40;i++)await Promise.resolve();
  if(missingNode){assert.equal(element('prepare').disabled,true);assert.equal(created.length,0);return;}
+ assert.equal(element('quickClientInstall').hidden,false);
+ assert.equal(element('prepare').disabled,true);
+ await element('prepare').onclick();
+ assert.equal(created.length,0,'unconfirmed client cannot issue VPN access');
+ assert.equal(assigned,undefined);
+ assert.equal(element('ocApp').href,platform==='ios'?'https://apps.apple.com/app/id1135064690':platform==='android'?'https://play.google.com/store/apps/details?id=com.cisco.anyconnect.vpn.android.avf':'https://gui.openconnect-vpn.net/');
+ element('quickClientConfirmed').checked=true;element('quickClientConfirmed').onchange();
+ assert.equal(element('prepare').disabled,false);
  if(platform==='ios' && node!=='us'){
   const option=descendants(element('iosVpnButtons')).find(n=>n.type==='checkbox');
   assert.equal(option.checked,false);
