@@ -1,11 +1,13 @@
 // Short sequential probes; never report their rates as connection speed.
 async function checkUploadPath(onresult = () => {}, {fetcher = fetch, timeout = 4000} = {}) {
-  const bytes = new Uint8Array(65536);
-  crypto.getRandomValues(bytes);
+  const bytes = new Uint8Array(524288);
+  for (let offset=0;offset<bytes.length;offset+=65536) crypto.getRandomValues(bytes.subarray(offset,offset+65536));
   const probes = [
-    ['Нью-Йорк', 'https://ikev2-us.tolf.is:8443/', 65536],
-    ['Нью-Йорк повторно', 'https://ikev2-us.tolf.is:8443/', 65536],
-    ['Рига', 'https://ikev2-riga.tolf.is:8443/', 65536]
+    ['Нью-Йорк · обычный обработчик :8443', 'https://ikev2-us.tolf.is:8443/', 65536],
+    ['Нью-Йорк · тестовый обработчик :443', 'https://ikev2-us.tolf.is/', 65536],
+    ['Нью-Йорк · тестовый обработчик :443', 'https://ikev2-us.tolf.is/', 524288],
+    ['Нью-Йорк · тестовый обработчик :443 повторно', 'https://ikev2-us.tolf.is/', 65536],
+    ['Рига · контроль', 'https://ikev2-riga.tolf.is:8443/', 65536]
   ];
   const results = [];
   for (let i = 0; i < probes.length; i++) {
@@ -23,7 +25,7 @@ async function checkUploadPath(onresult = () => {}, {fetcher = fetch, timeout = 
       });
       await response.arrayBuffer();
       result = {step:i+1, city, bytes:size, status:response.status,
-        result:response.ok ? 'принято' : 'ошибка HTTP'};
+        result:response.ok ? (server === 'https://ikev2-us.tolf.is/' ? (response.headers.get('X-Tolf-Received-Bytes') === String(size) ? 'получение подтверждено сервером' : 'число полученных байтов не подтверждено') : 'принято') : 'ошибка HTTP'};
     } catch (error) {
       result = {step:i+1, city, bytes:size, result:expired ? 'тайм-аут' : 'ошибка сети'};
     } finally { clearTimeout(timer); }
