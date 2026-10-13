@@ -134,6 +134,8 @@ html[data-vpn-transport="anyconnect"] #vpnUsername { overflow-wrap: anywhere; }
 #anyConnectModeSelector,
 #anyConnectAccess .oc-device-routing #anyConnectModeSelector {
   display:grid;
+  justify-self:end;
+  margin-inline-start:auto;
   grid-template-columns:minmax(72px,auto) repeat(3,48px);
   gap:3px;
   padding:3px;
