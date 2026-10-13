@@ -133,10 +133,10 @@ html[data-vpn-transport="anyconnect"] #vpnUsername { overflow-wrap: anywhere; }
 /* A single routing segment group. Selection is independent of session health. */
 #anyConnectModeSelector,
 #anyConnectAccess .oc-device-routing #anyConnectModeSelector {
-  display:grid;
+  display:flex;
+  flex-wrap:nowrap;
   justify-self:end;
   margin-inline-start:auto;
-  grid-template-columns:minmax(72px,auto) repeat(3,48px);
   gap:3px;
   padding:3px;
   height:44px;
@@ -151,7 +151,7 @@ html[data-vpn-transport="anyconnect"] #vpnUsername { overflow-wrap: anywhere; }
 #anyConnectModeSelector .anyconnect-mode-button,
 #anyConnectAccess .oc-device-routing #anyConnectModeSelector .anyconnect-mode-button {
   height:36px;min-height:36px;max-height:36px;
-  min-width:0;padding:0 10px;margin:0;
+  min-width:0;padding:0 10px;margin:0;white-space:nowrap;
   border:1px solid transparent;border-radius:7px;
   background:transparent;color:var(--secondary);
 }
@@ -181,4 +181,10 @@ html[data-vpn-transport="anyconnect"] #vpnUsername { overflow-wrap: anywhere; }
   .network-pair-value { flex-direction:row;justify-content:space-between;gap:10px; }
 }
 
-#anyConnectModeSelector.has-us { grid-template-columns:minmax(60px,auto) repeat(4,minmax(36px,48px)); }
+
+
+.cisco-client-install { margin:16px 0; }
+.cisco-client-install h3 { font-size:16px;font-weight:500; }
+.cisco-client-install > .button-link { display:flex;justify-content:center;margin:12px 0; }
+.cisco-install-confirm { display:flex;align-items:center;gap:10px;margin:12px 0;font-weight:400; }
+.cisco-install-confirm input { width:20px;height:20px; }

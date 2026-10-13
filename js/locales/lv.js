@@ -228,6 +228,7 @@ I18N.lv = {
   cityRiga: "Rīga",
   entryPointRecommended: "Ieteicams jūsu savienojumam.",
   entryPointRigaWarning: "Jūsu operators var ierobežot tiešus savienojumus no Krievijas.",
+  entryPointNewYorkWarning: "Tiešais savienojums ar Ņujorku var nebūt pieejams pie jūsu pakalpojumu sniedzēja.",
   cityMoscow: "Maskava",
   cityLondon: "Londona",
   cityNewYork: "Ņujorka",

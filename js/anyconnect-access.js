@@ -176,7 +176,7 @@
     statusBadge.className = "oc-device-status oc-session-" + state;
   };
   const copy = () => COPY[document.documentElement.lang] || COPY.en;
-  const selected = () => devices.find(d => d.id === selectedId && d.state === "active") || null;
+  const selected = () => window.isCiscoClientConfirmed?.(currentPlatform) ? devices.find(d => d.id === selectedId && d.state === "active") || null : null;
   window.ocAccess = { selected, accountUsername: () => account?.vpn?.username || "", ingress, ingresses, selectIngress };
   const path = id => "/oc/access/devices/" + encodeURIComponent(id);
   function connectionUri(d) {
@@ -305,7 +305,7 @@
     window.refreshAnyConnectTransport?.(); render();
   }
   async function perform(action) {
-    if (busy || loading || !account) return;
+    if (busy || loading || !account || !window.isCiscoClientConfirmed?.(currentPlatform)) return;
     const token = epoch;
     busy = true; message = ""; error = false; render();
     try { await action(token); }
@@ -328,15 +328,15 @@
     root.replaceChildren();
     if (!account) return;
     const c = copy(), mobile = currentPlatform !== "windows";
+    if (!window.isCiscoClientConfirmed?.(currentPlatform)) {
+      const gateCopy = window.getCiscoInstallCopy?.() || {blocked:"Confirm Cisco Secure Client installation in My VPN.",back:"Confirm installation"};
+      root.append(element("p",gateCopy.blocked,"oc-note"),button(gateCopy.back,()=>window.focusCiscoInstall?.()));
+      return;
+    }
     const header = element("div", null, "oc-access-header");
     header.append(element("h3", c.title));
     if (devices.length && !addingDevice) header.append(button(c.additional, () => { addingDevice = true; render(); }));
     root.append(header, element("p", c.separate, "oc-note"));
-    root.append(element("h4", "1. " + c.install));
-    const appUrl = currentPlatform === "ios" ? "https://apps.apple.com/app/id1135064690" :
-      currentPlatform === "android" ? "https://play.google.com/store/apps/details?id=com.cisco.anyconnect.vpn.android.avf" :
-      "https://www.cisco.com/c/en/us/support/security/secure-client-5/model.html";
-    root.append(link(c.app, appUrl));
     root.append(element("h4", "2. " + c.device));
     if (devices.length) {
       const label = element("label", c.device); label.setAttribute("for", "ocDeviceSelect"); root.append(label);
@@ -567,6 +567,7 @@
     window.refreshAnyConnectTransport?.(); render();
     if (account) refresh();
   };
+  window.addEventListener("tolf:cisco-install-confirmed",()=>{window.refreshAnyConnectTransport?.();render();});
   for (const event of ["vpntransportchange", "vpnplatformchange"]) window.addEventListener(event, render);
   new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
   setInterval(() => {

@@ -228,6 +228,7 @@ I18N.ru = {
   cityRiga: "Рига",
   entryPointRecommended: "Рекомендуется для вашего подключения.",
   entryPointRigaWarning: "Прямое подключение из России может быть ограничено вашим оператором.",
+  entryPointNewYorkWarning: "Прямое подключение к Нью-Йорку может быть недоступно у вашего провайдера.",
   cityMoscow: "Москва",
   cityLondon: "Лондон",
   cityNewYork: "Нью-Йорк",

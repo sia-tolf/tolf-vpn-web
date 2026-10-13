@@ -45,10 +45,11 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
     getElementById: id => ids[id], querySelectorAll: () => modes,
     createElement: tag => new Element(tag), addEventListener() {}};
   document.querySelector=()=>[ids.serverRiga,ids.serverMoscow].find(input=>input.checked);
+  let ciscoConfirmed = false;
   const handlers = {}, window = {tolfAccountState:{authenticated:true,userId:'owner',vpn:{username:'user0_ipad'}},
     addEventListener(name, fn) { (handlers[name] ||= []).push(fn); },
     dispatchEvent(event) { for (const fn of handlers[event.type] || []) fn(event); },
-    confirm: () => true, setInterval(){}};
+    isCiscoClientConfirmed: () => ciscoConfirmed, confirm: () => true, setInterval(){}};
   const first = {id:'one',label:'iPad',username:'tolf-oc-'+'1'.repeat(32),state:'active',mode:'auto'};
   const second = {id:'two',label:'Phone',username:'tolf-oc-'+'2'.repeat(32),state:'active',mode:'lv'};
   const devices = [first,second], calls = [];
@@ -106,6 +107,9 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   c.getConnectionTestServerKey=()=>c.getSelectedServerKey();
   vm.runInContext(fs.readFileSync(path.join(root,'js/network-metrics.js'),'utf8'),c);
   ids.vpnTransportAnyConnect.click(); await settle();
+  assert(!descendants(ids.anyConnectAccess).some(n=>n.textContent==='Установить профиль AnyConnect'));
+  assert.equal(window.ocAccess.selected(),null);
+  ciscoConfirmed=true;window.dispatchEvent(new c.Event('tolf:cisco-install-confirmed'));await settle();
   const usButton=modes.find(n=>n.dataset.mode==='us');
   assert(!usButton.classList.contains('hidden'));
   usButton.click();await settle();
@@ -146,7 +150,7 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   // Legacy Android/manual flow remains available; further tests cover it.
   assert(descendants(ids.anyConnectAccess).includes(ids.anyConnectModeRow), 'routing is in the selected device section');
   assert(!descendants(ids.anyConnectAccess).some(n=>n.tagName==='ol'));
-  assert(descendants(ids.anyConnectAccess).some(n=>n.tagName==='a'&&n.textContent==='Установить Cisco Secure Client'));
+  assert(!descendants(ids.anyConnectAccess).some(n=>n.tagName==='a'&&n.textContent==='Установить Cisco Secure Client'));
   assert(!ids.anyConnectAccess.textContent.includes('Перед импортом сертификата'));
   assert(!descendants(ids.anyConnectAccess).some(n=>n.tagName==='button'&&n.textContent==='Получить сертификат'));
   button(ids.anyConnectAccess,'Настроить на этом устройстве').click();

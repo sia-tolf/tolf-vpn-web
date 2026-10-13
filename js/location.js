@@ -127,8 +127,12 @@ function renderEntryPointRecommendation() {
   const restricted = geographicEntryPoint === "moscow";
   const warning = document.getElementById("rigaConnectionWarning");
   if (warning) {
-    warning.textContent = t("cityRiga") + ": " + t("entryPointRigaWarning");
-    warning.classList.toggle("hidden", !restricted);
+    const selected = typeof getSelectedServerKey === "function"
+      ? getSelectedServerKey() : Array.from(serverInputs).find(input => input.checked)?.value;
+    const newYork = selected === "us";
+    warning.textContent = t(newYork ? "cityNewYork" : "cityRiga") + ": "
+      + t(newYork ? "entryPointNewYorkWarning" : "entryPointRigaWarning");
+    warning.classList.toggle("hidden", !(newYork || (restricted && selected === "riga")));
   }
   document.getElementById("serverRiga")?.closest(".server-option")
     ?.classList.toggle("server-caution", restricted);
@@ -223,6 +227,7 @@ async function loadEntryPointRecommendation() {
 
 for (const input of serverInputs) {
   input.addEventListener("change", event => {
+    renderEntryPointRecommendation();
     if (event.isTrusted) {
       entryPointChangedManually = true;
     }
@@ -281,3 +286,10 @@ if (
     }
   });
 }
+
+if (typeof window !== "undefined") {
+  for (const event of ["vpntransportchange", "tolf:ingress-changed"])
+    window.addEventListener(event, renderEntryPointRecommendation);
+}
+
+if (typeof MutationObserver !== "undefined") new MutationObserver(renderEntryPointRecommendation).observe(document.documentElement, {attributes:true,attributeFilter:["lang"]});

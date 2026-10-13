@@ -228,6 +228,7 @@ I18N.en = {
   cityRiga: "Riga",
   entryPointRecommended: "Recommended for your connection.",
   entryPointRigaWarning: "Your operator may restrict direct connections from Russia.",
+  entryPointNewYorkWarning: "A direct connection to New York may be unavailable through your provider.",
   cityMoscow: "Moscow",
   cityLondon: "London",
   cityNewYork: "New York",

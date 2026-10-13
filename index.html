@@ -42,9 +42,9 @@
   <!-- Keep this order. Deferred scripts run after the HTML has been parsed. -->
   <script defer src="passkey-session-label.20260917-1.js"></script>
   <script defer src="js/config.js?v=mobile-new-york-20261013"></script>
-  <script defer src="js/locales/en.js?v=windows-new-york-20261012"></script>
-  <script defer src="js/locales/ru.js?v=windows-new-york-20261012"></script>
-  <script defer src="js/locales/lv.js?v=windows-new-york-20261012"></script>
+  <script defer src="js/locales/en.js?v=selected-warning-20261013"></script>
+  <script defer src="js/locales/ru.js?v=selected-warning-20261013"></script>
+  <script defer src="js/locales/lv.js?v=selected-warning-20261013"></script>
   <script defer src="js/dom.js?v=recovery-file-20260925"></script>
   <script defer src="js/network-metrics.js?v=ingress-ready-20261013"></script>
   <script defer src="js/platform.js?v=personal-anyconnect-20261002-1"></script>
@@ -60,7 +60,7 @@
   <script defer src="js/profile-settings.js?v=mobile-new-york-20261013"></script>
   <script defer src="js/vpn.js?v=profile-name-20260925"></script>
   <script defer src="js/promo.js?v=mobile-new-york-20261013"></script>
-  <script defer src="js/location.js?v=manual-entry-point-20261004-1"></script>
+  <script defer src="js/location.js?v=selected-warning-20261013"></script>
   <script defer src="js/librespeed.js?v=1"></script>
   <script defer src="js/measurement-targets.js?v=new-york-measurements-20261012"></script>
   <script defer src="js/latency.js?v=new-york-measurements-20261012"></script>
@@ -68,6 +68,7 @@
   <script defer src="js/connection-test.js?v=page-upload-20261012"></script>
   <script defer src="js/windows.js?v=new-york-menus-20261012"></script>
   <script defer src="js/invitations.js?v=account-page-20260921"></script>
+  <script defer src="js/cisco-client-install.js?v=cisco-gate-20261013"></script>
   <script defer src="js/quick-entry.js?v=manual-notice-20261007"></script>
   <script defer src="js/app.js?v=calm-layout-20260926"></script>
   <script defer src="js/admin-entry.js?v=header-account-20261004-9"></script>
@@ -75,8 +76,8 @@
   <script defer src="js/vpn-compact-selectors.js?v=mobile-new-york-20261013"></script>
   <script defer src="js/windows-dropdowns.js?v=20261007-1"></script>
   <link rel="stylesheet" href="css/windows-dropdowns.css?v=20261007-1">
-  <script defer src="js/anyconnect-access.js?v=new-york-20261012"></script>
-  <link rel="stylesheet" href="css/anyconnect-access.css?v=right-aligned-routing-20261013">
+  <script defer src="js/anyconnect-access.js?v=cisco-gate-20261013"></script>
+  <link rel="stylesheet" href="css/anyconnect-access.css?v=single-row-routing-20261013">
 <link rel="stylesheet" href="tolf-buttons.20260917-3.css">
 <script defer src="tolf-wordmark.20260917-3.js"></script>
 <link rel="stylesheet" href="tolf-header.20260919-1.css?v=languages-2">
@@ -241,6 +242,7 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
             <button id="platformWindows" class="platform-button" type="button" aria-pressed="false" aria-disabled="true" disabled><svg class="platform-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 3h9v8H2zM13 3h9v8h-9zM2 13h9v8H2zM13 13h9v8h-9z"/></svg><span>Windows</span></button>
           </div></div>
         <div id="myVpnProtocolField"></div>
+        <section id="ciscoClientInstall" class="cisco-client-install hidden"></section>
         <div class="vpn-protocol-explanation">
           <p data-i18n="ikev2Summary">IKEv2 — built-in VPN on iPhone, iPad and Windows; Android uses strongSwan.</p>
           <p data-i18n="anyConnectSummary">AnyConnect — VPN through Cisco Secure Client, using TLS/HTTPS. An alternative if IKEv2 cannot connect.</p>

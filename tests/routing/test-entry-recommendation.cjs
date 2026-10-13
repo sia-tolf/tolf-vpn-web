@@ -28,7 +28,7 @@ test('Russia recommends Moscow without overriding the selected endpoint',()=>{
   for(const latencies of [{moscow:150,riga:10},{moscow:null,riga:10},{moscow:10,riga:150}]) {
     f.c.setEntryPointLatencies(latencies);
     assert.equal(f.e.serverMoscow.checked,true);
-    assert.equal(f.e.rigaConnectionWarning.classList.contains('hidden'),false);
+    assert.equal(f.e.rigaConnectionWarning.classList.contains('hidden'),true);
     assert.equal(f.e.serverRiga.disabled,false);
   }
 });
@@ -62,4 +62,12 @@ test('country change clears Russia warning without overriding manual selection',
   assert.equal(f.e.serverRiga.classList.contains('server-caution'),false);
   assert.equal(f.e.rigaConnectionWarning.classList.contains('hidden'),true);
   assert.equal(f.e.serverMoscow.checked,true);
+});
+
+test('New York warning follows the selected entry, regardless of recommendation',()=>{
+  const f=fixture();f.c.getSelectedServerKey=()=> 'us';f.setGeo('moscow');
+  assert.equal(f.e.rigaConnectionWarning.classList.contains('hidden'),false);
+  assert.equal(f.e.rigaConnectionWarning.textContent,'cityNewYork: entryPointNewYorkWarning');
+  f.c.getSelectedServerKey=()=> 'moscow';f.c.renderEntryPointRecommendation();
+  assert.equal(f.e.rigaConnectionWarning.classList.contains('hidden'),true);
 });
