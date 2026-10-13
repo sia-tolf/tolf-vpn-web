@@ -13,7 +13,7 @@
   if (!selector || !ikev2 || !anyConnect || !overviewTitle) return;
 
   const device = () => window.ocAccess?.selected() || null;
-  const endpoint = (id, action) => `${API}/oc/access/devices/${encodeURIComponent(id)}/${action}`;
+  const endpoint = (id, action) => API + '/oc/access/devices/' + encodeURIComponent(id) + '/' + action + (action === 'policy' ? '?ingress=' + encodeURIComponent(window.ocAccess?.ingress?.().id || 'moscow') : '');
   let selectionToken = 0;
   const readChoice = key => { try { return sessionStorage.getItem(key); } catch { return null; } };
   const saveChoice = (key,value) => { try { sessionStorage.setItem(key,value); } catch {} };
@@ -21,6 +21,7 @@
   window.getVpnTransport = () => transport;
   let ikev2Server = readChoice("tolfIkev2Server");
   let anyConnectMode = "auto";
+  let supportedModes = ["auto","ru","lv","yt"];
   let policyLoaded = false;
   let policyBusy = false;
   let savedStatusTimer = null;
@@ -93,8 +94,9 @@
   }
 
   function copy() {
-    const c = COPY[lang()];
-    if (window.ocAccess?.ingress?.().id !== 'us' && !(window.ocAccess?.ingress?.().id === 'moscow' && window.getMoscowExitChoice?.() !== 'riga' && window.getMoscowExitChoice?.())) return c;
+    const us = {ru:['Весь трафик','→ Нью-Йорк'],en:['All traffic','→ New York'],lv:['Visa datplūsma','→ Ņujorka']}[lang()];
+    const c = {...COPY[lang()],us};
+    if (window.ocAccess?.ingress?.().id !== 'us') return c;
     const rest = {ru:'остальное → Нью-Йорк',en:'rest → New York',lv:'pārējais → Ņujorka'}[lang()];
     return {...c, auto:[c.auto[0],rest], yt:[c.yt[0],rest]};
   }
@@ -125,15 +127,16 @@
       const active = button.dataset.mode === anyConnectMode;
       button.classList.toggle("active", active);
       button.setAttribute("aria-checked", String(active));
-      button.disabled = policyBusy || !device() || (window.ocAccess?.ingress?.().id === 'moscow' && window.getMoscowExitChoice?.() === 'all_us');
+      if (button.dataset.mode === 'us') button.classList.toggle('hidden', window.ocAccess?.ingress?.().id !== 'moscow' || !supportedModes.includes('us'));
+      button.disabled = policyBusy || !device();
     }
     const controls = document.getElementById("anyConnectModeSelector");
+    controls?.classList.toggle('has-us', window.ocAccess?.ingress?.().id === 'moscow' && supportedModes.includes('us'));
     controls?.classList.toggle("policy-confirmed",
       policyLoaded && !policyBusy && sessionConnected);
 
     if (modeHelp) {
-      const fullNy = window.ocAccess?.ingress?.().id === 'moscow' && window.getMoscowExitChoice?.() === 'all_us';
-      const lines = fullNy ? ({ru:['Весь трафик','→ Нью-Йорк'],en:['All traffic','→ New York'],lv:['Visa datplūsma','→ Ņujorka']}[lang()]) : anyConnectMode ? c[anyConnectMode] : null;
+      const lines = anyConnectMode ? c[anyConnectMode] : null;
       modeHelp.replaceChildren();
       if (Array.isArray(lines)) {
         for (const line of lines) {
@@ -165,8 +168,8 @@
         if (!response.ok) throw new Error('Policy unavailable');
         const data = await response.json();
         if (requestToken !== sessionRequestToken || device()?.id !== selected.id) return;
-        if (data.username !== selected.username || !['auto','ru','lv','yt'].includes(data.mode)) throw new Error('Invalid policy');
-        anyConnectMode = data.mode; selectedMode = data.mode; policyConfirmed = data.applied === true;
+        if (data.username !== selected.username || !['auto','ru','lv','us','yt'].includes(data.mode)) throw new Error('Invalid policy');
+        anyConnectMode = data.mode; selectedMode = data.mode; supportedModes = data.supportedModes || supportedModes; policyConfirmed = data.applied === true;
         setModeStatus(policyConfirmed ? copy().saved : copy().pending);
         if (!policyConfirmed) { sessionConnected = false; return; }
       }
@@ -181,7 +184,7 @@
       if (requestToken === sessionRequestToken && device()?.id === selected.id) {
         if (data?.username !== selected.username || typeof data?.connected !== "boolean") throw new Error("Invalid session");
         sessionConnected = data?.username === selected.username &&
-          data?.mode === selectedMode && data?.connected === true;
+          (data?.mode === selectedMode || selectedMode === "us") && data?.connected === true;
         sessionNodes = data.nodes || null;
         setSessionStatus(data.connected ? "connected" : "disconnected");
       }
@@ -212,8 +215,9 @@
       if (!response.ok) throw new Error("HTTP " + response.status);
       const data = await response.json();
       if (token !== selectionToken) return;
-      if (!["auto", "ru", "lv", "yt"].includes(data?.mode)) throw new Error("Invalid mode");
+      if (!["auto", "ru", "lv", "us", "yt"].includes(data?.mode)) throw new Error("Invalid mode");
       anyConnectMode = data.mode;
+      supportedModes = Array.isArray(data.supportedModes) ? data.supportedModes : supportedModes;
       policyLoaded = true;
       policyConfirmed = data.applied === true;
       setModeStatus(policyConfirmed ? copy().saved : copy().pending);
@@ -235,7 +239,7 @@
     const selected = device();
     if (!selected) return;
     const token = selectionToken;
-    if (policyBusy || !["auto", "ru", "lv", "yt"].includes(mode)) return;
+    if (policyBusy || !["auto", "ru", "lv", "us", "yt"].includes(mode)) return;
     const previous = anyConnectMode;
     anyConnectMode = mode;
     sessionRequestToken++;
@@ -363,6 +367,10 @@
 
   window.refreshAnyConnectIngress = () => {
     if (transport !== 'anyconnect') return;
+    selectionToken++; sessionRequestToken++;
+    policyLoaded = false; policyBusy = false; policyConfirmed = false;
+    supportedModes = ['auto','ru','lv','yt'];
+    anyConnectMode = device()?.mode || 'auto';
     render();
     window.dispatchEvent(new Event('vpntransportchange'));
   };
@@ -420,6 +428,5 @@
     attributeFilter: ["lang"]
   });
 
-  window.addEventListener('tolf:external-exit-change', renderMode);
   render();
 })();

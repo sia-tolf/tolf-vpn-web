@@ -178,3 +178,5 @@ html[data-vpn-transport="anyconnect"] #vpnUsername { overflow-wrap: anywhere; }
   .network-pair-values { grid-template-columns:1fr;gap:9px; }
   .network-pair-value { flex-direction:row;justify-content:space-between;gap:10px; }
 }
+
+#anyConnectModeSelector.has-us { grid-template-columns:minmax(60px,auto) repeat(4,minmax(36px,48px)); }

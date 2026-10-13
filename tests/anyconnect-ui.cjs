@@ -38,7 +38,7 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
     'vpnStatus','usernameRow','vpnUsername','anyConnectModeRow','anyConnectModeLabel','anyConnectModeHelp',
     'anyConnectModeStatus','anyConnectModeSelector','anyConnectAccess','serverRiga','serverMoscow','networkMetrics','networkMetricMeasuredAt']) ids[name] = new Element();
   ids.serverRiga.value='riga';ids.serverRiga.checked=true;ids.serverMoscow.value='moscow';
-  const modes = ['auto','ru','lv','yt'].map(mode => { const n = new Element('button'); n.dataset.mode = mode; return n; });
+  const modes = ['auto','ru','lv','us','yt'].map(mode => { const n = new Element('button'); n.dataset.mode = mode; return n; });
   ids.anyConnectModeAuto = modes[0];
   const document = {documentElement:{lang:'ru',dataset:{}}, hidden:false,
     body:new Element('body'),
@@ -55,7 +55,7 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   const downloads = [], revokedUrls = [];
   let heldSession = null, connected = true, sessionError = false, sessionNodes = null, policyApplied = true;
   async function request(url, options = {}) {
-    const p = url.replace('https://api.tolf.is',''); calls.push([options.method || 'GET',p,options.credentials]);
+    const p = url.replace('https://api.tolf.is','').split('?')[0]; calls.push([options.method || 'GET',p,options.credentials]);
     if (p.endsWith('/capabilities')) return {issuance:true,nodeReady:true,version:2,guestSetup:true,ingresses:[{id:'moscow',host:'oc.tolf.is:4443'},{id:'riga',host:'oc-riga.tolf.is:443'},{id:'us',host:'oc-us.tolf.is:4443'}]};
     if (p === '/oc/access/devices') {
       if (options.method === 'POST') {
@@ -73,7 +73,7 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
     }
     if (p.endsWith('/policy')) {
       if (options.method === 'POST') d.mode = JSON.parse(options.body).mode;
-      return {username:d.username,mode:d.mode,applied:policyApplied};
+      return {username:d.username,mode:d.mode,applied:policyApplied,supportedModes:new URL(url).searchParams.get('ingress')==='moscow'?['auto','ru','lv','us','yt']:['auto','ru','lv','yt']};
     }
     if (p.endsWith('/import')) return {deviceId:d.id,password:'private-import-password',
       expiresAt:new Date(Date.now()+600000).toISOString(),certificateUrl:'https://api.tolf.is/import/token.p12',
@@ -106,6 +106,13 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   c.getConnectionTestServerKey=()=>c.getSelectedServerKey();
   vm.runInContext(fs.readFileSync(path.join(root,'js/network-metrics.js'),'utf8'),c);
   ids.vpnTransportAnyConnect.click(); await settle();
+  const usButton=modes.find(n=>n.dataset.mode==='us');
+  assert(!usButton.classList.contains('hidden'));
+  usButton.click();await settle();
+  assert(usButton.classList.contains('active'),'US uses the normal selected segment style');
+  assert(ids.anyConnectModeHelp.textContent.includes('Нью-Йорк'));
+  modes[0].click();await settle();
+  assert(ids.anyConnectModeHelp.textContent.includes('Рига'),'Auto keeps the original Riga default');
   // iPhone now uses one authenticated MobileConfig with a linked certificate.
   const iosInstall=descendants(ids.anyConnectAccess).find(n=>n.tagName==='a'&&n.textContent==='Установить профиль AnyConnect');
   assert(iosInstall,'a single profile installation button is offered on iOS');
@@ -152,7 +159,7 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   assert.equal(new URLSearchParams(connectionLink().href.split('?')[1]).get('host'),'oc-riga.tolf.is:443');
   assert.equal(new URLSearchParams(connectionLink().href.split('?')[1]).get('certcommonname'),first.username);
   assert.equal(new URLSearchParams(connectionLink().href.split('?')[1]).get('name'),'TOLF Riga iPad');
-  ids.serverMoscow.events.change();
+  ids.serverMoscow.events.change();await settle();
   assert.equal(window.ocAccess.ingress().id,'moscow');
   assert.equal(new URLSearchParams(connectionLink().href.split('?')[1]).get('name'),'TOLF Moscow iPad');
   assert(descendants(ids.anyConnectAccess).some(n=>n.tagName==='button'&&n.textContent==='Получить сертификат'));
