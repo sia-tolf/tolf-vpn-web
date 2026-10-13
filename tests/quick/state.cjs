@@ -3,7 +3,7 @@ const vm=require('vm'),fs=require('fs'),assert=require('assert/strict');
 const path=require('path'),root=path.resolve(__dirname,'../..');
 async function scenario(country,device='ios',credentialError=''){
  const ids=[...fs.readFileSync(path.join(root,'quick/index.html'),'utf8').matchAll(/id="([^"]+)"/g)].map(m=>m[1]);
- const elements=Object.fromEntries(ids.map(id=>[id,{hidden:false,disabled:false,value:'',textContent:'',dataset:{},setAttribute(){},focus(){},select(){}}]));
+ const elements=Object.fromEntries(ids.map(id=>[id,{hidden:false,disabled:false,value:'',textContent:'',dataset:{},setAttribute(){},replaceChildren(){},focus(){},select(){}}]));
  const storage=new Map(),langs=['en','ru','lv'].map(lang=>({dataset:{lang},setAttribute(){}}));
  let auth=false,record=null,requests=0,registeredName='';
  const context={URL,AbortSignal,console,location:{href:'https://vpn.tolf.is/quick/?protocol=ikev2'},sessionStorage:{getItem:k=>storage.get(k),setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)},localStorage:{getItem:()=>null,setItem(){}},
