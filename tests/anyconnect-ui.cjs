@@ -123,6 +123,14 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   assert(usButton.classList.contains('active'),'US uses the normal selected segment style');
   assert(usButton.attributes['data-tooltip'].includes('Нью-Йорк'));
   assert.equal(ids.anyConnectModeHelp.hidden,true);
+  usButton.events.pointerenter({pointerType:'mouse'});
+  assert(usButton.classList.contains('tooltip-hover'),'pointer hover shows the tooltip on touch-first devices');
+  usButton.events.pointerleave();
+  assert(!usButton.classList.contains('tooltip-hover'));
+  usButton.events.mouseenter();
+  assert(usButton.classList.contains('tooltip-hover'));
+  usButton.events.mouseleave();
+  assert(!usButton.classList.contains('tooltip-hover'));
   const postsBefore=calls.filter(x=>x[0]==='POST').length;
   usButton.click();await settle();
   assert(usButton.classList.contains('tooltip-open'));

@@ -399,6 +399,13 @@
   });
 
   for (const button of modeButtons) {
+    // iPad can report a touch-first device even with a mouse or trackpad.
+    button.addEventListener("pointerenter", event => {
+      if (event.pointerType !== "touch") button.classList.add("tooltip-hover");
+    });
+    button.addEventListener("pointerleave", () => button.classList.remove("tooltip-hover"));
+    button.addEventListener("mouseenter", () => button.classList.add("tooltip-hover"));
+    button.addEventListener("mouseleave", () => button.classList.remove("tooltip-hover"));
     button.addEventListener("click", () => {
       if (transport !== "anyconnect") return;
       const mode = button.dataset.mode;

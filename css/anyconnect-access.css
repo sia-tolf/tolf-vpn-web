@@ -205,6 +205,5 @@ html[data-vpn-transport="anyconnect"] #vpnUsername { overflow-wrap: anywhere; }
 }
 #anyConnectModeSelector .anyconnect-mode-button.tooltip-open::after,
 #anyConnectModeSelector .anyconnect-mode-button:focus-visible::after { display:block; }
-@media (hover:hover) {
-  #anyConnectModeSelector .anyconnect-mode-button:hover::after { display:block; }
-}
+#anyConnectModeSelector .anyconnect-mode-button:hover::after,
+#anyConnectModeSelector .anyconnect-mode-button.tooltip-hover::after { display:block; }
