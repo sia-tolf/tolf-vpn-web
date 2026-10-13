@@ -39,7 +39,7 @@
   try{
    const data=await request(d.id);
    if(token!==epoch)return;
-   choice=data.choice;ready=data.available===true;message='';
+   choice=data.choice;ready=data.available===true;message=data.applied===false?'failed':'';
   }catch{if(token===epoch)message='failed';}
   finally{if(token===epoch)render();}
  }
