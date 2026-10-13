@@ -207,3 +207,19 @@ html[data-vpn-transport="anyconnect"] #vpnUsername { overflow-wrap: anywhere; }
 #anyConnectModeSelector .anyconnect-mode-button:focus-visible::after { display:block; }
 #anyConnectModeSelector .anyconnect-mode-button:hover::after,
 #anyConnectModeSelector .anyconnect-mode-button.tooltip-hover::after { display:block; }
+
+/* Compact device actions and route on narrow screens. */
+@media (max-width:699px) {
+ #anyConnectAccess .oc-device-row { grid-template-columns:minmax(0,1fr) auto; gap:6px 8px; }
+ #anyConnectAccess .oc-device-row > .oc-select-wrapper { grid-column:1; grid-row:1; }
+ #anyConnectAccess .oc-device-row > .oc-action { grid-column:2; grid-row:1; height:44px;min-height:44px;max-height:44px;white-space:nowrap;padding:0 10px;font-size:14px; }
+ #anyConnectAccess .oc-device-row > .oc-device-status { grid-column:1 / -1;grid-row:2;min-height:22px;padding:0;font-weight:400; }
+ #anyConnectAccess .oc-device-row .vpn-dropdown-value { overflow:hidden;white-space:nowrap;text-overflow:ellipsis;display:block; }
+ #anyConnectAccess .oc-device-row .vpn-dropdown-arrow { flex-shrink:0; }
+ #anyConnectAccess .oc-device-routing { grid-template-columns:auto minmax(0,1fr);column-gap:8px;row-gap:4px; }
+ #anyConnectAccess .oc-device-routing .row-label { grid-column:1;grid-row:1;text-align:left;white-space:nowrap; }
+ #anyConnectAccess .oc-device-routing .anyconnect-mode-value { display:contents; }
+ #anyConnectAccess .oc-device-routing #anyConnectModeSelector { grid-column:2;grid-row:1;justify-self:end;margin-inline-start:0;gap:1px; }
+ #anyConnectAccess .oc-device-routing #anyConnectModeSelector .anyconnect-mode-button { padding:0 6px;font-size:12px; }
+ #anyConnectAccess .oc-device-routing .anyconnect-mode-meta { grid-column:1 / -1;grid-row:2;margin-top:0;text-align:right; }
+}
