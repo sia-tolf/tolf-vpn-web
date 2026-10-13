@@ -3,10 +3,10 @@ async function checkUploadPath(onresult = () => {}, {fetcher = fetch, timeout = 
   const bytes = new Uint8Array(524288);
   for (let offset=0;offset<bytes.length;offset+=65536) crypto.getRandomValues(bytes.subarray(offset,offset+65536));
   const probes = [
-    ['ikev2-us.tolf.is · Нью-Йорк', 'https://ikev2-us.tolf.is/', 65536],
-    ['dns-us.tolf.is · тот же Нью-Йорк', 'https://dns-us.tolf.is/', 65536],
-    ['dns-us.tolf.is · тот же Нью-Йорк', 'https://dns-us.tolf.is/', 524288],
-    ['ikev2-us.tolf.is · повторно', 'https://ikev2-us.tolf.is/', 65536],
+    ['Нью-Йорк :8443 · обычный TLS', 'https://ikev2-us.tolf.is:8443/', 65536],
+    ['Нью-Йорк :443 · без TLS tickets', 'https://ikev2-us.tolf.is/', 65536],
+    ['Нью-Йорк :443 · без TLS tickets', 'https://ikev2-us.tolf.is/', 524288],
+    ['Нью-Йорк :443 · повторно без tickets', 'https://ikev2-us.tolf.is/', 65536],
     ['Рига · контроль', 'https://ikev2-riga.tolf.is:8443/', 65536]
   ];
   const results = [];
