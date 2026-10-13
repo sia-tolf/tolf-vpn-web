@@ -94,7 +94,7 @@
 
   function copy() {
     const c = COPY[lang()];
-    if (window.ocAccess?.ingress?.().id !== 'us') return c;
+    if (window.ocAccess?.ingress?.().id !== 'us' && !(window.ocAccess?.ingress?.().id === 'moscow' && window.getMoscowExitChoice?.() !== 'riga' && window.getMoscowExitChoice?.())) return c;
     const rest = {ru:'остальное → Нью-Йорк',en:'rest → New York',lv:'pārējais → Ņujorka'}[lang()];
     return {...c, auto:[c.auto[0],rest], yt:[c.yt[0],rest]};
   }
@@ -125,14 +125,15 @@
       const active = button.dataset.mode === anyConnectMode;
       button.classList.toggle("active", active);
       button.setAttribute("aria-checked", String(active));
-      button.disabled = policyBusy || !device();
+      button.disabled = policyBusy || !device() || (window.ocAccess?.ingress?.().id === 'moscow' && window.getMoscowExitChoice?.() === 'all_us');
     }
     const controls = document.getElementById("anyConnectModeSelector");
     controls?.classList.toggle("policy-confirmed",
       policyLoaded && !policyBusy && sessionConnected);
 
     if (modeHelp) {
-      const lines = anyConnectMode ? c[anyConnectMode] : null;
+      const fullNy = window.ocAccess?.ingress?.().id === 'moscow' && window.getMoscowExitChoice?.() === 'all_us';
+      const lines = fullNy ? ({ru:['Весь трафик','→ Нью-Йорк'],en:['All traffic','→ New York'],lv:['Visa datplūsma','→ Ņujorka']}[lang()]) : anyConnectMode ? c[anyConnectMode] : null;
       modeHelp.replaceChildren();
       if (Array.isArray(lines)) {
         for (const line of lines) {
@@ -419,5 +420,6 @@
     attributeFilter: ["lang"]
   });
 
+  window.addEventListener('tolf:external-exit-change', renderMode);
   render();
 })();
