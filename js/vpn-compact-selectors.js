@@ -88,7 +88,7 @@
     const windowsIke=transport==="ikev2" && typeof currentPlatform!=="undefined" && currentPlatform==="windows";
     const winSelect=document.getElementById("windowsDeviceServer");
     const current=windowsIke?winSelect.value:transport==="anyconnect"?(window.ocAccess?.ingress?.().id||"moscow"):(document.querySelector('input[name="vpnServer"]:checked')?.value||"riga");
-    const allowed=transport==="anyconnect"?(window.ocAccess?.ingresses?.()||[{id:"moscow"}]).map(x=>x.id):windowsIke?[...winSelect.options].filter(x=>!x.disabled).map(x=>x.value):["riga","moscow"];
+    const allowed=transport==="anyconnect"?(window.ocAccess?.ingresses?.()||[{id:"moscow"}]).map(x=>x.id):windowsIke?[...winSelect.options].filter(x=>!x.disabled).map(x=>x.value):["riga","moscow",...(window.tolfMobileIkev2Ready?["us"]:[])];
     const recommended=(typeof recommendedEntryPoint!=="undefined"?recommendedEntryPoint:null);
     const latency=(id)=>{
       if(typeof entryPointLatencyMeasuring!=="undefined"&&entryPointLatencyMeasuring)return tr().measuring;
@@ -102,6 +102,7 @@
     })),current);
     if(transport==="anyconnect")document.getElementById("quickSetupLink").href="/quick/?protocol=anyconnect&ingress="+encodeURIComponent(current);
   }
+  window.addEventListener("vpncapabilitieschange",sync);
   window.addEventListener("vpntransportchange",sync);
   window.addEventListener("vpnplatformchange",sync);
   document.getElementById("windowsDeviceServer")?.addEventListener("change",sync);

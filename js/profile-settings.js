@@ -1,6 +1,6 @@
 
 function defaultAppleProfileName() {
-  const city = getSelectedServerKey() === "riga" ? "Riga" : "Moscow";
+  const city = ({riga:"Riga",moscow:"Moscow",us:"New York"})[getSelectedServerKey()];
   const localId = getSelectedLocalId() || "";
   return `TOLF ${city}${localId ? " " + localId : ""}`;
 }

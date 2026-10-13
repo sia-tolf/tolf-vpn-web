@@ -319,7 +319,9 @@
       if (riga) riga.disabled = false;
       if (moscow) moscow.disabled = false;
 
-      const restore = ikev2Server === "moscow" ? moscow : riga;
+      const ny = document.getElementById("serverNewYork");
+      if (ny) ny.disabled = !window.tolfMobileIkev2Ready;
+      const restore = ikev2Server === "us" && window.tolfMobileIkev2Ready ? ny : ikev2Server === "moscow" ? moscow : riga;
       if (restore && !restore.checked) {
         restore.checked = true;
         if (typeof updateSelectedServerAddress === "function") {

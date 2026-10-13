@@ -50,7 +50,7 @@ function renderLocalIdSettings() {
   localIdInput.value =
     localIdValues[server] || "";
 
-  localIdInput.placeholder = t(
+  localIdInput.placeholder = server === "us" ? "auto" : t(
     server === "riga"
       ? "localIdDefaultRiga"
       : "localIdDefaultMoscow"
@@ -227,6 +227,7 @@ function showSignedOut() {
   });
 
   localIdValues = {
+    us: "",
     riga: "",
     moscow: ""
   };

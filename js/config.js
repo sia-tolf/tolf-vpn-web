@@ -1,6 +1,7 @@
 const API = "https://api.tolf.is";
 
 const SERVERS = {
+  us: { host: "ikev2-us.tolf.is", nameKey: "cityNewYork" },
   riga: { host: "ikev2-riga.tolf.is", nameKey: "rigaLatvia" },
   moscow: { host: "ikev2.tolf.is", nameKey: "moscowRussia" },
   uk: { host: "", nameKey: "londonUk" }
@@ -21,11 +22,13 @@ const LOCAL_ID_OPTIONS = {
 };
 
 const LOCAL_ID_DEFAULTS = {
+  us: "auto",
   riga: "sr",
   moscow: ""
 };
 
 let localIdValues = {
+  us: "",
   riga: "",
   moscow: ""
 };

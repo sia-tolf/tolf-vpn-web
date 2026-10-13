@@ -52,7 +52,7 @@ function renderPromoState() {
 }
 
 function applyServerAccess(data) {
-  allowedServers = ["riga", "moscow"];
+  allowedServers = ["riga", "moscow", ...(window.tolfMobileIkev2Ready ? ["us"] : [])];
   promoRedeemed = Boolean(data.promoRedeemed);
   promoPending = Boolean(data.promoPending);
 
@@ -129,3 +129,14 @@ promoInput.addEventListener(
     }
   }
 );
+
+// Only expose mobile New York after the control plane enables issuance.
+fetch(API + "/vpn/capabilities", {cache:"no-store",credentials:"omit"})
+  .then(response => { if (!response.ok) throw new Error("Capabilities unavailable"); return response.json(); })
+  .then(data => {
+    window.tolfMobileIkev2Ready = data.mobileIkev2NewYork === true && data.servers?.includes("us");
+    allowedServers = ["riga", "moscow", ...(window.tolfMobileIkev2Ready ? ["us"] : [])];
+    updateServerAvailability();
+    window.dispatchEvent(new Event("vpncapabilitieschange"));
+  })
+  .catch(() => { window.tolfMobileIkev2Ready = false; });
