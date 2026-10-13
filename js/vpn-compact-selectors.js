@@ -45,9 +45,14 @@
       value.textContent=current?.label||"";
       if(current?.meta){const m=document.createElement("span");m.className="vpn-dropdown-value-meta";m.textContent=current.meta;value.append(" ",m);}
     }
-    document.addEventListener("pointerdown",e=>{if(!dd.contains(e.target))close();});
-    document.addEventListener("keydown",e=>{if(e.key==="Escape")close();});
-    return {field,label,render,close};
+    const outside=e=>{if(!dd.contains(e.target))close();};
+    const escape=e=>{if(e.key==="Escape")close();};
+    document.addEventListener("pointerdown",outside);
+    document.addEventListener("keydown",escape);
+    return {field,label,render,close,destroy(){
+      document.removeEventListener("pointerdown",outside);
+      document.removeEventListener("keydown",escape);
+    }};
   }
 
   // Expose the existing dropdown renderer for Windows manual fields.

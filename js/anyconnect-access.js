@@ -322,7 +322,34 @@
     choose(result.device.id);
     message = copy().ready;
   }
+  let dropdowns = [];
+  function compactSelect(select, labelText) {
+    if (!window.makeVpnDropdown) return select;
+    const dropdown = window.makeVpnDropdown(select.id + "Dropdown", labelText, [], value => {
+      if (select.disabled) return;
+      select.value = value;
+      select.dispatchEvent(new Event("change", {bubbles:true}));
+    });
+    const options = Array.from(select.options).map(option => ({
+      value:option.value,label:option.textContent,disabled:select.disabled || option.disabled
+    }));
+    dropdown.render(options, select.value);
+    dropdown.label.hidden = true;
+    dropdown.field.classList.add("oc-compact-select");
+    const control = dropdown.field.querySelector(".vpn-dropdown-button");
+    control.disabled = select.disabled;
+    control.id = select.id + "DropdownButton";
+    control.setAttribute("aria-label", labelText);
+    select.hidden = true;
+    select.tabIndex = -1;
+    dropdowns.push(dropdown);
+    const wrapper = element("div", null, "oc-select-wrapper");
+    wrapper.append(select, dropdown.field);
+    return wrapper;
+  }
   function render() {
+    for (const dropdown of dropdowns) dropdown.destroy?.();
+    dropdowns = [];
     statusBadge = null;
     setupSteps = null;
     root.replaceChildren();
@@ -339,7 +366,7 @@
     root.append(header, element("p", c.separate, "oc-note"));
     root.append(element("h4", "2. " + c.device));
     if (devices.length) {
-      const label = element("label", c.device); label.setAttribute("for", "ocDeviceSelect"); root.append(label);
+      const label = element("label", c.device); label.setAttribute("for", "ocDeviceSelectDropdownButton"); root.append(label);
       const row = element("div", null, "oc-device-row");
       const select = element("select"); select.id = "ocDeviceSelect"; select.setAttribute("aria-label", c.device);
       select.disabled = busy || loading;
@@ -348,7 +375,8 @@
         const opt = element("option", d.label);
         opt.value = d.id; opt.selected = d.id === selectedId; select.append(opt);
       }
-      select.addEventListener("change", () => choose(select.value)); row.append(select);
+      select.value = selectedId || "";
+      select.addEventListener("change", () => choose(select.value)); row.append(compactSelect(select, c.device));
       statusBadge = element("span", null, "oc-device-status");
       statusBadge.setAttribute("role", "status"); statusBadge.setAttribute("aria-live", "polite");
       row.append(statusBadge); window.updateAnyConnectSessionStatus();
@@ -390,11 +418,11 @@
       const connectionSettings = element('div', null, 'oc-connection-settings');
       if (ingresses().length > 1) {
         const field = element('div', null, 'oc-ingress-field');
-        const label = element('label', ingressCopy().label); label.htmlFor = 'ocIngress';
+        const label = element('label', ingressCopy().label); label.htmlFor = 'ocIngressDropdownButton';
         const select = element('select'); select.id = 'ocIngress'; select.disabled = busy || loading;
         for (const point of ingresses()) { const option = element('option', ingressCopy()[point.id]); option.value = point.id; select.append(option); }
         select.value = ingress().id; select.addEventListener('change', () => selectIngress(select.value));
-        field.append(label, select, element('p', ingressCopy().help)); connectionSettings.append(field);
+        field.append(label, compactSelect(select, ingressCopy().label)); connectionSettings.append(field);
       }
       const destinations = element("div", null, "oc-actions oc-import-actions oc-destinations");
       if (routingControls) connectionSettings.append(routingControls);

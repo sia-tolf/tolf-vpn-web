@@ -127,6 +127,9 @@
       const active = button.dataset.mode === anyConnectMode;
       button.classList.toggle("active", active);
       button.setAttribute("aria-checked", String(active));
+      const description = (c[button.dataset.mode] || []).join("\n");
+      button.setAttribute("data-tooltip", description);
+      button.setAttribute("aria-description", description);
       if (button.dataset.mode === 'us') button.classList.toggle('hidden', window.ocAccess?.ingress?.().id !== 'moscow' || !supportedModes.includes('us'));
       button.disabled = policyBusy || !device();
     }
@@ -136,15 +139,8 @@
       policyLoaded && !policyBusy && sessionConnected);
 
     if (modeHelp) {
-      const lines = anyConnectMode ? c[anyConnectMode] : null;
       modeHelp.replaceChildren();
-      if (Array.isArray(lines)) {
-        for (const line of lines) {
-          const span = document.createElement("span");
-          span.textContent = line;
-          modeHelp.appendChild(span);
-        }
-      }
+      modeHelp.hidden = true;
     }
   }
 
@@ -406,10 +402,24 @@
     button.addEventListener("click", () => {
       if (transport !== "anyconnect") return;
       const mode = button.dataset.mode;
-      if (mode === anyConnectMode && policyLoaded) return;
+      if (mode === anyConnectMode && policyLoaded) {
+        const visible = button.classList.contains("tooltip-open");
+        for (const item of modeButtons) item.classList.remove("tooltip-open");
+        button.classList.toggle("tooltip-open", !visible);
+        return;
+      }
+      for (const item of modeButtons) item.classList.remove("tooltip-open");
       savePolicy(mode);
     });
   }
+
+  document.addEventListener("pointerdown", event => {
+    if (!modeButtons.some(button => button === event.target || button.contains?.(event.target)))
+      for (const button of modeButtons) button.classList.remove("tooltip-open");
+  });
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape") for (const button of modeButtons) button.classList.remove("tooltip-open");
+  });
 
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {

@@ -161,7 +161,7 @@ html[data-vpn-transport="anyconnect"] #vpnUsername { overflow-wrap: anywhere; }
 }
 #anyConnectModeSelector .anyconnect-mode-button.active::before { content:none; }
 #anyConnectModeSelector #anyConnectModeAuto { margin-right:7px; }
-#anyConnectModeSelector #anyConnectModeAuto::after {
+#anyConnectModeSelector #anyConnectModeAuto::before {
   content:"";position:absolute;right:-6px;top:6px;bottom:6px;
   width:1px;background:var(--border);pointer-events:none;
 }
@@ -188,3 +188,23 @@ html[data-vpn-transport="anyconnect"] #vpnUsername { overflow-wrap: anywhere; }
 .cisco-client-install > .button-link { display:flex;justify-content:center;margin:12px 0; }
 .cisco-install-confirm { display:flex;align-items:center;gap:10px;margin:12px 0;font-weight:400; }
 .cisco-install-confirm input { width:20px;height:20px; }
+
+#anyConnectAccess .oc-select-wrapper { min-width:0; }
+#anyConnectAccess .oc-select-wrapper > select[hidden] { display:none; }
+#anyConnectAccess .oc-compact-select { margin:0; }
+#anyConnectAccess .oc-compact-select .vpn-dropdown-button { width:100%; }
+#anyConnectModeHelp[hidden] { display:none !important; }
+#anyConnectModeSelector .anyconnect-mode-button { position:relative; }
+#anyConnectModeSelector .anyconnect-mode-button::after {
+  content:attr(data-tooltip); display:none; position:absolute;
+  right:0; bottom:calc(100% + 10px); z-index:30;
+  width:max-content; max-width:250px; padding:10px 12px;
+  border:1px solid var(--border); border-radius:10px;
+  background:var(--card); color:var(--text); box-shadow:0 4px 18px #0002;
+  font-family:inherit;font-size:14px;font-weight:400;line-height:1.45; white-space:pre-line; text-align:left; pointer-events:none;
+}
+#anyConnectModeSelector .anyconnect-mode-button.tooltip-open::after,
+#anyConnectModeSelector .anyconnect-mode-button:focus-visible::after { display:block; }
+@media (hover:hover) {
+  #anyConnectModeSelector .anyconnect-mode-button:hover::after { display:block; }
+}

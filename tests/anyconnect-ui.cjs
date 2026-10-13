@@ -23,6 +23,10 @@ class Element {
   addEventListener(name, fn) { const previous=this.events[name]; this.events[name]=(...args)=>{previous?.(...args); return fn(...args);}; }
   click() { assert.equal(this.disabled, false); this.clicked = true; return this.events.click?.(); }
   remove() { this.removed = true; }
+  get options() { return this.children.filter(n=>n.tagName==='option'); }
+  contains(node) { return node===this || descendants(this).includes(node); }
+  querySelector(selector) { return descendants(this).find(n=>n.className?.split(' ').includes(selector.slice(1))); }
+  dispatchEvent(event) { return this.events[event.type]?.(event); }
   focus() {}
   scrollIntoView(options) { this.scrolled = options; }
 }
@@ -43,7 +47,7 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   const document = {documentElement:{lang:'ru',dataset:{}}, hidden:false,
     body:new Element('body'),
     getElementById: id => ids[id], querySelectorAll: () => modes,
-    createElement: tag => new Element(tag), addEventListener() {}};
+    createElement: tag => new Element(tag), addEventListener() {}, removeEventListener() {}};
   document.querySelector=()=>[ids.serverRiga,ids.serverMoscow].find(input=>input.checked);
   let ciscoConfirmed = false;
   const handlers = {}, window = {tolfAccountState:{authenticated:true,userId:'owner',vpn:{username:'user0_ipad'}},
@@ -106,6 +110,9 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   }
   c.getConnectionTestServerKey=()=>c.getSelectedServerKey();
   vm.runInContext(fs.readFileSync(path.join(root,'js/network-metrics.js'),'utf8'),c);
+  const dropdownSource=fs.readFileSync(path.join(root,'js/vpn-compact-selectors.js'),'utf8');
+  const factory=dropdownSource.slice(dropdownSource.indexOf('  function makeDropdown('),dropdownSource.indexOf('  // Expose'));
+  vm.runInContext(factory+';window.makeVpnDropdown=makeDropdown;',c);
   ids.vpnTransportAnyConnect.click(); await settle();
   assert(!descendants(ids.anyConnectAccess).some(n=>n.textContent==='Установить профиль AnyConnect'));
   assert.equal(window.ocAccess.selected(),null);
@@ -114,9 +121,23 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   assert(!usButton.classList.contains('hidden'));
   usButton.click();await settle();
   assert(usButton.classList.contains('active'),'US uses the normal selected segment style');
-  assert(ids.anyConnectModeHelp.textContent.includes('Нью-Йорк'));
+  assert(usButton.attributes['data-tooltip'].includes('Нью-Йорк'));
+  assert.equal(ids.anyConnectModeHelp.hidden,true);
+  const postsBefore=calls.filter(x=>x[0]==='POST').length;
+  usButton.click();await settle();
+  assert(usButton.classList.contains('tooltip-open'));
+  assert.equal(calls.filter(x=>x[0]==='POST').length,postsBefore);
   modes[0].click();await settle();
-  assert(ids.anyConnectModeHelp.textContent.includes('Рига'),'Auto keeps the original Riga default');
+  assert(modes[0].attributes['data-tooltip'].includes('Рига'),'Auto keeps the original Riga default');
+  const customMenus=descendants(ids.anyConnectAccess).filter(n=>n.className==='vpn-dropdown');
+  assert.equal(customMenus.length,2,'device and ingress use shared dropdown renderer');
+  const opener=customMenus[0].querySelector('.vpn-dropdown-button');
+  opener.events.click({stopPropagation(){}});
+  assert.equal(opener.attributes['aria-expanded'],'true');
+  assert.equal(customMenus[0].querySelector('.vpn-dropdown-menu').hidden,false);
+  const nativeSelects=descendants(ids.anyConnectAccess).filter(n=>n.tagName==='select');
+  assert(nativeSelects.every(n=>n.hidden),'native menu UI is replaced');
+  assert(!ids.anyConnectAccess.textContent.includes('Для Москвы, Риги и Нью-Йорка'));
   // iPhone now uses one authenticated MobileConfig with a linked certificate.
   const iosInstall=descendants(ids.anyConnectAccess).find(n=>n.tagName==='a'&&n.textContent==='Установить профиль AnyConnect');
   assert(iosInstall,'a single profile installation button is offered on iOS');
@@ -169,7 +190,7 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   assert(descendants(ids.anyConnectAccess).some(n=>n.tagName==='button'&&n.textContent==='Получить сертификат'));
   assert.equal(descendants(ids.anyConnectAccess).filter(n=>n.tagName==='input').length,0);
   const deviceRow = ids.anyConnectAccess.children.find(n=>n.className==='oc-device-row');
-  assert(deviceRow.children.some(n=>n.tagName==='select'));
+  assert(descendants(deviceRow).some(n=>n.tagName==='select'));
   assert(deviceRow.children.some(n=>n.tagName==='button'&&n.textContent==='Отозвать доступ'));
   assert(ids.anyConnectAccess.children.some(n=>n.className==='oc-access-header'&&
     n.children.some(child=>child.textContent==='Создать дополнительный доступ')));
