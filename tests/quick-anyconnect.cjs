@@ -39,7 +39,7 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
  await element('prepare').onclick();
  assert.equal(created.length,0,'unconfirmed client cannot issue VPN access');
  assert.equal(assigned,undefined);
- assert.equal(element('ocApp').href,platform==='ios'?'https://apps.apple.com/app/id1135064690':platform==='android'?'https://play.google.com/store/apps/details?id=com.cisco.anyconnect.vpn.android.avf':'https://gui.openconnect-vpn.net/');
+ assert.equal(element('ocApp').href,platform==='ios'?'https://apps.apple.com/app/id1135064690':platform==='android'?'https://play.google.com/store/apps/details?id=com.cisco.anyconnect.vpn.android.avf':'https://www.infradead.org/openconnect-gui/download/openconnect-gui-1.6.2-win64.exe');
  element('quickClientConfirmed').checked=true;element('quickClientConfirmed').onchange();
  assert.equal(element('prepare').disabled,false);
  if(platform==='ios' && node!=='us'){

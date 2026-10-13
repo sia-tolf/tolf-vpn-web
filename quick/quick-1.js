@@ -108,7 +108,7 @@ function render() {
  $('quickClientConfirmedLabel').textContent=cc.confirmed;
  $('quickClientRequired').textContent=clientInstalled?'':cc.required;
  $('ocApp').textContent=cc.install;
- $('ocApp').href=nativePlatform==='ios'?'https://apps.apple.com/app/id1135064690':nativePlatform==='android'?'https://play.google.com/store/apps/details?id=com.cisco.anyconnect.vpn.android.avf':'https://gui.openconnect-vpn.net/';
+ $('ocApp').href=nativePlatform==='ios'?'https://apps.apple.com/app/id1135064690':nativePlatform==='android'?'https://play.google.com/store/apps/details?id=com.cisco.anyconnect.vpn.android.avf':'https://www.infradead.org/openconnect-gui/download/openconnect-gui-1.6.2-win64.exe';
  $('ocControl').hidden=nativePlatform==='windows';
  $('prepare').disabled ||= !clientReady();
  if(!clientReady()){$('ocDelivery').hidden=true;$('iosProfileSave').replaceChildren();}
@@ -296,7 +296,7 @@ async function prepareOcImport(){
 }
 function renderOcDelivery(){
  const mobile=nativePlatform!=='windows',valid=ocGrant&&Date.parse(ocGrant.expiresAt)>Date.now()&&ocConfirmed&&!ocImported;
- $('ocApp').href=nativePlatform==='ios'?'https://apps.apple.com/app/id1135064690':nativePlatform==='android'?'https://play.google.com/store/apps/details?id=com.cisco.anyconnect.vpn.android.avf':'https://gui.openconnect-vpn.net/';
+ $('ocApp').href=nativePlatform==='ios'?'https://apps.apple.com/app/id1135064690':nativePlatform==='android'?'https://play.google.com/store/apps/details?id=com.cisco.anyconnect.vpn.android.avf':'https://www.infradead.org/openconnect-gui/download/openconnect-gui-1.6.2-win64.exe';
  const prefix='TOLF '+({riga:'Riga',moscow:'Moscow',us:'New York'}[server])+' ';
  const name=ocDevice.connectionNames?.[server]||Array.from(prefix+ocDevice.label).slice(0,24).join('').trimEnd();
  $('ocConnection').href='anyconnect://create/?'+new URLSearchParams({name,host:ocPoint.host,usecert:'true',certcommonname:ocDevice.username,netroam:'true'});

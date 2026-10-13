@@ -32,7 +32,7 @@
   const title=document.createElement('h3');title.textContent=c.title;
   const app=document.createElement('a');app.className='button-link secondary';
   app.textContent=c.install;app.target='_blank';app.rel='noopener noreferrer';
-  app.href=p==='ios'?'https://apps.apple.com/app/id1135064690':p==='android'?'https://play.google.com/store/apps/details?id=com.cisco.anyconnect.vpn.android.avf':'https://gui.openconnect-vpn.net/';
+  app.href=p==='ios'?'https://apps.apple.com/app/id1135064690':p==='android'?'https://play.google.com/store/apps/details?id=com.cisco.anyconnect.vpn.android.avf':'https://www.infradead.org/openconnect-gui/download/openconnect-gui-1.6.2-win64.exe';
   const label=document.createElement('label');label.className='cisco-install-confirm';
   const check=document.createElement('input');check.type='checkbox';check.checked=window.isCiscoClientConfirmed(p);
   check.addEventListener('change',()=>{
