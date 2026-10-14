@@ -69,3 +69,16 @@ setImmediate(() => {
   assert.equal(hidden.has('quickSetupCard'), false);
   console.log('PASS main page quick-setup entry visibility and invitation priority');
 });
+
+for(const protocol of ['ikev2','anyconnect']){
+ context.currentPlatform='windows';context.window.getVpnTransport=()=>protocol;
+ let prevented=false;
+ elements.quickSetupLink.listeners.click({preventDefault(){prevented=true;}});
+ assert(prevented,'Windows quick setup on iPad is blocked for '+protocol);
+}
+context.navigator.userAgent='Windows NT 10.0';context.navigator.platform='Win32';context.navigator.maxTouchPoints=0;
+let prevented=false;
+elements.quickSetupLink.listeners.click({preventDefault(){prevented=true;}});
+assert(!prevented);
+assert.equal(new URL(elements.quickSetupLink.href).searchParams.get('platform'),'windows');
+console.log('PASS Windows selection stays Windows; mobile quick setup blocked for both protocols');

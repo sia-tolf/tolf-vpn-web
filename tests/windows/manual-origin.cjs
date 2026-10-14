@@ -45,6 +45,6 @@ async function quick(hash=''){
  c.location.hash='#vpnCard';windowEvents.hashchange();
  assert.equal(notice.classList.contains('hidden'),true,'Manual hash navigation hides quick instructions');
  protocol='anyconnect';prevented=false;link.events.click({preventDefault(){prevented=true;}});
- assert.equal(prevented,false,'AnyConnect retains its own scenario');
+ assert.equal(prevented,true,'Windows AnyConnect also requires the Windows device for quick setup');
 }
 (async()=>{await manual();await quick();await quick('#vpnCard');console.log('PASS: iPad manual device creation and Windows quick guidance are separate');})().catch(e=>{console.error(e);process.exit(1);});

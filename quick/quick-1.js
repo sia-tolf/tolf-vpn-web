@@ -15,9 +15,9 @@ let ocGrant=null,ocPoint=null,ocDevice=null,ocConfirmed=false,ocImported=false,a
 let lang; try { lang = localStorage.getItem('tolfLanguage'); } catch {}
 if (!QUICK_TEXT[lang]) lang = /^ru/i.test(navigator.language) ? 'ru' : /^lv/i.test(navigator.language) ? 'lv' : 'en';
 for(const [language,text] of Object.entries({
- ru:'На компьютере Windows откройте vpn.tolf.is, выберите Windows, IKEv2 и «Быстрая настройка». Настройки устанавливаются на этом компьютере.',
- en:'Open vpn.tolf.is on your Windows computer, select Windows, IKEv2 and “Quick setup”. The settings are installed on that computer.',
- lv:'Windows datorā atveriet vpn.tolf.is, atlasiet Windows, IKEv2 un “Ātrā iestatīšana”. Iestatījumi tiek instalēti šajā datorā.'
+ ru:'На компьютере Windows откройте vpn.tolf.is, выберите Windows, нужный протокол и «Быстрая настройка». Настройки устанавливаются на этом компьютере.',
+ en:'Open vpn.tolf.is on your Windows computer, select Windows, the desired protocol and “Quick setup”. The settings are installed on that computer.',
+ lv:'Windows datorā atveriet vpn.tolf.is, atlasiet Windows, vajadzīgo protokolu un “Ātrā iestatīšana”. Iestatījumi tiek instalēti šajā datorā.'
 }))QUICK_TEXT[language].windowsQuickOnly=text;
 for(const [language,city] of Object.entries({ru:'Нью-Йорк',en:'New York',lv:'Ņujorka'}))QUICK_TEXT[language].us=city;
 const t = key => QUICK_TEXT[lang][key] || key;
@@ -175,7 +175,7 @@ async function initialize() {
  const number=++loadNumber;
  busy=true; panels(''); message('loading');
  try {
-  if(windowsQuickBlocked&&protocol==='ikev2'){ready=false;message('windowsQuickOnly');return;}
+  if(windowsQuickBlocked){ready=false;message('windowsQuickOnly');return;}
   const capabilities=await api('/quick-setup/capabilities');
   if(capabilities.version!==1) throw new Error('Unavailable');
   if(!nativePlatform){ready=false;message('unsupportedDevice',true);return;}
@@ -202,7 +202,7 @@ $('retry').onclick=()=>initialize();
 $('register').onclick=()=>accountAuth('signup');
 $('login').onclick=()=>accountAuth('signin');
 async function prepare() {
- if(!clientReady()||!authenticated||!ready||!nativePlatform||(windowsQuickBlocked&&protocol==='ikev2'))return;
+ if(!clientReady()||!authenticated||!ready||!nativePlatform||(windowsQuickBlocked))return;
  locked=true;$('choices').hidden=true; message('busy');
  if(protocol==='anyconnect'){await prepareOc();return;}
  const data=await api('/quick-setup/prepare',{method:'POST',body:JSON.stringify({platform:nativePlatform,server,language:lang,currentDevice:true})});
@@ -341,7 +341,7 @@ $('ocDownload').onclick=()=>action(async()=>{
 });
 
 render();
-if(protocol==='anyconnect'&&!clientHandoff){
+if(protocol==='anyconnect'&&!clientHandoff&&!windowsQuickBlocked){
  put('tolfTransport','anyconnect');
  window.location.assign('/?lang='+encodeURIComponent(lang));
 }else initialize();

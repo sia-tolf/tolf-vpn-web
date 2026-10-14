@@ -19,9 +19,9 @@
  notice.id='quickWindowsNotice'; notice.setAttribute('role','status');
  quickLink.parentElement.after(notice);
  const copy={
-  ru:['Быстрая настройка Windows','На компьютере Windows откройте vpn.tolf.is.','Выберите Windows, протокол IKEv2 и нажмите «Быстрая настройка».','Настройки устанавливаются на том компьютере, на котором открыт сайт.'],
-  en:['Windows quick setup','Open vpn.tolf.is on your Windows computer.','Select Windows, IKEv2 and “Quick setup”.','The settings are installed on the computer where you opened the site.'],
-  lv:['Windows ātrā iestatīšana','Windows datorā atveriet vpn.tolf.is.','Atlasiet Windows, IKEv2 un “Ātrā iestatīšana”.','Iestatījumi tiek instalēti datorā, kurā ir atvērta vietne.']
+  ru:['Быстрая настройка Windows','На компьютере Windows откройте vpn.tolf.is.','Выберите Windows, нужный протокол и нажмите «Быстрая настройка».','Настройки устанавливаются на том компьютере, на котором открыт сайт.'],
+  en:['Windows quick setup','Open vpn.tolf.is on your Windows computer.','Select Windows, the desired protocol and “Quick setup”.','The settings are installed on the computer where you opened the site.'],
+  lv:['Windows ātrā iestatīšana','Windows datorā atveriet vpn.tolf.is.','Atlasiet Windows, vajadzīgo protokolu un “Ātrā iestatīšana”.','Iestatījumi tiek instalēti datorā, kurā ir atvērta vietne.']
  };
  let noticeOpen=false;
  function nativeWindows(){
@@ -41,11 +41,12 @@
  handleHash();
  quickLink.addEventListener('click',event=>{
   const transport=window.getVpnTransport?.()||'ikev2';
-  if(currentPlatform==='windows'&&transport==='ikev2'&&!nativeWindows()){
+  if(currentPlatform==='windows'&&!nativeWindows()){
    event.preventDefault();noticeOpen=true;renderNotice();return;
   }
   const url=new URL(quickLink.href,location.href);
   url.searchParams.set('platform',currentPlatform);
+  url.searchParams.set('v','windows-platform-20261014');
   // One-use confirmation for this navigation, never a remembered installation.
   try{
    sessionStorage.removeItem('quickClientHandoff');
