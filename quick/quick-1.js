@@ -28,7 +28,15 @@ let server = null;
 let iosButtons = get('quickIosButtons') === 'true';
 let platform = windowsQuickBlocked?'windows':nativePlatform;
 
-let clientInstalled=false;
+const clientHandoff=(()=>{
+ const raw=get('quickClientHandoff',null);
+ put('quickClientHandoff','');
+ try{
+  const value=JSON.parse(raw),age=Date.now()-value.createdAt;
+  return protocol==='anyconnect'&&value.platform===nativePlatform&&age>=0&&age<60000;
+ }catch{return false;}
+})();
+let clientInstalled=clientHandoff;
 const clientReady=()=>protocol!=='anyconnect'||clientInstalled;
 const clientCopy=()=>{
  const name=nativePlatform==='windows'?'OpenConnect GUI':'Cisco Secure Client';
@@ -99,7 +107,7 @@ function render() {
  if(profile) renderDelivery();
  if(ocDevice)renderOcDelivery();
  const cc=clientCopy();
- $('quickClientInstall').hidden=protocol!=='anyconnect';
+ $('quickClientInstall').hidden=protocol!=='anyconnect'||clientHandoff;
  $('quickClientConfirmed').checked=clientInstalled;
  $('quickClientConfirmed').disabled=busy;
  $('quickClientConfirmedLabel').textContent=cc.confirmed;

@@ -46,6 +46,12 @@
   }
   const url=new URL(quickLink.href,location.href);
   url.searchParams.set('platform',currentPlatform);
+  // One-use confirmation for this navigation, never a remembered installation.
+  try{
+   sessionStorage.removeItem('quickClientHandoff');
+   if(transport==='anyconnect'&&window.isCiscoClientConfirmed?.(currentPlatform))
+    sessionStorage.setItem('quickClientHandoff',JSON.stringify({platform:currentPlatform,createdAt:Date.now()}));
+  }catch{}
   quickLink.href=url.href;noticeOpen=false;renderNotice();
  });
  window.addEventListener('vpnplatformchange',()=>{noticeOpen=false;renderNotice();});

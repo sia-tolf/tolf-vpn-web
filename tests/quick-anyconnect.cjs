@@ -1,7 +1,7 @@
 const {withShares}=require('./ios-city-share-fixture.cjs');
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const source=fs.readFileSync('quick/quick-1.js','utf8'),strings=fs.readFileSync('quick/strings-1.js','utf8');
-async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=false,buttons=false}={}){
+async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=false,buttons=false,handoff=false}={}){
  const map=new Map(),store=new Map(),posts=[],created=[],user='test-account',device='test-device';
  let lost=loseReply, recommendation=node==='us'?'riga':node;
  const makeElement=()=>({children:[],events:{},hidden:false,value:'',dataset:{},textContent:'',disabled:false,
@@ -31,9 +31,15 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
  else throw Error('Unexpected API '+url);
  posts.push(url);return {ok:true,json:async()=>data};
  }};
+ if(handoff)store.set('quickClientHandoff',JSON.stringify({platform,createdAt:Date.now()}));
  vm.createContext(ctx);vm.runInContext(strings,ctx);vm.runInContext(withShares(fs.readFileSync('js/ios-vpn-buttons.js','utf8')),ctx);vm.runInContext(source,ctx);
  for(let i=0;i<40;i++)await Promise.resolve();
  if(missingNode){assert.equal(element('prepare').disabled,true);assert.equal(created.length,0);return;}
+ if(handoff){
+  assert.equal(element('quickClientInstall').hidden,true,'no duplicate installation step');
+  assert.equal(element('quickClientConfirmed').checked,true,'confirmation transferred');
+  assert.equal(store.has('quickClientHandoff'),false,'handoff consumed once');
+ }else{
  assert.equal(element('quickClientInstall').hidden,false);
  assert.equal(element('prepare').disabled,true);
  await element('prepare').onclick();
@@ -41,6 +47,7 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
  assert.equal(assigned,undefined);
  assert.equal(element('ocApp').href,platform==='ios'?'https://apps.apple.com/app/id1135064690':platform==='android'?'https://play.google.com/store/apps/details?id=com.cisco.anyconnect.vpn.android.avf':'https://www.infradead.org/openconnect-gui/download/openconnect-gui-1.6.2-win64.exe');
  element('quickClientConfirmed').checked=true;element('quickClientConfirmed').onchange();
+ }
  assert.equal(element('prepare').disabled,false);
  if(platform==='ios' && node!=='us'){
   const option=descendants(element('iosVpnButtons')).find(n=>n.type==='checkbox');
@@ -145,4 +152,4 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
  assert.equal(element('ocCertificateDone').hidden,false);
  await element('ocRenew').onclick();assert.equal(created.length,before);assert.equal(element('ocGrantPanel').hidden,false);
 }
-(async()=>{for(const [ua,p]of[['iPhone','ios'],['desktop-ipad','ios'],['Android','android'],['Windows NT','windows']])for(const node of ['riga','moscow','us'])await run(ua,p,node);await run('iPhone','ios','riga',{buttons:true});await run('iPhone','ios','moscow',{missingNode:true});await run('Android','android','moscow',{loseReply:true});console.log('PASS: AnyConnect device/node selection, reusable device, lost reply, certificate URL validation, node availability, mobile/Windows steps, blocked import, confirmation, reset and certificate reuse');})().catch(e=>{console.error(e);process.exit(1)});
+(async()=>{for(const [ua,p]of[['iPhone','ios'],['desktop-ipad','ios'],['Android','android'],['Windows NT','windows']])await run(ua,p,'moscow',{handoff:true});await run('iPhone','ios','riga',{handoff:true,buttons:true});for(const [ua,p]of[['iPhone','ios'],['desktop-ipad','ios'],['Android','android'],['Windows NT','windows']])for(const node of ['riga','moscow','us'])await run(ua,p,node);await run('iPhone','ios','riga',{buttons:true});await run('iPhone','ios','moscow',{missingNode:true});await run('Android','android','moscow',{loseReply:true});console.log('PASS: AnyConnect device/node selection, reusable device, lost reply, certificate URL validation, node availability, mobile/Windows steps, blocked import, confirmation, reset and certificate reuse');})().catch(e=>{console.error(e);process.exit(1)});
