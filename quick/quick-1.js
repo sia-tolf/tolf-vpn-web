@@ -28,9 +28,7 @@ let server = null;
 let iosButtons = get('quickIosButtons') === 'true';
 let platform = windowsQuickBlocked?'windows':nativePlatform;
 
-const clientKey=(nativePlatform==='windows'?'tolfOpenConnectInstalled:':'tolfCiscoInstalled:')+nativePlatform;
 let clientInstalled=false;
-try { clientInstalled=localStorage.getItem(clientKey)==='true'; } catch {}
 const clientReady=()=>protocol!=='anyconnect'||clientInstalled;
 const clientCopy=()=>{
  const name=nativePlatform==='windows'?'OpenConnect GUI':'Cisco Secure Client';
@@ -42,7 +40,6 @@ const clientCopy=()=>{
 };
 $('quickClientConfirmed').onchange=()=>{
  clientInstalled=$('quickClientConfirmed').checked;
- try { localStorage.setItem(clientKey,String(clientInstalled)); } catch {}
  if(!clientInstalled){ocGrant=null;ocConfirmed=false;ocImported=false;clearTimeout(ocExpiryTimer);}
  if(ocDevice && nativePlatform!=='ios' && clientInstalled)panels('ocDelivery');else render();
 };
@@ -230,7 +227,7 @@ $('copyCode').onclick=()=>copy('code');$('copyLink').onclick=()=>copy('profileLi
 $('copyChromeSettings').onclick=()=>copy('chromeSettings');
 $('share').onclick=async()=>{try{await navigator.share({title:'TOLF VPN',url:profile});}catch(e){if(e.name!=='AbortError')message('failed',true);}};
 window.addEventListener('pagehide',()=>{clearTimeout(ocExpiryTimer);ocGrant=null;$('ocPassword').value='';$('ocImport').removeAttribute('href');});
-window.addEventListener('pageshow',e=>{if(e.persisted && nativePlatform==='ios' && iosButtons && ocDevice){render();return;}if(e.persisted){profile='';ocGrant=null;ocDevice=null;ocConfirmed=false;ocImported=false;$('code').value='';initialize();}});
+window.addEventListener('pageshow',e=>{if(!e.persisted)render();if(e.persisted && nativePlatform==='ios' && iosButtons && ocDevice){render();return;}if(e.persisted){profile='';ocGrant=null;ocDevice=null;ocConfirmed=false;ocImported=false;$('code').value='';initialize();}});
 
 function ocKey(suffix){return 'quickOc:'+accountId+':'+nativePlatform+':'+suffix;}
 function validateOcGrant(grant){

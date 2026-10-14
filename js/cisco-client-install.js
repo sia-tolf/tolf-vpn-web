@@ -15,10 +15,9 @@
  };
  const platform=()=>typeof currentPlatform!=='undefined'?currentPlatform:'ios';
  const transport=()=>window.getVpnTransport?.()||(()=>{try{return sessionStorage.getItem('tolfTransport')||'ikev2';}catch{return 'ikev2';}})();
- const key=p=>(p==='windows'?'tolfOpenConnectInstalled:':'tolfCiscoInstalled:')+p;
  window.isCiscoClientConfirmed=p=>{
   p=p||platform();if(!['ios','android','windows'].includes(p))return false;
-  try{return localStorage.getItem(key(p))==='true';}catch{return remembered.has(p);}
+  return remembered.has(p);
  };
  window.getCiscoInstallCopy=copy;
  window.focusCiscoInstall=()=>{
@@ -37,7 +36,6 @@
   const check=document.createElement('input');check.type='checkbox';check.checked=window.isCiscoClientConfirmed(p);
   check.addEventListener('change',()=>{
    if(check.checked)remembered.add(p);else remembered.delete(p);
-   try{localStorage.setItem(key(p),String(check.checked));}catch{}
    window.dispatchEvent(new Event('tolf:cisco-install-confirmed'));render();
   });
   const text=document.createElement('span');text.textContent=c.confirmed;
@@ -54,6 +52,7 @@
   },true);
  }
  for(const event of ['vpntransportchange','vpnplatformchange'])window.addEventListener(event,render);
+ window.addEventListener('pageshow',render);
  new MutationObserver(render).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
  render();
 })();

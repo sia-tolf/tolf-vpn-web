@@ -89,6 +89,10 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
    vm.runInContext(withShares(fs.readFileSync('js/ios-vpn-buttons.js','utf8')),ctx);
    vm.runInContext(source,ctx);
    for(let i=0;i<80;i++)await Promise.resolve();
+   assert.equal(element('quickClientConfirmed').checked,false,'reload resets client confirmation');
+   assert.equal(element('prepare').disabled,true,'reload gates further setup');
+   assert.equal(element('iosVpnButtons').hidden,true,'saved profile links cannot bypass confirmation');
+   element('quickClientConfirmed').checked=true;element('quickClientConfirmed').onchange();
    assert.equal(element('prepare').hidden,true,'reload restores prepared device');
    assert.equal(created.length,loseReply?2:1,'reload must not create another device');
    const nodes=descendants(element('iosVpnButtons'));
