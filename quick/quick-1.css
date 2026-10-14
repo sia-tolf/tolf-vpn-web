@@ -34,3 +34,8 @@ header > #backHome .tolf-wordmark{letter-spacing:.16em}
 .oc-windows-value input{flex:1;min-width:0;font-size:15px}
 .oc-windows-value button{flex:0 0 auto;font-size:14px;min-height:44px;padding:8px 12px;font-weight:400}
 #ocWindowsConnection,#ocWindowsCertificate,#ocWindowsDefaults,#ocEnable{white-space:pre-line}
+
+#ocWindowsAutoCopy{width:100%}
+#ocWindowsCommand{width:100%;height:100px;font:13px/1.5 monospace;resize:vertical;border:1px solid #d2d2d7;border-radius:10px;padding:10px;overflow-wrap:anywhere}
+#ocWindowsAutoHelp{white-space:pre-line}
+#ocWindowsManual{margin-top:12px}

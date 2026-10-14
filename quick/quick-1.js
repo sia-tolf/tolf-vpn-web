@@ -12,6 +12,7 @@ const protocol=requestedProtocol==='anyconnect' || (!requestedProtocol&&get('qui
 const requestedIngress=new URL(location.href).searchParams.get('ingress') || get('quickIngress', null);
 const OC_HOSTS={riga:'oc-riga.tolf.is:443',moscow:'oc.tolf.is:4443',us:'oc-us.tolf.is:4443'};
 let ocGrant=null,ocPoint=null,ocDevice=null,ocConfirmed=false,ocImported=false,accountId=null,ocExpiryTimer=null;
+let ocWindowsManual=false,ocWindowsCommand='';
 let lang; try { lang = localStorage.getItem('tolfLanguage'); } catch {}
 if (!QUICK_TEXT[lang]) lang = /^ru/i.test(navigator.language) ? 'ru' : /^lv/i.test(navigator.language) ? 'lv' : 'en';
 for(const [language,text] of Object.entries({
@@ -32,6 +33,19 @@ const OC_WINDOWS_TEXT={
  en:{copy:'Copy',start:'Open OpenConnect GUI. Select the gear → New profile (advanced).',fields:'Copy these values into the matching fields:',defaults:'VPN protocol: Cisco AnyConnect or OpenConnect.\nLeave Username, Groupname, CA Certificate and User Key empty. Keep the other settings unchanged.\nSelect Save, then “Connection added” here.',certificate:'1. Get the certificate, copy its password and download the .p12 file.\n2. In OpenConnect GUI select the profile → gear → Edit selected profile.\n3. Open Local Certificate. Select … beside User Certificate and choose the downloaded .p12. Leave User Key empty.\n4. Enter the certificate password when prompted. Select Save.',enable:'Select the profile in OpenConnect GUI and select Connect. If prompted for the certificate password, paste the password from this page.',help:'Download the .p12 and select it under Local Certificate → User Certificate.'},
  lv:{copy:'Kopēt',start:'Atveriet OpenConnect GUI. Izvēlieties zobratu → New profile (advanced).',fields:'Iekopējiet vērtības atbilstošajos laukos:',defaults:'VPN protocol: Cisco AnyConnect or OpenConnect.\nAtstājiet Username, Groupname, CA Certificate un User Key tukšus. Pārējos iestatījumus nemainiet.\nNospiediet Save, tad šeit — “Savienojums pievienots”.',certificate:'1. Iegūstiet sertifikātu, nokopējiet paroli un lejupielādējiet .p12 failu.\n2. OpenConnect GUI izvēlieties profilu → zobratu → Edit selected profile.\n3. Atveriet Local Certificate. Nospiediet … pie User Certificate un izvēlieties lejupielādēto .p12. Atstājiet User Key tukšu.\n4. Ievadiet sertifikāta paroli, kad lietotne to pieprasa. Nospiediet Save.',enable:'OpenConnect GUI izvēlieties profilu un nospiediet Connect. Ja tiek pieprasīta sertifikāta parole, ielīmējiet paroli no šīs lapas.',help:'Lejupielādējiet .p12 un izvēlieties to sadaļā Local Certificate → User Certificate.'}
 };
+const OC_SETUP_SHA256='b9c5313090cc54f04e4828d3a3f44deaf9ccf944b2345931efa2c9a8aa2ea286';
+const OC_AUTO_TEXT={
+ ru:{title:'2. Настройте OpenConnect GUI',copy:'Скопировать команду настройки',manual:'Ввести настройки вручную',label:'Команда PowerShell',help:'1. Если OpenConnect GUI открыт: Disconnect → File → Quit.\n2. Скопируйте команду настройки.\n3. Нажмите Win + R, введите powershell и нажмите Enter.\n4. Вставьте команду и нажмите Enter. Она создаст профиль с сертификатом и откроет OpenConnect GUI.\n5. Выберите новый профиль в Server и нажмите Connect.',copied:'Команда скопирована. Вставьте её в PowerShell на этом компьютере. Не передавайте команду другим: она содержит доступ к вашему сертификату.'},
+ en:{title:'2. Configure OpenConnect GUI',copy:'Copy setup command',manual:'Enter settings manually',label:'PowerShell command',help:'1. If OpenConnect GUI is open: Disconnect → File → Quit.\n2. Copy the setup command.\n3. Press Win + R, enter powershell and press Enter.\n4. Paste the command and press Enter. It creates the profile with its certificate and opens OpenConnect GUI.\n5. Select the new profile under Server and click Connect.',copied:'Command copied. Paste it into PowerShell on this computer. Keep it private: it contains access to your certificate.'},
+ lv:{title:'2. Iestatiet OpenConnect GUI',copy:'Kopēt iestatīšanas komandu',manual:'Ievadīt iestatījumus manuāli',label:'PowerShell komanda',help:'1. Ja OpenConnect GUI ir atvērts: Disconnect → File → Quit.\n2. Nokopējiet iestatīšanas komandu.\n3. Nospiediet Win + R, ievadiet powershell un nospiediet Enter.\n4. Ielīmējiet komandu un nospiediet Enter. Tā izveidos profilu ar sertifikātu un atvērs OpenConnect GUI.\n5. Laukā Server izvēlieties jauno profilu un nospiediet Connect.',copied:'Komanda nokopēta. Ielīmējiet to šī datora PowerShell. Neizplatiet komandu: tā satur piekļuvi jūsu sertifikātam.'}
+};
+function windowsSetupCommand(grant){
+ const config={deviceId:grant.deviceId,username:grant.username,certificateUrl:grant.certificateUrl,password:grant.password,
+  gateway:'https://'+ocPoint.host,name:'TOLF '+({moscow:'Moscow',riga:'Riga',us:'New York'}[server])+' Auto '+grant.deviceId.replaceAll('-','').slice(0,8)};
+ const bytes=new TextEncoder().encode(JSON.stringify(config));
+ const encoded=btoa(Array.from(bytes,b=>String.fromCharCode(b)).join(''));
+ return "[Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; $ocBytes=(New-Object Net.WebClient).DownloadData('https://vpn.tolf.is/windows/openconnect-setup-v1.ps1?v="+OC_SETUP_SHA256+"'); $ocHash=[BitConverter]::ToString([Security.Cryptography.SHA256]::Create().ComputeHash($ocBytes)).Replace('-','').ToLowerInvariant(); if($ocHash -ne '"+OC_SETUP_SHA256+"'){throw 'Setup script verification failed'}; & ([scriptblock]::Create([Text.Encoding]::UTF8.GetString($ocBytes))) -ConfigBase64 '"+encoded+"'";
+}
 function accountAuth(mode) { persist(); window.location.assign('/auth/?mode='+mode+'&next=quick&lang='+lang); }
 let busy = false, authenticated = false, ready = false, locked = false, choicesOpened = false, profile = '', messageKey = '', failed = false;
 let server = null;
@@ -247,7 +261,7 @@ async function copy(id){
 $('copyCode').onclick=()=>copy('code');$('copyLink').onclick=()=>copy('profileLink');
 $('copyChromeSettings').onclick=()=>copy('chromeSettings');
 $('share').onclick=async()=>{try{await navigator.share({title:'TOLF VPN',url:profile});}catch(e){if(e.name!=='AbortError')message('failed',true);}};
-window.addEventListener('pagehide',()=>{clearTimeout(ocExpiryTimer);ocGrant=null;$('ocPassword').value='';$('ocImport').removeAttribute('href');});
+window.addEventListener('pagehide',()=>{ocWindowsCommand='';$('ocWindowsCommand').value='';clearTimeout(ocExpiryTimer);ocGrant=null;$('ocPassword').value='';$('ocImport').removeAttribute('href');});
 window.addEventListener('pageshow',e=>{if(!e.persisted)render();if(e.persisted && nativePlatform==='ios' && iosButtons && ocDevice){render();return;}if(e.persisted){profile='';ocGrant=null;ocDevice=null;ocConfirmed=false;ocImported=false;$('code').value='';initialize();}});
 
 function ocKey(suffix){return 'quickOc:'+accountId+':'+nativePlatform+':'+suffix;}
@@ -310,11 +324,11 @@ async function prepareOc(){
   message('started');
   return;
  }
- ocConfirmed=false;ocImported=false;ocGrant=null;
+ ocConfirmed=false;ocImported=false;ocGrant=null;ocWindowsManual=false;ocWindowsCommand='';
  panels('ocDelivery');message('');
 }
-async function prepareOcImport(){
- if(!clientReady()||!ocDevice||!ocConfirmed)return;
+async function prepareOcImport(automatic=false){
+ if(!clientReady()||!ocDevice||(!ocConfirmed&&!automatic))return;
  ocImported=false;ocGrant=null;
  const deviceId=ocDevice.id;
  const started=performance.now();
@@ -330,6 +344,16 @@ async function prepareOcImport(){
 }
 function renderOcDelivery(){
  const mobile=nativePlatform!=='windows',valid=ocGrantValid(ocGrant)&&ocConfirmed&&!ocImported;
+ const automatic=!mobile&&!ocWindowsManual;
+ $('ocWindowsAutoPanel').hidden=!automatic;
+ for(const id of ['ocConnectionStep','ocCertificateStep','ocEnableStep'])$(id).hidden=automatic;
+ const auto=OC_AUTO_TEXT[lang];
+ $('ocWindowsAutoTitle').textContent=auto.title;$('ocWindowsAutoHelp').textContent=auto.help;
+ $('ocWindowsAutoCopy').textContent=auto.copy;$('ocWindowsAutoCopy').disabled=busy||!clientReady();
+ $('ocWindowsManual').textContent=auto.manual;$('ocWindowsManual').disabled=busy;
+ $('ocWindowsCommandLabel').textContent=auto.label;
+ $('ocWindowsCommandPanel').hidden=!automatic||!ocWindowsCommand||!ocGrantValid(ocGrant);
+ $('ocWindowsCommand').value=ocGrantValid(ocGrant)?ocWindowsCommand:'';
  $('ocApp').href=nativePlatform==='ios'?'https://apps.apple.com/app/id1135064690':nativePlatform==='android'?'https://play.google.com/store/apps/details?id=com.cisco.anyconnect.vpn.android.avf':'https://www.infradead.org/openconnect-gui/download/openconnect-gui-1.6.2-win64.exe';
  const prefix='TOLF '+({riga:'Riga',moscow:'Moscow',us:'New York'}[server])+' ';
  const name=ocDevice.connectionNames?.[server]||Array.from(prefix+ocDevice.label).slice(0,24).join('').trimEnd();
@@ -359,6 +383,16 @@ function renderOcDelivery(){
  $('ocCopyPassword').title=t('ocCopyPassword');
  $('ocCopyPassword').disabled=busy||!valid;$('ocDownload').disabled=busy||!valid;
 }
+$('ocWindowsManual').onclick=()=>{if(busy)return;ocWindowsManual=true;ocWindowsCommand='';render();};
+$('ocWindowsAutoCopy').onclick=()=>action(async()=>{
+ if(nativePlatform!=='windows'||!clientReady()||!ocDevice)return;
+ ocWindowsCommand='';
+ await prepareOcImport(true);
+ if(!ocGrantValid(ocGrant))throw Error('Expired');
+ ocWindowsCommand=windowsSetupCommand(ocGrant);render();
+ try{await navigator.clipboard.writeText(ocWindowsCommand);message(OC_AUTO_TEXT[lang].copied);}
+ catch{$('ocWindowsCommand').focus();$('ocWindowsCommand').select();message('');}
+});
 $('ocConfirmConnection').onclick=()=>{if(!clientReady()||busy||!ocDevice)return;ocConfirmed=true;message('');};
 $('ocAgain').onclick=()=>{if(busy)return;ocConfirmed=false;ocImported=false;ocGrant=null;clearTimeout(ocExpiryTimer);message('');};
 $('ocAlreadyImported').onclick=()=>{if(!clientReady()||busy||!ocConfirmed)return;ocImported=true;ocGrant=null;clearTimeout(ocExpiryTimer);message('');};
