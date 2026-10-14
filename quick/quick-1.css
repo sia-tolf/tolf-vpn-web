@@ -39,3 +39,8 @@ header > #backHome .tolf-wordmark{letter-spacing:.16em}
 #ocWindowsCommand{width:100%;height:100px;font:13px/1.5 monospace;resize:vertical;border:1px solid #d2d2d7;border-radius:10px;padding:10px;overflow-wrap:anywhere}
 #ocWindowsAutoHelp{white-space:pre-line}
 #ocWindowsManual{margin-top:12px}
+
+#ocWindowsAutoDownload{width:100%}
+#ocWindowsAutoPanel details{margin-top:14px}
+#ocWindowsAlternative{cursor:pointer;color:#626269;font-size:14px}
+#ocWindowsAutoCopy{margin-top:10px}

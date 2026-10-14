@@ -39,12 +39,22 @@ const OC_AUTO_TEXT={
  en:{title:'2. Configure OpenConnect GUI',copy:'Copy setup command',manual:'Enter settings manually',label:'PowerShell command',help:'1. If OpenConnect GUI is open: Disconnect → File → Quit.\n2. Copy the setup command.\n3. Press Win + R, enter powershell and press Enter.\n4. Paste the command and press Enter. It creates the profile with its certificate and opens OpenConnect GUI.\n5. Select the new profile under Server and click Connect.',copied:'Command copied. Paste it into PowerShell on this computer. Keep it private: it contains access to your certificate.'},
  lv:{title:'2. Iestatiet OpenConnect GUI',copy:'Kopēt iestatīšanas komandu',manual:'Ievadīt iestatījumus manuāli',label:'PowerShell komanda',help:'1. Ja OpenConnect GUI ir atvērts: Disconnect → File → Quit.\n2. Nokopējiet iestatīšanas komandu.\n3. Nospiediet Win + R, ievadiet powershell un nospiediet Enter.\n4. Ielīmējiet komandu un nospiediet Enter. Tā izveidos profilu ar sertifikātu un atvērs OpenConnect GUI.\n5. Laukā Server izvēlieties jauno profilu un nospiediet Connect.',copied:'Komanda nokopēta. Ielīmējiet to šī datora PowerShell. Neizplatiet komandu: tā satur piekļuvi jūsu sertifikātam.'}
 };
+for(const [language,copy] of Object.entries({
+ ru:{download:'Скачать файл настройки',alternative:'Выполнить команду вручную',help:'1. Если OpenConnect GUI открыт: Disconnect → File → Quit.\n2. Скачайте файл настройки и откройте его двойным щелчком.\n3. После настройки выберите новый профиль в Server и нажмите Connect.',downloaded:'Файл настройки скачан. Откройте его на этом компьютере. Файл содержит доступ к вашему сертификату — не передавайте его другим.'},
+ en:{download:'Download setup file',alternative:'Run the command manually',help:'1. If OpenConnect GUI is open: Disconnect → File → Quit.\n2. Download the setup file and double-click it.\n3. After setup, select the new profile under Server and click Connect.',downloaded:'Setup file downloaded. Open it on this computer. Keep it private: it contains access to your certificate.'},
+ lv:{download:'Lejupielādēt iestatīšanas failu',alternative:'Izpildīt komandu manuāli',help:'1. Ja OpenConnect GUI ir atvērts: Disconnect → File → Quit.\n2. Lejupielādējiet iestatīšanas failu un atveriet to ar dubultklikšķi.\n3. Pēc iestatīšanas laukā Server izvēlieties jauno profilu un nospiediet Connect.',downloaded:'Iestatīšanas fails lejupielādēts. Atveriet to šajā datorā. Neizplatiet failu: tas satur piekļuvi jūsu sertifikātam.'}
+}))Object.assign(OC_AUTO_TEXT[language],copy);
 function windowsSetupCommand(grant){
  const config={deviceId:grant.deviceId,username:grant.username,certificateUrl:grant.certificateUrl,password:grant.password,
   gateway:'https://'+ocPoint.host,name:'TOLF '+({moscow:'Moscow',riga:'Riga',us:'New York'}[server])+' Auto '+grant.deviceId.replaceAll('-','').slice(0,8)};
  const bytes=new TextEncoder().encode(JSON.stringify(config));
  const encoded=btoa(Array.from(bytes,b=>String.fromCharCode(b)).join(''));
  return "[Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; $ocBytes=(New-Object Net.WebClient).DownloadData('https://vpn.tolf.is/windows/openconnect-setup-v1.ps1?v="+OC_SETUP_SHA256+"'); $ocHash=[BitConverter]::ToString([Security.Cryptography.SHA256]::Create().ComputeHash($ocBytes)).Replace('-','').ToLowerInvariant(); if($ocHash -ne '"+OC_SETUP_SHA256+"'){throw 'Setup script verification failed'}; & ([scriptblock]::Create([Text.Encoding]::UTF8.GetString($ocBytes))) -ConfigBase64 '"+encoded+"'";
+}
+function windowsCommandFile(command){
+ // All dynamic values are base64. CMD must receive one quoted, ASCII command.
+ if(/[^\x20-\x7e]|["%!]/.test(command)||command.length>7000)throw Error('Invalid Windows command');
+ return '@echo off\r\nsetlocal DisableDelayedExpansion\r\npowershell.exe -NoLogo -NoProfile -Command "'+command+'"\r\nif errorlevel 1 (\r\n  echo Setup failed. Read the error above.\r\n  pause\r\n  exit /b 1\r\n)\r\necho Setup complete. Select your profile in OpenConnect GUI and click Connect.\r\npause\r\nexit /b 0\r\n';
 }
 function accountAuth(mode) { persist(); window.location.assign('/auth/?mode='+mode+'&next=quick&lang='+lang); }
 let busy = false, authenticated = false, ready = false, locked = false, choicesOpened = false, profile = '', messageKey = '', failed = false;
@@ -350,6 +360,8 @@ function renderOcDelivery(){
  const auto=OC_AUTO_TEXT[lang];
  $('ocWindowsAutoTitle').textContent=auto.title;$('ocWindowsAutoHelp').textContent=auto.help;
  $('ocWindowsAutoCopy').textContent=auto.copy;$('ocWindowsAutoCopy').disabled=busy||!clientReady();
+ $('ocWindowsAutoDownload').textContent=auto.download;$('ocWindowsAutoDownload').disabled=busy||!clientReady();
+ $('ocWindowsAlternative').textContent=auto.alternative;
  $('ocWindowsManual').textContent=auto.manual;$('ocWindowsManual').disabled=busy;
  $('ocWindowsCommandLabel').textContent=auto.label;
  $('ocWindowsCommandPanel').hidden=!automatic||!ocWindowsCommand||!ocGrantValid(ocGrant);
@@ -384,14 +396,23 @@ function renderOcDelivery(){
  $('ocCopyPassword').disabled=busy||!valid;$('ocDownload').disabled=busy||!valid;
 }
 $('ocWindowsManual').onclick=()=>{if(busy)return;ocWindowsManual=true;ocWindowsCommand='';render();};
-$('ocWindowsAutoCopy').onclick=()=>action(async()=>{
- if(nativePlatform!=='windows'||!clientReady()||!ocDevice)return;
- ocWindowsCommand='';
- await prepareOcImport(true);
+async function prepareWindowsCommand(){
+ if(nativePlatform!=='windows'||!clientReady()||!ocDevice)return false;
+ ocWindowsCommand='';await prepareOcImport(true);
  if(!ocGrantValid(ocGrant))throw Error('Expired');
- ocWindowsCommand=windowsSetupCommand(ocGrant);render();
+ ocWindowsCommand=windowsSetupCommand(ocGrant);render();return true;
+}
+$('ocWindowsAutoCopy').onclick=()=>action(async()=>{
+ if(!await prepareWindowsCommand())return;
  try{await navigator.clipboard.writeText(ocWindowsCommand);message(OC_AUTO_TEXT[lang].copied);}
  catch{$('ocWindowsCommand').focus();$('ocWindowsCommand').select();message('');}
+});
+$('ocWindowsAutoDownload').onclick=()=>action(async()=>{
+ if(!await prepareWindowsCommand())return;
+ const blob=new Blob([windowsCommandFile(ocWindowsCommand)],{type:'text/plain;charset=us-ascii'});
+ const url=URL.createObjectURL(blob),link=document.createElement('a');
+ link.href=url;link.download='TOLF-OpenConnect-Setup.cmd';document.body.append(link);link.click();link.remove();
+ setTimeout(()=>URL.revokeObjectURL(url),1000);message(OC_AUTO_TEXT[lang].downloaded);
 });
 $('ocConfirmConnection').onclick=()=>{if(!clientReady()||busy||!ocDevice)return;ocConfirmed=true;message('');};
 $('ocAgain').onclick=()=>{if(busy)return;ocConfirmed=false;ocImported=false;ocGrant=null;clearTimeout(ocExpiryTimer);message('');};

@@ -9,14 +9,15 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
    append(...nodes){this.children.push(...nodes);},replaceChildren(...nodes){this.children=nodes;},
    addEventListener(name,fn){this.events[name]=fn;},remove(){},click(){return this.events.click?.();}});
  const element=id=>{if(!map.has(id))map.set(id,makeElement());return map.get(id);};
- let assigned,elapsed=0;const copied=[];
+ let assigned,elapsed=0;const copied=[],downloadedBlobs=[],downloadLinks=[];
+ class FixtureURL extends URL {static createObjectURL(blob){downloadedBlobs.push(blob);return 'blob:test-download';}static revokeObjectURL(){}}
  const descendants=node=>node.children.flatMap(n=>[n,...descendants(n)]);
  const host=node==='us'?'oc-us.tolf.is:4443':node==='riga'?'oc-riga.tolf.is:443':'oc.tolf.is:4443';
  const cert='https://api.tolf.is/oc/access/import/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA.p12';
  const grant={deviceId:device,password:'TEST-ONLY-PASSWORD',expiresAt:new Date(Date.now()+7200000).toISOString(),certificateUrl:tamper?'https://example.invalid/test.p12':cert,username:'tolf-oc-aaaaaaaabbbbccccddddeeeeeeeeeeee',importUri:'anyconnect://import/?type=pkcs12&uri='+encodeURIComponent(cert),connections:[{id:node,host,connectionUri:'anyconnect://create/?host='+encodeURIComponent(host)+'&certcommonname=tolf-oc-aaaaaaaabbbbccccddddeeeeeeeeeeee'}]};
  if(mobileLinkFault){grant.importUri='https://example.invalid/';grant.connections[0].connectionUri='https://example.invalid/';}
  const BrowserDate=class extends Date {static now(){return Date.now()+clockSkew;}};
- const ctx={TextEncoder,btoa:value=>Buffer.from(value,'binary').toString('base64'),Date:BrowserDate,performance:{now:()=>elapsed},URL,URLSearchParams,AbortSignal,location:{href:'https://vpn.tolf.is/quick/?protocol=anyconnect'+(node==='us'?'&ingress=us':'')},navigator:{userAgent:ua,platform:ua==='desktop-ipad'?'MacIntel':'',maxTouchPoints:ua==='desktop-ipad'?5:0,language:'ru',clipboard:{writeText:async value=>{copied.push(value);}}},crypto:{randomUUID:()=> 'test-request-id'},localStorage:{getItem:k=>map.get('storage:'+k),setItem(k,v){map.set('storage:'+k,v)}},sessionStorage:{getItem:k=>store.get(k),setItem:(k,v)=>store.set(k,v),removeItem:k=>store.delete(k)},document:{getElementById:element,documentElement:{lang:'ru'},querySelectorAll:()=>[],querySelector:()=>element('defaults'),body:{append(){}},createElement:()=>makeElement()},window:{addEventListener(){},location:{assign(url){assigned=url;}}},setTimeout:()=>0,clearTimeout(){},
+ const ctx={Blob,TextEncoder,btoa:value=>Buffer.from(value,'binary').toString('base64'),Date:BrowserDate,performance:{now:()=>elapsed},URL:FixtureURL,URLSearchParams,AbortSignal,location:{href:'https://vpn.tolf.is/quick/?protocol=anyconnect'+(node==='us'?'&ingress=us':'')},navigator:{userAgent:ua,platform:ua==='desktop-ipad'?'MacIntel':'',maxTouchPoints:ua==='desktop-ipad'?5:0,language:'ru',clipboard:{writeText:async value=>{copied.push(value);}}},crypto:{randomUUID:()=> 'test-request-id'},localStorage:{getItem:k=>map.get('storage:'+k),setItem(k,v){map.set('storage:'+k,v)}},sessionStorage:{getItem:k=>store.get(k),setItem:(k,v)=>store.set(k,v),removeItem:k=>store.delete(k)},document:{getElementById:element,documentElement:{lang:'ru'},querySelectorAll:()=>[],querySelector:()=>element('defaults'),body:{append(link){downloadLinks.push(link);}},createElement:()=>makeElement()},window:{addEventListener(){},location:{assign(url){assigned=url;}}},setTimeout:()=>0,clearTimeout(){},
  fetch:async(url,opt={})=>{
  let data;
  if(url.endsWith('/quick-setup/capabilities'))data={version:1};
@@ -144,6 +145,17 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
   const hash=crypto.createHash('sha256').update(fs.readFileSync('windows/openconnect-setup-v1.ps1')).digest('hex');
   assert(command.includes(hash));assert(!command.includes('ExecutionPolicy'));assert(!command.includes('RunAs'));
   assert.equal(element('ocWindowsCommandPanel').hidden,false);
+  const imports=posts.filter(p=>p.endsWith('/import')).length;
+  await element('ocWindowsAutoDownload').onclick();
+  assert.equal(posts.filter(p=>p.endsWith('/import')).length,imports+1,'each setup download receives a fresh grant');
+  assert.equal(downloadLinks.at(-1).download,'TOLF-OpenConnect-Setup.cmd');
+  const cmd=await downloadedBlobs.at(-1).text();
+  assert(cmd.startsWith('@echo off\r\nsetlocal DisableDelayedExpansion\r\n'));
+  assert(cmd.includes('powershell.exe -NoLogo -NoProfile -Command "'+command+'"\r\n'));
+  assert(cmd.includes('if errorlevel 1 (\r\n'));
+  assert(!/[^\x00-\x7f]/.test(cmd),'CMD file is ASCII to avoid code-page corruption');
+  assert(!cmd.includes('ExecutionPolicy'));assert(!cmd.includes('RunAs'));
+
   elapsed=2*3600000+1;await element('ocCopyName').onclick();
   assert.equal(element('ocWindowsCommandPanel').hidden,true);assert.equal(element('ocWindowsCommand').value,'');
   return;
