@@ -27,3 +27,10 @@ header > #backHome .tolf-wordmark{letter-spacing:.16em}
 .quick-client-confirm{display:flex;align-items:center;gap:10px;font-weight:400}
 .quick-client-confirm input{width:20px;height:20px;min-height:20px;padding:0;flex:0 0 20px}
 #quickClientInstall #ocApp{width:100%;box-sizing:border-box}
+
+.oc-windows-field{margin:12px 0}
+.oc-windows-field label{margin:0 0 6px;font-weight:400}
+.oc-windows-value{display:flex;gap:8px;align-items:center}
+.oc-windows-value input{flex:1;min-width:0;font-size:15px}
+.oc-windows-value button{flex:0 0 auto;font-size:14px;min-height:44px;padding:8px 12px;font-weight:400}
+#ocWindowsConnection,#ocWindowsCertificate,#ocWindowsDefaults,#ocEnable{white-space:pre-line}

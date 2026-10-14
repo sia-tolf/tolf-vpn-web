@@ -27,6 +27,11 @@ for(const [language,messages] of Object.entries({
 }))Object.assign(QUICK_TEXT[language],messages);
 const t = key => QUICK_TEXT[lang][key] || key;
 const accountText = {en:['Create account','Sign in','Choose Passkey or username and password. No email address is required.'],ru:['Создать аккаунт','Войти','Выберите Passkey или логин и пароль. Электронная почта не нужна.'],lv:['Izveidot kontu','Pieteikties','Izvēlieties Passkey vai lietotājvārdu un paroli. E-pasts nav nepieciešams.']};
+const OC_WINDOWS_TEXT={
+ ru:{copy:'Копировать',start:'Откройте OpenConnect GUI. Нажмите шестерёнку → New profile (advanced).',fields:'Скопируйте значения в одноимённые поля:',defaults:'VPN protocol: Cisco AnyConnect or OpenConnect.\nUsername, Groupname, CA Certificate, User Key — оставьте пустыми. Остальные параметры оставьте без изменений.\nНажмите Save, затем здесь — «Соединение добавлено».',certificate:'1. Нажмите «Получить сертификат», скопируйте пароль и скачайте файл .p12.\n2. В OpenConnect GUI выберите профиль → шестерёнка → Edit selected profile.\n3. Откройте Local Certificate. Нажмите … у User Certificate и выберите скачанный .p12. Поле User Key оставьте пустым.\n4. Введите пароль сертификата, когда программа его запросит. Нажмите Save.',enable:'В OpenConnect GUI выберите профиль и нажмите Connect. Если появится запрос пароля сертификата, вставьте пароль с этой страницы.',help:'Скачайте .p12 и выберите его в Local Certificate → User Certificate.'},
+ en:{copy:'Copy',start:'Open OpenConnect GUI. Select the gear → New profile (advanced).',fields:'Copy these values into the matching fields:',defaults:'VPN protocol: Cisco AnyConnect or OpenConnect.\nLeave Username, Groupname, CA Certificate and User Key empty. Keep the other settings unchanged.\nSelect Save, then “Connection added” here.',certificate:'1. Get the certificate, copy its password and download the .p12 file.\n2. In OpenConnect GUI select the profile → gear → Edit selected profile.\n3. Open Local Certificate. Select … beside User Certificate and choose the downloaded .p12. Leave User Key empty.\n4. Enter the certificate password when prompted. Select Save.',enable:'Select the profile in OpenConnect GUI and select Connect. If prompted for the certificate password, paste the password from this page.',help:'Download the .p12 and select it under Local Certificate → User Certificate.'},
+ lv:{copy:'Kopēt',start:'Atveriet OpenConnect GUI. Izvēlieties zobratu → New profile (advanced).',fields:'Iekopējiet vērtības atbilstošajos laukos:',defaults:'VPN protocol: Cisco AnyConnect or OpenConnect.\nAtstājiet Username, Groupname, CA Certificate un User Key tukšus. Pārējos iestatījumus nemainiet.\nNospiediet Save, tad šeit — “Savienojums pievienots”.',certificate:'1. Iegūstiet sertifikātu, nokopējiet paroli un lejupielādējiet .p12 failu.\n2. OpenConnect GUI izvēlieties profilu → zobratu → Edit selected profile.\n3. Atveriet Local Certificate. Nospiediet … pie User Certificate un izvēlieties lejupielādēto .p12. Atstājiet User Key tukšu.\n4. Ievadiet sertifikāta paroli, kad lietotne to pieprasa. Nospiediet Save.',enable:'OpenConnect GUI izvēlieties profilu un nospiediet Connect. Ja tiek pieprasīta sertifikāta parole, ielīmējiet paroli no šīs lapas.',help:'Lejupielādējiet .p12 un izvēlieties to sadaļā Local Certificate → User Certificate.'}
+};
 function accountAuth(mode) { persist(); window.location.assign('/auth/?mode='+mode+'&next=quick&lang='+lang); }
 let busy = false, authenticated = false, ready = false, locked = false, choicesOpened = false, profile = '', messageKey = '', failed = false;
 let server = null;
@@ -84,12 +89,13 @@ function render() {
  document.querySelectorAll('[data-text]').forEach(el => el.textContent = t(el.dataset.text));
  $('passkeyHelp').textContent = accountText[lang][2];
  if(protocol==='anyconnect' && nativePlatform==='windows'){
-   $('ocWindowsConnection').textContent=t('ocWindowsConnection').replace('Cisco Secure Client','OpenConnect GUI');
-   $('ocWindowsCertificate').textContent={
-     ru:'Скачайте файл .p12. Укажите его как клиентский сертификат в профиле OpenConnect GUI и используйте указанный пароль.',
-     en:'Download the .p12 file. Select it as the client certificate in the OpenConnect GUI profile and use the displayed password.',
-     lv:'Lejupielādējiet .p12 failu. Atlasiet to kā klienta sertifikātu OpenConnect GUI profilā un izmantojiet norādīto paroli.'
-   }[lang];
+  const copy=OC_WINDOWS_TEXT[lang];
+  $('ocReturn').textContent=copy.start;
+  $('ocWindowsConnection').textContent=copy.fields;
+  $('ocWindowsDefaults').textContent=copy.defaults;
+  $('ocWindowsCertificate').textContent=copy.certificate;
+  $('ocEnable').textContent=copy.enable;
+  for(const id of ['ocCopyName','ocCopyGateway']){$(id).textContent=copy.copy;$(id).disabled=busy;}
  }
  if (protocol === 'anyconnect' && platform === 'ios') {
    $('prepare').textContent = t('ocIosInstall');
@@ -329,6 +335,9 @@ function renderOcDelivery(){
  const name=ocDevice.connectionNames?.[server]||Array.from(prefix+ocDevice.label).slice(0,24).join('').trimEnd();
  $('ocConnection').href='anyconnect://create/?'+new URLSearchParams({name,host:ocPoint.host,usecert:'true',certcommonname:ocDevice.username,netroam:'true'});
  $('ocServer').textContent=t(server)+': '+ocPoint.host;
+ $('ocWindowsFields').hidden=mobile;
+ $('ocWindowsName').value=name;
+ $('ocWindowsGateway').value='https://'+ocPoint.host;
  $('ocConnection').hidden=!mobile;
  $('ocConnectionActions').hidden=ocConfirmed;$('ocConnectionCompleted').hidden=!ocConfirmed;
  for(const id of ['ocConfirmConnection','ocAgain'])$(id).disabled=busy;
@@ -337,6 +346,10 @@ function renderOcDelivery(){
  $('ocAlreadyImported').hidden=ocImported;
  $('ocCertificateDone').hidden=!ocImported;
  $('ocCertificateHint').textContent=t(!ocConfirmed?'ocBlocked':ocGrant&&!valid?'ocExpired':'ocCertificateHelp');
+ if(!mobile){
+  if(!ocConfirmed)$('ocCertificateHint').textContent=({ru:'Сначала сохраните профиль в OpenConnect GUI и нажмите «Соединение добавлено».',en:'Save the OpenConnect GUI profile first, then select “Connection added”.',lv:'Vispirms saglabājiet OpenConnect GUI profilu un nospiediet “Savienojums pievienots”.'})[lang];
+  else if(!(ocGrant&&!valid))$('ocCertificateHint').textContent=OC_WINDOWS_TEXT[lang].help;
+ }
  $('ocGrantPanel').hidden=!valid;
  if(valid)$('ocImport').href=ocGrant.importUri;else $('ocImport').removeAttribute('href');
  $('ocImport').hidden=!mobile||!valid;
@@ -351,6 +364,13 @@ $('ocAgain').onclick=()=>{if(busy)return;ocConfirmed=false;ocImported=false;ocGr
 $('ocAlreadyImported').onclick=()=>{if(!clientReady()||busy||!ocConfirmed)return;ocImported=true;ocGrant=null;clearTimeout(ocExpiryTimer);message('');};
 $('ocConnection').onclick=event=>{if(!clientReady()||busy||!ocDevice)event.preventDefault();};
 
+for(const [button,input] of [['ocCopyName','ocWindowsName'],['ocCopyGateway','ocWindowsGateway']]){
+ $(button).onclick=()=>action(async()=>{
+  if(!ocDevice||nativePlatform!=='windows')return;
+  try{await navigator.clipboard.writeText($(input).value);message('copied');}
+  catch{$(input).focus();$(input).select();message('');}
+ });
+}
 $('ocCopyPassword').onclick=()=>action(async()=>{if(!clientReady()||!ocGrantValid(ocGrant))throw Error('Expired');await navigator.clipboard.writeText(ocGrant.password);message('copied');});
 $('ocImport').onclick=event=>{if(!clientReady()||!ocGrantValid(ocGrant)){event.preventDefault();message('ocExpired',true);}};
 $('ocRenew').onclick=()=>action(prepareOcImport);
