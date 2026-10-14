@@ -21,9 +21,9 @@ for(const [language,text] of Object.entries({
 }))QUICK_TEXT[language].windowsQuickOnly=text;
 for(const [language,city] of Object.entries({ru:'Нью-Йорк',en:'New York',lv:'Ņujorka'}))QUICK_TEXT[language].us=city;
 for(const [language,messages] of Object.entries({
- ru:{ocGrantInvalid:'Не удалось проверить ответ с сертификатом. Вернитесь в «Мой VPN» и повторите настройку.',ocDownloadFailed:'Не удалось скачать сертификат. Нажмите «Получить сертификат» и повторите скачивание.'},
- en:{ocGrantInvalid:'The certificate response could not be verified. Return to My VPN and repeat setup.',ocDownloadFailed:'The certificate download failed. Get a new certificate and download it again.'},
- lv:{ocGrantInvalid:'Neizdevās pārbaudīt sertifikāta atbildi. Atgriezieties sadaļā Mans VPN un atkārtojiet iestatīšanu.',ocDownloadFailed:'Neizdevās lejupielādēt sertifikātu. Iegūstiet jaunu sertifikātu un mēģiniet vēlreiz.'}
+ ru:{ocGrantInvalid:'Не удалось проверить ответ с сертификатом. Код проверки:',ocDownloadFailed:'Не удалось скачать сертификат. Нажмите «Получить сертификат» и повторите скачивание.'},
+ en:{ocGrantInvalid:'The certificate response could not be verified. Check code:',ocDownloadFailed:'The certificate download failed. Get a new certificate and download it again.'},
+ lv:{ocGrantInvalid:'Neizdevās pārbaudīt sertifikāta atbildi. Pārbaudes kods:',ocDownloadFailed:'Neizdevās lejupielādēt sertifikātu. Iegūstiet jaunu sertifikātu un mēģiniet vēlreiz.'}
 }))Object.assign(QUICK_TEXT[language],messages);
 const t = key => QUICK_TEXT[lang][key] || key;
 const accountText = {en:['Create account','Sign in','Choose Passkey or username and password. No email address is required.'],ru:['Создать аккаунт','Войти','Выберите Passkey или логин и пароль. Электронная почта не нужна.'],lv:['Izveidot kontu','Pieteikties','Izvēlieties Passkey vai lietotājvārdu un paroli. E-pasts nav nepieciešams.']};
@@ -140,7 +140,7 @@ async function api(path, options={}) {
 }
 function errorMessage(error) {
  if(error && error.messageKey)return error.messageKey;
- if(error && ['Invalid certificate grant','Invalid certificate URL','Invalid connection','Invalid import','Wrong certificate','Wrong connection identity'].includes(error.message))return 'ocGrantInvalid';
+ if(error?.certificateCheck)return t('ocGrantInvalid')+' '+error.certificateCheck;
  if(error && error.message==='Download failed')return 'ocDownloadFailed';
  if(error && error.name === 'NotAllowedError')return nativePlatform === 'windows' ? 'passkeyWindowsNotAllowed' : 'passkeyNotAllowed';
  if(error && (error.name === 'NotSupportedError' || error.name === 'SecurityError'))return 'passkeyUnavailable';
@@ -249,14 +249,23 @@ function ocKey(suffix){return 'quickOc:'+accountId+':'+nativePlatform+':'+suffix
 // use elapsed time locally so an incorrect Windows clock cannot reject it.
 const OC_GRANT_LIFETIME=2*60*60*1000;
 const ocGrantValid=grant=>!!grant&&Number.isFinite(grant.localDeadline)&&performance.now()<grant.localDeadline;
+function certificateCheck(code){throw Object.assign(new Error('Certificate validation failed'),{certificateCheck:code});}
 function validateOcGrant(grant){
  const point=grant.connections?.find(p=>p.id===server);
- if(!point||typeof grant.password!=='string'||!Number.isFinite(Date.parse(grant.expiresAt)))throw Error('Invalid certificate grant');
- const certificate=new URL(grant.certificateUrl);
- if(certificate.protocol!=='https:'||certificate.hostname!=='api.tolf.is'||certificate.username||certificate.password||!certificate.pathname.startsWith('/oc/access/import/'))throw Error('Invalid certificate URL');
- const connect=new URL(point.connectionUri),importLink=new URL(grant.importUri);
- if(connect.protocol!=='anyconnect:'||connect.hostname!=='create'||connect.searchParams.get('host')!==point.host||connect.searchParams.get('certcommonname')!==grant.username)throw Error('Invalid connection');
- if(importLink.protocol!=='anyconnect:'||importLink.hostname!=='import'||importLink.searchParams.get('uri')!==grant.certificateUrl)throw Error('Invalid import');
+ if(!point)certificateCheck('entry_missing');
+ if(typeof grant.password!=='string'||!grant.password)certificateCheck('password_missing');
+ if(!Number.isFinite(Date.parse(grant.expiresAt)))certificateCheck('expiry_format');
+ let certificate;
+ try{certificate=new URL(grant.certificateUrl);}catch{certificateCheck('download_url_format');}
+ if(certificate.protocol!=='https:'||certificate.hostname!=='api.tolf.is'||certificate.username||certificate.password||!certificate.pathname.startsWith('/oc/access/import/'))certificateCheck('download_url_identity');
+ // Windows downloads PKCS12 directly. Cisco application links are mobile-only.
+ if(nativePlatform!=='windows'){
+  let connect,importLink;
+  try{connect=new URL(point.connectionUri);importLink=new URL(grant.importUri);}catch{certificateCheck('mobile_url_format');}
+  if(connect.protocol!=='anyconnect:'||connect.hostname!=='create')certificateCheck('mobile_connection_scheme');
+  if(connect.searchParams.get('host')!==point.host||connect.searchParams.get('certcommonname')!==grant.username)certificateCheck('mobile_connection_identity');
+  if(importLink.protocol!=='anyconnect:'||importLink.hostname!=='import'||importLink.searchParams.get('uri')!==grant.certificateUrl)certificateCheck('mobile_import_identity');
+ }
  return point;
 }
 async function prepareOc(){
@@ -305,9 +314,10 @@ async function prepareOcImport(){
  const started=performance.now();
  const grant=await api('/oc/access/devices/'+encodeURIComponent(deviceId)+'/import',{method:'POST',body:'{}'});
  grant.localDeadline=started+OC_GRANT_LIFETIME;
- if(grant.deviceId!==deviceId)throw Error('Wrong certificate');
+ if(grant.deviceId!==deviceId)certificateCheck('device_identity');
  const point=validateOcGrant(grant);
- if(point.host!==ocPoint.host||grant.username!==ocDevice.username)throw Error('Wrong connection identity');
+ if(point.host!==ocPoint.host)certificateCheck('entry_identity');
+ if(grant.username!==ocDevice.username)certificateCheck('certificate_identity');
  ocGrant=grant;
  clearTimeout(ocExpiryTimer);ocExpiryTimer=setTimeout(()=>{if(ocGrant===grant)render();},Math.max(0,grant.localDeadline-performance.now()));
  panels('ocDelivery');message('');

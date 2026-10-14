@@ -1,7 +1,7 @@
 const {withShares}=require('./ios-city-share-fixture.cjs');
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const source=fs.readFileSync('quick/quick-1.js','utf8'),strings=fs.readFileSync('quick/strings-1.js','utf8');
-async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=false,buttons=false,handoff=false,clockSkew=0,expireGrant=false}={}){
+async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=false,buttons=false,handoff=false,clockSkew=0,expireGrant=false,mobileLinkFault=false}={}){
  const map=new Map(),store=new Map(),posts=[],created=[],user='test-account',device='test-device';
  let lost=loseReply, recommendation=node==='us'?'riga':node;
  const makeElement=()=>({children:[],events:{},style:{},hidden:false,value:'',dataset:{},textContent:'',disabled:false,
@@ -14,6 +14,7 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
  const host=node==='us'?'oc-us.tolf.is:4443':node==='riga'?'oc-riga.tolf.is:443':'oc.tolf.is:4443';
  const cert='https://api.tolf.is/oc/access/import/TEST.p12';
  const grant={deviceId:device,password:'TEST-ONLY-PASSWORD',expiresAt:new Date(Date.now()+7200000).toISOString(),certificateUrl:tamper?'https://example.invalid/test.p12':cert,username:'test-certificate-user',importUri:'anyconnect://import/?type=pkcs12&uri='+encodeURIComponent(cert),connections:[{id:node,host,connectionUri:'anyconnect://create/?host='+encodeURIComponent(host)+'&certcommonname=test-certificate-user'}]};
+ if(mobileLinkFault){grant.importUri='https://example.invalid/';grant.connections[0].connectionUri='https://example.invalid/';}
  const BrowserDate=class extends Date {static now(){return Date.now()+clockSkew;}};
  const ctx={Date:BrowserDate,performance:{now:()=>elapsed},URL,URLSearchParams,AbortSignal,location:{href:'https://vpn.tolf.is/quick/?protocol=anyconnect'+(node==='us'?'&ingress=us':'')},navigator:{userAgent:ua,platform:ua==='desktop-ipad'?'MacIntel':'',maxTouchPoints:ua==='desktop-ipad'?5:0,language:'ru',clipboard:{writeText:async()=>{}}},crypto:{randomUUID:()=> 'test-request-id'},localStorage:{getItem:k=>map.get('storage:'+k),setItem(k,v){map.set('storage:'+k,v)}},sessionStorage:{getItem:k=>store.get(k),setItem:(k,v)=>store.set(k,v),removeItem:k=>store.delete(k)},document:{getElementById:element,documentElement:{lang:'ru'},querySelectorAll:()=>[],querySelector:()=>element('defaults'),body:{append(){}},createElement:()=>makeElement()},window:{addEventListener(){},location:{assign(url){assigned=url;}}},setTimeout:()=>0,clearTimeout(){},
  fetch:async(url,opt={})=>{
@@ -133,7 +134,7 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
  assert.equal(element('ocRenew').disabled,false);
  assert.equal(element('ocConnectionCompleted').hidden,false);
  await element('ocRenew').onclick();
- if(tamper){assert.equal(element('ocGrantPanel').hidden,true);assert.equal(element('ocPassword').value,'');return;}
+ if(tamper||(mobileLinkFault&&platform!=='windows')){assert.equal(element('ocGrantPanel').hidden,true);assert.equal(element('ocPassword').value,'');return;}
  assert.equal(element('ocDelivery').hidden,false);assert.equal(element('ocServer').textContent,({riga:'Рига',moscow:'Москва',us:'Нью-Йорк'}[node])+': '+host);
  assert.equal(element('ocPassword').value,'TEST-ONLY-PASSWORD');
  if(expireGrant){elapsed=2*3600000+1;await element('ocCopyPassword').onclick();assert.equal(element('ocGrantPanel').hidden,true);assert.equal(element('ocPassword').value,'');return;}
@@ -148,4 +149,4 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
  assert.equal(element('ocCertificateDone').hidden,false);
  await element('ocRenew').onclick();assert.equal(created.length,before);assert.equal(element('ocGrantPanel').hidden,false);
 }
-(async()=>{for(const [ua,p]of[['iPhone','ios'],['desktop-ipad','ios'],['Android','android'],['Windows NT','windows']])await run(ua,p,'moscow',{handoff:true});await run('iPhone','ios','riga',{handoff:true,buttons:true});for(const [ua,p]of[['iPhone','ios'],['desktop-ipad','ios'],['Android','android'],['Windows NT','windows']])for(const node of ['riga','moscow','us'])await run(ua,p,node);await run('iPhone','ios','riga',{buttons:true});await run('iPhone','ios','moscow',{missingNode:true});await run('Android','android','moscow',{loseReply:true});await run('Windows NT','windows','moscow',{clockSkew:5*3600000});await run('Windows NT','windows','moscow',{clockSkew:-5*3600000});await run('Windows NT','windows','moscow',{expireGrant:true});await run('Windows NT','windows','moscow',{tamper:true});console.log('PASS: AnyConnect device/node selection, reusable device, lost reply, certificate URL validation, node availability, mobile/Windows steps, blocked import, confirmation, reset and certificate reuse');})().catch(e=>{console.error(e);process.exit(1)});
+(async()=>{for(const [ua,p]of[['iPhone','ios'],['desktop-ipad','ios'],['Android','android'],['Windows NT','windows']])await run(ua,p,'moscow',{handoff:true});await run('iPhone','ios','riga',{handoff:true,buttons:true});for(const [ua,p]of[['iPhone','ios'],['desktop-ipad','ios'],['Android','android'],['Windows NT','windows']])for(const node of ['riga','moscow','us'])await run(ua,p,node);await run('iPhone','ios','riga',{buttons:true});await run('iPhone','ios','moscow',{missingNode:true});await run('Android','android','moscow',{loseReply:true});await run('Windows NT','windows','moscow',{clockSkew:5*3600000});await run('Windows NT','windows','moscow',{clockSkew:-5*3600000});await run('Windows NT','windows','moscow',{expireGrant:true});await run('Windows NT','windows','moscow',{tamper:true});await run('Windows NT','windows','moscow',{mobileLinkFault:true});await run('Android','android','moscow',{mobileLinkFault:true});console.log('PASS: AnyConnect device/node selection, reusable device, lost reply, certificate URL validation, node availability, mobile/Windows steps, blocked import, confirmation, reset and certificate reuse');})().catch(e=>{console.error(e);process.exit(1)});
