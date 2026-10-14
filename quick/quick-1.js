@@ -20,6 +20,11 @@ for(const [language,text] of Object.entries({
  lv:'Windows datorā atveriet vpn.tolf.is, atlasiet Windows, vajadzīgo protokolu un “Ātrā iestatīšana”. Iestatījumi tiek instalēti šajā datorā.'
 }))QUICK_TEXT[language].windowsQuickOnly=text;
 for(const [language,city] of Object.entries({ru:'Нью-Йорк',en:'New York',lv:'Ņujorka'}))QUICK_TEXT[language].us=city;
+for(const [language,messages] of Object.entries({
+ ru:{ocGrantInvalid:'Не удалось проверить ответ с сертификатом. Вернитесь в «Мой VPN» и повторите настройку.',ocDownloadFailed:'Не удалось скачать сертификат. Нажмите «Получить сертификат» и повторите скачивание.'},
+ en:{ocGrantInvalid:'The certificate response could not be verified. Return to My VPN and repeat setup.',ocDownloadFailed:'The certificate download failed. Get a new certificate and download it again.'},
+ lv:{ocGrantInvalid:'Neizdevās pārbaudīt sertifikāta atbildi. Atgriezieties sadaļā Mans VPN un atkārtojiet iestatīšanu.',ocDownloadFailed:'Neizdevās lejupielādēt sertifikātu. Iegūstiet jaunu sertifikātu un mēģiniet vēlreiz.'}
+}))Object.assign(QUICK_TEXT[language],messages);
 const t = key => QUICK_TEXT[lang][key] || key;
 const accountText = {en:['Create account','Sign in','Choose Passkey or username and password. No email address is required.'],ru:['Создать аккаунт','Войти','Выберите Passkey или логин и пароль. Электронная почта не нужна.'],lv:['Izveidot kontu','Pieteikties','Izvēlieties Passkey vai lietotājvārdu un paroli. E-pasts nav nepieciešams.']};
 function accountAuth(mode) { persist(); window.location.assign('/auth/?mode='+mode+'&next=quick&lang='+lang); }
@@ -135,6 +140,8 @@ async function api(path, options={}) {
 }
 function errorMessage(error) {
  if(error && error.messageKey)return error.messageKey;
+ if(error && ['Invalid certificate grant','Invalid certificate URL','Invalid connection','Invalid import','Wrong certificate','Wrong connection identity'].includes(error.message))return 'ocGrantInvalid';
+ if(error && error.message==='Download failed')return 'ocDownloadFailed';
  if(error && error.name === 'NotAllowedError')return nativePlatform === 'windows' ? 'passkeyWindowsNotAllowed' : 'passkeyNotAllowed';
  if(error && (error.name === 'NotSupportedError' || error.name === 'SecurityError'))return 'passkeyUnavailable';
  if(error && error.name === 'AbortError')return 'passkeyCancelled';
@@ -238,9 +245,13 @@ window.addEventListener('pagehide',()=>{clearTimeout(ocExpiryTimer);ocGrant=null
 window.addEventListener('pageshow',e=>{if(!e.persisted)render();if(e.persisted && nativePlatform==='ios' && iosButtons && ocDevice){render();return;}if(e.persisted){profile='';ocGrant=null;ocDevice=null;ocConfirmed=false;ocImported=false;$('code').value='';initialize();}});
 
 function ocKey(suffix){return 'quickOc:'+accountId+':'+nativePlatform+':'+suffix;}
+// POST /import issues a fresh two-hour grant. The server enforces expiry;
+// use elapsed time locally so an incorrect Windows clock cannot reject it.
+const OC_GRANT_LIFETIME=2*60*60*1000;
+const ocGrantValid=grant=>!!grant&&Number.isFinite(grant.localDeadline)&&performance.now()<grant.localDeadline;
 function validateOcGrant(grant){
  const point=grant.connections?.find(p=>p.id===server);
- if(!point||typeof grant.password!=='string'||!Number.isFinite(Date.parse(grant.expiresAt))||Date.parse(grant.expiresAt)<=Date.now())throw Error('Invalid certificate grant');
+ if(!point||typeof grant.password!=='string'||!Number.isFinite(Date.parse(grant.expiresAt)))throw Error('Invalid certificate grant');
  const certificate=new URL(grant.certificateUrl);
  if(certificate.protocol!=='https:'||certificate.hostname!=='api.tolf.is'||certificate.username||certificate.password||!certificate.pathname.startsWith('/oc/access/import/'))throw Error('Invalid certificate URL');
  const connect=new URL(point.connectionUri),importLink=new URL(grant.importUri);
@@ -291,16 +302,18 @@ async function prepareOcImport(){
  if(!clientReady()||!ocDevice||!ocConfirmed)return;
  ocImported=false;ocGrant=null;
  const deviceId=ocDevice.id;
+ const started=performance.now();
  const grant=await api('/oc/access/devices/'+encodeURIComponent(deviceId)+'/import',{method:'POST',body:'{}'});
+ grant.localDeadline=started+OC_GRANT_LIFETIME;
  if(grant.deviceId!==deviceId)throw Error('Wrong certificate');
  const point=validateOcGrant(grant);
  if(point.host!==ocPoint.host||grant.username!==ocDevice.username)throw Error('Wrong connection identity');
  ocGrant=grant;
- clearTimeout(ocExpiryTimer);ocExpiryTimer=setTimeout(()=>{if(ocGrant===grant)render();},Math.max(0,Date.parse(grant.expiresAt)-Date.now()));
+ clearTimeout(ocExpiryTimer);ocExpiryTimer=setTimeout(()=>{if(ocGrant===grant)render();},Math.max(0,grant.localDeadline-performance.now()));
  panels('ocDelivery');message('');
 }
 function renderOcDelivery(){
- const mobile=nativePlatform!=='windows',valid=ocGrant&&Date.parse(ocGrant.expiresAt)>Date.now()&&ocConfirmed&&!ocImported;
+ const mobile=nativePlatform!=='windows',valid=ocGrantValid(ocGrant)&&ocConfirmed&&!ocImported;
  $('ocApp').href=nativePlatform==='ios'?'https://apps.apple.com/app/id1135064690':nativePlatform==='android'?'https://play.google.com/store/apps/details?id=com.cisco.anyconnect.vpn.android.avf':'https://www.infradead.org/openconnect-gui/download/openconnect-gui-1.6.2-win64.exe';
  const prefix='TOLF '+({riga:'Riga',moscow:'Moscow',us:'New York'}[server])+' ';
  const name=ocDevice.connectionNames?.[server]||Array.from(prefix+ocDevice.label).slice(0,24).join('').trimEnd();
@@ -328,11 +341,11 @@ $('ocAgain').onclick=()=>{if(busy)return;ocConfirmed=false;ocImported=false;ocGr
 $('ocAlreadyImported').onclick=()=>{if(!clientReady()||busy||!ocConfirmed)return;ocImported=true;ocGrant=null;clearTimeout(ocExpiryTimer);message('');};
 $('ocConnection').onclick=event=>{if(!clientReady()||busy||!ocDevice)event.preventDefault();};
 
-$('ocCopyPassword').onclick=()=>action(async()=>{if(!clientReady()||!ocGrant||Date.parse(ocGrant.expiresAt)<=Date.now())throw Error('Expired');await navigator.clipboard.writeText(ocGrant.password);message('copied');});
-$('ocImport').onclick=event=>{if(!clientReady()||!ocGrant||Date.parse(ocGrant.expiresAt)<=Date.now()){event.preventDefault();message('ocExpired',true);}};
+$('ocCopyPassword').onclick=()=>action(async()=>{if(!clientReady()||!ocGrantValid(ocGrant))throw Error('Expired');await navigator.clipboard.writeText(ocGrant.password);message('copied');});
+$('ocImport').onclick=event=>{if(!clientReady()||!ocGrantValid(ocGrant)){event.preventDefault();message('ocExpired',true);}};
 $('ocRenew').onclick=()=>action(prepareOcImport);
 $('ocDownload').onclick=()=>action(async()=>{
- if(!clientReady()||!ocGrant||Date.parse(ocGrant.expiresAt)<=Date.now())throw Error('Expired');
+ if(!clientReady()||!ocGrantValid(ocGrant))throw Error('Expired');
  const response=await fetch(ocGrant.certificateUrl,{credentials:'omit',cache:'no-store',signal:AbortSignal.timeout(20000)});
  if(!response.ok)throw Error('Download failed');
  const url=URL.createObjectURL(await response.blob()),a=document.createElement('a');
