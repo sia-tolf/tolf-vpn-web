@@ -107,7 +107,7 @@ function render() {
  if(profile) renderDelivery();
  if(ocDevice)renderOcDelivery();
  const cc=clientCopy();
- $('quickClientInstall').hidden=protocol!=='anyconnect'||clientHandoff;
+ $('quickClientInstall').hidden=true;
  $('quickClientConfirmed').checked=clientInstalled;
  $('quickClientConfirmed').disabled=busy;
  $('quickClientConfirmedLabel').textContent=cc.confirmed;
@@ -340,6 +340,10 @@ $('ocDownload').onclick=()=>action(async()=>{
  setTimeout(()=>URL.revokeObjectURL(url),1000);message('started');
 });
 
-render();initialize();
+render();
+if(protocol==='anyconnect'&&!clientHandoff){
+ put('tolfTransport','anyconnect');
+ window.location.assign('/?lang='+encodeURIComponent(lang));
+}else initialize();
 })();
 

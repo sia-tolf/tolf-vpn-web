@@ -31,23 +31,13 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
  else throw Error('Unexpected API '+url);
  posts.push(url);return {ok:true,json:async()=>data};
  }};
- if(handoff)store.set('quickClientHandoff',JSON.stringify({platform,createdAt:Date.now()}));
+ store.set('quickClientHandoff',JSON.stringify({platform,createdAt:Date.now()}));
  vm.createContext(ctx);vm.runInContext(strings,ctx);vm.runInContext(withShares(fs.readFileSync('js/ios-vpn-buttons.js','utf8')),ctx);vm.runInContext(source,ctx);
  for(let i=0;i<40;i++)await Promise.resolve();
  if(missingNode){assert.equal(element('prepare').disabled,true);assert.equal(created.length,0);return;}
- if(handoff){
-  assert.equal(element('quickClientInstall').hidden,true,'no duplicate installation step');
-  assert.equal(element('quickClientConfirmed').checked,true,'confirmation transferred');
-  assert.equal(store.has('quickClientHandoff'),false,'handoff consumed once');
- }else{
- assert.equal(element('quickClientInstall').hidden,false);
- assert.equal(element('prepare').disabled,true);
- await element('prepare').onclick();
- assert.equal(created.length,0,'unconfirmed client cannot issue VPN access');
- assert.equal(assigned,undefined);
- assert.equal(element('ocApp').href,platform==='ios'?'https://apps.apple.com/app/id1135064690':platform==='android'?'https://play.google.com/store/apps/details?id=com.cisco.anyconnect.vpn.android.avf':'https://www.infradead.org/openconnect-gui/download/openconnect-gui-1.6.2-win64.exe');
- element('quickClientConfirmed').checked=true;element('quickClientConfirmed').onchange();
- }
+ assert.equal(element('quickClientInstall').hidden,true,'installation only on My VPN');
+ assert.equal(element('quickClientConfirmed').checked,true);
+ assert.equal(store.has('quickClientHandoff'),false);
  assert.equal(element('prepare').disabled,false);
  if(platform==='ios' && node!=='us'){
   const option=descendants(element('iosVpnButtons')).find(n=>n.type==='checkbox');
@@ -96,10 +86,14 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
    vm.runInContext(withShares(fs.readFileSync('js/ios-vpn-buttons.js','utf8')),ctx);
    vm.runInContext(source,ctx);
    for(let i=0;i<80;i++)await Promise.resolve();
+   assert.equal(assigned,'/?lang=ru','reload returns to the single confirmation step');
+   assert.equal(element('quickClientInstall').hidden,true,'reload never duplicates installation');
    assert.equal(element('quickClientConfirmed').checked,false,'reload resets client confirmation');
    assert.equal(element('prepare').disabled,true,'reload gates further setup');
    assert.equal(element('iosVpnButtons').hidden,true,'saved profile links cannot bypass confirmation');
-   element('quickClientConfirmed').checked=true;element('quickClientConfirmed').onchange();
+   store.set('quickClientHandoff',JSON.stringify({platform,createdAt:Date.now()}));
+   vm.runInContext(source,ctx);
+   for(let i=0;i<80;i++)await Promise.resolve();
    assert.equal(element('prepare').hidden,true,'reload restores prepared device');
    assert.equal(created.length,loseReply?2:1,'reload must not create another device');
    const nodes=descendants(element('iosVpnButtons'));
