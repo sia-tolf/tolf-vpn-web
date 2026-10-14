@@ -89,7 +89,7 @@ function render() {
  if (protocol === 'anyconnect' && platform === 'ios') {
    $('prepare').textContent = t('ocIosInstall');
    const hint=document.querySelector('[data-text="defaults"]');
-   if(hint)hint.textContent=t('ocIosInstallHelp');
+   if(hint){hint.textContent=t('ocIosInstallHelp');hint.style.whiteSpace='pre-line';}
  }
  $('windowsPrep').hidden = true;
  $('passkeyNameField').hidden = true;

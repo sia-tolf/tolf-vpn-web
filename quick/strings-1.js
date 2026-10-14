@@ -25,13 +25,13 @@ Object.assign(QUICK_TEXT.lv,{"ocConfirmConnection":"Savienojums pievienots","ocC
 
 Object.assign(QUICK_TEXT.ru, {
   ocIosInstall: "Установить профиль AnyConnect",
-  ocIosInstallHelp: "Если Cisco Secure Client уже установлен, MobileConfig добавит сертификат и соединение с рекомендуемой точкой входа. Подтвердите установку профиля в настройках iPhone.",
+  ocIosInstallHelp: "1. Нажмите «Установить профиль AnyConnect» и разрешите загрузку.\n2. Откройте «Настройки» → «Основные» → «VPN и управление устройством» и выберите загруженный профиль TOLF.\n3. Нажмите «Установить», введите код-пароль устройства и подтвердите установку.",
 });
 Object.assign(QUICK_TEXT.en, {
   ocIosInstall: "Install AnyConnect profile",
-  ocIosInstallHelp: "With Cisco Secure Client installed, the MobileConfig adds the certificate and recommended server connection. Confirm profile installation in iPhone Settings.",
+  ocIosInstallHelp: "1. Tap “Install AnyConnect profile” and allow the download.\n2. Open Settings → General → VPN & Device Management and select the downloaded TOLF profile.\n3. Tap Install, enter your device passcode and confirm installation.",
 });
 Object.assign(QUICK_TEXT.lv, {
   ocIosInstall: "Instalēt AnyConnect profilu",
-  ocIosInstallHelp: "Ja Cisco Secure Client jau ir instalēts, MobileConfig pievieno sertifikātu un ieteikto serveri. Apstipriniet profilu iPhone iestatījumos.",
+  ocIosInstallHelp: "1. Pieskarieties “Instalēt AnyConnect profilu” un atļaujiet lejupielādi.\n2. Atveriet Iestatījumi → Vispārīgi → VPN un ierīču pārvaldība un atlasiet lejupielādēto TOLF profilu.\n3. Pieskarieties “Instalēt”, ievadiet ierīces piekļuves kodu un apstipriniet instalēšanu.",
 });

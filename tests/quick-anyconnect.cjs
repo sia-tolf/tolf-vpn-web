@@ -4,7 +4,7 @@ const source=fs.readFileSync('quick/quick-1.js','utf8'),strings=fs.readFileSync(
 async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=false,buttons=false,handoff=false}={}){
  const map=new Map(),store=new Map(),posts=[],created=[],user='test-account',device='test-device';
  let lost=loseReply, recommendation=node==='us'?'riga':node;
- const makeElement=()=>({children:[],events:{},hidden:false,value:'',dataset:{},textContent:'',disabled:false,
+ const makeElement=()=>({children:[],events:{},style:{},hidden:false,value:'',dataset:{},textContent:'',disabled:false,
    classList:{add(){},remove(){}},setAttribute(){},removeAttribute(){},
    append(...nodes){this.children.push(...nodes);},replaceChildren(...nodes){this.children=nodes;},
    addEventListener(name,fn){this.events[name]=fn;},remove(){},click(){return this.events.click?.();}});
