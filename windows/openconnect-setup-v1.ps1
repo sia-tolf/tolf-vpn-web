@@ -50,6 +50,14 @@ public static class TolfOpenConnectRsaV1 {
         return Wrap(2,bytes.ToArray());
     }
     public static byte[] Export(RSA rsa) {
+        // Ephemeral PFX imports use CNG. Set this imported key's export policy
+        // before exporting it, as documented by the .NET cryptography team.
+        RSACng cng = rsa as RSACng;
+        if (cng != null) {
+            cng.Key.SetProperty(new CngProperty("Export Policy",
+                BitConverter.GetBytes((int)(CngExportPolicies.AllowExport | CngExportPolicies.AllowPlaintextExport)),
+                CngPropertyOptions.None));
+        }
         RSAParameters p = rsa.ExportParameters(true);
         try {
             var values = new List<byte>(); values.AddRange(new byte[] {2,1,0});
