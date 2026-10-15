@@ -223,3 +223,5 @@ html[data-vpn-transport="anyconnect"] #vpnUsername { overflow-wrap: anywhere; }
  #anyConnectAccess .oc-device-routing #anyConnectModeSelector .anyconnect-mode-button { padding:0 6px;font-size:12px; }
  #anyConnectAccess .oc-device-routing .anyconnect-mode-meta { grid-column:1 / -1;grid-row:2;margin-top:0;text-align:right; }
 }
+
+#ocWindowsExcludedNetworks { box-sizing: border-box; width: 100%; min-height: 90px; resize: vertical; padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; font: inherit; background: var(--card); color: var(--text); }

@@ -273,15 +273,17 @@
     lv:{title:"3. Iestatiet OpenConnect GUI",download:"Lejupielādēt iestatīšanas failu",help:"1. Aizveriet OpenConnect: Disconnect → File → Quit.\n2. Lejupielādējiet TOLF VPN Setup.cmd un atveriet ar dubultklikšķi.\n3. Laukā Server izvēlieties izveidoto profilu un nospiediet Connect.\nDarbvirsmā parādīsies TOLF VPN Restore - … un TOLF VPN Remove - … . Restore atjauno profilu bez vietnes tajā pašā Windows kontā. Lai dzēstu profilu, aizveriet OpenConnect, palaidiet Remove un ievadiet REMOVE.",done:"Fails lejupielādēts. Palaidiet TOLF VPN Setup.cmd Windows datorā. Neizplatiet failu."}
   }[document.documentElement.lang] || windowsCopyEnglish);
   const windowsCopyEnglish={title:"3. Set up OpenConnect GUI",download:"Download setup file",help:"Run the downloaded setup file. Restore and Remove files will appear on your Desktop.",done:"Run TOLF VPN Setup.cmd on Windows."};
+  const windowsExclusions=new Map();
   function downloadWindowsSetup(d){
     const point={...ingress()};
+    const exclusions=windowsExclusions.get(d.id+":"+point.id)||"";
     return perform(async token=>{
       const policy=await apiRequest(path(d.id)+"/policy?ingress="+encodeURIComponent(point.id),{cache:"no-store",timeoutMs:30000});
       if(!["auto","ru","lv","us","yt"].includes(policy.mode)||policy.applied!==true)throw Error("Route not applied");
       const result=await apiRequest(path(d.id)+"/import",{method:"POST",timeoutMs:30000});
       if(token!==epoch||selectedId!==d.id||ingress().id!==point.id)return;
       if(result.deviceId!==d.id||result.username!==d.username)throw Error("Certificate identity mismatch");
-      const command=window.TolfWindowsSetup.command(result,point,policy.mode);
+      const command=window.TolfWindowsSetup.command(result,point,policy.mode,exclusions);
       const file=window.TolfWindowsSetup.file(command);
       const url=URL.createObjectURL(new Blob([file],{type:"text/plain;charset=us-ascii"}));
       const anchor=document.createElement("a");
@@ -540,7 +542,25 @@
         const help=element("p",text.help,"oc-note");help.style.whiteSpace="pre-line";
         const download=button(text.download,()=>downloadWindowsSetup(d),true);
         download.disabled ||= capabilities?.issuance !== true;
-        section.append(help,download);root.append(section);
+        const language=document.documentElement.lang;
+        const labels={
+          ru:["Исключить из VPN (IPv4)","По одной сети или IP-адресу в строке. Например: 192.168.200.0/24 или 10.0.21.10. Трафик к ним пойдёт по текущему маршруту вне VPN. Для виртуальной машины укажите адрес клиента удалённого управления."],
+          en:["Exclude from VPN (IPv4)","One network or IP address per line. Example: 192.168.200.0/24 or 10.0.21.10. These destinations keep their current route outside the VPN. For a virtual machine, include the remote management client address."],
+          lv:["Izslēgt no VPN (IPv4)","Viena tīkla vai IP adrese rindā. Piemēram: 192.168.200.0/24 vai 10.0.21.10. Šīm adresēm saglabāsies pašreizējais maršruts ārpus VPN. Virtuālajai mašīnai norādiet attālās pārvaldības klienta adresi."]
+        }[language]||["Exclude from VPN (IPv4)","One IPv4 network or address per line."];
+        const field=element("textarea");field.id="ocWindowsExcludedNetworks";field.rows=3;
+        field.placeholder="192.168.200.0/24\n10.0.21.10/32";field.spellcheck=false;
+        field.value=windowsExclusions.get(d.id+":"+ingress().id)||"";
+        field.disabled=busy||loading;
+        const label=element("label",labels[0]);label.htmlFor=field.id;
+        const validation=element("p","","oc-note");
+        field.addEventListener("input",()=>{
+          windowsExclusions.set(d.id+":"+ingress().id,field.value);
+          try{window.TolfWindowsSetup.parseExclusions(field.value);validation.textContent="";download.disabled=busy||loading||capabilities?.issuance!==true;}
+          catch(error){validation.textContent=error.message;download.disabled=true;}
+        });
+        try{window.TolfWindowsSetup.parseExclusions(field.value);}catch{download.disabled=true;}
+        section.append(help,label,field,element("p",labels[1],"oc-note"),validation,download);root.append(section);
       } else if (setupDestination === "local" && currentPlatform !== "ios") {
       const steps = element("div", null, "oc-steps");
       setupSteps = steps; steps.setAttribute('tabindex', '-1');

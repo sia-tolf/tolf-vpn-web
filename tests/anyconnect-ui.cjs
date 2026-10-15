@@ -407,12 +407,17 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   window.ocAccess.selectIngress('moscow');await settle();
   button(ids.anyConnectAccess,'Настроить на этом устройстве').click();await settle();
   assert(!descendants(ids.anyConnectAccess).some(n=>n.textContent==='Соединение добавлено'),'Windows setup does not require manual certificate entry');
+  const exclusionsField=descendants(ids.anyConnectAccess).find(n=>n.id==='ocWindowsExcludedNetworks');
+  assert(exclusionsField);
+  exclusionsField.value='192.168.200.118/24\n10.0.21.10';
+  exclusionsField.events.input();
   await button(ids.anyConnectAccess,'Скачать файл настройки').click();await settle();
   assert.equal(setupBlobs.length,1);
   const cmd=await setupBlobs[0].text();
   const encoded=cmd.match(/-ConfigBase64 '([^']+)'/)[1];
   const config=JSON.parse(Buffer.from(encoded,'base64').toString('utf8'));
   assert.equal(config.name,'TOLF Moscow US');
+  assert.deepEqual(config.excludedNetworks,['192.168.200.0/24','10.0.21.10/32']);
   assert.equal(config.gateway,'https://oc.tolf.is:4443');
   assert.equal(config.deviceId,winDevice.id);
   assert(document.body.children.some(n=>n.download==='TOLF VPN Setup.cmd'));

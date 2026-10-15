@@ -85,6 +85,116 @@ function ConvertTo-TolfPem([byte[]]$Bytes,[string]$Label) {
     return ('-----BEGIN '+$Label+"-----`n"+($lines -join "`n")+"`n-----END "+$Label+"-----`n")
 }
 $client = $null; $cert = $null; $rsa = $null;
+
+function ConvertTo-TolfExcludedNetworks($InputNetworks) {
+    $result=@()
+    foreach($value in @($InputNetworks)){
+        if([string]$value -notmatch '^(\d{1,3}\.){3}\d{1,3}/([1-9]|[12]\d|3[0-2])$'){throw 'Invalid IPv4 exclusion.'}
+        $parts=([string]$value).Split('/')
+        $octets=@($parts[0].Split('.') | ForEach-Object {[int]$_})
+        if(@($octets | Where-Object {$_ -gt 255}).Count){throw 'Invalid IPv4 exclusion.'}
+        $bits=[int]$parts[1];$canonical=@()
+        for($i=0;$i -lt 4;$i++){
+            $take=[Math]::Max(0,[Math]::Min(8,$bits-$i*8))
+            $mask=if($take -eq 0){0}else{256-[Math]::Pow(2,8-$take)}
+            $canonical+=($octets[$i] -band [int]$mask)
+        }
+        $network=($canonical -join '.')+'/'+$bits
+        if($result -notcontains $network){$result+=$network}
+    }
+    if($result.Count -gt 32){throw 'Maximum 32 excluded networks.'}
+    return $result
+}
+function New-TolfRouteFiles([string[]]$Networks,[string]$DeviceId,[string]$Exe) {
+    $defaultScript=Join-Path (Split-Path -Parent $Exe) 'vpnc-script.js'
+    if(!(Test-Path -LiteralPath $defaultScript)){throw 'OpenConnect vpnc-script.js was not found.'}
+    $identity=$DeviceId+'|'+($Networks -join ',')+'|'+$defaultScript
+    $hash=[BitConverter]::ToString([Security.Cryptography.SHA256]::Create().ComputeHash([Text.Encoding]::UTF8.GetBytes($identity))).Replace('-','').Substring(0,24)
+    $directory=Join-Path $env:LOCALAPPDATA ('TOLF\OpenConnect\'+$hash)
+    $hookPath=Join-Path $directory 'route-hook.ps1'
+    $wrapperPath=Join-Path $directory 'vpnc-wrapper.js'
+    $statePath=Join-Path $directory 'routes-state.json'
+    $settings=@{networks=@($Networks);state=$statePath} | ConvertTo-Json -Compress
+    $settings64=[Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($settings))
+    $hook=@'
+$ErrorActionPreference='Stop'
+$settings=[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('__SETTINGS__')) | ConvertFrom-Json
+function Clear-TolfOwnedRoutes {
+    if(!(Test-Path -LiteralPath $settings.state)){return}
+    $records=@(Get-Content -LiteralPath $settings.state -Raw | ConvertFrom-Json)
+    foreach($record in $records){
+        $routes=@(Get-NetRoute -AddressFamily IPv4 -DestinationPrefix $record.prefix -InterfaceIndex ([int]$record.index) -PolicyStore ActiveStore -ErrorAction SilentlyContinue |
+            Where-Object {$_.NextHop -eq $record.gateway -and $_.RouteMetric -eq [int]$record.metric})
+        foreach($route in $routes){$route | Remove-NetRoute -Confirm:$false -ErrorAction Stop}
+    }
+    Remove-Item -LiteralPath $settings.state -Force
+}
+if($env:reason -eq 'disconnect'){Clear-TolfOwnedRoutes;return}
+if($env:reason -ne 'connect'){return}
+Clear-TolfOwnedRoutes
+$owned=@()
+try{
+    # Resolve all paths before adding routes or letting the standard script enable VPN routing.
+    $plans=@()
+    foreach($prefix in $settings.networks){
+        $ip=([string]$prefix).Split('/')[0]
+        $path=@(Find-NetRoute -RemoteIPAddress $ip -ErrorAction Stop | Where-Object {$null -ne $_.PSObject.Properties['DestinationPrefix']}) | Select-Object -First 1
+        if($null -eq $path){throw ('No existing route to '+$prefix)}
+        if($env:TUNIDX -and $path.InterfaceIndex -eq [int]$env:TUNIDX){throw ('Existing path already uses VPN for '+$prefix)}
+        $plans+=@{prefix=[string]$prefix;index=[int]$path.InterfaceIndex;gateway=[string]$path.NextHop;metric=1}
+    }
+    foreach($plan in $plans){
+        # Keep any pre-existing matching route; never claim or delete another route.
+        $existing=@(Get-NetRoute -AddressFamily IPv4 -DestinationPrefix $plan.prefix -InterfaceIndex $plan.index -PolicyStore ActiveStore -ErrorAction SilentlyContinue |
+            Where-Object {$_.NextHop -eq $plan.gateway})
+        if($existing.Count){continue}
+        $null=New-NetRoute -DestinationPrefix $plan.prefix -InterfaceIndex $plan.index -NextHop $plan.gateway -RouteMetric $plan.metric -PolicyStore ActiveStore -ErrorAction Stop
+        $owned+=$plan
+        ConvertTo-Json -InputObject @($owned) -Compress | Set-Content -LiteralPath $settings.state -Encoding UTF8
+        Write-Host ('TOLF: excluded '+$plan.prefix+' via '+$plan.gateway+' interface '+$plan.index)
+    }
+}catch{
+    # Clear routes added during a partially failed attempt, including a state-write failure.
+    foreach($plan in $owned){
+        Get-NetRoute -AddressFamily IPv4 -DestinationPrefix $plan.prefix -InterfaceIndex $plan.index -PolicyStore ActiveStore -ErrorAction SilentlyContinue |
+            Where-Object {$_.NextHop -eq $plan.gateway -and $_.RouteMetric -eq $plan.metric} |
+            Remove-NetRoute -Confirm:$false -ErrorAction SilentlyContinue
+    }
+    if(Test-Path -LiteralPath $settings.state){Remove-Item -LiteralPath $settings.state -Force}
+    throw
+}
+'@
+    $hook=$hook.Replace('__SETTINGS__',$settings64)
+    # Read the hook through -Command; do not change the user's execution policy.
+    $path64=[Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($hookPath))
+    $loader='$p=[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('''+$path64+''')); & ([scriptblock]::Create([IO.File]::ReadAllText($p)))'
+    $encoded=[Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($loader))
+    $quotedDefault=ConvertTo-Json -InputObject $defaultScript -Compress
+    $wrapper=@'
+var shell = new ActiveXObject("WScript.Shell");
+var environment = shell.Environment("PROCESS");
+var reason = environment("reason");
+function hook() {
+    return shell.Run('powershell.exe -NoLogo -NoProfile -EncodedCommand __LOADER__', 0, true);
+}
+if (reason == "connect" && hook() != 0) {
+    WScript.Echo("TOLF: cannot preserve excluded routes. VPN routing was not enabled.");
+    WScript.Quit(1);
+}
+var result = shell.Run('cscript.exe //NoLogo "' + __DEFAULT__ + '"', 0, true);
+if (reason == "disconnect") {
+    if (hook() != 0) result = 1;
+} else if (reason == "connect" && result != 0) {
+    environment("reason") = "disconnect";
+    hook();
+    environment("reason") = reason;
+}
+WScript.Quit(result);
+'@
+    $wrapper=$wrapper.Replace('__LOADER__',$encoded).Replace('__DEFAULT__',$quotedDefault)
+    return @(@{path=$hookPath;content=$hook},@{path=$wrapperPath;content=$wrapper})
+}
+
 function New-TolfRemovalCommand([string]$Name,[string]$DeviceId,[string]$Gateway) {
     $template = @'
 $ErrorActionPreference='Stop'
@@ -129,6 +239,15 @@ try{
  if($backup.name -notmatch '^TOLF (Moscow|Riga|New York) (Auto|RU|LV|US|YT)$'){throw 'Invalid profile backup.'}
  $values=$backup.values
  if(@('https://oc.tolf.is:4443','https://oc-riga.tolf.is:443','https://oc-us.tolf.is:4443') -notcontains $values.server){throw 'Invalid gateway.'}
+ if($backup.PSObject.Properties['files']){
+  $allowedRoot=[IO.Path]::GetFullPath((Join-Path $env:LOCALAPPDATA 'TOLF\OpenConnect\'))
+  foreach($file in @($backup.files)){
+   $filePath=[IO.Path]::GetFullPath([string]$file.path)
+   if(!$filePath.StartsWith($allowedRoot,[StringComparison]::OrdinalIgnoreCase) -or [IO.Path]::GetFileName($filePath) -notin @('route-hook.ps1','vpnc-wrapper.js')){throw 'Invalid route helper path.'}
+   $null=[IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($filePath))
+   [IO.File]::WriteAllText($filePath,[string]$file.content,[Text.Encoding]::Unicode)
+  }
+ }
  $key='server:'+$backup.name
  $base=[Microsoft.Win32.Registry]::CurrentUser.CreateSubKey('Software\OpenConnect-GUI Team\OpenConnect-GUI')
  $existing=$base.OpenSubKey($key)
@@ -189,7 +308,7 @@ function Save-TolfRemovalCommand {
                 $values[$valueName]=$source.GetValue($valueName)
                 $kinds[$valueName]=[string]$kind
             }
-            $snapshot=@{name=[string]$config.name;exe=$exe;values=$values;kinds=$kinds} | ConvertTo-Json -Depth 5 -Compress
+            $snapshot=@{name=[string]$config.name;exe=$exe;values=$values;kinds=$kinds;files=@($routeFiles)} | ConvertTo-Json -Depth 5 -Compress
             $snapshotBytes=[Text.Encoding]::UTF8.GetBytes($snapshot)
             $sealed=[Security.Cryptography.ProtectedData]::Protect($snapshotBytes,$null,[Security.Cryptography.DataProtectionScope]::CurrentUser)
             $setupContent=New-TolfRestoreCommand ([Convert]::ToBase64String($sealed))
@@ -205,6 +324,13 @@ function Save-TolfRemovalCommand {
     } catch { Write-Warning ('VPN profile is configured, but the Desktop setup/removal files could not be saved: '+$_.Exception.Message) }
 }
 
+$routeFiles=@();$routeScript=''
+$excluded=@()
+if($config.PSObject.Properties['excludedNetworks']){$excluded=@(ConvertTo-TolfExcludedNetworks $config.excludedNetworks)}
+if($excluded.Count){
+    $routeFiles=@(New-TolfRouteFiles $excluded ([string]$config.deviceId) $exe)
+    $routeScript=[string]$routeFiles[1].path
+}
 $base = $null; $target = $null
 $p12 = $null; $keyDer = $null; $keyBytes = $null; $protected = $null; $created = $false; $previous = $null
 $registryPath = 'Software\OpenConnect-GUI Team\OpenConnect-GUI'
@@ -246,7 +372,7 @@ try {
     }
     $target = $base.CreateSubKey($profileKey); $created = $true
     $stringValues = @{
-        'protocol-name'='anyconnect'; 'username'=''; 'interface-name'=''; 'vpnc-script'='';
+        'protocol-name'='anyconnect'; 'username'=''; 'interface-name'=''; 'vpnc-script'=$routeScript;
         'tolf-device-id'=[string]$config.deviceId; 'tolf-cert-sha256'=$certHash;
         'ca-cert'='@ByteArray()'; 'server-hash'='@ByteArray()'; 'token-str'='@ByteArray()';
         'client-cert'=('@ByteArray('+$certPem+')');
@@ -255,6 +381,10 @@ try {
     foreach ($name in $stringValues.Keys) { $target.SetValue($name,$stringValues[$name],[Microsoft.Win32.RegistryValueKind]::String) }
     $numberValues = @{'batch'=0;'proxy'=0;'disable-udp'=0;'minimize-on-connect'=0;'reconnect-timeout'=300;'dtls_attempt_period'=25;'server-hash-algo'=0;'token-type'=-1}
     foreach ($name in $numberValues.Keys) { $target.SetValue($name,[int]$numberValues[$name],[Microsoft.Win32.RegistryValueKind]::DWord) }
+    foreach($file in $routeFiles){
+        $null=[IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName([string]$file.path))
+        [IO.File]::WriteAllText([string]$file.path,[string]$file.content,[Text.Encoding]::Unicode)
+    }
     # The /server value makes the profile visible. Write it only when complete.
     $target.SetValue('server',[string]$config.gateway,[Microsoft.Win32.RegistryValueKind]::String)
     $target.Flush(); $target.Close(); $target = $null
