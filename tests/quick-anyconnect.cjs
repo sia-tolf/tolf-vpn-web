@@ -154,6 +154,9 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
   assert(cmd.includes('where powershell.exe >nul 2>&1'));
   assert(command.includes("PSVersionTable.PSVersion -lt [version]'5.1'"));
   assert(command.includes('CurrentBuildNumber -lt 10240'));
+  assert(command.includes("CurrentVersion'; if ("));
+  assert(command.includes("SilentlyContinue; if ("));
+
   assert(command.includes('Release -lt 461808'));
   assert(command.indexOf('Release -lt 461808') < command.indexOf('DownloadData'));
 
