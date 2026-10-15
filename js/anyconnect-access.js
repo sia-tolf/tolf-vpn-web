@@ -335,7 +335,7 @@
       devices = results[1].value.devices.filter(d => d.state !== "revoked");
       if (!devices.some(d => d.id === selectedId)) {
         iosButtons = false;
-        selectedId = incomingDevice ? devices.find(d => d.id === incomingDevice)?.id || null : devices.find(d => d.state === "active")?.id || devices[0]?.id || null;
+        selectedId = incomingDevice ? devices.find(d => d.id === incomingDevice)?.id || null : null;
         if (incomingDevice && !selectedId) { message = deliveryCopy().missing; error = true; }
         grant = null;
         clearDownloadedPackage();
@@ -651,9 +651,9 @@
     clearDownloadedPackage();
     devices = []; selectedId = null; grant = null; capabilities = null; ingressId = 'moscow';
     const saved = account ? savedSetup() : {};
-    selectedId = incomingDevice || saved.selectedId || null;
+    selectedId = incomingDevice || null;
     ingressId = ['moscow','riga','us'].includes(saved.ingressId) ? saved.ingressId : 'moscow';
-    iosButtons = saved.iosButtons === true && (!incomingDevice || incomingDevice === saved.selectedId);
+    iosButtons = !!incomingDevice && saved.iosButtons === true && incomingDevice === saved.selectedId;
     setupDestination = incomingDevice ? "local" : null; transferNotice = "";
     confirmedDeviceId = null;
     importedDeviceId = null;

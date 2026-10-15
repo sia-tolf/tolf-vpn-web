@@ -119,6 +119,14 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   assert(!descendants(ids.anyConnectAccess).some(n=>n.textContent==='Установить профиль AnyConnect'));
   assert.equal(window.ocAccess.selected(),null);
   ciscoConfirmed=true;window.dispatchEvent(new c.Event('tolf:cisco-install-confirmed'));await settle();
+  assert.equal(window.ocAccess.selected(),null,'Initial manual setup requires explicit selection');
+  assert(!descendants(ids.anyConnectAccess).some(n=>n.textContent==='Отозвать доступ'));
+  assert(!descendants(ids.anyConnectAccess).some(n=>n.textContent==='Настроить на этом устройстве'));
+  function chooseAccess(id){
+    const select=descendants(ids.anyConnectAccess).find(n=>n.id==='ocDeviceSelect');
+    assert(select);select.value=id;select.events.change();
+  }
+  chooseAccess(first.id);await settle();
   const usButton=modes.find(n=>n.dataset.mode==='us');
   assert(!usButton.classList.contains('hidden'));
   usButton.click();await settle();
@@ -329,37 +337,27 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   assert(ids.usernameRow.classList.contains('hidden'));
   window.setAnyConnectAccount({authenticated:true,userId:'owner',vpn:{username:'user0_ipad'}});
   assert.equal(ids.vpnUsername.textContent,'user0_ipad');
-  // Full script reload, not merely rerender: retain non-default device and bundle step.
+  // A page reload must not silently restore the previous access.
   c.currentPlatform='ios';
   ids.vpnTransportAnyConnect.click();
-  window.ocAccess.selectIngress('riga');
   window.ocAccess.selectIngress('moscow');
-  window.dispatchEvent(new c.Event('vpnplatformchange')); await settle();
-  let bundle=descendants(ids.anyConnectAccess);
-  let checkbox=bundle.find(n=>n.type==='checkbox');
-  checkbox.checked=true; checkbox.events.change();
-  bundle=descendants(ids.anyConnectAccess);
-  bundle.find(n=>n.href?.includes('/shortcuts/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')).events.click();
+  await settle();
   const selectedBefore=window.ocAccess.selected().id;
-  for(const file of ['ios-vpn-buttons.js','transport-selector.js','anyconnect-access.js'])
-    vm.runInContext(withShares(fs.readFileSync(path.join(root,'js',file),'utf8')),c);
+  vm.runInContext(fs.readFileSync(path.join(root,'js/anyconnect-access.js'),'utf8'),c);
   await settle();
-  assert.equal(window.getVpnTransport(),'anyconnect');
-  assert.equal(window.ocAccess.ingress().id,'moscow');
-  assert.equal(window.ocAccess.selected().id,selectedBefore);
-  bundle=descendants(ids.anyConnectAccess);
-  assert.equal(bundle.find(n=>n.type==='checkbox').checked,true);
-  assert.equal(bundle.find(n=>n.textContent==='Команда добавлена — продолжить').disabled,false);
-  bundle.find(n=>n.textContent==='Команда добавлена — продолжить').events.click();
-  vm.runInContext(fs.readFileSync(path.join(root,'js','anyconnect-access.js'),'utf8'),c);
-  await settle();
-  assert(descendants(ids.anyConnectAccess).some(n=>n.href?.includes('ios.mobileconfig?ingress=moscow&buttons=true')));
+  assert.equal(window.ocAccess.selected(),null);
+  const placeholder=descendants(ids.anyConnectAccess).find(n=>n.id==='ocDeviceSelect');
+  assert.equal(placeholder.value,'');
+  assert(placeholder.children.some(n=>n.value===''&&n.textContent==='Выберите устройство'));
+  chooseAccess(selectedBefore);await settle();
   window.ocAccess.selectIngress('us');
   assert.equal(window.ocAccess.ingress().host,'oc-us.tolf.is:4443');
   // Simulate a reload: saved New York precedes asynchronous capabilities.
   vm.runInContext(fs.readFileSync(path.join(root,'js/anyconnect-access.js'),'utf8'),c);
   window.dispatchEvent(new c.Event('tolf:network-context-changed'));
   await settle();
+  assert.equal(window.ocAccess.selected(),null);
+  chooseAccess(selectedBefore);await settle();
   assert.equal(window.ocAccess.ingress().id,'us');
   assert.equal(ids.networkMetrics.children[0].children[0].textContent,'Нью-Йорк ↔ Рига');
   assert.equal(ids.networkMetrics.children[1].children[0].textContent,'Нью-Йорк ↔ Москва');
@@ -404,6 +402,8 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   window.location={search:''};
   window.tolfAccountState={authenticated:true,userId:'windows-owner',vpn:{username:'windows'}};
   vm.runInContext(fs.readFileSync(path.join(root,'js/anyconnect-access.js'),'utf8'),c);await settle();
+  assert.equal(window.ocAccess.selected(),null,'Windows must not inherit another device');
+  chooseAccess(winDevice.id);await settle();
   window.ocAccess.selectIngress('moscow');await settle();
   button(ids.anyConnectAccess,'Настроить на этом устройстве').click();await settle();
   assert(!descendants(ids.anyConnectAccess).some(n=>n.textContent==='Соединение добавлено'),'Windows setup does not require manual certificate entry');
