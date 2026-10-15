@@ -151,6 +151,12 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
   assert.equal(downloadLinks.at(-1).download,'TOLF-OpenConnect-Setup.cmd');
   const cmd=await downloadedBlobs.at(-1).text();
   assert(cmd.startsWith('@echo off\r\nsetlocal DisableDelayedExpansion\r\n'));
+  assert(cmd.includes('where powershell.exe >nul 2>&1'));
+  assert(command.includes("PSVersionTable.PSVersion -lt [version]'5.1'"));
+  assert(command.includes('CurrentBuildNumber -lt 10240'));
+  assert(command.includes('Release -lt 461808'));
+  assert(command.indexOf('Release -lt 461808') < command.indexOf('DownloadData'));
+
   assert(cmd.includes('powershell.exe -NoLogo -NoProfile -Command "'+command+'"\r\n'));
   assert(cmd.includes('if errorlevel 1 (\r\n'));
   assert(!/[^\x00-\x7f]/.test(cmd),'CMD file is ASCII to avoid code-page corruption');

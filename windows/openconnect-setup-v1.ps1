@@ -2,6 +2,11 @@ param([Parameter(Mandatory=$true)][string]$ConfigBase64)
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version 2
 if ($env:OS -ne 'Windows_NT') { throw 'Run this command on Windows.' }
+if ($PSVersionTable.PSVersion -lt [version]'5.1') { throw 'Windows PowerShell 5.1 or newer is required. Install Windows updates before running setup again.' }
+$win = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion'
+if ([int]$win.CurrentBuildNumber -lt 10240) { throw 'This Windows version is too old for automatic setup. Use an updated Windows 10 or Windows 11 computer.' }
+$net = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full' -ErrorAction SilentlyContinue
+if ($null -eq $net -or [int]$net.Release -lt 461808) { throw '.NET Framework 4.7.2 or newer is required. Install .NET Framework 4.8 from https://dotnet.microsoft.com/download/dotnet-framework/net48 and run setup again.' }
 if (Get-Process -Name 'openconnect-gui' -ErrorAction SilentlyContinue) {
     throw 'Disconnect VPN and exit OpenConnect GUI using File > Quit, then run this command again.'
 }
