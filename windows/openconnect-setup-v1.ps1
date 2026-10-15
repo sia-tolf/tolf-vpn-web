@@ -113,6 +113,64 @@ try{
     $encoded=[Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($body))
     return [string]::Join(([string][char]13+[char]10),@('@echo off','setlocal DisableDelayedExpansion',('powershell.exe -NoLogo -NoProfile -EncodedCommand '+$encoded),'if errorlevel 1 echo Removal failed. Read the error above.','pause',''))
 }
+
+function New-TolfRestoreCommand([string]$ProtectedSnapshot) {
+    if($ProtectedSnapshot -notmatch '^[A-Za-z0-9+/=]+$'){throw 'Invalid protected snapshot.'}
+    $template=@'
+$ErrorActionPreference='Stop'
+if(Get-Process -Name 'openconnect-gui' -ErrorAction SilentlyContinue){throw 'Exit OpenConnect GUI using File > Quit, then run Setup again.'}
+Add-Type -AssemblyName System.Security
+$plain=$null;$base=$null;$target=$null;$created=$false
+try{
+ try{
+  $plain=[Security.Cryptography.ProtectedData]::Unprotect([Convert]::FromBase64String('__SNAPSHOT__'),$null,[Security.Cryptography.DataProtectionScope]::CurrentUser)
+ }catch{throw 'This backup can only be restored by the Windows user who created it.'}
+ $backup=[Text.Encoding]::UTF8.GetString($plain) | ConvertFrom-Json
+ if($backup.name -notmatch '^TOLF (Moscow|Riga|New York) Auto [a-f0-9]{8}$'){throw 'Invalid profile backup.'}
+ $values=$backup.values
+ if(@('https://oc.tolf.is:4443','https://oc-riga.tolf.is:443','https://oc-us.tolf.is:4443') -notcontains $values.server){throw 'Invalid gateway.'}
+ $key='server:'+$backup.name
+ $base=[Microsoft.Win32.Registry]::CurrentUser.CreateSubKey('Software\OpenConnect-GUI Team\OpenConnect-GUI')
+ $existing=$base.OpenSubKey($key)
+ if($null -ne $existing){
+  try{
+   if($existing.GetValue('tolf-device-id') -ne $values.'tolf-device-id' -or $existing.GetValue('server') -ne $values.server -or $existing.GetValue('tolf-cert-sha256') -ne $values.'tolf-cert-sha256'){throw 'A different profile uses this name. Nothing was changed.'}
+  }finally{$existing.Close()}
+  Write-Host ('Profile already configured: '+$backup.name)
+ }else{
+  $target=$base.CreateSubKey($key);$created=$true
+  foreach($prop in $values.PSObject.Properties){
+   if($prop.Name -eq 'server'){continue}
+   $kind=[Microsoft.Win32.RegistryValueKind][Enum]::Parse([Microsoft.Win32.RegistryValueKind],[string]$backup.kinds.($prop.Name))
+   $value=$prop.Value
+   if($kind -eq [Microsoft.Win32.RegistryValueKind]::DWord){$value=[int]$value}
+   $target.SetValue($prop.Name,$value,$kind)
+  }
+  $target.SetValue('server',[string]$values.server,[Microsoft.Win32.RegistryValueKind]::String)
+  $target.Flush();$target.Close();$target=$null
+  $base.Flush()
+  Write-Host ('OK: restored '+$backup.name)
+ }
+ $created=$false
+ if(Test-Path -LiteralPath $backup.exe){Start-Process -FilePath $backup.exe}
+ Write-Host 'Select the profile in OpenConnect GUI and click Connect.'
+}catch{
+ if($target){$target.Close();$target=$null}
+ if($created -and $base){$base.DeleteSubKeyTree($key,$false)}
+ throw
+}finally{
+ if($target){$target.Close()};if($base){$base.Close()}
+ if($null -ne $plain){[Array]::Clear($plain,0,$plain.Length)}
+ $backup=$null;$values=$null
+}
+'@
+    $body=$template.Replace('__SNAPSHOT__',$ProtectedSnapshot)
+    $header=@('@echo off','setlocal DisableDelayedExpansion','set "TOLF_RESTORE_FILE=%~f0"',
+      'powershell.exe -NoLogo -NoProfile -Command "$s=[IO.File]::ReadAllText($env:TOLF_RESTORE_FILE); & ([scriptblock]::Create(($s -split '':TOLF_RESTORE_PAYLOAD\r?\n'',2)[1]))"',
+      'if errorlevel 1 echo Restore failed. Read the error above.','pause','exit /b',':TOLF_RESTORE_PAYLOAD')
+    return [string]::Join(([string][char]13+[char]10),$header)+[char]13+[char]10+$body
+}
+
 function Save-TolfRemovalCommand {
     try {
         $desktop=[Environment]::GetFolderPath([Environment+SpecialFolder]::DesktopDirectory)
@@ -121,10 +179,26 @@ function Save-TolfRemovalCommand {
         $content=New-TolfRemovalCommand ([string]$config.name) ([string]$config.deviceId) ([string]$config.gateway)
         [IO.File]::WriteAllText($file,$content,[Text.Encoding]::ASCII)
         Write-Host ('Removal file saved on Desktop: Remove '+[string]$config.name+'.cmd')
-        $ingress=@{'https://oc.tolf.is:4443'='moscow';'https://oc-riga.tolf.is:443'='riga';'https://oc-us.tolf.is:4443'='us'}[[string]$config.gateway]
-        $setupUrl='https://vpn.tolf.is/quick/?protocol=anyconnect&platform=windows&ingress='+$ingress
+        $source=$base.OpenSubKey($profileKey)
+        $snapshotBytes=$null
+        try {
+            $values=@{};$kinds=@{}
+            foreach($valueName in $source.GetValueNames()){
+                $kind=$source.GetValueKind($valueName)
+                if($kind -notin @([Microsoft.Win32.RegistryValueKind]::String,[Microsoft.Win32.RegistryValueKind]::DWord)){throw 'Unsupported profile value type.'}
+                $values[$valueName]=$source.GetValue($valueName)
+                $kinds[$valueName]=[string]$kind
+            }
+            $snapshot=@{name=[string]$config.name;exe=$exe;values=$values;kinds=$kinds} | ConvertTo-Json -Depth 5 -Compress
+            $snapshotBytes=[Text.Encoding]::UTF8.GetBytes($snapshot)
+            $sealed=[Security.Cryptography.ProtectedData]::Protect($snapshotBytes,$null,[Security.Cryptography.DataProtectionScope]::CurrentUser)
+            $setupContent=New-TolfRestoreCommand ([Convert]::ToBase64String($sealed))
+        }finally{
+            $source.Close()
+            if($null -ne $snapshotBytes){[Array]::Clear($snapshotBytes,0,$snapshotBytes.Length)}
+            $snapshot=$null;$values=$null
+        }
         $setupFile=Join-Path $desktop ('Setup '+[string]$config.name+'.cmd')
-        $setupContent=[string]::Join(([string][char]13+[char]10),@('@echo off',('start "" "'+$setupUrl+'"'),'exit /b 0',''))
         [IO.File]::WriteAllText($setupFile,$setupContent,[Text.Encoding]::ASCII)
         Write-Host ('Setup file saved on Desktop: Setup '+[string]$config.name+'.cmd')
 
