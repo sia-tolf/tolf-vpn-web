@@ -57,7 +57,8 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   const first = {id:'one',label:'iPad',username:'tolf-oc-'+'1'.repeat(32),state:'active',mode:'auto'};
   const second = {id:'two',label:'Phone',username:'tolf-oc-'+'2'.repeat(32),state:'active',mode:'lv'};
   const devices = [first,second], calls = [];
-  const downloads = [], revokedUrls = [];
+  const downloads = [], revokedUrls = [], setupBlobs=[];
+  let windowsGrant=false;
   let heldSession = null, connected = true, sessionError = false, sessionNodes = null, policyApplied = true;
   async function request(url, options = {}) {
     const p = url.replace('https://api.tolf.is','').split('?')[0]; calls.push([options.method || 'GET',p,options.credentials]);
@@ -78,8 +79,9 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
     }
     if (p.endsWith('/policy')) {
       if (options.method === 'POST') d.mode = JSON.parse(options.body).mode;
-      return {username:d.username,mode:d.mode,applied:policyApplied,supportedModes:new URL(url).searchParams.get('ingress')==='moscow'?['auto','ru','lv','us','yt']:['auto','ru','lv','yt']};
+      return {username:d.username,mode:d.mode,applied:policyApplied,supportedModes:new URL(url,'https://api.tolf.is').searchParams.get('ingress')==='moscow'?['auto','ru','lv','us','yt']:['auto','ru','lv','yt']};
     }
+    if(p.endsWith('/import') && windowsGrant)return {deviceId:d.id,username:d.username,password:'test-only',certificateUrl:'https://api.tolf.is/oc/access/import/'+'A'.repeat(43)+'.p12'};
     if (p.endsWith('/import')) return {deviceId:d.id,password:'private-import-password',
       expiresAt:new Date(Date.now()+600000).toISOString(),certificateUrl:'https://api.tolf.is/import/token.p12',
       importUri:'anyconnect://import/?type=pkcs12',connectionUri:'anyconnect://create/?host=oc.tolf.is'};
@@ -93,8 +95,8 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
     URLSearchParams,Event:class {constructor(type){this.type=type;}},
     MutationObserver:class {observe(){}},
     setInterval(){},setTimeout,clearTimeout,
-    apiRequest:request,copyText:async value=>{c.copied=value;},Blob,AbortController,
-    URL:class extends URL {static createObjectURL(blob){assert.equal(blob.type,'application/octet-stream');return 'blob:test-package';}
+    apiRequest:request,copyText:async value=>{c.copied=value;},Blob,AbortController,TextEncoder,btoa:s=>Buffer.from(s,"binary").toString("base64"),
+    URL:class extends URL {static createObjectURL(blob){if(blob.type==='text/plain;charset=us-ascii'){setupBlobs.push(blob);return 'blob:test-setup';}assert.equal(blob.type,'application/octet-stream');return 'blob:test-package';}
       static revokeObjectURL(url){revokedUrls.push(url);}},
     fetch:async (url,options)=>{
       if(url==='https://api.tolf.is/network-metrics') return {ok:true,json:async()=>({pairs:[{source:'riga',target:'moscow'},{source:'riga',target:'us'},{source:'moscow',target:'us'}]})};
@@ -391,5 +393,31 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   assert.equal(window.ocAccess.selected(),null);
   assert(ids.anyConnectAccess.textContent.includes('Этот доступ недоступен в текущем аккаунте'));
   assert(!descendants(ids.anyConnectAccess).some(n=>n.tagName==='button'&&n.textContent==='Получить сертификат'));
+
+  // Windows manual delivery uses the shared setup and the selected applied route.
+  window.setAnyConnectAccount(null);
+  windowsGrant=true;policyApplied=true;
+  const winDevice={id:'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',label:'Windows',username:'tolf-oc-aaaaaaaabbbbccccddddeeeeeeeeeeee',state:'active',mode:'us'};
+  devices.push(winDevice);
+  c.currentPlatform='windows';
+  vm.runInContext(fs.readFileSync(path.join(root,'js/openconnect-windows-setup.js'),'utf8'),c);
+  window.location={search:''};
+  window.tolfAccountState={authenticated:true,userId:'windows-owner',vpn:{username:'windows'}};
+  vm.runInContext(fs.readFileSync(path.join(root,'js/anyconnect-access.js'),'utf8'),c);await settle();
+  window.ocAccess.selectIngress('moscow');await settle();
+  button(ids.anyConnectAccess,'Настроить на этом устройстве').click();await settle();
+  assert(!descendants(ids.anyConnectAccess).some(n=>n.textContent==='Соединение добавлено'),'Windows setup does not require manual certificate entry');
+  await button(ids.anyConnectAccess,'Скачать файл настройки').click();await settle();
+  assert.equal(setupBlobs.length,1);
+  const cmd=await setupBlobs[0].text();
+  const encoded=cmd.match(/-ConfigBase64 '([^']+)'/)[1];
+  const config=JSON.parse(Buffer.from(encoded,'base64').toString('utf8'));
+  assert.equal(config.name,'TOLF Moscow US');
+  assert.equal(config.gateway,'https://oc.tolf.is:4443');
+  assert.equal(config.deviceId,winDevice.id);
+  assert(document.body.children.some(n=>n.download==='TOLF VPN Setup.cmd'));
+  policyApplied=false;
+  await button(ids.anyConnectAccess,'Скачать файл настройки').click();await settle();
+  assert.equal(setupBlobs.length,1,'Unapplied policy blocks setup download');
   console.log('PASS personal UI: device selection, import secret clearing, isolated routing, authenticated endpoints, stale session after logout');
 })().catch(error=>{console.error(error);process.exitCode=1;});

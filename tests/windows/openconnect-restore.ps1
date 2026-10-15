@@ -40,7 +40,7 @@ function Get-Process {param($Name,$ErrorAction) return $null}
 function Test-Path {param($LiteralPath) return $false}
 $values=@{'server'='https://oc.tolf.is:4443';'tolf-device-id'='aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee';'tolf-cert-sha256'='testhash';'batch'=0}
 $kinds=@{'server'='String';'tolf-device-id'='String';'tolf-cert-sha256'='String';'batch'='DWord'}
-$script:testPlain=[Text.Encoding]::UTF8.GetBytes((@{name='TOLF Moscow Auto aaaaaaaa';exe='unused';values=$values;kinds=$kinds}|ConvertTo-Json -Depth 5))
+$script:testPlain=[Text.Encoding]::UTF8.GetBytes((@{name='TOLF Moscow Auto';exe='unused';values=$values;kinds=$kinds}|ConvertTo-Json -Depth 5))
 # Clone because the generated script clears plaintext after each attempt.
 $run=$body.Replace("[Security.Cryptography.ProtectedData]::Unprotect([Convert]::FromBase64String('AQIDBA=='),"+'$null,[Security.Cryptography.DataProtectionScope]::CurrentUser)', '[byte[]]$script:testPlain.Clone()')
 $run=$run.Replace("[Microsoft.Win32.Registry]::CurrentUser.CreateSubKey('Software\OpenConnect-GUI Team\OpenConnect-GUI')",'$script:testBase')

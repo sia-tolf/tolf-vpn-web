@@ -3,7 +3,7 @@ const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/st
 const source=fs.readFileSync('quick/quick-1.js','utf8'),strings=fs.readFileSync('quick/strings-1.js','utf8');
 async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=false,buttons=false,handoff=false,clockSkew=0,expireGrant=false,mobileLinkFault=false,automaticOnly=false}={}){
  const map=new Map(),store=new Map(),posts=[],created=[],user='test-account',device='aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee';
- let lost=loseReply, recommendation=node==='us'?'riga':node;
+ let lost=loseReply, recommendation=node;
  const makeElement=()=>({children:[],events:{},style:{},hidden:false,value:'',dataset:{},textContent:'',disabled:false,
    classList:{add(){},remove(){}},setAttribute(){},removeAttribute(){},
    append(...nodes){this.children.push(...nodes);},replaceChildren(...nodes){this.children=nodes;},
@@ -30,12 +30,13 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
  if(lost){lost=false;throw Error('Lost reply');}
  data={device:{id:device,state:'active',label:'Test device',username:'tolf-oc-aaaaaaaabbbbccccddddeeeeeeeeeeee'}};
  }else if(url.endsWith('/oc/access/devices'))data={devices:[{id:device,state:'active',label:'Test device',username:'tolf-oc-aaaaaaaabbbbccccddddeeeeeeeeeeee',expires_at:new Date(Date.now()+86400000).toISOString()}]};
+ else if(url.includes('/policy?ingress=')){data={mode:'auto',applied:true};}
  else if(url.endsWith('/import')){assert.equal(opt.credentials,'include');data=grant;}
  else throw Error('Unexpected API '+url);
  posts.push(url);return {ok:true,json:async()=>data};
  }};
  store.set('quickClientHandoff',JSON.stringify({platform,createdAt:BrowserDate.now()}));
- vm.createContext(ctx);vm.runInContext(strings,ctx);vm.runInContext(withShares(fs.readFileSync('js/ios-vpn-buttons.js','utf8')),ctx);vm.runInContext(source,ctx);
+ vm.createContext(ctx);vm.runInContext(strings,ctx);vm.runInContext(withShares(fs.readFileSync('js/ios-vpn-buttons.js','utf8')),ctx);vm.runInContext(fs.readFileSync('js/openconnect-windows-setup.js','utf8'),ctx);vm.runInContext(source,ctx);
  for(let i=0;i<40;i++)await Promise.resolve();
  if(missingNode){assert.equal(element('prepare').disabled,true);assert.equal(created.length,0);return;}
  assert.equal(element('quickClientInstall').hidden,true,'installation only on My VPN');
@@ -87,7 +88,7 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
    const originalFetch=ctx.fetch;
    ctx.fetch=async(url,opt)=>url.endsWith('/oc/access/capabilities')?{ok:true,json:async()=>({issuance:true,ingresses:[{id:'moscow',host:'oc.tolf.is:4443'},{id:'riga',host:'oc-riga.tolf.is:443'}]})}:originalFetch(url,opt);
    vm.runInContext(withShares(fs.readFileSync('js/ios-vpn-buttons.js','utf8')),ctx);
-   vm.runInContext(source,ctx);
+   vm.runInContext(fs.readFileSync('js/openconnect-windows-setup.js','utf8'),ctx);vm.runInContext(source,ctx);
    for(let i=0;i<80;i++)await Promise.resolve();
    assert.equal(assigned,'/?lang=ru','reload returns to the single confirmation step');
    assert.equal(element('quickClientInstall').hidden,true,'reload never duplicates installation');
@@ -95,7 +96,7 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
    assert.equal(element('prepare').disabled,true,'reload gates further setup');
    assert.equal(element('iosVpnButtons').hidden,true,'saved profile links cannot bypass confirmation');
    store.set('quickClientHandoff',JSON.stringify({platform,createdAt:BrowserDate.now()}));
-   vm.runInContext(source,ctx);
+   vm.runInContext(fs.readFileSync('js/openconnect-windows-setup.js','utf8'),ctx);vm.runInContext(source,ctx);
    for(let i=0;i<80;i++)await Promise.resolve();
    assert.equal(element('prepare').hidden,true,'reload restores prepared device');
    assert.equal(created.length,loseReply?2:1,'reload must not create another device');
@@ -140,7 +141,7 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
   assert.equal(config.deviceId,device);assert.equal(config.gateway,'https://'+host);
   assert.equal(config.username,grant.username);assert.equal(config.password,grant.password);
   assert.equal(config.certificateUrl,cert);
-  assert.equal(config.name,'TOLF '+({moscow:'Moscow',riga:'Riga',us:'New York'}[node])+' Auto aaaaaaaa');
+  assert.equal(config.name,'TOLF '+({moscow:'Moscow',riga:'Riga',us:'New York'}[node])+' Auto');
   const crypto=require('node:crypto');
   const hash=crypto.createHash('sha256').update(fs.readFileSync('windows/openconnect-setup-v1.ps1')).digest('hex');
   assert(command.includes(hash));assert(!command.includes('ExecutionPolicy'));assert(!command.includes('RunAs'));
@@ -148,7 +149,7 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
   const imports=posts.filter(p=>p.endsWith('/import')).length;
   await element('ocWindowsAutoDownload').onclick();
   assert.equal(posts.filter(p=>p.endsWith('/import')).length,imports+1,'each setup download receives a fresh grant');
-  assert.equal(downloadLinks.at(-1).download,'TOLF-OpenConnect-Setup.cmd');
+  assert.equal(downloadLinks.at(-1).download,'TOLF VPN Setup.cmd');
   const cmd=await downloadedBlobs.at(-1).text();
   assert(cmd.startsWith('@echo off\r\nsetlocal DisableDelayedExpansion\r\n'));
   assert(cmd.includes('where powershell.exe >nul 2>&1'));

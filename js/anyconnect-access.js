@@ -266,6 +266,32 @@
       anchor.remove();
     });
   }
+
+  const windowsCopy=()=>({
+    ru:{title:"3. Настройте OpenConnect GUI",download:"Скачать файл настройки",help:"1. Закройте OpenConnect: Disconnect → File → Quit.\n2. Скачайте TOLF VPN Setup.cmd и запустите двойным щелчком.\n3. Выберите созданный профиль в Server и нажмите Connect.\nНа рабочем столе появятся TOLF VPN Restore - … и TOLF VPN Remove - … . Restore восстанавливает профиль без сайта в той же учётной записи Windows. Для удаления закройте OpenConnect, запустите Remove и введите REMOVE.",done:"Файл скачан. Запустите TOLF VPN Setup.cmd на компьютере Windows. Не передавайте файл другим."},
+    en:{title:"3. Set up OpenConnect GUI",download:"Download setup file",help:"1. Exit OpenConnect: Disconnect → File → Quit.\n2. Download TOLF VPN Setup.cmd and double-click it.\n3. Select the created profile under Server and click Connect.\nTOLF VPN Restore - … and TOLF VPN Remove - … appear on your Desktop. Restore works without the website under the same Windows account. To remove the profile, exit OpenConnect, run Remove and type REMOVE.",done:"Downloaded. Run TOLF VPN Setup.cmd on Windows. Keep the file private."},
+    lv:{title:"3. Iestatiet OpenConnect GUI",download:"Lejupielādēt iestatīšanas failu",help:"1. Aizveriet OpenConnect: Disconnect → File → Quit.\n2. Lejupielādējiet TOLF VPN Setup.cmd un atveriet ar dubultklikšķi.\n3. Laukā Server izvēlieties izveidoto profilu un nospiediet Connect.\nDarbvirsmā parādīsies TOLF VPN Restore - … un TOLF VPN Remove - … . Restore atjauno profilu bez vietnes tajā pašā Windows kontā. Lai dzēstu profilu, aizveriet OpenConnect, palaidiet Remove un ievadiet REMOVE.",done:"Fails lejupielādēts. Palaidiet TOLF VPN Setup.cmd Windows datorā. Neizplatiet failu."}
+  }[document.documentElement.lang] || windowsCopyEnglish);
+  const windowsCopyEnglish={title:"3. Set up OpenConnect GUI",download:"Download setup file",help:"Run the downloaded setup file. Restore and Remove files will appear on your Desktop.",done:"Run TOLF VPN Setup.cmd on Windows."};
+  function downloadWindowsSetup(d){
+    const point={...ingress()};
+    return perform(async token=>{
+      const policy=await apiRequest(path(d.id)+"/policy?ingress="+encodeURIComponent(point.id),{cache:"no-store",timeoutMs:30000});
+      if(!["auto","ru","lv","us","yt"].includes(policy.mode)||policy.applied!==true)throw Error("Route not applied");
+      const result=await apiRequest(path(d.id)+"/import",{method:"POST",timeoutMs:30000});
+      if(token!==epoch||selectedId!==d.id||ingress().id!==point.id)return;
+      if(result.deviceId!==d.id||result.username!==d.username)throw Error("Certificate identity mismatch");
+      const command=window.TolfWindowsSetup.command(result,point,policy.mode);
+      const file=window.TolfWindowsSetup.file(command);
+      const url=URL.createObjectURL(new Blob([file],{type:"text/plain;charset=us-ascii"}));
+      const anchor=document.createElement("a");
+      anchor.href=url;anchor.download="TOLF VPN Setup.cmd";
+      document.body.appendChild(anchor);anchor.click();anchor.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),1000);
+      message=windowsCopy().done;
+    });
+  }
+
   function revokeDevice(d) {
     if (!window.confirm(copy().confirm)) return;
     perform(async token => {
@@ -507,6 +533,14 @@
           if (capabilities?.guestSetup !== true) transfer.append(element("p", t.update, "oc-note"));
         }
         root.append(transfer);
+      } else if (setupDestination === "local" && currentPlatform === "windows") {
+        const section=element("section",null,"oc-step");
+        const text=windowsCopy();
+        section.append(element("h4",text.title));
+        const help=element("p",text.help,"oc-note");help.style.whiteSpace="pre-line";
+        const download=button(text.download,()=>downloadWindowsSetup(d),true);
+        download.disabled ||= capabilities?.issuance !== true;
+        section.append(help,download);root.append(section);
       } else if (setupDestination === "local" && currentPlatform !== "ios") {
       const steps = element("div", null, "oc-steps");
       setupSteps = steps; steps.setAttribute('tabindex', '-1');

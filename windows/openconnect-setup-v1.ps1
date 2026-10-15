@@ -17,7 +17,7 @@ if ([string]$config.deviceId -notmatch '^[a-f0-9-]{36}$' -or
     [string]$config.username -ne ('tolf-oc-' + ([string]$config.deviceId).Replace('-',''))) {
     throw 'Invalid device identity.'
 }
-if ([string]$config.name -notmatch '^TOLF (Moscow|Riga|New York) Auto [a-f0-9]{8}$') { throw 'Invalid profile name.' }
+if ([string]$config.name -notmatch '^TOLF (Moscow|Riga|New York) (Auto|RU|LV|US|YT)$') { throw 'Invalid profile name.' }
 $url = [Uri]$config.certificateUrl
 if ($url.Scheme -ne 'https' -or $url.Host -ne 'api.tolf.is' -or $url.Port -ne 443 -or
     $url.UserInfo -or $url.Query -or $url.Fragment -or
@@ -126,7 +126,7 @@ try{
   $plain=[Security.Cryptography.ProtectedData]::Unprotect([Convert]::FromBase64String('__SNAPSHOT__'),$null,[Security.Cryptography.DataProtectionScope]::CurrentUser)
  }catch{throw 'This backup can only be restored by the Windows user who created it.'}
  $backup=[Text.Encoding]::UTF8.GetString($plain) | ConvertFrom-Json
- if($backup.name -notmatch '^TOLF (Moscow|Riga|New York) Auto [a-f0-9]{8}$'){throw 'Invalid profile backup.'}
+ if($backup.name -notmatch '^TOLF (Moscow|Riga|New York) (Auto|RU|LV|US|YT)$'){throw 'Invalid profile backup.'}
  $values=$backup.values
  if(@('https://oc.tolf.is:4443','https://oc-riga.tolf.is:443','https://oc-us.tolf.is:4443') -notcontains $values.server){throw 'Invalid gateway.'}
  $key='server:'+$backup.name
@@ -175,10 +175,10 @@ function Save-TolfRemovalCommand {
     try {
         $desktop=[Environment]::GetFolderPath([Environment+SpecialFolder]::DesktopDirectory)
         if(!$desktop){throw 'Desktop folder not found.'}
-        $file=Join-Path $desktop ('Remove '+[string]$config.name+'.cmd')
+        $file=Join-Path $desktop ('TOLF VPN Remove - '+([string]$config.name).Substring(5)+'.cmd')
         $content=New-TolfRemovalCommand ([string]$config.name) ([string]$config.deviceId) ([string]$config.gateway)
         [IO.File]::WriteAllText($file,$content,[Text.Encoding]::ASCII)
-        Write-Host ('Removal file saved on Desktop: Remove '+[string]$config.name+'.cmd')
+        Write-Host ('Removal file saved on Desktop: TOLF VPN Remove - '+([string]$config.name).Substring(5)+'.cmd')
         $source=$base.OpenSubKey($profileKey)
         $snapshotBytes=$null
         try {
@@ -198,15 +198,15 @@ function Save-TolfRemovalCommand {
             if($null -ne $snapshotBytes){[Array]::Clear($snapshotBytes,0,$snapshotBytes.Length)}
             $snapshot=$null;$values=$null
         }
-        $setupFile=Join-Path $desktop ('Setup '+[string]$config.name+'.cmd')
+        $setupFile=Join-Path $desktop ('TOLF VPN Restore - '+([string]$config.name).Substring(5)+'.cmd')
         [IO.File]::WriteAllText($setupFile,$setupContent,[Text.Encoding]::ASCII)
-        Write-Host ('Setup file saved on Desktop: Setup '+[string]$config.name+'.cmd')
+        Write-Host ('Restore file saved on Desktop: TOLF VPN Restore - '+([string]$config.name).Substring(5)+'.cmd')
 
     } catch { Write-Warning ('VPN profile is configured, but the Desktop setup/removal files could not be saved: '+$_.Exception.Message) }
 }
 
 $base = $null; $target = $null
-$p12 = $null; $keyDer = $null; $keyBytes = $null; $protected = $null; $created = $false
+$p12 = $null; $keyDer = $null; $keyBytes = $null; $protected = $null; $created = $false; $previous = $null
 $registryPath = 'Software\OpenConnect-GUI Team\OpenConnect-GUI'
 $profileKey = 'server:' + [string]$config.name
 try {
@@ -233,18 +233,16 @@ try {
     $base = [Microsoft.Win32.Registry]::CurrentUser.CreateSubKey($registryPath)
     $certHash = [BitConverter]::ToString([Security.Cryptography.SHA256]::Create().ComputeHash($cert.RawData)).Replace('-','').ToLowerInvariant()
     if ($base.GetSubKeyNames() -contains $profileKey) {
-        $existing = $base.OpenSubKey($profileKey)
+        $existing=$base.OpenSubKey($profileKey)
         try {
-            $matches = $existing.GetValue('tolf-device-id') -eq [string]$config.deviceId -and
-                       $existing.GetValue('tolf-cert-sha256') -eq $certHash -and
-                       $existing.GetValue('server') -eq [string]$config.gateway
-        } finally { $existing.Close() }
-        if (!$matches) { throw 'A different profile already uses this name. Existing settings were not changed.' }
-        Write-Host ('OK: profile already configured: '+[string]$config.name)
-        Save-TolfRemovalCommand
-        Start-Process -FilePath $exe
-        Write-Host 'Select the profile in Server and click Connect.'
-        return
+            $same=$existing.GetValue('tolf-device-id') -eq [string]$config.deviceId -and $existing.GetValue('server') -eq [string]$config.gateway
+            if(!$same){
+                Write-Host ('Replace existing local profile: '+[string]$config.name)
+                if((Read-Host 'Type REPLACE to confirm') -cne 'REPLACE'){throw 'Cancelled. Existing profile was not changed.'}
+            }
+            $previous=@{}
+            foreach($n in $existing.GetValueNames()){$previous[$n]=@($existing.GetValue($n),$existing.GetValueKind($n))}
+        }finally{$existing.Close()}
     }
     $target = $base.CreateSubKey($profileKey); $created = $true
     $stringValues = @{
@@ -260,14 +258,21 @@ try {
     # The /server value makes the profile visible. Write it only when complete.
     $target.SetValue('server',[string]$config.gateway,[Microsoft.Win32.RegistryValueKind]::String)
     $target.Flush(); $target.Close(); $target = $null
-    Write-Host ('OK: profile created: '+[string]$config.name)
+    $created=$false
+    Write-Host ('OK: profile configured: '+[string]$config.name)
     Save-TolfRemovalCommand
     try { Start-Process -FilePath $exe }
     catch { Write-Host 'Open OpenConnect GUI from its shortcut.' }
     Write-Host 'Select the new profile in Server and click Connect.'
 } catch {
     if ($target) { $target.Close(); $target = $null }
-    if ($created -and $base) { $base.DeleteSubKeyTree($profileKey,$false) }
+    if ($created -and $base) {
+        $base.DeleteSubKeyTree($profileKey,$false)
+        if($null -ne $previous){
+            $restore=$base.CreateSubKey($profileKey)
+            try{foreach($n in $previous.Keys){$restore.SetValue($n,$previous[$n][0],$previous[$n][1])};$restore.Flush()}finally{$restore.Close()}
+        }
+    }
     throw
 } finally {
     if ($target) { $target.Close() }; if ($base) { $base.Close() }

@@ -5,12 +5,12 @@ $ast=[Management.Automation.Language.Parser]::ParseInput($s,[ref]$tokens,[ref]$e
 if($errors.Count){throw ($errors | Out-String)}
 $function=$ast.Find({param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq 'New-TolfRemovalCommand'},$true)
 . ([scriptblock]::Create($function.Extent.Text))
-$cmd=New-TolfRemovalCommand 'TOLF Moscow Auto aaaaaaaa' 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee' 'https://oc.tolf.is:4443'
+$cmd=New-TolfRemovalCommand 'TOLF Moscow Auto' 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee' 'https://oc.tolf.is:4443'
 if($cmd -notmatch '-EncodedCommand ([A-Za-z0-9+/=]+)'){throw 'Missing encoded payload'}
 $body=[Text.Encoding]::Unicode.GetString([Convert]::FromBase64String($Matches[1]))
 [void][Management.Automation.Language.Parser]::ParseInput($body,[ref]$tokens,[ref]$errors)
 if($errors.Count){throw ($errors | Out-String)}
-foreach($expected in @('TOLF Moscow Auto aaaaaaaa','tolf-device-id','https://oc.tolf.is:4443','Type REMOVE to confirm','-cne','DeleteSubKeyTree($key,$false)','GetSubKeyNames() -contains $key')){
+foreach($expected in @('TOLF Moscow Auto','tolf-device-id','https://oc.tolf.is:4443','Type REMOVE to confirm','-cne','DeleteSubKeyTree($key,$false)','GetSubKeyNames() -contains $key')){
  if(!$body.Contains($expected)){throw "Missing removal guard: $expected"}
 }
 if($body.Contains('certificateUrl') -or $body.Contains('password') -or $body.Contains('client-key')){throw 'Unexpected credential in removal file'}
