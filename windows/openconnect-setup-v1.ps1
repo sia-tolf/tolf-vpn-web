@@ -84,7 +84,47 @@ function ConvertTo-TolfPem([byte[]]$Bytes,[string]$Label) {
     }
     return ('-----BEGIN '+$Label+"-----`n"+($lines -join "`n")+"`n-----END "+$Label+"-----`n")
 }
-$client = $null; $cert = $null; $rsa = $null; $base = $null; $target = $null
+$client = $null; $cert = $null; $rsa = $null;
+function New-TolfRemovalCommand([string]$Name,[string]$DeviceId,[string]$Gateway) {
+    $template = @'
+$ErrorActionPreference='Stop'
+if(Get-Process -Name 'openconnect-gui' -ErrorAction SilentlyContinue){throw 'Exit OpenConnect GUI using File > Quit, then run this file again.'}
+$name='__NAME__'
+$base=[Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Software\OpenConnect-GUI Team\OpenConnect-GUI',$true)
+if($null -eq $base){Write-Host 'Profile already absent.';exit 0}
+try{
+ $key='server:'+$name
+ $profile=$base.OpenSubKey($key)
+ if($null -eq $profile){Write-Host 'Profile already absent.';exit 0}
+ try{
+  if($profile.GetValue('tolf-device-id') -ne '__DEVICE__' -or $profile.GetValue('server') -ne '__GATEWAY__'){throw 'Profile identity changed. Nothing was deleted.'}
+ }finally{$profile.Close()}
+ Write-Host ('Remove local VPN profile: '+$name)
+ Write-Host 'Other profiles and server access will remain unchanged.'
+ if((Read-Host 'Type REMOVE to confirm') -cne 'REMOVE'){Write-Host 'Cancelled. Nothing was deleted.';exit 0}
+ if(Get-Process -Name 'openconnect-gui' -ErrorAction SilentlyContinue){throw 'OpenConnect GUI is running. Nothing was deleted.'}
+ $base.DeleteSubKeyTree($key,$false)
+ $base.Flush()
+ if($base.GetSubKeyNames() -contains $key){throw 'Profile removal failed.'}
+ Write-Host ('OK: removed '+$name)
+}finally{$base.Close()}
+'@
+    $body=$template.Replace('__NAME__',$Name).Replace('__DEVICE__',$DeviceId).Replace('__GATEWAY__',$Gateway)
+    $encoded=[Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($body))
+    return [string]::Join(([string][char]13+[char]10),@('@echo off','setlocal DisableDelayedExpansion',('powershell.exe -NoLogo -NoProfile -EncodedCommand '+$encoded),'if errorlevel 1 echo Removal failed. Read the error above.','pause',''))
+}
+function Save-TolfRemovalCommand {
+    try {
+        $desktop=[Environment]::GetFolderPath([Environment+SpecialFolder]::DesktopDirectory)
+        if(!$desktop){throw 'Desktop folder not found.'}
+        $file=Join-Path $desktop ('Remove '+[string]$config.name+'.cmd')
+        $content=New-TolfRemovalCommand ([string]$config.name) ([string]$config.deviceId) ([string]$config.gateway)
+        [IO.File]::WriteAllText($file,$content,[Text.Encoding]::ASCII)
+        Write-Host ('Removal file saved on Desktop: Remove '+[string]$config.name+'.cmd')
+    } catch { Write-Warning ('VPN profile is configured, but the removal file could not be saved: '+$_.Exception.Message) }
+}
+
+$base = $null; $target = $null
 $p12 = $null; $keyDer = $null; $keyBytes = $null; $protected = $null; $created = $false
 $registryPath = 'Software\OpenConnect-GUI Team\OpenConnect-GUI'
 $profileKey = 'server:' + [string]$config.name
@@ -120,6 +160,7 @@ try {
         } finally { $existing.Close() }
         if (!$matches) { throw 'A different profile already uses this name. Existing settings were not changed.' }
         Write-Host ('OK: profile already configured: '+[string]$config.name)
+        Save-TolfRemovalCommand
         Start-Process -FilePath $exe
         Write-Host 'Select the profile in Server and click Connect.'
         return
@@ -139,6 +180,7 @@ try {
     $target.SetValue('server',[string]$config.gateway,[Microsoft.Win32.RegistryValueKind]::String)
     $target.Flush(); $target.Close(); $target = $null
     Write-Host ('OK: profile created: '+[string]$config.name)
+    Save-TolfRemovalCommand
     try { Start-Process -FilePath $exe }
     catch { Write-Host 'Open OpenConnect GUI from its shortcut.' }
     Write-Host 'Select the new profile in Server and click Connect.'
