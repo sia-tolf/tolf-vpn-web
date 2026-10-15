@@ -638,7 +638,7 @@
     if (error || (!loading && capabilities?.issuance !== true)) {
       root.append(button(c.refresh, () => { message = ""; error = false; refresh(); }));
     }
-    root.append(link(currentPlatform === "windows" ? "OpenConnect GUI" : c.docs, currentPlatform === "windows" ? "https://gui.openconnect-vpn.net/" : GUIDE));
+    if (currentPlatform !== "windows") root.append(link(c.docs, GUIDE));
   }
   window.setAnyConnectAccount = data => {
     if (account?.userId === data?.userId && account) {
