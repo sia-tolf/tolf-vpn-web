@@ -121,7 +121,14 @@ function Save-TolfRemovalCommand {
         $content=New-TolfRemovalCommand ([string]$config.name) ([string]$config.deviceId) ([string]$config.gateway)
         [IO.File]::WriteAllText($file,$content,[Text.Encoding]::ASCII)
         Write-Host ('Removal file saved on Desktop: Remove '+[string]$config.name+'.cmd')
-    } catch { Write-Warning ('VPN profile is configured, but the removal file could not be saved: '+$_.Exception.Message) }
+        $ingress=@{'https://oc.tolf.is:4443'='moscow';'https://oc-riga.tolf.is:443'='riga';'https://oc-us.tolf.is:4443'='us'}[[string]$config.gateway]
+        $setupUrl='https://vpn.tolf.is/quick/?protocol=anyconnect&platform=windows&ingress='+$ingress
+        $setupFile=Join-Path $desktop ('Setup '+[string]$config.name+'.cmd')
+        $setupContent=[string]::Join(([string][char]13+[char]10),@('@echo off',('start "" "'+$setupUrl+'"'),'exit /b 0',''))
+        [IO.File]::WriteAllText($setupFile,$setupContent,[Text.Encoding]::ASCII)
+        Write-Host ('Setup file saved on Desktop: Setup '+[string]$config.name+'.cmd')
+
+    } catch { Write-Warning ('VPN profile is configured, but the Desktop setup/removal files could not be saved: '+$_.Exception.Message) }
 }
 
 $base = $null; $target = $null
