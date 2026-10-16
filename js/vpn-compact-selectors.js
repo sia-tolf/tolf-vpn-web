@@ -83,7 +83,18 @@
     document.getElementById("serverSection")?.classList.remove("hidden");
     protocolDD.label.textContent=tr().protocol; entryDD.label.textContent=tr().entry;
     const transport=window.getVpnTransport?.()||"";
-    document.querySelectorAll("[data-protocol-summary]").forEach(el=>el.classList.toggle("hidden",el.dataset.protocolSummary!==transport));
+    const p=typeof currentPlatform!=="undefined"?currentPlatform:"ios";
+    const summaries={
+      ru:{ios:"IKEv2 — встроенный VPN на iPhone и iPad.",windows:"IKEv2 — встроенный VPN в Windows.",android:"IKEv2 — VPN через приложение strongSwan VPN Client.",any:"AnyConnect — VPN через приложение CLIENT по TLS/HTTPS."},
+      en:{ios:"IKEv2 — built-in VPN on iPhone and iPad.",windows:"IKEv2 — built-in VPN in Windows.",android:"IKEv2 — VPN through the strongSwan VPN Client app.",any:"AnyConnect — VPN through CLIENT using TLS/HTTPS."},
+      lv:{ios:"IKEv2 — iebūvēts VPN iPhone un iPad ierīcēs.",windows:"IKEv2 — iebūvēts VPN sistēmā Windows.",android:"IKEv2 — VPN lietotnē strongSwan VPN Client.",any:"AnyConnect — VPN lietotnē CLIENT, izmantojot TLS/HTTPS."}
+    };
+    const summary=summaries[lang()]||summaries.en;
+    document.querySelectorAll("[data-protocol-summary]").forEach(el=>{
+      el.removeAttribute("data-i18n");
+      el.classList.toggle("hidden",el.dataset.protocolSummary!==transport);
+      el.textContent=el.dataset.protocolSummary==="ikev2"?summary[p]:summary.any.replace("CLIENT",p==="windows"?"OpenConnect GUI":"Cisco Secure Client");
+    });
     document.getElementById("quickSetupLink").classList.remove("hidden");
     document.getElementById("quickSetupLink").href="/quick/?protocol="+transport;
     document.getElementById("quickProtocolNote").classList.add("hidden");
