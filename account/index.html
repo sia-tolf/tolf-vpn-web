@@ -5,7 +5,7 @@
 <link rel="stylesheet" href="../css/styles.css?v=account-page-20260921">
 <link rel="stylesheet" href="../tolf-buttons.20260917-3.css">
 <link rel="stylesheet" href="../tolf-header.20260919-1.css?v=languages-2">
-<link rel="stylesheet" href="../css/account-password.css?v=20260928-save-credentials-1">
+<link rel="stylesheet" href="../css/account-password.css?v=login-actions-row-20261016">
 <link rel="stylesheet" href="styles.css?v=identity-20261005-2">
 <script defer src="config.js?v=1"></script>
 <script defer src="../js/locales/en.js?v=account-services-20260928-1"></script>
@@ -42,10 +42,12 @@
           <div id="apExisting" class="hidden">
             <label for="apLogin" data-password-text="username">Username</label>
             <input id="apLogin" readonly autocomplete="username">
-            <button id="apSaveExisting" type="button" class="secondary ap-wide" data-password-text="exportExisting">Save sign-in details</button>
           </div>
           <p id="apNone" class="section-description" data-password-text="none"></p>
+          <div class="ap-login-actions">
+            <button id="apSaveExisting" type="button" class="secondary ap-wide" data-password-text="exportExisting">Save sign-in details</button>
           <button id="apOpen" type="button" class="secondary ap-wide"></button>
+          </div>
           <form id="apExportForm" class="hidden">
             <p class="section-description" data-password-text="exportHelp"></p>
             <label for="apCurrentPassword" data-password-text="currentPassword">Current account password</label>
