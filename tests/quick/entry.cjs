@@ -35,6 +35,7 @@ for (const id of ['manualSetupLink','quickSetupLink','vpnCard']) {
   }
 }
 const observers = [];
+const bodyClasses = new Set();
 const context = {
   URL,
   location:{href:'https://vpn.tolf.is/',hash:''},
@@ -42,7 +43,7 @@ const context = {
   currentPlatform:'ios',
   window:{addEventListener(){},getVpnTransport:()=> 'ikev2'},
   document:{
-    body:{classList:{add(){}}},
+    body:{classList:{add(name){bodyClasses.add(name);},remove(name){bodyClasses.delete(name);}}},
     documentElement:{lang:'ru'},
     createElement:()=>({
       className:'',children:[],setAttribute(){},replaceChildren(){},
@@ -72,8 +73,11 @@ setImmediate(() => {
 
 for(const protocol of ['ikev2','anyconnect']){
  context.currentPlatform='windows';context.window.getVpnTransport=()=>protocol;
+ bodyClasses.add('manual-setup-open');
  let prevented=false;
  elements.quickSetupLink.listeners.click({preventDefault(){prevented=true;}});
+ assert(!bodyClasses.has('manual-setup-open'),'Quick setup hides manual panel');
+ assert.equal(elements.manualSetupLink.attributes['aria-expanded'],'false');
  assert(prevented,'Windows quick setup on iPad is blocked for '+protocol);
 }
 context.navigator.userAgent='Windows NT 10.0';context.navigator.platform='Win32';context.navigator.maxTouchPoints=0;
