@@ -32,7 +32,22 @@
  function renderNotice(){
   notice.classList.toggle('hidden',!noticeOpen);
   if(!noticeOpen)return;
-  const words=copy[document.documentElement.lang]||copy.en;
+  const language=document.documentElement.lang;
+  const mobileCopy={
+   ru:['Быстрая настройка '+(currentPlatform==='android'?'Android':'iPhone / iPad'),
+       'Откройте vpn.tolf.is на устройстве '+(currentPlatform==='android'?'Android':'iPhone или iPad')+'.',
+       'Выберите AnyConnect, подтвердите установку Cisco Secure Client и нажмите «Быстрая настройка».',
+       'Быстрая настройка выполняется на том устройстве, на котором открыт сайт.'],
+   en:['Quick setup for '+(currentPlatform==='android'?'Android':'iPhone / iPad'),
+       'Open vpn.tolf.is on your '+(currentPlatform==='android'?'Android device':'iPhone or iPad')+'.',
+       'Select AnyConnect, confirm Cisco Secure Client installation and select “Quick setup”.',
+       'Quick setup runs on the device where the website is open.'],
+   lv:[(currentPlatform==='android'?'Android':'iPhone / iPad')+' ātrā iestatīšana',
+       'Atveriet vpn.tolf.is '+(currentPlatform==='android'?'Android ierīcē':'iPhone vai iPad')+'.',
+       'Atlasiet AnyConnect, apstipriniet Cisco Secure Client instalēšanu un nospiediet “Ātrā iestatīšana”.',
+       'Ātrā iestatīšana notiek ierīcē, kurā atvērta vietne.']
+  };
+  const words=currentPlatform==='windows'?(copy[language]||copy.en):(mobileCopy[language]||mobileCopy.en);
   const title=document.createElement('strong');title.textContent=words[0];
   const steps=document.createElement('ol');
   for(const word of words.slice(1)){const li=document.createElement('li');li.textContent=word;steps.append(li);}
@@ -43,13 +58,8 @@
   const transport=window.getVpnTransport?.()||'ikev2';
   const ua=navigator.userAgent||'';
   const nativePlatform=/Android/i.test(ua)?'android':nativeWindows()?'windows':'ios';
-  if(transport==='anyconnect' && currentPlatform!=='windows' && currentPlatform!==nativePlatform){
-   event.preventDefault();
-   openManual();
-   document.getElementById('vpnCard')?.scrollIntoView?.({behavior:'smooth',block:'start'});
-   return;
-  }
-  if(currentPlatform==='windows'&&!nativeWindows()){
+  if((currentPlatform==='windows'&&!nativeWindows()) ||
+     (transport==='anyconnect'&&currentPlatform!==nativePlatform)){
    event.preventDefault();noticeOpen=true;renderNotice();return;
   }
   const url=new URL(quickLink.href,location.href);
