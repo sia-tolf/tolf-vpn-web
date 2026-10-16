@@ -32,7 +32,7 @@
       enable: "Включите VPN в приложении. Если предлагается группа, оставьте группу по умолчанию. Вернитесь на сайт: зелёная точка появится после подтверждения сессии выбранного устройства. Маршрутизацию меняйте здесь.",
       ready: "Доступ готов", pending: "Выдача не завершена", revoking: "Отзыв выполняется",
       unavailable: "Выдача пока недоступна. Обновите после активации сервера.", loading: "Загрузка…",
-      failed: "Не удалось выполнить действие. Повторите попытку.",
+      failed: "Не удалось выполнить действие.",
       revoke: "Отозвать доступ", confirm: "Отозвать доступ этого устройства? Его VPN-соединение будет отключено.",
       revoked: "Доступ отозван.", revokePending: "Отзыв принят. Сервер завершит отключение после восстановления связи.",
       separate: "Создавайте отдельный доступ для каждого устройства. Сертификат и пароль предназначены только для вас.",
@@ -60,7 +60,7 @@
       enable: "Enable VPN in the app. Keep the default group if asked. Return here: the green dot appears after this device’s session is confirmed. Change routing here.",
       ready: "Access ready", pending: "Issuance incomplete", revoking: "Revocation in progress",
       unavailable: "Issuance is unavailable. Refresh after server activation.", loading: "Loading…",
-      failed: "The action failed. Refresh and try again.",
+      failed: "The action failed.",
       revoke: "Revoke access", confirm: "Revoke this device’s access? Its VPN connection will be disconnected.",
       revoked: "Access revoked.", revokePending: "Revocation accepted. Disconnection will complete when server connectivity returns.",
       separate: "Create separate access for each device. Keep the certificate and password private.",
@@ -88,7 +88,7 @@
       enable: "Ieslēdziet VPN lietotnē. Ja tiek prasīta grupa, atstājiet noklusējuma grupu. Atgriezieties vietnē: zaļais punkts parādīsies pēc šīs ierīces sesijas apstiprināšanas. Maršrutēšanu mainiet šeit.",
       ready: "Piekļuve gatava", pending: "Izsniegšana nav pabeigta", revoking: "Notiek atsaukšana",
       unavailable: "Izsniegšana nav pieejama. Atjauniniet pēc servera aktivizēšanas.", loading: "Ielāde…",
-      failed: "Darbība neizdevās. Atjauniniet un mēģiniet vēlreiz.",
+      failed: "Darbība neizdevās.",
       revoke: "Atsaukt piekļuvi", confirm: "Atsaukt šīs ierīces piekļuvi? VPN savienojums tiks pārtraukts.",
       revoked: "Piekļuve atsaukta.", revokePending: "Atsaukšana pieņemta. Savienojums tiks pārtraukts pēc saziņas ar serveri atjaunošanas.",
       separate: "Izveidojiet atsevišķu piekļuvi katrai ierīcei. Sertifikāts un parole paredzēti tikai jums.",
@@ -189,6 +189,35 @@
     };
     return {...base,...extra};
   };
+  const DEVICE_LIMIT = 8;
+  const ERROR_COPY = {
+    ru: {limit:"Максимальное количество устройств — 8.", auth:"Сеанс входа завершён. Войдите в личный кабинет.", forbidden:"Нет разрешения на это действие.", unavailable:"Сервер временно недоступен.", timeout:"Сервер не ответил вовремя.", network:"Не удалось связаться с сервером."},
+    en: {limit:"Maximum number of devices — 8.", auth:"Your sign-in session expired. Sign in to your account.", forbidden:"You do not have permission for this action.", unavailable:"The server is temporarily unavailable.", timeout:"The server did not respond in time.", network:"Unable to reach the server."},
+    lv: {limit:"Maksimālais ierīču skaits — 8.", auth:"Pieteikšanās sesija ir beigusies. Piesakieties savā kontā.", forbidden:"Šai darbībai nav atļaujas.", unavailable:"Serveris īslaicīgi nav pieejams.", timeout:"Serveris neatbildēja laikā.", network:"Neizdevās sazināties ar serveri."}
+  };
+  const errorCopy = () => ERROR_COPY[document.documentElement.lang] || ERROR_COPY.en;
+  const deviceLimitReached = () => devices.filter(d =>
+    ["pending", "active", "revoking"].includes(d.state) && Date.parse(d.expires_at) > Date.now()
+  ).length >= DEVICE_LIMIT;
+  function actionError(cause) {
+    const text = errorCopy();
+    if (cause?.message === "Device limit reached") return text.limit;
+    if (cause?.status === 401) return text.auth;
+    if (cause?.status === 403) return text.forbidden;
+    if (cause?.status >= 500) return text.unavailable;
+    if (cause?.message === "Request timed out" || cause?.name === "AbortError") return text.timeout;
+    if (cause instanceof TypeError) return text.network;
+    return copy().failed;
+  }
+  function beginAdditionalDevice() {
+    message = ""; error = false;
+    if (deviceLimitReached()) {
+      addingDevice = false; message = errorCopy().limit; error = true;
+    } else {
+      addingDevice = true;
+    }
+    render();
+  }
   const selected = () => window.isCiscoClientConfirmed?.(currentPlatform) ? devices.find(d => d.id === selectedId && d.state === "active") || null : null;
   window.ocAccess = { selected, accountUsername: () => account?.vpn?.username || "", ingress, ingresses, selectIngress };
   const path = id => "/oc/access/devices/" + encodeURIComponent(id);
@@ -340,7 +369,7 @@
         grant = null;
         clearDownloadedPackage();
       }
-    } else { message = copy().failed; error = true; }
+    } else { message = actionError(results[1].reason); error = true; }
     loading = false;
     saveSetup();
     window.refreshAnyConnectTransport?.(); render();
@@ -350,7 +379,7 @@
     const token = epoch;
     busy = true; message = ""; error = false; render();
     try { await action(token); }
-    catch { if (token === epoch) { await refresh(); message = copy().failed; error = true; } }
+    catch (cause) { if (token === epoch) { await refresh(); if (token !== epoch) return; message = actionError(cause); error = true; if (cause?.message === "Device limit reached") addingDevice = false; } }
     finally { if (token === epoch) { busy = false; render(); } }
   }
   async function create(requestId, label, token) {
@@ -403,9 +432,13 @@
     }
     const header = element("div", null, "oc-access-header");
     header.append(element("h3", c.title));
-    if (devices.length && !addingDevice) header.append(button(c.additional, () => { addingDevice = true; render(); }));
+    if (devices.length && !addingDevice) header.append(button(c.additional, beginAdditionalDevice));
     root.append(header, element("p", c.separate, "oc-note"));
     root.append(element("h4", "2. " + c.device));
+    if (message === errorCopy().limit) {
+      const notice = element("p", message, "oc-message oc-error");
+      notice.setAttribute("role", "alert"); root.append(notice);
+    }
     if (devices.length) {
       const label = element("label", c.device); label.setAttribute("for", "ocDeviceSelectDropdownButton"); root.append(label);
       const row = element("div", null, "oc-device-row");
@@ -633,7 +666,7 @@
       steps.append(enable); root.append(steps);
       }
     }
-    const status = element("p", message, "oc-message" + (error ? " oc-error" : ""));
+    const status = element("p", message === errorCopy().limit ? "" : message, "oc-message" + (error ? " oc-error" : ""));
     status.setAttribute("role", "status"); status.setAttribute("aria-live", "polite"); root.append(status);
     if (currentPlatform !== "windows") root.append(link(c.docs, GUIDE));
   }
