@@ -445,7 +445,7 @@
       return create(creationRequest, deviceName.trim(), token);
     }), true);
     createButton.disabled ||= capabilities?.issuance !== true || !deviceName.trim();
-    const createActions = element("div", null, "oc-actions");
+    const createActions = element("div", null, "oc-actions oc-create-actions");
     createActions.append(createButton);
     if (devices.length) createActions.append(button(c.cancel, () => {
       addingDevice = false; deviceName = ""; creationRequest = null; render();
@@ -635,9 +635,6 @@
     }
     const status = element("p", message, "oc-message" + (error ? " oc-error" : ""));
     status.setAttribute("role", "status"); status.setAttribute("aria-live", "polite"); root.append(status);
-    if (error || (!loading && capabilities?.issuance !== true)) {
-      root.append(button(c.refresh, () => { message = ""; error = false; refresh(); }));
-    }
     if (currentPlatform !== "windows") root.append(link(c.docs, GUIDE));
   }
   window.setAnyConnectAccount = data => {

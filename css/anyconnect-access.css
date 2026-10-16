@@ -225,3 +225,8 @@ html[data-vpn-transport="anyconnect"] #vpnUsername { overflow-wrap: anywhere; }
 }
 
 #ocWindowsExcludedNetworks { box-sizing: border-box; width: 100%; min-height: 90px; resize: vertical; padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; font: inherit; background: var(--card); color: var(--text); }
+
+/* Equal create/cancel actions, including narrow Android screens. */
+#anyConnectAccess .oc-actions.oc-create-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; align-items:stretch; }
+#anyConnectAccess .oc-create-actions > .oc-action { width:100%; min-width:0; box-sizing:border-box; display:flex; align-items:center; justify-content:center; text-align:center; }
+#anyConnectAccess .oc-create-actions > .oc-action:only-child { grid-column:1 / -1; }
