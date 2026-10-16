@@ -3,6 +3,7 @@
  let enabled=false;
  const manualLink=document.getElementById('manualSetupLink');
  function openManual(){
+  if(!window.getVpnTransport?.())return;
   document.body.classList.add('manual-setup-open');
   manualLink.setAttribute('aria-expanded','true');
   noticeOpen=false;
@@ -53,7 +54,10 @@
   for(const word of words.slice(1)){const li=document.createElement('li');li.textContent=word;steps.append(li);}
   notice.replaceChildren(title,steps);
  }
- handleHash();
+ // A reload starts with no protocol, even if the previous URL targeted manual setup.
+ document.body.classList.remove('manual-setup-open');
+ if(location.hash==='#vpnCard'||location.hash==='#signedOutCard')
+  history.replaceState(history.state,'',location.pathname+location.search);
  quickLink.addEventListener('click',event=>{
   document.body.classList.remove('manual-setup-open');
   manualLink.setAttribute('aria-expanded','false');
