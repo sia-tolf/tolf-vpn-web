@@ -8,9 +8,9 @@
 
   const lang=()=>((document.documentElement.lang||"en").toLowerCase());
   const COPY={
-    en:{protocol:"Protocol",entry:"VPN Entry Point",riga:"Riga",moscow:"Moscow",us:"New York",recommended:"Recommended",measuring:"Measuring…",unavailable:"—",unsupported:"Available with AnyConnect or Windows",notReady:"Not available"},
-    ru:{protocol:"Протокол",entry:"Точка входа VPN",riga:"Рига",moscow:"Москва",us:"Нью-Йорк",recommended:"Рекомендуется",measuring:"Измерение…",unavailable:"—",unsupported:"Доступен в AnyConnect или Windows",notReady:"Недоступен"},
-    lv:{protocol:"Protokols",entry:"VPN ieejas punkts",riga:"Rīga",moscow:"Maskava",us:"Ņujorka",recommended:"Ieteicams",measuring:"Mērīšana…",unavailable:"—",unsupported:"Pieejams ar AnyConnect vai Windows",notReady:"Nav pieejams"}
+    en:{protocol:"Protocol",chooseProtocol:"Choose a protocol",entry:"VPN Entry Point",riga:"Riga",moscow:"Moscow",us:"New York",recommended:"Recommended",measuring:"Measuring…",unavailable:"—",unsupported:"Available with AnyConnect or Windows",notReady:"Not available"},
+    ru:{protocol:"Протокол",chooseProtocol:"Выберите протокол",entry:"Точка входа VPN",riga:"Рига",moscow:"Москва",us:"Нью-Йорк",recommended:"Рекомендуется",measuring:"Измерение…",unavailable:"—",unsupported:"Доступен в AnyConnect или Windows",notReady:"Недоступен"},
+    lv:{protocol:"Protokols",chooseProtocol:"Izvēlieties protokolu",entry:"VPN ieejas punkts",riga:"Rīga",moscow:"Maskava",us:"Ņujorka",recommended:"Ieteicams",measuring:"Mērīšana…",unavailable:"—",unsupported:"Pieejams ar AnyConnect vai Windows",notReady:"Nav pieejams"}
   };
   const tr=()=>COPY[lang()]||COPY.en;
 
@@ -82,11 +82,13 @@
   function sync(){
     document.getElementById("serverSection")?.classList.remove("hidden");
     protocolDD.label.textContent=tr().protocol; entryDD.label.textContent=tr().entry;
-    const transport=window.getVpnTransport?.()||"ikev2";
+    const transport=window.getVpnTransport?.()||"";
+    document.querySelectorAll("[data-protocol-summary]").forEach(el=>el.classList.toggle("hidden",el.dataset.protocolSummary!==transport));
     document.getElementById("quickSetupLink").classList.remove("hidden");
     document.getElementById("quickSetupLink").href="/quick/?protocol="+transport;
     document.getElementById("quickProtocolNote").classList.add("hidden");
     protocolDD.render([
+      {value:"",label:tr().chooseProtocol,disabled:true},
       {value:"ikev2",label:"IKEv2",disabled:ike.disabled||ike.classList.contains("hidden")},
       {value:"anyconnect",label:"AnyConnect",disabled:any.disabled||any.classList.contains("hidden")}
     ],transport);

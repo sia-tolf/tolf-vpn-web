@@ -17,7 +17,8 @@
   let selectionToken = 0;
   const readChoice = key => { try { return sessionStorage.getItem(key); } catch { return null; } };
   const saveChoice = (key,value) => { try { sessionStorage.setItem(key,value); } catch {} };
-  let transport = readChoice("tolfTransport") === "anyconnect" ? "anyconnect" : "ikev2";
+  let transport = "";
+  saveChoice("tolfTransport", "");
   window.getVpnTransport = () => transport;
   let ikev2Server = readChoice("tolfIkev2Server");
   let anyConnectMode = "auto";
@@ -109,9 +110,9 @@
   function setPressed() {
     const isIkev2 = transport === "ikev2";
     ikev2.classList.toggle("active", isIkev2);
-    anyConnect.classList.toggle("active", !isIkev2);
+    anyConnect.classList.toggle("active", transport === "anyconnect");
     ikev2.setAttribute("aria-pressed", String(isIkev2));
-    anyConnect.setAttribute("aria-pressed", String(!isIkev2));
+    anyConnect.setAttribute("aria-pressed", String(transport === "anyconnect"));
   }
 
   function renderMode() {
@@ -285,7 +286,7 @@
     overviewTitle.textContent = copy().protocol;
     const value = document.getElementById("vpnStatus");
     if (value) {
-      value.textContent = transport === "anyconnect" ? "AnyConnect" : "IKEv2";
+      value.textContent = transport === "anyconnect" ? "AnyConnect" : transport === "ikev2" ? "IKEv2" : "—";
       value.className = "vpn-overview-status";
     }
     if (transport === "anyconnect") {
@@ -312,6 +313,7 @@
     document.documentElement.dataset.vpnTransport = transport;
     window.renderVpnProtocol();
     setPressed();
+    if (!transport) return;
     const riga = document.getElementById("serverRiga");
     const moscow = document.getElementById("serverMoscow");
 

@@ -370,4 +370,4 @@ Object.assign(I18N.lv, {
 
 Object.assign(I18N.lv, {"setupChoiceDescription": "Ātrā iestatīšana izmanto šo ierīci un ieteikto ieejas punktu. Manuāli var izvēlēties ierīci un parametrus.", "manualSetupTitle": "Manuāla iestatīšana"});
 
-Object.assign(I18N.lv,{"ikev2Summary": "IKEv2 — iebūvēts VPN iPhone, iPad un Windows; Android izmanto strongSwan.", "anyConnectSummary": "AnyConnect — VPN ar Cisco Secure Client lietotni, izmantojot TLS/HTTPS. Alternatīva, ja IKEv2 neizveido savienojumu.", "quickIkev2Only": "Ātrā iestatīšana pašlaik ir pieejama IKEv2. AnyConnect izmantojiet manuālo iestatīšanu."});
+Object.assign(I18N.lv,{"ikev2Summary": "IKEv2 — iebūvēts VPN iPhone, iPad un Windows ierīcēs. Android izmanto lietotni strongSwan VPN Client.", "anyConnectSummary": "AnyConnect — VPN lietotnē Cisco Secure Client, izmantojot TLS/HTTPS.", "quickIkev2Only": "Ātrā iestatīšana pašlaik ir pieejama IKEv2. AnyConnect izmantojiet manuālo iestatīšanu."});

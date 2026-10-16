@@ -18,7 +18,7 @@
   return c;
  };
  const platform=()=>typeof currentPlatform!=='undefined'?currentPlatform:'ios';
- const transport=()=>window.getVpnTransport?.()||(()=>{try{return sessionStorage.getItem('tolfTransport')||'ikev2';}catch{return 'ikev2';}})();
+ const transport=()=>window.getVpnTransport?.()||'';
  window.isCiscoClientConfirmed=p=>{
   p=p||platform();if(!['ios','android','windows'].includes(p))return false;
   return remembered.has(p);
@@ -46,12 +46,15 @@
   });
   const text=document.createElement('span');text.textContent=c.confirmed;
   label.append(check,text);host.append(title,app,label);
-  const blocked=transport()==='anyconnect'&&!window.isCiscoClientConfirmed(p);
-  if(blocked){const note=document.createElement('p');note.className='card-description';note.textContent=c.blocked;host.append(note);}
+  const blocked=!transport()||(transport()==='anyconnect'&&!window.isCiscoClientConfirmed(p));
+  if(blocked&&transport()==='anyconnect'){const note=document.createElement('p');note.className='card-description';note.textContent=c.blocked;host.append(note);}
   for(const id of ['quickSetupLink','manualSetupLink'])document.getElementById(id)?.setAttribute('aria-disabled',String(blocked));
  }
  for(const id of ['quickSetupLink','manualSetupLink']){
   document.getElementById(id)?.addEventListener('click',event=>{
+   if(!transport()){
+    event.preventDefault();event.stopImmediatePropagation();document.querySelector('#vpnProtocolDropdown button')?.focus();return;
+   }
    if(transport()==='anyconnect'&&!window.isCiscoClientConfirmed(platform())){
     event.preventDefault();event.stopImmediatePropagation();window.focusCiscoInstall();
    }
