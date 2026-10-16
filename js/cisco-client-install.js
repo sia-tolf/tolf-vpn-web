@@ -80,7 +80,7 @@
  let lastTransport=transport();
  window.addEventListener('vpntransportchange',()=>{
   const next=transport();
-  if(lastTransport&&next!==lastTransport&&needsApp()){
+  if(next!==lastTransport&&needsApp()){
    if(needsStrongSwan()){
     strongSwanConfirmed=false;
     try{sessionStorage.removeItem('tolfStrongSwanInstalled');}catch{}
