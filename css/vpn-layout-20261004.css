@@ -57,3 +57,7 @@ html[data-tolf-ui="vpn"] .compact-header > .brand-copy{display:none!important}\n
  html[data-tolf-ui="vpn"] .vpn-header-signout { grid-column:2!important; grid-row:2!important; justify-self:start!important; }
  html[data-tolf-ui="vpn"] .compact-header .header-navigation > .help-navigation { grid-column:2!important; grid-row:2!important; justify-self:end!important; }
 }
+
+/* Protocol menu must extend beyond the My VPN card. */
+#quickSetupCard, #quickSetupCard > .card-content { overflow: visible; }
+#quickSetupCard { position: relative; z-index: 2; }
