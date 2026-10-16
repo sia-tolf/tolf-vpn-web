@@ -21,6 +21,13 @@
   const c={...(texts[document.documentElement.lang]||texts.en)};
   if(needsStrongSwan())for(const key of ['title','install','confirmed','blocked'])c[key]=c[key].replaceAll('Cisco Secure Client','strongSwan VPN Client').replace(' (AnyConnect)',' (IKEv2)');
   if(platform()==='windows')for(const key of ['title','install','confirmed','blocked'])c[key]=c[key].replaceAll('Cisco Secure Client','OpenConnect GUI');
+  const store=platform()==='ios'?'App Store':platform()==='android'?'Google Play':null;
+  if(store){
+   const language=document.documentElement.lang;
+   const suffix=language==='ru'?' из '+store:language==='lv'?' no '+store:' from '+store;
+   c.install+=suffix;
+   c.title=c.title.replace(/\.$/,'')+suffix+'.';
+  }
   return c;
  };
  const platform=()=>typeof currentPlatform!=='undefined'?currentPlatform:'ios';
