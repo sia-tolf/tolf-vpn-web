@@ -77,7 +77,22 @@
    }
   },true);
  }
- for(const event of ['vpntransportchange','vpnplatformchange'])window.addEventListener(event,render);
+ let lastTransport=transport();
+ window.addEventListener('vpntransportchange',()=>{
+  const next=transport();
+  if(lastTransport&&next!==lastTransport&&needsApp()){
+   if(needsStrongSwan()){
+    strongSwanConfirmed=false;
+    try{sessionStorage.removeItem('tolfStrongSwanInstalled');}catch{}
+   }else{
+    remembered.delete(platform());
+    try{sessionStorage.removeItem(confirmationKey(platform()));}catch{}
+   }
+  }
+  lastTransport=next;
+  render();
+ });
+ window.addEventListener('vpnplatformchange',render);
  window.addEventListener('pageshow',render);
  new MutationObserver(render).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
  render();
