@@ -55,6 +55,10 @@
  }
  handleHash();
  quickLink.addEventListener('click',event=>{
+  document.body.classList.remove('manual-setup-open');
+  manualLink.setAttribute('aria-expanded','false');
+  if(location.hash==='#vpnCard'||location.hash==='#signedOutCard')
+   history.replaceState(history.state,'',location.pathname+location.search);
   const transport=window.getVpnTransport?.()||'ikev2';
   const ua=navigator.userAgent||'';
   const nativePlatform=/Android/i.test(ua)?'android':nativeWindows()?'windows':'ios';
