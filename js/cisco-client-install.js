@@ -78,9 +78,10 @@
   },true);
  }
  let lastTransport=transport();
- window.addEventListener('vpntransportchange',()=>{
-  const next=transport();
-  if(next!==lastTransport&&needsApp()){
+ let lastPlatform=platform();
+ function selectionChanged(){
+  const next=transport(),nextPlatform=platform();
+  if((next!==lastTransport||nextPlatform!==lastPlatform)&&needsApp()){
    if(needsStrongSwan()){
     strongSwanConfirmed=false;
     try{sessionStorage.removeItem('tolfStrongSwanInstalled');}catch{}
@@ -90,9 +91,11 @@
    }
   }
   lastTransport=next;
+  lastPlatform=nextPlatform;
   render();
- });
- window.addEventListener('vpnplatformchange',render);
+ }
+ window.addEventListener('vpntransportchange',selectionChanged);
+ window.addEventListener('vpnplatformchange',selectionChanged);
  window.addEventListener('pageshow',render);
  new MutationObserver(render).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
  render();
