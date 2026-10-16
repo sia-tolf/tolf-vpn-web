@@ -41,6 +41,14 @@
  handleHash();
  quickLink.addEventListener('click',event=>{
   const transport=window.getVpnTransport?.()||'ikev2';
+  const ua=navigator.userAgent||'';
+  const nativePlatform=/Android/i.test(ua)?'android':nativeWindows()?'windows':'ios';
+  if(transport==='anyconnect' && currentPlatform!=='windows' && currentPlatform!==nativePlatform){
+   event.preventDefault();
+   openManual();
+   document.getElementById('vpnCard')?.scrollIntoView?.({behavior:'smooth',block:'start'});
+   return;
+  }
   if(currentPlatform==='windows'&&!nativeWindows()){
    event.preventDefault();noticeOpen=true;renderNotice();return;
   }

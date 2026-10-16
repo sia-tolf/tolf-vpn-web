@@ -3,6 +3,10 @@
  const host=document.getElementById('ciscoClientInstall');
  if(!host)return;
  const remembered=new Set();
+ const confirmationKey=p=>'tolfCiscoInstalled:'+p;
+ for(const p of ['ios','android','windows']){
+  try{if(sessionStorage.getItem(confirmationKey(p))==='true')remembered.add(p);}catch{}
+ }
  const texts={
   ru:{title:'1. Установите Cisco Secure Client (AnyConnect).',install:'Установить Cisco Secure Client',confirmed:'Cisco Secure Client установлен',blocked:'Чтобы продолжить, подтвердите установку Cisco Secure Client в разделе «Мой VPN».',back:'К подтверждению установки'},
   en:{title:'1. Install Cisco Secure Client (AnyConnect).',install:'Install Cisco Secure Client',confirmed:'Cisco Secure Client is installed',blocked:'Confirm Cisco Secure Client installation in My VPN to continue.',back:'Confirm installation'},
@@ -27,6 +31,7 @@
  };
  function render(){
   const c=copy(),p=platform();host.classList.toggle('hidden',transport()!=='anyconnect');
+  host.dataset.confirmed=String(window.isCiscoClientConfirmed(p));
   host.replaceChildren();
   const title=document.createElement('h3');title.textContent=c.title;
   const app=document.createElement('a');app.className='button-link secondary';
@@ -36,6 +41,7 @@
   const check=document.createElement('input');check.type='checkbox';check.checked=window.isCiscoClientConfirmed(p);
   check.addEventListener('change',()=>{
    if(check.checked)remembered.add(p);else remembered.delete(p);
+   try{if(check.checked)sessionStorage.setItem(confirmationKey(p),'true');else sessionStorage.removeItem(confirmationKey(p));}catch{}
    window.dispatchEvent(new Event('tolf:cisco-install-confirmed'));render();
   });
   const text=document.createElement('span');text.textContent=c.confirmed;
