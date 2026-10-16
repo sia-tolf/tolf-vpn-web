@@ -25,7 +25,6 @@
   if(store){
    const language=document.documentElement.lang;
    const suffix=language==='ru'?' из '+store:language==='lv'?' no '+store:' from '+store;
-   c.install+=suffix;
    c.title=c.title.replace(/\.$/,'')+suffix+'.';
   }
   return c;
