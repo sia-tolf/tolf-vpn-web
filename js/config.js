@@ -59,17 +59,18 @@ if (!["en", "ru", "lv"].includes(currentLanguage)) {
 
 const tolfUserAgent = navigator.userAgent || "";
 
-// Initial platform follows the physical device on every page load.
-// Manual switching still works for the current session, but a stale saved
-// Android/Windows choice must never make an iPad reopen as that platform.
-let currentPlatform =
-  /Windows NT/i.test(tolfUserAgent)
+// Restore the user's selected platform; detect the device only on the first visit.
+let savedPlatform = null;
+try { savedPlatform = localStorage.getItem("tolfPlatform"); } catch {}
+let currentPlatform = ["ios", "android", "windows"].includes(savedPlatform)
+  ? savedPlatform
+  : /Windows NT/i.test(tolfUserAgent)
     ? "windows"
     : /Android/i.test(tolfUserAgent)
       ? "android"
       : "ios";
 
-localStorage.setItem("tolfPlatform", currentPlatform);
+try { localStorage.setItem("tolfPlatform", currentPlatform); } catch {}
 
 let lastVpnState = null;
 let lastPasskeys = [];
