@@ -336,6 +336,8 @@ I18N.ru = {
   accountDeleted: "Аккаунт TOLF удалён.",
   measureConnection: "Замерить соединение",
   measuringConnection: "Измеряем…",
+  vpnConnectionTo: "Скорость VPN: {city}",
+  connectionTestVpnUnavailable: "VPN-соединение с выбранной точкой недоступно",
   connectionTo: "Соединение с точкой {city}",
   connectionLatency: "Задержка",
   connectionJitter: "Джиттер",
