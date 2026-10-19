@@ -32,3 +32,19 @@
  .measurements-header h1 { grid-column: 1 / -1; grid-row: 2; text-align: left; font-size: 24px; }
  .measurement-controls { grid-template-columns: 1fr; gap: 14px; }
 }
+
+/* Network values share aligned columns; narrow screens scroll the table. */
+.measurements-page #networkMetrics { min-width: 0; max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; padding: 0 16px 16px; box-sizing: border-box; }
+.measurements-page .network-table { width: 100%; min-width: 600px; border-collapse: collapse; table-layout: fixed; text-align: left; font-size: 14px; }
+.measurements-page .network-table th, .measurements-page .network-table td { padding: 14px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.measurements-page .network-table thead th { color: var(--secondary); font-size: 12px; font-weight: 500; }
+.measurements-page .network-table th:first-child { width: 21%; padding-left: 0; }
+.measurements-page .network-table th:nth-child(2) { width: 20%; }
+.measurements-page .network-table th:last-child, .measurements-page .network-table td:last-child { padding-right: 0; }
+.measurements-page .network-table tbody tr:last-child > * { border-bottom: 0; }
+.measurements-page .network-table-pair { font-weight: 600; color: var(--text); }
+.measurements-page .network-table-direction, .measurements-page .network-table-time { display: block; color: var(--secondary); font-size: 11px; line-height: 1.5; font-weight: 400; }
+.measurements-page .network-table-direction { min-height: 17px; margin-bottom: 5px; }
+.measurements-page .network-table-value strong { display: block; font-size: 14px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.measurements-page .network-table-time { margin-top: 7px; }
+.measurements-page .network-table-caption { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }

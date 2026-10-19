@@ -13,10 +13,10 @@ function networkPairsForIngress(pairs, ingress) {
 (() => {
   let pairs = [], unavailable = false;
   const copy = () => ({
-    ru: {latency:'Задержка', speed:'Скорость', missing:'Нет замера', stale:'устарел', failed:'Измерения недоступны', riga:'Рига', moscow:'Москва', us:'Нью-Йорк'},
-    en: {latency:'Latency', speed:'Speed', missing:'Not measured', stale:'outdated', failed:'Measurements unavailable', riga:'Riga', moscow:'Moscow', us:'New York'},
-    lv: {latency:'Aizture', speed:'Ātrums', missing:'Nav mērījuma', stale:'novecojis', failed:'Mērījumi nav pieejami', riga:'Rīga', moscow:'Maskava', us:'Ņujorka'}
-  }[document.documentElement.lang] || {latency:'Latency', speed:'Speed', missing:'Not measured', stale:'outdated', failed:'Measurements unavailable', riga:'Riga', moscow:'Moscow', us:'New York'});
+    ru: {latency:'Задержка', speed:'Скорость', pair:'Соединение', forward:'Прямое направление', reverse:'Обратное направление', measured:'Замер', missing:'Нет замера', stale:'устарел', failed:'Измерения недоступны', riga:'Рига', moscow:'Москва', us:'Нью-Йорк'},
+    en: {latency:'Latency', speed:'Speed', pair:'Connection', forward:'Forward direction', reverse:'Reverse direction', measured:'Measured', missing:'Not measured', stale:'outdated', failed:'Measurements unavailable', riga:'Riga', moscow:'Moscow', us:'New York'},
+    lv: {latency:'Aizture', speed:'Ātrums', pair:'Savienojums', forward:'Tiešais virziens', reverse:'Pretējais virziens', measured:'Mērīts', missing:'Nav mērījuma', stale:'novecojis', failed:'Mērījumi nav pieejami', riga:'Rīga', moscow:'Maskava', us:'Ņujorka'}
+  }[document.documentElement.lang] || {latency:'Latency', speed:'Speed', pair:'Connection', forward:'Forward direction', reverse:'Reverse direction', measured:'Measured', missing:'Not measured', stale:'outdated', failed:'Measurements unavailable', riga:'Riga', moscow:'Moscow', us:'New York'});
   const node = (tag, className, text) => {
     const el = document.createElement(tag); el.className = className;
     if (text !== undefined) el.textContent = text;
@@ -35,23 +35,39 @@ function networkPairsForIngress(pairs, ingress) {
     };
     const metric = (value, unit, decimals) => Number.isFinite(value) && value >= 0 ? `${value.toFixed(decimals)} ${unit}` : c.missing;
     container.replaceChildren();
-    for (const p of networkPairsForIngress(pairs, ingress)) {
-      const section = node('div', 'network-pair');
-      section.appendChild(node('div', 'network-pair-title', `${c[p.source]} ↔ ${c[p.target]}`));
-      const values = node('div', 'network-pair-values');
-      for (const [label, value] of [
-        [c.latency, metric(p.rtt_ms, 'ms', 1)],
-        [`${c[p.source]} → ${c[p.target]}`, metric(p.forward_mbps, 'Mbps', 1)],
-        [`${c[p.target]} → ${c[p.source]}`, metric(p.reverse_mbps, 'Mbps', 1)]
-      ]) {
-        const cell = node('div', 'network-pair-value');
-        cell.appendChild(node('span', 'network-pair-label', label));
-        cell.appendChild(node('strong', '', value)); values.appendChild(cell);
-      }
-      section.appendChild(values);
-      section.appendChild(node('div', 'network-pair-time', `${c.latency}: ${stamp(p.measured_at, 15*60000)} · ${c.speed}: ${stamp(p.throughput_measured_at, (p.source === 'us' || p.target === 'us' ? 12 : 2)*3600000)}`));
-      container.appendChild(section);
+    const table = node('table', 'network-table');
+    const caption = node('caption', 'network-table-caption', document.querySelector('[data-i18n="measurementNetworkHelp"]')?.textContent || '');
+    table.appendChild(caption);
+    const head = node('thead', '');
+    const headings = node('tr', '');
+    for (const label of [c.pair, c.latency, c.forward, c.reverse]) {
+      const cell = node('th', '', label);
+      cell.setAttribute('scope', 'col'); headings.appendChild(cell);
     }
+    head.appendChild(headings); table.appendChild(head);
+    const body = node('tbody', '');
+    for (const p of networkPairsForIngress(pairs, ingress)) {
+      const row = node('tr', 'network-table-row');
+      const pair = node('th', 'network-table-pair', `${c[p.source]} ↔ ${c[p.target]}`);
+      pair.setAttribute('scope', 'row'); row.appendChild(pair);
+      const speedAge = (p.source === 'us' || p.target === 'us' ? 12 : 2)*3600000;
+      for (const [direction, value, measuredAt, maxAge] of [
+        ['', metric(p.rtt_ms, 'ms', 1), p.measured_at, 15*60000],
+        [`${c[p.source]} → ${c[p.target]}`, metric(p.forward_mbps, 'Mbps', 1), p.throughput_measured_at, speedAge],
+        [`${c[p.target]} → ${c[p.source]}`, metric(p.reverse_mbps, 'Mbps', 1), p.throughput_measured_at, speedAge]
+      ]) {
+        const cell = node('td', 'network-table-value');
+        const directionLabel = node('span', 'network-table-direction', direction);
+        if (!direction) directionLabel.setAttribute('aria-hidden', 'true');
+        cell.appendChild(directionLabel);
+        cell.appendChild(node('strong', '', value));
+        cell.appendChild(node('small', 'network-table-time', `${c.measured}: ${stamp(measuredAt, maxAge)}`));
+        row.appendChild(cell);
+      }
+      body.appendChild(row);
+    }
+    table.appendChild(body);
+    container.appendChild(table);
     container.classList.remove('hidden');
     const status = document.getElementById('networkMetricMeasuredAt');
     if (status) status.textContent = unavailable ? c.failed : '';

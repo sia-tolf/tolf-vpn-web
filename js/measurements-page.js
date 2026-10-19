@@ -16,6 +16,9 @@ function t(key, replacements = {}) {
   const server = document.getElementById("measurementServer");
   const mode = document.getElementById("measurementMode");
   const cancel = document.getElementById("measurementCancel");
+  const vpnConfirmation = document.getElementById("measurementVpnConfirmation");
+  const vpnConnected = document.getElementById("measurementVpnConnected");
+  const vpnConfirmationText = document.getElementById("measurementVpnConfirmationText");
   const storage = {get(key) {try {return localStorage.getItem(key);} catch {return null;}},
     set(key, value) {try {localStorage.setItem(key, value);} catch {}}};
   const url = new URL(location.href);
@@ -29,11 +32,12 @@ function t(key, replacements = {}) {
     busy = running;
     server.disabled = mode.disabled = running;
     cancel.hidden = !running;
-    connectionTestButton.disabled = running || vpnUnavailable();
+    vpnConfirmation.hidden = mode.value !== "vpn";
+    vpnConnected.disabled = running || vpnUnavailable();
+    connectionTestButton.disabled = running || vpnUnavailable() || mode.value === "vpn" && !vpnConnected.checked;
   };
   window.canStartConnectionMeasurement = () => {
-    if (vpnUnavailable()) return false;
-    return true;
+    return !busy && !vpnUnavailable() && (mode.value !== "vpn" || vpnConnected.checked);
   };
   function render() {
     document.documentElement.lang = currentLanguage;
@@ -44,12 +48,15 @@ function t(key, replacements = {}) {
       button.classList.toggle("active", active); button.setAttribute("aria-pressed", String(active));
     }
     document.getElementById("measurementBack").href = "../?lang=" + currentLanguage;
+    const cityKey = {riga:"cityRiga", moscow:"cityMoscow", us:"cityNewYork"}[server.value];
+    vpnConfirmationText.textContent = t("measurementVpnConnected", {city:t(cityKey)});
     document.getElementById("measurementModeHelp").textContent = t(vpnUnavailable() ? "measurementVpnNotReady" : mode.value === "direct" ? "measurementDirectHelp" : "measurementVpnHelp");
     renderConnectionTestTarget();
     if (vpnUnavailable()) {connectionTestStatus.textContent = t("connectionTestUnavailable"); connectionTestStatus.className = "vpn-overview-updated";}
     window.updateMeasurementControls(busy);
   }
   function contextChanged() {
+    vpnConnected.checked = false;
     resetConnectionTestContext();
     storage.set("tolfMeasurementServer", server.value);
     storage.set("tolfMeasurementMode", mode.value);
@@ -60,13 +67,14 @@ function t(key, replacements = {}) {
     window.dispatchEvent(new CustomEvent("tolf:measurement-selection-changed"));
   }
   for (const select of [server, mode]) select.addEventListener("change", contextChanged);
+  vpnConnected.addEventListener("change", () => window.updateMeasurementControls(busy));
   cancel.addEventListener("click", () => {resetConnectionTestContext(); render();});
   for (const button of document.querySelectorAll("[data-language]")) button.addEventListener("click", () => {
     currentLanguage = button.dataset.language; storage.set("tolfLanguage", currentLanguage);
     const next = new URL(location.href); next.searchParams.set("lang", currentLanguage);
     history.replaceState(null, "", next.pathname + next.search + next.hash); render();
   });
-  window.addEventListener("online", () => window.updateMeasurementControls(busy));
-  window.addEventListener("pageshow", render);
+  window.addEventListener("online", () => {vpnConnected.checked = false; window.updateMeasurementControls(busy);});
+  window.addEventListener("pageshow", () => {vpnConnected.checked = false; render();});
   document.addEventListener("DOMContentLoaded", render, {once:true});
 })();
