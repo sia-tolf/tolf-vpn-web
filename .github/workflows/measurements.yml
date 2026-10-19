@@ -2,9 +2,9 @@ name: Connection measurement checks
 on:
   push:
     branches: ['main']
-    paths: ['connection/**', 'css/connection-page.css', 'js/measurements-page.js', 'js/measurement-link.js', 'js/librespeed.js', 'js/network-metrics.js', 'js/locales/**', 'js/measurement-targets.js', 'js/latency.js', 'js/connection-test.js', 'speedtest_worker.js', 'tests/measurement*.cjs', 'index.html', '.github/workflows/measurements.yml']
+    paths: ['setup/measurements/install-direct-bypass.py', 'tests/measurement-bypass.py', 'connection/**', 'css/connection-page.css', 'js/measurements-page.js', 'js/measurement-link.js', 'js/librespeed.js', 'js/network-metrics.js', 'js/locales/**', 'js/measurement-targets.js', 'js/latency.js', 'js/connection-test.js', 'speedtest_worker.js', 'tests/measurement*.cjs', 'index.html', '.github/workflows/measurements.yml']
   pull_request:
-    paths: ['connection/**', 'css/connection-page.css', 'js/measurements-page.js', 'js/measurement-link.js', 'js/librespeed.js', 'js/network-metrics.js', 'js/locales/**', 'js/measurement-targets.js', 'js/latency.js', 'js/connection-test.js', 'speedtest_worker.js', 'tests/measurement*.cjs', 'index.html', '.github/workflows/measurements.yml']
+    paths: ['setup/measurements/install-direct-bypass.py', 'tests/measurement-bypass.py', 'connection/**', 'css/connection-page.css', 'js/measurements-page.js', 'js/measurement-link.js', 'js/librespeed.js', 'js/network-metrics.js', 'js/locales/**', 'js/measurement-targets.js', 'js/latency.js', 'js/connection-test.js', 'speedtest_worker.js', 'tests/measurement*.cjs', 'index.html', '.github/workflows/measurements.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -19,5 +19,6 @@ jobs:
       - run: node tests/measurement-targets.cjs
       - run: node tests/measurement-regression.cjs
       - run: node tests/measurement-page.cjs
+      - run: python3 tests/measurement-bypass.py
       - run: node tests/network-pairs.cjs
       - run: node tests/confirmed-upload.cjs

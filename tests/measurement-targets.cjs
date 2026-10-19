@@ -12,7 +12,7 @@ const privateUs = 'https://speedtest-us.vpn.tolf.is:8444/';
 
 function setup() {
   const handlers = {}, requests = [], instances = [];
-  let selected = 'moscow', mode = 'internal', testMode = 'vpn';
+  let selected = 'moscow', mode = 'internal', testMode = 'vpn', reportedIP = '8.8.4.4';
   let hold = null;
   const element = () => ({
     textContent: '—', disabled: false, className: '',
@@ -55,7 +55,7 @@ function setup() {
       const available = mode === 'internal' ? server !== publicMoscow
         : mode === 'public' ? ![internal, privateRiga, privateUs].includes(server) : false;
       if (!available) throw new Error('unreachable');
-      return {status: 200, text: async () => ''};
+      return {status: 200, text: async () => '', json: async () => ({processedString:reportedIP})};
     }
   });
   for (const name of ['connectionTestButton', 'connectionTestTitle', 'connectionTestStatus',
@@ -65,7 +65,7 @@ function setup() {
   vm.runInContext(source('measurement-targets.js'), c);
   vm.runInContext(source('connection-test.js'), c);
   return { c, requests, instances, window, setMode: m => {mode = m;},
-    setSelected: s => {selected = s;}, setTestMode: m => {testMode=m;}, setHold: p => {hold = p;} };
+    setSelected: s => {selected = s;}, setTestMode: m => {testMode=m;}, setReportedIP: ip => {reportedIP=ip;}, setHold: p => {hold = p;} };
 }
 
 (async () => {
@@ -169,5 +169,22 @@ function setup() {
   await independent.c.startConnectionTest();
   assert.equal(independent.instances[0].target.server,publicMoscow,'measurement selector is independent of profile/platform selectors');
   independent.c.resetConnectionTestContext();
+  for(const ip of ['188.214.39.114','92.243.66.32','92.243.66.204','162.252.174.201','10.19.0.22','10.21.0.33','10.91.0.44']) {
+    const guard=setup();guard.setMode('public');guard.setTestMode('direct');guard.setReportedIP(ip);
+    await guard.c.startConnectionTest();
+    assert.equal(guard.instances.length,0,'VPN-routed requests must not start a direct measurement');
+    assert.equal(guard.c.connectionTestStatus.textContent,'measurementDirectViaVpn');
+  }
+  const unknown=setup();unknown.setMode('public');unknown.setTestMode('direct');unknown.setReportedIP('masked-or-invalid');
+  await unknown.c.startConnectionTest();
+  assert.equal(unknown.instances.length,0);
+  assert.equal(unknown.c.connectionTestStatus.textContent,'measurementDirectUnverified');
+  const changed=setup();changed.setMode('public');changed.setTestMode('direct');
+  await changed.c.startConnectionTest();
+  changed.instances[0].onupdate({pingStatus:'45',jitterStatus:'1',dlStatus:'200',ulStatus:'40'});
+  changed.setReportedIP('188.214.39.114');
+  await changed.instances[0].onend(false);
+  assert.equal(changed.c.connectionTestStatus.textContent,'measurementDirectPathChanged');
+  assert.equal(changed.c.connectionTestDownload.textContent,'—','clear misleading results after a path change');
   console.log('PASS explicit direct/VPN routes for every city, private-only VPN, independent selection, cache and cancellation');
 })().catch(error => { console.error(error); process.exitCode = 1; });

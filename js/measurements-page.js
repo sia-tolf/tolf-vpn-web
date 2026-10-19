@@ -15,8 +15,6 @@ function t(key, replacements = {}) {
 (() => {
   const server = document.getElementById("measurementServer");
   const mode = document.getElementById("measurementMode");
-  const off = document.getElementById("measurementVpnOff");
-  const confirmation = document.getElementById("measurementDirectConfirmation");
   const cancel = document.getElementById("measurementCancel");
   const storage = {get(key) {try {return localStorage.getItem(key);} catch {return null;}},
     set(key, value) {try {localStorage.setItem(key, value);} catch {}}};
@@ -29,16 +27,12 @@ function t(key, replacements = {}) {
   const vpnUnavailable = () => mode.value === "vpn" && typeof MEASUREMENT_TARGETS !== "undefined" && MEASUREMENT_TARGETS[server.value]?.vpnReady === false;
   window.updateMeasurementControls = running => {
     busy = running;
-    server.disabled = mode.disabled = off.disabled = running;
+    server.disabled = mode.disabled = running;
     cancel.hidden = !running;
-    connectionTestButton.disabled = running || vpnUnavailable() || (mode.value === "direct" && !off.checked);
+    connectionTestButton.disabled = running || vpnUnavailable();
   };
   window.canStartConnectionMeasurement = () => {
     if (vpnUnavailable()) return false;
-    if (mode.value === "direct" && !off.checked) {
-      connectionTestStatus.textContent = t("measurementConfirmDirect");
-      return false;
-    }
     return true;
   };
   function render() {
@@ -51,13 +45,11 @@ function t(key, replacements = {}) {
     }
     document.getElementById("measurementBack").href = "../?lang=" + currentLanguage;
     document.getElementById("measurementModeHelp").textContent = t(vpnUnavailable() ? "measurementVpnNotReady" : mode.value === "direct" ? "measurementDirectHelp" : "measurementVpnHelp");
-    confirmation.hidden = mode.value !== "direct";
     renderConnectionTestTarget();
     if (vpnUnavailable()) {connectionTestStatus.textContent = t("connectionTestUnavailable"); connectionTestStatus.className = "vpn-overview-updated";}
     window.updateMeasurementControls(busy);
   }
   function contextChanged() {
-    off.checked = false;
     resetConnectionTestContext();
     storage.set("tolfMeasurementServer", server.value);
     storage.set("tolfMeasurementMode", mode.value);
@@ -68,14 +60,13 @@ function t(key, replacements = {}) {
     window.dispatchEvent(new CustomEvent("tolf:measurement-selection-changed"));
   }
   for (const select of [server, mode]) select.addEventListener("change", contextChanged);
-  off.addEventListener("change", () => window.updateMeasurementControls(busy));
   cancel.addEventListener("click", () => {resetConnectionTestContext(); render();});
   for (const button of document.querySelectorAll("[data-language]")) button.addEventListener("click", () => {
     currentLanguage = button.dataset.language; storage.set("tolfLanguage", currentLanguage);
     const next = new URL(location.href); next.searchParams.set("lang", currentLanguage);
     history.replaceState(null, "", next.pathname + next.search + next.hash); render();
   });
-  window.addEventListener("online", () => {off.checked = false; window.updateMeasurementControls(busy);});
-  window.addEventListener("pageshow", () => {off.checked = false; render();});
+  window.addEventListener("online", () => window.updateMeasurementControls(busy));
+  window.addEventListener("pageshow", render);
   document.addEventListener("DOMContentLoaded", render, {once:true});
 })();

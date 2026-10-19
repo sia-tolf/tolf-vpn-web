@@ -92,3 +92,38 @@ function resolveMeasurementTarget(key, { refresh = false, purpose = "entry" } = 
 function invalidateMeasurementTargets() {
   measurementTargetCache.clear();
 }
+
+
+// Only classify the request path; do not store or display the visitor address.
+const TOLF_MEASUREMENT_EGRESS = new Set([
+  "188.214.39.114", "92.243.66.32", "92.243.66.204", "162.252.174.201"
+]);
+function measurementSourcePath(value) {
+  if (typeof value !== "string") return "unknown";
+  const address = value.trim().replace(/^::ffff:/i, "");
+  if (!/^\d{1,3}(?:\.\d{1,3}){3}$/.test(address)) return "unknown";
+  const octets = address.split(".").map(Number);
+  if (octets.some(x => x > 255)) return "unknown";
+  if (TOLF_MEASUREMENT_EGRESS.has(octets.join("."))) return "vpn";
+  const [a,b] = octets;
+  if (a === 10 || a === 172 && b >= 16 && b <= 31 || a === 192 && b === 168 || a === 100 && b >= 64 && b <= 127) return "vpn";
+  if (a === 0 || a === 127 || a >= 224 || a === 169 && b === 254) return "unknown";
+  return "direct";
+}
+
+async function verifyDirectMeasurementPath(server) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5000);
+  try {
+    const response = await fetch(server + "getIP.php?cors=true&r=" + Math.random(), {
+      cache: "no-store", credentials: "omit", signal: controller.signal
+    });
+    if (response.status !== 200) return "unknown";
+    const data = await response.json();
+    return measurementSourcePath(data?.processedString);
+  } catch {
+    return "unknown";
+  } finally {
+    clearTimeout(timeout);
+  }
+}
