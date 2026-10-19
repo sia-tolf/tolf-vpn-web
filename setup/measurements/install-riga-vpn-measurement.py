@@ -24,6 +24,7 @@ Wants=network-online.target
 
 [Service]
 DynamicUser=yes
+ExecStartPre=+/usr/sbin/ip address replace 10.250.80.1/32 dev lo
 ExecStart=/usr/local/bin/speedtest-backend -c /etc/tolf-vpn-measurement.toml
 LoadCredential=tls-chain:/etc/letsencrypt/live/tolf-vpn-wildcard/fullchain.pem
 LoadCredential=tls-key:/etc/letsencrypt/live/tolf-vpn-wildcard/privkey.pem
@@ -34,7 +35,7 @@ ProtectSystem=strict
 ProtectHome=yes
 PrivateTmp=yes
 PrivateDevices=yes
-RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX AF_NETLINK
 MemoryMax=512M
 TasksMax=256
 LimitNOFILE=8192
@@ -55,8 +56,9 @@ def run(args):
 def validate():
  binary=Path("/usr/local/bin/speedtest-backend")
  assert hashlib.sha256(binary.read_bytes()).hexdigest()==EXPECTED_BACKEND, "Backend differs from reviewed build"
- addresses=json.loads(run(["ip","-j","-4","addr","show","dev","lo"]))
- assert any(a.get("local")=="10.250.80.1" for link in addresses for a in link.get("addr_info",[])), "Existing Riga loopback address is absent"
+ addresses=json.loads(run(["ip","-j","-4","addr","show"]))
+ assert any(a.get("local")=="188.214.39.114" for link in addresses for a in link.get("addr_info",[])), "This installer is limited to Riga"
+ assert all(link["ifname"]=="lo" for link in addresses for a in link.get("addr_info",[]) if a.get("local")=="10.250.80.1"), "Measurement address belongs to another interface"
  for name in ["fullchain.pem","privkey.pem"]:
   assert (Path("/etc/letsencrypt/live/tolf-vpn-wildcard")/name).exists()
  for filename,(_,text) in FILES.items():
