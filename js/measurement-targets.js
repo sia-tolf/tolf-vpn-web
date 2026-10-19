@@ -1,13 +1,22 @@
 // Measurement addresses describe a destination, independently of the UI protocol.
 const MEASUREMENT_TARGETS = {
-  us: { nameKey: "cityNewYork", servers: ["https://ikev2-us.tolf.is:8443/"] },
+  us: {
+    nameKey: "cityNewYork",
+    vpnReady: false,
+    servers: ["https://ikev2-us.tolf.is:8443/"],
+    directServers: ["https://ikev2-us.tolf.is:8443/"],
+    connectionServers: ["https://speedtest-us.vpn.tolf.is:8444/"]
+  },
   riga: {
     nameKey: "cityRiga",
     servers: ["https://ikev2-riga.tolf.is:8443/"],
+    directServers: ["https://ikev2-riga.tolf.is:8443/"],
     connectionServers: ["https://speedtest-riga.vpn.tolf.is:8444/"]
   },
   moscow: {
     nameKey: "cityMoscow",
+    directServers: ["https://ikev2.tolf.is:8443/"],
+    connectionServers: ["https://speedtest.vpn.tolf.is:8444/"],
     // Prefer the tunnel address instead of the excluded public VPN gateway.
     servers: [
       "https://speedtest.vpn.tolf.is:8444/",
@@ -43,7 +52,8 @@ function resolveMeasurementTarget(key, { refresh = false, purpose = "entry" } = 
   // Entry latency and VPN throughput must never reuse each other's target.
   const cacheKey = key + ":" + purpose;
   const vpnOnly = purpose === "connection" && !!definition.connectionServers;
-  const candidates = vpnOnly ? definition.connectionServers : definition.servers;
+  const candidates = vpnOnly ? definition.connectionServers
+    : purpose === "direct" ? definition.directServers : definition.servers;
   const cached = measurementTargetCache.get(cacheKey);
   if (cached?.pending) return cached.promise;
   if (!refresh && cached?.result && Date.now() - cached.at < MEASUREMENT_CACHE_MS) {

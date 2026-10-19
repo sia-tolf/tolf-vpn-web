@@ -36,6 +36,9 @@ function setLanguage(language) {
     accountNavigation.textContent = {en:"My account",ru:"Личный кабинет",lv:"Mans konts"}[language];
     accountNavigation.href = "account/?lang=" + language;
   }
+  for (const link of document.querySelectorAll("[data-measurement-link]")) {
+    const url = new URL(link.href, location.href); url.searchParams.set("lang", language); link.href = url.href;
+  }
   const helpNavigation = document.getElementById("helpNavigation");
   if (helpNavigation) {
     const helpLabel = { en: "Help", ru: "Помощь", lv: "Palīdzība" }[language];

@@ -108,14 +108,9 @@
     const current=windowsIke?winSelect.value:transport==="anyconnect"?(window.ocAccess?.ingress?.().id||"moscow"):(document.querySelector('input[name="vpnServer"]:checked')?.value||"riga");
     const allowed=transport==="anyconnect"?(window.ocAccess?.ingresses?.()||[{id:"moscow"}]).map(x=>x.id):windowsIke?[...winSelect.options].filter(x=>!x.disabled).map(x=>x.value):["riga","moscow",...(window.tolfMobileIkev2Ready?["us"]:[])];
     const recommended=(typeof recommendedEntryPoint!=="undefined"?recommendedEntryPoint:null);
-    const latency=(id)=>{
-      if(typeof entryPointLatencyMeasuring!=="undefined"&&entryPointLatencyMeasuring)return tr().measuring;
-      const v=(typeof entryPointLatencyValues!=="undefined"?entryPointLatencyValues[id]:null);
-      return Number.isFinite(v)&&v>=0?Math.round(v)+" ms":tr().unavailable;
-    };
     entryDD.render(["riga","moscow","us"].map(x=>({
       value:x,label:tr()[x],disabled:!allowed.includes(x),
-      meta:allowed.includes(x)?latency(x):(x==="us"&&transport==="ikev2"&&!windowsIke?tr().unsupported:tr().notReady),
+      meta:allowed.includes(x)?"":(x==="us"&&transport==="ikev2"&&!windowsIke?tr().unsupported:tr().notReady),
       badge:allowed.includes(x)&&x===recommended?"("+tr().recommended+")":""
     })),current);
     if(transport==="anyconnect")document.getElementById("quickSetupLink").href="/quick/?protocol=anyconnect&ingress="+encodeURIComponent(current);

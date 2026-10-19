@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en" data-tolf-ui="measurements">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Check connection — TOLF</title>
+<link rel="stylesheet" href="../css/styles.css?v=platform-choice-20261007">
+<link rel="stylesheet" href="../tolf-buttons.20260917-3.css">
+<link rel="stylesheet" href="../tolf-header.20260919-1.css?v=languages-2">
+<link rel="stylesheet" href="../css/return-control.css?v=20261005-header-match">
+<link rel="stylesheet" href="../css/connection-page.css?v=connection-page-20261019">
+<script defer src="../js/config.js?v=remember-platform-20261016"></script>
+<script defer src="../js/locales/en.js?v=connection-page-20261019"></script>
+<script defer src="../js/locales/ru.js?v=connection-page-20261019"></script>
+<script defer src="../js/locales/lv.js?v=connection-page-20261019"></script>
+<script defer src="../js/measurements-page.js?v=connection-page-20261019"></script>
+<script defer src="../js/librespeed.js?v=connection-page-20261019"></script>
+<script defer src="../js/measurement-targets.js?v=connection-page-20261019"></script>
+<script defer src="../js/confirmed-upload.js?v=page-upload-20261012"></script>
+<script defer src="../js/connection-test.js?v=connection-page-20261019"></script>
+<script defer src="../js/network-metrics.js?v=connection-page-20261019"></script>
+<script defer src="../js/return-control.js?v=20261005"></script>
+</head>
+<body>
+<main class="page measurements-page">
+<header class="measurements-header">
+<a id="measurementBack" data-return-control data-return-logo="yes" href="../?lang=en"><span>Back</span></a>
+<h1 data-i18n="connectionCheckTitle">Check connection</h1>
+<div class="tolf-language language-switcher" aria-label="Language">
+<button class="language-button" data-language="en" type="button" lang="en" aria-label="English">EN</button>
+<button class="language-button" data-language="ru" type="button" lang="ru" aria-label="Русский">RU</button>
+<button class="language-button" data-language="lv" type="button" lang="lv" aria-label="Latviešu">LV</button>
+</div>
+</header>
+<section class="card"><div class="card-content">
+<div class="measurement-controls">
+<div><label for="measurementServer" data-i18n="measurementEntry">Entry point</label>
+<select id="measurementServer" class="settings-select"><option value="riga" data-i18n="cityRiga">Riga</option><option value="moscow" data-i18n="cityMoscow">Moscow</option><option value="us" data-i18n="cityNewYork">New York</option></select></div>
+<div><label for="measurementMode" data-i18n="measurementMode">Measurement mode</label>
+<select id="measurementMode" class="settings-select"><option value="direct" data-i18n="measurementDirect">Direct</option><option value="vpn" data-i18n="measurementVpn">Through VPN</option></select></div>
+</div>
+<p class="measurement-note" data-i18n="measurementChoiceHelp">This selection applies only to measurements. Your VPN setup stays the same.</p>
+<p id="measurementModeHelp" class="measurement-help"></p>
+<label id="measurementDirectConfirmation" class="measurement-confirmation"><input id="measurementVpnOff" type="checkbox"><span data-i18n="measurementVpnOff">VPN is disconnected on this device</span></label>
+          <section
+            id="connectionTestCard"
+            class="vpn-overview-card connection-test-card"
+          >
+            <div class="vpn-overview-header">
+              <div
+                id="connectionTestTitle"
+                class="vpn-overview-title"
+              >Connection to Riga</div>
+
+              <div
+                id="connectionTestStatus"
+                class="vpn-overview-updated"
+                data-i18n="connectionTestReady"
+              >Ready</div>
+            </div>
+
+            <div class="connection-test-results">
+              <div class="connection-test-result">
+                <span data-i18n="connectionLatency">Latency</span>
+                <strong id="connectionTestLatency">—</strong>
+              </div>
+              <div class="connection-test-result">
+                <span data-i18n="connectionJitter">Jitter</span>
+                <strong id="connectionTestJitter">—</strong>
+              </div>
+              <div class="connection-test-result">
+                <span data-i18n="connectionDownload">Download</span>
+                <strong id="connectionTestDownload">—</strong>
+              </div>
+              <div class="connection-test-result">
+                <span data-i18n="connectionUpload">Upload</span>
+                <strong id="connectionTestUpload">—</strong>
+              </div>
+            </div>
+
+          </section>
+
+          <div class="connection-test-action">
+            <button
+              id="connectionTestButton"
+              class="network-test-button constructive"
+              type="button"
+            >
+              <svg
+                class="network-test-icon"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path d="M5.6 18.4a8 8 0 1 1 12.8 0"/>
+                <path d="M12 12l4.2-3.2"/>
+                <circle cx="12" cy="12" r="1.2"/>
+              </svg>
+              <span data-i18n="measureConnection">Measure connection</span>
+            </button>
+          </div>
+
+
+<button id="measurementCancel" type="button" class="secondary measurement-cancel" hidden data-i18n="measurementCancel">Cancel measurement</button>
+</div></section>
+          <details
+            id="networkThroughputCard"
+            class="vpn-overview-card vpn-overview-speed"
+          >
+            <summary class="vpn-overview-header">
+              <div
+                class="vpn-overview-title"
+                data-i18n="measurementNetworkTitle"
+              >TOLF network</div>
+
+              <div
+                id="networkMetricMeasuredAt"
+                class="vpn-overview-updated"
+              >—</div>
+            </summary>
+
+            <p class="measurement-note network-help" data-i18n="measurementNetworkHelp">Links between TOLF servers. These values do not measure your device’s connection.</p><div id="networkMetrics" class="network-metrics" aria-live="polite"></div>
+
+          </details>
+</main>
+</body>
+</html>
