@@ -3,7 +3,8 @@ const MEASUREMENT_TARGETS = {
   us: { nameKey: "cityNewYork", servers: ["https://ikev2-us.tolf.is:8443/"] },
   riga: {
     nameKey: "cityRiga",
-    servers: ["https://ikev2-riga.tolf.is:8443/"]
+    servers: ["https://ikev2-riga.tolf.is:8443/"],
+    connectionServers: ["https://speedtest-riga.vpn.tolf.is:8444/"]
   },
   moscow: {
     nameKey: "cityMoscow",
@@ -18,9 +19,9 @@ const MEASUREMENT_TARGETS = {
 const measurementTargetCache = new Map();
 const MEASUREMENT_CACHE_MS = 15000;
 
-async function probeMeasurementServer(server) {
+async function probeMeasurementServer(server, timeoutMs = 2500) {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 2500);
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
   const started = performance.now();
   try {
     const response = await fetch(
@@ -36,10 +37,14 @@ async function probeMeasurementServer(server) {
   }
 }
 
-function resolveMeasurementTarget(key, { refresh = false } = {}) {
+function resolveMeasurementTarget(key, { refresh = false, purpose = "entry" } = {}) {
   const definition = MEASUREMENT_TARGETS[key];
   if (!definition) return Promise.resolve(null);
-  const cached = measurementTargetCache.get(key);
+  // Entry latency and VPN throughput must never reuse each other's target.
+  const cacheKey = key + ":" + purpose;
+  const vpnOnly = purpose === "connection" && !!definition.connectionServers;
+  const candidates = vpnOnly ? definition.connectionServers : definition.servers;
+  const cached = measurementTargetCache.get(cacheKey);
   if (cached?.pending) return cached.promise;
   if (!refresh && cached?.result && Date.now() - cached.at < MEASUREMENT_CACHE_MS) {
     return Promise.resolve(cached.result);
@@ -48,28 +53,29 @@ function resolveMeasurementTarget(key, { refresh = false } = {}) {
   const entry = { pending: true, result: null, at: 0, promise: null };
   entry.promise = (async () => {
     let result = null;
-    for (const server of definition.servers) {
-      const firstPing = await probeMeasurementServer(server);
+    for (const server of candidates) {
+      // A user-initiated VPN probe can wait for the browser network permission.
+      const firstPing = await probeMeasurementServer(server, vpnOnly ? 20000 : 2500);
       if (firstPing === null) continue;
       let pingT = firstPing;
       for (let sample = 1; sample < 3; sample++) {
         const ping = await probeMeasurementServer(server);
         if (ping !== null) pingT = Math.min(pingT, ping);
       }
-      result = { nameKey: definition.nameKey, server, pingT };
+      result = { nameKey: definition.nameKey, server, pingT, viaVpn: vpnOnly };
       break;
     }
     entry.pending = false;
     entry.result = result;
     entry.at = Date.now();
-    if (measurementTargetCache.get(key) === entry) {
+    if (purpose === "entry" && measurementTargetCache.get(cacheKey) === entry) {
       window.dispatchEvent(new CustomEvent("tolf:measurement-target-resolved", {
         detail: { key, target: result }
       }));
     }
     return result;
   })();
-  measurementTargetCache.set(key, entry);
+  measurementTargetCache.set(cacheKey, entry);
   return entry.promise;
 }
 

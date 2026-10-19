@@ -336,6 +336,8 @@ I18N.lv = {
   accountDeleted: "TOLF konts dzēsts.",
   measureConnection: "Izmērīt savienojumu",
   measuringConnection: "Mērīšana…",
+  vpnConnectionTo: "VPN ātrums: {city}",
+  connectionTestVpnUnavailable: "VPN savienojums ar izvēlēto punktu nav pieejams",
   connectionTo: "Savienojums ar {city}",
   connectionLatency: "Aizture",
   connectionJitter: "Džiteris",

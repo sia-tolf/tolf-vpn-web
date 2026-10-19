@@ -32,7 +32,7 @@ function renderConnectionTestTarget() {
   const serverKey = activeConnectionTestServer || getConnectionTestServerKey();
   const server = MEASUREMENT_TARGETS[serverKey];
 
-  connectionTestTitle.textContent = t("connectionTo", {
+  connectionTestTitle.textContent = t(server?.connectionServers ? "vpnConnectionTo" : "connectionTo", {
     city: t(server?.nameKey || "cityRiga")
   });
   if (connectionTestStatus) connectionTestStatus.textContent = t(connectionTestStatusKey) + (connectionTestFailureDetail ? " (" + connectionTestFailureDetail + ")" : "");
@@ -158,11 +158,12 @@ async function startConnectionTest() {
   setConnectionTestRunning(true);
 
   try {
-    const target = await resolveMeasurementTarget(serverKey, { refresh: true });
+    const target = await resolveMeasurementTarget(serverKey, { refresh: true, purpose: "connection" });
     if (request !== connectionTestRequest) return;
     connectionTestPreparing = false;
     if (!target) {
-      connectionTestStatusKey = "connectionTestUnavailable";
+      connectionTestStatusKey = MEASUREMENT_TARGETS[serverKey].connectionServers
+        ? "connectionTestVpnUnavailable" : "connectionTestUnavailable";
       if (connectionTestStatus) {
         connectionTestStatus.textContent = t(connectionTestStatusKey);
         connectionTestStatus.className = "vpn-overview-updated status-error";

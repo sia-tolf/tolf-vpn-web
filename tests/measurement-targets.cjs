@@ -7,6 +7,7 @@ const source = name => fs.readFileSync(path.join(root, 'js', name), 'utf8');
 const internal = 'https://speedtest.vpn.tolf.is:8444/';
 const publicMoscow = 'https://ikev2.tolf.is:8443/';
 const publicRiga = 'https://ikev2-riga.tolf.is:8443/';
+const privateRiga = 'https://speedtest-riga.vpn.tolf.is:8444/';
 
 function setup() {
   const handlers = {}, requests = [], instances = [];
@@ -51,7 +52,7 @@ function setup() {
         options.signal.addEventListener('abort', () => reject(new Error('timeout')), {once: true});
       });
       const available = mode === 'internal' ? server !== publicMoscow
-        : mode === 'public' ? server !== internal : false;
+        : mode === 'public' ? ![internal, privateRiga].includes(server) : false;
       if (!available) throw new Error('unreachable');
       return {status: 200, text: async () => ''};
     }
@@ -89,16 +90,17 @@ function setup() {
   await instances[1].onend(false);
   assert.equal(c.connectionTestStatus.textContent, 'connectionTestComplete');
 
+  s.setMode('internal');
   s.setSelected('riga');
   c.resetConnectionTestContext();
   await c.startConnectionTest();
-  assert.equal(instances[2].target.server, publicRiga, 'do not substitute Moscow for Riga');
+  assert.equal(instances[2].target.server, privateRiga, 'Riga speed uses its VPN-only listener');
   c.resetConnectionTestContext();
   s.setMode('none');
   await c.startConnectionTest();
-  assert.equal(c.connectionTestStatus.textContent, 'connectionTestUnavailable');
+  assert.equal(c.connectionTestStatus.textContent, 'connectionTestVpnUnavailable');
   assert.equal(c.connectionTestButton.disabled, false);
-  assert.equal(c.latencyRiga.textContent, 'connectionTestUnavailable');
+  assert.ok(c.latencyRiga.textContent.endsWith(' ms'), 'a speed-test failure must not overwrite entry latency');
 
   s.setMode('internal');
   let release;
@@ -109,6 +111,21 @@ function setup() {
   await pending;
   assert.equal(instances.length, 3, 'cancel while resolving, before a worker starts');
   assert.equal(c.connectionTestButton.disabled, false);
+
+  const offline = setup();
+  offline.setSelected('riga'); offline.setMode('public');
+  await offline.c.resolveMeasurementTarget('riga');
+  const beforeVpnProbe = offline.requests.length;
+  await offline.c.startConnectionTest();
+  assert.equal(offline.instances.length, 0, 'do not start a public test when VPN is unavailable');
+  assert.equal(offline.c.connectionTestStatus.textContent, 'connectionTestVpnUnavailable');
+  assert.deepEqual(offline.requests.slice(beforeVpnProbe), [privateRiga], 'no public fallback for Riga VPN throughput');
+  const separate = setup();
+  const entry = separate.c.resolveMeasurementTarget('riga');
+  const vpn = separate.c.resolveMeasurementTarget('riga', {purpose:'connection'});
+  assert.notEqual(entry, vpn, 'entry and VPN cache entries are separate');
+  assert.equal((await entry).server, publicRiga);
+  assert.equal((await vpn).server, privateRiga);
 
   const timeout = setup();
   timeout.setMode('timeout');

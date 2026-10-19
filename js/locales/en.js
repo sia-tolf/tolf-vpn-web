@@ -336,6 +336,8 @@ I18N.en = {
   accountDeleted: "TOLF account deleted.",
   measureConnection: "Measure connection",
   measuringConnection: "Measuring…",
+  vpnConnectionTo: "VPN speed: {city}",
+  connectionTestVpnUnavailable: "VPN connection to the selected location is unavailable",
   connectionTo: "Connection to {city}",
   connectionLatency: "Latency",
   connectionJitter: "Jitter",
