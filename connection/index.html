@@ -9,17 +9,17 @@
 <link rel="stylesheet" href="../tolf-buttons.20260917-3.css">
 <link rel="stylesheet" href="../tolf-header.20260919-1.css?v=languages-2">
 <link rel="stylesheet" href="../css/return-control.css?v=20261005-header-match">
-<link rel="stylesheet" href="../css/connection-page.css?v=connection-page-20261019">
+<link rel="stylesheet" href="../css/connection-page.css?v=measurement-ui-20261019">
 <script defer src="../js/config.js?v=remember-platform-20261016"></script>
-<script defer src="../js/locales/en.js?v=direct-bypass-20261019"></script>
-<script defer src="../js/locales/ru.js?v=direct-bypass-20261019"></script>
-<script defer src="../js/locales/lv.js?v=direct-bypass-20261019"></script>
-<script defer src="../js/measurements-page.js?v=direct-bypass-20261019"></script>
-<script defer src="../js/librespeed.js?v=connection-page-20261019"></script>
-<script defer src="../js/measurement-targets.js?v=direct-bypass-20261019"></script>
+<script defer src="../js/locales/en.js?v=measurement-ui-20261019"></script>
+<script defer src="../js/locales/ru.js?v=measurement-ui-20261019"></script>
+<script defer src="../js/locales/lv.js?v=measurement-ui-20261019"></script>
+<script defer src="../js/measurements-page.js?v=measurement-ui-20261019"></script>
+<script defer src="../js/librespeed.js?v=measurement-ui-20261019"></script>
+<script defer src="../js/measurement-targets.js?v=measurement-ui-20261019"></script>
 <script defer src="../js/confirmed-upload.js?v=page-upload-20261012"></script>
-<script defer src="../js/connection-test.js?v=direct-bypass-20261019"></script>
-<script defer src="../js/network-metrics.js?v=connection-page-20261019"></script>
+<script defer src="../js/connection-test.js?v=measurement-ui-20261019"></script>
+<script defer src="../js/network-metrics.js?v=measurement-ui-20261019"></script>
 <script defer src="../js/return-control.js?v=20261005"></script>
 </head>
 <body>
@@ -40,8 +40,12 @@
 <div><label for="measurementMode" data-i18n="measurementMode">Measurement mode</label>
 <select id="measurementMode" class="settings-select"><option value="direct" data-i18n="measurementDirect">Direct</option><option value="vpn" data-i18n="measurementVpn">Through VPN</option></select></div>
 </div>
-<p class="measurement-note" data-i18n="measurementChoiceHelp">This selection applies only to measurements. Your VPN setup stays the same.</p>
+<p class="measurement-note" data-i18n="measurementChoiceHelp">This selection applies only to this measurement.</p>
 <p id="measurementModeHelp" class="measurement-help"></p>
+<label id="measurementVpnConfirmation" class="measurement-confirmation" hidden>
+<input id="measurementVpnConnected" type="checkbox" autocomplete="off">
+<span id="measurementVpnConfirmationText"></span>
+</label>
           <section
             id="connectionTestCard"
             class="vpn-overview-card connection-test-card"

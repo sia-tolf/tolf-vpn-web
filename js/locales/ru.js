@@ -374,12 +374,14 @@ Object.assign(I18N.ru, {"setupChoiceDescription": "Быстрая настрой
 
 Object.assign(I18N.ru,{"ikev2Summary": "IKEv2 — встроенный VPN на iPhone, iPad и Windows. На Android используется приложение strongSwan VPN Client.", "anyConnectSummary": "AnyConnect — VPN через приложение Cisco Secure Client по TLS/HTTPS.", "quickIkev2Only": "Быстрая настройка пока доступна для IKEv2. Для AnyConnect выберите ручную настройку."});
 
-Object.assign(I18N.ru, {"connectionCheckTitle": "Проверка соединения", "measurementEntry": "Точка входа", "measurementMode": "Режим измерения", "measurementDirect": "Напрямую", "measurementVpn": "Через VPN", "connectionDirectTo": "Напрямую · {city}", "connectionVpnTo": "Через VPN · {city}", "measurementDirectHelp": "VPN TOLF можно оставить включённым. Прямой замер использует обход туннеля; путь проверяется автоматически. После обновления настроек один раз переподключите OpenConnect.", "measurementVpnHelp": "Подключите устройство к выбранной точке входа VPN. Выбор города здесь не переключает VPN.", "measurementVpnOff": "VPN на этом устройстве отключён", "measurementConfirmDirect": "Для прямого замера отключите VPN и подтвердите это ниже.", "measurementNetworkTitle": "Сеть TOLF", "measurementNetworkHelp": "Соединения между серверами TOLF. Эти показатели не измеряют соединение вашего устройства.", "measurementChoiceHelp": "Выбор используется только для измерений. Настройка вашего VPN сохраняется.", "measurementCancel": "Отменить замер"});
+Object.assign(I18N.ru, {"connectionCheckTitle": "Проверка соединения", "measurementEntry": "Точка входа", "measurementMode": "Режим измерения", "measurementDirect": "Напрямую", "measurementVpn": "Через VPN", "connectionDirectTo": "Напрямую · {city}", "connectionVpnTo": "Через VPN · {city}", "measurementDirectHelp": "Измерение прямого соединения с выбранной точкой.", "measurementVpnHelp": "Подключитесь к выбранной точке и подтвердите подключение ниже. Выбор города здесь не переключает VPN.", "measurementVpnOff": "VPN на этом устройстве отключён", "measurementConfirmDirect": "Для прямого замера отключите VPN и подтвердите это ниже.", "measurementNetworkTitle": "Сеть TOLF", "measurementNetworkHelp": "Соединения между серверами TOLF. Эти показатели не измеряют соединение вашего устройства.", "measurementChoiceHelp": "Выбор применяется только к этому замеру.", "measurementCancel": "Отменить замер"});
 
 Object.assign(I18N.ru, {"measurementVpnNotReady": "Замер через VPN для этой точки пока недоступен. Можно измерить прямое соединение."});
 
-Object.assign(I18N.ru, {"measurementDirectViaVpn": "Запрос пришёл через VPN TOLF. Переподключите VPN, чтобы получить маршруты обхода, и повторите замер."});
+Object.assign(I18N.ru, {"measurementDirectViaVpn": "Прямое соединение с выбранной точкой не подтверждено. Замер не запущен."});
 
 Object.assign(I18N.ru, {"measurementDirectUnverified": "Не удалось подтвердить прямой путь. Результат прямого замера не рассчитывался."});
 
 Object.assign(I18N.ru, {"measurementDirectPathChanged": "После замера не удалось подтвердить прямой путь. Повторите проверку; результат сброшен."});
+
+Object.assign(I18N.ru, {"measurementVpnConnected": "VPN подключён к точке «{city}»"});

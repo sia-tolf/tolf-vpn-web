@@ -374,12 +374,14 @@ Object.assign(I18N.lv, {"setupChoiceDescription": "Ātrā iestatīšana izmanto 
 
 Object.assign(I18N.lv,{"ikev2Summary": "IKEv2 — iebūvēts VPN iPhone, iPad un Windows ierīcēs. Android izmanto lietotni strongSwan VPN Client.", "anyConnectSummary": "AnyConnect — VPN lietotnē Cisco Secure Client, izmantojot TLS/HTTPS.", "quickIkev2Only": "Ātrā iestatīšana pašlaik ir pieejama IKEv2. AnyConnect izmantojiet manuālo iestatīšanu."});
 
-Object.assign(I18N.lv, {"connectionCheckTitle": "Savienojuma pārbaude", "measurementEntry": "Ieejas punkts", "measurementMode": "Mērījuma režīms", "measurementDirect": "Tieši", "measurementVpn": "Caur VPN", "connectionDirectTo": "Tieši · {city}", "connectionVpnTo": "Caur VPN · {city}", "measurementDirectHelp": "TOLF VPN var palikt ieslēgts. Tiešais mērījums apiet tuneli un automātiski pārbauda pieprasījuma ceļu. Pēc iestatījumu atjaunināšanas vienreiz atkārtoti savienojiet OpenConnect.", "measurementVpnHelp": "Savienojiet ierīci ar izvēlēto VPN ieejas punktu. Pilsētas izvēle šeit nepārslēdz VPN.", "measurementVpnOff": "VPN šajā ierīcē ir atvienots", "measurementConfirmDirect": "Tiešam mērījumam atvienojiet VPN un apstipriniet to zemāk.", "measurementNetworkTitle": "TOLF tīkls", "measurementNetworkHelp": "Savienojumi starp TOLF serveriem. Šie rādītāji nemēra jūsu ierīces savienojumu.", "measurementChoiceHelp": "Izvēle attiecas tikai uz mērījumiem. Jūsu VPN iestatījumi nemainās.", "measurementCancel": "Atcelt mērījumu"});
+Object.assign(I18N.lv, {"connectionCheckTitle": "Savienojuma pārbaude", "measurementEntry": "Ieejas punkts", "measurementMode": "Mērījuma režīms", "measurementDirect": "Tieši", "measurementVpn": "Caur VPN", "connectionDirectTo": "Tieši · {city}", "connectionVpnTo": "Caur VPN · {city}", "measurementDirectHelp": "Tiešā savienojuma mērījums ar izvēlēto punktu.", "measurementVpnHelp": "Savienojiet ierīci ar izvēlēto punktu un apstipriniet savienojumu zemāk. Pilsētas izvēle šeit nepārslēdz VPN.", "measurementVpnOff": "VPN šajā ierīcē ir atvienots", "measurementConfirmDirect": "Tiešam mērījumam atvienojiet VPN un apstipriniet to zemāk.", "measurementNetworkTitle": "TOLF tīkls", "measurementNetworkHelp": "Savienojumi starp TOLF serveriem. Šie rādītāji nemēra jūsu ierīces savienojumu.", "measurementChoiceHelp": "Izvēle attiecas tikai uz šo mērījumu.", "measurementCancel": "Atcelt mērījumu"});
 
 Object.assign(I18N.lv, {"measurementVpnNotReady": "Šim ieejas punktam mērījumi caur VPN vēl nav pieejami. Varat izmērīt tiešo savienojumu."});
 
-Object.assign(I18N.lv, {"measurementDirectViaVpn": "Pieprasījums pienāca caur TOLF VPN. Atkārtoti savienojiet VPN, lai saņemtu apiešanas maršrutus, un mēģiniet vēlreiz."});
+Object.assign(I18N.lv, {"measurementDirectViaVpn": "Tiešais savienojums ar izvēlēto punktu netika apstiprināts. Mērījums netika sākts."});
 
 Object.assign(I18N.lv, {"measurementDirectUnverified": "Neizdevās apstiprināt tiešo pieprasījuma ceļu. Tiešais mērījums netika aprēķināts."});
 
 Object.assign(I18N.lv, {"measurementDirectPathChanged": "Pēc mērījuma neizdevās apstiprināt tiešo ceļu. Atkārtojiet pārbaudi; rezultāts tika notīrīts."});
+
+Object.assign(I18N.lv, {"measurementVpnConnected": "VPN ir savienots ar punktu «{city}»"});
