@@ -21,3 +21,7 @@ Its renewal hook restarts only this measurement service after renewal.
 
 Rollback: revert the website commit; on Riga run the installer --rollback.
 The dedicated DNS A record can remain without affecting VPN connections.
+
+The listener ensures its loopback address with a privileged ip address replace
+pre-start command on every start. It does not rely on a previous runtime address.
+The listener itself still runs as DynamicUser; rollback retains the shared address.
