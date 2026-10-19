@@ -42,13 +42,12 @@
   <!-- Keep this order. Deferred scripts run after the HTML has been parsed. -->
   <script defer src="passkey-session-label.20260917-1.js"></script>
   <script defer src="js/config.js?v=remember-platform-20261016"></script>
-  <script defer src="js/locales/en.js?v=riga-vpn-path-20261019"></script>
-  <script defer src="js/locales/ru.js?v=riga-vpn-path-20261019"></script>
-  <script defer src="js/locales/lv.js?v=riga-vpn-path-20261019"></script>
+  <script defer src="js/locales/en.js?v=connection-page-20261019"></script>
+  <script defer src="js/locales/ru.js?v=connection-page-20261019"></script>
+  <script defer src="js/locales/lv.js?v=connection-page-20261019"></script>
   <script defer src="js/dom.js?v=recovery-file-20260925"></script>
-  <script defer src="js/network-metrics.js?v=ingress-ready-20261013"></script>
   <script defer src="js/platform.js?v=personal-anyconnect-20261002-1"></script>
-  <script defer src="js/i18n.js?v=help-icon-20260928-1"></script>
+  <script defer src="js/i18n.js?v=connection-page-20261019"></script>
   <script defer src="js/webauthn.js?v=local-id-2"></script>
   <script defer src="js/api.js?v=account-retry-20260922"></script>
   <script defer src="js/ui.js?v=mobile-new-york-20261013"></script>
@@ -61,19 +60,15 @@
   <script defer src="js/vpn.js?v=profile-name-20260925"></script>
   <script defer src="js/promo.js?v=mobile-new-york-20261013"></script>
   <script defer src="js/location.js?v=selected-warning-20261013"></script>
-  <script defer src="js/librespeed.js?v=1"></script>
-  <script defer src="js/measurement-targets.js?v=riga-vpn-path-20261019"></script>
-  <script defer src="js/latency.js?v=new-york-measurements-20261012"></script>
-  <script defer src="js/confirmed-upload.js?v=page-upload-20261012"></script>
-  <script defer src="js/connection-test.js?v=riga-vpn-path-20261019"></script>
   <script defer src="js/windows.js?v=new-york-menus-20261012"></script>
   <script defer src="js/invitations.js?v=account-page-20260921"></script>
   <script defer src="js/cisco-client-install.js?v=client-platform-confirmation-20261016"></script>
   <script defer src="js/quick-entry.js?v=manual-explicit-open-20261016"></script>
+  <script defer src="js/measurement-link.js?v=connection-page-20261019"></script>
   <script defer src="js/app.js?v=calm-layout-20260926"></script>
   <script defer src="js/admin-entry.js?v=header-account-20261004-9"></script>
   <script defer src="js/transport-selector.js?v=platform-protocol-copy-20261016"></script>
-  <script defer src="js/vpn-compact-selectors.js?v=platform-protocol-copy-20261016"></script>
+  <script defer src="js/vpn-compact-selectors.js?v=connection-page-20261019"></script>
   <script defer src="js/windows-dropdowns.js?v=20261007-1"></script>
   <link rel="stylesheet" href="css/windows-dropdowns.css?v=20261007-1">
 <script defer src="/js/openconnect-windows-setup.js?v=windows-exclusions-20261015"></script>
@@ -124,7 +119,8 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
   html[data-tolf-ui] #homeNavigation .tolf-wordmark { color: #f5f5f7; }
 }
 </style>
-<link rel="stylesheet" href="/css/return-control.css?v=20261005-header-match"><script defer src="/js/return-control.js?v=20261005"></script></head>
+<link rel="stylesheet" href="/css/return-control.css?v=20261005-header-match"><script defer src="/js/return-control.js?v=20261005"></script><link rel="stylesheet" href="css/connection-page.css?v=connection-page-20261019">
+</head>
 
 <body>
   <main class="page">
@@ -252,6 +248,7 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
         <div class="vpn-setup-actions">
           <a id="quickSetupLink" class="button-link primary quick-setup-button" href="/quick/" data-i18n="quickSetupTitle">Quick setup</a>
           <a id="manualSetupLink" class="button-link secondary" href="#vpnCard" data-i18n="manualSetupTitle">Manual setup</a>
+<div class="connection-page-action"><a class="button-link secondary" data-measurement-link href="connection/" data-i18n="connectionCheckTitle">Check connection</a></div>
         </div>
       </div>
     </section>
@@ -509,10 +506,6 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
                     class="server-city"
                     data-i18n="cityRiga"
                   >Riga</span>
-                  <span
-                    id="latencyRiga"
-                    class="server-latency"
-                  >Measuring…</span>
                 </span>
               </label>
             </div>
@@ -534,10 +527,6 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
                     class="server-city"
                     data-i18n="cityMoscow"
                   >Moscow</span>
-                  <span
-                    id="latencyMoscow"
-                    class="server-latency"
-                  >Measuring…</span>
                 </span>
                 <span
                   id="moscowAccessLabel"
@@ -565,10 +554,6 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
                     class="server-city"
                     data-i18n="cityNewYork"
                   >New York</span>
-                  <span
-                    class="server-latency"
-                    data-i18n="comingSoon"
-                  >Coming Soon</span>
                 </span>
               </label>
             </div>
@@ -952,82 +937,7 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
 
           </div>
 
-          <section
-            id="connectionTestCard"
-            class="vpn-overview-card connection-test-card"
-          >
-            <div class="vpn-overview-header">
-              <div
-                id="connectionTestTitle"
-                class="vpn-overview-title"
-              >Connection to Riga</div>
-
-              <div
-                id="connectionTestStatus"
-                class="vpn-overview-updated"
-                data-i18n="connectionTestReady"
-              >Ready</div>
-            </div>
-
-            <div class="connection-test-results">
-              <div class="connection-test-result">
-                <span data-i18n="connectionLatency">Latency</span>
-                <strong id="connectionTestLatency">—</strong>
-              </div>
-              <div class="connection-test-result">
-                <span data-i18n="connectionJitter">Jitter</span>
-                <strong id="connectionTestJitter">—</strong>
-              </div>
-              <div class="connection-test-result">
-                <span data-i18n="connectionDownload">Download</span>
-                <strong id="connectionTestDownload">—</strong>
-              </div>
-              <div class="connection-test-result">
-                <span data-i18n="connectionUpload">Upload</span>
-                <strong id="connectionTestUpload">—</strong>
-              </div>
-            </div>
-
-          </section>
-
-          <div class="connection-test-action">
-            <button
-              id="connectionTestButton"
-              class="network-test-button constructive"
-              type="button"
-            >
-              <svg
-                class="network-test-icon"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <path d="M5.6 18.4a8 8 0 1 1 12.8 0"/>
-                <path d="M12 12l4.2-3.2"/>
-                <circle cx="12" cy="12" r="1.2"/>
-              </svg>
-              <span data-i18n="measureConnection">Measure connection</span>
-            </button>
-          </div>
-
-          <section
-            id="networkThroughputCard"
-            class="vpn-overview-card vpn-overview-speed"
-          >
-            <div class="vpn-overview-header">
-              <div
-                class="vpn-overview-title"
-                data-i18n="networkThroughput"
-              >TOLF network latency and speed</div>
-
-              <div
-                id="networkMetricMeasuredAt"
-                class="vpn-overview-updated"
-              >—</div>
-            </div>
-
-            <div id="networkMetrics" class="network-metrics" aria-live="polite"></div>
-
-          </section>
+<div class="connection-page-action"><a class="button-link secondary" data-measurement-link href="connection/" data-i18n="connectionCheckTitle">Check connection</a></div>
         </div>
 
         <section id="anyConnectAccess" aria-label="AnyConnect">

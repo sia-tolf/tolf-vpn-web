@@ -2,12 +2,20 @@ let connectionUploadController = null;
 let connectionTestFailureDetail = "";
 let activeConnectionTest = null;
 let activeConnectionTestServer = null;
+let activeConnectionTestMode = null;
 let connectionTestWatchdog = null;
 let connectionTestPreparing = false;
 let connectionTestRequest = 0;
 let connectionTestStatusKey = "connectionTestReady";
 
+function getConnectionTestMode() {
+  return typeof document !== "undefined"
+    ? document.getElementById?.("measurementMode")?.value || "vpn" : "vpn";
+}
+
 function getConnectionTestServerKey() {
+  const measurementServer = typeof document !== "undefined" && document.getElementById?.("measurementServer");
+  if (measurementServer) return measurementServer.value;
   if (window.getVpnTransport?.() !== "anyconnect" && typeof currentPlatform !== "undefined" && currentPlatform === "windows") {
     return document.getElementById("windowsDeviceServer")?.value || "riga";
   }
@@ -32,7 +40,7 @@ function renderConnectionTestTarget() {
   const serverKey = activeConnectionTestServer || getConnectionTestServerKey();
   const server = MEASUREMENT_TARGETS[serverKey];
 
-  connectionTestTitle.textContent = t(server?.connectionServers ? "vpnConnectionTo" : "connectionTo", {
+  connectionTestTitle.textContent = t((activeConnectionTestMode || getConnectionTestMode()) === "direct" ? "connectionDirectTo" : "connectionVpnTo", {
     city: t(server?.nameKey || "cityRiga")
   });
   if (connectionTestStatus) connectionTestStatus.textContent = t(connectionTestStatusKey) + (connectionTestFailureDetail ? " (" + connectionTestFailureDetail + ")" : "");
@@ -64,6 +72,7 @@ function setConnectionTestRunning(running) {
 
   connectionTestButton.disabled = running;
   connectionTestButton.setAttribute("aria-busy", String(running));
+  window.updateMeasurementControls?.(running);
   setConnectionTestButtonLabel(
     running ? "measuringConnection" : "measureConnection"
   );
@@ -140,12 +149,15 @@ async function startConnectionTest() {
     return;
   }
 
+  if (window.canStartConnectionMeasurement && !window.canStartConnectionMeasurement()) return;
   const serverKey = getConnectionTestServerKey();
+  const mode = getConnectionTestMode();
   if (!MEASUREMENT_TARGETS[serverKey]) return;
   const request = ++connectionTestRequest;
 
   resetConnectionTestResults();
   activeConnectionTestServer = serverKey;
+  activeConnectionTestMode = mode;
   renderConnectionTestTarget();
 
   if (connectionTestStatus) {
@@ -158,11 +170,11 @@ async function startConnectionTest() {
   setConnectionTestRunning(true);
 
   try {
-    const target = await resolveMeasurementTarget(serverKey, { refresh: true, purpose: "connection" });
+    const target = await resolveMeasurementTarget(serverKey, { refresh: true, purpose: mode === "direct" ? "direct" : "connection" });
     if (request !== connectionTestRequest) return;
     connectionTestPreparing = false;
     if (!target) {
-      connectionTestStatusKey = MEASUREMENT_TARGETS[serverKey].connectionServers
+      connectionTestStatusKey = mode === "vpn"
         ? "connectionTestVpnUnavailable" : "connectionTestUnavailable";
       if (connectionTestStatus) {
         connectionTestStatus.textContent = t(connectionTestStatusKey);
@@ -176,6 +188,7 @@ async function startConnectionTest() {
     const speedtest = new Speedtest();
     activeConnectionTest = speedtest;
 
+    speedtest.setParameter("workerFile", "/speedtest_worker.js");
     speedtest.setParameter("test_order", "P_D");
     speedtest.setParameter("count_ping", 10);
     speedtest.setParameter("time_dl_max", 15);
@@ -259,6 +272,7 @@ function resetConnectionTestContext() {
   }
   setConnectionTestRunning(false);
   activeConnectionTestServer = null;
+  activeConnectionTestMode = null;
   resetConnectionTestResults();
   renderConnectionTestTarget();
 }
@@ -279,3 +293,5 @@ if (connectionTestStatus) {
 
 resetConnectionTestResults();
 renderConnectionTestTarget();
+
+window.addEventListener("pagehide", resetConnectionTestContext);
