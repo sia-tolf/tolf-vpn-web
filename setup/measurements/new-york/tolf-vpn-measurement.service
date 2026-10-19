@@ -1,0 +1,26 @@
+[Unit]
+Description=TOLF VPN-only New York connection measurements
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+DynamicUser=yes
+User=tolf-vpn-measurement
+ExecStartPre=+/usr/sbin/ip address replace 10.250.81.1/32 dev lo
+ExecStart=/usr/local/bin/tolf-speedtest-backend -c /etc/tolf-vpn-measurement.toml
+LoadCredential=tls-chain:/etc/tolf-node/pki/measurement-vpn-chain.pem
+LoadCredential=tls-key:/etc/tolf-node/pki/measurement-vpn.key
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX AF_NETLINK
+MemoryMax=512M
+TasksMax=256
+LimitNOFILE=8192
+
+[Install]
+WantedBy=multi-user.target

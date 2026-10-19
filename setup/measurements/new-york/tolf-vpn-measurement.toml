@@ -1,0 +1,10 @@
+bind_address = "10.250.81.1"
+listen_port = 8444
+proxyprotocol_port = 0
+assets_path = ""
+database_type = "none"
+redact_ip_addresses = true
+enable_tls = true
+enable_http2 = false
+tls_cert_file = "/run/credentials/tolf-vpn-measurement.service/tls-chain"
+tls_key_file = "/run/credentials/tolf-vpn-measurement.service/tls-key"
