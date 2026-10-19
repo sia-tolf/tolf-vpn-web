@@ -1,24 +1,29 @@
 // Use in-memory bytes from the page, avoiding the worker/Blob upload path.
 // Only successful server responses count; progress events never count as receipt.
 async function measureConfirmedUpload(server, {signal, onprogress = () => {}, duration = 15000,
-  streams = 4, fetcher = fetch, now = () => performance.now()} = {}) {
+  warmup = 3000, streams = 4, fetcher = fetch, now = () => performance.now()} = {}) {
   const controller = new AbortController();
   const abort = () => controller.abort();
   if (signal?.aborted) throw new Error('upload_cancelled');
   signal?.addEventListener('abort', abort, {once:true});
   const started = now();
-  let bytes = 0, completed = 0, failures = 0, lastError = '', expired = false;
+  const measurementStarted = started + Math.max(0, warmup);
+  const stopAt = measurementStarted + duration;
+  let bytes = 0, completed = 0, failures = 0, lastError = '';
   const payload = new Uint8Array(4 * 1024 * 1024);
   for (let offset = 0; offset < payload.length; offset += 65536) {
     crypto.getRandomValues(payload.subarray(offset, offset + 65536));
   }
-  const timer = setTimeout(() => { expired = true; controller.abort(); }, duration);
-  const report = () => onprogress({mbps: bytes * 8 / Math.max(1, now() - started) / 1000,
-    acknowledgedBytes:bytes, completed, failures});
+  const timer = setTimeout(() => controller.abort(), Math.max(0, warmup) + duration);
+  const report = () => onprogress({
+    mbps: bytes * 8 / Math.max(1, now() - measurementStarted) / 1000,
+    acknowledgedBytes:bytes, completed, failures,
+    warmingUp:now() < measurementStarted
+  });
   const ticker = setInterval(report, 250);
   async function stream() {
     let size = 65536, consecutiveFailures = 0;
-    while (!controller.signal.aborted && now() - started < duration) {
+    while (!controller.signal.aborted && now() < stopAt) {
       const sentAt = now();
       try {
         const response = await fetcher(server + 'empty.php?cors=true&r=' + Math.random(), {
@@ -27,9 +32,14 @@ async function measureConfirmedUpload(server, {signal, onprogress = () => {}, du
         });
         if (!response.ok) throw new Error('upload_http_' + response.status);
         await response.arrayBuffer();
-        if (controller.signal.aborted || now() - started >= duration) break;
-        bytes += size; completed++; consecutiveFailures = 0;
-        const elapsed = now() - sentAt;
+        const receivedAt = now();
+        if (controller.signal.aborted || receivedAt >= stopAt) break;
+        // Warm-up requests tune the block size but never inflate the measured rate.
+        if (sentAt >= measurementStarted) {
+          bytes += size; completed++;
+        }
+        consecutiveFailures = 0;
+        const elapsed = receivedAt - sentAt;
         size = Math.min(payload.length, Math.max(16384,
           elapsed < 750 ? size * 2 : elapsed > 2000 ? size / 2 : size));
       } catch (error) {
@@ -44,10 +54,9 @@ async function measureConfirmedUpload(server, {signal, onprogress = () => {}, du
   try {
     await Promise.all(Array.from({length:streams}, stream));
     if (signal?.aborted) throw new Error('upload_cancelled');
-    // Do not present an interrupted/all-failed test as a measured rate.
-    if (!bytes || (!expired && now() - started < duration)) throw new Error(lastError || 'upload_no_response');
-    const result = {mbps:bytes * 8 / Math.max(duration, now()-started) / 1000,
-      acknowledgedBytes:bytes, completed, failures};
+    if (!bytes) throw new Error(lastError || 'upload_no_response');
+    const result = {mbps:bytes * 8 / Math.max(1, duration) / 1000,
+      acknowledgedBytes:bytes, completed, failures, warmingUp:false};
     onprogress(result);
     return result;
   } finally {
