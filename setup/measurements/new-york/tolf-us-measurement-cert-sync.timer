@@ -1,0 +1,11 @@
+[Unit]
+Description=Refresh the New York measurement certificate after issuer renewal
+
+[Timer]
+OnCalendar=*-*-* 00,12:20:00
+RandomizedDelaySec=5min
+Persistent=true
+Unit=tolf-us-measurement-cert-sync.service
+
+[Install]
+WantedBy=timers.target

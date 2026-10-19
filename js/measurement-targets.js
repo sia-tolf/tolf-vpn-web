@@ -2,7 +2,7 @@
 const MEASUREMENT_TARGETS = {
   us: {
     nameKey: "cityNewYork",
-    vpnReady: false,
+    vpnReady: true,
     servers: ["https://ikev2-us.tolf.is:8443/"],
     directServers: ["https://ikev2-us.tolf.is:8443/"],
     connectionServers: ["https://speedtest-us.vpn.tolf.is:8444/"]
