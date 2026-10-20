@@ -25,6 +25,7 @@ CREATE TABLE vpn_imports(user_id TEXT,protected INTEGER);
 CREATE TABLE windows_devices(id TEXT,user_id TEXT,name TEXT,username TEXT,state TEXT,created_at TEXT);
 CREATE TABLE windows_device_nodes(device_id TEXT,server TEXT);
 CREATE TABLE sessions(token_hash BLOB,user_id TEXT);
+CREATE TABLE oc_devices(id TEXT,user_id TEXT,username TEXT,state TEXT);
 ''')
         for i,user in enumerate((one,two),1):
             db.execute('INSERT INTO users VALUES(?,?,?)',(user,'2026-09-14T00:00:00+00:00',b'SECRET_RECOVERY'))
@@ -109,13 +110,15 @@ def test_live_sessions_access_mapping_and_partial_failure(database, monkeypatch)
         if not user:raise HTTPException(401,'not authenticated')
         return user
     a.install(app,{'DB':path,'authenticated_user_id':auth})
+    with sqlite3.connect(path) as con:
+        con.execute('INSERT INTO oc_devices VALUES(?,?,?,?)',('oc-id',two,'oc-user','active'))
     calls=[]
     def query(node):
         calls.append(node)
         if node=='riga':return {'node':node,'status':'error','error':'node_unavailable'}
         return {'node':node,'status':'ok','observedAt':'2026-09-14T14:44:07+00:00','sessions':[
-            {'identity':'user_2'}, {'identity':'user_device'}, {'identity':'manual'}, {'identity':'192.168.1.1'}]}
-    monkeypatch.setattr(a,'query_node',query)
+            {'identity':'user_2'}, {'identity':'user_device'}, {'identity':'manual'}, {'identity':'192.168.1.1'}, {'identity':'oc-user','protocol':'AnyConnect'}]}
+    monkeypatch.setattr(a,'query_sessions_node',query)
     with TestClient(app) as c:
         assert c.get('/admin/sessions').status_code==401
         assert c.get('/admin/sessions',headers={'x-test-user':two}).status_code==403
@@ -123,26 +126,29 @@ def test_live_sessions_access_mapping_and_partial_failure(database, monkeypatch)
         a.root_grant(path,1)
         result=c.get('/admin/sessions',headers={'x-test-user':one})
         assert result.status_code==200 and 'no-store' in result.headers['cache-control']
-        riga,moscow=result.json()['nodes']
+        riga,moscow,new_york=result.json()['nodes']
         assert riga['status']=='error' and 'sessions' not in riga
         assert moscow['sessions'][0]['account']=={'accountId':two,'number':2}
         assert moscow['sessions'][1]['account']=={'accountId':two,'number':2}
         assert moscow['sessions'][2]['account']=={'accountId':None,'number':3}
         assert moscow['sessions'][3]['account'] is None
+        assert moscow['sessions'][4]['account']=={'accountId':two,'number':2}
+        assert moscow['sessions'][4]['protocol']=='AnyConnect'
+        assert new_york['node']=='us'
         assert a.SESSION_POLL.acquire(blocking=False)
         try:assert c.get('/admin/sessions',headers={'x-test-user':one}).status_code==429
         finally:a.SESSION_POLL.release()
         def revoke_query(node):
             if node=='riga':a.root_revoke(path,1)
             return {'node':node,'status':'ok','sessions':[]}
-        monkeypatch.setattr(a,'query_node',revoke_query)
+        monkeypatch.setattr(a,'query_sessions_node',revoke_query)
         assert c.get('/admin/sessions',headers={'x-test-user':one}).status_code==403
 
 
 def test_node_transport_validation(monkeypatch):
     import json
     a.CTX={'RIGA_KNOWN_HOSTS':'known','RIGA_KEY':'key','RIGA_USER':'tolfprov','RIGA_HOST':'riga'}
-    body={'status':'ok','version':'1.0.0','node':'moscow','observedAt':'2026-09-14T14:44:07+00:00','sessions':[]}
+    body={'status':'ok','version':'1.0.0','node':'riga','observedAt':'2026-09-14T14:44:07+00:00','sessions':[]}
     class Reply:
         returncode=0
         @property
@@ -152,20 +158,20 @@ def test_node_transport_validation(monkeypatch):
         commands.append(command)
         return Reply()
     monkeypatch.setattr(a.subprocess,'run',run)
-    assert a.query_node('moscow')['sessions']==[]
-    assert commands[-1][-1]=='admin-sessions moscow'
+    assert a.query_node('riga')['sessions']==[]
+    assert commands[-1][-1]=='admin-sessions riga'
     assert 'StrictHostKeyChecking=yes' in commands[-1]
     body['sessions']=[dict(id=5441,establishedSeconds=518,bytesIn=1,bytesOut=2,identity='user_1',identitySource='remote-id',virtualAddresses=[],password='DO_NOT_RETURN')]
-    result=a.query_node('moscow')
+    result=a.query_node('riga')
     assert result['status']=='ok' and 'password' not in result['sessions'][0]
     body['sessions'][0]['id']=True
-    assert a.query_node('moscow')['status']=='error'
-    body['sessions']=[];body['node']='riga'
-    assert a.query_node('moscow')['status']=='error'
+    assert a.query_node('riga')['status']=='error'
+    body['sessions']=[];body['node']='moscow'
+    assert a.query_node('riga')['status']=='error'
     with pytest.raises(ValueError):a.query_node('moscow;id')
     def timeout(*args,**kwargs):raise a.subprocess.TimeoutExpired('ssh',40)
     monkeypatch.setattr(a.subprocess,'run',timeout)
-    value=a.query_node('moscow')
+    value=a.query_node('riga')
     assert value['status']=='error' and 'sessions' not in value
 
 @pytest.fixture
@@ -305,3 +311,31 @@ def test_access_partial_response_and_revocation(control_client,monkeypatch):
     assert c.post('/admin/test-access',json={'action':'suspend','revision':'a'*32},headers=h).json()=={'status':'unknown'}
     a.root_revoke(path,1)
     assert c.post('/admin/test-access',json={'action':'resume','revision':'b'*32},headers=h).status_code==403
+
+
+def test_anyconnect_allowlist_and_snapshot_freshness(tmp_path,monkeypatch):
+    import json,time
+    from datetime import datetime,timezone
+    rows=a.normalize_anyconnect([
+        {'ID':12,'State':'connected','Username':'oc-user','IPv4':'10.1.0.2',
+         'Remote IP':'203.0.113.1','raw_connected_at':900,'rxBytes':123,'txBytes':456,
+         'Cookie':'SECRET_COOKIE','Session':'SECRET_SESSION'},
+        {'ID':13,'State':'auth','Username':'oc-user'}],1000)
+    assert len(rows)==1
+    assert rows[0]['establishedSeconds']==100
+    assert rows[0]['bytesIn']==123 and rows[0]['bytesOut']==456
+    assert 'SECRET' not in json.dumps(rows)
+    path=tmp_path/'snapshot.json'
+    monkeypatch.setattr(a,'SESSION_STORE',str(path))
+    assert a.query_sessions_node('moscow')['status']=='error'
+    def snapshot(age):
+        stamp=datetime.fromtimestamp(time.time()-age,timezone.utc).isoformat()
+        path.write_text(json.dumps({'observedAt':stamp,'nodes':[
+            {'node':'moscow','status':'ok','observedAt':stamp,'sessions':rows}]}))
+    snapshot(5)
+    assert a.query_sessions_node('moscow')['sessions']==rows
+    snapshot(100)
+    result=a.query_sessions_node('moscow')
+    assert result['error']=='snapshot_stale' and 'sessions' not in result
+    path.write_text('{invalid')
+    assert a.query_sessions_node('moscow')['status']=='error'

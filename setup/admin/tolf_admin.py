@@ -97,6 +97,156 @@ def user_record(con, row):
             'protected': bool(con.execute('SELECT 1 FROM vpn_imports WHERE user_id=? AND protected=1', (user_id,)).fetchone())}
 
 
+SESSION_STORE = '/var/lib/tolf-api/admin-vpn-sessions.json'
+SESSION_NODES = ('riga', 'moscow', 'us')
+
+
+def normalize_anyconnect(rows, now):
+    """Allow-list display data; never forward occtl cookies/session secrets."""
+    result = []
+    if not isinstance(rows, list) or len(rows) > 10000:
+        raise ValueError('Invalid AnyConnect inventory')
+    for row in rows:
+        if not isinstance(row, dict) or row.get('State') != 'connected':
+            continue
+        user = row.get('Username')
+        if not isinstance(user, str) or not re.fullmatch(r'[A-Za-z0-9_.@-]{1,128}', user):
+            continue
+        sid = row.get('ID')
+        if type(sid) is not int or sid < 0:
+            raise ValueError('Invalid session ID')
+        start = row.get('raw_connected_at')
+        age = max(0, int(now - start)) if type(start) is int and start > 0 else None
+        def count(key):
+            value = row.get(key)
+            return value if type(value) is int and 0 <= value <= 2**63-1 else None
+        def address(key):
+            import ipaddress
+            value = row.get(key)
+            if not value:
+                return None
+            return str(ipaddress.ip_address(value))
+        vip = address('IPv4')
+        result.append({'id': sid, 'protocol': 'AnyConnect', 'state': 'ESTABLISHED',
+                       'connection': 'AnyConnect', 'identity': user,
+                       'identitySource': 'certificate', 'remoteHost': address('Remote IP'),
+                       'virtualAddresses': [vip] if vip else [], 'establishedSeconds': age,
+                       'bytesIn': count('rxBytes'), 'bytesOut': count('txBytes')})
+    return result
+
+
+def collect_sessions_node(node):
+    targets = {
+        'moscow': ('92.243.66.204', '/opt/tolf-mcp/moscow_ed25519',
+                   '/opt/tolf-api/.ssh/known_hosts', '/var/run/occtl-moscow.socket'),
+        'riga': ('188.214.39.114', '/opt/tolf-mcp/riga_ed25519',
+                 '/opt/tolf-api/.ssh/known_hosts', '/var/run/occtl.socket'),
+        'us': ('162.252.174.201', '/opt/tolf-mcp/us_ed25519',
+               '/opt/tolf-mcp/us_known_hosts', '/run/occtl-node.socket'),
+    }
+    host, key, known, socket = targets[node]
+    remote = r'''
+import json,re,subprocess
+from pathlib import Path
+out={}
+for kind,args in [('ikeRaw',['swanctl','--list-sas','--raw']),('ocRaw',['occtl','-s',SOCKET,'--json','show','users'])]:
+ try:
+  p=subprocess.run(args,capture_output=True,text=True,timeout=12,check=True)
+  if len(p.stdout)>2*1024*1024: raise ValueError('too large')
+  if kind=='ikeRaw':out[kind]=p.stdout;continue
+  users=json.loads(p.stdout);rows=[]
+  if not isinstance(users,list) or len(users)>10000:raise ValueError('invalid list')
+  for u in users:
+   if u.get('State')!='connected':continue
+   r={k:u.get(k) for k in ('ID','Username','State','IPv4','Remote IP','raw_connected_at')}
+   dev=u.get('Device','')
+   if re.fullmatch(r'vpns[A-Za-z0-9_-]+',dev):
+    for key,name in [('rxBytes','rx_bytes'),('txBytes','tx_bytes')]:
+     try:r[key]=int((Path('/sys/class/net')/dev/'statistics'/name).read_text())
+     except (OSError,ValueError):pass
+   rows.append(r)
+  out[kind]=rows
+ except Exception:out[kind]=None
+print(json.dumps(out))
+'''.replace('SOCKET', repr(socket))
+    cmd = ['/usr/bin/ssh', '-T', '-i', key, '-o', 'IdentitiesOnly=yes',
+           '-o', 'BatchMode=yes', '-o', 'StrictHostKeyChecking=yes',
+           '-o', 'UserKnownHostsFile=' + known, '-o', 'ConnectTimeout=8',
+           'root@' + host, 'python3', '-']
+    protocols, sessions = [], []
+    observed = datetime.now(timezone.utc).isoformat()
+    try:
+        p = subprocess.run(cmd, input=remote, capture_output=True, text=True, timeout=35, check=True)
+        if len(p.stdout) > 3 * 1024 * 1024:
+            raise ValueError('Oversized node output')
+        value = json.loads(p.stdout)
+        observed = datetime.now(timezone.utc).isoformat()
+        for kind, protocol in [('ikeRaw', 'IKEv2'), ('ocRaw', 'AnyConnect')]:
+            try:
+                if value.get(kind) is None:
+                    raise ValueError('Protocol unavailable')
+                rows = (parse_inventory(value[kind]) if kind == 'ikeRaw'
+                        else normalize_anyconnect(value[kind], time.time()))
+                for row in rows:
+                    row['protocol'] = protocol
+                sessions.extend(rows)
+                protocols.append({'protocol': protocol, 'status': 'ok'})
+            except (ValueError, TypeError, KeyError):
+                protocols.append({'protocol': protocol, 'status': 'error'})
+    except (OSError, ValueError, TypeError, subprocess.SubprocessError):
+        protocols = [{'protocol': p, 'status': 'error'} for p in ('IKEv2', 'AnyConnect')]
+    good = any(p['status'] == 'ok' for p in protocols)
+    return {'node': node, 'status': 'ok' if good else 'error', 'observedAt': observed,
+            'sessions': sessions, 'protocolStatus': protocols}
+
+
+def collect_sessions():
+    """Root timer performs fixed read-only SSH probes; API only reads the snapshot."""
+    import os
+    import pwd
+    import tempfile
+    from pathlib import Path
+    with ThreadPoolExecutor(max_workers=3) as pool:
+        nodes = list(pool.map(collect_sessions_node, SESSION_NODES))
+    data = {'observedAt': datetime.now(timezone.utc).isoformat(), 'nodes': nodes}
+    path = Path(SESSION_STORE)
+    fd, name = tempfile.mkstemp(prefix='.admin-vpn-sessions-', dir=path.parent)
+    try:
+        with os.fdopen(fd, 'w') as f:
+            owner = pwd.getpwnam('tolfa')
+            os.fchmod(f.fileno(), 0o600)
+            os.fchown(f.fileno(), owner.pw_uid, owner.pw_gid)
+            json.dump(data, f)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(name, path)
+    finally:
+        if os.path.exists(name):
+            os.unlink(name)
+    print(json.dumps({n['node']: {p['protocol']: p['status'] for p in n['protocolStatus']} for n in nodes}))
+
+
+def query_sessions_node(node):
+    from pathlib import Path
+    if node not in SESSION_NODES:
+        raise ValueError('Invalid node')
+    failed = {'node': node, 'status': 'error', 'error': 'snapshot_unavailable'}
+    try:
+        path = Path(SESSION_STORE)
+        if path.stat().st_size > 8 * 1024 * 1024:
+            return failed
+        data = json.loads(path.read_text())
+        age = time.time() - datetime.fromisoformat(data['observedAt']).timestamp()
+        result = next(n for n in data['nodes'] if n['node'] == node)
+        node_age = time.time() - datetime.fromisoformat(result['observedAt']).timestamp()
+        if not -5 <= age <= 90 or not -5 <= node_age <= 90:
+            return {**failed, 'error': 'snapshot_stale'}
+        return result
+    except (OSError, KeyError, ValueError, TypeError, StopIteration):
+        return failed
+
+
+
 def query_node(node):
     # Node names are fixed by the caller; no browser input enters SSH commands.
     if node not in ('riga', 'moscow'):
@@ -228,7 +378,10 @@ def map_session(con, session):
     username = session.get('identity')
     if not username:
         return None
-    rows = con.execute("SELECT account_id,number FROM managed_users WHERE vpn_username=? AND deleted_at IS NULL", (username,)).fetchall()
+    if session.get('protocol') == 'AnyConnect':
+        rows = con.execute("SELECT d.user_id,m.number FROM oc_devices d LEFT JOIN managed_users m ON m.account_id=d.user_id AND m.deleted_at IS NULL WHERE d.username=?", (username,)).fetchall()
+    else:
+        rows = con.execute("SELECT account_id,number FROM managed_users WHERE vpn_username=? AND deleted_at IS NULL", (username,)).fetchall()
     rows += con.execute("SELECT w.user_id,m.number FROM windows_devices w JOIN users u ON u.id=w.user_id LEFT JOIN managed_users m ON m.account_id=w.user_id AND m.deleted_at IS NULL WHERE w.username=? AND w.state!='deleted'", (username,)).fetchall()
     matches = {(row[0], row[1]) for row in rows}
     # Display-only registry match; never authorization for a mutation.
@@ -365,8 +518,8 @@ def install(app, context):
             raise HTTPException(429, 'session_poll_in_progress')
         try:
             with ThreadPoolExecutor(max_workers=4) as pool:
-                sessions_pending = [pool.submit(query_node, node)
-                                    for node in ('riga', 'moscow')]
+                sessions_pending = [pool.submit(query_sessions_node, node)
+                                    for node in SESSION_NODES]
                 metrics_pending = [pool.submit(query_metrics, node)
                                    for node in ('riga', 'moscow')]
                 results = [job.result() for job in sessions_pending]
@@ -526,3 +679,10 @@ def install(app, context):
         with db() as con:
             rows = con.execute('SELECT actor,action,target,created_at AS createdAt FROM admin_audit ORDER BY id DESC LIMIT 100').fetchall()
         return response({'events':[dict(r) for r in rows]})
+
+
+if __name__ == '__main__':
+    import sys
+    if sys.argv[1:] != ['--collect-sessions']:
+        raise SystemExit('Use --collect-sessions')
+    collect_sessions()

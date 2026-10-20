@@ -1,0 +1,10 @@
+[Unit]
+Description=TOLF read-only IKEv2 and AnyConnect session snapshots
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/tolf-api
+ExecStart=/opt/tolf-api/venv/bin/python /opt/tolf-api/tolf_admin.py --collect-sessions
+TimeoutStartSec=45
+UMask=0077

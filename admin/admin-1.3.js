@@ -79,6 +79,9 @@ const $ = id => document.getElementById(id);
 let lang;
 try { lang=localStorage.getItem('tolfLanguage'); } catch {}
 if(!copy[lang])lang=navigator.language.toLowerCase().startsWith('ru')?'ru':navigator.language.toLowerCase().startsWith('lv')?'lv':'en';
+Object.assign(copy.ru,{protocol:'Тип соединения',protocolUnavailable:'Не удалось получить сеансы протокола',us:'Нью-Йорк',trafficNote:'Счётчики относятся к текущему сеансу. Счётчики IKEv2 могут сбрасываться при обновлении ключей. Суммарный расход — на вкладке «Трафик».'});
+Object.assign(copy.en,{protocol:'Connection type',protocolUnavailable:'Could not retrieve sessions for protocol',us:'New York',trafficNote:'Counters cover the current session. IKEv2 counters may reset on rekey. Combined usage is shown in Traffic.'});
+Object.assign(copy.lv,{protocol:'Savienojuma veids',protocolUnavailable:'Neizdevās iegūt protokola sesijas',us:'Ņujorka',trafficNote:'Skaitītāji attiecas uz pašreizējo sesiju. IKEv2 skaitītāji var atiestatīties, atjauninot atslēgas. Kopējais patēriņš redzams sadaļā Datu apjoms.'});
 let tab='sessions',offset=0,total=0,epoch=0,detailEpoch=0,allowed=false,hiddenSince=0,trafficPeriod='24h';
 const t=key=>copy[lang][key]||copy.en[key]||key;
 const node=(tag,text,cls)=>{const el=document.createElement(tag);if(text!==undefined)el.textContent=String(text);if(cls)el.className=cls;return el;};
@@ -177,7 +180,7 @@ function showUsers(data){const body=table(['account','vpn','devices','keys','cre
 function showRegistry(data){const body=table(['account','vpn','linked','provisioned','source']);for(const u of data.records){const row=node('tr');row.append(node('td','#'+u.number),node('td',u.username||'—'),node('td',u.accountId||t('unlinked'),'admin-id'),node('td',u.provisioned?t('yes'):t('no')),node('td',u.source||'—'));body.append(row);}}
 function showAudit(data){const body=table(['when','actor','action','target']);for(const e of data.events){const row=node('tr');row.append(node('td',date(e.createdAt)),node('td',e.actor==='root'?t('root'):e.actor),node('td',e.action==='admin.grant'?t('grant'):e.action==='admin.revoke'?t('revoke'):t(e.action)),node('td',e.target,'admin-id'));body.append(row);}}
 function duration(value){if(value==null)return '—';const n=Math.floor(value);return Math.floor(n/3600)+':'+String(Math.floor(n/60)%60).padStart(2,'0')+':'+String(n%60).padStart(2,'0');}
-function bytes(value){const units=['B','KiB','MiB','GiB','TiB'];let n=value,i=0;while(n>=1024&&i<units.length-1){n/=1024;i++;}return n.toLocaleString(lang,{maximumFractionDigits:i?1:0})+' '+units[i];}
+function bytes(value){if(!Number.isFinite(value)||value<0)return '—';const units=['B','KiB','MiB','GiB','TiB'];let n=value,i=0;while(n>=1024&&i<units.length-1){n/=1024;i++;}return n.toLocaleString(lang,{maximumFractionDigits:i?1:0})+' '+units[i];}
 Object.assign(copy.en,{cpuNow:'Now',cpu15m:'Last 15 minutes',cpuCollecting:'Collecting data'});
 Object.assign(copy.ru,{cpuNow:'Сейчас',cpu15m:'За 15 минут',cpuCollecting:'Данные собираются'});
 Object.assign(copy.lv,{cpuNow:'Tagad',cpu15m:'Pēdējās 15 minūtēs',cpuCollecting:'Dati tiek vākti'});
@@ -210,22 +213,25 @@ function showSessions(data){
  for(const result of data.nodes){
   const section=node('section',undefined,'admin-node');section.dataset.node=result.node;
   section.append(node('h2',t(result.node)));$('results').append(section);
-  showNodeMetrics(result.metrics,section);
+  if(result.metrics)showNodeMetrics(result.metrics,section);
   if(result.status!=='ok'){section.append(node('p',t('nodeError'),'admin-node-error'));continue;}
   section.append(node('p',t('checked')+': '+date(result.observedAt),'admin-muted'));
+  for(const item of result.protocolStatus||[]){
+   if(item.status!=='ok')section.append(node('p',t('protocolUnavailable')+': '+item.protocol,'admin-node-error'));
+  }
   if(!result.sessions.length){section.append(node('p',t('noSessions')));continue;}
-  const body=table(['account','peer','addresses','sessionState','duration','traffic'],section);
+  const body=table(['account','protocol','peer','addresses','sessionState','duration','traffic'],section);
   for(const session of result.sessions){
    const row=node('tr');const match=session.account;
    const account=node('td',match?(match.number==null?match.accountId:'#'+match.number):t('unmatched'));
    if(match?.accountId){const button=node('button',t('open'),'secondary');button.type='button';button.addEventListener('click',()=>detail(match.accountId));account.append(button);}
-   if(testControl&&match?.number===26&&match.accountId==='0888048c-ac6e-44d2-8aed-9857aa31e9ed'&&session.identity==='user_0888048cac6e44d28aed9857aa31e9ed'&&session.state==='ESTABLISHED'){
+   if((session.protocol||'IKEv2')==='IKEv2'&&testControl&&match?.number===26&&match.accountId==='0888048c-ac6e-44d2-8aed-9857aa31e9ed'&&session.identity==='user_0888048cac6e44d28aed9857aa31e9ed'&&session.state==='ESTABLISHED'){
     const button=node('button',t('disconnectTest'),'admin-disconnect');button.type='button';button.addEventListener('click',()=>disconnectTest(result.node,session.id,button));account.append(button);
    }
    const peer=node('td',session.identity||'—');peer.append(node('small','#'+session.id));
    const addresses=node('td',session.remoteHost||'—');addresses.append(node('small',session.virtualAddresses.join(', ')));
    const traffic=node('td',t('received')+': '+bytes(session.bytesIn));traffic.append(node('small',t('sent')+': '+bytes(session.bytesOut)));
-   row.append(account,peer,addresses,node('td',t(session.state||'unknown')),node('td',duration(session.establishedSeconds)),traffic);body.append(row);
+   row.append(account,node('td',session.protocol||'IKEv2'),peer,addresses,node('td',t(session.state||'unknown')),node('td',duration(session.establishedSeconds)),traffic);body.append(row);
   }
  }
  $('results').append(node('p',t('trafficNote'),'admin-muted'));
