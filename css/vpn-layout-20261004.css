@@ -44,18 +44,28 @@ html[data-tolf-ui="vpn"] .compact-header > .brand-copy{display:none!important}\n
 #profileSettings .server-address-label{font-size:14px;font-weight:600;color:var(--text)}
 #profileSettings .server-address-value{font-size:14px;font-weight:400}
 
-/* Phone header: navigation first, language and secondary actions below. */
+/* Phone header: back/languages above account/sign-out/help, without shared cells. */
 @media(max-width:699px) {
  html[data-tolf-ui="vpn"] .compact-header .header-navigation {
-  grid-template-columns:minmax(0,1fr) auto!important;
-  grid-template-rows:auto auto!important;
+  grid-template-columns:152px minmax(0,1fr) 42px!important;
+  grid-template-rows:42px 42px!important;
   height:auto!important; gap:8px!important;
  }
  html[data-tolf-ui="vpn"] #homeNavigation { grid-column:1!important; grid-row:1!important; min-width:0; }
- html[data-tolf-ui="vpn"] .vpn-header-account { grid-column:2!important; grid-row:1!important; }
- html[data-tolf-ui="vpn"] .compact-header .header-navigation > .language-switcher { grid-column:1!important; grid-row:2!important; justify-self:start!important; }
- html[data-tolf-ui="vpn"] .vpn-header-signout { grid-column:2!important; grid-row:2!important; justify-self:start!important; }
- html[data-tolf-ui="vpn"] .compact-header .header-navigation > .help-navigation { grid-column:2!important; grid-row:2!important; justify-self:end!important; }
+ html[data-tolf-ui="vpn"] .compact-header .header-navigation > .language-switcher { grid-column:2/4!important; grid-row:1!important; justify-self:end!important; }
+ html[data-tolf-ui="vpn"] .vpn-header-account {
+  grid-column:1!important; grid-row:2!important; justify-self:start;
+  width:152px; min-width:152px; max-width:152px;
+ }
+ html[data-tolf-ui="vpn"] .vpn-header-signout {
+  grid-column:2!important; grid-row:2!important; justify-self:end!important;
+  min-width:0; max-width:100%;
+ }
+ html[data-tolf-ui="vpn"] .compact-header .header-navigation > .help-navigation { grid-column:3!important; grid-row:2!important; justify-self:end!important; }
+}
+@media(max-width:359px) {
+ html[data-tolf-ui="vpn"] .compact-header .header-navigation { column-gap:6px!important; }
+ html[data-tolf-ui="vpn"] .vpn-header-signout { padding-inline:3px!important; font-size:12px!important; }
 }
 
 /* Protocol menu must extend beyond the My VPN card. */
