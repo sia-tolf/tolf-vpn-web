@@ -261,6 +261,7 @@ I18N.ru = {
   profileLinkCopied: "Ссылка на профиль скопирована.",
   profileShareFailed: "Не удалось поделиться профилем.",
   changeVpnPassword: "Сменить пароль VPN",
+  trafficPaymentTitle: "Трафик и оплата",
   changePasswordNote: "Этот пароль общий для всех профилей на всех серверах.",
   deleteVpnAccess: "Удалить VPN-доступ",
   deleteVpnNote: "Доступ Apple и Android будет удалён на обоих серверах. Устройства Windows и аккаунт TOLF сохранятся.",

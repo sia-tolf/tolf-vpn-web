@@ -8,11 +8,11 @@
 <link rel="stylesheet" href="../css/account-password.css?v=login-actions-row-20261016">
 <link rel="stylesheet" href="styles.css?v=identity-20261005-2">
 <script defer src="config.js?v=1"></script>
-<script defer src="../js/locales/en.js?v=account-services-20260928-1"></script>
-<script defer src="../js/locales/ru.js?v=account-services-20260928-1"></script>
-<script defer src="../js/locales/lv.js?v=account-services-20260928-1"></script>
+<script defer src="../js/locales/en.js?v=billing-preview-20261020"></script>
+<script defer src="../js/locales/ru.js?v=billing-preview-20261020"></script>
+<script defer src="../js/locales/lv.js?v=billing-preview-20261020"></script>
 <script defer src="../js/webauthn.js?v=auth-20260917-1"></script>
-<script defer src="page.js?v=identity-20261005-2"></script>
+<script defer src="page.js?v=billing-preview-20261020"></script>
 <script defer src="../js/account-password.js?v=identity-20261005-2"></script>
 <script defer src="../js/passkeys.js?v=account-page-20260921"></script>
 <script defer src="recovery.js?v=1"></script>
@@ -31,7 +31,7 @@
 <main class="page account-settings">
 <div class="account-heading"><h1 data-i18n="accountTitle">My account</h1><div class="account-service-links"><a id="vpnNavigation" href="../?lang=en"><span class="service-label-wide" data-i18n="myVpn">My VPN</span><span class="service-label-narrow">VPN</span></a><a id="smartDnsNavigation" href="https://smartdns.tolf.is/?lang=en"><span class="service-label-wide" data-i18n="mySmartDns">My Smart DNS</span><span class="service-label-narrow">Smart DNS</span></a></div><button id="accountSignOut" class="secondary" data-i18n="signOut">Sign out</button></div>
 <p id="accountStatus" class="message" role="status"></p>
-<div id="accountContent" class="hidden"><section class="card" id="accountIdentity"><div class="card-content"><dl class="account-identity">
+<div id="accountContent" class="hidden"><section class="card"><div class="card-content"><a id="billingNavigation" class="account-admin-link" href="../billing/"><span data-i18n="trafficPaymentTitle">Traffic and payments</span><span aria-hidden="true">→</span></a></div></section><section class="card" id="accountIdentity"><div class="card-content"><dl class="account-identity">
 <div><dt data-i18n="accountUserNumber">User number</dt><dd id="accountUserNumber">—</dd></div>
 <div><dt id="accountUsernameLabel" data-i18n="accountUsername">Username</dt><dd id="accountUsername">—</dd></div>
 <div id="accountVpnIdentity" class="hidden"><dt data-i18n="accountVpnUsername">VPN username</dt><dd id="accountVpnUsername">—</dd></div>

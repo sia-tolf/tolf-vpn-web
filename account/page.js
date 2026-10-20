@@ -31,6 +31,7 @@ function setLanguage(lang){
  $('backHome').href='https://tolf.is/?lang='+lang;
  $('backHome').setAttribute('aria-label',{en:'TOLF home',ru:'На главную TOLF',lv:'Uz TOLF sākumlapu'}[lang]);
  $('vpnNavigation').href='../?lang='+lang;
+ $('billingNavigation').href='../billing/?lang='+lang;
  $('smartDnsNavigation').href='https://smartdns.tolf.is/?lang='+encodeURIComponent(lang);
  document.title=t('accountTitle');setAdminLabel(lang);renderAccountIdentity();
  const url=new URL(location.href);url.searchParams.set('lang',lang);history.replaceState(null,'',url);

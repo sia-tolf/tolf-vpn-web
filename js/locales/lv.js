@@ -261,6 +261,7 @@ I18N.lv = {
   profileLinkCopied: "Profila saite nokopēta.",
   profileShareFailed: "Profilu neizdevās kopīgot.",
   changeVpnPassword: "Mainīt VPN paroli",
+  trafficPaymentTitle: "Datu apjoms un maksājumi",
   changePasswordNote: "Šī parole ir kopīga visiem profiliem visos serveros.",
   deleteVpnAccess: "Dzēst VPN piekļuvi",
   deleteVpnNote: "Apple un Android piekļuve tiks dzēsta abos serveros. Windows ierīces un TOLF konts tiks saglabāti.",
