@@ -11,7 +11,7 @@
 .measurement-confirmation { display: flex; align-items: center; gap: 10px; margin: 0 0 20px; font-size: 14px; line-height: 1.5; cursor: pointer; }
 .measurement-confirmation input { flex: 0 0 20px; width: 20px; height: 20px; margin: 0; accent-color: var(--success); }
 .measurements-page .connection-test-card { margin-top: 22px; }
-.measurements-page .connection-test-result { min-height: 78px; }
+.measurements-page .connection-test-result { min-height: 52px; padding: 6px 8px; gap: 2px; }
 .measurements-page .vpn-overview-header { gap: 14px; flex-wrap: wrap; }
 .measurements-page .vpn-overview-title { color: var(--text); font-size: 15px; }
 .measurements-page .connection-test-action { margin-top: 18px; }
@@ -33,7 +33,7 @@
  .measurement-controls { grid-template-columns: 1fr; gap: 14px; }
 }
 
-/* Network values share aligned columns; narrow screens scroll the table. */
+/* Network values share aligned columns, with stacked pairs on narrow screens. */
 .measurements-page #networkMetrics { min-width: 0; max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; padding: 0 16px 16px; box-sizing: border-box; }
 .measurements-page .network-table { width: 100%; min-width: 600px; border-collapse: collapse; table-layout: fixed; text-align: left; font-size: 14px; }
 .measurements-page .network-table th, .measurements-page .network-table td { padding: 14px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
@@ -45,6 +45,28 @@
 .measurements-page .network-table-pair { font-weight: 600; color: var(--text); }
 .measurements-page .network-table-direction, .measurements-page .network-table-time { display: block; color: var(--secondary); font-size: 11px; line-height: 1.5; font-weight: 400; }
 .measurements-page .network-table-direction { min-height: 17px; margin-bottom: 5px; }
+.measurements-page .network-table-latency-label { visibility: hidden; }
 .measurements-page .network-table-value strong { display: block; font-size: 14px; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .measurements-page .network-table-time { margin-top: 7px; }
 .measurements-page .network-table-caption { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+
+@media (max-width: 620px) {
+ .measurements-page .connection-test-result { min-height: 48px; padding: 5px 8px; }
+ .measurements-page #networkMetrics { overflow-x: visible; }
+ .measurements-page .network-table { display: block; min-width: 0; width: 100%; }
+ .measurements-page .network-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+ .measurements-page .network-table tbody { display: block; width: 100%; }
+ .measurements-page .network-table-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-bottom: 1px solid var(--border); }
+ .measurements-page .network-table-row:last-child { border-bottom: 0; }
+ .measurements-page .network-table th, .measurements-page .network-table td { min-width: 0; width: auto; border: 0; padding: 8px 0 12px; overflow-wrap: anywhere; }
+ .measurements-page .network-table th:first-child { width: auto; padding: 12px 0 4px; }
+ .measurements-page .network-table-pair { grid-column: 1 / -1; }
+ .measurements-page .network-table-value:nth-child(2) { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; padding: 0 0 6px; }
+ .measurements-page .network-table-value:nth-child(3) { padding-right: 8px; }
+ .measurements-page .network-table-value:nth-child(4) { padding-left: 8px; }
+ .measurements-page .network-table-direction { min-height: 0; margin-bottom: 3px; line-height: 1.35; }
+ .measurements-page .network-table-latency-label { visibility: visible; margin: 0; }
+ .measurements-page .network-table-value strong { white-space: normal; }
+ .measurements-page .network-table-time { margin-top: 3px; font-size: 10px; line-height: 1.35; }
+ .measurements-page .network-table-value:nth-child(2) .network-table-time { margin: 0; }
+}

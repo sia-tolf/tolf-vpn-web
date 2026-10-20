@@ -47,6 +47,7 @@ assert.equal(context.networkPairsForIngress([], 'us')[0].forward_mbps,undefined)
   assert.equal(rows()[0].children[0].textContent,'Нью-Йорк ↔ Рига');
   assert.equal(rows()[0].children[0].attrs.scope,'row');
   assert.equal(rows()[0].children[1].children[1].textContent,'111.2 ms');
+  assert.equal(rows()[0].children[1].children[0].textContent,'Задержка','mobile latency row has a localized label');
   assert.equal(rows()[0].children[2].children[0].textContent,'Нью-Йорк → Рига');
   assert.equal(rows()[0].children[2].children[1].textContent,'400.0 Mbps');
   assert.equal(rows()[0].children[3].children[0].textContent,'Рига → Нью-Йорк');
@@ -66,6 +67,7 @@ assert.equal(context.networkPairsForIngress([], 'us')[0].forward_mbps,undefined)
   for(const [lang,header] of [['en','Connection'],['lv','Savienojums']]) {
     context.document.documentElement.lang=lang;listeners['tolf:measurement-selection-changed']();
     assert.equal(table().children[1].children[0].children[0].textContent,header);
+    assert.equal(rows()[0].children[1].children[0].textContent,lang==='en'?'Latency':'Aizture');
   }
   console.log('PASS aligned semantic network table, directional values, missing data, separate timestamps, languages and ingress changes');
 })();

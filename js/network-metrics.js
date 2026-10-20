@@ -64,7 +64,7 @@ function networkPairsForIngress(pairs, ingress) {
         [`${c[p.target]} → ${c[p.source]}`, metric(p.reverse_mbps, 'Mbps', 1), p.throughput_measured_at, speedAge]
       ]) {
         const cell = node('td', 'network-table-value');
-        const directionLabel = node('span', 'network-table-direction', direction);
+        const directionLabel = node('span', 'network-table-direction' + (direction ? '' : ' network-table-latency-label'), direction || c.latency);
         if (!direction) directionLabel.setAttribute('aria-hidden', 'true');
         cell.appendChild(directionLabel);
         cell.appendChild(node('strong', '', value));
