@@ -385,3 +385,4 @@ Object.assign(I18N.ru, {"measurementDirectUnverified": "Не удалось по
 Object.assign(I18N.ru, {"measurementDirectPathChanged": "После замера не удалось подтвердить прямой путь. Повторите проверку; результат сброшен."});
 
 Object.assign(I18N.ru, {"measurementVpnConnected": "VPN подключён к точке «{city}»"});
+Object.assign(I18N.ru, {"measurementChooseEntry": "Выберите точку входа", "measurementChooseMode": "Выберите режим измерения", "measurementChooseBoth": "Выберите точку входа и режим измерения, чтобы начать проверку."});

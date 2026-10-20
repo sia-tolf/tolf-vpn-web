@@ -385,3 +385,4 @@ Object.assign(I18N.en, {"measurementDirectUnverified": "The direct request path 
 Object.assign(I18N.en, {"measurementDirectPathChanged": "The direct path could not be confirmed after the measurement. Please try again; the result was cleared."});
 
 Object.assign(I18N.en, {"measurementVpnConnected": "VPN is connected to {city}"});
+Object.assign(I18N.en, {"measurementChooseEntry": "Choose an entry point", "measurementChooseMode": "Choose a measurement mode", "measurementChooseBoth": "Choose an entry point and measurement mode to start the check."});

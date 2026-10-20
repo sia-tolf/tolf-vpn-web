@@ -9,8 +9,8 @@ let connectionTestRequest = 0;
 let connectionTestStatusKey = "connectionTestReady";
 
 function getConnectionTestMode() {
-  return typeof document !== "undefined"
-    ? document.getElementById?.("measurementMode")?.value || "vpn" : "vpn";
+  const mode = typeof document !== "undefined" && document.getElementById?.("measurementMode");
+  return mode ? mode.value : "vpn";
 }
 
 function getConnectionTestServerKey() {
@@ -40,9 +40,10 @@ function renderConnectionTestTarget() {
   const serverKey = activeConnectionTestServer || getConnectionTestServerKey();
   const server = MEASUREMENT_TARGETS[serverKey];
 
-  connectionTestTitle.textContent = t((activeConnectionTestMode || getConnectionTestMode()) === "direct" ? "connectionDirectTo" : "connectionVpnTo", {
-    city: t(server?.nameKey || "cityRiga")
-  });
+  const mode = activeConnectionTestMode || getConnectionTestMode();
+  connectionTestTitle.textContent = server && ["direct", "vpn"].includes(mode)
+    ? t(mode === "direct" ? "connectionDirectTo" : "connectionVpnTo", {city:t(server.nameKey)})
+    : t("connectionCheckTitle");
   if (connectionTestStatus) connectionTestStatus.textContent = t(connectionTestStatusKey) + (connectionTestFailureDetail ? " (" + connectionTestFailureDetail + ")" : "");
   setConnectionTestButtonLabel(
     activeConnectionTest || connectionTestPreparing ? "measuringConnection" : "measureConnection"
@@ -162,7 +163,7 @@ async function startConnectionTest() {
   if (window.canStartConnectionMeasurement && !window.canStartConnectionMeasurement()) return;
   const serverKey = getConnectionTestServerKey();
   const mode = getConnectionTestMode();
-  if (!MEASUREMENT_TARGETS[serverKey]) return;
+  if (!MEASUREMENT_TARGETS[serverKey] || !["direct", "vpn"].includes(mode)) return;
   const request = ++connectionTestRequest;
 
   resetConnectionTestResults();

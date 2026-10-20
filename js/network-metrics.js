@@ -1,5 +1,6 @@
 // Each pair is stored once; orient both rates from the selected ingress.
 function networkPairsForIngress(pairs, ingress) {
+  if (!['riga', 'moscow', 'us'].includes(ingress)) return [];
   return ['riga', 'moscow', 'us'].filter(id => id !== ingress).map(target => {
     const pair = pairs.find(p => (p.source === ingress && p.target === target) ||
       (p.target === ingress && p.source === target));
@@ -35,6 +36,12 @@ function networkPairsForIngress(pairs, ingress) {
     };
     const metric = (value, unit, decimals) => Number.isFinite(value) && value >= 0 ? `${value.toFixed(decimals)} ${unit}` : c.missing;
     container.replaceChildren();
+    if (!['riga', 'moscow', 'us'].includes(ingress)) {
+      container.appendChild(node('p', 'measurement-note', t('measurementChooseEntry')));
+      const status = document.getElementById('networkMetricMeasuredAt');
+      if (status) status.textContent = '';
+      return;
+    }
     const table = node('table', 'network-table');
     const caption = node('caption', 'network-table-caption', document.querySelector('[data-i18n="measurementNetworkHelp"]')?.textContent || '');
     table.appendChild(caption);

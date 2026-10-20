@@ -22,22 +22,24 @@ function t(key, replacements = {}) {
   const storage = {get(key) {try {return localStorage.getItem(key);} catch {return null;}},
     set(key, value) {try {localStorage.setItem(key, value);} catch {}}};
   const url = new URL(location.href);
-  const selected = url.searchParams.get("server") || storage.get("tolfMeasurementServer");
-  server.value = ["riga", "moscow", "us"].includes(selected) ? selected : "riga";
-  const selectedMode = url.searchParams.get("mode") || storage.get("tolfMeasurementMode");
-  mode.value = ["direct", "vpn"].includes(selectedMode) ? selectedMode : "vpn";
+  // Every page visit requires an explicit choice, including old links and history restores.
+  server.value = mode.value = "";
+  url.searchParams.delete("server"); url.searchParams.delete("mode");
+  history.replaceState(null, "", url.pathname + url.search + url.hash);
   let busy = false;
+  const hasServer = () => ["riga", "moscow", "us"].includes(server.value);
+  const hasSelection = () => hasServer() && ["direct", "vpn"].includes(mode.value);
   const vpnUnavailable = () => mode.value === "vpn" && typeof MEASUREMENT_TARGETS !== "undefined" && MEASUREMENT_TARGETS[server.value]?.vpnReady === false;
   window.updateMeasurementControls = running => {
     busy = running;
     server.disabled = mode.disabled = running;
     cancel.hidden = !running;
-    vpnConfirmation.hidden = mode.value !== "vpn";
+    vpnConfirmation.hidden = !hasServer() || mode.value !== "vpn";
     vpnConnected.disabled = running || vpnUnavailable();
-    connectionTestButton.disabled = running || vpnUnavailable() || mode.value === "vpn" && !vpnConnected.checked;
+    connectionTestButton.disabled = running || !hasSelection() || vpnUnavailable() || mode.value === "vpn" && !vpnConnected.checked;
   };
   window.canStartConnectionMeasurement = () => {
-    return !busy && !vpnUnavailable() && (mode.value !== "vpn" || vpnConnected.checked);
+    return !busy && hasSelection() && !vpnUnavailable() && (mode.value !== "vpn" || vpnConnected.checked);
   };
   function render() {
     document.documentElement.lang = currentLanguage;
@@ -49,8 +51,8 @@ function t(key, replacements = {}) {
     }
     document.getElementById("measurementBack").href = "../?lang=" + currentLanguage;
     const cityKey = {riga:"cityRiga", moscow:"cityMoscow", us:"cityNewYork"}[server.value];
-    vpnConfirmationText.textContent = t("measurementVpnConnected", {city:t(cityKey)});
-    document.getElementById("measurementModeHelp").textContent = t(vpnUnavailable() ? "measurementVpnNotReady" : mode.value === "direct" ? "measurementDirectHelp" : "measurementVpnHelp");
+    vpnConfirmationText.textContent = hasServer() ? t("measurementVpnConnected", {city:t(cityKey)}) : "";
+    document.getElementById("measurementModeHelp").textContent = t(!hasSelection() ? "measurementChooseBoth" : vpnUnavailable() ? "measurementVpnNotReady" : mode.value === "direct" ? "measurementDirectHelp" : "measurementVpnHelp");
     renderConnectionTestTarget();
     if (vpnUnavailable()) {connectionTestStatus.textContent = t("connectionTestUnavailable"); connectionTestStatus.className = "vpn-overview-updated";}
     window.updateMeasurementControls(busy);
@@ -58,10 +60,8 @@ function t(key, replacements = {}) {
   function contextChanged() {
     vpnConnected.checked = false;
     resetConnectionTestContext();
-    storage.set("tolfMeasurementServer", server.value);
-    storage.set("tolfMeasurementMode", mode.value);
     const next = new URL(location.href);
-    next.searchParams.set("server", server.value); next.searchParams.set("mode", mode.value);
+    next.searchParams.delete("server"); next.searchParams.delete("mode");
     history.replaceState(null, "", next.pathname + next.search + next.hash);
     render();
     window.dispatchEvent(new CustomEvent("tolf:measurement-selection-changed"));
@@ -75,6 +75,11 @@ function t(key, replacements = {}) {
     history.replaceState(null, "", next.pathname + next.search + next.hash); render();
   });
   window.addEventListener("online", () => {vpnConnected.checked = false; window.updateMeasurementControls(busy);});
-  window.addEventListener("pageshow", () => {vpnConnected.checked = false; render();});
+  window.addEventListener("pageshow", () => {
+    server.value = mode.value = "";
+    vpnConnected.checked = false;
+    resetConnectionTestContext(); render();
+    window.dispatchEvent(new CustomEvent("tolf:measurement-selection-changed"));
+  });
   document.addEventListener("DOMContentLoaded", render, {once:true});
 })();

@@ -11,15 +11,15 @@
 <link rel="stylesheet" href="../css/return-control.css?v=20261005-header-match">
 <link rel="stylesheet" href="../css/connection-page.css?v=measurement-ui-20261019">
 <script defer src="../js/config.js?v=remember-platform-20261016"></script>
-<script defer src="../js/locales/en.js?v=measurement-ui-20261019"></script>
-<script defer src="../js/locales/ru.js?v=measurement-ui-20261019"></script>
-<script defer src="../js/locales/lv.js?v=measurement-ui-20261019"></script>
-<script defer src="../js/measurements-page.js?v=measurement-ui-20261019"></script>
+<script defer src="../js/locales/en.js?v=explicit-choice-20261020"></script>
+<script defer src="../js/locales/ru.js?v=explicit-choice-20261020"></script>
+<script defer src="../js/locales/lv.js?v=explicit-choice-20261020"></script>
+<script defer src="../js/measurements-page.js?v=explicit-choice-20261020"></script>
 <script defer src="../js/librespeed.js?v=measurement-ui-20261019"></script>
 <script defer src="../js/measurement-targets.js?v=measurement-ui-20261019"></script>
 <script defer src="../js/confirmed-upload.js?v=page-upload-20261019-warmup"></script>
-<script defer src="../js/connection-test.js?v=measurement-ui-20261019"></script>
-<script defer src="../js/network-metrics.js?v=measurement-ui-20261019"></script>
+<script defer src="../js/connection-test.js?v=explicit-choice-20261020"></script>
+<script defer src="../js/network-metrics.js?v=explicit-choice-20261020"></script>
 <script defer src="../js/return-control.js?v=20261005"></script>
 </head>
 <body>
@@ -36,9 +36,9 @@
 <section class="card"><div class="card-content">
 <div class="measurement-controls">
 <div><label for="measurementServer" data-i18n="measurementEntry">Entry point</label>
-<select id="measurementServer" class="settings-select"><option value="riga" data-i18n="cityRiga">Riga</option><option value="moscow" data-i18n="cityMoscow">Moscow</option><option value="us" data-i18n="cityNewYork">New York</option></select></div>
+<select id="measurementServer" class="settings-select" autocomplete="off" required><option value="" disabled selected data-i18n="measurementChooseEntry">Choose an entry point</option><option value="riga" data-i18n="cityRiga">Riga</option><option value="moscow" data-i18n="cityMoscow">Moscow</option><option value="us" data-i18n="cityNewYork">New York</option></select></div>
 <div><label for="measurementMode" data-i18n="measurementMode">Measurement mode</label>
-<select id="measurementMode" class="settings-select"><option value="direct" data-i18n="measurementDirect">Direct</option><option value="vpn" data-i18n="measurementVpn">Through VPN</option></select></div>
+<select id="measurementMode" class="settings-select" autocomplete="off" required><option value="" disabled selected data-i18n="measurementChooseMode">Choose a measurement mode</option><option value="direct" data-i18n="measurementDirect">Direct</option><option value="vpn" data-i18n="measurementVpn">Through VPN</option></select></div>
 </div>
 <p class="measurement-note" data-i18n="measurementChoiceHelp">This selection applies only to this measurement.</p>
 <p id="measurementModeHelp" class="measurement-help"></p>
@@ -54,7 +54,7 @@
               <div
                 id="connectionTestTitle"
                 class="vpn-overview-title"
-              >Connection to Riga</div>
+              >Check connection</div>
 
               <div
                 id="connectionTestStatus"
@@ -89,6 +89,7 @@
               id="connectionTestButton"
               class="network-test-button constructive"
               type="button"
+              disabled
             >
               <svg
                 class="network-test-icon"

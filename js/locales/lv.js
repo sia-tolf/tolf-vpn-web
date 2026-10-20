@@ -385,3 +385,4 @@ Object.assign(I18N.lv, {"measurementDirectUnverified": "Neizdevās apstiprināt 
 Object.assign(I18N.lv, {"measurementDirectPathChanged": "Pēc mērījuma neizdevās apstiprināt tiešo ceļu. Atkārtojiet pārbaudi; rezultāts tika notīrīts."});
 
 Object.assign(I18N.lv, {"measurementVpnConnected": "VPN ir savienots ar punktu «{city}»"});
+Object.assign(I18N.lv, {"measurementChooseEntry": "Izvēlieties ieejas punktu", "measurementChooseMode": "Izvēlieties mērījuma režīmu", "measurementChooseBoth": "Lai sāktu pārbaudi, izvēlieties ieejas punktu un mērījuma režīmu."});
