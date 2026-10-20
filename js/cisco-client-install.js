@@ -56,9 +56,10 @@
    const field=document.createElement('div');field.className='cisco-install-link';
    const input=document.createElement('input');input.type='text';input.readOnly=true;
    input.value=app.href;input.setAttribute('aria-label',c.link);input.spellcheck=false;
-   const button=document.createElement('button');button.type='button';button.className='secondary cisco-copy-link';
+   const button=document.createElement('button');button.type='button';button.className='oc-copy cisco-copy-link';
    button.setAttribute('aria-label',c.copy);button.title=c.copy;
-   button.innerHTML='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M15 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h3"/></svg>';
+   const glyph=document.createElement('span');glyph.className='oc-copy-glyph';
+   glyph.setAttribute('aria-hidden','true');button.append(glyph);
    const status=document.createElement('span');status.className='cisco-copy-status';status.setAttribute('role','status');
    button.addEventListener('click',async()=>{
     try{

@@ -77,14 +77,14 @@ html[data-vpn-transport="anyconnect"] #legacyVpnPanel { display: block !importan
 #anyConnectAccess .oc-transfer-field .oc-copy-glyph::after { background: var(--card); }
 #anyConnectAccess .oc-password-row { display: flex; align-items: center; gap: 12px; background: var(--code-background); color: var(--text); padding: 0 12px; border: 1px solid var(--border); border-radius: 12px; }
 #anyConnectAccess .oc-secret { flex: 1; min-width: 0; font: 16px ui-monospace, monospace; overflow-wrap: anywhere; padding: 12px 0; user-select: all; }
-#anyConnectAccess .oc-copy { flex: 0 0 44px; width: 44px; min-height: 44px; padding: 0; border: 0; border-radius: 8px; background: transparent; color: var(--tolf-action-text, var(--text)); }
-#anyConnectAccess .oc-copy:hover { background: var(--tolf-secondary-hover); }
+:is(#anyConnectAccess,#ciscoClientInstall) .oc-copy { flex: 0 0 44px; width: 44px; min-height: 44px; padding: 0; border: 0; border-radius: 8px; background: transparent; color: var(--tolf-action-text, var(--text)); }
+:is(#anyConnectAccess,#ciscoClientInstall) .oc-copy:hover { background: var(--tolf-secondary-hover); }
 #anyConnectAccess .oc-copy-control { position: relative; display: flex; flex: 0 0 44px; }
 #anyConnectAccess .oc-copy-feedback { position: absolute; z-index: 1; bottom: calc(100% + 6px); right: 0; white-space: nowrap; padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); font-size: 13px; line-height: 1.3; box-shadow: 0 2px 8px #00000014; pointer-events: none; }
-#anyConnectAccess .oc-copy-glyph { position: relative; display: block; width: 22px; height: 22px; }
-#anyConnectAccess .oc-copy-glyph::before, #anyConnectAccess .oc-copy-glyph::after { content: ""; position: absolute; width: 14px; height: 14px; border: 1.7px solid currentColor; border-radius: 3px; }
-#anyConnectAccess .oc-copy-glyph::before { left: 0; top: 0; }
-#anyConnectAccess .oc-copy-glyph::after { left: 5px; top: 5px; background: var(--code-background); }
+:is(#anyConnectAccess,#ciscoClientInstall) .oc-copy-glyph { position: relative; display: block; width: 22px; height: 22px; }
+:is(#anyConnectAccess,#ciscoClientInstall) .oc-copy-glyph::before, :is(#anyConnectAccess,#ciscoClientInstall) .oc-copy-glyph::after { content: ""; position: absolute; width: 14px; height: 14px; border: 1.7px solid currentColor; border-radius: 3px; }
+:is(#anyConnectAccess,#ciscoClientInstall) .oc-copy-glyph::before { left: 0; top: 0; }
+:is(#anyConnectAccess,#ciscoClientInstall) .oc-copy-glyph::after { left: 5px; top: 5px; background: var(--code-background); }
 #anyConnectAccess .oc-message { min-height: 20px; color: var(--text); }
 #anyConnectAccess .oc-error { color: var(--error); }
 #anyConnectAccess .oc-note { color: var(--text); }
@@ -241,3 +241,5 @@ body.manual-setup-open #ciscoClientInstall[data-confirmed="true"] { display:none
 .cisco-copy-status:empty{display:none}
 
 #anyConnectAccess:empty{display:none!important}
+
+#ciscoClientInstall .cisco-install-link .oc-copy-glyph::after{background:var(--card)}
