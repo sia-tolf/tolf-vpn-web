@@ -41,18 +41,20 @@ localStorage:{getItem:k=>memory.get(k),setItem:(k,v)=>memory.set(k,v)},MutationO
 vm.createContext(c);vm.runInContext(fs.readFileSync(path.join(root,'js/cisco-client-install.js'),'utf8'),c);
 assert.equal(window.isCiscoClientConfirmed(),false);
 let prevented=false;ids.quickSetupLink.events.click({preventDefault(){prevented=true},stopImmediatePropagation(){}});
-assert(prevented);assert.equal(ids.manualSetupLink.attributes['aria-disabled'],'true');
+assert.equal(prevented,false,'choose setup before installing the client');assert.equal(ids.manualSetupLink.attributes['aria-disabled'],'false');
 let check=descendants(ids.ciscoClientInstall).find(n=>n.type==='checkbox');check.checked=true;check.events.change();
 assert(window.isCiscoClientConfirmed('ios'));assert.equal(ids.quickSetupLink.attributes['aria-disabled'],'false');
 c.currentPlatform='android';window.dispatchEvent(new c.Event('vpnplatformchange'));assert.equal(window.isCiscoClientConfirmed('android'),false);
-assert.equal(ids.manualSetupLink.attributes['aria-disabled'],'true');
+assert.equal(ids.manualSetupLink.attributes['aria-disabled'],'false');
 transport='ikev2';window.dispatchEvent(new c.Event('vpntransportchange'));assert.equal(ids.manualSetupLink.attributes['aria-disabled'],'false');
-assert(ids.ciscoClientInstall.classList.contains('hidden'));
+assert(!ids.ciscoClientInstall.classList.contains('hidden'),'Android IKEv2 needs its own strongSwan step');
 c.currentPlatform='windows';transport='anyconnect';window.dispatchEvent(new c.Event('vpnplatformchange'));
 assert.equal(descendants(ids.ciscoClientInstall).find(n=>n.tagName==='a').href,'https://www.infradead.org/openconnect-gui/download/openconnect-gui-1.6.2-win64.exe');
 assert(ids.ciscoClientInstall.textContent.includes('OpenConnect GUI'));
 c.currentPlatform='ios';vm.runInContext(fs.readFileSync(path.join(root,'js/cisco-client-install.js'),'utf8'),c);
 assert.equal(window.isCiscoClientConfirmed('ios'),false,'reload clears confirmation even with old storage');
 assert.equal(descendants(ids.ciscoClientInstall).find(n=>n.type==='checkbox').checked,false);
-assert.equal(ids.manualSetupLink.attributes['aria-disabled'],'true');
-console.log('PASS client confirmation: old storage ignored, reload resets, navigation gated, IKEv2 unaffected');
+assert.equal(ids.manualSetupLink.attributes['aria-disabled'],'false');
+console.log('PASS client confirmation: old storage ignored, reload resets, scenario navigation allowed before installation, IKEv2 unaffected');
+
+const html=fs.readFileSync(path.join(root,'index.html'),'utf8');assert(html.indexOf('id=\"ciscoClientInstall\"')>html.indexOf('id=\"vpnCard\"'),'installation belongs to manual setup');

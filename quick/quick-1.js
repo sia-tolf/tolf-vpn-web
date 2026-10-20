@@ -132,7 +132,7 @@ function render() {
  if(profile) renderDelivery();
  if(ocDevice)renderOcDelivery();
  const cc=clientCopy();
- $('quickClientInstall').hidden=true;
+ $('quickClientInstall').hidden=protocol!=='anyconnect'||!nativePlatform||windowsQuickBlocked||clientInstalled;
  $('quickClientConfirmed').checked=clientInstalled;
  $('quickClientConfirmed').disabled=busy;
  $('quickClientConfirmedLabel').textContent=cc.confirmed;
@@ -434,9 +434,6 @@ $('ocDownload').onclick=()=>action(async()=>{
 });
 
 render();
-if(protocol==='anyconnect'&&!clientHandoff&&!windowsQuickBlocked){
- put('tolfTransport','anyconnect');
- window.location.assign('/?lang='+encodeURIComponent(lang));
-}else initialize();
+initialize();
 })();
 

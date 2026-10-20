@@ -35,12 +35,15 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
  else throw Error('Unexpected API '+url);
  posts.push(url);return {ok:true,json:async()=>data};
  }};
- store.set('quickClientHandoff',JSON.stringify({platform,createdAt:BrowserDate.now()}));
  vm.createContext(ctx);vm.runInContext(strings,ctx);vm.runInContext(withShares(fs.readFileSync('js/ios-vpn-buttons.js','utf8')),ctx);vm.runInContext(fs.readFileSync('js/openconnect-windows-setup.js','utf8'),ctx);vm.runInContext(source,ctx);
  for(let i=0;i<40;i++)await Promise.resolve();
  if(missingNode){assert.equal(element('prepare').disabled,true);assert.equal(created.length,0);return;}
- assert.equal(element('quickClientInstall').hidden,true,'installation only on My VPN');
- assert.equal(element('quickClientConfirmed').checked,true);
+ assert.equal(assigned,undefined,'quick setup must not redirect to My VPN for installation');
+ assert.equal(element('quickClientInstall').hidden,false,'install on the current device within quick setup');
+ assert.equal(element('quickClientConfirmed').checked,false);
+ assert.equal(element('prepare').disabled,true,'client installation still gates preparation');
+ await element('prepare').onclick();assert.equal(created.length,0,'no preparation before installation');
+ element('quickClientConfirmed').checked=true;element('quickClientConfirmed').onchange();
  assert.equal(store.has('quickClientHandoff'),false);
  assert.equal(element('prepare').disabled,false);
  if(platform==='ios' && node!=='us'){
@@ -90,8 +93,8 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
    vm.runInContext(withShares(fs.readFileSync('js/ios-vpn-buttons.js','utf8')),ctx);
    vm.runInContext(fs.readFileSync('js/openconnect-windows-setup.js','utf8'),ctx);vm.runInContext(source,ctx);
    for(let i=0;i<80;i++)await Promise.resolve();
-   assert.equal(assigned,'/?lang=ru','reload returns to the single confirmation step');
-   assert.equal(element('quickClientInstall').hidden,true,'reload never duplicates installation');
+   assert.equal(assigned,undefined,'reload stays in quick setup');
+   assert.equal(element('quickClientInstall').hidden,false,'reload asks for confirmation within quick setup');
    assert.equal(element('quickClientConfirmed').checked,false,'reload resets client confirmation');
    assert.equal(element('prepare').disabled,true,'reload gates further setup');
    assert.equal(element('iosVpnButtons').hidden,true,'saved profile links cannot bypass confirmation');

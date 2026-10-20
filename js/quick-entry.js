@@ -37,15 +37,15 @@
   const mobileCopy={
    ru:['Быстрая настройка '+(currentPlatform==='android'?'Android':'iPhone / iPad'),
        'Откройте vpn.tolf.is на устройстве '+(currentPlatform==='android'?'Android':'iPhone или iPad')+'.',
-       'Выберите AnyConnect, подтвердите установку Cisco Secure Client и нажмите «Быстрая настройка».',
+       'Выберите AnyConnect и нажмите «Быстрая настройка». Установите клиент в её шагах.',
        'Быстрая настройка выполняется на том устройстве, на котором открыт сайт.'],
    en:['Quick setup for '+(currentPlatform==='android'?'Android':'iPhone / iPad'),
        'Open vpn.tolf.is on your '+(currentPlatform==='android'?'Android device':'iPhone or iPad')+'.',
-       'Select AnyConnect, confirm Cisco Secure Client installation and select “Quick setup”.',
+       'Select AnyConnect and “Quick setup”. Install the client in the setup steps.',
        'Quick setup runs on the device where the website is open.'],
    lv:[(currentPlatform==='android'?'Android':'iPhone / iPad')+' ātrā iestatīšana',
        'Atveriet vpn.tolf.is '+(currentPlatform==='android'?'Android ierīcē':'iPhone vai iPad')+'.',
-       'Atlasiet AnyConnect, apstipriniet Cisco Secure Client instalēšanu un nospiediet “Ātrā iestatīšana”.',
+       'Atlasiet AnyConnect un nospiediet “Ātrā iestatīšana”. Instalējiet klientu iestatīšanas soļos.',
        'Ātrā iestatīšana notiek ierīcē, kurā atvērta vietne.']
   };
   const words=currentPlatform==='windows'?(copy[language]||copy.en):(mobileCopy[language]||mobileCopy.en);

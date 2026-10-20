@@ -13,9 +13,9 @@
   try{if(sessionStorage.getItem(confirmationKey(p))==='true')remembered.add(p);}catch{}
  }
  const texts={
-  ru:{title:'1. Установите Cisco Secure Client (AnyConnect).',install:'Установить Cisco Secure Client',confirmed:'Cisco Secure Client установлен',blocked:'Чтобы продолжить, подтвердите установку Cisco Secure Client в разделе «Мой VPN».',back:'К подтверждению установки'},
-  en:{title:'1. Install Cisco Secure Client (AnyConnect).',install:'Install Cisco Secure Client',confirmed:'Cisco Secure Client is installed',blocked:'Confirm Cisco Secure Client installation in My VPN to continue.',back:'Confirm installation'},
-  lv:{title:'1. Instalējiet Cisco Secure Client (AnyConnect).',install:'Instalēt Cisco Secure Client',confirmed:'Cisco Secure Client ir instalēts',blocked:'Lai turpinātu, sadaļā Mans VPN apstipriniet Cisco Secure Client instalēšanu.',back:'Apstiprināt instalēšanu'}
+  ru:{title:'1. Установите Cisco Secure Client (AnyConnect).',install:'Установить Cisco Secure Client',confirmed:'Cisco Secure Client установлен',blocked:'Чтобы продолжить, подтвердите установку Cisco Secure Client в ручной настройке.',back:'К подтверждению установки'},
+  en:{title:'1. Install Cisco Secure Client (AnyConnect).',install:'Install Cisco Secure Client',confirmed:'Cisco Secure Client is installed',blocked:'Confirm Cisco Secure Client installation in manual setup to continue.',back:'Confirm installation'},
+  lv:{title:'1. Instalējiet Cisco Secure Client (AnyConnect).',install:'Instalēt Cisco Secure Client',confirmed:'Cisco Secure Client ir instalēts',blocked:'Lai turpinātu, manuālajā iestatīšanā apstipriniet Cisco Secure Client instalēšanu.',back:'Apstiprināt instalēšanu'}
  };
  const copy=()=>{
   const c={...(texts[document.documentElement.lang]||texts.en)};
@@ -63,17 +63,14 @@
   });
   const text=document.createElement('span');text.textContent=c.confirmed;
   label.append(check,text);host.append(title,app,label);
-  const blocked=!transport()||(needsApp()&&!appConfirmed());
-  if(blocked&&needsApp()){const note=document.createElement('p');note.className='card-description';note.textContent=c.blocked;host.append(note);}
+  const blocked=!transport();
+  if(needsApp()&&!appConfirmed()){const note=document.createElement('p');note.className='card-description';note.textContent=c.blocked;host.append(note);}
   for(const id of ['quickSetupLink','manualSetupLink'])document.getElementById(id)?.setAttribute('aria-disabled',String(blocked));
  }
  for(const id of ['quickSetupLink','manualSetupLink']){
   document.getElementById(id)?.addEventListener('click',event=>{
    if(!transport()){
     event.preventDefault();event.stopImmediatePropagation();document.querySelector('#vpnProtocolDropdown button')?.focus();return;
-   }
-   if(needsApp()&&!appConfirmed()){
-    event.preventDefault();event.stopImmediatePropagation();window.focusCiscoInstall();
    }
   },true);
  }
