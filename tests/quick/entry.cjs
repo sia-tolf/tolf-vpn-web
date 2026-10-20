@@ -80,10 +80,13 @@ for(const protocol of ['ikev2','anyconnect']){
  assert.equal(elements.manualSetupLink.attributes['aria-expanded'],'false');
  assert(prevented,'Windows quick setup on iPad is blocked for '+protocol);
 }
-context.currentPlatform='android';context.window.getVpnTransport=()=> 'anyconnect';
-let androidPrevented=false;
-elements.quickSetupLink.listeners.click({preventDefault(){androidPrevented=true;}});
-assert(androidPrevented,'Android quick setup on iPad must first direct the user to Android');
+context.currentPlatform='android';
+for(const protocol of ['ikev2','anyconnect']){
+ context.window.getVpnTransport=()=>protocol;
+ let androidPrevented=false;
+ elements.quickSetupLink.listeners.click({preventDefault(){androidPrevented=true;}});
+ assert(androidPrevented,'Android quick setup on iPad must direct the user to Android for '+protocol);
+}
 context.currentPlatform='ios';
 let iosPrevented=false;
 elements.quickSetupLink.listeners.click({preventDefault(){iosPrevented=true;}});

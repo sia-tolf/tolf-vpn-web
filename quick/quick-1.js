@@ -6,7 +6,7 @@ const nativePlatform = /Android/i.test(navigator.userAgent) ? 'android' : /Windo
 const get = (key, fallback) => { try { return sessionStorage.getItem(key) || fallback; } catch { return fallback; } };
 const put = (key, value) => { try { if(value) sessionStorage.setItem(key, value); else sessionStorage.removeItem(key); } catch {} };
 const requestedPlatform=new URL(location.href).searchParams.get('platform');
-const windowsQuickBlocked=requestedPlatform==='windows'&&nativePlatform!=='windows';
+const deviceQuickBlocked=['ios','android','windows'].includes(requestedPlatform)&&requestedPlatform!==nativePlatform;
 const requestedProtocol=new URL(location.href).searchParams.get('protocol');
 const protocol=requestedProtocol==='anyconnect' || (!requestedProtocol&&get('quickProtocol')==='anyconnect')?'anyconnect':'ikev2';
 const requestedIngress=new URL(location.href).searchParams.get('ingress') || get('quickIngress', null);
@@ -20,6 +20,12 @@ for(const [language,text] of Object.entries({
  en:'Open vpn.tolf.is on your Windows computer, select Windows, the desired protocol and “Quick setup”. The settings are installed on that computer.',
  lv:'Windows datorā atveriet vpn.tolf.is, atlasiet Windows, vajadzīgo protokolu un “Ātrā iestatīšana”. Iestatījumi tiek instalēti šajā datorā.'
 }))QUICK_TEXT[language].windowsQuickOnly=text;
+if(deviceQuickBlocked&&requestedPlatform!=='windows'){
+ const device=requestedPlatform==='android'?'Android':'iPhone / iPad';
+ QUICK_TEXT.ru.windowsQuickOnly='Откройте vpn.tolf.is на устройстве '+device+', выберите нужный протокол и «Быстрая настройка». Настройки устанавливаются на том устройстве, на котором открыт сайт.';
+ QUICK_TEXT.en.windowsQuickOnly='Open vpn.tolf.is on your '+device+' device, select the desired protocol and “Quick setup”. Setup runs on the device where the website is open.';
+ QUICK_TEXT.lv.windowsQuickOnly='Atveriet vpn.tolf.is '+device+' ierīcē, atlasiet vajadzīgo protokolu un “Ātrā iestatīšana”. Iestatīšana notiek ierīcē, kurā atvērta vietne.';
+}
 for(const [language,city] of Object.entries({ru:'Нью-Йорк',en:'New York',lv:'Ņujorka'}))QUICK_TEXT[language].us=city;
 for(const [language,messages] of Object.entries({
  ru:{ocGrantInvalid:'Не удалось проверить ответ с сертификатом. Код проверки:',ocDownloadFailed:'Не удалось скачать сертификат. Нажмите «Получить сертификат» и повторите скачивание.'},
@@ -50,7 +56,7 @@ function accountAuth(mode) { persist(); window.location.assign('/auth/?mode='+mo
 let busy = false, authenticated = false, ready = false, locked = false, choicesOpened = false, profile = '', messageKey = '', failed = false;
 let server = null;
 let iosButtons = get('quickIosButtons') === 'true';
-let platform = windowsQuickBlocked?'windows':nativePlatform;
+let platform = deviceQuickBlocked?requestedPlatform:nativePlatform;
 
 const clientHandoff=(()=>{
  const raw=get('quickClientHandoff',null);
@@ -132,7 +138,7 @@ function render() {
  if(profile) renderDelivery();
  if(ocDevice)renderOcDelivery();
  const cc=clientCopy();
- $('quickClientInstall').hidden=protocol!=='anyconnect'||!nativePlatform||windowsQuickBlocked||clientInstalled;
+ $('quickClientInstall').hidden=protocol!=='anyconnect'||!nativePlatform||deviceQuickBlocked||clientInstalled;
  $('quickClientConfirmed').checked=clientInstalled;
  $('quickClientConfirmed').disabled=busy;
  $('quickClientConfirmedLabel').textContent=cc.confirmed;
@@ -202,7 +208,7 @@ async function initialize() {
  const number=++loadNumber;
  busy=true; panels(''); message('loading');
  try {
-  if(windowsQuickBlocked){ready=false;message('windowsQuickOnly');return;}
+  if(deviceQuickBlocked){ready=false;message('windowsQuickOnly');return;}
   const capabilities=await api('/quick-setup/capabilities');
   if(capabilities.version!==1) throw new Error('Unavailable');
   if(!nativePlatform){ready=false;message('unsupportedDevice',true);return;}
@@ -229,7 +235,7 @@ $('retry').onclick=()=>initialize();
 $('register').onclick=()=>accountAuth('signup');
 $('login').onclick=()=>accountAuth('signin');
 async function prepare() {
- if(!clientReady()||!authenticated||!ready||!nativePlatform||(windowsQuickBlocked))return;
+ if(!clientReady()||!authenticated||!ready||!nativePlatform||(deviceQuickBlocked))return;
  locked=true;$('choices').hidden=true; message('busy');
  if(protocol==='anyconnect'){await prepareOc();return;}
  const data=await api('/quick-setup/prepare',{method:'POST',body:JSON.stringify({platform:nativePlatform,server,language:lang,currentDevice:true})});

@@ -37,15 +37,15 @@
   const mobileCopy={
    ru:['Быстрая настройка '+(currentPlatform==='android'?'Android':'iPhone / iPad'),
        'Откройте vpn.tolf.is на устройстве '+(currentPlatform==='android'?'Android':'iPhone или iPad')+'.',
-       'Выберите AnyConnect и нажмите «Быстрая настройка». Установите клиент в её шагах.',
+       'Выберите нужный протокол и нажмите «Быстрая настройка». Если нужен клиент, установите его в шагах настройки.',
        'Быстрая настройка выполняется на том устройстве, на котором открыт сайт.'],
    en:['Quick setup for '+(currentPlatform==='android'?'Android':'iPhone / iPad'),
        'Open vpn.tolf.is on your '+(currentPlatform==='android'?'Android device':'iPhone or iPad')+'.',
-       'Select AnyConnect and “Quick setup”. Install the client in the setup steps.',
+       'Select the desired protocol and “Quick setup”. If a client is required, install it in the setup steps.',
        'Quick setup runs on the device where the website is open.'],
    lv:[(currentPlatform==='android'?'Android':'iPhone / iPad')+' ātrā iestatīšana',
        'Atveriet vpn.tolf.is '+(currentPlatform==='android'?'Android ierīcē':'iPhone vai iPad')+'.',
-       'Atlasiet AnyConnect un nospiediet “Ātrā iestatīšana”. Instalējiet klientu iestatīšanas soļos.',
+       'Atlasiet vajadzīgo protokolu un nospiediet “Ātrā iestatīšana”. Ja nepieciešams klients, instalējiet to iestatīšanas soļos.',
        'Ātrā iestatīšana notiek ierīcē, kurā atvērta vietne.']
   };
   const words=currentPlatform==='windows'?(copy[language]||copy.en):(mobileCopy[language]||mobileCopy.en);
@@ -66,8 +66,7 @@
   const transport=window.getVpnTransport?.()||'ikev2';
   const ua=navigator.userAgent||'';
   const nativePlatform=/Android/i.test(ua)?'android':nativeWindows()?'windows':'ios';
-  if((currentPlatform==='windows'&&!nativeWindows()) ||
-     (transport==='anyconnect'&&currentPlatform!==nativePlatform)){
+  if(currentPlatform!==nativePlatform){
    event.preventDefault();noticeOpen=true;renderNotice();return;
   }
   const url=new URL(quickLink.href,location.href);
