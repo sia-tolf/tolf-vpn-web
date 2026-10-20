@@ -71,3 +71,11 @@ html[data-tolf-ui="vpn"] .compact-header > .brand-copy{display:none!important}\n
 /* Protocol menu must extend beyond the My VPN card. */
 #quickSetupCard, #quickSetupCard > .card-content { overflow: visible; }
 #quickSetupCard { position: relative; z-index: 2; }
+
+/* Recommendation is separate from the mandatory manual entry choice. */
+.vpn-entry-field>.vpn-compact-label{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px}
+.vpn-entry-recommendation{color:#248a3d;font-size:12px;font-weight:400}
+#vpnCard.manual-entry-pending #anyConnectAccess,
+#vpnCard.manual-entry-pending #windowsPanel,
+#vpnCard.manual-entry-pending .vpn-profile-actions,
+#vpnCard.manual-entry-pending .vpn-overview{display:none!important}

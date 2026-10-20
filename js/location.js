@@ -80,6 +80,7 @@ function setEntryPointLatencies(latencies) {
 }
 
 function selectRecommendedEntryPoint() {
+  if (window.tolfManualEntry) return;
   if (
     recommendedEntryPoint !== "moscow"
     && recommendedEntryPoint !== "riga"

@@ -261,7 +261,7 @@ I18N.en = {
   profileLinkCopied: "Profile link copied.",
   profileShareFailed: "Could not share the profile.",
   changeVpnPassword: "Change VPN Password",
-  changePasswordNote: "This password is shared by your Apple and Android profiles for Riga and Moscow. After changing it, generate and install new profiles. Windows devices have separate passwords.",
+  changePasswordNote: "This password is shared by all profiles on all servers.",
   deleteVpnAccess: "Delete VPN Access",
   deleteVpnNote: "This removes Apple and Android VPN access on both servers. Windows devices and your TOLF account remain.",
 

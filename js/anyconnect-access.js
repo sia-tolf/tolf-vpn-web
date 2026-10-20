@@ -375,6 +375,7 @@
     window.refreshAnyConnectTransport?.(); render();
   }
   async function perform(action) {
+    if (window.tolfManualEntry && !window.tolfManualEntry.ensure()) return;
     if (busy || loading || !account || !window.isCiscoClientConfirmed?.(currentPlatform)) return;
     const token = epoch;
     busy = true; message = ""; error = false; render();

@@ -1,0 +1,42 @@
+
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const {JSDOM}=require(process.env.TOLF_JSDOM||'jsdom');
+const html=fs.readFileSync('index.html','utf8'),source=fs.readFileSync('js/vpn-compact-selectors.js','utf8');
+for(const language of ['ru','en','lv'])for(const platform of ['ios','android','windows'])for(const protocol of ['ikev2','anyconnect']){
+ const dom=new JSDOM(html,{runScripts:'outside-only',url:'https://vpn.tolf.is/'}),w=dom.window,d=w.document;
+ d.documentElement.lang=language;d.body.classList.add('manual-setup-open');
+ w.currentPlatform=platform;w.recommendedEntryPoint='moscow';w.entryPointChangedManually=false;
+ let transport=protocol,ingress='moscow',actions=0;
+ w.getVpnTransport=()=>transport;
+ w.ocAccess={ingress:()=>({id:ingress}),ingresses:()=>['moscow','riga','us'].map(id=>({id})),selectIngress:id=>{ingress=id}};
+ w.setInstallLink=()=>{};
+ w.setInterval=fn=>{w.sync=fn};w.setTimeout=()=>{};
+ d.getElementById('windowsDeviceServer').disabled=false;
+ for(const option of d.getElementById('windowsDeviceServer').options)option.disabled=false;
+ for(const value of ['ikev2','anyconnect'])d.getElementById(value==='ikev2'?'vpnTransportIkev2':'vpnTransportAnyConnect').onclick=()=>{transport=value;w.dispatchEvent(new w.Event('vpntransportchange'))};
+ w.eval(source);
+ const field=d.getElementById('vpnEntryDropdown'),value=()=>field.querySelector('.vpn-dropdown-value').textContent;
+ const placeholders={ru:'Выберите точку входа',en:'Choose an entry point',lv:'Izvēlieties ieejas punktu'};
+ assert.equal(value(),placeholders[language]);
+ assert.equal(d.querySelector('.vpn-entry-field').closest('#vpnCard').id,'vpnCard');
+ assert.match(d.querySelector('.vpn-entry-recommendation').textContent,language==='ru'?/Москва/:language==='en'?/Moscow/:/Maskava/);
+ assert.equal(w.tolfManualEntry.ensure(),false);
+ assert.equal(d.getElementById('anyConnectAccess').inert,true);
+ const action=d.getElementById('generateProfileButton');action.addEventListener('click',()=>actions++);
+ action.click();assert.equal(actions,0,'No action before explicit entry');
+ field.querySelector('[data-value="riga"]').click();w.sync();
+ assert.equal(w.tolfManualEntry.selected(),'riga');
+ assert.equal(w.tolfManualEntry.ensure(),true);
+ assert.equal(d.getElementById('anyConnectAccess').inert,false);
+ action.click();assert.equal(actions,1);
+ w.recommendedEntryPoint='moscow';w.sync();
+ assert.equal(w.tolfManualEntry.selected(),'riga','Recommendation must not overwrite choice');
+ transport=protocol==='ikev2'?'anyconnect':'ikev2';w.sync();
+ assert.equal(value(),placeholders[language],'Other protocol requires its own choice');
+ assert.equal(w.tolfManualEntry.ensure(),false);
+ assert.equal(d.querySelectorAll('#vpnCard [data-measurement-link]').length,0);
+ assert.equal(d.querySelectorAll('[data-measurement-link]').length,1);
+ dom.window.close();
+}
+console.log('18 manual setup combinations passed: 3 languages × 3 platforms × 2 protocols');

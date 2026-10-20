@@ -76,6 +76,7 @@ function renderLocalIdSettings() {
 }
 
 function getProfileSelection() {
+  if (window.tolfManualEntry && !window.tolfManualEntry.ensure()) return null;
   if (currentPlatform === "windows") return null;
   const server = getSelectedServerKey();
   const localId = getSelectedLocalId();

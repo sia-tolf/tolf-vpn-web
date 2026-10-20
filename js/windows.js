@@ -359,6 +359,7 @@ windowsName.addEventListener('input', () => windowsName.setCustomValidity(''));
 
 windowsForm.addEventListener('submit', event => {
   event.preventDefault();
+  if (window.tolfManualEntry && !window.tolfManualEntry.ensure()) return;
   if (!windowsAdding || vpnBusy || !windowsReady || !lastVpnState) return;
   if (!windowsServers.has(windowsServer.value)) return;
   const name = windowsName.value.trim();
