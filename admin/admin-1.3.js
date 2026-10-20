@@ -87,8 +87,11 @@ const t=key=>copy[lang][key]||copy.en[key]||key;
 const node=(tag,text,cls)=>{const el=document.createElement(tag);if(text!==undefined)el.textContent=String(text);if(cls)el.className=cls;return el;};
 const date=value=>{const d=new Date(value);return Number.isNaN(d.valueOf())?'—':d.toLocaleString(lang==='ru'?'ru-RU':lang==='lv'?'lv-LV':'en-GB');};
 async function api(path) {
- const r=await fetch('https://api.tolf.is/admin/'+path,{credentials:'include',cache:'no-store',headers:{Accept:'application/json'}});
- if(!r.ok){const e=new Error('request');e.status=r.status;throw e;}return r.json();
+ const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),25000);
+ try{
+  const r=await fetch('https://api.tolf.is/admin/'+path,{credentials:'include',cache:'no-store',headers:{Accept:'application/json'},signal:controller.signal});
+  if(!r.ok){const e=new Error('request');e.status=r.status;throw e;}return await r.json();
+ }finally{clearTimeout(timer);}
 }
 function clearData(){epoch++;detailEpoch++;$('results').replaceChildren();$('detailContent').replaceChildren();$('detail').hidden=true;$('status').textContent='';}
 function gate(message){allowed=false;clearData();$('workspace').hidden=true;$('gate').hidden=false;$('gateMessage').textContent=message;}
@@ -157,7 +160,11 @@ function showPolicies(data){
  }$('results').append(editor);
 }
 
+Object.assign(copy.ru,{trafficWindow:'Период учёта',connectionUnknown:'Статус подключения неизвестен'});
+Object.assign(copy.en,{trafficWindow:'Usage period',connectionUnknown:'Connection status unknown'});
+Object.assign(copy.lv,{trafficWindow:'Uzskaites periods',connectionUnknown:'Savienojuma statuss nav zināms'});
 function showTraffic(data){
+ $('results').append(node('p',t('trafficWindow')+': '+date(data.from)+' — '+date(data.observedAt),'admin-muted'));
  const controls=node('div',undefined,'admin-traffic-controls');controls.append(node('span',t('trafficPeriod'),'admin-muted'));
  for(const value of ['24h','7d','30d']){const labels={'24h':'period24h','7d':'period7d','30d':'period30d'};const button=node('button',t(labels[value]),value===trafficPeriod?'primary':'secondary');button.type='button';button.setAttribute('aria-pressed',String(value===trafficPeriod));button.addEventListener('click',()=>{if(trafficPeriod===value)return;trafficPeriod=value;load();});controls.append(button);}
  $('results').append(controls);
@@ -166,7 +173,7 @@ function showTraffic(data){
  for(const u of users){
   const row=node('tr'),account=node('td',u.number==null?'—':'#'+u.number);if(u.username)account.append(node('small',u.username));
   const ac=Boolean(u.connections?.anyconnect),ike=Boolean(u.connections?.ikev2);
-  let online=t('notConnected');if(ac&&ike)online=t('anyconnect')+' + '+t('ikev2');else if(ac)online=t('anyconnect');else if(ike)online=t('ikev2');
+  let online=t(u.connections?.anyconnectComplete===false?'connectionUnknown':'notConnected');if(ac&&ike)online=t('anyconnect')+' + '+t('ikev2');else if(ac)online=t('anyconnect');else if(ike)online=t('ikev2');
   const onlineCell=node('td',online);
   if(ac&&u.connections?.anyconnectNodes?.length)onlineCell.append(node('small',u.connections.anyconnectNodes.map(n=>t(n)).join(', ')));
   if(ike&&u.connections?.ikev2Nodes?.length)onlineCell.append(node('small',u.connections.ikev2Nodes.map(n=>t(n)).join(', ')));
