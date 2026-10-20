@@ -11,9 +11,9 @@
 <link rel="stylesheet" href="../css/return-control.css?v=20261005-header-match">
 <link rel="stylesheet" href="../css/connection-page.css?v=compact-mobile-20261020">
 <script defer src="../js/config.js?v=remember-platform-20261016"></script>
-<script defer src="../js/locales/en.js?v=current-route-20261020"></script>
-<script defer src="../js/locales/ru.js?v=current-route-20261020"></script>
-<script defer src="../js/locales/lv.js?v=current-route-20261020"></script>
+<script defer src="../js/locales/en.js?v=network-mode-labels-20261020"></script>
+<script defer src="../js/locales/ru.js?v=network-mode-labels-20261020"></script>
+<script defer src="../js/locales/lv.js?v=network-mode-labels-20261020"></script>
 <script defer src="../js/measurements-page.js?v=explicit-choice-20261020"></script>
 <script defer src="../js/librespeed.js?v=measurement-ui-20261019"></script>
 <script defer src="../js/measurement-targets.js?v=current-route-20261020"></script>
@@ -38,7 +38,7 @@
 <div><label for="measurementServer" data-i18n="measurementEntry">Entry point</label>
 <select id="measurementServer" class="settings-select" autocomplete="off" required><option value="" disabled selected data-i18n="measurementChooseEntry">Choose an entry point</option><option value="riga" data-i18n="cityRiga">Riga</option><option value="moscow" data-i18n="cityMoscow">Moscow</option><option value="us" data-i18n="cityNewYork">New York</option></select></div>
 <div><label for="measurementMode" data-i18n="measurementMode">Measurement mode</label>
-<select id="measurementMode" class="settings-select" autocomplete="off" required><option value="" disabled selected data-i18n="measurementChooseMode">Choose a measurement mode</option><option value="direct" data-i18n="measurementDirect">Direct</option><option value="vpn" data-i18n="measurementVpn">Through VPN</option></select></div>
+<select id="measurementMode" class="settings-select" autocomplete="off" required><option value="" disabled selected data-i18n="measurementChooseMode">Choose a measurement mode</option><option value="direct" data-i18n="measurementDirect">Through the public network</option><option value="vpn" data-i18n="measurementVpn">Through the TOLF network</option></select></div>
 </div>
 <p class="measurement-note" data-i18n="measurementChoiceHelp">This selection applies only to this measurement.</p>
 <p id="measurementModeHelp" class="measurement-help"></p>

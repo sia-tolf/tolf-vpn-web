@@ -337,7 +337,7 @@ I18N.en = {
   measureConnection: "Measure connection",
   measuringConnection: "Measuring…",
   vpnConnectionTo: "VPN speed: {city}",
-  connectionTestVpnUnavailable: "VPN connection to the selected location is unavailable",
+  connectionTestVpnUnavailable: "The selected location is unavailable through the TOLF network",
   connectionTo: "Connection to {city}",
   connectionLatency: "Latency",
   connectionJitter: "Jitter",
@@ -374,9 +374,9 @@ Object.assign(I18N.en, {"setupChoiceDescription": "Quick setup uses this device 
 
 Object.assign(I18N.en,{"ikev2Summary": "IKEv2 — built-in VPN on iPhone, iPad and Windows. Android uses the strongSwan VPN Client app.", "anyConnectSummary": "AnyConnect — VPN through Cisco Secure Client using TLS/HTTPS.", "quickIkev2Only": "Quick setup currently supports IKEv2. For AnyConnect, use manual setup."});
 
-Object.assign(I18N.en, {"connectionCheckTitle": "Check connection", "measurementEntry": "Entry point", "measurementMode": "Measurement mode", "measurementDirect": "Direct", "measurementVpn": "Through VPN", "connectionDirectTo": "Direct · {city}", "connectionVpnTo": "Through VPN · {city}", "measurementDirectHelp": "Measure the connection to the selected location’s public address using the device’s current route.", "measurementVpnHelp": "Connect to the selected location and confirm the connection below. Choosing a city here does not switch your VPN.", "measurementVpnOff": "VPN is disconnected on this device", "measurementConfirmDirect": "Disconnect the VPN and confirm it below to measure directly.", "measurementNetworkTitle": "TOLF network", "measurementNetworkHelp": "Links between TOLF servers. These values do not measure your device’s connection.", "measurementChoiceHelp": "This selection applies only to this measurement.", "measurementCancel": "Cancel measurement"});
+Object.assign(I18N.en, {"connectionCheckTitle": "Check connection", "measurementEntry": "Entry point", "measurementMode": "Measurement mode", "measurementDirect": "Through the public network", "measurementVpn": "Through the TOLF network", "connectionDirectTo": "Through the public network · {city}", "connectionVpnTo": "Through the TOLF network · {city}", "measurementDirectHelp": "Measure the connection to the selected location’s public address using the device’s current route.", "measurementVpnHelp": "Connect to the TOLF network and confirm access to the selected location below. Choosing a city here does not change the connection route.", "measurementVpnOff": "VPN is disconnected on this device", "measurementConfirmDirect": "Disconnect the VPN and confirm it below to measure directly.", "measurementNetworkTitle": "TOLF network", "measurementNetworkHelp": "Links between TOLF servers. These values do not measure your device’s connection.", "measurementChoiceHelp": "This selection applies only to this measurement.", "measurementCancel": "Cancel measurement"});
 
-Object.assign(I18N.en, {"measurementVpnNotReady": "VPN measurements for this entry point are not available yet. You can measure the direct connection."});
+Object.assign(I18N.en, {"measurementVpnNotReady": "Measurement through the TOLF network is not yet available for this location. You can measure through the public network."});
 
 Object.assign(I18N.en, {"measurementDirectViaVpn": "The direct connection to the selected location was not confirmed. The measurement did not start."});
 
@@ -384,5 +384,5 @@ Object.assign(I18N.en, {"measurementDirectUnverified": "The direct request path 
 
 Object.assign(I18N.en, {"measurementDirectPathChanged": "The direct path could not be confirmed after the measurement. Please try again; the result was cleared."});
 
-Object.assign(I18N.en, {"measurementVpnConnected": "VPN is connected to {city}"});
+Object.assign(I18N.en, {"measurementVpnConnected": "Connected to {city} through the TOLF network"});
 Object.assign(I18N.en, {"measurementChooseEntry": "Choose an entry point", "measurementChooseMode": "Choose a measurement mode", "measurementChooseBoth": "Choose an entry point and measurement mode to start the check."});
