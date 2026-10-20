@@ -140,16 +140,6 @@ function finishConnectionTest(aborted) {
   renderConnectionTestTarget();
 }
 
-function rejectDirectConnectionTest(path, changed = false) {
-  connectionTestPreparing = false;
-  resetConnectionTestResults();
-  finishConnectionTest(true);
-  connectionTestStatusKey = changed ? "measurementDirectPathChanged"
-    : path === "vpn" ? "measurementDirectViaVpn" : "measurementDirectUnverified";
-  renderConnectionTestTarget();
-  if (connectionTestStatus) connectionTestStatus.className = "vpn-overview-updated status-error";
-}
-
 async function startConnectionTest() {
   if (activeConnectionTest || connectionTestPreparing || typeof Speedtest !== "function") {
     if (typeof Speedtest !== "function" && connectionTestStatus) {
@@ -183,11 +173,6 @@ async function startConnectionTest() {
   try {
     const target = await resolveMeasurementTarget(serverKey, { refresh: true, purpose: mode === "direct" ? "direct" : "connection" });
     if (request !== connectionTestRequest) return;
-    if (target && mode === "direct") {
-      const path = await verifyDirectMeasurementPath(target.server);
-      if (request !== connectionTestRequest) return;
-      if (path !== "direct") {rejectDirectConnectionTest(path); return;}
-    }
     connectionTestPreparing = false;
     if (!target) {
       connectionTestStatusKey = mode === "vpn"
@@ -250,11 +235,6 @@ async function startConnectionTest() {
           }
         });
         if (request !== connectionTestRequest || activeConnectionTest !== speedtest) return;
-        if (mode === "direct") {
-          const path = await verifyDirectMeasurementPath(target.server);
-          if (request !== connectionTestRequest || activeConnectionTest !== speedtest) return;
-          if (path !== "direct") {rejectDirectConnectionTest(path, true); return;}
-        }
         finishConnectionTest(false);
       } catch (error) {
         if (request !== connectionTestRequest || activeConnectionTest !== speedtest) return;

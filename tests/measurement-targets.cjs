@@ -169,22 +169,16 @@ function setup() {
   await independent.c.startConnectionTest();
   assert.equal(independent.instances[0].target.server,publicMoscow,'measurement selector is independent of profile/platform selectors');
   independent.c.resetConnectionTestContext();
-  for(const ip of ['188.214.39.114','92.243.66.32','92.243.66.204','162.252.174.201','10.19.0.22','10.21.0.33','10.91.0.44']) {
-    const guard=setup();guard.setMode('public');guard.setTestMode('direct');guard.setReportedIP(ip);
-    await guard.c.startConnectionTest();
-    assert.equal(guard.instances.length,0,'VPN-routed requests must not start a direct measurement');
-    assert.equal(guard.c.connectionTestStatus.textContent,'measurementDirectViaVpn');
+  for (const city of ['riga','moscow','us']) {
+    const route=setup();route.setSelected(city);route.setMode('public');route.setTestMode('direct');
+    route.setReportedIP('10.20.0.5 - private IPv4 access');
+    await route.c.startConnectionTest();
+    assert.equal(route.instances.length,1,'router tunnel must not block the public endpoint: '+city);
+    route.instances[0].onupdate({pingStatus:'45',jitterStatus:'1',dlStatus:'200',ulStatus:'40'});
+    await route.instances[0].onend(false);
+    assert.equal(route.c.connectionTestStatus.textContent,'connectionTestComplete');
+    assert.equal(route.c.connectionTestDownload.textContent,'200.0 Mbps','keep completed measurements');
+    assert.ok(route.requests.every(url=>!url.includes('getIP.php')),'no source-IP classification request');
   }
-  const unknown=setup();unknown.setMode('public');unknown.setTestMode('direct');unknown.setReportedIP('masked-or-invalid');
-  await unknown.c.startConnectionTest();
-  assert.equal(unknown.instances.length,0);
-  assert.equal(unknown.c.connectionTestStatus.textContent,'measurementDirectUnverified');
-  const changed=setup();changed.setMode('public');changed.setTestMode('direct');
-  await changed.c.startConnectionTest();
-  changed.instances[0].onupdate({pingStatus:'45',jitterStatus:'1',dlStatus:'200',ulStatus:'40'});
-  changed.setReportedIP('188.214.39.114');
-  await changed.instances[0].onend(false);
-  assert.equal(changed.c.connectionTestStatus.textContent,'measurementDirectPathChanged');
-  assert.equal(changed.c.connectionTestDownload.textContent,'—','clear misleading results after a path change');
   console.log('PASS explicit direct/VPN routes for every city, private-only VPN, independent selection, cache and cancellation');
 })().catch(error => { console.error(error); process.exitCode = 1; });
