@@ -2,6 +2,8 @@
 (() => {
  const host=document.getElementById('ciscoClientInstall');
  if(!host)return;
+ const ua=navigator.userAgent||'';
+ const nativePlatform=/Android/i.test(ua)?'android':/Windows NT/i.test(ua)?'windows':/iPhone|iPad|iPod/i.test(ua)||(/Mac/i.test(navigator.platform||'')&&navigator.maxTouchPoints>1)?'ios':null;
  const remembered=new Set();
  let strongSwanConfirmed=false;
  try{strongSwanConfirmed=sessionStorage.getItem('tolfStrongSwanInstalled')==='true';}catch{}
@@ -13,9 +15,9 @@
   try{if(sessionStorage.getItem(confirmationKey(p))==='true')remembered.add(p);}catch{}
  }
  const texts={
-  ru:{title:'1. Установите Cisco Secure Client (AnyConnect).',install:'Установить Cisco Secure Client',confirmed:'Cisco Secure Client установлен',blocked:'Чтобы продолжить, подтвердите установку Cisco Secure Client в ручной настройке.',back:'К подтверждению установки'},
-  en:{title:'1. Install Cisco Secure Client (AnyConnect).',install:'Install Cisco Secure Client',confirmed:'Cisco Secure Client is installed',blocked:'Confirm Cisco Secure Client installation in manual setup to continue.',back:'Confirm installation'},
-  lv:{title:'1. Instalējiet Cisco Secure Client (AnyConnect).',install:'Instalēt Cisco Secure Client',confirmed:'Cisco Secure Client ir instalēts',blocked:'Lai turpinātu, manuālajā iestatīšanā apstipriniet Cisco Secure Client instalēšanu.',back:'Apstiprināt instalēšanu'}
+  ru:{title:'1. Установите Cisco Secure Client (AnyConnect).',install:'Установить Cisco Secure Client',confirmed:'Cisco Secure Client установлен',blocked:'Чтобы продолжить, подтвердите установку Cisco Secure Client в ручной настройке.',back:'К подтверждению установки',link:'Ссылка на установку',copy:'Копировать ссылку',copied:'Ссылка скопирована',copyFailed:'Не удалось скопировать. Выделенная ссылка доступна для копирования вручную.'},
+  en:{title:'1. Install Cisco Secure Client (AnyConnect).',install:'Install Cisco Secure Client',confirmed:'Cisco Secure Client is installed',blocked:'Confirm Cisco Secure Client installation in manual setup to continue.',back:'Confirm installation',link:'Installation link',copy:'Copy link',copied:'Link copied',copyFailed:'Could not copy. Copy the selected link manually.'},
+  lv:{title:'1. Instalējiet Cisco Secure Client (AnyConnect).',install:'Instalēt Cisco Secure Client',confirmed:'Cisco Secure Client ir instalēts',blocked:'Lai turpinātu, manuālajā iestatīšanā apstipriniet Cisco Secure Client instalēšanu.',back:'Apstiprināt instalēšanu',link:'Instalēšanas saite',copy:'Kopēt saiti',copied:'Saite nokopēta',copyFailed:'Neizdevās nokopēt. Nokopējiet atlasīto saiti manuāli.'}
  };
  const copy=()=>{
   const c={...(texts[document.documentElement.lang]||texts.en)};
@@ -49,6 +51,24 @@
   const app=document.createElement('a');app.className='button-link secondary';
   app.textContent=c.install;app.target='_blank';app.rel='noopener noreferrer';
   app.href=needsStrongSwan()?'https://play.google.com/store/apps/details?id=org.strongswan.android':p==='ios'?'https://apps.apple.com/app/id1135064690':p==='android'?'https://play.google.com/store/apps/details?id=com.cisco.anyconnect.vpn.android.avf':'https://www.infradead.org/openconnect-gui/download/openconnect-gui-1.6.2-win64.exe';
+  let installControl=app;
+  if(nativePlatform!==p){
+   const field=document.createElement('div');field.className='cisco-install-link';
+   const input=document.createElement('input');input.type='text';input.readOnly=true;
+   input.value=app.href;input.setAttribute('aria-label',c.link);input.spellcheck=false;
+   const button=document.createElement('button');button.type='button';button.className='secondary cisco-copy-link';
+   button.setAttribute('aria-label',c.copy);button.title=c.copy;
+   button.innerHTML='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M15 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h3"/></svg>';
+   const status=document.createElement('span');status.className='cisco-copy-status';status.setAttribute('role','status');
+   button.addEventListener('click',async()=>{
+    try{
+     if(navigator.clipboard?.writeText)await navigator.clipboard.writeText(input.value);
+     else{input.focus();input.select();if(!document.execCommand('copy'))throw new Error('copy');}
+     status.textContent=c.copied;
+    }catch{input.focus();input.select();status.textContent=c.copyFailed;}
+   });
+   field.append(input,button,status);installControl=field;
+  }
   const label=document.createElement('label');label.className='cisco-install-confirm';
   const check=document.createElement('input');check.type='checkbox';check.checked=appConfirmed();
   check.addEventListener('change',()=>{
@@ -62,9 +82,8 @@
    window.dispatchEvent(new Event('tolf:cisco-install-confirmed'));render();
   });
   const text=document.createElement('span');text.textContent=c.confirmed;
-  label.append(check,text);host.append(title,app,label);
+  label.append(check,text);host.append(title,installControl,label);
   const blocked=!transport();
-  if(needsApp()&&!appConfirmed()){const note=document.createElement('p');note.className='card-description';note.textContent=c.blocked;host.append(note);}
   for(const id of ['quickSetupLink','manualSetupLink'])document.getElementById(id)?.setAttribute('aria-disabled',String(blocked));
  }
  for(const id of ['quickSetupLink','manualSetupLink']){

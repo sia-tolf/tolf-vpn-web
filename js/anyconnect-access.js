@@ -426,11 +426,7 @@
     root.replaceChildren();
     if (!account) return;
     const c = copy(), mobile = currentPlatform !== "windows";
-    if (!window.isCiscoClientConfirmed?.(currentPlatform)) {
-      const gateCopy = window.getCiscoInstallCopy?.() || {blocked:"Confirm Cisco Secure Client installation in My VPN.",back:"Confirm installation"};
-      root.append(element("p",gateCopy.blocked,"oc-note"),button(gateCopy.back,()=>window.focusCiscoInstall?.()));
-      return;
-    }
+    if (!window.isCiscoClientConfirmed?.(currentPlatform)) return;
     const header = element("div", null, "oc-access-header");
     header.append(element("h3", c.title));
     if (devices.length && !addingDevice) header.append(button(c.additional, beginAdditionalDevice));
