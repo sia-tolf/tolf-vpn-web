@@ -29,6 +29,7 @@ function render(){
  document.querySelector('.trust-note').hidden=trial;
  for(const input of document.querySelectorAll('[name="package"]'))input.checked=input.value===selected;
  const url=new URL(location.href);url.searchParams.set('lang',language);history.replaceState(null,'',url);
+ window.dispatchEvent(new Event('tolf:billing-render'));
 }
 $('selectTrial').addEventListener('click',()=>{selected='trial';render();});
 for(const input of document.querySelectorAll('[name="package"]'))input.addEventListener('change',()=>{if(input.checked){selected=input.value;render();}});

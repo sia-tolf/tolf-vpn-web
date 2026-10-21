@@ -9,12 +9,12 @@ Customers choose a package on vpn.tolf.is, sign in, review the terms and proceed
 - Public company/contact page and terms prepared in English, Latvian and Russian.
 - Privacy page updated with controller identity and planned payment processing.
 - Ordinary reviewer account created and /me login verified; credentials are stored outside git.
-- Billing is still a preview. Sandbox API checkout and signed notifications are NOT implemented or tested yet.
+- Sandbox checkout and signed order notifications are implemented, restricted to the reviewer and existing administrators. Unit/security and UI tests pass. End-to-end provider results are recorded separately below. Other accounts still see the preview.
 - Live payments, traffic crediting and commercial quota enforcement remain disabled.
 - Do not reconfirm the merchant application as complete until the sandbox tests below pass.
 
 ## Required next inputs
-1. Merchant places Sandbox Access Key and Sandbox Secret Key on UK using setup/payments/store-sandbox-keys.py. Keys must never enter git, HTML, browser storage or logs.
+1. Sandbox keys have been stored on UK and accepted by the authenticated provider API. Keys must never enter git, HTML, browser storage or logs.
 2. Merchant reviews final prices/taxes and the terms, including the proportionate-service withdrawal policy, before checkout is activated.
 3. Merchant provides the requested residence-permit copy directly to Montonio through their verified secure channel. Do not place identity documents on the public site or in git.
 
