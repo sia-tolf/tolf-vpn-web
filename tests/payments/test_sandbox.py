@@ -53,7 +53,7 @@ def test_access_is_restricted(env):
     assert c.get('/billing/capabilities',headers=headers('admin')).json()['mode']=='sandbox'
     assert c.get('/billing/sandbox/account',headers=headers()).json()['testBalanceBytes']==0
 
-@pytest.mark.parametrize('changes',[{'amount':0.01},{'userId':'victim'},{'acceptTerms':False},{'startNow':False},{'termsVersion':'old'},{'package':'1'},{'method':'applePay'},{'method':'paymentInitiation','bankCountry':'LV','bankCode':'forged'}])
+@pytest.mark.parametrize('changes',[{'amount':0.01},{'userId':'victim'},{'acceptTerms':False},{'startNow':False},{'termsVersion':'old'},{'package':'1'},{'package':[]},{'locale':[]},{'method':'applePay'},{'method':'paymentInitiation','bankCountry':'LV','bankCode':'forged'}])
 def test_tampering_and_consent_rejected(env,changes):
     c,state=env
     assert c.post('/billing/sandbox/orders',headers=headers(),json=payload(**changes)).status_code==400

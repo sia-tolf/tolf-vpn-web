@@ -244,7 +244,7 @@ def install(app,ns):
         if set(p)-expected:
             raise HTTPException(400,'unexpected_checkout_fields')
         sku=p.get('package')
-        if sku not in PACKAGES:
+        if not isinstance(sku,str) or sku not in PACKAGES:
             raise HTTPException(400,'invalid_package')
         if p.get('termsVersion')!=TERMS or p.get('acceptTerms') is not True or p.get('startNow') is not True:
             raise HTTPException(400,'checkout_consent_required')
@@ -253,7 +253,7 @@ def install(app,ns):
         if method not in methods['methods']:
             raise HTTPException(400,'payment_method_unavailable')
         locale=p.get('locale')
-        if locale not in {'en','ru','lv'}:
+        if not isinstance(locale,str) or locale not in {'en','ru','lv'}:
             raise HTTPException(400,'invalid_locale')
         options={}
         if method=='paymentInitiation':
@@ -299,7 +299,7 @@ def install(app,ns):
             provider_id=matching_order(result,row)
             url=result.get('paymentUrl','')
             parsed=urlparse(url)
-            if parsed.scheme!='https' or parsed.hostname not in {'sandbox-stargate.montonio.com','sandbox-checkout.montonio.com'} or parsed.username or parsed.port not in (None,443):
+            if parsed.scheme!='https' or parsed.hostname not in {'sandbox-stargate.montonio.com','sandbox-checkout.montonio.com','sandbox-gateway.montonio.com'} or parsed.username or parsed.port not in (None,443):
                 raise HTTPException(502,'unsafe_payment_url')
             with database() as c:
                 c.execute("UPDATE orders SET provider_uuid=?,payment_url=?,status=CASE WHEN status='PAID' THEN status ELSE 'PENDING' END,updated=? WHERE reference=?",

@@ -9,7 +9,7 @@ This module is sandbox-only. It never modifies live traffic balances or enforcem
 - Copy tolf_billing_sandbox.py to /opt/tolf-api/ mode 0644, back up main.py, append import tolf_billing_sandbox and tolf_billing_sandbox.install(app, globals()). Restart tolf-api and verify /billing/capabilities.
 - Database /var/lib/tolf-api/montonio-sandbox.db is owned by tolfa, mode 0600. Never merge its credits into the live ledger.
 - Public billing/sandbox.js upgrades the preview only when authenticated /billing/capabilities explicitly enables sandbox for that account.
-- Hosted sandbox URLs may use sandbox-checkout.montonio.com or sandbox-stargate.montonio.com. No live URL or fallback is accepted.
+- Hosted sandbox URLs may use sandbox-checkout.montonio.com, sandbox-gateway.montonio.com or sandbox-stargate.montonio.com. No live URL or fallback is accepted.
 - The return token is validated but does not create credits. Signed webhook or authenticated provider GET verification credits exactly once.
 - Tests: pytest tests/payments/test_sandbox.py and node tests/payments/frontend.cjs with TOLF_JSDOM pointing to jsdom.
 

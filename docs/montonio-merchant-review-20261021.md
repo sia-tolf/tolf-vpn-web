@@ -38,3 +38,11 @@ https://help.montonio.com/en/articles/217849-website-checklist-for-montonio-merc
 https://docs.montonio.com/api/stargate/checklist
 https://docs.montonio.com/api/stargate/guides/orders
 https://www.ptac.gov.lv/lv/atteikuma-tiesibas
+
+## Provider end-to-end checks — 21 October 2026
+- Card checkout, 200 GB / EUR 9: PAID; one signed webhook received, exactly one credit of 200,000,000,000 test bytes. Official Adyen synthetic test card used.
+- Latvian bank checkout, 50 GB / EUR 3: PAID; one signed webhook received, exactly one credit of 50,000,000,000 test bytes.
+- Cancelled card checkout, 50 GB / EUR 3: returned without payment; provider order remains PENDING and no credit exists. Cancellation of checkout does not necessarily close the provider order, so it may remain resumable until expiry.
+- Live balances and quotas unchanged. Current review account balance is 250 test GB.
+- Backend security tests and frontend consent/language/bank-selection tests pass.
+- Apple Pay / Google Pay are returned as enabled by the sandbox API but have not been completed using real device wallets.
