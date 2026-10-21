@@ -78,13 +78,32 @@ body{margin:0;background:var(--background);color:var(--text)}
 
 @media(min-width:761px){.benefits{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px}.benefits>div+div{border-top:0;border-left:1px solid var(--border);padding-top:0;padding-left:20px;margin-top:0}}
 
-/* Full-width account/trial overview followed by two aligned purchase columns. */
+/* Wide screens use complete rows rather than unequal purchase columns. */
 @media(min-width:761px){
- .trial-card{display:grid;grid-template-columns:minmax(0,1fr) 240px;gap:4px 26px;margin-bottom:26px}
+ .billing-layout{display:block}
+ .billing-options,.billing-checkout{display:contents}
+ .balance-card{padding:16px 20px}
+ .trial-card{display:grid;grid-template-columns:minmax(0,1fr) 240px;gap:4px 24px}
  .trial-card .trial-heading{grid-column:1/-1}
  .trial-card>p{grid-column:1;margin:4px 0}
  .trial-card>#selectTrial{grid-column:2;grid-row:2/4;align-self:center;margin:0}
- .billing-options{display:flex;flex-direction:column}
- .billing-options>.speed-note{margin-top:auto;margin-bottom:0}
- .billing-checkout>.trust-note{margin-bottom:0}
+ .package-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+ .package-list legend{grid-column:1/-1}
+ .package-option{margin:0;display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:10px;padding:18px 16px}
+ .package-option .discount{grid-column:2;grid-row:2;justify-self:start}
+ .package-option .package-price{grid-column:3;grid-row:1}
+ .draft-price{margin:10px 0 20px}
+ .payment-list{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+ .payment-option{min-height:64px;padding:16px}
+ .summary-card{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:12px 28px;align-items:center;margin-bottom:16px}
+ .summary-card dl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;grid-row:1/4}
+ .summary-card dl>div{display:flex;flex-direction:column;gap:8px;margin:0}
+ .summary-card dd{font-size:23px;text-align:left}
+ .summary-card .summary-total{border:0;border-left:1px solid var(--border);padding:0 0 0 20px;margin:0}
+ .summary-total dd{font-size:30px;line-height:1}
+ .summary-card>#checkoutButton,.summary-card>#checkoutAvailability,.summary-card>.no-subscription{grid-column:2;margin:0}
+ .summary-card>#checkoutAvailability,.summary-card>.no-subscription{text-align:center}
+ .trust-note{margin:0 0 20px}
+ .speed-note{margin-bottom:20px}
+ .benefits{margin-top:0}
 }
