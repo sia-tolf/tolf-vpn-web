@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="../tolf-buttons.20260917-3.css">
 <link rel="stylesheet" href="../tolf-header.20260919-1.css?v=languages-2">
 <link rel="stylesheet" href="../css/return-control.css?v=20261005-header-match">
-<link rel="stylesheet" href="page.css?v=billing-preview-20261020">
+<link rel="stylesheet" href="page.css?v=balanced-wide-20261021">
 <script defer src="page.js?v=billing-preview-20261020"></script>
 <script defer src="../js/return-control.js?v=20261005"></script>
 </head>
@@ -24,8 +24,6 @@
 <h1 data-text="title">Трафик и оплата</h1>
 <p class="billing-subtitle" data-text="subtitle">Покупайте гигабайты, а не время</p>
 <p class="preview-note" role="note" data-text="preview">Предварительный просмотр. Оплата и активация пакетов пока недоступны.</p>
-<div class="billing-layout">
-<div class="billing-options">
 <section class="billing-card balance-card" aria-labelledby="balanceTitle">
 <div><h2 id="balanceTitle" data-text="balance">Остаток оплаченного трафика</h2><strong class="balance-value">— <span data-text="gb">ГБ</span></strong><p class="muted" data-text="balanceHelp">Баланс появится после запуска пакетов.</p></div>
 <span class="balance-badge" data-text="neverExpires">Без срока сгорания</span>
@@ -36,6 +34,8 @@
 <p class="muted" data-text="trialSeparate">Пробный трафик учитывается отдельно от оплаченного.</p>
 <button id="selectTrial" class="billing-secondary" type="button" aria-pressed="false" data-text="tryFree">Попробовать бесплатно</button>
 </section>
+<div class="billing-layout">
+<div class="billing-options">
 <fieldset class="package-list"><legend data-text="topUp">Пополнить трафик</legend>
 <label class="package-option"><input type="radio" name="package" value="50"><span class="package-copy"><strong>50 <span data-text="gb">ГБ</span></strong><small>0,06 € / <span data-text="gb">ГБ</span></small></span><strong class="package-price">3 €</strong></label>
 <label class="package-option"><input type="radio" name="package" value="200" checked><span class="package-copy"><strong>200 <span data-text="gb">ГБ</span></strong><small>0,045 € / <span data-text="gb">ГБ</span></small></span><span class="discount" data-discount="25">Выгода 25%</span><strong class="package-price">9 €</strong></label>
