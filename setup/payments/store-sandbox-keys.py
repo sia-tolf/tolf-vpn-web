@@ -10,10 +10,24 @@ import tempfile
 def main():
     if os.geteuid() != 0:
         raise SystemExit("Run as root on the UK server.")
-    access = getpass.getpass("Montonio Sandbox Access Key (hidden): ").strip()
-    secret = getpass.getpass("Montonio Sandbox Secret Key (hidden): ").strip()
-    if not access or not secret or any(c in access+secret for c in "\r\n\x00"):
-        raise SystemExit("Both keys are required; no file was changed.")
+    print("Ввод ключей Montonio Sandbox. Символы при вставке не отображаются.")
+    print("Вставляйте по одному ключу, затем нажимайте Enter. Ctrl+C — отмена.")
+    def read_key(label):
+        while True:
+            try:
+                value = getpass.getpass(label + ": ").strip()
+            except (EOFError, KeyboardInterrupt):
+                raise SystemExit("\nВвод отменён. Файл не изменён.")
+            if not value:
+                print("Поле пустое. Вставьте ключ ещё раз; при скрытом вводе символов не видно.")
+                continue
+            if any(ord(c) < 32 or ord(c) == 127 for c in value):
+                print("Вставлен перенос строки или управляющий символ. Скопируйте только сам ключ.")
+                continue
+            print("Ключ принят.")
+            return value
+    access = read_key("1. Sandbox Access Key")
+    secret = read_key("2. Sandbox Secret Key")
     folder=Path("/etc/tolf-payments")
     folder.mkdir(mode=0o750,exist_ok=True)
     group=grp.getgrnam("tolfa").gr_gid
