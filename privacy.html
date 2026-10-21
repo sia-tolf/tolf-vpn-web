@@ -92,8 +92,8 @@
             <p>Account deletion does not guarantee immediate erasure of backups, previously issued profile files or infrastructure logs. Removing a profile from your device is a separate action.</p>
           </section>
 
-          <p class="privacy-date">Updated: <time datetime="2026-09-04">4 September 2026</time>.</p>
-        </article>
+          <p class="privacy-date">Updated: <time datetime="2026-10-21">21 October 2026</time>.</p>
+        <section><h3>Controller and payments</h3><p>The controller is SIA “Tolf”, registration number 40203551237, Brīvības iela 101–6, Rīga, LV-1001, Latvia. Contact: tolf@velbnk.is; +371 26165804. When payments launch, order identifiers, package, amount, currency, payment status and transaction references will be linked to your account to supply the service, handle refunds and meet accounting obligations. Montonio is the planned payment provider; its privacy notice applies to payment data it processes. TOLF does not receive the full card number or card security code. Statutory transaction records may need to be retained after account deletion. Contact the controller to exercise applicable data-access, correction, deletion or objection rights; you may also complain to Latvia’s Data State Inspectorate (dvi.gov.lv).</p><p><a href="contact.html?lang=en">Company and contacts</a> · <a href="terms.html?lang=en">Terms of service</a> · <a href="https://www.montonio.com/legal/privacy-policy">Montonio</a></p></section></article>
 
         <article id="privacyRu" lang="ru" aria-labelledby="privacyRuTitle" hidden>
           <h2 id="privacyRuTitle">Приватность</h2>
@@ -143,8 +143,8 @@
             <p>Удаление аккаунта не гарантирует немедленного удаления резервных копий, ранее выпущенных файлов профиля или журналов инфраструктуры. Удаление профиля с устройства выполняется отдельно.</p>
           </section>
 
-          <p class="privacy-date">Обновлено: <time datetime="2026-09-04">4 сентября 2026 года</time>.</p>
-        </article>
+          <p class="privacy-date">Обновлено: <time datetime="2026-10-21">21 октября 2026 года</time>.</p>
+        <section><h3>Оператор данных и платежи</h3><p>Оператор — SIA «Tolf», регистрационный номер 40203551237, Brīvības iela 101–6, Rīga, LV-1001, Латвия. Контакты: tolf@velbnk.is; +371 26165804. После запуска оплаты к аккаунту будут привязываться номер заказа, пакет, сумма, валюта, статус и идентификаторы платежа для оказания услуги, возврата и выполнения требований бухгалтерского учёта. Планируемый платёжный провайдер — Montonio; к обрабатываемым им платёжным данным применяется его политика конфиденциальности. TOLF не получает полный номер карты и защитный код. Предусмотренные законом платёжные записи могут сохраняться после удаления аккаунта. Для реализации применимых прав на доступ, исправление, удаление данных или возражение обратитесь к оператору; также можно подать жалобу в латвийскую Государственную инспекцию данных (dvi.gov.lv).</p><p><a href="contact.html?lang=ru">Компания и контакты</a> · <a href="terms.html?lang=ru">Условия сервиса</a> · <a href="https://www.montonio.com/legal/privacy-policy">Montonio</a></p></section></article>
 
         <article id="privacyLv" lang="lv" aria-labelledby="privacyLvTitle" hidden>
           <h2 id="privacyLvTitle">Privātums</h2>
@@ -194,8 +194,8 @@
             <p>Konta dzēšana negarantē tūlītēju rezerves kopiju, iepriekš izdotu profilu failu vai infrastruktūras žurnālu dzēšanu. Profils no ierīces jādzēš atsevišķi.</p>
           </section>
 
-          <p class="privacy-date">Atjaunināts: <time datetime="2026-09-04">2026. gada 4. septembrī</time>.</p>
-        </article>
+          <p class="privacy-date">Atjaunināts: <time datetime="2026-10-21">2026. gada 21. oktobrī</time>.</p>
+        <section><h3>Pārzinis un maksājumi</h3><p>Pārzinis ir SIA “Tolf”, reģistrācijas numurs 40203551237, Brīvības iela 101–6, Rīga, LV-1001, Latvija. Kontakti: tolf@velbnk.is; +371 26165804. Pēc maksājumu ieviešanas kontam tiks piesaistīti pasūtījuma numurs, paka, summa, valūta, maksājuma statuss un darījuma identifikatori pakalpojuma sniegšanai, atmaksai un grāmatvedības pienākumu izpildei. Plānotais maksājumu sniedzējs ir Montonio; tā apstrādātajiem maksājumu datiem piemēro tā privātuma politiku. TOLF nesaņem pilnu kartes numuru vai drošības kodu. Likumā prasītie darījumu ieraksti var tikt saglabāti pēc konta dzēšanas. Lai izmantotu piemērojamās piekļuves, labošanas, dzēšanas vai iebildumu tiesības, sazinieties ar pārzini; varat arī iesniegt sūdzību Datu valsts inspekcijā (dvi.gov.lv).</p><p><a href="contact.html?lang=lv">Uzņēmums un kontakti</a> · <a href="terms.html?lang=lv">Pakalpojuma noteikumi</a> · <a href="https://www.montonio.com/legal/privacy-policy">Montonio</a></p></section></article>
       </div>
     </div>
     <noscript>
@@ -234,8 +234,8 @@
         });
         try { localStorage.setItem("tolfLanguage", selected); } catch {}
       }
-      let language;
-      try { language = localStorage.getItem("tolfLanguage"); } catch {}
+      let language = new URL(location.href).searchParams.get("lang");
+      if (!language) try { language = localStorage.getItem("tolfLanguage"); } catch {}
       if (!["en", "ru", "lv"].includes(language)) {
         const browserLanguage = (navigator.language || "en").toLowerCase();
         language = browserLanguage.startsWith("ru") ? "ru" : browserLanguage.startsWith("lv") ? "lv" : "en";
