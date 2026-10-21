@@ -11,21 +11,20 @@ for(const language of ['ru','en','lv']){
  for(const [gb,price] of [[50,3],[200,9],[500,20]]){
   const input=d.querySelector('[name="package"][value="'+gb+'"]');
   input.checked=true;input.dispatchEvent(new w.Event('change'));
-  assert.equal(d.getElementById('totalPrice').textContent,price+' €');
-  assert.ok(d.getElementById('selectedPackage').textContent.startsWith(String(gb)));
+  assert.ok(d.getElementById('checkoutButton').textContent.endsWith(price+' €'));
+  assert.equal(d.querySelector('.checkout-action dl'),null);
   assert.equal(d.getElementById('paymentMethods').hidden,false);
  }
  d.getElementById('selectTrial').click();
- assert.equal(d.getElementById('totalPrice').textContent,'0 €');
- assert.ok(d.getElementById('addedTraffic').textContent.startsWith('1 '));
+ assert.ok(/1 (ГБ|GB)/.test(d.getElementById('checkoutButton').textContent));
  assert.equal(d.getElementById('selectTrial').getAttribute('aria-pressed'),'true');
  assert.equal(d.getElementById('paymentMethods').hidden,true);
  assert.equal(d.getElementById('checkoutButton').disabled,true);
  assert.ok([...d.querySelectorAll('[name="package"]')].every(x=>!x.checked));
  d.querySelector('[data-lang="en"]').click();
- assert.equal(d.getElementById('totalPrice').textContent,'0 €');
+ assert.ok(/1 (ГБ|GB)/.test(d.getElementById('checkoutButton').textContent));
  const input=d.querySelector('[name="package"][value="200"]');input.checked=true;input.dispatchEvent(new w.Event('change'));
- assert.equal(d.getElementById('totalPrice').textContent,'9 €');
+ assert.equal(d.getElementById('checkoutButton').textContent,'Pay 9 €');
  assert.equal(d.getElementById('selectTrial').getAttribute('aria-pressed'),'false');
  assert.equal(d.getElementById('paymentMethods').hidden,false);
  assert.equal(d.querySelectorAll('input[name*="card"],input[name*="cvc"]').length,0);

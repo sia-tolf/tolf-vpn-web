@@ -7,8 +7,8 @@
 <link rel="stylesheet" href="../tolf-buttons.20260917-3.css">
 <link rel="stylesheet" href="../tolf-header.20260919-1.css?v=languages-2">
 <link rel="stylesheet" href="../css/return-control.css?v=20261005-header-match">
-<link rel="stylesheet" href="page.css?v=aligned-rows-20261021-2">
-<script defer src="page.js?v=billing-preview-20261020"></script>
+<link rel="stylesheet" href="page.css?v=simple-checkout-20261021">
+<script defer src="page.js?v=simple-checkout-20261021"></script>
 <script defer src="../js/return-control.js?v=20261005"></script>
 </head>
 <body>
@@ -53,13 +53,11 @@
 <label class="payment-option" id="googlePayMethod" hidden><input type="radio" name="payment" value="google"><span class="wallet-wordmark" aria-hidden="true">G</span><span>Google Pay</span></label>
 </fieldset>
 <p id="paymentPreviewNote" class="muted" data-text="methodPreview">Предварительный набор способов оплаты. Доступность будет подтверждена при подключении Montonio.</p>
-<section class="billing-card summary-card" aria-labelledby="summaryTitle">
-<h2 id="summaryTitle" class="visually-hidden" data-text="summary">Итог</h2>
-<dl><div><dt data-text="selected">Выбрано</dt><dd id="selectedPackage">200 ГБ</dd></div><div><dt data-text="added">Будет добавлено</dt><dd id="addedTraffic">200 ГБ</dd></div><div class="summary-total"><dt data-text="total">К оплате</dt><dd id="totalPrice">9 €</dd></div></dl>
+<div class="checkout-action">
 <button id="checkoutButton" class="billing-primary" type="button" disabled aria-describedby="checkoutAvailability">Оплатить 9 €</button>
 <p id="checkoutAvailability" class="muted" role="status" data-text="checkoutUnavailable">Онлайн-оплата ещё не открыта.</p>
 <p class="no-subscription" data-text="noSubscription">Без подписки и автоматических списаний</p>
-</section>
+</div>
 <p class="trust-note"><strong data-text="secure">Безопасная оплата через Montonio</strong><span data-text="privacy">TOLF не получает реквизиты вашей карты.</span></p>
 </aside>
 </div>

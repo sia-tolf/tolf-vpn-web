@@ -52,12 +52,6 @@ body{margin:0;background:var(--background);color:var(--text)}
 .payment-icon{font-size:22px;color:var(--secondary)}
 .wallet-wordmark{font-weight:650;font-size:17px}
 #paymentPreviewNote{margin:10px 0 18px}
-.summary-card dl{margin:0}
-.summary-card dl>div{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 0 12px}
-.summary-card dt{font-size:14px;color:var(--secondary)}
-.summary-card dd{margin:0;font-weight:600;font-size:16px;text-align:right}
-.summary-card .summary-total{padding-top:16px;margin-top:18px;border-top:1px solid var(--border)}
-.summary-total dd{font-size:30px}
 .billing-primary{background:var(--billing-blue);color:#fff;border:1px solid var(--billing-blue);font-weight:600}
 .billing-primary:disabled{opacity:.6;cursor:default}
 .no-subscription{text-align:center;font-size:12px;color:var(--secondary);margin:14px 0 0}
@@ -95,15 +89,11 @@ body{margin:0;background:var(--background);color:var(--text)}
  .draft-price{margin:10px 0 20px}
  .payment-list{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
  .payment-option{min-height:64px;padding:16px}
- .summary-card{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:12px 28px;align-items:center;margin-bottom:16px}
- .summary-card dl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;grid-row:1/4}
- .summary-card dl>div{display:flex;flex-direction:column;gap:8px;margin:0}
- .summary-card dd{font-size:23px;text-align:left}
- .summary-card .summary-total{border:0;border-left:1px solid var(--border);padding:0 0 0 20px;margin:0}
- .summary-total dd{font-size:30px;line-height:1}
- .summary-card>#checkoutButton,.summary-card>#checkoutAvailability,.summary-card>.no-subscription{grid-column:2;margin:0}
- .summary-card>#checkoutAvailability,.summary-card>.no-subscription{text-align:center}
  .trust-note{margin:0 0 20px}
  .speed-note{margin-bottom:20px}
  .benefits{margin-top:0}
 }
+
+.checkout-action{margin:18px 0;text-align:center}
+.checkout-action .muted{margin:8px 0 0}
+.checkout-action .no-subscription{margin:8px 0 0}
