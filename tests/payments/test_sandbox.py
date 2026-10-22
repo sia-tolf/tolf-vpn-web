@@ -362,3 +362,70 @@ def test_resume_requires_fresh_provider_check_and_fresh_safe_url(env,monkeypatch
         return original(method,path,p)
     monkeypatch.setattr(sb,'provider',unavailable)
     assert c.get(path,headers=headers()).status_code==502
+
+
+def pdf_text(content):
+    import subprocess
+    return subprocess.run(['pdftotext','-layout','-','-'],input=content,capture_output=True,check=True).stdout.decode('utf-8')
+
+@pytest.mark.parametrize('kind',['purchases','movements','balances','fees'])
+@pytest.mark.parametrize('locale',['ru','en','lv'])
+def test_accounting_pdf_matches_csv_and_is_admin_only(env,kind,locale):
+    import csv,io
+    c,state=env
+    order,data=paid_order(env,buyer=BUYER)
+    data['paymentStatus']='PAID'
+    data['paymentIntents']=[{'uuid':'fee-known','status':'PAID','serviceFee':'0.25','serviceFeeCurrency':'EUR'},
+                            {'uuid':'fee-unknown','status':'PAID','serviceFee':None,'serviceFeeCurrency':'EUR'}]
+    sb.apply_status(data,'api')
+    month=time.strftime('%Y-%m',time.gmtime())
+    url='/billing/sandbox/admin/export.pdf?month='+month+'&kind='+kind+'&locale='+locale
+    assert c.get(url).status_code==401
+    assert c.get(url,headers=headers()).status_code==403
+    assert c.get(url,headers=headers('ordinary')).status_code==403
+    result=c.get(url,headers=headers('admin'))
+    assert result.status_code==200,result.text
+    assert result.content.startswith(b'%PDF-') and result.headers['content-type']=='application/pdf'
+    assert result.headers['cache-control']=='no-store'
+    assert 'attachment' in result.headers['content-disposition']
+    text=pdf_text(result.content)
+    assert sb.records.EXPORT_TEXT[locale]['title'] in text
+    assert month in text and 'SANDBOX' in text and order['reference'] in text
+    rows=list(csv.DictReader(io.StringIO(c.get('/billing/sandbox/admin/export.csv?month='+month+'&kind='+kind,headers=headers('admin')).text.lstrip(chr(65279)))))
+    assert rows
+    if kind=='purchases':
+        assert BUYER['name'] in text and '9.00 EUR' in text
+    if kind=='balances':
+        assert '200.000 GB (200000000000 B)' in text
+    if kind=='fees':
+        assert '0.25 EUR' in text and sb.records.EXPORT_TEXT[locale]['unknownFees'] in text
+    with sb.database() as db:
+        assert db.execute('SELECT COUNT(*) FROM ledger_events').fetchone()[0]==1
+        assert db.execute('SELECT COUNT(*) FROM documents').fetchone()[0]==1
+
+def test_accounting_pdf_empty_and_validation(env):
+    c,_=env
+    month='2020-01'
+    result=c.get('/billing/sandbox/admin/export.pdf?month='+month,headers=headers('admin'))
+    assert result.status_code==200 and 'No records for the selected period.' in pdf_text(result.content)
+    for query in ['month=2026-13','month=2026-10&kind=invalid','month=2026-10&locale=invalid']:
+        assert c.get('/billing/sandbox/admin/export.pdf?'+query,headers=headers('admin')).status_code==400
+
+def test_accounting_pdf_refund_totals_and_multiple_pages(env,monkeypatch,tmp_path):
+    c,_=env
+    original=sb.records.export
+    import csv,io
+    out=io.StringIO()
+    writer=csv.writer(out)
+    writer.writerow(['mode','document','issued_utc','paid_utc','order','buyer_name','buyer_registration','gb','gross_eur','vat_policy','tax_country','country_status'])
+    for i in range(18):
+        writer.writerow(['sandbox',('TOLF-SB-CR-' if i==17 else 'TOLF-SB-')+str(i),'2026-10-22T12:00:00+00:00','2026-10-22T12:00:00+00:00','TOLF-SB-report-'+str(i),'SIA Rīga <&> Длинное имя покупателя','40203551237',200,'9.00',sb.records.POLICY,'','unresolved'])
+    monkeypatch.setattr(sb.records,'export',lambda *a:out.getvalue().encode('utf-8-sig'))
+    result=c.get('/billing/sandbox/admin/export.pdf?month=2026-10&locale=lv',headers=headers('admin'))
+    assert result.status_code==200
+    text=pdf_text(result.content)
+    assert '153.00 EUR' in text and '9.00 EUR' in text and '144.00 EUR' in text
+    assert 'TOLF-SB-report-17' in text and 'Rīga <&>' in text
+    assert text.count(chr(12))>1
+    # Synthetic report retained only for rendering QA, not customer data.
+    Path('/tmp/tolf-accounting-report-qa.pdf').write_bytes(result.content)

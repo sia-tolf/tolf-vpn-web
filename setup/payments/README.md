@@ -64,3 +64,10 @@ Visual QA: Chromium headless at 1100px and 390px verified equal buyer-control to
 ## Billing visual consistency and transient return status
 Compact package controls use one headline row: GB, savings badge, price; unit price is below, with no second badge row. Tablet widths stack packages; wide screens retain three columns. Billing colours and action buttons reuse the same TOLF tokens and primary/secondary classes as the VPN page.
 Both order-token and sandboxOrder return parameters are removed from the URL immediately after capture, before async verification. Refreshing the cleaned URL loads history without replaying a prior success banner. Switching packages/language or restoring the page from back-forward cache clears transient result text. Persistent payment state remains in history.
+
+## Accounting reports in PDF and CSV
+Admin-only /billing/sandbox/admin/export.pdf accepts the same UTC month and report kind as export.csv, plus locale=ru|en|lv (default en).
+The PDF uses the CSV export as its data source inside a read transaction: identical period filtering, no duplicate billing supplements, no ledger changes.
+Every CSV field is included in readable record tables, with localised field labels, exact bytes alongside GB, repeating record headings and page numbers.
+The header marks all reports SANDBOX. Purchases and refunds are totalled separately; fees are grouped by currency and unavailable fees remain unknown.
+The frontend exposes PDF and CSV next to each of the four report types; ordinary users cannot access either export endpoint.

@@ -346,3 +346,136 @@ def export(c,month,kind):
             w.writerow(['sandbox',r['order_reference'],r['intent_id'],'' if r['fee_cents'] is None else f"{r['fee_cents']/100:.2f}",r['currency'],r['status'],datetime.fromtimestamp(r['observed'],timezone.utc).isoformat()])
     else: raise HTTPException(400,'invalid_export_kind')
     return ('﻿'+out.getvalue()).encode('utf-8')
+
+EXPORT_TEXT = {
+ 'ru': {'title':'Бухгалтерская выгрузка TOLF','test':'ТЕСТОВЫЕ ДАННЫЕ - SANDBOX',
+        'period':'Период (UTC)','generated':'Сформировано (UTC)','rows':'Количество записей','empty':'За выбранный период записей нет.',
+        'purchases':'Покупки и возвраты','movements':'Движение трафика','balances':'Остатки пакетов','fees':'Комиссии Montonio',
+        'note':'Реальные деньги не списывались. Это тестовый отчёт, а не налоговый счёт. Пустое значение обозначено прочерком.',
+        'balanceNote':'Остатки рассчитаны на конец выбранного месяца; для текущего месяца - по имеющимся данным. Оценки стоимости не являются бухгалтерскими проводками. Распределение стоимости SmartDNS не определено.',
+        'feeNote':'Отсутствующая комиссия не считается нулевой. Показаны последние известные сведения по оплатам выбранного месяца.',
+        'page':'Страница','total':'Итого','refunds':'Возвраты','sales':'Покупки','knownFees':'Известные комиссии','unknownFees':'Комиссия неизвестна'},
+ 'en': {'title':'TOLF accounting export','test':'TEST DATA - SANDBOX',
+        'period':'Period (UTC)','generated':'Generated (UTC)','rows':'Record count','empty':'No records for the selected period.',
+        'purchases':'Purchases and refunds','movements':'Traffic movements','balances':'Package balances','fees':'Montonio fees',
+        'note':'No real money was charged. This is a test report, not a VAT invoice. A dash indicates an unavailable value.',
+        'balanceNote':'Balances are calculated at month end; the current month uses available data. Value estimates are not accounting entries. SmartDNS allocation is not determined.',
+        'feeNote':'An unavailable fee is not zero. Latest known information is shown for payments made in the selected month.',
+        'page':'Page','total':'Total','refunds':'Refunds','sales':'Purchases','knownFees':'Known fees','unknownFees':'Unknown fee'},
+ 'lv': {'title':'TOLF grāmatvedības eksports','test':'TESTA DATI - SANDBOX',
+        'period':'Periods (UTC)','generated':'Sagatavots (UTC)','rows':'Ierakstu skaits','empty':'Izvēlētajā periodā ierakstu nav.',
+        'purchases':'Pirkumi un atmaksas','movements':'Datu kustība','balances':'Paku atlikumi','fees':'Montonio komisijas',
+        'note':'Reāla nauda netika iekasēta. Šis ir testa pārskats, nevis PVN rēķins. Trūkstošā vērtība apzīmēta ar svītru.',
+        'balanceNote':'Atlikumi aprēķināti mēneša beigās; tekošajam mēnesim izmantoti pieejamie dati. Vērtības aplēses nav grāmatvedības ieraksti. SmartDNS vērtības sadalījums nav noteikts.',
+        'feeNote':'Nezināma komisija nav nulle. Norādīta jaunākā zināmā informācija par izvēlētā mēneša maksājumiem.',
+        'page':'Lapa','total':'Kopā','refunds':'Atmaksas','sales':'Pirkumi','knownFees':'Zināmās komisijas','unknownFees':'Nezināma komisija'}
+}
+EXPORT_FIELDS = {
+ 'document':('Документ','Document','Dokuments'),
+ 'issued_utc':('Дата документа (UTC)','Document date (UTC)','Dokumenta datums (UTC)'),
+ 'paid_utc':('Дата операции (UTC)','Transaction date (UTC)','Darījuma datums (UTC)'),
+ 'order':('Заказ','Order','Pasūtījums'),
+ 'buyer_name':('Покупатель','Buyer','Pircējs'),
+ 'buyer_registration':('Регистрационный номер','Registration number','Reģistrācijas numurs'),
+ 'gb':('Объём, ГБ','Volume, GB','Apjoms, GB'),
+ 'gross_eur':('Сумма, EUR','Amount, EUR','Summa, EUR'),
+ 'vat_policy':('Налоговая политика','Tax policy','Nodokļu politika'),
+ 'tax_country':('Страна для налогов','Tax country','Nodokļu valsts'),
+ 'country_status':('Статус страны','Country status','Valsts statuss'),
+ 'event':('Идентификатор события','Event ID','Notikuma ID'),
+ 'account':('Идентификатор аккаунта','Account ID','Konta ID'),
+ 'kind':('Тип операции','Movement type','Darījuma veids'),
+ 'bytes':('Изменение трафика','Traffic change','Datu izmaiņa'),
+ 'eur':('Изменение суммы, EUR','Amount change, EUR','Summas izmaiņa, EUR'),
+ 'utc':('Дата (UTC)','Date (UTC)','Datums (UTC)'),
+ 'total_bytes':('Начисленный объём','Credited traffic','Ieskaitītie dati'),
+ 'remaining_bytes_at_month_end':('Остаток на конец месяца','Month-end traffic balance','Datu atlikums mēneša beigās'),
+ 'paid_eur':('Оплачено, EUR','Paid, EUR','Samaksāts, EUR'),
+ 'refunded_eur':('Возвращено, EUR','Refunded, EUR','Atmaksāts, EUR'),
+ 'usage_bytes':('Использованный объём','Used traffic','Izmantotie dati'),
+ 'usage_value_estimate_eur':('Оценка стоимости расхода, EUR','Estimated usage value, EUR','Izlietojuma vērtības aplēse, EUR'),
+ 'unspent_value_estimate_eur':('Оценка стоимости остатка, EUR','Estimated remaining value, EUR','Atlikuma vērtības aplēse, EUR'),
+ 'note':('Примечание','Note','Piezīme'),
+ 'intent':('Идентификатор платежа','Payment intent ID','Maksājuma ID'),
+ 'fee_amount':('Комиссия','Fee','Komisija'),
+ 'currency':('Валюта','Currency','Valūta'),
+ 'status':('Статус','Status','Statuss'),
+ 'last_observed_utc':('Последнее обновление (UTC)','Last observed (UTC)','Pēdējais novērojums (UTC)')
+}
+
+def export_pdf(c,month,kind,locale='en'):
+    if locale not in EXPORT_TEXT:
+        raise HTTPException(400,'invalid_locale')
+    # Reuse the CSV snapshot so both formats have the same filtering and data.
+    raw=export(c,month,kind).decode('utf-8-sig')
+    reader=csv.DictReader(io.StringIO(raw))
+    fields=list(reader.fieldnames)
+    rows=list(reader)
+    x=EXPORT_TEXT[locale]
+    lang_index={'ru':0,'en':1,'lv':2}[locale]
+    now=datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
+    output=io.BytesIO()
+    doc=SimpleDocTemplate(output,pagesize=(595.28,841.89),leftMargin=36,rightMargin=36,topMargin=36,bottomMargin=42,
+                          title=x['title']+' - '+month+' - '+x[kind],author='SIA Tolf')
+    normal=ParagraphStyle('report',fontName='Tolf',fontSize=9,leading=13,textColor=colors.HexColor('#202124'),wordWrap='CJK')
+    bold=ParagraphStyle('reportBold',parent=normal,fontName='TolfBold')
+    muted=ParagraphStyle('reportMuted',parent=normal,fontSize=8,leading=12,textColor=colors.HexColor('#666666'))
+    title=ParagraphStyle('reportTitle',parent=bold,fontSize=19,leading=25,spaceAfter=8)
+    def para(value,style=normal):return Paragraph(escape(str(value)),style)
+    story=[para(x['title'],title),para(x[kind],ParagraphStyle('reportSubtitle',parent=bold,fontSize=13,leading=18)),
+           Spacer(1,10),para(x['test'],bold),para(SELLER['name']+' | '+SELLER['registration']),
+           para(x['period']+': '+month+' | '+x['rows']+': '+str(len(rows))),para(x['generated']+': '+now,muted),
+           Spacer(1,10),para(x['note'],muted)]
+    if kind in ('balances','fees'):
+        story.append(para(x['balanceNote' if kind=='balances' else 'feeNote'],muted))
+    if kind=='purchases':
+        sales=sum((Decimal(row['gross_eur']) for row in rows if not row['document'].startswith('TOLF-SB-CR-')),Decimal(0))
+        refunds=sum((Decimal(row['gross_eur']) for row in rows if row['document'].startswith('TOLF-SB-CR-')),Decimal(0))
+        story += [Spacer(1,10),para(x['sales']+': '+f'{sales:.2f} EUR'+' | '+x['refunds']+': '+f'{refunds:.2f} EUR'+' | '+x['total']+': '+f'{sales-refunds:.2f} EUR',bold)]
+    elif kind=='fees':
+        known={}
+        for row in rows:
+            if row['fee_amount'] and row['currency']:
+                known[row['currency']]=known.get(row['currency'],Decimal(0))+Decimal(row['fee_amount'])
+        unknown=sum(1 for row in rows if not row['fee_amount'] or not row['currency'])
+        story += [Spacer(1,10),para(x['knownFees']+': '+(' / '.join(f'{v:.2f} {k}' for k,v in sorted(known.items())) or '-')+' | '+x['unknownFees']+': '+str(unknown),bold)]
+    story.append(Spacer(1,14))
+    if not rows:
+        story.append(para(x['empty']))
+    for index,row in enumerate(rows,1):
+        heading=str(index)+'. '+(row.get('document') or row.get('event') or row.get('order') or '')
+        if kind=='purchases' and row['document'].startswith('TOLF-SB-CR-'):
+            heading=x['refunds']+' - '+heading
+        record=[ [para(heading,bold),para('')] ]
+        for key in fields:
+            if key=='mode':
+                continue
+            value=row[key] or '-'
+            if key in ('bytes','total_bytes','remaining_bytes_at_month_end','usage_bytes'):
+                value=f"{Decimal(value)/Decimal(1000000000):.3f} GB ({value} B)"
+            elif key in ('issued_utc','paid_utc','utc','last_observed_utc') and value!='-':
+                value=datetime.fromisoformat(value).astimezone(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
+            elif key=='note' and kind=='balances':
+                value=x['balanceNote']
+            elif key=='country_status' and value=='unresolved':
+                value={'ru':'Не определена','en':'Unresolved','lv':'Nav noteikta'}[locale]
+            elif key=='kind':
+                value={'purchase':{'ru':'Начисление','en':'Purchase credit','lv':'Ieskaitīšana'},
+                       'usage':{'ru':'Расход','en':'Usage','lv':'Izlietojums'},
+                       'refund':{'ru':'Возврат','en':'Refund','lv':'Atmaksa'}}.get(value,{}).get(locale,value)
+            record.append([para(EXPORT_FIELDS[key][lang_index],muted),para(value)])
+        table=Table(record,colWidths=[172,351.28],repeatRows=1,hAlign='LEFT')
+        table.setStyle(TableStyle([
+            ('SPAN',(0,0),(-1,0)),('BACKGROUND',(0,0),(-1,0),colors.HexColor('#eaf0f8')),
+            ('VALIGN',(0,0),(-1,-1),'TOP'),('ROWBACKGROUNDS',(0,1),(-1,-1),[colors.white,colors.HexColor('#f7f8fa')]),
+            ('LEFTPADDING',(0,0),(-1,-1),9),('RIGHTPADDING',(0,0),(-1,-1),9),
+            ('TOPPADDING',(0,0),(-1,-1),5),('BOTTOMPADDING',(0,0),(-1,-1),5)]))
+        story += [table,Spacer(1,14)]
+    def footer(canvas,document):
+        canvas.saveState()
+        canvas.setFont('Tolf',8);canvas.setFillColor(colors.HexColor('#666666'))
+        canvas.drawString(36,23,'TOLF | SANDBOX | '+month)
+        canvas.drawRightString(559.28,23,x['page']+' '+str(document.page))
+        canvas.restoreState()
+    doc.build(story,onFirstPage=footer,onLaterPages=footer)
+    return output.getvalue()

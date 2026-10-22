@@ -312,6 +312,16 @@ def install(app,ns):
         return Response(result,media_type='text/csv; charset=utf-8',
                         headers={**HEADERS,'Content-Disposition':'attachment; filename="tolf-sandbox-'+month+'-'+kind+'.csv"'})
 
+    @app.get('/billing/sandbox/admin/export.pdf')
+    def accounting_export_pdf(request:Request,month:str,kind:str='purchases',locale:str='en'):
+        require_admin(request)
+        with database() as c:
+            c.execute('BEGIN')
+            result=records.export_pdf(c,month,kind,locale)
+        return Response(result,media_type='application/pdf',
+                        headers={**HEADERS,'Content-Disposition':'attachment; filename="tolf-sandbox-'+month+'-'+kind+'.pdf"',
+                                 'X-Content-Type-Options':'nosniff'})
+
     @app.post('/billing/sandbox/admin/usage')
     async def test_usage(request:Request):
         require_admin(request)
