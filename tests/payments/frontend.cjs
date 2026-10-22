@@ -3,12 +3,16 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{JSDOM}=require
  for(const language of ['ru','en','lv']){
   const dom=new JSDOM(fs.readFileSync('billing/index.html','utf8'),{url:'https://vpn.tolf.is/billing/?lang='+language,runScripts:'outside-only'}),w=dom.window,d=w.document;
   const methods={methods:['cardPayments','paymentInitiation','applePay','googlePay'],billingCountries:['LV','EE','LT'],banks:{LV:[{code:'TEST','name':'Test bank'}]}};
+  const balanceBytes=language==='ru'?200e9:language==='lv'?0:200.123456e9;
+  const remainingBytes=language==='ru'?175e9:language==='lv'?0:175.987654e9;
   const postRequests=[];let documentIssued=false;
   w.URL.createObjectURL=()=>"blob:test";w.URL.revokeObjectURL=()=>{};w.HTMLAnchorElement.prototype.click=function(){};
-  w.fetch=async(url,options)=>{if(url.endsWith('/billing-document')){postRequests.push(JSON.parse(options.body));documentIssued=true;return {ok:true,json:async()=>({number:'TOLF-SB-2026-000002'})};}return {ok:true,blob:async()=>new w.Blob(['%PDF-test']),json:async()=>url.endsWith('/capabilities')?{mode:'sandbox',enabled:true,termsVersion:'2026-10-21',accountingExport:true}:url.endsWith('/methods')?methods:{testBalanceBytes:200e9,orders:[{reference:'TOLF-SB-test-immutable',status:'PAID',gb:200,amount:9,createdAt:1792656000,remainingBytes:175e9,billingDocumentNumber:documentIssued?'TOLF-SB-2026-000002':null,documents:[{number:'TOLF-SB-2026-000001',kind:'purchase'}]}]}};};
+  w.fetch=async(url,options)=>{if(url.endsWith('/billing-document')){postRequests.push(JSON.parse(options.body));documentIssued=true;return {ok:true,json:async()=>({number:'TOLF-SB-2026-000002'})};}return {ok:true,blob:async()=>new w.Blob(['%PDF-test']),json:async()=>url.endsWith('/capabilities')?{mode:'sandbox',enabled:true,termsVersion:'2026-10-21',accountingExport:true}:url.endsWith('/methods')?methods:{testBalanceBytes:balanceBytes,orders:[{reference:'TOLF-SB-test-immutable',status:'PAID',gb:200,amount:9,createdAt:1792656000,remainingBytes,billingDocumentNumber:documentIssued?'TOLF-SB-2026-000002':null,documents:[{number:'TOLF-SB-2026-000001',kind:'purchase'}]}]}};};
   w.eval(fs.readFileSync('billing/page.js','utf8'));w.eval(fs.readFileSync('billing/sandbox.js','utf8'));
   await new Promise(resolve=>setImmediate(resolve));
   assert.ok(d.querySelector('.preview-note').textContent.includes(language==='ru'?'Тестовый':language==='lv'?'testa':'test'));
+  assert.ok(d.querySelector('.balance-value').textContent.includes((balanceBytes/1e9).toLocaleString(language,{minimumFractionDigits:3,maximumFractionDigits:3})));
+  assert.ok(d.querySelector('.sandbox-order-description').textContent.includes((remainingBytes/1e9).toLocaleString(language,{minimumFractionDigits:3,maximumFractionDigits:3})));
   assert.equal(d.getElementById('checkoutButton').disabled,true);
   for(const id of ['sandboxTerms','sandboxEarly']){d.getElementById(id).checked=true;d.getElementById(id).dispatchEvent(new w.Event('change'));}
   assert.equal(d.getElementById('checkoutButton').disabled,false);
@@ -46,7 +50,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{JSDOM}=require
   d.getElementById('selectTrial').click();
   assert.equal(d.getElementById('sandboxConsent').hidden,true);
   assert.equal(d.getElementById('checkoutButton').disabled,true);
-  assert.ok(d.querySelector('.balance-value').textContent.includes('200'));
+  assert.ok(d.querySelector('.balance-value').textContent.includes((balanceBytes/1e9).toLocaleString('lv',{minimumFractionDigits:3,maximumFractionDigits:3})));
   assert.equal([...d.querySelectorAll('[name="payment"]')].filter(e=>!e.closest('label').hidden).length,4);
   dom.window.close();
  }

@@ -178,7 +178,7 @@ def create_document(c,row,kind='purchase',external_id=None,cents=None,buyer_over
     paid=c.execute('SELECT created FROM credits WHERE order_reference=?',(row['reference'],)).fetchone()
     original=c.execute("SELECT number FROM documents WHERE order_reference=? AND kind='purchase'",(row['reference'],)).fetchone()
     snapshot={'version':1,'number':number,'kind':kind,'created':paid[0] if kind=='purchase' and paid else now,
-              'issuedAt':now,'locale':row['locale'],'seller':dict(SELLER),'buyer':buyer,
+              'issuedAt':now,'locale':'lv' if buyer.get('country')=='LV' else 'en','seller':dict(SELLER),'buyer':buyer,
               'accountReference':row['user_id'],'orderReference':row['reference'],'gb':row['gb'],
               'cents':row['cents'] if cents is None else cents,'currency':'EUR','taxPolicy':POLICY,
               'taxCountry':None,'vatRate':None,'vatCents':None,'environment':'sandbox',

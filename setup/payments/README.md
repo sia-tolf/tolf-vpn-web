@@ -45,3 +45,8 @@ Rollback: restore prior installed sandbox module and remove its new records impo
 ## Post-payment billing details
 Authenticated owners can POST /billing/sandbox/orders/{reference}/billing-document with {buyer:{kind,name,address,country,registration,vatNumber}} for paid/refunded purchases. Origin and payload checks apply. A new immutable billing_details supplement links the original purchase and freezes its seller/tax/amount snapshot. The original PDF and checkout details are never overwritten. Same details return the same document; different details after issuance return 409 and require support. If the original purchase document already has billing details, it is returned without a duplicate.
 Supplements are excluded from financial purchase export rows to avoid counting a sale twice; exported buyer details use the supplement when present. They do not credit/debit traffic, trigger payment or create ledger events. Sandbox output remains a test purchase confirmation, not a fiscal invoice. The three-language history UI opens an accessible dialog for optional post-payment details and downloads the resulting PDF.
+
+
+## Document language and traffic precision
+New documents are English by default, independent of checkout/UI language. Documents containing buyer billing details with country LV are Latvian. A post-payment billing supplement selects its own language from the supplied billing details. Previously issued immutable PDFs are not regenerated.
+User-visible total traffic balance and per-package remaining traffic always show exactly three decimal places in GB, using the UI locale's decimal separator. Internal accounting continues to store exact integer bytes; display rounding never changes balances.

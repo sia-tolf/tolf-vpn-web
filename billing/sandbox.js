@@ -37,6 +37,7 @@ en:{pdf:'Billing details document (PDF)',get:'Get an invoice with billing detail
 lv:{pdf:'Dokuments ar rekvizītiem (PDF)',get:'Saņemt rēķinu ar rekvizītiem',save:'Sagatavot dokumentu',cancel:'Atcelt',busy:'Sagatavojam…',issued:'Dokuments ar rekvizītiem jau ir izsniegts. Labojumiem sazinieties ar atbalstu.',failed:'Dokumentu neizdevās sagatavot. Mēģiniet vēlreiz.'}
 };
 const rt=()=>recordsText[lang()];
+const trafficGb=bytes=>(bytes/1e9).toLocaleString(lang(),{minimumFractionDigits:3,maximumFractionDigits:3});
 function readBuyer(){
  if(!$('billingBuyerEnabled')?.checked)return null;
  return {kind:$('billingBuyerKind').value,name:$('billingBuyerName').value.trim(),address:$('billingBuyerAddress').value.trim(),country:$('billingBuyerCountry').value,registration:$('billingBuyerRegistration').value.trim(),vatNumber:$('billingBuyerVat').value.trim()};
@@ -167,7 +168,7 @@ function showHistory(){
   const status=document.createElement('span');status.textContent=order.status==='REFUNDED'?rt().refunded:order.status==='PARTIALLY_REFUNDED'?rt().partial:t().statuses[order.status]||order.status;
   const amount=document.createElement('strong');amount.textContent=order.amount+' €';
   const description=document.createElement('span');description.className='sandbox-order-description';
-  description.textContent=new Date(order.createdAt*1000).toLocaleString(lang())+' · '+order.gb+' GB'+(order.remainingBytes!=null?' · '+rt().remaining+': '+(order.remainingBytes/1e9).toLocaleString(lang())+' GB':'');
+  description.textContent=new Date(order.createdAt*1000).toLocaleString(lang())+' · '+order.gb+' GB'+(order.remainingBytes!=null?' · '+rt().remaining+': '+trafficGb(order.remainingBytes)+' GB':'');
   ref.append(document.createElement('br'),description);
   row.append(ref,status,amount);
   for(const doc of order.documents||[]){
@@ -188,7 +189,7 @@ function update(){
  document.documentElement.classList.add('billing-sandbox');
  document.querySelector('.preview-note').textContent=x.banner;
  $('balanceTitle').textContent=x.balance;
- document.querySelector('.balance-value').textContent=((account?.testBalanceBytes||0)/1e9).toLocaleString(lang())+' '+(lang()==='ru'?'ГБ':'GB');
+ document.querySelector('.balance-value').textContent=trafficGb(account?.testBalanceBytes||0)+' '+(lang()==='ru'?'ГБ':'GB');
  document.querySelector('.balance-card .muted').textContent=x.balanceHelp;
  $('paymentPreviewNote').textContent=x.methods;
  $('sandboxConsent').hidden=isTrial;

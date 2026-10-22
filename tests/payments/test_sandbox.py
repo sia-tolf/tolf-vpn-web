@@ -285,3 +285,26 @@ def test_supplements_for_multiple_orders_are_independent(env):
         assert c.post('/billing/sandbox/orders/'+order['reference']+'/billing-document',headers=headers(),json={'buyer':BUYER}).status_code==200
     with sb.database() as db:
         assert db.execute("SELECT COUNT(*) FROM documents WHERE kind='billing_details'").fetchone()[0]==2
+
+
+@pytest.mark.parametrize('ui_locale,buyer_country,expected',[
+    ('ru',None,'en'),('lv',None,'en'),('en',None,'en'),
+    ('ru','LV','lv'),('en','LV','lv'),('lv','EE','en')
+])
+def test_document_language_uses_billing_country_not_ui(env,ui_locale,buyer_country,expected):
+    c,_=env
+    buyer={**BUYER,'country':buyer_country} if buyer_country else None
+    order,data=paid_order(env,locale=ui_locale,**({'buyer':buyer} if buyer else {}))
+    with sb.database() as db:
+        snapshot=json.loads(db.execute("SELECT snapshot_json FROM documents WHERE order_reference=? AND kind='purchase'",(order['reference'],)).fetchone()[0])
+    assert snapshot['locale']==expected
+
+@pytest.mark.parametrize('country,expected',[('LV','lv'),('EE','en')])
+def test_post_payment_language_independent_of_original_language(env,country,expected):
+    c,_=env;order,data=paid_order(env,locale='ru')
+    result=c.post('/billing/sandbox/orders/'+order['reference']+'/billing-document',headers=headers(),json={'buyer':{**BUYER,'country':country}})
+    assert result.status_code==200
+    with sb.database() as db:
+        snapshots={r['kind']:json.loads(r['snapshot_json']) for r in db.execute('SELECT kind,snapshot_json FROM documents WHERE order_reference=?',(order['reference'],))}
+    assert snapshots['purchase']['locale']=='en'
+    assert snapshots['billing_details']['locale']==expected
