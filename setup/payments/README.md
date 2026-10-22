@@ -32,7 +32,7 @@ This is a review environment, not a live billing launch. Trial activation, real 
 
 
 ### Prepared deployment
-This change has NOT been installed or published. Automatic approval review rejected copying the new modules/database backup and restarting the production API; explicit deployment/restart confirmation is pending. No deployment backup was created by the rejected command.
+Deployment explicitly approved by the user on 2026-10-22 after automatic review initially requested specific approval. API modules installed, restarted and verified. Online SQLite and module backup: /opt/tolf-backups/billing-records-20261022-074740. Frontend publication follows the verified backend. Live payments remain disabled.
 Before approved deployment:
 1. SQLite online backup of montonio-sandbox.db and copies of installed payment modules under /opt/tolf-backups/billing-records-UTCSTAMP (0700).
 2. Install dependencies from requirements.txt with umask 022, fonts-dejavu-core, then copy both modules mode 0644. Restart tolf-api.
