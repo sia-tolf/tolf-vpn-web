@@ -113,3 +113,14 @@ body{margin:0;background:var(--background);color:var(--text)}
 .sandbox-history-row{grid-template-columns:minmax(0,2fr) minmax(0,1fr) auto;overflow-wrap:anywhere}
 .sandbox-order-description{font-size:12px}
 @media(max-width:600px){.billing-buyer-fields{grid-template-columns:1fr}#billingExportLinks{grid-template-columns:1fr 1fr}.sandbox-history-row{grid-template-columns:1fr auto}.sandbox-history-row span:first-child{grid-column:1/-1}}
+
+.post-document-dialog{box-sizing:border-box;width:min(580px,calc(100% - 28px));max-height:calc(100dvh - 32px);overflow:auto;border:1px solid var(--border,#d8d8dc);border-radius:16px;padding:22px;background:var(--card,#fff);color:var(--text,#202124);font-family:inherit}
+.post-document-dialog::backdrop{background:rgba(0,0,0,.4)}
+.post-document-dialog h2{font-size:21px;margin:0 0 12px}
+.post-document-dialog .muted{font-size:13px;color:var(--secondary,#666);overflow-wrap:anywhere}
+.post-document-dialog input,.post-document-dialog select{font:inherit}
+.post-document-dialog #postDocumentError{color:#a51d36;font-size:13px}
+.post-document-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:end}
+.post-document-actions button{font:inherit;cursor:pointer}
+.post-document-request{grid-column:1/-1;justify-self:start}
+@media(max-width:600px){.post-document-dialog{padding:18px}.post-document-actions{grid-template-columns:1fr}}

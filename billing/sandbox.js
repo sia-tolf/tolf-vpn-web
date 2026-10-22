@@ -31,6 +31,11 @@ ru:{invoice:'Нужен документ с реквизитами',invoiceHelp:
 en:{invoice:'Add billing details to the document',invoiceHelp:'Test mode produces a purchase confirmation with billing details, not a VAT invoice.',kind:'Buyer',individual:'Individual',company:'Company',name:'Full name / company name',address:'Billing address',billingCountry:'Billing country',registration:'Company registration number',vat:'VAT number (if applicable)',chooseCountry:'Choose a country',pdf:'Download PDF',remaining:'Remaining',export:'Accounting export — test data',purchases:'Purchases and refunds',movements:'Traffic movements',balances:'Package balances',fees:'Montonio fees',exportNote:'UTC month. Usage value estimates are not accounting entries. An unavailable fee is not zero.',downloadError:'Could not download the document. Please try again.',refunded:'Refunded — test',partial:'Partially refunded — test'},
 lv:{invoice:'Pievienot dokumentam pircēja rekvizītus',invoiceHelp:'Testa režīmā tiek sagatavots pirkuma apstiprinājums ar rekvizītiem, nevis PVN rēķins.',kind:'Pircējs',individual:'Privātpersona',company:'Uzņēmums',name:'Vārds un uzvārds / uzņēmuma nosaukums',address:'Rēķina adrese',billingCountry:'Valsts rekvizītos',registration:'Uzņēmuma reģistrācijas numurs',vat:'PVN numurs (ja ir)',chooseCountry:'Izvēlieties valsti',pdf:'Lejupielādēt PDF',remaining:'Atlikums',export:'Grāmatvedības eksports — testa dati',purchases:'Pirkumi un atmaksas',movements:'Datu kustība',balances:'Paku atlikumi',fees:'Montonio komisijas',exportNote:'Mēnesis pēc UTC. Izmantotā apjoma vērtības aplēses nav grāmatvedības ieraksti. Nezināma komisija nav nulle.',downloadError:'Dokumentu neizdevās lejupielādēt. Mēģiniet vēlreiz.',refunded:'Atmaksāts — tests',partial:'Daļēji atmaksāts — tests'}
 };
+const postDocumentText={
+ru:{get:'Получить счёт с реквизитами',save:'Сформировать документ',cancel:'Отмена',busy:'Формируем…',issued:'Документ с реквизитами уже выдан. Для исправления обратитесь в поддержку.',failed:'Не удалось сформировать документ. Повторите попытку.'},
+en:{get:'Get an invoice with billing details',save:'Create document',cancel:'Cancel',busy:'Creating…',issued:'A document with billing details has already been issued. Contact support for corrections.',failed:'Could not create the document. Please try again.'},
+lv:{get:'Saņemt rēķinu ar rekvizītiem',save:'Sagatavot dokumentu',cancel:'Atcelt',busy:'Sagatavojam…',issued:'Dokuments ar rekvizītiem jau ir izsniegts. Labojumiem sazinieties ar atbalstu.',failed:'Dokumentu neizdevās sagatavot. Mēģiniet vēlreiz.'}
+};
 const rt=()=>recordsText[lang()];
 function readBuyer(){
  if(!$('billingBuyerEnabled')?.checked)return null;
@@ -92,6 +97,45 @@ async function download(path,filename,button){
  finally{button.disabled=false;}
 }
 
+function openBillingDocument(order){
+ const x=rt(),px=postDocumentText[lang()];
+ let dialog=$('postDocumentDialog');
+ if(dialog)dialog.remove();
+ dialog=document.createElement('dialog');dialog.id='postDocumentDialog';dialog.className='post-document-dialog';dialog.setAttribute('aria-labelledby','postDocumentTitle');
+ const form=document.createElement('form');form.innerHTML='<h2 id="postDocumentTitle"></h2><p id="postDocumentOrder" class="muted"></p><p id="postDocumentNote" class="muted"></p><p id="postDocumentError" role="alert"></p><div class="post-document-actions"><button type="button" id="postDocumentCancel" class="billing-secondary"></button><button type="submit" id="postDocumentSave" class="billing-primary"></button></div>';
+ const fields=$('billingBuyerFields').cloneNode(true);fields.id='postBuyerFields';fields.hidden=false;
+ for(const el of fields.querySelectorAll('[id]'))el.id=el.id.replace('billingBuyer','postBuyer');
+ for(const el of fields.querySelectorAll('input'))el.value='';
+ fields.querySelector('#postBuyerCountry').value='';fields.querySelector('#postBuyerKind').value='individual';
+ fields.querySelector('#postBuyerHelp').remove();
+ form.querySelector('.post-document-actions').before(fields);
+ dialog.append(form);document.body.append(dialog);
+ $('postDocumentTitle').textContent=px.get;$('postDocumentOrder').textContent=order.reference;
+ $('postDocumentNote').textContent=x.invoiceHelp;$('postDocumentCancel').textContent=px.cancel;$('postDocumentSave').textContent=px.save;
+ const close=()=>{if(dialog.close)dialog.close();dialog.remove();};
+ $('postDocumentCancel').addEventListener('click',close);
+ dialog.addEventListener('cancel',event=>{event.preventDefault();if(!$('postDocumentSave').disabled)close();});
+ const validateKind=()=>{
+  for(const id of ['Name','Address','Country'])$('postBuyer'+id).required=true;
+  const company=$('postBuyerKind').value==='company';
+  $('postBuyerRegistration').required=company;$('postBuyerRegistration').closest('label').hidden=!company;
+ };
+ $('postBuyerKind').addEventListener('change',validateKind);validateKind();
+ form.addEventListener('submit',async event=>{
+  event.preventDefault();if(!form.reportValidity())return;
+  const save=$('postDocumentSave'),cancel=$('postDocumentCancel'),error=$('postDocumentError');
+  save.disabled=true;cancel.disabled=true;save.textContent=px.busy;error.textContent='';
+  const buyer={kind:$('postBuyerKind').value,name:$('postBuyerName').value.trim(),address:$('postBuyerAddress').value.trim(),country:$('postBuyerCountry').value,registration:$('postBuyerRegistration').value.trim(),vatNumber:$('postBuyerVat').value.trim()};
+  try{
+   const doc=await request('/billing/sandbox/orders/'+encodeURIComponent(order.reference)+'/billing-document',{buyer});
+   await refreshAccount();close();
+   const button=document.createElement('button');await download('/billing/sandbox/documents/'+encodeURIComponent(doc.number)+'.pdf',doc.number+'.pdf',button);
+  }catch(e){error.textContent=e.message==='billing_document_already_issued'?px.issued:px.failed;save.disabled=false;cancel.disabled=false;save.textContent=px.save;}
+ });
+ if(dialog.showModal)dialog.showModal();else dialog.setAttribute('open','');
+ $('postBuyerName').focus();
+}
+
 function ensureUI(){
  if($('sandboxConsent'))return;
  const box=document.createElement('div');box.id='sandboxConsent';box.className='sandbox-consent';
@@ -129,6 +173,10 @@ function showHistory(){
   for(const doc of order.documents||[]){
    const b=document.createElement('button');b.type='button';b.className='sandbox-document';b.textContent=rt().pdf;b.title=doc.number;
    b.addEventListener('click',()=>download('/billing/sandbox/documents/'+encodeURIComponent(doc.number)+'.pdf',doc.number+'.pdf',b));row.append(b);
+  }
+  if(['PAID','PARTIALLY_REFUNDED','REFUNDED'].includes(order.status)&&!order.billingDocumentNumber){
+   const b=document.createElement('button');b.type='button';b.className='sandbox-document post-document-request';b.textContent=postDocumentText[lang()].get;
+   b.addEventListener('click',()=>openBillingDocument(order));row.append(b);
   }
   if(order.paymentUrl){try{const u=new URL(order.paymentUrl);if(u.protocol==='https:'&&['sandbox-stargate.montonio.com','sandbox-checkout.montonio.com','sandbox-gateway.montonio.com'].includes(u.hostname)){const link=document.createElement('a');link.href=u.href;link.textContent=t().resume;row.append(link);}}catch{}}
   list.append(row);

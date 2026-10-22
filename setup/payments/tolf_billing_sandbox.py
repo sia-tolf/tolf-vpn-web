@@ -264,6 +264,21 @@ def install(app,ns):
             balance=c.execute('SELECT COALESCE(SUM(remaining_bytes),0) FROM package_lots WHERE user_id=?',(uid,)).fetchone()[0]
         return JSONResponse({'mode':'sandbox','testBalanceBytes':balance,'orders':[public_order(x) for x in rows]},headers=HEADERS)
 
+    @app.post('/billing/sandbox/orders/{reference}/billing-document')
+    async def billing_document(reference:str,request:Request):
+        uid=allowed(request)
+        p=await read_payload(request)
+        if set(p)!={'buyer'}:
+            raise HTTPException(400,'unexpected_document_fields')
+        buyer=records.clean_buyer(p.get('buyer'))
+        with database() as c:
+            c.execute('BEGIN IMMEDIATE')
+            row=c.execute('SELECT * FROM orders WHERE reference=? AND user_id=?',(reference,uid)).fetchone()
+            if not row:
+                raise HTTPException(404,'unknown_sandbox_order')
+            number=records.request_billing_document(c,row,buyer)
+        return JSONResponse({'number':number,'mode':'sandbox'},headers=HEADERS)
+
     @app.get('/billing/sandbox/documents/{number}.pdf')
     def document(number:str,request:Request):
         uid=allowed(request)

@@ -156,11 +156,15 @@ def render_pdf(snapshot):
     story += [table,Spacer(1,16),para(x['total']+': '+amount,ParagraphStyle('total',parent=title,alignment=TA_RIGHT,fontSize=17)),
               Spacer(1,12),para(x['note'],muted),para(x['tax'],muted),Spacer(1,12),para(x['end'],muted)]
     if snapshot.get('originalDocument'):
-        story += [Spacer(1,12),para(snapshot['originalDocument'],muted)]
+        related={'ru':'Первоначальный документ','en':'Original document','lv':'Sākotnējais dokuments'}[snapshot['locale']]
+        story += [Spacer(1,12),para(related+': '+snapshot['originalDocument'],muted)]
+    if snapshot.get('paymentCreated'):
+        paid_label={'ru':'Дата оплаты (UTC)','en':'Payment date (UTC)','lv':'Apmaksas datums (UTC)'}[snapshot['locale']]
+        story += [para(paid_label+': '+datetime.fromtimestamp(snapshot['paymentCreated'],timezone.utc).strftime('%Y-%m-%d %H:%M:%S'),muted)]
     doc.build(story)
     return output.getvalue()
 
-def create_document(c,row,kind='purchase',external_id=None,cents=None):
+def create_document(c,row,kind='purchase',external_id=None,cents=None,buyer_override=None):
     existing=c.execute('SELECT number FROM documents WHERE order_reference=? AND kind=? AND external_id IS ?',
                        (row['reference'],kind,external_id)).fetchone()
     if existing: return existing[0]
@@ -170,7 +174,7 @@ def create_document(c,row,kind='purchase',external_id=None,cents=None):
     seq=c.execute('SELECT COUNT(*)+1 FROM documents WHERE number LIKE ?',(prefix+'%',)).fetchone()[0]
     number=prefix+str(seq).zfill(6)
     details=c.execute('SELECT buyer_json FROM checkout_details WHERE order_reference=?',(row['reference'],)).fetchone()
-    buyer=json.loads(details[0]) if details else {}
+    buyer=buyer_override if buyer_override is not None else json.loads(details[0]) if details else {}
     paid=c.execute('SELECT created FROM credits WHERE order_reference=?',(row['reference'],)).fetchone()
     original=c.execute("SELECT number FROM documents WHERE order_reference=? AND kind='purchase'",(row['reference'],)).fetchone()
     snapshot={'version':1,'number':number,'kind':kind,'created':paid[0] if kind=='purchase' and paid else now,
@@ -178,10 +182,32 @@ def create_document(c,row,kind='purchase',external_id=None,cents=None):
               'accountReference':row['user_id'],'orderReference':row['reference'],'gb':row['gb'],
               'cents':row['cents'] if cents is None else cents,'currency':'EUR','taxPolicy':POLICY,
               'taxCountry':None,'vatRate':None,'vatCents':None,'environment':'sandbox',
-              'originalDocument':original[0] if kind=='refund' and original else None}
+              'originalDocument':original[0] if kind in {'refund','billing_details'} and original else None}
+    if kind=='billing_details':
+        original_snapshot=json.loads(c.execute("SELECT snapshot_json FROM documents WHERE number=?",(original[0],)).fetchone()[0])
+        for key in ['seller','taxPolicy','taxCountry','vatRate','vatCents','cents','currency','gb','environment']:
+            snapshot[key]=original_snapshot[key]
+        snapshot['paymentCreated']=original_snapshot['created']
     encoded=json.dumps(snapshot,ensure_ascii=False,sort_keys=True)
     c.execute('INSERT INTO documents VALUES(?,?,?,?,?,?,?)',(number,row['reference'],kind,external_id,encoded,render_pdf(snapshot),now))
     return number
+
+def request_billing_document(c,row,buyer):
+    if row['status'] not in {'PAID','PARTIALLY_REFUNDED','REFUNDED'}:
+        raise HTTPException(409,'paid_order_required')
+    if not buyer:
+        raise HTTPException(400,'buyer_details_required')
+    original=c.execute("SELECT number,snapshot_json FROM documents WHERE order_reference=? AND kind='purchase'",(row['reference'],)).fetchone()
+    if not original:
+        raise HTTPException(409,'purchase_document_not_ready')
+    existing=c.execute("SELECT number,snapshot_json FROM documents WHERE order_reference=? AND kind='billing_details'",(row['reference'],)).fetchone()
+    if not existing and json.loads(original['snapshot_json'])['buyer']:
+        existing=original
+    if existing:
+        if json.loads(existing['snapshot_json'])['buyer']!=buyer:
+            raise HTTPException(409,'billing_document_already_issued')
+        return existing['number']
+    return create_document(c,row,'billing_details','billing-details:'+row['reference'],buyer_override=buyer)
 
 def record_paid(c,row):
     ref=row['reference']
@@ -246,6 +272,12 @@ def enrich(c,result):
     result['documents']=[{'number':r['number'],'kind':r['kind']} for r in c.execute('SELECT number,kind FROM documents WHERE order_reference=? ORDER BY created',(ref,))]
     lot=c.execute('SELECT total_bytes,remaining_bytes FROM package_lots WHERE order_reference=?',(ref,)).fetchone()
     result['remainingBytes']=lot['remaining_bytes'] if lot else None
+    billing=c.execute("SELECT number FROM documents WHERE order_reference=? AND kind='billing_details'",(ref,)).fetchone()
+    if not billing:
+        original=c.execute("SELECT number,snapshot_json FROM documents WHERE order_reference=? AND kind='purchase'",(ref,)).fetchone()
+        if original and json.loads(original['snapshot_json'])['buyer']:
+            billing=original
+    result['billingDocumentNumber']=billing['number'] if billing else None
     result['countryEvidence']=country_info(c,ref)
     return result
 
@@ -261,8 +293,11 @@ def export(c,month,kind):
         return "'"+v if isinstance(v,str) and v.lstrip().startswith(('=','+','-','@')) else v
     if kind=='purchases':
         w.writerow(['mode','document','issued_utc','paid_utc','order','buyer_name','buyer_registration','gb','gross_eur','vat_policy','tax_country','country_status'])
-        for r in c.execute('SELECT * FROM documents WHERE created>=? AND created<? ORDER BY created',(start,end)):
+        for r in c.execute("SELECT * FROM documents WHERE created>=? AND created<? AND kind!='billing_details' ORDER BY created",(start,end)):
             d=json.loads(r['snapshot_json'])
+            supplement=c.execute("SELECT snapshot_json FROM documents WHERE order_reference=? AND kind='billing_details'",(r['order_reference'],)).fetchone()
+            if supplement:
+                d['buyer']=json.loads(supplement[0])['buyer']
             w.writerow([safe(v) for v in ['sandbox',r['number'],datetime.fromtimestamp(r['created'],timezone.utc).isoformat(),
                          datetime.fromtimestamp(d['created'],timezone.utc).isoformat(),r['order_reference'],d['buyer'].get('name',''),
                          d['buyer'].get('registration',''),d['gb'],f"{d['cents']/100:.2f}",d['taxPolicy'],'','unresolved']])

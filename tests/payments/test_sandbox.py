@@ -226,3 +226,62 @@ def test_month_export_and_fee_unknown_distinct_from_zero(env):
     assert ',,EUR,' in result.text
     assert c.get('/billing/sandbox/admin/export.csv?month=2026-13',headers=headers('admin')).status_code==400
     assert c.get('/billing/sandbox/admin/export.csv?month='+month+'&kind=bad',headers=headers('admin')).status_code==400
+
+
+BUYER={'kind':'company','name':'SIA Pārbaude','address':'Brīvības iela 101-6, Rīga','country':'LV','registration':'123','vatNumber':''}
+
+def test_post_payment_document_owner_only_and_no_second_sale(env):
+    import csv,io
+    c,state=env;order,data=paid_order(env)
+    original=c.get('/billing/sandbox/account',headers=headers()).json()['orders'][0]['documents'][0]
+    original_url='/billing/sandbox/documents/'+original['number']+'.pdf'
+    original_pdf=c.get(original_url,headers=headers()).content
+    path='/billing/sandbox/orders/'+order['reference']+'/billing-document'
+    assert c.post(path,headers=headers('other-reviewer'),json={'buyer':BUYER}).status_code==404
+    assert c.post(path,json={'buyer':BUYER}).status_code==401
+    assert c.post(path,headers={'x-user':'reviewer'},json={'buyer':BUYER}).status_code==403
+    first=c.post(path,headers=headers(),json={'buyer':BUYER})
+    assert first.status_code==200,first.text
+    again=c.post(path,headers=headers(),json={'buyer':BUYER})
+    assert again.json()==first.json()
+    changed=c.post(path,headers=headers(),json={'buyer':{**BUYER,'name':'Different buyer'}})
+    assert changed.status_code==409
+    number=first.json()['number']
+    assert number!=original['number']
+    assert c.get(original_url,headers=headers()).content==original_pdf
+    assert c.get('/billing/sandbox/documents/'+number+'.pdf',headers=headers()).content.startswith(b'%PDF-')
+    account=c.get('/billing/sandbox/account',headers=headers()).json()
+    assert account['testBalanceBytes']==200_000_000_000
+    assert account['orders'][0]['billingDocumentNumber']==number
+    with sb.database() as db:
+        assert db.execute('SELECT COUNT(*) FROM credits').fetchone()[0]==1
+        assert db.execute('SELECT COUNT(*) FROM ledger_events').fetchone()[0]==1
+        d=json.loads(db.execute('SELECT snapshot_json FROM documents WHERE number=?',(number,)).fetchone()[0])
+        assert d['buyer']==BUYER and d['originalDocument']==original['number']
+        assert d['taxPolicy']==sb.records.POLICY and d['vatRate'] is None
+    month=time.strftime('%Y-%m',time.gmtime())
+    rows=list(csv.DictReader(io.StringIO(c.get('/billing/sandbox/admin/export.csv?month='+month,headers=headers('admin')).text.lstrip(chr(65279)))))
+    assert len(rows)==1 and rows[0]['gross_eur']=='9.00' and rows[0]['buyer_name']==BUYER['name']
+
+def test_post_payment_document_requires_paid_and_valid_details(env):
+    c,_=env;order=create(env)
+    path='/billing/sandbox/orders/'+order['reference']+'/billing-document'
+    assert c.post(path,headers=headers(),json={'buyer':BUYER}).status_code==409
+    assert c.post(path,headers=headers(),json={'buyer':{}}).status_code==400
+    assert c.post(path,headers=headers(),json={'buyer':BUYER,'amount':0}).status_code==400
+
+def test_original_document_with_details_reused_without_duplicate(env):
+    c,_=env;order,data=paid_order(env,buyer=BUYER)
+    before=c.get('/billing/sandbox/account',headers=headers()).json()['orders'][0]
+    result=c.post('/billing/sandbox/orders/'+order['reference']+'/billing-document',headers=headers(),json={'buyer':BUYER})
+    assert result.status_code==200 and result.json()['number']==before['documents'][0]['number']
+    assert before['billingDocumentNumber']==result.json()['number']
+    assert len(c.get('/billing/sandbox/account',headers=headers()).json()['orders'][0]['documents'])==1
+
+def test_supplements_for_multiple_orders_are_independent(env):
+    c,_=env
+    for i in range(2):
+        order,data=paid_order(env)
+        assert c.post('/billing/sandbox/orders/'+order['reference']+'/billing-document',headers=headers(),json={'buyer':BUYER}).status_code==200
+    with sb.database() as db:
+        assert db.execute("SELECT COUNT(*) FROM documents WHERE kind='billing_details'").fetchone()[0]==2

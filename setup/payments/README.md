@@ -40,3 +40,8 @@ Before approved deployment:
 4. Publish billing/index.html, page.css, sandbox.js together after backend checks.
 5. Reconcile existing paid sandbox orders via authenticated provider GET; verify country remains unresolved for currently observed sandbox metadata.
 Rollback: restore prior installed sandbox module and remove its new records import by restoring the old file. Added tables can remain unused; do not restore a stale database over newer payment events. If reverting database is required, stop writes and reconcile provider payments first.
+
+
+## Post-payment billing details
+Authenticated owners can POST /billing/sandbox/orders/{reference}/billing-document with {buyer:{kind,name,address,country,registration,vatNumber}} for paid/refunded purchases. Origin and payload checks apply. A new immutable billing_details supplement links the original purchase and freezes its seller/tax/amount snapshot. The original PDF and checkout details are never overwritten. Same details return the same document; different details after issuance return 409 and require support. If the original purchase document already has billing details, it is returned without a duplicate.
+Supplements are excluded from financial purchase export rows to avoid counting a sale twice; exported buyer details use the supplement when present. They do not credit/debit traffic, trigger payment or create ledger events. Sandbox output remains a test purchase confirmation, not a fiscal invoice. The three-language history UI opens an accessible dialog for optional post-payment details and downloads the resulting PDF.
