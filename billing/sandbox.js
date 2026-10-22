@@ -32,9 +32,9 @@ en:{invoice:'Add billing details to the document',invoiceHelp:'Test mode produce
 lv:{invoice:'Pievienot dokumentam pircēja rekvizītus',invoiceHelp:'Testa režīmā tiek sagatavots pirkuma apstiprinājums ar rekvizītiem, nevis PVN rēķins.',kind:'Pircējs',individual:'Privātpersona',company:'Uzņēmums',name:'Vārds un uzvārds / uzņēmuma nosaukums',address:'Rēķina adrese',billingCountry:'Valsts rekvizītos',registration:'Uzņēmuma reģistrācijas numurs',vat:'PVN numurs (ja ir)',chooseCountry:'Izvēlieties valsti',pdf:'Lejupielādēt PDF',remaining:'Atlikums',export:'Grāmatvedības eksports — testa dati',purchases:'Pirkumi un atmaksas',movements:'Datu kustība',balances:'Paku atlikumi',fees:'Montonio komisijas',exportNote:'Mēnesis pēc UTC. Izmantotā apjoma vērtības aplēses nav grāmatvedības ieraksti. Nezināma komisija nav nulle.',downloadError:'Dokumentu neizdevās lejupielādēt. Mēģiniet vēlreiz.',refunded:'Atmaksāts — tests',partial:'Daļēji atmaksāts — tests'}
 };
 const postDocumentText={
-ru:{get:'Получить счёт с реквизитами',save:'Сформировать документ',cancel:'Отмена',busy:'Формируем…',issued:'Документ с реквизитами уже выдан. Для исправления обратитесь в поддержку.',failed:'Не удалось сформировать документ. Повторите попытку.'},
-en:{get:'Get an invoice with billing details',save:'Create document',cancel:'Cancel',busy:'Creating…',issued:'A document with billing details has already been issued. Contact support for corrections.',failed:'Could not create the document. Please try again.'},
-lv:{get:'Saņemt rēķinu ar rekvizītiem',save:'Sagatavot dokumentu',cancel:'Atcelt',busy:'Sagatavojam…',issued:'Dokuments ar rekvizītiem jau ir izsniegts. Labojumiem sazinieties ar atbalstu.',failed:'Dokumentu neizdevās sagatavot. Mēģiniet vēlreiz.'}
+ru:{pdf:'Счёт с реквизитами (PDF)',get:'Получить счёт с реквизитами',save:'Сформировать документ',cancel:'Отмена',busy:'Формируем…',issued:'Документ с реквизитами уже выдан. Для исправления обратитесь в поддержку.',failed:'Не удалось сформировать документ. Повторите попытку.'},
+en:{pdf:'Billing details document (PDF)',get:'Get an invoice with billing details',save:'Create document',cancel:'Cancel',busy:'Creating…',issued:'A document with billing details has already been issued. Contact support for corrections.',failed:'Could not create the document. Please try again.'},
+lv:{pdf:'Dokuments ar rekvizītiem (PDF)',get:'Saņemt rēķinu ar rekvizītiem',save:'Sagatavot dokumentu',cancel:'Atcelt',busy:'Sagatavojam…',issued:'Dokuments ar rekvizītiem jau ir izsniegts. Labojumiem sazinieties ar atbalstu.',failed:'Dokumentu neizdevās sagatavot. Mēģiniet vēlreiz.'}
 };
 const rt=()=>recordsText[lang()];
 function readBuyer(){
@@ -171,7 +171,7 @@ function showHistory(){
   ref.append(document.createElement('br'),description);
   row.append(ref,status,amount);
   for(const doc of order.documents||[]){
-   const b=document.createElement('button');b.type='button';b.className='sandbox-document';b.textContent=rt().pdf;b.title=doc.number;
+   const b=document.createElement('button');b.type='button';b.className='sandbox-document';b.textContent=doc.number===order.billingDocumentNumber?postDocumentText[lang()].pdf:rt().pdf;b.title=doc.number;
    b.addEventListener('click',()=>download('/billing/sandbox/documents/'+encodeURIComponent(doc.number)+'.pdf',doc.number+'.pdf',b));row.append(b);
   }
   if(['PAID','PARTIALLY_REFUNDED','REFUNDED'].includes(order.status)&&!order.billingDocumentNumber){
