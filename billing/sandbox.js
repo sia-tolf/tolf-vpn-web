@@ -17,8 +17,11 @@ const backMapping={cardPayments:'card',paymentInitiation:'bank',applePay:'apple'
 const returnUrl=new URL(location.href);
 const returnToken=returnUrl.searchParams.get('order-token');
 const returnReference=returnUrl.searchParams.get('sandboxOrder');
-// Do not leave signed order data in browser history or outgoing referrers.
-if(returnToken){returnUrl.searchParams.delete('order-token');history.replaceState(null,'',returnUrl);}
+// Consume return parameters once. A refresh must not replay an old payment result.
+if(returnToken||returnReference){
+ returnUrl.searchParams.delete('order-token');returnUrl.searchParams.delete('sandboxOrder');
+ history.replaceState(null,'',returnUrl);
+}
 async function request(path,body){
  const response=await fetch(API+path,{method:body?'POST':'GET',credentials:'include',cache:'no-store',headers:body?{'Content-Type':'application/json'}:{'Accept':'application/json'},...(body?{body:JSON.stringify(body)}:{})});
  let data;try{data=await response.json();}catch{throw Error('invalid_response');}
@@ -88,7 +91,7 @@ function renderRecordsUI(){
   const links=$('billingExportLinks');links.replaceChildren();
   const month=$('billingExportMonth').value;
   for(const kind of ['purchases','movements','balances','fees']){
-   const b=document.createElement('button');b.type='button';b.className='billing-secondary';b.textContent=x[kind];
+   const b=document.createElement('button');b.type='button';b.className='billing-secondary secondary';b.textContent=x[kind];
    b.disabled=!/^20[0-9]{2}-(0[1-9]|1[0-2])$/.test(month);
    b.addEventListener('click',()=>download('/billing/sandbox/admin/export.csv?month='+encodeURIComponent(month)+'&kind='+kind,'tolf-sandbox-'+month+'-'+kind+'.csv',b));
    links.append(b);
@@ -111,7 +114,7 @@ function openBillingDocument(order){
  let dialog=$('postDocumentDialog');
  if(dialog)dialog.remove();
  dialog=document.createElement('dialog');dialog.id='postDocumentDialog';dialog.className='post-document-dialog';dialog.setAttribute('aria-labelledby','postDocumentTitle');
- const form=document.createElement('form');form.innerHTML='<h2 id="postDocumentTitle"></h2><p id="postDocumentOrder" class="muted"></p><p id="postDocumentNote" class="muted"></p><p id="postDocumentError" role="alert"></p><div class="post-document-actions"><button type="button" id="postDocumentCancel" class="billing-secondary"></button><button type="submit" id="postDocumentSave" class="billing-primary"></button></div>';
+ const form=document.createElement('form');form.innerHTML='<h2 id="postDocumentTitle"></h2><p id="postDocumentOrder" class="muted"></p><p id="postDocumentNote" class="muted"></p><p id="postDocumentError" role="alert"></p><div class="post-document-actions"><button type="button" id="postDocumentCancel" class="billing-secondary secondary"></button><button type="submit" id="postDocumentSave" class="billing-primary primary"></button></div>';
  const fields=$('billingBuyerFields').cloneNode(true);fields.id='postBuyerFields';fields.hidden=false;
  for(const el of fields.querySelectorAll('[id]'))el.id=el.id.replace('billingBuyer','postBuyer');
  for(const el of fields.querySelectorAll('input'))el.value='';
@@ -212,21 +215,21 @@ function showHistory(){
   const original=(order.documents||[]).find(d=>d.kind==='purchase');
   if(original&&paidStatuses.includes(order.status)){
    const actions=document.createElement('div');actions.className='sandbox-history-actions';
-   const base=document.createElement('button');base.type='button';base.className='sandbox-document';base.textContent=x.bill;
+   const base=document.createElement('button');base.type='button';base.className='sandbox-document secondary';base.textContent=x.bill;
    base.addEventListener('click',()=>download('/billing/sandbox/documents/'+encodeURIComponent(original.number)+'.pdf',original.number+'.pdf',base));
-   const details=document.createElement('button');details.type='button';details.className='sandbox-document';details.textContent=x.details;
+   const details=document.createElement('button');details.type='button';details.className='sandbox-document secondary';details.textContent=x.details;
    if(order.billingDocumentNumber)details.addEventListener('click',()=>download('/billing/sandbox/documents/'+encodeURIComponent(order.billingDocumentNumber)+'.pdf',order.billingDocumentNumber+'.pdf',details));
    else{details.classList.add('post-document-request');details.addEventListener('click',()=>openBillingDocument(order));}
    actions.append(base,details);row.append(actions);
    for(const doc of (order.documents||[]).filter(d=>d.kind==='refund')){
-    const b=document.createElement('button');b.type='button';b.className='sandbox-document';b.textContent=x.refund;
+    const b=document.createElement('button');b.type='button';b.className='sandbox-document secondary';b.textContent=x.refund;
     b.addEventListener('click',()=>download('/billing/sandbox/documents/'+encodeURIComponent(doc.number)+'.pdf',doc.number+'.pdf',b));row.append(b);
    }
   }else if(!paidStatuses.includes(order.status)){
    const note=document.createElement('p');note.className='sandbox-pending-note';
    const resumable=order.status==='PENDING'&&paymentUrl(order.paymentUrl);
    note.textContent=resumable?x.pending:x.checking;
-   const b=document.createElement('button');b.type='button';b.className='sandbox-document sandbox-resume';b.textContent=resumable?x.resume:x.check;
+   const b=document.createElement('button');b.type='button';b.className='sandbox-document secondary sandbox-resume';b.textContent=resumable?x.resume:x.check;
    b.addEventListener('click',()=>resumeOrder(order,b,!!resumable));row.append(note,b);
   }
   list.append(row);
@@ -288,7 +291,8 @@ async function checkout(){
   messageKey=error.message==='order_already_created'?'unknown':'failed';busy=false;update();refreshAccount().catch(()=>{});
  }
 }
-window.addEventListener('tolf:billing-render',update);
+window.addEventListener('tolf:billing-render',()=>{messageKey='';update();});
+window.addEventListener('pageshow',event=>{if(event.persisted){messageKey='';historyFeedbackKey='';update();}});
 for(const radio of document.querySelectorAll('[name="payment"]'))radio.addEventListener('change',()=>{messageKey='';update();});
 $('checkoutButton').addEventListener('click',checkout);
 (async()=>{

@@ -59,3 +59,8 @@ User-visible total traffic balance and per-package remaining traffic always show
 - The balance integer and unit retain the text colour; decimal separator and three fractional digits are rendered at 45% opacity. Exact stored byte balances do not change.
 
 Visual QA: Chromium headless at 1100px and 390px verified equal buyer-control top coordinates on desktop, equal-width invoice buttons on the same row at both widths, no horizontal overflow, and balance integer/fraction split with opacity 0.45. The offline fixture includes paid, pending and abandoned orders and makes no real API/payment calls.
+
+
+## Billing visual consistency and transient return status
+Compact package controls use one headline row: GB, savings badge, price; unit price is below, with no second badge row. Tablet widths stack packages; wide screens retain three columns. Billing colours and action buttons reuse the same TOLF tokens and primary/secondary classes as the VPN page.
+Both order-token and sandboxOrder return parameters are removed from the URL immediately after capture, before async verification. Refreshing the cleaned URL loads history without replaying a prior success banner. Switching packages/language or restoring the page from back-forward cache clears transient result text. Persistent payment state remains in history.
