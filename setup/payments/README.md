@@ -14,4 +14,29 @@ This module is sandbox-only. It never modifies live traffic balances or enforcem
 - Tests: pytest tests/payments/test_sandbox.py and node tests/payments/frontend.cjs with TOLF_JSDOM pointing to jsdom.
 
 ## Limits before production
-This is a review environment, not a live billing launch. Trial activation, real balance enforcement, automatic refunds, accounting document delivery and production activation still require implementation and acceptance. Refund requests remain a support process; no refund button is exposed. Do not mark all commercial-launch checks complete merely because a sandbox purchase works.
+This is a review environment, not a live billing launch. Trial activation, real balance enforcement, automatic refund initiation, fiscal invoice issuance and production activation still require implementation and acceptance. Refund requests remain a support process; no refund button is exposed. Do not mark all commercial-launch checks complete merely because a sandbox purchase works.
+
+
+## Sandbox records (2026-10-22)
+- Install reportlab >=4.4,<5 and pycountry >=24,<25 in the API virtualenv (umask 022), plus fonts-dejavu-core on Debian. Copy both tolf_billing_sandbox.py and tolf_billing_records.py to /opt/tolf-api/.
+- Startup adds tables without rewriting orders/credits. Existing verified paid sandbox orders receive a lot and a TEST purchase confirmation exactly once. PDFs are stored as immutable blobs and repeat downloads return identical bytes. Buyer details and seller/tax-policy snapshots are frozen at issuance.
+- Customers can optionally add individual/company billing details. No mandatory residency selector. No full card number, CVC, full payer IBAN or raw provider payload is retained.
+- Observed authenticated sandbox GET /orders on 2026-10-22: card paymentIntents.paymentMethodMetadata is empty; paymentMetadata supplies cardPaymentPricingGroup only. Bank metadata supplies preferredProvider, preferredCountry, providerName and receiverIban (MERCHANT recipient). These do not establish payer residence. preferredCountry is gateway routing (international banks share codes across lists). billingAddress is merchant/customer supplied, not independently bank-verified.
+- country_evidence stores explicitly classified country observations only. taxCountry stays null/unresolved. No inference from language, server city, method name, pricing group, bank BIC or merchant receiving account. Adding independently verified payer-country fields requires documented semantics and tests.
+- VAT policy sandbox-tax-unconfigured-20261022 explicitly does not claim exemption or 0% VAT. All receipts say TEST and are NOT VAT invoices. No production launch until tax treatment and required location evidence are established.
+- Package lots use decimal GB (1 GB = 10^9 bytes), FIFO usage and immutable purchase/usage/refund events. Actual VPN traffic is NOT attached. The admin-only /billing/sandbox/admin/usage test endpoint records idempotent simulated usage with eventId, userId, bytes.
+- Refund initiation is not exposed. Authenticated GET reconciliation of successful provider refunds creates separate test correction documents and revokes proportional unspent test traffic. Signed sparse paid/refund notifications update order state and schedule an authenticated provider GET in a background task for complete metadata and refunds. Owner GET can retry if the provider is unavailable. No correction replaces an original PDF.
+- Month exports (UTC), admin-only: /billing/sandbox/admin/export.csv?month=YYYY-MM&kind=purchases|movements|balances|fees. Purchase export is document ISSUE month (historical migration issue time may differ from original paid date); both timestamps are shown. Balance export reconstructs month-end events, not today's balance. Value estimates are NOT posted revenue and do not allocate SmartDNS. Null fees remain blank, not zero. Provider fees are latest observed data for payments in that paid month. This is NOT a settlement/payout reconciliation: provider payout reports are not yet integrated.
+- Accountant exports are on the billing page for authenticated admins only. Ordinary reviewers can download only their own PDFs. CSV text fields are formula-escaped.
+- No trial activation, live crediting, tax-threshold monitoring, tax registration automation or accounting bookings are enabled. Production and sandbox number series remain separate.
+
+
+### Prepared deployment
+This change has NOT been installed or published. Automatic approval review rejected copying the new modules/database backup and restarting the production API; explicit deployment/restart confirmation is pending. No deployment backup was created by the rejected command.
+Before approved deployment:
+1. SQLite online backup of montonio-sandbox.db and copies of installed payment modules under /opt/tolf-backups/billing-records-UTCSTAMP (0700).
+2. Install dependencies from requirements.txt with umask 022, fonts-dejavu-core, then copy both modules mode 0644. Restart tolf-api.
+3. Verify service readiness and authenticated reviewer capabilities, paid-order PDFs, owner isolation and unchanged live balances.
+4. Publish billing/index.html, page.css, sandbox.js together after backend checks.
+5. Reconcile existing paid sandbox orders via authenticated provider GET; verify country remains unresolved for currently observed sandbox metadata.
+Rollback: restore prior installed sandbox module and remove its new records import by restoring the old file. Added tables can remain unused; do not restore a stale database over newer payment events. If reverting database is required, stop writes and reconcile provider payments first.

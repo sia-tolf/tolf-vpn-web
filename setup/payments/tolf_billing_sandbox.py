@@ -15,8 +15,9 @@ from urllib.request import Request as UrlRequest, build_opener, HTTPRedirectHand
 from urllib.error import HTTPError, URLError
 
 import jwt
-from fastapi import HTTPException, Request
-from fastapi.responses import JSONResponse
+from fastapi import HTTPException, Request, BackgroundTasks
+from fastapi.responses import JSONResponse, Response
+import tolf_billing_records as records
 from starlette.concurrency import run_in_threadpool
 
 CONFIG = Path('/etc/tolf-payments/montonio-sandbox.json')
@@ -99,6 +100,10 @@ def initialize():
             order_reference TEXT PRIMARY KEY REFERENCES orders(reference),
             user_id TEXT NOT NULL, bytes INTEGER NOT NULL, created REAL NOT NULL)''')
         c.execute('CREATE INDEX IF NOT EXISTS orders_user ON orders(user_id,created)')
+        records.initialize(c)
+        c.execute('BEGIN IMMEDIATE')
+        for row in c.execute('SELECT o.* FROM orders o JOIN credits p ON p.order_reference=o.reference').fetchall():
+            records.record_paid(c,row)
     DATABASE.chmod(0o600)
 
 def money(value):
@@ -135,14 +140,19 @@ def apply_status(data,source):
             raise HTTPException(404,'unknown_sandbox_order')
         provider_id=matching_order(data,row)
         status=data.get('paymentStatus')
-        if status not in {'PENDING','PAID','ABANDONED','VOIDED','DECLINED','CANCELLED','EXPIRED','AUTHORIZED'}:
+        if status not in {'PENDING','PAID','ABANDONED','VOIDED','DECLINED','CANCELLED','EXPIRED','AUTHORIZED','PARTIALLY_REFUNDED','REFUNDED'}:
             raise HTTPException(400,'unknown_payment_status')
         # Late pending/failed notifications cannot reverse a paid order.
-        if row['status']=='PAID':
-            status='PAID'
-        if status=='PAID':
+        paid_states={'PAID','PARTIALLY_REFUNDED','REFUNDED'}
+        rank={'PAID':1,'PARTIALLY_REFUNDED':2,'REFUNDED':3}
+        if row['status'] in paid_states and rank.get(status,0)<rank[row['status']]:
+            status=row['status']
+        if status in paid_states:
             c.execute('INSERT OR IGNORE INTO credits VALUES (?,?,?,?)',
                       (reference,row['user_id'],row['gb']*1_000_000_000,time.time()))
+        records.evidence(c,reference,data,source)
+        records.record_paid(c,row)
+        records.record_refunds(c,row,data,source)
         c.execute('UPDATE orders SET provider_uuid=?,status=?,updated=?,webhook_count=webhook_count+? WHERE reference=?',
                   (provider_id,status,time.time(),1 if source=='webhook' else 0,reference))
     return reference
@@ -162,10 +172,12 @@ def decode_notification(token):
     return data
 
 def public_order(row):
-    return {'reference':row['reference'],'package':row['sku'],'gb':row['gb'],
+    result={'reference':row['reference'],'package':row['sku'],'gb':row['gb'],
             'amount':row['cents']/100,'currency':'EUR','status':row['status'],
             'createdAt':row['created'],'updatedAt':row['updated'],
             'mode':'sandbox','paymentUrl':row['payment_url'] if row['status']=='PENDING' else None}
+    with database() as c:
+        return records.enrich(c,result)
 
 def install(app,ns):
     initialize()
@@ -181,6 +193,13 @@ def install(app,ns):
             raise HTTPException(403,'sandbox_review_only')
         return uid
 
+    def require_admin(request):
+        uid=allowed(request)
+        with sqlite3.connect(ns['DB']) as c:
+            if not c.execute('SELECT 1 FROM admin_roles WHERE user_id=?',(uid,)).fetchone():
+                raise HTTPException(403,'admin_required')
+        return uid
+
     def enabled_methods():
         with methods_lock:
             if time.time()<cache['until']:
@@ -189,7 +208,7 @@ def install(app,ns):
             if data.get('uuid')!=config()['storeUuid']:
                 raise HTTPException(502,'sandbox_store_mismatch')
             raw=data.get('paymentMethods',{})
-            result={'methods':[m for m in ['cardPayments','paymentInitiation','applePay','googlePay'] if m in raw],
+            result={'billingCountries':sorted(records.ISO),'methods':[m for m in ['cardPayments','paymentInitiation','applePay','googlePay'] if m in raw],
                     'banks':{}}
             for country,setup in raw.get('paymentInitiation',{}).get('setup',{}).items():
                 banks=[{'code':b['code'],'name':b['name']} for b in setup.get('paymentMethods',[]) if 'EUR' in b.get('supportedCurrencies',[])]
@@ -224,7 +243,13 @@ def install(app,ns):
             if exc.status_code in (401,403,503):
                 return JSONResponse({'mode':'preview','enabled':False},headers=HEADERS)
             raise
-        return JSONResponse({'mode':'sandbox','enabled':True,'termsVersion':TERMS,'livePayments':False},headers=HEADERS)
+        try:
+            require_admin(request)
+            admin=True
+        except HTTPException:
+            admin=False
+        return JSONResponse({'mode':'sandbox','enabled':True,'termsVersion':TERMS,'livePayments':False,
+                             'accountingExport':admin,'taxCountryStatus':'unresolved'},headers=HEADERS)
 
     @app.get('/billing/sandbox/methods')
     def methods(request:Request):
@@ -236,13 +261,44 @@ def install(app,ns):
         uid=allowed(request)
         with database() as c:
             rows=c.execute('SELECT * FROM orders WHERE user_id=? ORDER BY created DESC LIMIT 30',(uid,)).fetchall()
-            balance=c.execute('SELECT COALESCE(SUM(bytes),0) FROM credits WHERE user_id=?',(uid,)).fetchone()[0]
+            balance=c.execute('SELECT COALESCE(SUM(remaining_bytes),0) FROM package_lots WHERE user_id=?',(uid,)).fetchone()[0]
         return JSONResponse({'mode':'sandbox','testBalanceBytes':balance,'orders':[public_order(x) for x in rows]},headers=HEADERS)
 
+    @app.get('/billing/sandbox/documents/{number}.pdf')
+    def document(number:str,request:Request):
+        uid=allowed(request)
+        with database() as c:
+            doc=c.execute('SELECT d.pdf FROM documents d JOIN orders o ON o.reference=d.order_reference WHERE d.number=? AND o.user_id=?',
+                          (number,uid)).fetchone()
+        if not doc:
+            raise HTTPException(404,'unknown_document')
+        return Response(bytes(doc[0]),media_type='application/pdf',
+                        headers={**HEADERS,'Content-Disposition':'attachment; filename="'+number+'.pdf"','X-Content-Type-Options':'nosniff'})
+
+    @app.get('/billing/sandbox/admin/export.csv')
+    def accounting_export(request:Request,month:str,kind:str='purchases'):
+        require_admin(request)
+        with database() as c:
+            result=records.export(c,month,kind)
+        return Response(result,media_type='text/csv; charset=utf-8',
+                        headers={**HEADERS,'Content-Disposition':'attachment; filename="tolf-sandbox-'+month+'-'+kind+'.csv"'})
+
+    @app.post('/billing/sandbox/admin/usage')
+    async def test_usage(request:Request):
+        require_admin(request)
+        p=await read_payload(request)
+        if set(p)!={'userId','eventId','bytes'} or not isinstance(p['userId'],str) or len(p['userId'])>100:
+            raise HTTPException(400,'invalid_usage_request')
+        with database() as c:
+            c.execute('BEGIN IMMEDIATE')
+            records.consume(c,p['userId'],p['eventId'],p['bytes'])
+        return JSONResponse({'mode':'sandbox','recorded':True},headers=HEADERS)
+
     def create(uid,p):
-        expected={'package','method','locale','bankCountry','bankCode','requestId','termsVersion','acceptTerms','startNow'}
+        expected={'package','method','locale','bankCountry','bankCode','requestId','termsVersion','acceptTerms','startNow','buyer'}
         if set(p)-expected:
             raise HTTPException(400,'unexpected_checkout_fields')
+        buyer=records.clean_buyer(p.get('buyer'))
         sku=p.get('package')
         if not isinstance(sku,str) or sku not in PACKAGES:
             raise HTTPException(400,'invalid_package')
@@ -272,7 +328,9 @@ def install(app,ns):
             c.execute('BEGIN IMMEDIATE')
             existing=c.execute('SELECT * FROM orders WHERE user_id=? AND request_id=?',(uid,request_id)).fetchone()
             if existing:
-                if existing['sku']!=sku or existing['method']!=method:
+                previous=c.execute('SELECT buyer_json FROM checkout_details WHERE order_reference=?',(existing['reference'],)).fetchone()
+                previous_buyer=json.loads(previous[0]) if previous else {}
+                if existing['sku']!=sku or existing['method']!=method or previous_buyer!=buyer:
                     raise HTTPException(409,'request_id_reused')
                 if existing['status']=='PENDING' and existing['payment_url']:
                     return public_order(existing)
@@ -283,6 +341,11 @@ def install(app,ns):
             c.execute('''INSERT INTO orders(reference,user_id,request_id,sku,gb,cents,method,locale,status,
                        terms_version,early_service,created,updated) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)''',
                       (ref,uid,request_id,sku,gb,cents,method,locale,'CREATING',TERMS,1,now,now))
+            c.execute('INSERT INTO checkout_details VALUES(?,?,?,?)',(ref,json.dumps(buyer,ensure_ascii=False,sort_keys=True),
+                       p.get('bankCountry') if method=='paymentInitiation' else None,
+                       p.get('bankCode') if method=='paymentInitiation' else None))
+            if buyer:
+                records.evidence(c,ref,{'billingAddress':{'country':buyer['country']}},'checkout')
         amount=cents/100
         payment={'method':method,'amount':amount,'currency':'EUR'}
         if options:
@@ -341,11 +404,23 @@ def install(app,ns):
             row=c.execute('SELECT * FROM orders WHERE reference=? AND user_id=?',(reference,uid)).fetchone()
         return JSONResponse(public_order(row),headers=HEADERS)
 
+    def refresh_provider(reference):
+        with database() as c:
+            row=c.execute('SELECT provider_uuid FROM orders WHERE reference=?',(reference,)).fetchone()
+        if row and row[0]:
+            try:
+                apply_status(provider('GET','/orders/'+row[0]),'api')
+            except HTTPException:
+                # Preserve the signed status; owner GET can retry reconciliation.
+                pass
+
     @app.post('/billing/sandbox/notify')
-    async def notify(request:Request):
+    async def notify(request:Request,background_tasks:BackgroundTasks):
         payload=await read_payload(request,False)
         data=decode_notification(payload.get('orderToken'))
-        apply_status(data,'webhook')
+        reference=apply_status(data,'webhook')
+        if data.get('paymentStatus') in {'PAID','PARTIALLY_REFUNDED','REFUNDED'}:
+            background_tasks.add_task(refresh_provider,reference)
         return JSONResponse({'received':True},headers=HEADERS)
 
     @app.post('/billing/sandbox/validate-return')

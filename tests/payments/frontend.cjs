@@ -2,13 +2,28 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{JSDOM}=require
 (async()=>{
  for(const language of ['ru','en','lv']){
   const dom=new JSDOM(fs.readFileSync('billing/index.html','utf8'),{url:'https://vpn.tolf.is/billing/?lang='+language,runScripts:'outside-only'}),w=dom.window,d=w.document;
-  const methods={methods:['cardPayments','paymentInitiation','applePay','googlePay'],banks:{LV:[{code:'TEST','name':'Test bank'}]}};
-  w.fetch=async(url,options)=>({ok:true,json:async()=>url.endsWith('/capabilities')?{mode:'sandbox',enabled:true,termsVersion:'2026-10-21'}:url.endsWith('/methods')?methods:{testBalanceBytes:200e9,orders:[]}});
+  const methods={methods:['cardPayments','paymentInitiation','applePay','googlePay'],billingCountries:['LV','EE','LT'],banks:{LV:[{code:'TEST','name':'Test bank'}]}};
+  w.fetch=async(url,options)=>({ok:true,json:async()=>url.endsWith('/capabilities')?{mode:'sandbox',enabled:true,termsVersion:'2026-10-21',accountingExport:true}:url.endsWith('/methods')?methods:{testBalanceBytes:200e9,orders:[{reference:'TOLF-SB-test-immutable',status:'PAID',gb:200,amount:9,createdAt:1792656000,remainingBytes:175e9,documents:[{number:'TOLF-SB-2026-000001',kind:'purchase'}]}]}});
   w.eval(fs.readFileSync('billing/page.js','utf8'));w.eval(fs.readFileSync('billing/sandbox.js','utf8'));
   await new Promise(resolve=>setImmediate(resolve));
   assert.ok(d.querySelector('.preview-note').textContent.includes(language==='ru'?'Тестовый':language==='lv'?'testa':'test'));
   assert.equal(d.getElementById('checkoutButton').disabled,true);
   for(const id of ['sandboxTerms','sandboxEarly']){d.getElementById(id).checked=true;d.getElementById(id).dispatchEvent(new w.Event('change'));}
+  assert.equal(d.getElementById('checkoutButton').disabled,false);
+  assert.equal(d.querySelectorAll('.sandbox-document').length,1);
+  assert.ok(d.getElementById('billingExports'));
+  assert.equal(d.querySelectorAll('#billingExportLinks button').length,4);
+  const buyer=d.getElementById('billingBuyerEnabled');buyer.checked=true;buyer.dispatchEvent(new w.Event('change',{bubbles:true}));
+  assert.equal(d.getElementById('checkoutButton').disabled,true);
+  for(const [id,value] of [['Name','SIA Test'],['Address','Rīga, LV-1001'],['Country','LV']]){
+   d.getElementById('billingBuyer'+id).value=value;d.getElementById('billingBuyer'+id).dispatchEvent(new w.Event('input',{bubbles:true}));
+  }
+  assert.equal(d.getElementById('checkoutButton').disabled,false);
+  d.getElementById('billingBuyerKind').value='company';d.getElementById('billingBuyerKind').dispatchEvent(new w.Event('change',{bubbles:true}));
+  assert.equal(d.getElementById('checkoutButton').disabled,true);
+  d.getElementById('billingBuyerRegistration').value='123';d.getElementById('billingBuyerRegistration').dispatchEvent(new w.Event('input',{bubbles:true}));
+  assert.equal(d.getElementById('checkoutButton').disabled,false);
+  buyer.checked=false;buyer.dispatchEvent(new w.Event('change',{bubbles:true}));
   assert.equal(d.getElementById('checkoutButton').disabled,false);
   const bank=d.querySelector('[name="payment"][value="bank"]');bank.checked=true;bank.dispatchEvent(new w.Event('change'));
   assert.equal(d.getElementById('checkoutButton').disabled,true);
