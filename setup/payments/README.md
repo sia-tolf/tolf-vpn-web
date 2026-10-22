@@ -50,3 +50,12 @@ Supplements are excluded from financial purchase export rows to avoid counting a
 ## Document language and traffic precision
 New documents are English by default, independent of checkout/UI language. Documents containing buyer billing details with country LV are Latvian. A post-payment billing supplement selects its own language from the supplied billing details. Previously issued immutable PDFs are not regenerated.
 User-visible total traffic balance and per-package remaining traffic always show exactly three decimal places in GB, using the UI locale's decimal separator. Internal accounting continues to store exact integer bytes; display rounding never changes balances.
+
+
+## Purchase history and presentation (2026-10-22)
+- History exposes paid/refunded purchases and pending/uncertain states; terminal unpaid ABANDONED/VOIDED/DECLINED/CANCELLED/EXPIRED orders stay in the database but are omitted from customer history. Pending orders have clear guidance. Continue payment first forces authenticated provider verification using ?resume=true, takes the fresh provider payment URL, and reuses the existing order. A failed verification does not redirect or create a second order.
+- Receipt and billing-details actions are equal-width buttons on one row at all viewport sizes. Refund corrections remain available separately.
+- Account captions use the existing VPN username (then login name, then public account number) captured in order_identity. Never display the internal UUID as a buyer name. Existing no-details PDFs get a sealed document_presentations rendition with only the technical caption corrected; original financial snapshots and original PDFs remain unchanged in documents. Repeat downloads return identical rendition bytes.
+- The balance integer and unit retain the text colour; decimal separator and three fractional digits are rendered at 45% opacity. Exact stored byte balances do not change.
+
+Visual QA: Chromium headless at 1100px and 390px verified equal buyer-control top coordinates on desktop, equal-width invoice buttons on the same row at both widths, no horizontal overflow, and balance integer/fraction split with opacity 0.45. The offline fixture includes paid, pending and abandoned orders and makes no real API/payment calls.

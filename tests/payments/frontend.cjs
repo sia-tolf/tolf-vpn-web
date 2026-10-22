@@ -16,6 +16,12 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),{JSDOM}=require
   assert.equal(d.getElementById('checkoutButton').disabled,true);
   for(const id of ['sandboxTerms','sandboxEarly']){d.getElementById(id).checked=true;d.getElementById(id).dispatchEvent(new w.Event('change'));}
   assert.equal(d.getElementById('checkoutButton').disabled,false);
+  assert.equal(d.querySelectorAll('.sandbox-history-actions').length,1);
+  const invoiceActions=d.querySelector('.sandbox-history-actions');
+  assert.equal(invoiceActions.children.length,2);
+  assert.ok(!invoiceActions.textContent.includes('PDF'));
+  assert.ok(d.querySelector('.traffic-whole'));
+  assert.equal(d.querySelector('.traffic-fraction').textContent,(balanceBytes/1e9).toLocaleString(language,{minimumFractionDigits:3,maximumFractionDigits:3}).match(/[.,][0-9]{3}$/)[0]);
   assert.equal(d.querySelectorAll('.sandbox-document:not(.post-document-request)').length,1);
   assert.ok(d.getElementById('billingExports'));
   assert.equal(d.querySelectorAll('#billingExportLinks button').length,4);

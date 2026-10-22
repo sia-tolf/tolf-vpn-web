@@ -36,6 +36,14 @@ ru:{pdf:'Счёт с реквизитами (PDF)',get:'Получить счё�
 en:{pdf:'Billing details document (PDF)',get:'Get an invoice with billing details',save:'Create document',cancel:'Cancel',busy:'Creating…',issued:'A document with billing details has already been issued. Contact support for corrections.',failed:'Could not create the document. Please try again.'},
 lv:{pdf:'Dokuments ar rekvizītiem (PDF)',get:'Saņemt rēķinu ar rekvizītiem',save:'Sagatavot dokumentu',cancel:'Atcelt',busy:'Sagatavojam…',issued:'Dokuments ar rekvizītiem jau ir izsniegts. Labojumiem sazinieties ar atbalstu.',failed:'Dokumentu neizdevās sagatavot. Mēģiniet vēlreiz.'}
 };
+const historyText={
+ru:{bill:'Скачать счёт',details:'Скачать счёт с реквизитами',refund:'Скачать возврат',resume:'Продолжить оплату',check:'Проверить статус',pending:'Оплата не подтверждена. Нажмите «Продолжить оплату», чтобы вернуться в Montonio и завершить её.',checking:'Проверяем подтверждение платежа. Нажмите «Проверить статус» для обновления.',closed:'Этот заказ уже нельзя оплатить. Для новой покупки выберите пакет выше.',unavailable:'Не удалось проверить статус. Повторите проверку, прежде чем оплачивать заново.',paid:'Оплата подтверждена. Пакет начислен.'},
+en:{bill:'Download invoice',details:'Download invoice with billing details',refund:'Download refund document',resume:'Continue payment',check:'Check status',pending:'Payment is not confirmed. Select “Continue payment” to return to Montonio and complete it.',checking:'Awaiting payment confirmation. Select “Check status” to refresh.',closed:'This order can no longer be paid. Select a package above to start a new purchase.',unavailable:'Could not check the status. Check again before paying a second time.',paid:'Payment confirmed. The package has been credited.'},
+lv:{bill:'Lejupielādēt rēķinu',details:'Lejupielādēt rēķinu ar rekvizītiem',refund:'Lejupielādēt atmaksas dokumentu',resume:'Turpināt apmaksu',check:'Pārbaudīt statusu',pending:'Apmaksa nav apstiprināta. Nospiediet “Turpināt apmaksu”, lai atgrieztos Montonio un to pabeigtu.',checking:'Gaidām maksājuma apstiprinājumu. Nospiediet “Pārbaudīt statusu”, lai atjauninātu.',closed:'Šo pasūtījumu vairs nevar apmaksāt. Jaunam pirkumam izvēlieties paku augstāk.',unavailable:'Statusu neizdevās pārbaudīt. Pirms atkārtotas apmaksas mēģiniet vēlreiz.',paid:'Apmaksa apstiprināta. Paka ir ieskaitīta.'}
+};
+let historyFeedbackKey='';
+const paidStatuses=['PAID','PARTIALLY_REFUNDED','REFUNDED'];
+const hiddenStatuses=['ABANDONED','VOIDED','DECLINED','CANCELLED','EXPIRED'];
 const rt=()=>recordsText[lang()];
 const trafficGb=bytes=>(bytes/1e9).toLocaleString(lang(),{minimumFractionDigits:3,maximumFractionDigits:3});
 function readBuyer(){
@@ -156,40 +164,82 @@ function fillBanks(){
  for(const bank of methods.banks[$('sandboxCountry').value]||[]){const o=document.createElement('option');o.value=bank.code;o.textContent=bank.name;select.append(o);}
  if([...select.options].some(o=>o.value===previous))select.value=previous;
 }
+function paymentUrl(value){
+ try{const u=new URL(value);if(u.protocol==='https:'&&!u.username&&!u.password&&(!u.port||u.port==='443')&&['sandbox-stargate.montonio.com','sandbox-checkout.montonio.com','sandbox-gateway.montonio.com'].includes(u.hostname))return u.href;}catch{}
+ return null;
+}
+async function resumeOrder(order,button,continuePayment){
+ button.disabled=true;
+ try{
+  const latest=await request('/billing/sandbox/orders/'+encodeURIComponent(order.reference)+(continuePayment?'?resume=true':''));
+  if(paidStatuses.includes(latest.status))historyFeedbackKey='paid';
+  else if(hiddenStatuses.includes(latest.status))historyFeedbackKey='closed';
+  else historyFeedbackKey='checking';
+  await refreshAccount();
+  if(continuePayment&&latest.status==='PENDING'){
+   const url=paymentUrl(latest.paymentUrl);
+   if(url){location.assign(url);return;}
+  }
+ }catch{historyFeedbackKey='unavailable';showHistory();}
+ finally{button.disabled=false;}
+}
+function renderBalance(bytes){
+ const value=document.querySelector('.balance-value');value.replaceChildren();
+ const parts=new Intl.NumberFormat(lang(),{minimumFractionDigits:3,maximumFractionDigits:3}).formatToParts(bytes/1e9);
+ const whole=document.createElement('span');whole.className='traffic-whole';
+ const fraction=document.createElement('span');fraction.className='traffic-fraction';
+ for(const part of parts)(['decimal','fraction'].includes(part.type)?fraction:whole).append(document.createTextNode(part.value));
+ value.append(whole,fraction,document.createTextNode(' '+(lang()==='ru'?'ГБ':'GB')));
+}
 function showHistory(){
  if(!account)return;
+ const x=historyText[lang()];
  const section=document.querySelector('.billing-history');section.querySelector('h2').textContent=t().history;
  const old=section.querySelector('.muted');if(old)old.hidden=true;
+ let feedback=$('sandboxHistoryFeedback');if(!feedback){feedback=document.createElement('p');feedback.id='sandboxHistoryFeedback';feedback.setAttribute('role','status');section.append(feedback);}
+ feedback.textContent=historyFeedbackKey?x[historyFeedbackKey]:'';feedback.hidden=!historyFeedbackKey;
  let list=$('sandboxHistory');if(!list){list=document.createElement('div');list.id='sandboxHistory';section.append(list);}list.replaceChildren();
- if(!account.orders.length){list.textContent=t().empty;return;}
- for(const order of account.orders){
+ const orders=account.orders.filter(o=>!hiddenStatuses.includes(o.status));
+ if(!orders.length){list.textContent=t().empty;return;}
+ for(const order of orders){
   const row=document.createElement('div');row.className='sandbox-history-row';
   const ref=document.createElement('span');ref.textContent=order.reference;
   const status=document.createElement('span');status.textContent=order.status==='REFUNDED'?rt().refunded:order.status==='PARTIALLY_REFUNDED'?rt().partial:t().statuses[order.status]||order.status;
   const amount=document.createElement('strong');amount.textContent=order.amount+' €';
   const description=document.createElement('span');description.className='sandbox-order-description';
   description.textContent=new Date(order.createdAt*1000).toLocaleString(lang())+' · '+order.gb+' GB'+(order.remainingBytes!=null?' · '+rt().remaining+': '+trafficGb(order.remainingBytes)+' GB':'');
-  ref.append(document.createElement('br'),description);
-  row.append(ref,status,amount);
-  for(const doc of order.documents||[]){
-   const b=document.createElement('button');b.type='button';b.className='sandbox-document';b.textContent=doc.number===order.billingDocumentNumber?postDocumentText[lang()].pdf:rt().pdf;b.title=doc.number;
-   b.addEventListener('click',()=>download('/billing/sandbox/documents/'+encodeURIComponent(doc.number)+'.pdf',doc.number+'.pdf',b));row.append(b);
+  ref.append(document.createElement('br'),description);row.append(ref,status,amount);
+  const original=(order.documents||[]).find(d=>d.kind==='purchase');
+  if(original&&paidStatuses.includes(order.status)){
+   const actions=document.createElement('div');actions.className='sandbox-history-actions';
+   const base=document.createElement('button');base.type='button';base.className='sandbox-document';base.textContent=x.bill;
+   base.addEventListener('click',()=>download('/billing/sandbox/documents/'+encodeURIComponent(original.number)+'.pdf',original.number+'.pdf',base));
+   const details=document.createElement('button');details.type='button';details.className='sandbox-document';details.textContent=x.details;
+   if(order.billingDocumentNumber)details.addEventListener('click',()=>download('/billing/sandbox/documents/'+encodeURIComponent(order.billingDocumentNumber)+'.pdf',order.billingDocumentNumber+'.pdf',details));
+   else{details.classList.add('post-document-request');details.addEventListener('click',()=>openBillingDocument(order));}
+   actions.append(base,details);row.append(actions);
+   for(const doc of (order.documents||[]).filter(d=>d.kind==='refund')){
+    const b=document.createElement('button');b.type='button';b.className='sandbox-document';b.textContent=x.refund;
+    b.addEventListener('click',()=>download('/billing/sandbox/documents/'+encodeURIComponent(doc.number)+'.pdf',doc.number+'.pdf',b));row.append(b);
+   }
+  }else if(!paidStatuses.includes(order.status)){
+   const note=document.createElement('p');note.className='sandbox-pending-note';
+   const resumable=order.status==='PENDING'&&paymentUrl(order.paymentUrl);
+   note.textContent=resumable?x.pending:x.checking;
+   const b=document.createElement('button');b.type='button';b.className='sandbox-document sandbox-resume';b.textContent=resumable?x.resume:x.check;
+   b.addEventListener('click',()=>resumeOrder(order,b,!!resumable));row.append(note,b);
   }
-  if(['PAID','PARTIALLY_REFUNDED','REFUNDED'].includes(order.status)&&!order.billingDocumentNumber){
-   const b=document.createElement('button');b.type='button';b.className='sandbox-document post-document-request';b.textContent=postDocumentText[lang()].get;
-   b.addEventListener('click',()=>openBillingDocument(order));row.append(b);
-  }
-  if(order.paymentUrl){try{const u=new URL(order.paymentUrl);if(u.protocol==='https:'&&['sandbox-stargate.montonio.com','sandbox-checkout.montonio.com','sandbox-gateway.montonio.com'].includes(u.hostname)){const link=document.createElement('a');link.href=u.href;link.textContent=t().resume;row.append(link);}}catch{}}
   list.append(row);
  }
 }
+
 function update(){
  if(!enabled)return;
  const x=t(),isTrial=!sku();renderRecordsUI();
  document.documentElement.classList.add('billing-sandbox');
  document.querySelector('.preview-note').textContent=x.banner;
  $('balanceTitle').textContent=x.balance;
- document.querySelector('.balance-value').textContent=trafficGb(account?.testBalanceBytes||0)+' '+(lang()==='ru'?'ГБ':'GB');
+ renderBalance(account?.testBalanceBytes||0);
  document.querySelector('.balance-card .muted').textContent=x.balanceHelp;
  $('paymentPreviewNote').textContent=x.methods;
  $('sandboxConsent').hidden=isTrial;

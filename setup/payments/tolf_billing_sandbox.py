@@ -181,6 +181,19 @@ def public_order(row):
 
 def install(app,ns):
     initialize()
+    def account_label(uid):
+        with sqlite3.connect(ns['DB']) as c:
+            row=c.execute('''SELECT COALESCE(NULLIF(m.vpn_username,''),NULLIF(p.username,'')),m.number
+                             FROM managed_users m LEFT JOIN account_passwords p ON p.user_id=m.account_id
+                             WHERE m.account_id=? AND m.deleted_at IS NULL''',(uid,)).fetchone()
+        if not row:
+            return ''
+        return row[0] or 'TOLF #'+str(row[1])
+
+    with database() as c:
+        rows=c.execute('SELECT reference,user_id FROM orders WHERE reference NOT IN (SELECT order_reference FROM order_identity)').fetchall()
+        for row in rows:
+            c.execute('INSERT OR IGNORE INTO order_identity VALUES(?,?)',(row['reference'],account_label(row['user_id'])))
     methods_lock=threading.Lock()
     cache={'until':0,'data':None}
 
@@ -260,7 +273,7 @@ def install(app,ns):
     def account(request:Request):
         uid=allowed(request)
         with database() as c:
-            rows=c.execute('SELECT * FROM orders WHERE user_id=? ORDER BY created DESC LIMIT 30',(uid,)).fetchall()
+            rows=c.execute("SELECT * FROM orders WHERE user_id=? AND status NOT IN ('ABANDONED','VOIDED','DECLINED','CANCELLED','EXPIRED') ORDER BY created DESC LIMIT 30",(uid,)).fetchall()
             balance=c.execute('SELECT COALESCE(SUM(remaining_bytes),0) FROM package_lots WHERE user_id=?',(uid,)).fetchone()[0]
         return JSONResponse({'mode':'sandbox','testBalanceBytes':balance,'orders':[public_order(x) for x in rows]},headers=HEADERS)
 
@@ -283,11 +296,12 @@ def install(app,ns):
     def document(number:str,request:Request):
         uid=allowed(request)
         with database() as c:
-            doc=c.execute('SELECT d.pdf FROM documents d JOIN orders o ON o.reference=d.order_reference WHERE d.number=? AND o.user_id=?',
+            doc=c.execute('SELECT d.number FROM documents d JOIN orders o ON o.reference=d.order_reference WHERE d.number=? AND o.user_id=?',
                           (number,uid)).fetchone()
-        if not doc:
-            raise HTTPException(404,'unknown_document')
-        return Response(bytes(doc[0]),media_type='application/pdf',
+            if not doc:
+                raise HTTPException(404,'unknown_document')
+            pdf=records.document_pdf(c,number)
+        return Response(pdf,media_type='application/pdf',
                         headers={**HEADERS,'Content-Disposition':'attachment; filename="'+number+'.pdf"','X-Content-Type-Options':'nosniff'})
 
     @app.get('/billing/sandbox/admin/export.csv')
@@ -356,6 +370,7 @@ def install(app,ns):
             c.execute('''INSERT INTO orders(reference,user_id,request_id,sku,gb,cents,method,locale,status,
                        terms_version,early_service,created,updated) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)''',
                       (ref,uid,request_id,sku,gb,cents,method,locale,'CREATING',TERMS,1,now,now))
+            c.execute('INSERT INTO order_identity VALUES(?,?)',(ref,account_label(uid)))
             c.execute('INSERT INTO checkout_details VALUES(?,?,?,?)',(ref,json.dumps(buyer,ensure_ascii=False,sort_keys=True),
                        p.get('bankCountry') if method=='paymentInitiation' else None,
                        p.get('bankCode') if method=='paymentInitiation' else None))
@@ -397,7 +412,7 @@ def install(app,ns):
         return JSONResponse(data,headers=HEADERS)
 
     @app.get('/billing/sandbox/orders/{reference}')
-    def get_order(reference:str,request:Request):
+    def get_order(reference:str,request:Request,resume:bool=False):
         uid=allowed(request)
         with database() as c:
             row=c.execute('SELECT * FROM orders WHERE reference=? AND user_id=?',(reference,uid)).fetchone()
@@ -405,15 +420,22 @@ def install(app,ns):
                 raise HTTPException(404,'unknown_sandbox_order')
             now=time.time()
             # Limit provider polling even with multiple tabs/workers.
-            should_check=bool(row['provider_uuid']) and now-row['last_provider_check']>=5
+            should_check=bool(row['provider_uuid']) and (resume or now-row['last_provider_check']>=5)
             if should_check:
                 c.execute('UPDATE orders SET last_provider_check=? WHERE reference=?',(now,reference))
         if should_check:
             try:
                 data=provider('GET','/orders/'+row['provider_uuid'])
                 apply_status(data,'api')
+                if resume and data.get('paymentStatus')=='PENDING':
+                    fresh_url=data.get('paymentUrl')
+                    parsed=urlparse(fresh_url or '')
+                    if fresh_url and (parsed.scheme!='https' or parsed.hostname not in {'sandbox-stargate.montonio.com','sandbox-checkout.montonio.com','sandbox-gateway.montonio.com'} or parsed.username or parsed.password or parsed.port not in (None,443)):
+                        raise HTTPException(502,'unsafe_payment_url')
+                    with database() as c:
+                        c.execute("UPDATE orders SET payment_url=? WHERE reference=? AND status='PENDING'",(fresh_url,reference))
             except HTTPException as exc:
-                if exc.status_code!=502:
+                if resume or exc.status_code!=502:
                     raise
         with database() as c:
             row=c.execute('SELECT * FROM orders WHERE reference=? AND user_id=?',(reference,uid)).fetchone()

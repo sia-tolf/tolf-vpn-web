@@ -17,6 +17,11 @@ def env(tmp_path,monkeypatch):
     with sqlite3.connect(main) as c:
         c.execute('CREATE TABLE admin_roles(user_id TEXT PRIMARY KEY)')
         c.execute("INSERT INTO admin_roles VALUES ('admin')")
+        c.execute('CREATE TABLE managed_users(number INTEGER,account_id TEXT,vpn_username TEXT,deleted_at TEXT)')
+        c.execute('CREATE TABLE account_passwords(user_id TEXT,username TEXT)')
+        c.execute("INSERT INTO managed_users VALUES(9,'reviewer','user0_ipad',NULL)")
+        c.execute("INSERT INTO managed_users VALUES(10,'other-reviewer','other_user',NULL)")
+        c.execute("INSERT INTO managed_users VALUES(11,'admin','admin_account',NULL)")
     state={'calls':0,'orders':{}}
     def provider(method,path,p=None):
         if path=='/stores/payment-methods':
@@ -308,3 +313,52 @@ def test_post_payment_language_independent_of_original_language(env,country,expe
         snapshots={r['kind']:json.loads(r['snapshot_json']) for r in db.execute('SELECT kind,snapshot_json FROM documents WHERE order_reference=?',(order['reference'],))}
     assert snapshots['purchase']['locale']=='en'
     assert snapshots['billing_details']['locale']==expected
+
+
+def test_public_account_name_is_used_in_document(env):
+    c,_=env;order,data=paid_order(env)
+    with sb.database() as db:
+        snapshot=json.loads(db.execute("SELECT snapshot_json FROM documents WHERE order_reference=? AND kind='purchase'",(order['reference'],)).fetchone()[0])
+    assert snapshot['accountLabel']=='user0_ipad'
+    assert snapshot['accountReference']=='reviewer'
+
+def test_old_account_caption_rendition_preserves_original_pdf_and_snapshot(env):
+    c,_=env;order,data=paid_order(env)
+    with sb.database() as db:
+        doc=db.execute("SELECT * FROM documents WHERE order_reference=? AND kind='purchase'",(order['reference'],)).fetchone()
+        snapshot=json.loads(doc['snapshot_json']);snapshot.pop('accountLabel')
+        old_snapshot=json.dumps(snapshot)
+        old_pdf=b'%PDF-original-preserved-for-audit'
+        db.execute('UPDATE documents SET snapshot_json=?,pdf=? WHERE number=?',(old_snapshot,old_pdf,doc['number']))
+    url='/billing/sandbox/documents/'+doc['number']+'.pdf'
+    first=c.get(url,headers=headers()).content
+    assert first.startswith(b'%PDF-') and first!=old_pdf
+    assert c.get(url,headers=headers()).content==first
+    with sb.database() as db:
+        archived=db.execute('SELECT snapshot_json,pdf FROM documents WHERE number=?',(doc['number'],)).fetchone()
+        assert archived['snapshot_json']==old_snapshot and archived['pdf']==old_pdf
+        rendition=db.execute('SELECT account_label,pdf FROM document_presentations WHERE number=?',(doc['number'],)).fetchone()
+        assert rendition['account_label']=='user0_ipad' and bytes(rendition['pdf'])==first
+
+@pytest.mark.parametrize('status',['ABANDONED','VOIDED','DECLINED','CANCELLED','EXPIRED'])
+def test_closed_unpaid_orders_hidden_but_retained(env,status):
+    c,state=env;order=create(env);data=next(iter(state['orders'].values()))
+    c.post('/billing/sandbox/notify',json={'orderToken':token(data,paymentStatus=status)})
+    assert c.get('/billing/sandbox/account',headers=headers()).json()['orders']==[]
+    with sb.database() as db:
+        assert db.execute('SELECT status FROM orders WHERE reference=?',(order['reference'],)).fetchone()[0]==status
+
+def test_resume_requires_fresh_provider_check_and_fresh_safe_url(env,monkeypatch):
+    c,state=env;order=create(env);data=next(iter(state['orders'].values()))
+    data['paymentUrl']='https://sandbox-checkout.montonio.com/fresh'
+    path='/billing/sandbox/orders/'+order['reference']+'?resume=true'
+    assert c.get(path,headers=headers()).json()['paymentUrl'].endswith('/fresh')
+    data['paymentStatus']='ABANDONED'
+    assert c.get(path,headers=headers()).json()['paymentUrl'] is None
+    assert c.get('/billing/sandbox/account',headers=headers()).json()['orders']==[]
+    original=sb.provider
+    def unavailable(method,path,p=None):
+        if method=='GET' and path.startswith('/orders/'):raise HTTPException(502,'provider_unavailable')
+        return original(method,path,p)
+    monkeypatch.setattr(sb,'provider',unavailable)
+    assert c.get(path,headers=headers()).status_code==502

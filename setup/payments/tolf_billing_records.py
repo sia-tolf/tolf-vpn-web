@@ -25,6 +25,10 @@ ISO = {x.alpha_2 for x in pycountry.countries}
 
 def initialize(c):
     c.executescript("""
+    CREATE TABLE IF NOT EXISTS order_identity(
+        order_reference TEXT PRIMARY KEY, account_label TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS document_presentations(
+        number TEXT PRIMARY KEY, account_label TEXT NOT NULL, pdf BLOB NOT NULL, created REAL NOT NULL);
     CREATE TABLE IF NOT EXISTS checkout_details(
         order_reference TEXT PRIMARY KEY, buyer_json TEXT NOT NULL, bank_country TEXT, bank_code TEXT);
     CREATE TABLE IF NOT EXISTS country_evidence(
@@ -145,7 +149,7 @@ def render_pdf(snapshot):
     s=snapshot['seller']
     story+=block(x['seller'],[s['name'],s['registration'],s['address'],s['email']+' | '+s['phone']])
     b=snapshot['buyer']
-    story+=block(x['buyer'],[b.get('name',x['account']+' '+snapshot['accountReference']),b.get('registration'),b.get('vatNumber'),b.get('address'),b.get('country')])
+    story+=block(x['buyer'],[b.get('name',snapshot.get('accountLabel') or x['account']),b.get('registration'),b.get('vatNumber'),b.get('address'),b.get('country')])
     story += [para(x['order']+': '+snapshot['orderReference'],muted),Spacer(1,18)]
     amount=f"{snapshot['cents']/100:.2f} EUR"
     rows=[[para(x['refund'] if snapshot['kind']=='refund' else x['service']),para('' if snapshot['kind']=='refund' else str(snapshot['gb'])+' GB'),para(amount)]]
@@ -177,9 +181,10 @@ def create_document(c,row,kind='purchase',external_id=None,cents=None,buyer_over
     buyer=buyer_override if buyer_override is not None else json.loads(details[0]) if details else {}
     paid=c.execute('SELECT created FROM credits WHERE order_reference=?',(row['reference'],)).fetchone()
     original=c.execute("SELECT number FROM documents WHERE order_reference=? AND kind='purchase'",(row['reference'],)).fetchone()
+    identity=c.execute('SELECT account_label FROM order_identity WHERE order_reference=?',(row['reference'],)).fetchone()
     snapshot={'version':1,'number':number,'kind':kind,'created':paid[0] if kind=='purchase' and paid else now,
               'issuedAt':now,'locale':'lv' if buyer.get('country')=='LV' else 'en','seller':dict(SELLER),'buyer':buyer,
-              'accountReference':row['user_id'],'orderReference':row['reference'],'gb':row['gb'],
+              'accountReference':row['user_id'],'accountLabel':identity[0] if identity else None,'orderReference':row['reference'],'gb':row['gb'],
               'cents':row['cents'] if cents is None else cents,'currency':'EUR','taxPolicy':POLICY,
               'taxCountry':None,'vatRate':None,'vatCents':None,'environment':'sandbox',
               'originalDocument':original[0] if kind in {'refund','billing_details'} and original else None}
@@ -191,6 +196,25 @@ def create_document(c,row,kind='purchase',external_id=None,cents=None,buyer_over
     encoded=json.dumps(snapshot,ensure_ascii=False,sort_keys=True)
     c.execute('INSERT INTO documents VALUES(?,?,?,?,?,?,?)',(number,row['reference'],kind,external_id,encoded,render_pdf(snapshot),now))
     return number
+
+def document_pdf(c,number):
+    document=c.execute('SELECT snapshot_json,pdf,order_reference FROM documents WHERE number=?',(number,)).fetchone()
+    if not document:
+        return None
+    presentation=c.execute('SELECT pdf FROM document_presentations WHERE number=?',(number,)).fetchone()
+    if presentation:
+        return bytes(presentation[0])
+    snapshot=json.loads(document['snapshot_json'])
+    if snapshot['buyer'] or snapshot.get('accountLabel'):
+        return bytes(document['pdf'])
+    identity=c.execute('SELECT account_label FROM order_identity WHERE order_reference=?',(document['order_reference'],)).fetchone()
+    # Only the technical account caption is corrected. The originally issued PDF and
+    # financial snapshot remain in documents, unchanged, for audit.
+    snapshot['accountLabel']=identity[0] if identity else None
+    rendered=render_pdf(snapshot)
+    c.execute('INSERT OR IGNORE INTO document_presentations VALUES(?,?,?,?)',
+              (number,snapshot['accountLabel'] or '',rendered,time.time()))
+    return bytes(c.execute('SELECT pdf FROM document_presentations WHERE number=?',(number,)).fetchone()[0])
 
 def request_billing_document(c,row,buyer):
     if row['status'] not in {'PAID','PARTIALLY_REFUNDED','REFUNDED'}:
