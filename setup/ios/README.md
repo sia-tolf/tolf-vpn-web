@@ -11,3 +11,9 @@ The setup page downloads the authenticated /oc/access/devices/{device}/shortcuts
 The signed command name, its Cisco VPN target, the WebClip run-shortcut name and the full Home Screen label are identical, including AnyConnect and ordinary spaces (no TOLF- rewrite).
 The site wizard uses a new progress key so a previous confirmation of a stale iCloud command cannot skip the new command step.
 Installed commands are not automatically removed or renamed. Replacement/duplicate behaviour in Apple's Shortcuts remains a separate investigation.
+
+## Visible command-import step
+The command download action remains visible after the user confirms import, so a missing command can be added again without clearing browser storage.
+Wizard state is namespaced as tolfIosImportV4 to discard earlier confirmations that may have preceded actual import.
+The setup explains that the profile installs the Home Screen launcher, not the shortcut itself; a downloaded signed .shortcut file must be opened and added separately.
+The website cannot inspect the iPad Shortcuts collection. A user acknowledgement never counts as an automatic device-side verification.

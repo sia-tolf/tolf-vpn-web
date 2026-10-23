@@ -84,6 +84,7 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
     assert(!confirm.disabled,'opened step persists across reload');
     assert(nodes.some(n=>n.href===shortcut.href));
     confirm.events.click();
+    assert(descendants(element('iosVpnButtons')).some(n=>n.href===shortcut.href),'command link remains available after confirmation');
    }
    // Reload all controller code after recommendation changes while away in Shortcuts.
    recommendation=node==='moscow'?'riga':'moscow';
