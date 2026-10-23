@@ -5,3 +5,9 @@ apply_profile_labels.py applies the narrow change to the existing /opt/tolf-api/
 Deploy only the vpn_name function from setup/anyconnect/tolf_oc_shortcuts.py into the installed shortcut module; do not replace unrelated runtime shortcut changes. Back up both installed modules first, then restart tolf-api. VPN daemons do not need restarting.
 Tests: tests/ios/test_profile_names.py against TOLF_PROFILES_SOURCE, tests/ios/profile-name-ui.cjs, AnyConnect mobileconfig and shortcut suites, quick-anyconnect.cjs.
 Already installed profiles and shortcuts retain their prior names until reinstalled. Previously issued token payloads remain immutable; create a fresh profile to obtain the new label.
+
+## AnyConnect control icon binding
+The setup page downloads the authenticated /oc/access/devices/{device}/shortcuts/control.shortcut for the selected ingress, rather than a historical fixed-name iCloud share.
+The signed command name, its Cisco VPN target, the WebClip run-shortcut name and the full Home Screen label are identical, including AnyConnect and ordinary spaces (no TOLF- rewrite).
+The site wizard uses a new progress key so a previous confirmation of a stale iCloud command cannot skip the new command step.
+Installed commands are not automatically removed or renamed. Replacement/duplicate behaviour in Apple's Shortcuts remains a separate investigation.

@@ -170,11 +170,11 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   assert.equal(new URL(iosInstall.href).searchParams.get('buttons'), 'true');
   assert(details.textContent.includes('TOLF Moscow'));
   assert(iosInstall.hidden, 'ordinary installation hidden while bundle selected');
-  assert.deepEqual(descendants(details).filter(n=>n.tagName==='a').map(n=>n.textContent), ['Добавить команду «TOLF-Moscow AnyConnect»']);
+  assert.deepEqual(descendants(details).filter(n=>n.tagName==='a').map(n=>n.textContent), ['Добавить команду «TOLF Moscow AnyConnect»']);
   for (const mode of ['control']) {
-    const shortcut=descendants(details).find(n=>n.tagName==='a'&&n.textContent==='Добавить команду «TOLF-Moscow AnyConnect»');
+    const shortcut=descendants(details).find(n=>n.tagName==='a'&&n.textContent==='Добавить команду «TOLF Moscow AnyConnect»');
     assert(shortcut);
-    assert.equal(shortcut.href, 'https://www.icloud.com/shortcuts/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+    assert(shortcut.href.includes('/shortcuts/control.shortcut?ingress=moscow'));
     shortcut.click();
     button(details,'Команда добавлена — продолжить').click();
   }

@@ -84,11 +84,28 @@ class IosMobileConfig(unittest.TestCase):
             self.assertEqual(len(profile["PayloadContent"]), 3)
             self.assertEqual(normal["PayloadUUID"], profile["PayloadUUID"])
             clip = profile["PayloadContent"][2]
-            self.assertEqual(clip["Label"], "TOLF " + {"Москва":"Moscow", "Рига":"Riga"}[city])
-            self.assertEqual(parse_qs(urlparse(clip["URL"]).query), {"name": ["TOLF-" + {"Москва":"Moscow", "Рига":"Riga"}[city] + " AnyConnect"]})
+            self.assertEqual(clip["Label"], "TOLF " + {"Москва":"Moscow", "Рига":"Riga"}[city] + " AnyConnect")
+            self.assertEqual(parse_qs(urlparse(clip["URL"]).query), {"name": ["TOLF " + {"Москва":"Moscow", "Рига":"Riga"}[city] + " AnyConnect"]})
             self.assertEqual(clip["PayloadType"], "com.apple.webClip.managed")
             self.assertTrue(clip["Icon"].startswith(b"\x89PNG"))
             self.assertTrue(clip["IsRemovable"])
+
+    def test_icon_command_and_cisco_share_one_exact_name(self):
+        from tolf_oc_shortcuts import controller
+        from urllib.parse import urlparse,parse_qs
+        for host,city in [("oc.tolf.is:4443","Москва"),("oc-riga.tolf.is:443","Рига")]:
+            profile=plistlib.loads(tolf_oc_mobileconfig.make_combined_profile(
+                self.device,self.ca,host,city,production=True,include_buttons=True))
+            vpn=profile["PayloadContent"][1]
+            clip=profile["PayloadContent"][2]
+            name=vpn["UserDefinedName"]
+            command=controller(name)
+            self.assertEqual(clip["Label"],name)
+            self.assertEqual(parse_qs(urlparse(clip["URL"]).query)["name"],[command["WFWorkflowName"]])
+            for action in command["WFWorkflowActions"]:
+                params=action["WFWorkflowActionParameters"]
+                if "vpnConfig" in params:self.assertEqual(params["vpnConfig"],name)
+                if "WFVPN" in params:self.assertEqual(params["WFVPN"]["title"],name)
 
     def test_webclip_identity_is_stable_and_device_scoped(self):
         from tolf_oc_webclips import webclip_payloads

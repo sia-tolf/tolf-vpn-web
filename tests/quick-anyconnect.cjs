@@ -67,7 +67,7 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
     assert(confirm.disabled);
     confirm.events.click();
     assert(!descendants(element('iosVpnButtons')).some(n=>n.href?.includes('/ios.mobileconfig?')));
-    const shortcut=nodes.find(n=>n.href?.includes('/shortcuts/'+(node==='moscow'?'a':'b').repeat(32)));
+    const shortcut=nodes.find(n=>n.href?.includes('/shortcuts/control.shortcut?ingress='+node));
     assert(shortcut);
     if(mode==='on')assert(!nodes.some(n=>n.href?.includes('/shortcuts/off.shortcut')));
     shortcut.events.click();

@@ -1,14 +1,19 @@
 /* Shared iOS setup controls. Names must match the WebClip URLs and signed files. */
 (() => {
   'use strict';
-  // Shared English controllers, verified against their published iCloud records.
-  const CITY_SHARES = {
-    moscow: "f480fd5427e6404aa122684df1aee6fb",
-    riga: "54c7236b5b2d4812a7fae50f387b75dd",
-  };
-  function shortcutLink(city) {
-    const id = CITY_SHARES[city];
-    return /^[a-f0-9]{32}$/.test(id || '') ? 'https://www.icloud.com/shortcuts/' + id : null;
+  // Download the command generated for this device and exact VPN name.
+  function shortcutLink(profileUrl) {
+    try {
+      const link = new URL(profileUrl);
+      if (link.origin !== 'https://api.tolf.is' ||
+          !/^\/oc\/access\/devices\/[A-Za-z0-9_-]+\/ios\.mobileconfig$/.test(link.pathname)) return null;
+      const city = link.searchParams.get('ingress') || 'moscow';
+      if (!['moscow','riga'].includes(city)) return null;
+      link.pathname = link.pathname.replace(/\/ios\.mobileconfig$/, '/shortcuts/control.shortcut');
+      link.search = '';
+      link.searchParams.set('ingress', city);
+      return link.href;
+    } catch { return null; }
   }
   const TEXT = {
     ru: {
@@ -89,13 +94,13 @@
     const city = url ? new URL(url).searchParams.get('ingress') : '';
     const icon = element('span', '⏻', 'ios-vpn-icon ' + (city === 'riga' ? 'riga' : 'moscow'));
     icon.setAttribute('aria-hidden', 'true');
-    item.append(icon, element('strong', vpnName ? vpnName.split(' ').slice(0,2).join(' ') : 'TOLF'));
+    item.append(icon, element('strong', vpnName || 'TOLF'));
     preview.append(item);
     details.append(preview, element('p', text.permission, 'oc-note'));
     // Quick Setup supplies the invariant city name after preparation.
-    if (vpnName) details.append(element('p', text.setup.replaceAll('{vpn}', vpnName).replace('{shortcut}', vpnName.replace('TOLF ', 'TOLF-'))));
+    if (vpnName) details.append(element('p', text.setup.replaceAll('{vpn}', vpnName).replace('{shortcut}', vpnName)));
     else details.append(element('p', ({ru:'Сначала добавим команду TOLF, затем установим профиль VPN.', en:'First add the TOLF shortcut, then install the VPN profile.', lv:'Vispirms pievienosim komandu TOLF, pēc tam instalēsim VPN profilu.'})[lang] || 'First add the TOLF shortcut, then install the VPN profile.'));
-    const key = 'tolfIosCityV2:' + (url ? profileUrl(url, false) : '') + ':' + (vpnName || '');
+    const key = 'tolfIosBoundV3:' + (url ? profileUrl(url, false) : '') + ':' + (vpnName || '');
     let state = progress(key);
     let save;
     const wizard = element('div', '', 'ios-vpn-wizard');
@@ -106,8 +111,8 @@
       if (save) { save.hidden = !allowed(); save.disabled = disabled || !allowed(); }
       if (!checkbox.checked || !vpnName || !url) return;
       if (state.step < 1) {
-        const addLabel = text.add.replace('{vpn}', vpnName.replace('TOLF ', 'TOLF-'));
-        const link = shortcutLink(city);
+        const addLabel = text.add.replace('{vpn}', vpnName);
+        const link = shortcutLink(url);
         if (!link) {
           wizard.append(element('p', ({ru:'Команда пока недоступна.', en:'The shortcut is not available yet.', lv:'Komanda vēl nav pieejama.'})[lang] || 'The shortcut is not available yet.', 'oc-note'));
           return;
