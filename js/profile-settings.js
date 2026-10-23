@@ -2,7 +2,7 @@
 function defaultAppleProfileName() {
   const city = ({riga:"Riga",moscow:"Moscow",us:"New York"})[getSelectedServerKey()];
   const localId = getSelectedLocalId() || "";
-  return `TOLF ${city}${localId ? " " + localId : ""}`;
+  return `TOLF ${city} IKEv2${localId ? " " + localId : ""}`;
 }
 
 function updateProfileNameDefault() {

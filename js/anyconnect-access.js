@@ -506,7 +506,7 @@
         if (ingress().id === 'us') iosButtons = false;
         const install = link(c.iosInstall, window.tolfIosButtons.profileUrl(location, iosButtons), true);
         const options = ingress().id === 'us' ? null : window.tolfIosButtons.create({checked:iosButtons, disabled:busy || loading,
-          vpnName:"TOLF " + (ingress().id === "moscow" ? "Moscow" : "Riga"),
+          vpnName:"TOLF " + (ingress().id === "moscow" ? "Moscow" : "Riga") + " AnyConnect",
           url:location, includeInstall:true, saveHost:destinations, onChange:checked => { iosButtons = checked; saveSetup(); actions.hidden = checked; install.hidden = checked; install.href = window.tolfIosButtons.profileUrl(location, checked); }
         });
         if (options) root.append(options);

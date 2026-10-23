@@ -22,7 +22,7 @@ def vpn_name(row, entry_name):
         "Нью-Йорк": "New York", "Ņujorka": "New York",
         "us": "New York", "new-york": "New York",
     }
-    return "TOLF " + cities.get(entry_name, entry_name)
+    return "TOLF " + cities.get(entry_name, entry_name) + " AnyConnect"
 
 def workflow(name, mode):
     if mode not in ("on", "off"):

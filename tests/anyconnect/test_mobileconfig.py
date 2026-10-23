@@ -67,7 +67,7 @@ class IosMobileConfig(unittest.TestCase):
             cert, vpn = first["PayloadContent"][:2]
             self.assertEqual(vpn["VPN"]["PayloadCertificateUUID"], cert["PayloadUUID"])
             self.assertEqual(vpn["VPN"]["RemoteAddress"], host)
-            self.assertEqual(first["PayloadDisplayName"], "TOLF " + {"Москва":"Moscow", "Рига":"Riga"}[city])
+            self.assertEqual(first["PayloadDisplayName"], "TOLF " + {"Москва":"Moscow", "Рига":"Riga"}[city] + " AnyConnect")
             profiles.append(first)
         for field in ("PayloadUUID", "PayloadIdentifier"):
             self.assertTrue(identities(profiles[0], field).isdisjoint(identities(profiles[1], field)))
@@ -85,7 +85,7 @@ class IosMobileConfig(unittest.TestCase):
             self.assertEqual(normal["PayloadUUID"], profile["PayloadUUID"])
             clip = profile["PayloadContent"][2]
             self.assertEqual(clip["Label"], "TOLF " + {"Москва":"Moscow", "Рига":"Riga"}[city])
-            self.assertEqual(parse_qs(urlparse(clip["URL"]).query), {"name": ["TOLF-" + {"Москва":"Moscow", "Рига":"Riga"}[city]]})
+            self.assertEqual(parse_qs(urlparse(clip["URL"]).query), {"name": ["TOLF-" + {"Москва":"Moscow", "Рига":"Riga"}[city] + " AnyConnect"]})
             self.assertEqual(clip["PayloadType"], "com.apple.webClip.managed")
             self.assertTrue(clip["Icon"].startswith(b"\x89PNG"))
             self.assertTrue(clip["IsRemovable"])

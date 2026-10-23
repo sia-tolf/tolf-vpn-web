@@ -77,7 +77,7 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
     const profile='https://api.tolf.is/oc/access/devices/'+device+'/ios.mobileconfig?ingress='+node;
     element('iosVpnButtons').replaceChildren(ctx.window.tolfIosButtons.create({
       checked:true,includeInstall:true,lang:'ru',url:profile,
-      vpnName:'TOLF '+(node==='moscow'?'Moscow':'Riga')
+      vpnName:'TOLF '+(node==='moscow'?'Moscow':'Riga')+' AnyConnect'
     }));
     nodes=descendants(element('iosVpnButtons'));
     confirm=nodes.find(n=>n.textContent==='Команда добавлена — продолжить');
@@ -111,7 +111,7 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
    assigned=install.href;
    const other=ctx.window.tolfIosButtons.create({checked:true,includeInstall:true,lang:'ru',
      url:'https://api.tolf.is/oc/access/devices/other/ios.mobileconfig?ingress='+node,
-     vpnName:'TOLF '+(node==='moscow'?'Moscow':'Riga')});
+     vpnName:'TOLF '+(node==='moscow'?'Moscow':'Riga')+' AnyConnect'});
    assert(!descendants(other).some(n=>n.href?.includes('/ios.mobileconfig?')),
      'completion must not carry into a different device');
    const option=nodes.find(n=>n.type==='checkbox');

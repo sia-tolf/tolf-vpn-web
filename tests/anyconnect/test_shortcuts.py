@@ -17,7 +17,7 @@ class CiscoShortcuts(unittest.TestCase):
         for city in ("Москва", "Рига"):
             row = {"label": "iPhone <&> " + "😀" * 40}
             name = shortcuts.vpn_name(row, city)
-            self.assertEqual(name, "TOLF " + {"Москва":"Moscow", "Рига":"Riga"}[city])
+            self.assertEqual(name, "TOLF " + {"Москва":"Moscow", "Рига":"Riga"}[city] + " AnyConnect")
             for mode in ("on", "off"):
                 workflow = plistlib.loads(plistlib.dumps(shortcuts.workflow(name, mode)))
                 action = workflow["WFWorkflowActions"][0]
@@ -37,7 +37,7 @@ class CiscoShortcuts(unittest.TestCase):
             for city in aliases:
                 with self.subTest(city=city):
                     name=shortcuts.vpn_name({"label":"iPad пользователя"},city)
-                    self.assertEqual(name,"TOLF "+expected)
+                    self.assertEqual(name,"TOLF "+expected+" AnyConnect")
                     self.assertTrue(name.isascii())
                     start=shortcuts.workflow(name,"on")["WFWorkflowActions"][0]
                     self.assertEqual(start["WFWorkflowActionParameters"]["vpnConfig"],name)
@@ -146,9 +146,9 @@ class CiscoShortcuts(unittest.TestCase):
                 response = client.get(path+"?ingress=riga", headers={"x-test-user":"owner"})
                 self.assertEqual(response.status_code, 200)
                 self.assertEqual(response.content, SIGNED)
-                self.assertEqual('inline; filename="TOLF Riga.shortcut"', response.headers["content-disposition"])
+                self.assertEqual('inline; filename="TOLF Riga AnyConnect.shortcut"', response.headers["content-disposition"])
                 self.assertEqual("application/x-apple-shortcut", response.headers["content-type"])
-                signer.assert_called_once_with("TOLF Riga", "control")
+                signer.assert_called_once_with("TOLF Riga AnyConnect", "control")
                 self.assertIn("no-store", response.headers["cache-control"])
                 self.assertEqual(client.get(path+"?ingress=invalid", headers={"x-test-user":"owner"}).status_code, 400)
                 self.assertEqual(client.get(path.replace("control.shortcut","bad.shortcut"), headers={"x-test-user":"owner"}).status_code, 400)
