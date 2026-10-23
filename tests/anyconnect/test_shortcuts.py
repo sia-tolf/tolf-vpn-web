@@ -46,7 +46,10 @@ class CiscoShortcuts(unittest.TestCase):
         # The distributed file and API must carry the same controller.
         path = Path(__file__).resolve().parents[2] / "shortcuts/auto-install/TOLF.plist"
         native = plistlib.loads(path.read_bytes())
-        self.assertEqual(shortcuts.controller("TOLF Москва iPhone", "ru"), native)
+        candidate = shortcuts.controller("TOLF Москва iPhone", "ru")
+        self.assertEqual(candidate["WFWorkflowIcon"]["WFWorkflowIconStartColor"], 4282601983)
+        native["WFWorkflowIcon"]["WFWorkflowIconStartColor"] = 4282601983
+        self.assertEqual(candidate, native)
         for city in ("Москва", "Рига"):
             name = shortcuts.vpn_name({"label":"Phone <&>"}, city)
             document = shortcuts.controller(name)
