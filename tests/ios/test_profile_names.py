@@ -16,8 +16,8 @@ class ProfileNames(unittest.TestCase):
         for server,city in [("moscow","Moscow"),("riga","Riga"),("us","New York")]:
             for route in profiles.ROUTING[server]:
                 for language in ["ru","lv","en"]:
-                    for requested in ["","TOLF "+city,"TOLF "+city+(" "+route if route else "")]:
-                        expected="TOLF "+city+" IKEv2"+(" "+route if route else "")
+                    for requested in ["","TOLF "+city,"TOLF "+city+(" "+route if route else ""),"TOLF "+city+" IKEv2","TOLF "+city+" IKEv2 "+route]:
+                        expected="TOLF "+city+" IKEv2 "+(route or "auto").upper()
                         name,data=profiles._build_profile("synthetic-user","synthetic-password",server,route,"ios",identity,
                                                          {"profileName":requested,"language":language})
                         p=plistlib.loads(data);vpn=p["PayloadContent"][0]
@@ -26,6 +26,7 @@ class ProfileNames(unittest.TestCase):
                         self.assertEqual(vpn["UserDefinedName"],expected)
                         self.assertEqual(vpn["PayloadDisplayName"],expected)
                         self.assertEqual(vpn["VPNType"],"IKEv2")
+                        self.assertEqual(vpn["IKEv2"].get("LocalIdentifier"),route)
                         self.assertEqual(vpn["IKEv2"]["RemoteAddress"],profiles.HOSTS[server])
                         self.assertEqual(p["PayloadUUID"],identity["PROFILE_UUID"])
                         self.assertEqual(vpn["PayloadUUID"],identity["VPN_UUID"])

@@ -2,7 +2,7 @@
 function defaultAppleProfileName() {
   const city = ({riga:"Riga",moscow:"Moscow",us:"New York"})[getSelectedServerKey()];
   const localId = getSelectedLocalId() || "";
-  return `TOLF ${city} IKEv2${localId ? " " + localId : ""}`;
+  return `TOLF ${city} IKEv2 ${(localId || "auto").toUpperCase()}`;
 }
 
 function updateProfileNameDefault() {
@@ -16,7 +16,10 @@ function updateProfileNameDefault() {
 
 function selectedAppleProfileName() {
   const input = document.getElementById("profileNameInput");
-  return input?.value.trim() || defaultAppleProfileName();
+  let name = input?.value.trim() || defaultAppleProfileName();
+  name = name.replace(/\s+(?:AUTO|SR|LV|RU|YT)$/i, "");
+  if (!/\bIKEv2\b/i.test(name)) name += " IKEv2";
+  return name + " " + (getSelectedLocalId() || "auto").toUpperCase();
 }
 
 const dpdRate = document.getElementById("dpdRate");
