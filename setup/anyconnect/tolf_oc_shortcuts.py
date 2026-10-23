@@ -12,7 +12,7 @@ from urllib.request import Request, urlopen
 
 _LOCK = threading.Lock()
 CACHE = Path("/var/lib/tolf-api/ios-shortcuts")
-VERSION = "cisco-controller-v8-city-colors"
+VERSION = "cisco-controller-v9-native-connect"
 
 def vpn_name(row, entry_name):
     # Profile and connection names are independent of the UI/catalog language.
@@ -115,23 +115,27 @@ def controller(name, lang="en"):
     # iPhone-tested name binding: retain the native object and Cisco descriptor,
     # omit its device-local identifier so reinstalling the profile still resolves.
     expanded = []
+    def native(operation, on_demand=None):
+        params = {
+            "WFVPNOperation": operation,
+            "WFVPN": {"title": name, "appDescriptor": {
+                "BundleIdentifier": "com.cisco.anyconnect",
+                "Name": "AnyConnect", "TeamIdentifier": "DE8Y96K9QP"}}
+        }
+        if on_demand is not None:
+            params["WFOnDemandValue"] = on_demand
+        return {"WFWorkflowActionIdentifier": "is.workflow.actions.vpn.set",
+                "WFWorkflowActionParameters": params}
     for action in actions:
         identifier = action["WFWorkflowActionIdentifier"]
-        if identifier in ("com.cisco.anyconnect.StartVpnIntent", "com.cisco.anyconnect.StopVpnIntent"):
-            expanded.append({
-                "WFWorkflowActionIdentifier": "is.workflow.actions.vpn.set",
-                "WFWorkflowActionParameters": {
-                    "WFVPNOperation": "Set On Demand",
-                    "WFOnDemandValue": 1 if identifier.endswith("StartVpnIntent") else 0,
-                    "WFVPN": {
-                        "title": name,
-                        "appDescriptor": {"BundleIdentifier": "com.cisco.anyconnect",
-                                          "Name": "AnyConnect", "TeamIdentifier": "DE8Y96K9QP"}
-                    }
-                }
-            })
-            action["WFWorkflowActionParameters"]["ShowWhenRun"] = False
-        expanded.append(action)
+        if identifier == "com.cisco.anyconnect.StartVpnIntent":
+            # Connect before enabling automatic reconnection. Cisco Start raises
+            # an error when On Demand or an earlier run already connected VPN.
+            expanded.extend([native("Connect"), native("Set On Demand", 1)])
+        elif identifier == "com.cisco.anyconnect.StopVpnIntent":
+            expanded.extend([native("Set On Demand", 0), native("Disconnect")])
+        else:
+            expanded.append(action)
     # Clear the branch result before navigation and at completion, so URL
     # launches do not return the on/off text to the caller.
     expanded.extend([
