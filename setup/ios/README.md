@@ -17,3 +17,10 @@ The command download action remains visible after the user confirms import, so a
 Wizard state is namespaced as tolfIosImportV4 to discard earlier confirmations that may have preceded actual import.
 The setup explains that the profile installs the Home Screen launcher, not the shortcut itself; a downloaded signed .shortcut file must be opened and added separately.
 The website cannot inspect the iPad Shortcuts collection. A user acknowledgement never counts as an automatic device-side verification.
+
+## iCloud restoration (current delivery policy)
+Direct .shortcut download is removed from the setup UI. Only validated iCloud shares may be linked.
+Historical f480fd5427e6404aa122684df1aee6fb and 54c7236b5b2d4812a7fae50f387b75dd were inspected through their public iCloud records and shortcut plists: they target TOLF Moscow and TOLF Riga, not the protocol-qualified current VPN names.
+CITY_SHARES is intentionally null until the owner publishes updated commands with the exact current target names. Do not re-enable these historical shares or silently rename VPN profiles to fit them.
+While awaiting publication, the site states that icon setup is unavailable and permits profile installation without an icon. It does not mark the shortcut installed or expose a file fallback.
+After obtaining an updated owner-provided share, verify its public name and all Cisco/WFVPN targets against CITY_SHORTCUT_NAMES before enabling the matching city.

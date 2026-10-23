@@ -174,7 +174,7 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   for (const mode of ['control']) {
     const shortcut=descendants(details).find(n=>n.tagName==='a'&&n.textContent==='Добавить команду «TOLF Moscow AnyConnect»');
     assert(shortcut);
-    assert(shortcut.href.includes('/shortcuts/control.shortcut?ingress=moscow'));
+    assert.equal(shortcut.href, 'https://www.icloud.com/shortcuts/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
     shortcut.click();
     button(details,'Команда добавлена — продолжить').click();
   }

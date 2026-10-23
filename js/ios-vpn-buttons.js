@@ -1,19 +1,20 @@
 /* Shared iOS setup controls. Names must match the WebClip URLs and signed files. */
 (() => {
   'use strict';
-  // Download the command generated for this device and exact VPN name.
-  function shortcutLink(profileUrl) {
-    try {
-      const link = new URL(profileUrl);
-      if (link.origin !== 'https://api.tolf.is' ||
-          !/^\/oc\/access\/devices\/[A-Za-z0-9_-]+\/ios\.mobileconfig$/.test(link.pathname)) return null;
-      const city = link.searchParams.get('ingress') || 'moscow';
-      if (!['moscow','riga'].includes(city)) return null;
-      link.pathname = link.pathname.replace(/\/ios\.mobileconfig$/, '/shortcuts/control.shortcut');
-      link.search = '';
-      link.searchParams.set('ingress', city);
-      return link.href;
-    } catch { return null; }
+  // Enable a share only after its published VPN target matches the profile.
+  // Historical shares target TOLF Moscow/Riga and cannot control renamed profiles.
+  const CITY_SHARES = {
+    moscow: null,
+    riga: null,
+  };
+  const CITY_SHORTCUT_NAMES = {
+    moscow: 'TOLF Moscow AnyConnect',
+    riga: 'TOLF Riga AnyConnect',
+  };
+  function shortcutLink(city, vpnName) {
+    const id = CITY_SHARES[city];
+    return vpnName === CITY_SHORTCUT_NAMES[city] && /^[a-f0-9]{32}$/.test(id || '')
+      ? 'https://www.icloud.com/shortcuts/' + id : null;
   }
   const TEXT = {
     ru: {
@@ -23,7 +24,7 @@
       setup: "Настройка состоит из двух шагов: добавьте команду «{shortcut}», затем установите профиль «{vpn}» со значком.",
       add: "Добавить команду «{vpn}»", save: 'Сохранить MobileConfig', saving: 'Сохраняем…',
       failed: 'Не удалось сохранить профиль. Попробуйте ещё раз.',
-      note: "Если Safari скачает файл .shortcut, откройте его в «Загрузках» и подтвердите добавление в «Команды». Продолжайте установку профиля только после появления команды в приложении. Сохраните её название.",
+      note: "Добавьте команду на странице iCloud, затем вернитесь в Safari. Продолжайте только после появления команды в приложении «Команды». Сохраните её название.",
       confirm: "Команда добавлена — продолжить",
       ready: "2. Установите VPN",
       install: "Установить профиль",
@@ -36,7 +37,7 @@
       setup: "Two steps: add the “{shortcut}” shortcut, then install the “{vpn}” VPN profile and icon.",
       add: "Add “{vpn}” shortcut", save: 'Save MobileConfig', saving: 'Saving…',
       failed: 'Unable to save the profile. Please try again.',
-      note: "If Safari downloads a .shortcut file, open it in Downloads and confirm adding it to Shortcuts. Continue installing the profile only after the command appears in the app. Keep its name.",
+      note: "Add the shortcut through iCloud, then return to Safari. Continue only after it appears in Shortcuts. Keep its name.",
       confirm: "Shortcut added — continue",
       ready: "2. Install VPN",
       install: "Install profile",
@@ -49,7 +50,7 @@
       setup: "Divi soļi: pievienojiet komandu “{shortcut}”, pēc tam instalējiet VPN profilu “{vpn}” ar ikonu.",
       add: "Pievienot komandu “{vpn}”", save: 'Saglabāt MobileConfig', saving: 'Saglabā…',
       failed: 'Neizdevās saglabāt profilu. Mēģiniet vēlreiz.',
-      note: "Ja Safari lejupielādē .shortcut failu, atveriet to sadaļā Lejupielādes un apstipriniet pievienošanu lietotnei Shortcuts. Turpiniet profila instalēšanu tikai tad, kad komanda redzama lietotnē. Saglabājiet tās nosaukumu.",
+      note: "Pievienojiet komandu iCloud lapā, pēc tam atgriezieties Safari. Turpiniet tikai tad, kad komanda redzama lietotnē Shortcuts. Saglabājiet tās nosaukumu.",
       confirm: "Komanda pievienota — turpināt",
       ready: "2. Instalējiet VPN",
       install: "Instalēt profilu",
@@ -100,21 +101,21 @@
     // Quick Setup supplies the invariant city name after preparation.
     if (vpnName) details.append(element('p', text.setup.replaceAll('{vpn}', vpnName).replace('{shortcut}', vpnName)));
     else details.append(element('p', ({ru:'Сначала добавим команду TOLF, затем установим профиль VPN.', en:'First add the TOLF shortcut, then install the VPN profile.', lv:'Vispirms pievienosim komandu TOLF, pēc tam instalēsim VPN profilu.'})[lang] || 'First add the TOLF shortcut, then install the VPN profile.'));
-    const key = 'tolfIosImportV4:' + (url ? profileUrl(url, false) : '') + ':' + (vpnName || '');
+    const key = 'tolfIosIcloudV5:' + (url ? profileUrl(url, false) : '') + ':' + (vpnName || '');
     let state = progress(key);
     let save;
     const wizard = element('div', '', 'ios-vpn-wizard');
     details.append(wizard);
-    const allowed = () => !checkbox.checked || state.step === 1;
+    const allowed = () => !checkbox.checked || (state.step === 1 && !!shortcutLink(city, vpnName));
     function renderWizard() {
       wizard.replaceChildren();
       if (save) { save.hidden = !allowed(); save.disabled = disabled || !allowed(); }
       if (!checkbox.checked || !vpnName || !url) return;
       {
         const addLabel = text.add.replace('{vpn}', vpnName);
-        const link = shortcutLink(url);
+        const link = shortcutLink(city, vpnName);
         if (!link) {
-          wizard.append(element('p', ({ru:'Команда пока недоступна.', en:'The shortcut is not available yet.', lv:'Komanda vēl nav pieejama.'})[lang] || 'The shortcut is not available yet.', 'oc-note'));
+          wizard.append(element('p', ({ru:'Добавление значка временно недоступно: обновлённая команда iCloud ещё не опубликована. Профиль можно установить без значка.', en:'The icon is temporarily unavailable: the updated iCloud shortcut has not been published. You can install the profile without the icon.', lv:'Ikona īslaicīgi nav pieejama: atjauninātā iCloud komanda vēl nav publicēta. Profilu var instalēt bez ikonas.'})[lang] || 'The shortcut is not available yet.', 'oc-note'));
           return;
         }
         wizard.append(element('p', '1. ' + addLabel));
