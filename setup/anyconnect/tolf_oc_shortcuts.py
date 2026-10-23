@@ -15,7 +15,14 @@ CACHE = Path("/var/lib/tolf-api/ios-shortcuts")
 VERSION = "cisco-controller-v7-colored-menu"
 
 def vpn_name(row, entry_name):
-    return "TOLF " + {"Москва": "Moscow", "Рига": "Riga", "moscow": "Moscow", "riga": "Riga", "Rīga": "Riga", "Maskava": "Moscow"}.get(entry_name, entry_name)
+    # Profile and connection names are independent of the UI/catalog language.
+    cities = {
+        "Москва": "Moscow", "Maskava": "Moscow", "moscow": "Moscow",
+        "Рига": "Riga", "Rīga": "Riga", "riga": "Riga",
+        "Нью-Йорк": "New York", "Ņujorka": "New York",
+        "us": "New York", "new-york": "New York",
+    }
+    return "TOLF " + cities.get(entry_name, entry_name)
 
 def workflow(name, mode):
     if mode not in ("on", "off"):

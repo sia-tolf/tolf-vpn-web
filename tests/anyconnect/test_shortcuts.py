@@ -27,6 +27,21 @@ class CiscoShortcuts(unittest.TestCase):
                 self.assertEqual(workflow["WFWorkflowName"], "TOLF " + mode.upper())
                 self.assertEqual(workflow["WFWorkflowImportQuestions"], [])
 
+    def test_profile_names_are_english_for_all_entry_languages(self):
+        cases = {
+            "Moscow": ["Москва", "Maskava", "Moscow", "moscow"],
+            "Riga": ["Рига", "Rīga", "Riga", "riga"],
+            "New York": ["Нью-Йорк", "Ņujorka", "New York", "us", "new-york"],
+        }
+        for expected, aliases in cases.items():
+            for city in aliases:
+                with self.subTest(city=city):
+                    name=shortcuts.vpn_name({"label":"iPad пользователя"},city)
+                    self.assertEqual(name,"TOLF "+expected)
+                    self.assertTrue(name.isascii())
+                    start=shortcuts.workflow(name,"on")["WFWorkflowActions"][0]
+                    self.assertEqual(start["WFWorkflowActionParameters"]["vpnConfig"],name)
+
     def test_controller_matches_distributed_template(self):
         # The distributed file and API must carry the same controller.
         path = Path(__file__).resolve().parents[2] / "shortcuts/auto-install/TOLF.plist"
