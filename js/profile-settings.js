@@ -1,8 +1,14 @@
+function appleProfileRoutingName() {
+  const server = getSelectedServerKey();
+  const localId = getSelectedLocalId() || "";
+  return server === "riga" && localId === "sr" ? "AUTO" : (localId || "auto").toUpperCase();
+}
+
 
 function defaultAppleProfileName() {
   const city = ({riga:"Riga",moscow:"Moscow",us:"New York"})[getSelectedServerKey()];
   const localId = getSelectedLocalId() || "";
-  return `TOLF ${city} IKEv2 ${(localId || "auto").toUpperCase()}`;
+  return `TOLF ${city} IKEv2 ${appleProfileRoutingName()}`;
 }
 
 function updateProfileNameDefault() {
@@ -19,7 +25,7 @@ function selectedAppleProfileName() {
   let name = input?.value.trim() || defaultAppleProfileName();
   name = name.replace(/\s+(?:AUTO|SR|LV|RU|YT)$/i, "");
   if (!/\bIKEv2\b/i.test(name)) name += " IKEv2";
-  return name + " " + (getSelectedLocalId() || "auto").toUpperCase();
+  return name + " " + appleProfileRoutingName();
 }
 
 const dpdRate = document.getElementById("dpdRate");

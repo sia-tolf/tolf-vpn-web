@@ -17,7 +17,7 @@ class ProfileNames(unittest.TestCase):
             for route in profiles.ROUTING[server]:
                 for language in ["ru","lv","en"]:
                     for requested in ["","TOLF "+city,"TOLF "+city+(" "+route if route else ""),"TOLF "+city+" IKEv2","TOLF "+city+" IKEv2 "+route]:
-                        expected="TOLF "+city+" IKEv2 "+(route or "auto").upper()
+                        expected="TOLF "+city+" IKEv2 "+("AUTO" if server=="riga" and route=="sr" else (route or "auto").upper())
                         name,data=profiles._build_profile("synthetic-user","synthetic-password",server,route,"ios",identity,
                                                          {"profileName":requested,"language":language})
                         p=plistlib.loads(data);vpn=p["PayloadContent"][0]
