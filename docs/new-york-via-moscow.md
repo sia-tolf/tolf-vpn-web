@@ -80,3 +80,19 @@ using RSA 2048. Both direct and Moscow-relay public TLS endpoints now validate
 and serve the RSA certificate. The deploy hook reloaded ocserv successfully.
 The existing iPad session must reconnect before testing whether DTLS is restored.
 Do not claim a speed improvement until measured on the iPad.
+
+
+## Approved UDP/4443 comparison
+
+After reconnecting with the RSA certificate the iPad still used TCP only.
+A short DTLS capture showed a ClientHello, matching resumed ServerHello,
+ChangeCipherSpec and encrypted Finished from the server, followed by repeated
+client ClientHellos. There was no server plaintext rejection. This does not
+identify whether the iPad received or accepted the server flight.
+
+Moscow's established VPN service uses UDP/4443, unlike New York's UDP/443.
+With separate explicit approval, New York was changed to UDP/4443 and restarted.
+The dedicated Moscow relay now maps UDP/4443 (and legacy ingress UDP/443)
+to New York UDP/4443. Moscow's primary-address VPN service is unaffected.
+The active configuration and nftables rules persist across reboot. The listener
+and TLS certificate are verified. iPad DTLS and speed remain to be checked.

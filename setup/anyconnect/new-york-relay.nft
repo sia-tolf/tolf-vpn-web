@@ -4,7 +4,7 @@ table inet tolf_ny_relay {
  chain ingress {
   type nat hook prerouting priority -101; policy accept;
   iifname "br-lan" ip daddr 92.243.66.204 tcp dport { 80, 4443 } counter dnat ip to 162.252.174.201
-  iifname "br-lan" ip daddr 92.243.66.204 udp dport 443 counter dnat ip to 162.252.174.201
+  iifname "br-lan" ip daddr 92.243.66.204 udp dport { 443, 4443 } counter dnat ip to 162.252.174.201:4443
  }
  chain return_path {
   type nat hook postrouting priority 99; policy accept;
