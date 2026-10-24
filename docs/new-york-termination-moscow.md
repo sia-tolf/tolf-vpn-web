@@ -81,3 +81,13 @@ timer. Restore the old relay file only if transparent forwarding is deliberately
 wanted; otherwise disable the RU gate to return new profiles to direct NY.
 Restore Moscow helper files, restart external-exit, reapply device rules,
 restore UK modules and restart tolf-api. Existing direct NY clients are unaffected.
+
+## Measurement DNS correction
+
+The customer iPad established ECDHE-RSA DTLS on the new listener but could not
+resolve speedtest-us.vpn.tolf.is: Moscow dnsmasq rebinding protection removed
+the private A answer. The initial probe used an explicit IP override and missed
+this dependency. Added only this hostname to the existing rebind_domain list;
+global rebinding protection remains enabled. Re-tested via the actual VPN DNS
+10.254.0.54, resolved 10.250.81.1, validated TLS by hostname, and received HTTP
+200 with CORS for ping, 1 MiB download and 1 MiB upload without a DNS override.
