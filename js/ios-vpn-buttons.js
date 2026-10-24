@@ -5,7 +5,7 @@
   // Historical shares target TOLF Moscow/Riga and cannot control renamed profiles.
   const CITY_SHARES = {
     moscow: '3b5b6270b5464d84866084aad873647b',
-    riga: null,
+    riga: '02ed7a839cee48289255a2a4338392fe',
   };
   const CITY_SHORTCUT_NAMES = {
     moscow: 'TOLF Moscow AnyConnect',
