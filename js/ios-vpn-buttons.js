@@ -4,7 +4,7 @@
   // Enable a share only after its published VPN target matches the profile.
   // Historical shares target TOLF Moscow/Riga and cannot control renamed profiles.
   const CITY_SHARES = {
-    moscow: null,
+    moscow: '3b5b6270b5464d84866084aad873647b',
     riga: null,
   };
   const CITY_SHORTCUT_NAMES = {

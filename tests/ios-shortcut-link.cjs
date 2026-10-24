@@ -10,8 +10,8 @@ for(const configured of [false,true]){
   for(const lang of ['ru','en','lv']){
    const nodes=flat(ctx.window.tolfIosButtons.create({checked:true,vpnName:name,lang,url:'https://api.tolf.is/oc/access/devices/test-device/ios.mobileconfig?ingress='+city}));
    const a=nodes.find(n=>n.href);
-   if(!configured){assert.equal(a,undefined);continue;}
-   assert.equal(a.href,'https://www.icloud.com/shortcuts/'+ids[city]);
+   if(!configured && city==='riga'){assert.equal(a,undefined);continue;}
+   assert.equal(a.href,'https://www.icloud.com/shortcuts/'+(configured?ids[city]:'3b5b6270b5464d84866084aad873647b'));
    assert(a.textContent.includes(name));
    assert(!nodes.some(n=>n.href?.includes('.shortcut')));
   }
