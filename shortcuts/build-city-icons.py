@@ -2,7 +2,7 @@
 import base64, json, math, struct, zlib
 from pathlib import Path
 
-COLORS = {"moscow": "#AD5555", "riga": "#793D52"}
+COLORS = {"moscow": "#AD5555", "riga": "#793D52", "us": "#1B9AF7"}
 def png(color):
     bg = bytes.fromhex(color.lstrip("#"))
     size, scale = 180, 4

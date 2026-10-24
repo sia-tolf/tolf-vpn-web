@@ -89,16 +89,15 @@ $('passkeyName').value = suggestedPasskeyName;
 function message(key, error = false) { messageKey = key; failed = error; render(); }
 function persist() { if(protocol==='anyconnect')put('quickIngress',requestedIngress); put('quickServer', server); put('quickPlatform', platform);put('quickProtocol',protocol); }
 function render() {
- if(server==='us')iosButtons=false;
  $('prepare').hidden = protocol === 'anyconnect' && nativePlatform === 'ios' && iosButtons && !!ocDevice;
  const options = $('iosVpnButtons');
  $('iosProfileSave').replaceChildren();
- options.hidden = !(protocol === 'anyconnect' && nativePlatform === 'ios') || server==='us' || !clientReady();
+ options.hidden = !(protocol === 'anyconnect' && nativePlatform === 'ios') || !clientReady();
  if (!options.hidden) {
    const url = ocDevice ? new URL(API+'/oc/access/devices/'+encodeURIComponent(ocDevice.id)+'/ios.mobileconfig') : null;
    if (url) url.searchParams.set('ingress', server);
    options.replaceChildren(window.tolfIosButtons.create({checked:iosButtons, disabled:busy, lang,
-     vpnName:ocDevice ? 'TOLF '+(server==='moscow'?'Moscow':'Riga')+' AnyConnect' : null,
+     vpnName:ocDevice ? 'TOLF '+({moscow:'Moscow',riga:'Riga',us:'New York'}[server])+' AnyConnect' : null,
      url:url?.href, includeInstall:true, saveHost:$('iosProfileSave'), onChange:checked => {iosButtons = checked; saveIosSetup(); put('quickIosButtons', checked ? 'true' : ''); render();}
    }));
  }
@@ -194,7 +193,7 @@ async function loadAccount() {
    const point=caps.ingresses?.find(p=>p.id===saved.server);
    const list=await api('/oc/access/devices');
    const device=list.devices?.find(d=>d.id===saved.device && d.state==='active' && Date.parse(d.expires_at)>Date.now());
-   if(point && point.host===OC_HOSTS[saved.server] && device){server=saved.server;ocPoint=point;ocDevice=device;iosButtons=saved.server!=='us' && saved.buttons===true;persist();}
+   if(point && point.host===OC_HOSTS[saved.server] && device){server=saved.server;ocPoint=point;ocDevice=device;iosButtons=saved.buttons===true;persist();}
    else put(ocKey('setup'),'');
   }
  }

@@ -503,10 +503,9 @@
         // MobileConfig with both the certificate and the Cisco VPN.
         const location = API + path(d.id) + "/ios.mobileconfig?ingress=" + encodeURIComponent(ingress().id);
         const actions = element("div", null, "oc-actions oc-ios-install");
-        if (ingress().id === 'us') iosButtons = false;
         const install = link(c.iosInstall, window.tolfIosButtons.profileUrl(location, iosButtons), true);
-        const options = ingress().id === 'us' ? null : window.tolfIosButtons.create({checked:iosButtons, disabled:busy || loading,
-          vpnName:"TOLF " + (ingress().id === "moscow" ? "Moscow" : "Riga") + " AnyConnect",
+        const options = window.tolfIosButtons.create({checked:iosButtons, disabled:busy || loading,
+          vpnName:"TOLF " + ({moscow:"Moscow",riga:"Riga",us:"New York"}[ingress().id]) + " AnyConnect",
           url:location, includeInstall:true, saveHost:destinations, onChange:checked => { iosButtons = checked; saveSetup(); actions.hidden = checked; install.hidden = checked; install.href = window.tolfIosButtons.profileUrl(location, checked); }
         });
         if (options) root.append(options);

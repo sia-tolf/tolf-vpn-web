@@ -46,7 +46,7 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
  element('quickClientConfirmed').checked=true;element('quickClientConfirmed').onchange();
  assert.equal(store.has('quickClientHandoff'),false);
  assert.equal(element('prepare').disabled,false);
- if(platform==='ios' && node!=='us'){
+ if(platform==='ios'){
   const option=descendants(element('iosVpnButtons')).find(n=>n.type==='checkbox');
   assert.equal(option.checked,false);
   if(buttons){option.checked=true;option.events.change();}
@@ -67,7 +67,7 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
     assert(confirm.disabled);
     confirm.events.click();
     assert(!descendants(element('iosVpnButtons')).some(n=>n.href?.includes('/ios.mobileconfig?')));
-    const shortcut=nodes.find(n=>n.href?.includes('/shortcuts/'+(node==='moscow'?'a':'b').repeat(32)));
+    const shortcut=nodes.find(n=>n.href?.includes('/shortcuts/'+({moscow:'a',riga:'b',us:'c'}[node]).repeat(32)));
     assert(shortcut);
     if(mode==='on')assert(!nodes.some(n=>n.href?.includes('/shortcuts/off.shortcut')));
     shortcut.events.click();
@@ -77,7 +77,7 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
     const profile='https://api.tolf.is/oc/access/devices/'+device+'/ios.mobileconfig?ingress='+node;
     element('iosVpnButtons').replaceChildren(ctx.window.tolfIosButtons.create({
       checked:true,includeInstall:true,lang:'ru',url:profile,
-      vpnName:'TOLF '+(node==='moscow'?'Moscow':'Riga')+' AnyConnect'
+      vpnName:'TOLF '+({moscow:'Moscow',riga:'Riga',us:'New York'}[node])+' AnyConnect'
     }));
     nodes=descendants(element('iosVpnButtons'));
     confirm=nodes.find(n=>n.textContent==='Команда добавлена — продолжить');
@@ -90,7 +90,7 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
    recommendation=node==='moscow'?'riga':'moscow';
    // Both nodes remain available; the active setup must win over the new recommendation.
    const originalFetch=ctx.fetch;
-   ctx.fetch=async(url,opt)=>url.endsWith('/oc/access/capabilities')?{ok:true,json:async()=>({issuance:true,ingresses:[{id:'moscow',host:'oc.tolf.is:4443'},{id:'riga',host:'oc-riga.tolf.is:443'}]})}:originalFetch(url,opt);
+   ctx.fetch=async(url,opt)=>url.endsWith('/oc/access/capabilities')?{ok:true,json:async()=>({issuance:true,ingresses:[{id:'moscow',host:'oc.tolf.is:4443'},{id:'riga',host:'oc-riga.tolf.is:443'},{id:'us',host:'oc-us.tolf.is:4443'}]})}:originalFetch(url,opt);
    vm.runInContext(withShares(fs.readFileSync('js/ios-vpn-buttons.js','utf8')),ctx);
    vm.runInContext(fs.readFileSync('js/openconnect-windows-setup.js','utf8'),ctx);vm.runInContext(source,ctx);
    for(let i=0;i<80;i++)await Promise.resolve();
@@ -112,7 +112,7 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
    assigned=install.href;
    const other=ctx.window.tolfIosButtons.create({checked:true,includeInstall:true,lang:'ru',
      url:'https://api.tolf.is/oc/access/devices/other/ios.mobileconfig?ingress='+node,
-     vpnName:'TOLF '+(node==='moscow'?'Moscow':'Riga')+' AnyConnect'});
+     vpnName:'TOLF '+({moscow:'Moscow',riga:'Riga',us:'New York'}[node])+' AnyConnect'});
    assert(!descendants(other).some(n=>n.href?.includes('/ios.mobileconfig?')),
      'completion must not carry into a different device');
    const option=nodes.find(n=>n.type==='checkbox');
@@ -127,8 +127,7 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
   assert.equal(url.searchParams.get('ingress'),node);
   assert.equal(url.searchParams.get('buttons'),buttons?'true':null);
   assert.equal(posts.filter(p=>p.endsWith('/import')).length,0);
-  if(node==='us')assert.equal(element('iosVpnButtons').hidden,true);
-  else assert(descendants(element('iosVpnButtons')).some(n=>n.textContent.includes('TOLF '+(node==='moscow'?'Moscow':'Riga'))));
+  assert(descendants(element('iosVpnButtons')).some(n=>n.textContent.includes('TOLF '+({moscow:'Moscow',riga:'Riga',us:'New York'}[node]))));
   return;
  }
  if(automaticOnly){
@@ -209,4 +208,4 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
  assert.equal(element('ocCertificateDone').hidden,false);
  await element('ocRenew').onclick();assert.equal(created.length,before);assert.equal(element('ocGrantPanel').hidden,false);
 }
-(async()=>{for(const [ua,p]of[['iPhone','ios'],['desktop-ipad','ios'],['Android','android'],['Windows NT','windows']])await run(ua,p,'moscow',{handoff:true});await run('iPhone','ios','riga',{handoff:true,buttons:true});for(const [ua,p]of[['iPhone','ios'],['desktop-ipad','ios'],['Android','android'],['Windows NT','windows']])for(const node of ['riga','moscow','us'])await run(ua,p,node);await run('iPhone','ios','riga',{buttons:true});await run('iPhone','ios','moscow',{missingNode:true});await run('Android','android','moscow',{loseReply:true});await run('Windows NT','windows','moscow',{clockSkew:5*3600000});await run('Windows NT','windows','moscow',{clockSkew:-5*3600000});await run('Windows NT','windows','moscow',{expireGrant:true});await run('Windows NT','windows','moscow',{tamper:true});await run('Windows NT','windows','moscow',{mobileLinkFault:true});await run('Android','android','moscow',{mobileLinkFault:true});for(const node of ['moscow','riga','us'])await run('Windows NT','windows',node,{automaticOnly:true});await run('Windows NT','windows','moscow',{automaticOnly:true,clockSkew:5*3600000});await run('Windows NT','windows','moscow',{automaticOnly:true,tamper:true});console.log('PASS: AnyConnect device/node selection, reusable device, lost reply, certificate URL validation, node availability, mobile/Windows steps, blocked import, confirmation, reset and certificate reuse');})().catch(e=>{console.error(e);process.exit(1)});
+(async()=>{for(const [ua,p]of[['iPhone','ios'],['desktop-ipad','ios'],['Android','android'],['Windows NT','windows']])await run(ua,p,'moscow',{handoff:true});await run('iPhone','ios','riga',{handoff:true,buttons:true});for(const [ua,p]of[['iPhone','ios'],['desktop-ipad','ios'],['Android','android'],['Windows NT','windows']])for(const node of ['riga','moscow','us'])await run(ua,p,node);await run('iPhone','ios','riga',{buttons:true});await run('iPhone','ios','us',{buttons:true});await run('iPhone','ios','moscow',{missingNode:true});await run('Android','android','moscow',{loseReply:true});await run('Windows NT','windows','moscow',{clockSkew:5*3600000});await run('Windows NT','windows','moscow',{clockSkew:-5*3600000});await run('Windows NT','windows','moscow',{expireGrant:true});await run('Windows NT','windows','moscow',{tamper:true});await run('Windows NT','windows','moscow',{mobileLinkFault:true});await run('Android','android','moscow',{mobileLinkFault:true});for(const node of ['moscow','riga','us'])await run('Windows NT','windows',node,{automaticOnly:true});await run('Windows NT','windows','moscow',{automaticOnly:true,clockSkew:5*3600000});await run('Windows NT','windows','moscow',{automaticOnly:true,tamper:true});console.log('PASS: AnyConnect device/node selection, reusable device, lost reply, certificate URL validation, node availability, mobile/Windows steps, blocked import, confirmation, reset and certificate reuse');})().catch(e=>{console.error(e);process.exit(1)});

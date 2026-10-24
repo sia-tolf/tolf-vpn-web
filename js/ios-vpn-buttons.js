@@ -6,10 +6,12 @@
   const CITY_SHARES = {
     moscow: '3b5b6270b5464d84866084aad873647b',
     riga: '02ed7a839cee48289255a2a4338392fe',
+    us: '823c220015df4b1d92e8fb326f69ebde',
   };
   const CITY_SHORTCUT_NAMES = {
     moscow: 'TOLF Moscow AnyConnect',
     riga: 'TOLF Riga AnyConnect',
+    us: 'TOLF New York AnyConnect',
   };
   function shortcutLink(city, vpnName) {
     const id = CITY_SHARES[city];
@@ -93,7 +95,7 @@
     const preview = element('div', '', 'ios-vpn-buttons-preview');
     const item = element('div');
     const city = url ? new URL(url).searchParams.get('ingress') : '';
-    const icon = element('span', '⏻', 'ios-vpn-icon ' + (city === 'riga' ? 'riga' : 'moscow'));
+    const icon = element('span', '⏻', 'ios-vpn-icon ' + (city === 'us' ? 'us' : city === 'riga' ? 'riga' : 'moscow'));
     icon.setAttribute('aria-hidden', 'true');
     item.append(icon, element('strong', vpnName || 'TOLF'));
     preview.append(item);

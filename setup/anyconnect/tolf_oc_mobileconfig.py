@@ -9,9 +9,9 @@ from tolf_oc_shortcuts import vpn_name
 
 
 def make_combined_profile(row, authority, ingress, entry_name, production=False, include_buttons=False):
-    if ingress not in ("oc.tolf.is:4443", "oc-riga.tolf.is:443"):
+    if ingress not in ("oc.tolf.is:4443", "oc-riga.tolf.is:443", "oc-us.tolf.is:4443"):
         raise ValueError("Unsupported ingress")
-    entry_id = {"oc.tolf.is:4443": "moscow", "oc-riga.tolf.is:443": "riga"}[ingress]
+    entry_id = {"oc.tolf.is:4443": "moscow", "oc-riga.tolf.is:443": "riga", "oc-us.tolf.is:4443": "us"}[ingress]
     pkcs12_bytes, pkcs12_password = authority.bundle(row)
     if production:
         # Stable per-device, per-entry identity: reinstall updates only this entry.
@@ -131,8 +131,8 @@ def register_combined_test(app, authenticate, record, authority, database, enabl
         if ingress not in enabled_nodes:
             raise HTTPException(400, "Entry point not enabled")
         row = record(user, device_id, True)
-        name = "Москва" if ingress == "moscow" else "Рига"
-        host = {"moscow": "oc.tolf.is:4443", "riga": "oc-riga.tolf.is:443"}[ingress]
+        name = {"moscow":"Москва", "riga":"Рига", "us":"New York"}[ingress]
+        host = {"moscow": "oc.tolf.is:4443", "riga": "oc-riga.tolf.is:443", "us": "oc-us.tolf.is:4443"}[ingress]
         unsigned = make_combined_profile(row, authority, host, name, production=True, include_buttons=buttons)
         # Signing uses the same TOLF signing authority as iOS IKEv2 and DNS profiles.
         from tolf_profiles import _sign_apple_profile
@@ -152,7 +152,7 @@ def register_combined_test(app, authenticate, record, authority, database, enabl
             raise HTTPException(400, "Unsupported shortcut or entry point")
         row = record(user, device_id, True)
         from tolf_oc_shortcuts import signed_shortcut, vpn_name
-        name = vpn_name(row, "Москва" if ingress == "moscow" else "Рига")
+        name = vpn_name(row, {"moscow":"Москва", "riga":"Рига", "us":"New York"}[ingress])
         try:
             signed = signed_shortcut(name, mode)
         except Exception:
@@ -219,7 +219,7 @@ def register_combined_test(app, authenticate, record, authority, database, enabl
                 WHERE token_hash=?
             """, (hashlib.sha256(token.encode()).digest(),))
         name = "Москва" if row["ingress"] == "moscow" else "Рига"
-        ingress_host = {"moscow": "oc.tolf.is:4443", "riga": "oc-riga.tolf.is:443"}[row["ingress"]]
+        ingress_host = {"moscow": "oc.tolf.is:4443", "riga": "oc-riga.tolf.is:443", "us": "oc-us.tolf.is:4443"}[row["ingress"]]
         body = make_combined_profile(row, authority, ingress_host, name)
         return Response(body, media_type="application/x-apple-aspen-config", headers={
             "Cache-Control": "private, no-store, no-transform",
