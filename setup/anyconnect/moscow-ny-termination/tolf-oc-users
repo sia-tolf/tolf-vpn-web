@@ -1,0 +1,22 @@
+#!/usr/bin/python3
+import json,subprocess,sys,re
+from pathlib import Path
+users=[]
+for socket,entry in [('/var/run/occtl-moscow.socket','moscow'),('/var/run/occtl-ny-moscow.socket','us')]:
+ if entry=='us' and not Path(socket).exists():continue
+ p=subprocess.run(['occtl','-s',socket,'--json','show','users'],capture_output=True,text=True,timeout=15,check=True)
+ rows=json.loads(p.stdout)
+ if not isinstance(rows,list):raise ValueError('Invalid session inventory')
+ for row in rows:row['TolfEntry']=entry
+ users.extend(rows)
+if len(sys.argv)==3 and sys.argv[1]=='--status':
+ cn=sys.argv[2]
+ if not re.fullmatch(r'tolf-oc-[0-9a-f]{32}',cn):raise ValueError('Invalid identity')
+ entries={entry:any(u.get('Username')==cn and u.get('TolfEntry')==entry for u in users) for entry in ('moscow','us')}
+ print(json.dumps({'status':'ok','username':cn,'connected':any(entries.values()),'entries':entries}))
+elif len(sys.argv)==2:
+ cn=sys.argv[1]
+ if not re.fullmatch(r'tolf-oc-[0-9a-f]{32}',cn):raise ValueError('Invalid identity')
+ print('true' if any(u.get('Username')==cn for u in users) else 'false')
+elif len(sys.argv)==1:print(json.dumps(users))
+else:raise ValueError('Invalid arguments')

@@ -1,0 +1,14 @@
+#!/bin/sh /etc/rc.common
+START=97
+STOP=8
+USE_PROCD=1
+start_service() {
+ ip route replace 10.250.81.1/32 dev greus proto 245 || return 1
+ /usr/libexec/tolf-oc-devices apply || return 1
+ procd_open_instance
+ procd_set_param command /usr/sbin/ocserv -d 4 -s -f -c /etc/ocserv-ny-moscow/ocserv.conf
+ procd_set_param respawn
+ procd_set_param stdout 1
+ procd_set_param stderr 1
+ procd_close_instance
+}
