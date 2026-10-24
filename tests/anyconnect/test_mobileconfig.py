@@ -84,7 +84,7 @@ class IosMobileConfig(unittest.TestCase):
             self.assertEqual(len(profile["PayloadContent"]), 3)
             self.assertEqual(normal["PayloadUUID"], profile["PayloadUUID"])
             clip = profile["PayloadContent"][2]
-            self.assertEqual(clip["Label"], "TOLF " + {"Москва":"Moscow", "Рига":"Riga"}[city] + " AnyConnect")
+            self.assertEqual(clip["Label"], "TOLF " + {"Москва":"Moscow", "Рига":"Riga"}[city])
             self.assertEqual(parse_qs(urlparse(clip["URL"]).query), {"name": ["TOLF " + {"Москва":"Moscow", "Рига":"Riga"}[city] + " AnyConnect"]})
             self.assertEqual(clip["PayloadType"], "com.apple.webClip.managed")
             self.assertTrue(clip["Icon"].startswith(b"\x89PNG"))
@@ -100,7 +100,8 @@ class IosMobileConfig(unittest.TestCase):
             clip=profile["PayloadContent"][2]
             name=vpn["UserDefinedName"]
             command=controller(name)
-            self.assertEqual(clip["Label"],name)
+            self.assertEqual(clip["Label"],name.removesuffix(" AnyConnect"))
+            self.assertEqual(clip["PayloadDisplayName"],clip["Label"])
             self.assertEqual(parse_qs(urlparse(clip["URL"]).query)["name"],[command["WFWorkflowName"]])
             for action in command["WFWorkflowActions"]:
                 params=action["WFWorkflowActionParameters"]

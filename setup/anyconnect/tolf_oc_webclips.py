@@ -12,14 +12,16 @@ ICONS = {"moscow": "iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAAGUElEQVR42u2d
 def webclip_payloads(device_id, entry_id=None, vpn_name=None):
     city = {"moscow": "Moscow", "riga": "Riga"}.get(entry_id, "")
     name = vpn_name or ("TOLF " + city + " AnyConnect").strip()
+    # Keep the compact icon caption separate from the exact Shortcuts target.
+    label = name.removesuffix(" AnyConnect")
     identifier = "is.tolf.anyconnect.launcher." + str(device_id) + "." + (entry_id or "default") + ".menu"
     return [{
         "PayloadType": "com.apple.webClip.managed",
         "PayloadVersion": 1,
         "PayloadIdentifier": identifier,
         "PayloadUUID": str(uuid.uuid5(uuid.NAMESPACE_URL, identifier)).upper(),
-        "PayloadDisplayName": name,
-        "Label": name,
+        "PayloadDisplayName": label,
+        "Label": label,
         "URL": "shortcuts://run-shortcut?name=" + quote(name, safe=""),
         "Icon": base64.b64decode(ICONS.get(entry_id, ICONS["moscow"])),
         "IsRemovable": True,
