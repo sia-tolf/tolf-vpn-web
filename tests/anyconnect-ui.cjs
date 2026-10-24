@@ -62,7 +62,7 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   let heldSession = null, connected = true, sessionError = false, sessionNodes = null, policyApplied = true;
   async function request(url, options = {}) {
     const p = url.replace('https://api.tolf.is','').split('?')[0]; calls.push([options.method || 'GET',p,options.credentials]);
-    if (p.endsWith('/capabilities')) return {issuance:true,nodeReady:true,version:2,guestSetup:true,ingresses:[{id:'moscow',host:'oc.tolf.is:4443'},{id:'riga',host:'oc-riga.tolf.is:443'},{id:'us',host:'oc-us.tolf.is:4443'}]};
+    if (p.endsWith('/capabilities')) return {issuance:true,nodeReady:true,version:2,guestSetup:true,ingresses:[{id:'moscow',host:'oc.tolf.is:4443'},{id:'riga',host:'oc-riga.tolf.is:443'},{id:'us',host:'oc-us-moscow.tolf.is:4443'}]};
     if (p === '/oc/access/devices') {
       if (options.method === 'POST') {
         const data=JSON.parse(options.body),device={id:'three',label:data.label,username:'tolf-oc-'+'3'.repeat(32),state:'active',mode:'auto'};
@@ -351,7 +351,7 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   assert(placeholder.children.some(n=>n.value===''&&n.textContent==='Выберите устройство'));
   chooseAccess(selectedBefore);await settle();
   window.ocAccess.selectIngress('us');
-  assert.equal(window.ocAccess.ingress().host,'oc-us.tolf.is:4443');
+  assert.equal(window.ocAccess.ingress().host,'oc-us-moscow.tolf.is:4443');
   // Simulate a reload: saved New York precedes asynchronous capabilities.
   vm.runInContext(fs.readFileSync(path.join(root,'js/anyconnect-access.js'),'utf8'),c);
   window.dispatchEvent(new c.Event('tolf:network-context-changed'));
@@ -371,7 +371,7 @@ async function settle() { for (let i = 0; i < 10; i++) await new Promise(resolve
   button(ids.anyConnectAccess,'Настроить на этом устройстве').click();
   const usUri=descendants(ids.anyConnectAccess).find(n=>n.textContent==='Добавить в AnyConnect').href;
   const usParams=new URLSearchParams(usUri.split('?')[1]);
-  assert.equal(usParams.get('host'),'oc-us.tolf.is:4443');
+  assert.equal(usParams.get('host'),'oc-us-moscow.tolf.is:4443');
   assert(usParams.get('name').startsWith('TOLF New York '));
   await settle();
   // A late session response must not restore the green indicator after logout.

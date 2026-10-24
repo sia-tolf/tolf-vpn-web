@@ -12,7 +12,7 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
  let assigned,elapsed=0;const copied=[],downloadedBlobs=[],downloadLinks=[];
  class FixtureURL extends URL {static createObjectURL(blob){downloadedBlobs.push(blob);return 'blob:test-download';}static revokeObjectURL(){}}
  const descendants=node=>node.children.flatMap(n=>[n,...descendants(n)]);
- const host=node==='us'?'oc-us.tolf.is:4443':node==='riga'?'oc-riga.tolf.is:443':'oc.tolf.is:4443';
+ const host=node==='us'?'oc-us-moscow.tolf.is:4443':node==='riga'?'oc-riga.tolf.is:443':'oc.tolf.is:4443';
  const cert='https://api.tolf.is/oc/access/import/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA.p12';
  const grant={deviceId:device,password:'TEST-ONLY-PASSWORD',expiresAt:new Date(Date.now()+7200000).toISOString(),certificateUrl:tamper?'https://example.invalid/test.p12':cert,username:'tolf-oc-aaaaaaaabbbbccccddddeeeeeeeeeeee',importUri:'anyconnect://import/?type=pkcs12&uri='+encodeURIComponent(cert),connections:[{id:node,host,connectionUri:'anyconnect://create/?host='+encodeURIComponent(host)+'&certcommonname=tolf-oc-aaaaaaaabbbbccccddddeeeeeeeeeeee'}]};
  if(mobileLinkFault){grant.importUri='https://example.invalid/';grant.connections[0].connectionUri='https://example.invalid/';}
@@ -90,7 +90,7 @@ async function run(ua,platform,node,{tamper=false,missingNode=false,loseReply=fa
    recommendation=node==='moscow'?'riga':'moscow';
    // Both nodes remain available; the active setup must win over the new recommendation.
    const originalFetch=ctx.fetch;
-   ctx.fetch=async(url,opt)=>url.endsWith('/oc/access/capabilities')?{ok:true,json:async()=>({issuance:true,ingresses:[{id:'moscow',host:'oc.tolf.is:4443'},{id:'riga',host:'oc-riga.tolf.is:443'},{id:'us',host:'oc-us.tolf.is:4443'}]})}:originalFetch(url,opt);
+   ctx.fetch=async(url,opt)=>url.endsWith('/oc/access/capabilities')?{ok:true,json:async()=>({issuance:true,ingresses:[{id:'moscow',host:'oc.tolf.is:4443'},{id:'riga',host:'oc-riga.tolf.is:443'},{id:'us',host:'oc-us-moscow.tolf.is:4443'}]})}:originalFetch(url,opt);
    vm.runInContext(withShares(fs.readFileSync('js/ios-vpn-buttons.js','utf8')),ctx);
    vm.runInContext(fs.readFileSync('js/openconnect-windows-setup.js','utf8'),ctx);vm.runInContext(source,ctx);
    for(let i=0;i<80;i++)await Promise.resolve();

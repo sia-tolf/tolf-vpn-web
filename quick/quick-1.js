@@ -10,7 +10,7 @@ const deviceQuickBlocked=['ios','android','windows'].includes(requestedPlatform)
 const requestedProtocol=new URL(location.href).searchParams.get('protocol');
 const protocol=requestedProtocol==='anyconnect' || (!requestedProtocol&&get('quickProtocol')==='anyconnect')?'anyconnect':'ikev2';
 const requestedIngress=new URL(location.href).searchParams.get('ingress') || get('quickIngress', null);
-const OC_HOSTS={riga:'oc-riga.tolf.is:443',moscow:'oc.tolf.is:4443',us:'oc-us.tolf.is:4443'};
+const OC_HOSTS={riga:'oc-riga.tolf.is:443',moscow:'oc.tolf.is:4443',us:'oc-us-moscow.tolf.is:4443'};
 let ocGrant=null,ocPoint=null,ocDevice=null,ocConfirmed=false,ocImported=false,accountId=null,ocExpiryTimer=null;
 let ocWindowsManual=false,ocWindowsCommand='';
 let lang; try { lang = localStorage.getItem('tolfLanguage'); } catch {}
