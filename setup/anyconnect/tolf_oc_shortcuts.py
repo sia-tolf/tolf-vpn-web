@@ -12,7 +12,7 @@ from urllib.request import Request, urlopen
 
 _LOCK = threading.Lock()
 CACHE = Path("/var/lib/tolf-api/ios-shortcuts")
-VERSION = "cisco-controller-v9-native-connect"
+VERSION = "cisco-controller-v10-new-york"
 
 def vpn_name(row, entry_name):
     # Profile and connection names are independent of the UI/catalog language.
@@ -152,9 +152,10 @@ def controller(name, lang="en"):
         if expanded[i]["WFWorkflowActionIdentifier"] == "is.workflow.actions.choosefrommenu"
         and expanded[i]["WFWorkflowActionParameters"]["WFControlFlowMode"] == 2)
     menu = expanded[menu_start:menu_end + 1]
-    city = name.split(" ", 2)[1]
+    city = "New York" if name.startswith("TOLF New York") else name.split(" ", 2)[1]
     city_colors = {"Moscow": 4282601983, "Москва": 4282601983,
-                   "Riga": 2071128575, "Рига": 2071128575, "Rīga": 2071128575}
+                   "Riga": 2071128575, "Рига": 2071128575, "Rīga": 2071128575,
+                   "New York": 463140863}
     if city in city_colors:
         doc["WFWorkflowIcon"]["WFWorkflowIconStartColor"] = city_colors[city]
     localized = {
