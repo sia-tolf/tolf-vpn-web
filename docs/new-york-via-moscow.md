@@ -1,6 +1,6 @@
 # New York AnyConnect via Moscow
 
-Status: server relay and dual-name certificate verified; API deployed with selection disabled until frontend publication.
+Status: live. Frontend e2e83ad published and verified byte-for-byte; Russian-only selection enabled and tested through the live API.
 
 Endpoint: oc-us-moscow.tolf.is:4443, A record 92.243.66.204, DNS only.
 Moscow uses a dedicated inet tolf_ny_relay nftables table and init service.
@@ -61,3 +61,7 @@ Existing installed New York profiles retain their original address until
 reinstalled. Country is determined at profile/setup issuance, not at each VPN
 connection. This change covers AnyConnect setup for iOS, Android and Windows;
 IKEv2 ingress endpoints are not changed.
+
+Certificate renewal dry run succeeded for both names; deploy hook config check
+and ocserv reload passed. No diagnostic client keys or VPN sessions remain.
+UK API rollback backup: /opt/tolf-api/ny-relay-backup-20261024T150854Z.
