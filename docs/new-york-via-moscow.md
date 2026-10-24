@@ -65,3 +65,18 @@ IKEv2 ingress endpoints are not changed.
 Certificate renewal dry run succeeded for both names; deploy hook config check
 and ocserv reload passed. No diagnostic client keys or VPN sessions remain.
 UK API rollback backup: /opt/tolf-api/ny-relay-backup-20261024T150854Z.
+
+## iPad DTLS compatibility follow-up
+
+The iPad measurement completed at 41.2 Mbps down / 39.8 Mbps up.
+Its live session used TLS over TCP without an established DTLS ciphersuite.
+The iPad negotiated ECDHE-RSA-AES128-GCM-SHA256 for legacy DTLS while the
+new dual-name certificate had an ECDSA key. Causation remains unconfirmed:
+an independent OpenConnect test using legacy static-RSA DTLS succeeded even
+with the ECDSA certificate, so it did not reproduce the iPad's exact handshake.
+
+With explicit user approval, the same dual-name Certbot lineage was reissued
+using RSA 2048. Both direct and Moscow-relay public TLS endpoints now validate
+and serve the RSA certificate. The deploy hook reloaded ocserv successfully.
+The existing iPad session must reconnect before testing whether DTLS is restored.
+Do not claim a speed improvement until measured on the iPad.
