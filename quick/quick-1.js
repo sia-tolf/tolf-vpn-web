@@ -10,7 +10,8 @@ const deviceQuickBlocked=['ios','android','windows'].includes(requestedPlatform)
 const requestedProtocol=new URL(location.href).searchParams.get('protocol');
 const protocol=requestedProtocol==='anyconnect' || (!requestedProtocol&&get('quickProtocol')==='anyconnect')?'anyconnect':'ikev2';
 const requestedIngress=new URL(location.href).searchParams.get('ingress') || get('quickIngress', null);
-const OC_HOSTS={riga:'oc-riga.tolf.is:443',moscow:'oc.tolf.is:4443',us:'oc-us-moscow.tolf.is:4443'};
+const OC_HOSTS={riga:'oc-riga.tolf.is:443',moscow:'oc.tolf.is:4443',us:'oc-us.tolf.is:4443'};
+const ocHostAllowed=(id,host)=>host===OC_HOSTS[id]||(id==='us'&&host==='oc-us-moscow.tolf.is:4443');
 let ocGrant=null,ocPoint=null,ocDevice=null,ocConfirmed=false,ocImported=false,accountId=null,ocExpiryTimer=null;
 let ocWindowsManual=false,ocWindowsCommand='';
 let lang; try { lang = localStorage.getItem('tolfLanguage'); } catch {}
@@ -193,7 +194,7 @@ async function loadAccount() {
    const point=caps.ingresses?.find(p=>p.id===saved.server);
    const list=await api('/oc/access/devices');
    const device=list.devices?.find(d=>d.id===saved.device && d.state==='active' && Date.parse(d.expires_at)>Date.now());
-   if(point && point.host===OC_HOSTS[saved.server] && device){server=saved.server;ocPoint=point;ocDevice=device;iosButtons=saved.buttons===true;persist();}
+   if(point && ocHostAllowed(saved.server,point.host) && device){server=saved.server;ocPoint=point;ocDevice=device;iosButtons=saved.buttons===true;persist();}
    else put(ocKey('setup'),'');
   }
  }
@@ -220,7 +221,7 @@ async function initialize() {
   if(protocol==='anyconnect'){
    const oc=await api('/oc/access/capabilities');
    ocPoint=oc.ingresses?.find(p=>p.id===server);
-   if(oc.issuance!==true||!ocPoint||ocPoint.host!==OC_HOSTS[server])throw new Error('AnyConnect node unavailable');
+   if(oc.issuance!==true||!ocPoint||!ocHostAllowed(server,ocPoint.host))throw new Error('AnyConnect node unavailable');
   }
   if(number!==loadNumber)return;
   persist();

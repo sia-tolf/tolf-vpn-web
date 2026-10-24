@@ -1,5 +1,5 @@
 (()=>{
-const OC_SETUP_SHA256='71321ace4bad15c4afdc8dbc59fe10ddc1bfebb1a50d42dbc46c802a0edad380';
+const OC_SETUP_SHA256='0f8ecf580ddb4d812e5168bf49b21e09187bfaf68a374792e2e87a015afb54c4';
 
 function parseExclusions(input){
  const entries=Array.isArray(input)?input:String(input||"").split(/[\s,;]+/);
@@ -21,7 +21,7 @@ function parseExclusions(input){
 
 function windowsSetupCommand(grant,point,mode="auto",exclusions=[]){
  const cities={moscow:"Moscow",riga:"Riga",us:"New York"},modes={auto:"Auto",ru:"RU",lv:"LV",us:"US",yt:"YT"};
- if(!cities[point.id]||!modes[mode]||({moscow:"oc.tolf.is:4443",riga:"oc-riga.tolf.is:443",us:"oc-us-moscow.tolf.is:4443"}[point.id])!==point.host)throw Error("Invalid Windows setup selection");
+ if(!cities[point.id]||!modes[mode]||!({moscow:["oc.tolf.is:4443"],riga:["oc-riga.tolf.is:443"],us:["oc-us.tolf.is:4443","oc-us-moscow.tolf.is:4443"]}[point.id]||[]).includes(point.host))throw Error("Invalid Windows setup selection");
  const cert=new URL(grant.certificateUrl);
  if(!/^[a-f0-9-]{36}$/.test(grant.deviceId)||grant.username!=="tolf-oc-"+grant.deviceId.replaceAll("-","")||cert.origin!=="https://api.tolf.is"||cert.search||cert.hash||cert.username||cert.password||!/^\/oc\/access\/import\/[A-Za-z0-9_-]{43}\.p12$/.test(cert.pathname))throw Error("Invalid Windows certificate grant");
  const config={excludedNetworks:parseExclusions(exclusions),deviceId:grant.deviceId,username:grant.username,certificateUrl:grant.certificateUrl,password:grant.password,

@@ -22,7 +22,7 @@
     lv:{label:'Ieejas punkts',moscow:'Maskava',riga:'Rīga',us:'Ņujorka',help:'Maskavas, Rīgas un Ņujorkas savienojumi izmanto vienu šīs piekļuves sertifikātu. Lai mainītu ieejas punktu, Cisco Secure Client atvienojiet VPN, izvēlieties otru savienojumu un pievienojieties vēlreiz.'}
   };
   const connections = () => {
-    const points = Array.isArray(info?.connections) ? info.connections.filter(item => item.id === 'moscow' && item.host === 'oc.tolf.is:4443' || item.id === 'riga' && item.host === 'oc-riga.tolf.is:443' || item.id === 'us' && item.host === 'oc-us-moscow.tolf.is:4443') : [];
+    const points = Array.isArray(info?.connections) ? info.connections.filter(item => item.id === 'moscow' && item.host === 'oc.tolf.is:4443' || item.id === 'riga' && item.host === 'oc-riga.tolf.is:443' || item.id === 'us' && ['oc-us.tolf.is:4443','oc-us-moscow.tolf.is:4443'].includes(item.host)) : [];
     return points.length ? points : [{id:'moscow',host:info?.server || 'oc.tolf.is:4443',connectionUri:info?.connectionUri}];
   };
   const connection = () => connections().find(item => item.id === ingressId) || connections()[0];

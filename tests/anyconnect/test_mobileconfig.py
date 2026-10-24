@@ -93,7 +93,7 @@ class IosMobileConfig(unittest.TestCase):
     def test_icon_command_and_cisco_share_one_exact_name(self):
         from tolf_oc_shortcuts import controller
         from urllib.parse import urlparse,parse_qs
-        for host,city in [("oc.tolf.is:4443","Москва"),("oc-riga.tolf.is:443","Рига"),("oc-us-moscow.tolf.is:4443","New York")]:
+        for host,city in [("oc.tolf.is:4443","Москва"),("oc-riga.tolf.is:443","Рига"),("oc-us.tolf.is:4443","New York")]:
             profile=plistlib.loads(tolf_oc_mobileconfig.make_combined_profile(
                 self.device,self.ca,host,city,production=True,include_buttons=True))
             vpn=profile["PayloadContent"][1]

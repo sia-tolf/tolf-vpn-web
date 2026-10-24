@@ -126,7 +126,7 @@
   };
   const ingressCopy = () => INGRESS_COPY[document.documentElement.lang] || INGRESS_COPY.en;
   const ingresses = () => (capabilities?.ingresses || [{id:'moscow',host:'oc.tolf.is:4443'}])
-    .filter(item => item.id === 'moscow' && item.host === 'oc.tolf.is:4443' || item.id === 'riga' && item.host === 'oc-riga.tolf.is:443' || item.id === 'us' && item.host === 'oc-us-moscow.tolf.is:4443');
+    .filter(item => item.id === 'moscow' && item.host === 'oc.tolf.is:4443' || item.id === 'riga' && item.host === 'oc-riga.tolf.is:443' || item.id === 'us' && ['oc-us.tolf.is:4443','oc-us-moscow.tolf.is:4443'].includes(item.host));
   const ingress = () => ingresses().find(item => item.id === ingressId) || ingresses()[0] || {id:'moscow',host:'oc.tolf.is:4443'};
   function selectIngress(id) {
     if (busy || loading || !ingresses().some(item => item.id === id) || ingressId === id) return;

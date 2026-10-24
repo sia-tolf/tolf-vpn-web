@@ -11,7 +11,7 @@ if (Get-Process -Name 'openconnect-gui' -ErrorAction SilentlyContinue) {
     throw 'Disconnect VPN and exit OpenConnect GUI using File > Quit, then run this command again.'
 }
 $config = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($ConfigBase64)) | ConvertFrom-Json
-$allowed = @('https://oc.tolf.is:4443','https://oc-riga.tolf.is:443','https://oc-us-moscow.tolf.is:4443')
+$allowed = @('https://oc.tolf.is:4443','https://oc-riga.tolf.is:443','https://oc-us.tolf.is:4443','https://oc-us-moscow.tolf.is:4443')
 if ($allowed -notcontains [string]$config.gateway) { throw 'Invalid TOLF gateway.' }
 if ([string]$config.deviceId -notmatch '^[a-f0-9-]{36}$' -or
     [string]$config.username -ne ('tolf-oc-' + ([string]$config.deviceId).Replace('-',''))) {
@@ -238,7 +238,7 @@ try{
  $backup=[Text.Encoding]::UTF8.GetString($plain) | ConvertFrom-Json
  if($backup.name -notmatch '^TOLF (Moscow|Riga|New York) (Auto|RU|LV|US|YT)$'){throw 'Invalid profile backup.'}
  $values=$backup.values
- if(@('https://oc.tolf.is:4443','https://oc-riga.tolf.is:443','https://oc-us-moscow.tolf.is:4443') -notcontains $values.server){throw 'Invalid gateway.'}
+ if(@('https://oc.tolf.is:4443','https://oc-riga.tolf.is:443','https://oc-us.tolf.is:4443','https://oc-us-moscow.tolf.is:4443') -notcontains $values.server){throw 'Invalid gateway.'}
  if($backup.PSObject.Properties['files']){
   $allowedRoot=[IO.Path]::GetFullPath((Join-Path $env:LOCALAPPDATA 'TOLF\OpenConnect\'))
   foreach($file in @($backup.files)){

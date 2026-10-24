@@ -18,9 +18,9 @@ Activation gates:
    HTTP/80 challenge forwarding can be scoped to 92.243.66.204 if required.
 4. Verify TLS hostname and certificate validation from an independent host;
    verify both TCP-only and DTLS VPN traffic and DNS through the relay.
-5. Back up UK API modules and node registry. Change only the US catalog entry
-   anyconnect_endpoint, deploy tolf_oc_mobileconfig.py and restart API with
-   rollback on health failure.
+5. Back up UK API modules and node registry. Deploy the request-scoped endpoint selector and catalog-aware API candidates;
+   leave the global US node catalog unchanged. Enable the RU-only gate after
+   TLS and VPN verification, restart API with rollback on health failure.
 6. Run profile identity, UI and Windows endpoint-validation tests. Publish the
    matching frontend change only after the server-side endpoint is healthy.
 7. Existing profiles retain the old address; users reinstall only the New York
@@ -29,3 +29,9 @@ Activation gates:
 Rollback: restore the US catalog endpoint and API module, republish the previous
 frontend revision, remove only the dedicated relay firewall sections. Direct
 New York endpoint and all Moscow/Riga services remain available.
+
+Selection is per request, using the existing Russian RIPE allocation classifier.
+Only Russian source IPs use the relay when ny-moscow-relay.json enabled=true.
+Non-Russian and unknown addresses keep the direct endpoint. No global DNS or
+US catalog replacement is required. The candidate API modules are based on
+the current live catalog-aware implementation and remain undeployed.
