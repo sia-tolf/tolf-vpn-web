@@ -91,3 +91,16 @@ this dependency. Added only this hostname to the existing rebind_domain list;
 global rebinding protection remains enabled. Re-tested via the actual VPN DNS
 10.254.0.54, resolved 10.250.81.1, validated TLS by hostname, and received HTTP
 200 with CORS for ping, 1 MiB download and 1 MiB upload without a DNS override.
+
+## Stable Moscow comparison target
+
+The customer comparison while remaining on New York VPN failed because
+speedtest.vpn.tolf.is resolved to 10.21.0.1, which only exists while an ordinary
+Moscow pool tunnel is active. There were only 10.24 clients at that point.
+Added an independent unused loopback /32, 10.250.82.1, managed by an enabled
+startup service. Moscow VPN DNS maps the measurement hostname to that address.
+No client pool address is permanently assigned or modified. The remote public
+DNS record remains unchanged; this override is scoped to the Moscow resolver.
+A control client on the actual New York ingress resolved the hostname through
+10.254.0.54 and completed TLS, CORS ping, 1 MiB download and 1 MiB upload to
+the Moscow measurement server. This restores the comparison, not a speed fix.
