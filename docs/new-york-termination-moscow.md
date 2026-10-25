@@ -123,3 +123,30 @@ new maximum throughput or prove elimination of drops at its higher rate.
 
 The attempted 500-versus-2000 mutation test was abandoned; no conclusion from an
 A/B load comparison is claimed. patch-ny-tun-queue.py records the deployed change.
+
+## Per-session iPad performance observer, 2026-10-25
+
+Remaining TUN drops persisted after the queue-prefix correction. The deployed
+worker hash was traced through profile changes to the O2/DTLS16 build, which
+already preserves TUN batch32 and DTLS readiness polling. It was not replaced.
+
+A separate UK diagnostic VPN with temporary per-address BBR delivered 159,809,456
+bytes in 10.18 s (125.62 Mbps); its worker used 57.2% of one core and TUN dropped
+zero packets. Its connected UDP socket had SO_RCVBUF 8,388,608 and SO_SNDBUF
+524,288 with zero socket drops. Temporary identity, routes and timers were cleaned.
+These results do not reproduce the customer's higher-rate iPad drops.
+
+Installed metadata-only /usr/libexec/tolf-ny-ipad-performance under procd,
+restricted to the authorized iPad certificate CN and the NY/Moscow socket. It
+records process CPU, TUN byte/packet/drop counters, and connected UDP socket queue
+and drop counters. No payloads, certificates or credentials are captured. Five
+second inventory refresh; samples every second, or every 250 ms when active
+traffic exceeds 10 Mbps. Logs rotate every five minutes and retain 24 files under
+/root/tolf-diagnostics/ny-ipad-performance. PID start time and interface index
+prevent comparisons across recycled processes/interfaces. No routes, priorities,
+socket buffers or queue sizes are changed by the observer.
+
+Syntax, procd launch and real control-session metric reads were validated.
+The control-session test invoked the sampling function directly, without changing
+the production CN filter. A customer-session load sample is still required before
+attributing remaining losses to a specific queue or applying another change.
