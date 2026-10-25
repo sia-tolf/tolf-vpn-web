@@ -188,3 +188,20 @@ termination grace, procd service inventory was empty and autostart disabled.
 The active iPad VPN worker remained PID 24284, connected using DTLS.
 The metadata-only performance observer remains enabled.
 No performance improvement is claimed until a subsequent measurement.
+
+### 2026-10-25 07:42 UTC: temporary GRE pacing trial reverted
+
+Before trial (packet capture stopped): browser 193.6/50.9 Mbps,
+Moscow observer 2779 new TUN transmit drops.
+Installed fq pacing, default parameters, handle 9871: on NY gremoscow,
+replacing noqueue temporarily with a guarded 30-minute rollback timer.
+The control HTTPS transfer returned HTTP 200 and 1048576 bytes.
+During the iPad trial fq sent 397290937 bytes, dropped zero packets,
+and recorded 35664 throttling events, confirming that pacing was exercised.
+Browser: 191.8/63.2 Mbps; Moscow TUN still dropped 2307 packets.
+Of these, 1656 were in intervals with worker CPU 83-99% and runnable
+scheduler wait 0.616-1.424 ms (approximately 250 ms samples).
+This does not support GRE pacing as a sufficient fix and shows local
+loss can occur with negligible runnable CPU wait.
+Restored noqueue with the guarded rollback script and stopped its timer.
+No trial fq configuration was persisted. No user reconnection was required.
