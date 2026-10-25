@@ -28,9 +28,9 @@ if(returnToken||returnReference){
  returnUrl.searchParams.delete('order-token');returnUrl.searchParams.delete('sandboxOrder');returnUrl.searchParams.delete('liveOrder');
  history.replaceState(null,'',returnUrl);
 }
-async function request(path,body){
+async function request(path,body,signal){
  if(cap?.mode==='live')path=path.replace('/billing/sandbox/','/billing/live/');
- const response=await fetch(API+path,{method:body?'POST':'GET',credentials:'include',cache:'no-store',headers:body?{'Content-Type':'application/json'}:{'Accept':'application/json'},...(body?{body:JSON.stringify(body)}:{})});
+ const response=await fetch(API+path,{method:body?'POST':'GET',credentials:'include',cache:'no-store',headers:body?{'Content-Type':'application/json'}:{'Accept':'application/json'},...(body?{body:JSON.stringify(body)}:{}),...(signal?{signal}:{})});
  let data;try{data=await response.json();}catch{throw Error('invalid_response');}
  if(!response.ok)throw Error(data.detail||'request_failed');
  return data;
@@ -290,7 +290,47 @@ function update(){
  }
  showHistory();
 }
-async function refreshAccount(){account=await request('/billing/sandbox/account');update();}
+let accountRefreshVersion=0,activeAccountRequests=0,balanceRefreshTimer=null;
+let balanceUpdatesStarted=false,balancePageActive=true;
+const balanceBytes=data=>(cap?.mode==='live'?data?.balanceBytes:data?.testBalanceBytes)||0;
+async function refreshAccount({quiet=false}={}){
+ const version=++accountRefreshVersion,controller=new AbortController();
+ const timeout=setTimeout(()=>controller.abort(),12000);
+ activeAccountRequests++;
+ try{
+  const next=await request('/billing/sandbox/account',undefined,controller.signal);
+  if(version!==accountRefreshVersion)return;
+  const previous=account;account=next;
+  if(!quiet){update();return;}
+  // Keep checkout inputs and selection intact during background refreshes.
+  if(balanceBytes(previous)!==balanceBytes(next))renderBalance(balanceBytes(next));
+  if(JSON.stringify(previous?.orders)!==JSON.stringify(next.orders))showHistory();
+ }finally{clearTimeout(timeout);activeAccountRequests--;}
+}
+function scheduleBalanceRefresh(){
+ clearTimeout(balanceRefreshTimer);balanceRefreshTimer=null;
+ if(!balanceUpdatesStarted||!balancePageActive||document.hidden)return;
+ balanceRefreshTimer=setTimeout(refreshVisibleBalance,15000);
+}
+async function refreshVisibleBalance(){
+ clearTimeout(balanceRefreshTimer);balanceRefreshTimer=null;
+ if(!balanceUpdatesStarted||!balancePageActive||document.hidden)return;
+ try{
+  if(!busy&&!activeAccountRequests)await refreshAccount({quiet:true});
+ }catch{
+  // A network error must not replace the last confirmed balance with zero.
+ }finally{scheduleBalanceRefresh();}
+}
+function startBalanceUpdates(){
+ if(balanceUpdatesStarted)return;
+ balanceUpdatesStarted=true;
+ document.addEventListener('visibilitychange',refreshVisibleBalance);
+ window.addEventListener('focus',refreshVisibleBalance);
+ window.addEventListener('online',refreshVisibleBalance);
+ window.addEventListener('pagehide',()=>{balancePageActive=false;clearTimeout(balanceRefreshTimer);balanceRefreshTimer=null;});
+ window.addEventListener('pageshow',()=>{balancePageActive=true;refreshVisibleBalance();});
+ scheduleBalanceRefresh();
+}
 async function checkOrder(reference,tries=0){
  try{
   const order=await request('/billing/sandbox/orders/'+encodeURIComponent(reference));
@@ -335,7 +375,7 @@ $('checkoutButton').addEventListener('click',checkout);
   enabled=true;ensureUI();
   // Availability comes from Montonio, not from browser sniffing.
   for(const radio of document.querySelectorAll('[name="payment"]'))radio.closest('label').hidden=!methods.methods.includes(mapping[radio.value]);
-  await refreshAccount();update();
+  await refreshAccount();update();startBalanceUpdates();
   if(returnToken){
    messageKey='checking';update();
    try{const checked=await request('/billing/sandbox/validate-return',{orderToken:returnToken});await checkOrder(checked.reference);}
@@ -344,3 +384,4 @@ $('checkoutButton').addEventListener('click',checkout);
  }catch{if(enabled){messageKey='failed';update();}}
 })();
 })();
+
