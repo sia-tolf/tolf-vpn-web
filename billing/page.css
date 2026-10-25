@@ -181,14 +181,14 @@ html[data-tolf-ui="billing"]{--billing-choice-gap:16px}
 .billing-page .payment-option{font-size:16px;font-weight:600;line-height:1.25;padding-block:10px}
 @media(max-width:760px){html[data-tolf-ui="billing"]{--billing-choice-gap:10px}}
 
-/* Familiar payment brand names replace the ambiguous card symbol. */
-.payment-copy{display:flex;flex-direction:column;gap:3px;min-width:0}
-.payment-brands{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;font-size:13px;font-weight:600;line-height:1.2;color:var(--text)}
-.payment-brands>span{white-space:nowrap}
-.payment-brand-visa{font-style:italic;font-weight:800;letter-spacing:-.03em}
-@media(max-width:760px){.payment-brands{font-size:11px;gap:4px 6px}}
-
-/* Use the original Apple and Google acceptance artwork. */
+/* Payment brands replace a redundant heading and share a visual baseline. */
 .billing-page .payment-option{padding-block:8px}
-.payment-copy{gap:2px}
-.payment-brand-mark{display:block;height:24px;width:auto;flex-shrink:0;object-fit:contain}
+.payment-copy{min-width:0}
+.billing-page .payment-brands{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;font-size:16px;font-weight:600;line-height:1.25;color:var(--text)}
+.payment-brands>span{white-space:nowrap}
+.payment-brand-visa{font:inherit}
+.payment-brand-mark{display:block;width:auto;height:36px;flex-shrink:0;object-fit:contain}
+.payment-google-mark{display:flex;align-items:center;justify-content:center;width:88px;height:44px;overflow:hidden;flex-shrink:0}
+.payment-google-mark>.payment-brand-mark{height:74px;max-width:none;flex-shrink:0}
+@media(max-width:900px){.billing-page .payment-list{grid-template-columns:1fr}}
+@media(max-width:760px){.billing-page .payment-list{grid-template-columns:1fr}.billing-page .payment-brands{display:grid;grid-template-columns:max-content max-content;gap:6px 16px}}
