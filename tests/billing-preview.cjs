@@ -23,6 +23,8 @@ for(const language of ['ru','en','lv']){
  assert.ok([...d.querySelectorAll('[name="package"]')].every(x=>!x.checked));
  d.querySelector('[data-lang="en"]').click();
  assert.ok(/1 (ГБ|GB)/.test(d.getElementById('checkoutButton').textContent));
+ assert.deepEqual([...d.querySelectorAll('[name="payment"]')].map(x=>x.value),['card','bank']);
+ assert.match(d.querySelector('[data-text="card"]').textContent,/Apple Pay, Google Pay/);
  const input=d.querySelector('[name="package"][value="200"]');input.checked=true;input.dispatchEvent(new w.Event('change'));
  assert.equal(d.getElementById('checkoutButton').textContent,'Pay 9 €');
  assert.equal(d.getElementById('selectTrial').getAttribute('aria-pressed'),'false');

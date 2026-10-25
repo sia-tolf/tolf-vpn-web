@@ -18,8 +18,7 @@ const lang=()=>document.documentElement.lang in text?document.documentElement.la
 const t=()=>cap?.mode==='live'?{...text[lang()],...liveText[lang()],statuses:{...text[lang()].statuses,PAID:liveText[lang()].paidStatus}}:text[lang()];
 const sku=()=>document.querySelector('[name="package"]:checked')?.value;
 const method=()=>document.querySelector('[name="payment"]:checked')?.value;
-const mapping={card:'cardPayments',bank:'paymentInitiation',apple:'applePay',google:'googlePay'};
-const backMapping={cardPayments:'card',paymentInitiation:'bank',applePay:'apple',googlePay:'google'};
+const mapping={card:'cardPayments',bank:'paymentInitiation'};
 const returnUrl=new URL(location.href);
 const returnToken=returnUrl.searchParams.get('order-token');
 const returnEnvironment=returnUrl.searchParams.has('sandboxOrder')?'sandbox':null;

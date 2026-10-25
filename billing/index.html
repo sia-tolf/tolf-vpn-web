@@ -7,9 +7,9 @@
 <link rel="stylesheet" href="../tolf-buttons.20260917-3.css">
 <link rel="stylesheet" href="../tolf-header.20260919-1.css?v=languages-2">
 <link rel="stylesheet" href="../css/return-control.css?v=20261005-header-match">
-<link rel="stylesheet" href="page.css?v=billing-live-20261025-1">
-<script defer src="page.js?v=sandbox-20261021-1"></script>
-<script defer src="sandbox.js?v=billing-live-20261025-1"></script>
+<link rel="stylesheet" href="page.css?v=billing-method-groups-20261025-1">
+<script defer src="page.js?v=billing-method-groups-20261025-1"></script>
+<script defer src="sandbox.js?v=billing-method-groups-20261025-1"></script>
 <script defer src="../js/return-control.js?v=20261005"></script>
 </head>
 <body>
@@ -48,10 +48,8 @@
 </div>
 <aside class="billing-checkout" aria-label="Checkout">
 <fieldset id="paymentMethods" class="payment-list"><legend data-text="payment">Способ оплаты</legend>
-<label class="payment-option"><input type="radio" name="payment" value="card" checked><span aria-hidden="true" class="payment-icon">▣</span><span data-text="card">Банковская карта</span></label>
+<label class="payment-option"><input type="radio" name="payment" value="card" checked><span aria-hidden="true" class="payment-icon">▣</span><span data-text="card">Банковская карта, Apple Pay, Google Pay</span></label>
 <label class="payment-option"><input type="radio" name="payment" value="bank"><span aria-hidden="true" class="payment-icon">▥</span><span data-text="bank">Интернет-банк</span></label>
-<label class="payment-option" id="applePayMethod" hidden><input type="radio" name="payment" value="apple"><span class="wallet-wordmark" aria-hidden="true">Pay</span><span>Apple Pay</span></label>
-<label class="payment-option" id="googlePayMethod" hidden><input type="radio" name="payment" value="google"><span class="wallet-wordmark" aria-hidden="true">G</span><span>Google Pay</span></label>
 </fieldset>
 <p id="paymentPreviewNote" class="muted" data-text="methodPreview">Предварительный набор способов оплаты. Доступность будет подтверждена при подключении Montonio.</p>
 <div class="checkout-action">
