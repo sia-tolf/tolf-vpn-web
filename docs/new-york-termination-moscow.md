@@ -231,3 +231,37 @@ The production iPad worker separately accumulated 1398 user ticks and
 These results do not yet identify which kernel function is costly.
 Temporary control disconnected, eligibility removed, private key and
 certificate deleted, source rule/table cleaned by the script finally block.
+
+### 2026-10-25: resolved kernel sampling on isolated control worker
+
+Software perf CPU-clock sampling is available although /proc/kallsyms and
+ftrace are absent. Added control-kernel-sample.py: at most 10 seconds,
+200 Hz, explicit disposable CN/PID guard, excludes iPad CN, kernel IPs
+and kernel callchains only, no packet data. Used on disposable sessions,
+never attached to the production iPad worker. All control sessions cleaned.
+
+Official OpenWrt 25.12.5 x86/64 kernel-debug.tar.zst SHA256:
+d543a677b2ed98b75d36ea6d13c167c0ceebe26e19993aa5375f8a4c2a0ee1b5.
+Runtime /boot/vmlinuz SHA256 matches official generic-kernel.bin:
+e440f082d59550072b1421f10d1a83449c6a4cf356eea5bfa9ac1306978d649b.
+Debug ELF and running kernel GNU build ID both:
+c1944ed92969f05f2e7095af77c9fcf8d5225bcf.
+Read only /proc/kcore ELF/program headers to establish text mapping;
+no kernel memory contents read. Runtime text begins at link address
+0xffffffff81000000, so symbol mapping uses zero relocation.
+
+260-sample run: core 206, nf_tables 31, nf_conntrack 11, tun 6,
+nf_nat 5, nf_defrag_ipv4 1. No lost samples.
+Independent 241-sample callchain run: iowrite16 37 samples (15.4%),
+nf_tables 32, nf_conntrack 12. The 37 iowrite16 callchains all pass:
+virtqueue_notify -> start_xmit -> bridge forwarding -> UDP sendmsg/sendto.
+Thus the expensive I/O-port operation belongs to virtio TX notification.
+This is a measured cost contributor, not proof it explains all drops.
+
+Moscow bridge br-lan has only eth0; driver virtio_net, napi_tx enabled,
+GSO/GRO/checksum offloads enabled; hardware UDP segmentation unavailable.
+No NIC settings, kernel, security mitigations, routing or worker changed.
+Control load remained 66-82 Mbps, below iPad rate, with no TUN drops;
+these profiles do not reproduce or conclusively diagnose the high-rate drop.
+Full source symbols and private address samples retained on UK under
+/var/lib/tolf-diagnostics/moscow-kernel-symbols-20261025.
