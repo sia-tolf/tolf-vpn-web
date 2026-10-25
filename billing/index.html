@@ -7,13 +7,15 @@
 <link rel="stylesheet" href="../tolf-buttons.20260917-3.css">
 <link rel="stylesheet" href="../tolf-header.20260919-1.css?v=languages-2">
 <link rel="stylesheet" href="../css/return-control.css?v=20261005-header-match">
-<link rel="stylesheet" href="page.css?v=billing-invoice-link-20261025-1">
-<script defer src="page.js?v=billing-invoice-link-20261025-1"></script>
-<script defer src="sandbox.js?v=billing-invoice-link-20261025-1"></script>
+<link rel="stylesheet" href="page.css?v=volume-20261025-1">
+<link rel="stylesheet" href="price-preview.css?v=volume-20261025-1">
+<script defer src="pricing-curve.js?v=volume-20261025-1"></script>
+<script defer src="page.js?v=volume-20261025-1"></script>
+<script defer src="sandbox.js?v=volume-20261025-1"></script>
 <script defer src="../js/return-control.js?v=20261005"></script>
 </head>
 <body>
-<main class="billing-page">
+<main class="billing-page pricing-preview billing-volume-checkout">
 <header class="billing-header">
 <a id="billingBack" data-return-control data-return-logo="yes" href="../?lang=ru"><span>Возврат</span></a>
 <div class="tolf-language billing-language" aria-label="Language">
@@ -37,24 +39,36 @@
 </section>
 <div class="billing-layout">
 <div class="billing-options">
-<fieldset class="package-list"><legend data-text="topUp">Пополнить трафик</legend>
-<label class="package-option"><input type="radio" name="package" value="50"><span class="package-copy"><strong>50 <span data-text="gb">ГБ</span></strong><small>0,06 € / <span data-text="gb">ГБ</span></small></span><strong class="package-price">3 €</strong></label>
-<label class="package-option"><input type="radio" name="package" value="200" checked><span class="package-copy"><strong>200 <span data-text="gb">ГБ</span></strong><small>0,045 € / <span data-text="gb">ГБ</span></small></span><span class="discount" data-discount="25">Выгода 25%</span><strong class="package-price">9 €</strong></label>
-<label class="package-option"><input type="radio" name="package" value="500"><span class="package-copy"><strong>500 <span data-text="gb">ГБ</span></strong><small>0,04 € / <span data-text="gb">ГБ</span></small></span><span class="discount" data-discount="33">Выгода 33%</span><strong class="package-price">20 €</strong></label>
-</fieldset>
-<p class="draft-price muted" data-text="draftPrice">Цена пакета 200 ГБ — предварительная.</p>
-
-
+<h2 class="volume-section-title" data-text="topUp">Пополнить трафик</h2>
+<section id="volumeWorkbench" class="pricing-workbench" aria-labelledby="volumeTitle">
+<div class="volume-controls">
+<label id="volumeTitle" for="volumeNumber" data-volume-copy="volume">Объём трафика</label>
+<div class="volume-entry"><input id="volumeNumber" type="number" inputmode="numeric" min="50" max="1000" step="1" value="200" aria-describedby="volumeHint volumeError"><span data-volume-copy="gb">ГБ</span></div>
+<p id="volumeHint" class="pricing-help" data-volume-copy="hint">Введите число или передвиньте ползунок</p>
+<label class="visually-hidden" for="volumeRange" data-volume-copy="rangeLabel">Выбор объёма трафика от 50 до 1000 гигабайт</label>
+<input id="volumeRange" class="volume-slider" type="range" min="50" max="1000" step="1" value="200">
+<div class="volume-marks" aria-label="Volumes"><button type="button" data-volume="50" style="--position:0%">50</button><button type="button" data-volume="200" style="--position:15.7895%">200</button><button type="button" data-volume="500" style="--position:47.3684%">500</button><button type="button" data-volume="1000" style="--position:100%">1000</button></div>
+<p id="volumeError" class="volume-error" role="status" hidden></p>
+<p class="volume-limit" data-volume-copy="limit">От 50 ГБ до 1 ТБ · 1 ТБ = 1000 ГБ</p>
+</div>
+<div class="price-summary" aria-live="polite" aria-atomic="true">
+<div class="price-summary-top"><span data-volume-copy="total">Итого</span><span id="discountBadge" class="price-discount">−8%</span></div>
+<output id="priceTotal" for="volumeNumber volumeRange" class="price-total">11,04 €</output>
+<p id="priceForVolume" class="price-for-volume">за 200 ГБ</p>
+<dl class="price-breakdown"><div><dt data-volume-copy="withoutDiscount">Без скидки</dt><dd><s id="basePrice">12,00 €</s></dd></div><div class="price-savings"><dt data-volume-copy="saving">Вы экономите</dt><dd id="savedPrice">0,96 €</dd></div><div><dt data-volume-copy="unit">За гигабайт</dt><dd id="unitPrice">0,0552 €</dd></div></dl>
+<p class="price-no-expiry" data-volume-copy="noExpiry">Без подписки и срока сгорания</p>
+</div>
+</section>
+<button id="returnToPaid" class="return-to-paid" type="button" hidden data-volume-copy="returnPaid">Выбрать платный объём</button>
 </div>
 <aside class="billing-checkout" aria-label="Checkout">
 <fieldset id="paymentMethods" class="payment-list"><legend data-text="payment">Способ оплаты</legend>
 <label class="payment-option"><input type="radio" name="payment" value="card" checked><span class="payment-copy"><span class="payment-brands"><img src="../assets/payments/visa.png" alt="Visa" class="payment-brand-mark payment-brand-visa"><img src="../assets/payments/mastercard.png" alt="Mastercard" class="payment-brand-mark payment-brand-mastercard"><img src="../assets/payments/apple-pay.svg" alt="Apple Pay" class="payment-brand-mark"><span class="payment-google-mark"><img src="../assets/payments/google-pay.svg" alt="Google Pay" class="payment-brand-mark"></span></span></span></label>
 <label class="payment-option"><input type="radio" name="payment" value="bank"><span data-text="bank">Интернет-банк</span></label>
-<a id="bankInvoiceLink" class="payment-invoice-link" href="mailto:tolf@velbnk.is" data-text="invoiceRequest">Получить счёт для банковского перевода</a>
 </fieldset>
 <p id="paymentPreviewNote" class="muted" data-text="methodPreview">Предварительный набор способов оплаты. Доступность будет подтверждена при подключении Montonio.</p>
 <div class="checkout-action">
-<button id="checkoutButton" class="billing-primary primary" type="button" disabled aria-describedby="checkoutAvailability">Оплатить 9 €</button>
+<button id="checkoutButton" class="billing-primary primary" type="button" disabled aria-describedby="checkoutAvailability">Оплатить 11,04 €</button>
 <p id="checkoutAvailability" class="muted" role="status" data-text="checkoutUnavailable">Онлайн-оплата ещё не открыта.</p>
 <p class="no-subscription" data-text="noSubscription">Без подписки и автоматических списаний</p>
 </div>

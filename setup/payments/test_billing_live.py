@@ -24,7 +24,7 @@ def run():
    if path=='/stores/payment-methods':return {'uuid':store,'paymentMethods':{'cardPayments':{}}}
    return {**p,'uuid':str(uuid.uuid4()),'paymentUrl':'https://stargate.montonio.com/payment','paymentStatus':'PENDING'}
   headers={'x-user':'admin','origin':live.ORIGIN}
-  p={'package':'200','method':'cardPayments','locale':'ru','requestId':str(uuid.uuid4()),'termsVersion':live.TERMS,'acceptTerms':True,'startNow':True}
+  p={'package':'200','method':'cardPayments','locale':'ru','requestId':str(uuid.uuid4()),'termsVersion':live.TERMS,'pricingVersion':live.pricing.VERSION,'acceptTerms':True,'startNow':True}
   with patch.object(live,'provider',side_effect=provider),patch.object(live,'usage',return_value=123):
    for path in ['/billing/live/methods','/billing/live/account','/billing/live/orders/other']:
     assert client.get(path).status_code==403
@@ -33,17 +33,23 @@ def run():
    assert client.get('/billing/live/capabilities').json()=={'mode':'preview','enabled':False}
    assert client.get('/billing/live/capabilities',headers=headers).json()['enabled'] is True
    assert client.post('/billing/live/orders',json=p,headers={'x-user':'admin'}).status_code==403
+   for value in ['1','49','1001','50.5','050',50,True]:
+    assert client.post('/billing/live/orders',json={**p,'package':value},headers=headers).status_code==400
+   assert client.post('/billing/live/orders',json={**p,'pricingVersion':'old'},headers=headers).status_code==409
+   assert client.post('/billing/live/orders',json={**p,'cents':1},headers=headers).status_code==400
+   assert calls==[]
    a=client.post('/billing/live/orders',json=p,headers=headers);assert a.status_code==200,a.text
    ref=a.json()['reference'];assert ref.startswith('TOLF-LIVE-')
    b=client.post('/billing/live/orders',json=p,headers=headers);assert b.json()['reference']==ref
    assert sum(m=='POST' for m,path in calls)==1
    assert client.post('/billing/live/orders',json={**p,'package':'50'},headers=headers).status_code==409
    with live.database() as c:row=dict(c.execute('SELECT * FROM live_payment_orders WHERE reference=?',(ref,)).fetchone())
-   paid={'uuid':row['provider_uuid'],'merchantReference':ref,'currency':'EUR','grandTotal':9,'paymentStatus':'PAID','storeUuid':store}
+   paid={'uuid':row['provider_uuid'],'merchantReference':ref,'currency':'EUR','grandTotal':11.04,'paymentStatus':'PAID','storeUuid':store}
    for field,value in [('grandTotal',1),('currency','USD'),('uuid',str(uuid.uuid4())),('storeUuid',str(uuid.uuid4()))]:
     try:live.apply_status({**paid,field:value},'test')
     except HTTPException:pass
     else:raise AssertionError(field)
+   assert live.match({**paid,'grandTotal':9},{**row,'cents':900})==row['provider_uuid']
    token=jwt.encode({**paid,'accessKey':'live-test-key','iat':int(time.time()),'exp':int(time.time())+120},'x'*40,algorithm='HS256')
    ret=client.post('/billing/live/validate-return',json={'orderToken':token},headers=headers);assert ret.status_code==200
    assert client.get('/billing/live/account',headers=headers).json()['creditedBytes']==0
@@ -61,7 +67,11 @@ def run():
     try:live.payment_url(url)
     except HTTPException:pass
     else:raise AssertionError(url)
+   for g,expected in [('50',2.94),('375',19.13),('1000',36)]:
+    response=client.post('/billing/live/orders',json={**p,'package':g,'requestId':str(uuid.uuid4())},headers=headers)
+    assert response.status_code==200,response.text
+    assert response.json()['amount']==expected and response.json()['gb']==int(g)
    cfg.unlink();assert client.get('/billing/live/capabilities',headers=headers).json()['enabled'] is False
    assert client.post('/billing/live/orders',json=p,headers=headers).status_code==503
-  print('PASS: admin gate, fail-closed config, origin, fixed prices, idempotent creation, signed return without credit, verified webhooks, duplicate credit, mismatches, usage, refunds, safe payment URLs')
+  print('PASS: admin gate, fail-closed config, origin, versioned volume prices, minimum 50 GB, arbitrary volumes, legacy amounts, idempotent creation, signed return without credit, verified webhooks, duplicate credit, mismatches, usage, refunds, safe payment URLs')
 run()

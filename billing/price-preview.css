@@ -7,3 +7,7 @@
 .pricing-footnote{display:flex;flex-direction:column;gap:5px;color:var(--secondary);font-size:13px;line-height:1.5;margin:18px 2px 26px}.pricing-explanation{font-size:13px;color:var(--secondary);line-height:1.6}.pricing-explanation summary{cursor:pointer;color:var(--tolf-action-text);width:fit-content}.pricing-explanation p{margin:10px 0}.price-formula{font-size:16px;color:var(--text);font-variant-numeric:tabular-nums}
 @media(max-width:760px){.pricing-intro{margin:6px 0 22px}.pricing-intro h1{font-size:26px}.pricing-workbench{grid-template-columns:1fr}.volume-controls,.price-summary{padding:24px}.price-summary{border-left:0;border-top:1px solid var(--border)}.price-total{font-size:44px}.volume-entry input{width:160px}.volume-limit{margin-top:22px}}
 @media(prefers-reduced-motion:no-preference){.volume-entry input{transition:border-color .15s}}
+
+.pricing-workbench[hidden],.return-to-paid[hidden]{display:none}
+.billing-volume-checkout .volume-section-title{font-size:18px;font-weight:600;margin:0 0 12px}
+.billing-volume-checkout .return-to-paid{appearance:none;width:auto;min-height:44px;border:0;box-shadow:none;padding:0;background:transparent;color:var(--tolf-action-text);font:inherit;font-size:14px;text-decoration:underline}

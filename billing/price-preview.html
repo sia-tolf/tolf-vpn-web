@@ -8,9 +8,9 @@
 <link rel="stylesheet" href="../tolf-header.20260919-1.css?v=languages-2">
 <link rel="stylesheet" href="../css/return-control.css?v=20261005-header-match">
 <link rel="stylesheet" href="page.css?v=billing-invoice-link-20261025-1">
-<link rel="stylesheet" href="price-preview.css?v=20261025-1">
-<script defer src="pricing-curve.js?v=20261025-1"></script>
-<script defer src="price-preview.js?v=20261025-1"></script>
+<link rel="stylesheet" href="price-preview.css?v=volume50-20261025-1">
+<script defer src="pricing-curve.js?v=volume50-20261025-1"></script>
+<script defer src="price-preview.js?v=volume50-20261025-1"></script>
 <script defer src="../js/return-control.js?v=20261005"></script>
 </head>
 <body>
@@ -23,13 +23,13 @@
 <section class="pricing-workbench" aria-labelledby="volumeTitle">
 <div class="volume-controls">
 <label id="volumeTitle" for="volumeNumber" data-copy="volume">Объём трафика</label>
-<div class="volume-entry"><input id="volumeNumber" type="number" inputmode="numeric" min="1" max="1000" step="1" value="200" aria-describedby="volumeHint volumeError"><span data-copy="gb">ГБ</span></div>
+<div class="volume-entry"><input id="volumeNumber" type="number" inputmode="numeric" min="50" max="1000" step="1" value="200" aria-describedby="volumeHint volumeError"><span data-copy="gb">ГБ</span></div>
 <p id="volumeHint" class="pricing-help" data-copy="hint">Введите число или передвиньте ползунок</p>
-<label class="visually-hidden" for="volumeRange" data-copy="rangeLabel">Выбор объёма трафика от 1 до 1000 гигабайт</label>
-<input id="volumeRange" class="volume-slider" type="range" min="1" max="1000" step="1" value="200">
-<div class="volume-marks" aria-label="Volumes"><button type="button" data-volume="50" style="--position:4.9049%">50</button><button type="button" data-volume="200" style="--position:19.9199%">200</button><button type="button" data-volume="500" style="--position:49.9499%">500</button><button type="button" data-volume="1000" style="--position:100%">1000</button></div>
+<label class="visually-hidden" for="volumeRange" data-copy="rangeLabel">Выбор объёма трафика от 50 до 1000 гигабайт</label>
+<input id="volumeRange" class="volume-slider" type="range" min="50" max="1000" step="1" value="200">
+<div class="volume-marks" aria-label="Volumes"><button type="button" data-volume="50" style="--position:0%">50</button><button type="button" data-volume="200" style="--position:15.7895%">200</button><button type="button" data-volume="500" style="--position:47.3684%">500</button><button type="button" data-volume="1000" style="--position:100%">1000</button></div>
 <p id="volumeError" class="volume-error" role="status" hidden></p>
-<p class="volume-limit" data-copy="limit">От 1 ГБ до 1 ТБ · 1 ТБ = 1000 ГБ</p>
+<p class="volume-limit" data-copy="limit">От 50 ГБ до 1 ТБ · 1 ТБ = 1000 ГБ</p>
 </div>
 <div class="price-summary" aria-live="polite" aria-atomic="true">
 <div class="price-summary-top"><span data-copy="total">Итого</span><span id="discountBadge" class="price-discount">−8%</span></div>

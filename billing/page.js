@@ -9,13 +9,16 @@ lv:{
 termsLink:"Pakalpojuma noteikumi",contactLink:"Uzņēmums un kontakti",title:'Datu apjoms un maksājumi',subtitle:'Pērciet gigabaitus, nevis laiku',preview:'Priekšskatījums. Maksājumi un datu paku aktivizēšana vēl nav pieejami.',balance:'Atlikušais apmaksātais datu apjoms',gb:'GB',balanceHelp:'Atlikums būs redzams pēc datu paku ieviešanas.',neverExpires:'Bez derīguma termiņa',newCustomers:'Jauniem lietotājiem',trialTitle:'Izmēģinājuma paka',free:'Bezmaksas',trialHelp:'Savienojuma un ātruma pārbaudei. Bez bankas kartes un laika ierobežojuma. Vienu reizi katram kontam pēc reģistrācijas.',trialSeparate:'Izmēģinājuma dati tiek uzskaitīti atsevišķi no apmaksātajiem.',tryFree:'Izmēģināt bez maksas',trialChosen:'Izmēģinājuma paka izvēlēta',topUp:'Papildināt datu apjomu',discount:'Ietaupījums',draftPrice:'200 GB pakas cena ir provizoriska.',speedTitle:'Pēc pakas iztērēšanas — līdz 256 Kbit/s',speedHelp:'Rezerves piekļuve ir pieejama pēc pirmās pakas iegādes. Pēc papildināšanas pilns ātrums atjaunojas automātiski.',smartTitle:'SmartDNS ir iekļauts',smartHelp:'Bez ierobežojumiem, kamēr ir apmaksāti vai izmēģinājuma dati. DNS pieprasījumi netērē datu paku.',configTitle:'Konfigurators — bez maksas visiem',configHelp:'Bez reģistrācijas un maksājuma neatkarīgi no atlikušā datu apjoma.',payment:'Maksājuma veids',card:'Bankas karte',bank:'Internetbanka',invoiceRequest:'Saņemt rēķinu bankas pārskaitījumam',invoiceSubject:'TOLF rēķina pieprasījums',invoiceBody:'Lūdzu izrakstīt rēķinu bankas pārskaitījumam.\n\nPaka: {gb} GB\nSumma: {price} €\n\nVārds un uzvārds / uzņēmuma nosaukums:\nUzņēmuma reģistrācijas numurs (ja attiecināms):\nAdrese:\nPVN numurs (ja ir):\nTOLF konts:',invoiceHint:'Pieprasīt rēķinu e-pastā',methodPreview:'Maksājumu veidu priekšskatījums. Pieejamība tiks apstiprināta pēc Montonio pieslēgšanas.',checkoutUnavailable:'Tiešsaistes maksājumi vēl nav pieejami.',trialUnavailable:'Izmēģinājuma paku aktivizēšana vēl nav pieejama.',noSubscription:'Bez abonementa un automātiskiem maksājumiem',secure:'Drošs maksājums ar Montonio',privacy:'TOLF nesaņem jūsu kartes datus.',rulesTitle:'Kā tiek uzskaitīti dati',rules:'1 GB = 1 miljards baitu. Tiek uzskaitīta lejupielāde un augšupielāde visos serveros. Pārsūtīšana starp TOLF serveriem netiek uzskaitīta atkārtoti. Jauna apmaksāta paka tiek pieskaitīta atlikumam.',history:'Maksājumu vēsture',historyEmpty:'Pēc maksājumu ieviešanas šeit būs redzami jūsu pirkumi.',account:'Mans konts',help:'Palīdzība',privacyLink:'Privātums',pay:'Maksāt',activateTrial:'Saņemt 1 GB bez maksas'}
 };
 const $=id=>document.getElementById(id);
-const packages={50:{gb:50,price:3},200:{gb:200,price:9},500:{gb:500,price:20}};
+const curve=window.TolfPricingCurve;
 let language=new URL(location.href).searchParams.get('lang');
 if(!copy[language]){try{language=localStorage.getItem('tolfLanguage');}catch{}}
 if(!copy[language])language=navigator.language?.startsWith('ru')?'ru':navigator.language?.startsWith('lv')?'lv':'en';
-let selected='200';
+let selected='200',lastVolume=200,validVolume=true;
+const volumeCopy={"ru": {"volume": "Объём трафика", "gb": "ГБ", "hint": "Введите число или передвиньте ползунок", "rangeLabel": "Выбор объёма от 50 до 1000 гигабайт", "limit": "От 50 ГБ до 1 ТБ · 1 ТБ = 1000 ГБ", "total": "Итого", "withoutDiscount": "Без скидки", "saving": "Вы экономите", "unit": "За гигабайт", "noExpiry": "Без подписки и срока сгорания", "invalid": "Введите целое число от 50 до 1000 ГБ.", "returnPaid": "Выбрать платный объём"}, "en": {"volume": "Traffic volume", "gb": "GB", "hint": "Enter a number or move the slider", "rangeLabel": "Choose from 50 to 1000 gigabytes", "limit": "From 50 GB to 1 TB · 1 TB = 1000 GB", "total": "Total", "withoutDiscount": "Before discount", "saving": "You save", "unit": "Per gigabyte", "noExpiry": "No subscription or expiry date", "invalid": "Enter a whole number from 50 to 1000 GB.", "returnPaid": "Choose paid traffic"}, "lv": {"volume": "Datu apjoms", "gb": "GB", "hint": "Ievadiet skaitli vai pārvietojiet slīdni", "rangeLabel": "Izvēlieties no 50 līdz 1000 gigabaitiem", "limit": "No 50 GB līdz 1 TB · 1 TB = 1000 GB", "total": "Kopā", "withoutDiscount": "Bez atlaides", "saving": "Jūs ietaupāt", "unit": "Par gigabaitu", "noExpiry": "Bez abonementa un derīguma termiņa", "invalid": "Ievadiet veselu skaitli no 50 līdz 1000 GB.", "returnPaid": "Izvēlēties apmaksātu apjomu"}};
+const money=c=>new Intl.NumberFormat(language,{style:'currency',currency:'EUR',minimumFractionDigits:2,maximumFractionDigits:2}).format(c/100);
+const forVolume=g=>language==='ru'?'за '+g+' ГБ':language==='lv'?'par '+g+' GB':'for '+g+' GB';
 function render(){
- const text=copy[language],trial=selected==='trial',item=trial?{gb:1,price:0}:packages[selected];
+ const text=copy[language],trial=selected==='trial',q=curve.quote(lastVolume),item=trial?{gb:1,price:0}:{gb:lastVolume,price:q.cents/100};
  document.documentElement.lang=language;document.title=text.title+' — TOLF';
  for(const el of document.querySelectorAll('[data-text]'))el.textContent=text[el.dataset.text];
  for(const el of document.querySelectorAll('[data-lang]'))el.setAttribute('aria-pressed',String(el.dataset.lang===language));
@@ -23,19 +26,34 @@ function render(){
  for(const [id,path] of [['billingBack','../'],['accountLink','../account/'],['helpLink','../help.html'],['privacyLink','../privacy.html'],['termsLink','../terms.html'],['contactLink','../contact.html']])$(id).href=path+'?lang='+language;
  $('selectTrial').setAttribute('aria-pressed',String(trial));
  $('selectTrial').textContent=trial?text.trialChosen:text.tryFree;
- $('checkoutButton').textContent=trial?text.activateTrial:text.pay+' '+item.price+' €';
+ $('checkoutButton').textContent=trial?text.activateTrial:text.pay+' '+money(q.cents);
  $('checkoutAvailability').textContent=trial?text.trialUnavailable:text.checkoutUnavailable;
  $('paymentMethods').hidden=trial;$('paymentPreviewNote').hidden=trial;
- const invoice=$('bankInvoiceLink');invoice.hidden=trial;invoice.title=text.invoiceHint;
- invoice.href='mailto:tolf@velbnk.is?subject='+encodeURIComponent(text.invoiceSubject)+'&body='+encodeURIComponent(text.invoiceBody.replace('{gb}',item.gb).replace('{price}',item.price));
-
  document.querySelector('.trust-note').hidden=trial;
- for(const input of document.querySelectorAll('[name="package"]'))input.checked=input.value===selected;
+ $('volumeWorkbench').hidden=trial;$('returnToPaid').hidden=!trial;
+ for(const el of document.querySelectorAll('[data-volume-copy]'))el.textContent=volumeCopy[language][el.dataset.volumeCopy];
+ $('volumeRange').value=lastVolume;$('volumeRange').style.setProperty('--fill',((lastVolume-50)/950*100)+'%');
+ $('volumeRange').setAttribute('aria-valuetext',lastVolume+' '+text.gb);
+ if(validVolume)$('volumeNumber').value=lastVolume;
+ $('volumeNumber').setAttribute('aria-invalid',String(!validVolume));
+ $('volumeError').hidden=validVolume;$('volumeError').textContent=validVolume?'':volumeCopy[language].invalid;
+ $('priceTotal').textContent=validVolume?money(q.cents):'—';$('priceForVolume').textContent=forVolume(lastVolume.toLocaleString(language));
+ $('basePrice').textContent=money(q.baseCents);$('savedPrice').textContent=money(q.savingCents);
+ $('discountBadge').textContent='−'+new Intl.NumberFormat(language,{maximumFractionDigits:2}).format(q.discountPercent)+'%';
+ $('unitPrice').textContent=new Intl.NumberFormat(language,{minimumFractionDigits:3,maximumFractionDigits:4}).format(q.unitEuros)+' €';
+ if(!validVolume){$('checkoutButton').disabled=true;$('checkoutAvailability').textContent=volumeCopy[language].invalid;}
+
  const url=new URL(location.href);url.searchParams.set('lang',language);history.replaceState(null,'',url);
  window.dispatchEvent(new Event('tolf:billing-render'));
 }
 $('selectTrial').addEventListener('click',()=>{selected='trial';render();});
-for(const input of document.querySelectorAll('[name="package"]'))input.addEventListener('change',()=>{if(input.checked){selected=input.value;render();}});
+function setVolume(g){lastVolume=curve.quote(g).gb;selected=String(g);validVolume=true;render();}
+window.TolfBillingVolume={getVolume:()=>selected==='trial'||!validVolume?null:lastVolume,isTrial:()=>selected==='trial',isValid:()=>validVolume,setVolume};
+$('volumeRange').addEventListener('input',e=>setVolume(Number(e.target.value)));
+$('volumeNumber').addEventListener('input',e=>{const g=e.target.valueAsNumber;if(Number.isInteger(g)&&g>=50&&g<=1000)setVolume(g);else{validVolume=false;selected=String(lastVolume);render();}});
+$('volumeNumber').addEventListener('change',e=>{const n=e.target.valueAsNumber;setVolume(Number.isFinite(n)?Math.max(50,Math.min(1000,Math.round(n))):lastVolume);});
+for(const el of document.querySelectorAll('[data-volume]'))el.addEventListener('click',()=>setVolume(Number(el.dataset.volume)));
+$('returnToPaid').addEventListener('click',()=>setVolume(lastVolume));
 for(const button of document.querySelectorAll('[data-lang]'))button.addEventListener('click',()=>{
  language=button.dataset.lang;try{localStorage.setItem('tolfLanguage',language);localStorage.setItem('tolf-language',language);}catch{}render();
 });

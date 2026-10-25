@@ -1,3 +1,4 @@
+import tolf_billing_pricing as pricing
 """Montonio SANDBOX only. Does not touch live traffic, quotas or money."""
 import hashlib
 import hmac
@@ -261,7 +262,7 @@ def install(app,ns):
             admin=True
         except HTTPException:
             admin=False
-        return JSONResponse({'mode':'sandbox','enabled':True,'termsVersion':TERMS,'livePayments':False,
+        return JSONResponse({'mode':'sandbox','enabled':True,'termsVersion':TERMS,'pricingVersion':pricing.VERSION,'livePayments':False,
                              'accountingExport':admin,'taxCountryStatus':'unresolved'},headers=HEADERS)
 
     @app.get('/billing/sandbox/methods')
@@ -334,13 +335,13 @@ def install(app,ns):
         return JSONResponse({'mode':'sandbox','recorded':True},headers=HEADERS)
 
     def create(uid,p):
-        expected={'package','method','locale','bankCountry','bankCode','requestId','termsVersion','acceptTerms','startNow','buyer'}
+        expected={'package','method','locale','bankCountry','bankCode','requestId','termsVersion','acceptTerms','startNow','buyer','pricingVersion'}
         if set(p)-expected:
             raise HTTPException(400,'unexpected_checkout_fields')
         buyer=records.clean_buyer(p.get('buyer'))
         sku=p.get('package')
-        if not isinstance(sku,str) or sku not in PACKAGES:
-            raise HTTPException(400,'invalid_package')
+        pricing.require_version(p)
+        gb,cents=pricing.quote(sku)
         if p.get('termsVersion')!=TERMS or p.get('acceptTerms') is not True or p.get('startNow') is not True:
             raise HTTPException(400,'checkout_consent_required')
         method=p.get('method')
@@ -362,7 +363,6 @@ def install(app,ns):
         except (ValueError,TypeError,AttributeError):
             raise HTTPException(400,'invalid_request_id')
         now=time.time()
-        gb,cents=PACKAGES[sku]
         with database() as c:
             c.execute('BEGIN IMMEDIATE')
             existing=c.execute('SELECT * FROM orders WHERE user_id=? AND request_id=?',(uid,request_id)).fetchone()

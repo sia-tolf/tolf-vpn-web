@@ -1,3 +1,4 @@
+import tolf_billing_pricing as pricing
 """Montonio production pilot. Creation and account access require an admin role."""
 import hashlib
 import hmac
@@ -17,7 +18,7 @@ import jwt
 from fastapi import HTTPException, Request
 from fastapi.responses import JSONResponse
 from starlette.concurrency import run_in_threadpool
-from tolf_billing_sandbox import NoRedirect, PACKAGES, TERMS, ORIGIN, HEADERS
+from tolf_billing_sandbox import NoRedirect, TERMS, ORIGIN, HEADERS
 from tolf_billing_records import clean_buyer, ISO
 
 CONFIG = Path('/etc/tolf-payments/montonio-live.json')
@@ -209,10 +210,12 @@ def notification(token):
     return data
 
 def create(uid,p):
-    if set(p)-{'package','method','locale','bankCountry','bankCode','requestId','termsVersion','acceptTerms','startNow','buyer'}:
+    if set(p)-{'package','method','locale','bankCountry','bankCode','requestId','termsVersion','acceptTerms','startNow','buyer','pricingVersion'}:
         raise HTTPException(400,'unexpected_checkout_fields')
     sku=p.get('package');method=p.get('method');locale=p.get('locale')
-    if not isinstance(sku,str) or sku not in PACKAGES or locale not in {'en','ru','lv'}:
+    pricing.require_version(p)
+    gb,cents=pricing.quote(sku)
+    if locale not in {'en','ru','lv'}:
         raise HTTPException(400,'invalid_package_or_locale')
     if p.get('termsVersion')!=TERMS or p.get('acceptTerms') is not True or p.get('startNow') is not True:
         raise HTTPException(400,'checkout_consent_required')
@@ -230,7 +233,7 @@ def create(uid,p):
         if not any(b['code']==p.get('bankCode') for b in available['banks'].get(p.get('bankCountry'),[])):
             raise HTTPException(400,'invalid_bank')
         options={'preferredCountry':p['bankCountry'],'preferredProvider':p['bankCode']}
-    gb,cents=PACKAGES[sku];now=time.time();ref='TOLF-LIVE-'+uuid.uuid4().hex
+    now=time.time();ref='TOLF-LIVE-'+uuid.uuid4().hex
     with database() as c:
         c.execute('BEGIN IMMEDIATE')
         old=c.execute('SELECT * FROM live_payment_orders WHERE user_id=? AND request_id=?',(uid,request_id)).fetchone()
@@ -279,7 +282,7 @@ def install(app,ns):
             config();ready=True
         except HTTPException:
             ready=False
-        return JSONResponse({'mode':'live','enabled':ready,'livePayments':ready,'adminOnly':True,'termsVersion':TERMS,'accountingExport':False},headers=HEADERS)
+        return JSONResponse({'mode':'live','enabled':ready,'livePayments':ready,'adminOnly':True,'termsVersion':TERMS,'pricingVersion':pricing.VERSION,'accountingExport':False},headers=HEADERS)
 
     @app.get('/billing/live/methods')
     def get_methods(request:Request):

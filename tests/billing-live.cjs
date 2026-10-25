@@ -6,18 +6,18 @@ const {JSDOM,VirtualConsole}=require(process.env.TOLF_JSDOM||'jsdom');
   const dom=new JSDOM(fs.readFileSync('billing/index.html','utf8'),{runScripts:'outside-only',virtualConsole:console,url:'https://vpn.tolf.is/billing/?lang='+lang});
   const w=dom.window,d=w.document,calls=[],orders=[];
   w.fetch=async (url,options)=>{calls.push(url);let data;
-   if(url.endsWith('/billing/live/capabilities'))data={mode:'live',enabled:true,termsVersion:'2026-10-21',accountingExport:false};
+   if(url.endsWith('/billing/live/capabilities'))data={mode:'live',enabled:true,termsVersion:'2026-10-21',pricingVersion:'volume-parabola-20261025-v1',accountingExport:false};
    else if(url.endsWith('/billing/live/methods'))data={methods:['cardPayments','paymentInitiation'],banks:{LV:[{name:'Bank',code:'bank'}]},billingCountries:['LV']};
    else if(url.endsWith('/billing/live/account'))data={mode:'live',balanceBytes:200e9,orders:[]};
-   else if(url.endsWith('/billing/live/orders')){orders.push(JSON.parse(options.body));data={reference:'TOLF-LIVE-test',paymentUrl:'https://stargate.montonio.com/test'};}
+   else if(url.endsWith('/billing/live/orders')){orders.push(JSON.parse(options.body));data={gb:Number(orders.at(-1).package),amount:w.TolfPricingCurve.quote(Number(orders.at(-1).package)).cents/100,reference:'TOLF-LIVE-test',paymentUrl:'https://stargate.montonio.com/test'};}
    else throw Error('Unexpected URL '+url);
    return {ok:true,json:async()=>data};
   };
-  w.eval(fs.readFileSync('billing/page.js','utf8'));w.eval(fs.readFileSync('billing/sandbox.js','utf8'));
+  w.eval(fs.readFileSync('billing/pricing-curve.js','utf8'));w.eval(fs.readFileSync('billing/page.js','utf8'));w.eval(fs.readFileSync('billing/sandbox.js','utf8'));
   await new Promise(r=>setTimeout(r,30));
   assert.equal(calls.length,3);assert.ok(calls.every(x=>x.includes('/billing/live/')));
   assert.equal(d.getElementById('checkoutButton').disabled,true);
-  assert.equal(d.querySelector('.draft-price').hidden,true);
+  assert.equal(d.getElementById('volumeNumber').min,'50');
   assert.equal(d.getElementById('billingBuyer').hidden,true);
   assert.ok(!/sandbox|test mode|тестов|testa/i.test(d.querySelector('.preview-note').textContent));
   for(const id of ['sandboxTerms','sandboxEarly']){d.getElementById(id).checked=true;d.getElementById(id).dispatchEvent(new w.Event('change'));}
@@ -30,9 +30,10 @@ const {JSDOM,VirtualConsole}=require(process.env.TOLF_JSDOM||'jsdom');
   assert.equal(d.getElementById('checkoutButton').disabled,true);
   const card=d.querySelector('[name="payment"][value="card"]');card.checked=true;card.dispatchEvent(new w.Event('change'));
   assert.equal(d.getElementById('sandboxBankFields').hidden,true);
+  w.TolfBillingVolume.setVolume(375);
   d.getElementById('checkoutButton').click();
   await new Promise(r=>setTimeout(r,30));
-  assert.equal(orders.length,1);assert.equal(orders[0].method,'cardPayments');
+  assert.equal(orders.length,1);assert.equal(orders[0].method,'cardPayments');assert.equal(orders[0].package,'375');assert.equal(orders[0].pricingVersion,'volume-parabola-20261025-v1');
   dom.window.close();
  }
  console.log('Live frontend: RU/EN/LV, production API, real-payment labels, consent gate, provider method availability');
