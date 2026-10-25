@@ -7,5 +7,11 @@ function quote(gb){
  const cents=Math.floor((7500*gb-3*gb*gb+625)/1250);
  return {gb,cents,baseCents,savingCents:baseCents-cents,discountPercent:gb/25,unitEuros:cents/100/gb};
 }
-return Object.freeze({quote,min:50,max:1000});
+const scaleSteps=10000;
+function toPosition(gb){quote(gb);return Math.round(Math.log(gb/50)/Math.log(20)*scaleSteps);}
+function fromPosition(position){
+ if(!Number.isFinite(position))throw new RangeError('Invalid slider position');
+ return Math.max(50,Math.min(1000,Math.round(50*Math.pow(20,Math.max(0,Math.min(scaleSteps,position))/scaleSteps))));
+}
+return Object.freeze({quote,min:50,max:1000,scaleSteps,toPosition,fromPosition});
 });

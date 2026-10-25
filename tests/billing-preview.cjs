@@ -9,6 +9,14 @@ for(const language of ['ru','en','lv']){
   w.TolfBillingVolume.setVolume(gb);assert.equal(w.TolfBillingVolume.getVolume(),gb);
   assert.equal(d.getElementById('priceTotal').textContent.replace(/[^0-9]/g,''),String(cents));assert.ok(d.getElementById('checkoutButton').textContent.includes(d.getElementById('priceTotal').textContent));
  }
+ const range=d.getElementById('volumeRange');
+ range.value='5000';range.dispatchEvent(new w.Event('input'));assert.equal(w.TolfBillingVolume.getVolume(),224);
+ range.dispatchEvent(new w.KeyboardEvent('keydown',{key:'ArrowRight'}));assert.equal(w.TolfBillingVolume.getVolume(),225);
+ range.dispatchEvent(new w.KeyboardEvent('keydown',{key:'End'}));assert.equal(w.TolfBillingVolume.getVolume(),1000);
+ range.dispatchEvent(new w.KeyboardEvent('keydown',{key:'ArrowLeft',shiftKey:true}));assert.equal(w.TolfBillingVolume.getVolume(),990);
+ range.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Home'}));assert.equal(w.TolfBillingVolume.getVolume(),50);
+ assert.equal(range.getAttribute('aria-valuenow'),'50');
+ assert.equal(d.querySelectorAll('.volume-tick').length,11);assert.equal(d.querySelectorAll('.volume-tick-major').length,4);
  const number=d.getElementById('volumeNumber');number.value='49';number.dispatchEvent(new w.Event('input'));assert.equal(number.getAttribute('aria-invalid'),'true');assert.equal(w.TolfBillingVolume.getVolume(),null);assert.equal(d.getElementById('checkoutButton').disabled,true);
  number.dispatchEvent(new w.Event('change'));assert.equal(number.value,'50');
  d.getElementById('selectTrial').click();assert.equal(w.TolfBillingVolume.isTrial(),true);assert.equal(d.getElementById('volumeWorkbench').hidden,true);assert.equal(d.getElementById('checkoutButton').disabled,true);

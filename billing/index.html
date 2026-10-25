@@ -8,9 +8,9 @@
 <link rel="stylesheet" href="../tolf-header.20260919-1.css?v=languages-2">
 <link rel="stylesheet" href="../css/return-control.css?v=20261005-header-match">
 <link rel="stylesheet" href="page.css?v=volume-20261025-1">
-<link rel="stylesheet" href="price-preview.css?v=compact-contrast-20261025-1">
-<script defer src="pricing-curve.js?v=volume-20261025-1"></script>
-<script defer src="page.js?v=volume-20261025-1"></script>
+<link rel="stylesheet" href="price-preview.css?v=log-scale-20261025-1">
+<script defer src="pricing-curve.js?v=log-scale-20261025-1"></script>
+<script defer src="page.js?v=log-scale-20261025-1"></script>
 <script defer src="sandbox.js?v=volume-20261025-1"></script>
 <script defer src="../js/return-control.js?v=20261005"></script>
 </head>
@@ -46,8 +46,8 @@
 <div class="volume-entry"><input id="volumeNumber" type="number" inputmode="numeric" min="50" max="1000" step="1" value="200" aria-describedby="volumeHint volumeError"><span data-volume-copy="gb">ГБ</span></div>
 <p id="volumeHint" class="pricing-help" data-volume-copy="hint">Введите число или передвиньте ползунок</p>
 <label class="visually-hidden" for="volumeRange" data-volume-copy="rangeLabel">Выбор объёма трафика от 50 до 1000 гигабайт</label>
-<input id="volumeRange" class="volume-slider" type="range" min="50" max="1000" step="1" value="200">
-<div class="volume-marks" aria-label="Volumes"><button type="button" data-volume="50" style="--position:0%">50</button><button type="button" data-volume="200" style="--position:15.7895%">200</button><button type="button" data-volume="500" style="--position:47.3684%">500</button><button type="button" data-volume="1000" style="--position:100%">1000</button></div>
+<input id="volumeRange" class="volume-slider" type="range" min="0" max="10000" step="1" value="4628" aria-valuemin="50" aria-valuemax="1000" aria-valuenow="200">
+<div class="volume-marks" aria-label="Volumes"><span class="volume-tick volume-tick-major" style="--position:0.000000%" aria-hidden="true"></span><span class="volume-tick" style="--position:23.137821%" aria-hidden="true"></span><span class="volume-tick volume-tick-major" style="--position:46.275643%" aria-hidden="true"></span><span class="volume-tick" style="--position:59.810400%" aria-hidden="true"></span><span class="volume-tick" style="--position:69.413464%" aria-hidden="true"></span><span class="volume-tick volume-tick-major" style="--position:76.862179%" aria-hidden="true"></span><span class="volume-tick" style="--position:82.948222%" aria-hidden="true"></span><span class="volume-tick" style="--position:88.093898%" aria-hidden="true"></span><span class="volume-tick" style="--position:92.551285%" aria-hidden="true"></span><span class="volume-tick" style="--position:96.482980%" aria-hidden="true"></span><span class="volume-tick volume-tick-major" style="--position:100.000000%" aria-hidden="true"></span><button type="button" data-volume="50" style="--position:0.000000%">50</button><button type="button" data-volume="200" style="--position:46.275643%">200</button><button type="button" data-volume="500" style="--position:76.862179%">500</button><button type="button" data-volume="1000" style="--position:100.000000%">1000</button></div>
 <p id="volumeError" class="volume-error" role="status" hidden></p>
 <p class="volume-limit" data-volume-copy="limit">От 50 ГБ до 1 ТБ · 1 ТБ = 1000 ГБ</p>
 </div>

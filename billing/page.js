@@ -32,7 +32,8 @@ function render(){
  document.querySelector('.trust-note').hidden=trial;
  $('volumeWorkbench').hidden=trial;$('returnToPaid').hidden=!trial;
  for(const el of document.querySelectorAll('[data-volume-copy]'))el.textContent=volumeCopy[language][el.dataset.volumeCopy];
- $('volumeRange').value=lastVolume;$('volumeRange').style.setProperty('--fill',((lastVolume-50)/950*100)+'%');
+ $('volumeRange').value=curve.toPosition(lastVolume);$('volumeRange').style.setProperty('--fill',(curve.toPosition(lastVolume)/curve.scaleSteps*100)+'%');
+ $('volumeRange').setAttribute('aria-valuenow',String(lastVolume));
  $('volumeRange').setAttribute('aria-valuetext',lastVolume+' '+text.gb);
  if(validVolume)$('volumeNumber').value=lastVolume;
  $('volumeNumber').setAttribute('aria-invalid',String(!validVolume));
@@ -49,7 +50,13 @@ function render(){
 $('selectTrial').addEventListener('click',()=>{selected='trial';render();});
 function setVolume(g){lastVolume=curve.quote(g).gb;selected=String(g);validVolume=true;render();}
 window.TolfBillingVolume={getVolume:()=>selected==='trial'||!validVolume?null:lastVolume,isTrial:()=>selected==='trial',isValid:()=>validVolume,setVolume};
-$('volumeRange').addEventListener('input',e=>setVolume(Number(e.target.value)));
+$('volumeRange').addEventListener('input',e=>setVolume(curve.fromPosition(Number(e.target.value))));
+$('volumeRange').addEventListener('keydown',e=>{
+ const change={ArrowRight:1,ArrowUp:1,ArrowLeft:-1,ArrowDown:-1,PageUp:50,PageDown:-50}[e.key];
+ if(change!==undefined||e.key==='Home'||e.key==='End'){
+  e.preventDefault();setVolume(e.key==='Home'?50:e.key==='End'?1000:Math.max(50,Math.min(1000,lastVolume+change*(e.shiftKey?10:1))));
+ }
+});
 $('volumeNumber').addEventListener('input',e=>{const g=e.target.valueAsNumber;if(Number.isInteger(g)&&g>=50&&g<=1000)setVolume(g);else{validVolume=false;selected=String(lastVolume);render();}});
 $('volumeNumber').addEventListener('change',e=>{const n=e.target.valueAsNumber;setVolume(Number.isFinite(n)?Math.max(50,Math.min(1000,Math.round(n))):lastVolume);});
 for(const el of document.querySelectorAll('[data-volume]'))el.addEventListener('click',()=>setVolume(Number(el.dataset.volume)));

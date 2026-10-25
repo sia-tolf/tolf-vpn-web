@@ -12,8 +12,8 @@ let volume=200;
 const money=c=>new Intl.NumberFormat(language,{style:'currency',currency:'EUR',minimumFractionDigits:2,maximumFractionDigits:2}).format(c/100);
 function renderPrice(){
  const q=curve.quote(volume),t=copy[language];
- $('volumeRange').value=volume;$('volumeNumber').value=volume;
- $('volumeRange').style.setProperty('--fill',((volume-50)/950*100)+'%');
+ $('volumeRange').value=curve.toPosition(volume);$('volumeRange').setAttribute('aria-valuenow',String(volume));$('volumeNumber').value=volume;
+ $('volumeRange').style.setProperty('--fill',(curve.toPosition(volume)/curve.scaleSteps*100)+'%');
  $('volumeRange').setAttribute('aria-valuetext',volume+' '+t.gb);
  $('priceTotal').textContent=money(q.cents);$('priceForVolume').textContent=t.forVolume(volume.toLocaleString(language));
  $('discountBadge').textContent='−'+new Intl.NumberFormat(language,{maximumFractionDigits:2}).format(q.discountPercent)+'%';
@@ -29,7 +29,13 @@ function renderLanguage(){
  const url=new URL(location.href);url.searchParams.set('lang',language);history.replaceState(null,'',url);
  renderPrice();
 }
-$('volumeRange').addEventListener('input',e=>{volume=Number(e.target.value);renderPrice();});
+$('volumeRange').addEventListener('input',e=>{volume=curve.fromPosition(Number(e.target.value));renderPrice();});
+$('volumeRange').addEventListener('keydown',e=>{
+ const change={ArrowRight:1,ArrowUp:1,ArrowLeft:-1,ArrowDown:-1,PageUp:50,PageDown:-50}[e.key];
+ if(change!==undefined||e.key==='Home'||e.key==='End'){
+  e.preventDefault();volume=e.key==='Home'?50:e.key==='End'?1000:Math.max(50,Math.min(1000,volume+change*(e.shiftKey?10:1)));renderPrice();
+ }
+});
 $('volumeNumber').addEventListener('input',e=>{
  const g=e.target.valueAsNumber;
  if(Number.isInteger(g)&&g>=50&&g<=1000){volume=g;renderPrice();}
