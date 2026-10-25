@@ -169,3 +169,22 @@ The observer alone was restarted; the iPad worker PID remained 24284.
 Verification: deployed syntax compiled, procd running, new JSONL records
 contained schedulerRuntimeMs, schedulerWaitMs and hostStealPercent.
 Initial idle records are not evidence for behavior during a speed test.
+
+### 2026-10-25 07:31 UTC: iPad scheduler measurement and old capture cleanup
+
+Browser result: 177.1 Mbps down, 57.6 Mbps up, 151 ms latency.
+Matching observer file session-24284-1792913367872588943.jsonl:
+462 TUN transmit drops (313 and 149), zero connected UDP socket drops.
+The corresponding approximately 253/254 ms intervals recorded 40.874/63.057 ms
+of runnable scheduler wait. Per-vCPU steal was zero in the first interval
+and 3.846% on one vCPU in the second. Active samples totalled about
+2.974 s runnable wait and 18.684 s execution. This establishes scheduler
+delay during losses, not that scheduler delay alone caused them.
+
+Found the older tolf-oc-hang-trap service still running a tcpdump child on
+all interfaces. Stopped and disabled only this diagnostic service under
+the user's instruction to stop packet captures. After its 10-second
+termination grace, procd service inventory was empty and autostart disabled.
+The active iPad VPN worker remained PID 24284, connected using DTLS.
+The metadata-only performance observer remains enabled.
+No performance improvement is claimed until a subsequent measurement.
