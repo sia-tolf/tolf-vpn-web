@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="bank-transfer.css?v=20261025-1">
 <link rel="stylesheet" href="price-preview.css?v=equal-columns-20261025-1">
 <script defer src="pricing-curve.js?v=log-scale-20261025-1"></script>
-<script defer src="page.js?v=log-scale-20261025-1"></script>
+<script defer src="page.js?v=indefinitely-20261025-1"></script>
 <script defer src="bank-common.js?v=20261025-1"></script>
 <script defer src="bank-invoice.js?v=20261025-1"></script>
 <script defer src="sandbox.js?v=bank-invoices-20261025-1"></script>
@@ -32,7 +32,7 @@
 <p class="preview-note" role="note" data-text="preview">Предварительный просмотр. Оплата и активация пакетов пока недоступны.</p>
 <section class="billing-card balance-card" aria-labelledby="balanceTitle">
 <div><h2 id="balanceTitle" data-text="balance">Остаток оплаченного трафика</h2><strong class="balance-value">— <span data-text="gb">ГБ</span></strong><p class="muted" data-text="balanceHelp">Баланс появится после запуска пакетов.</p></div>
-<span class="balance-badge" data-text="neverExpires">Без срока сгорания</span>
+<span class="balance-badge" data-text="neverExpires">Бессрочно</span>
 </section>
 <section class="billing-card trial-card" aria-labelledby="trialTitle">
 <div class="trial-heading"><div><span class="eyebrow" data-text="newCustomers">Для новых пользователей</span><h2 id="trialTitle" data-text="trialTitle">Пробный пакет</h2></div><strong class="trial-volume">1 <span data-text="gb">ГБ</span><small data-text="free">Бесплатно</small></strong></div>
@@ -59,7 +59,7 @@
 <output id="priceTotal" for="volumeNumber volumeRange" class="price-total">11,04 €</output>
 <p id="priceForVolume" class="price-for-volume">за 200 ГБ</p>
 <dl class="price-breakdown"><div><dt data-volume-copy="withoutDiscount">Без скидки</dt><dd><s id="basePrice">12,00 €</s></dd></div><div class="price-savings"><dt data-volume-copy="saving">Вы экономите</dt><dd id="savedPrice">0,96 €</dd></div><div><dt data-volume-copy="unit">За гигабайт</dt><dd id="unitPrice">0,0552 €</dd></div></dl>
-<p class="price-no-expiry" data-volume-copy="noExpiry">Без подписки и срока сгорания</p>
+<p class="price-no-expiry" data-volume-copy="noExpiry">Без подписки · бессрочно</p>
 </div>
 </section>
 <button id="returnToPaid" class="return-to-paid" type="button" hidden data-volume-copy="returnPaid">Выбрать платный объём</button>
