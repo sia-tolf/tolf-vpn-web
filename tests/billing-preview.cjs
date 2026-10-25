@@ -24,7 +24,8 @@ for(const language of ['ru','en','lv']){
  d.querySelector('[data-lang="en"]').click();
  assert.ok(/1 (ГБ|GB)/.test(d.getElementById('checkoutButton').textContent));
  assert.deepEqual([...d.querySelectorAll('[name="payment"]')].map(x=>x.value),['card','bank']);
- assert.match(d.querySelector('[data-text="card"]').textContent,/Apple Pay, Google Pay/);
+ assert.deepEqual([...d.querySelectorAll('.payment-brands>span')].map(x=>x.textContent),['VISA','Mastercard','Apple Pay','Google Pay']);
+ assert.equal(d.querySelector('[name="payment"][value="card"]').closest('label').querySelector('.payment-icon'),null);
  const input=d.querySelector('[name="package"][value="200"]');input.checked=true;input.dispatchEvent(new w.Event('change'));
  assert.equal(d.getElementById('checkoutButton').textContent,'Pay 9 €');
  assert.equal(d.getElementById('selectTrial').getAttribute('aria-pressed'),'false');

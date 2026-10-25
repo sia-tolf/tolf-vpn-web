@@ -180,3 +180,10 @@ html[data-tolf-ui="billing"]{--billing-choice-gap:16px}
 .billing-page #paymentMethods{margin-top:24px}
 .billing-page .payment-option{font-size:16px;font-weight:600;line-height:1.25;padding-block:10px}
 @media(max-width:760px){html[data-tolf-ui="billing"]{--billing-choice-gap:10px}}
+
+/* Familiar payment brand names replace the ambiguous card symbol. */
+.payment-copy{display:flex;flex-direction:column;gap:3px;min-width:0}
+.payment-brands{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;font-size:13px;font-weight:600;line-height:1.2;color:var(--text)}
+.payment-brands>span{white-space:nowrap}
+.payment-brand-visa{font-style:italic;font-weight:800;letter-spacing:-.03em}
+@media(max-width:760px){.payment-brands{font-size:11px;gap:4px 6px}}
