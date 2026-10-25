@@ -173,3 +173,10 @@ html[data-tolf-ui="billing"]{--billing-choice-height:64px}
 
 /* Card and wallets share Montonio checkout; online banking is separate. */
 .billing-page .payment-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+
+/* Consistent spacing and readable payment labels across both choice groups. */
+html[data-tolf-ui="billing"]{--billing-choice-gap:16px}
+.billing-page .package-list,.billing-page .payment-list{gap:var(--billing-choice-gap)}
+.billing-page #paymentMethods{margin-top:24px}
+.billing-page .payment-option{font-size:16px;font-weight:600;line-height:1.25;padding-block:10px}
+@media(max-width:760px){html[data-tolf-ui="billing"]{--billing-choice-gap:10px}}
