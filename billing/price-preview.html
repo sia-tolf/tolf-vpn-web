@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ru" data-tolf-ui="billing">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="color-scheme" content="light dark">
+<title>Выбрать объём трафика — TOLF</title>
+<link rel="stylesheet" href="../css/styles.css?v=account-page-20260921">
+<link rel="stylesheet" href="../tolf-buttons.20260917-3.css">
+<link rel="stylesheet" href="../tolf-header.20260919-1.css?v=languages-2">
+<link rel="stylesheet" href="../css/return-control.css?v=20261005-header-match">
+<link rel="stylesheet" href="page.css?v=billing-invoice-link-20261025-1">
+<link rel="stylesheet" href="price-preview.css?v=20261025-1">
+<script defer src="pricing-curve.js?v=20261025-1"></script>
+<script defer src="price-preview.js?v=20261025-1"></script>
+<script defer src="../js/return-control.js?v=20261005"></script>
+</head>
+<body>
+<main class="billing-page pricing-preview">
+<header class="billing-header">
+<a id="previewBack" data-return-control data-return-logo="yes" href="./?lang=ru"><span data-copy="back">Возврат</span></a>
+<div class="tolf-language billing-language" aria-label="Language"><button type="button" data-language="en">EN</button><button type="button" data-language="ru">RU</button><button type="button" data-language="lv">LV</button></div>
+</header>
+<div class="pricing-intro"><span class="pricing-kicker" data-copy="preview">Предварительный вариант</span><h1 data-copy="title">Сколько гигабайт вам нужно?</h1><p class="billing-subtitle" data-copy="subtitle">Выберите объём — цена и скидка пересчитаются сразу.</p></div>
+<section class="pricing-workbench" aria-labelledby="volumeTitle">
+<div class="volume-controls">
+<label id="volumeTitle" for="volumeNumber" data-copy="volume">Объём трафика</label>
+<div class="volume-entry"><input id="volumeNumber" type="number" inputmode="numeric" min="1" max="1000" step="1" value="200" aria-describedby="volumeHint volumeError"><span data-copy="gb">ГБ</span></div>
+<p id="volumeHint" class="pricing-help" data-copy="hint">Введите число или передвиньте ползунок</p>
+<label class="visually-hidden" for="volumeRange" data-copy="rangeLabel">Выбор объёма трафика от 1 до 1000 гигабайт</label>
+<input id="volumeRange" class="volume-slider" type="range" min="1" max="1000" step="1" value="200">
+<div class="volume-marks" aria-label="Volumes"><button type="button" data-volume="50" style="--position:4.9049%">50</button><button type="button" data-volume="200" style="--position:19.9199%">200</button><button type="button" data-volume="500" style="--position:49.9499%">500</button><button type="button" data-volume="1000" style="--position:100%">1000</button></div>
+<p id="volumeError" class="volume-error" role="status" hidden></p>
+<p class="volume-limit" data-copy="limit">От 1 ГБ до 1 ТБ · 1 ТБ = 1000 ГБ</p>
+</div>
+<div class="price-summary" aria-live="polite" aria-atomic="true">
+<div class="price-summary-top"><span data-copy="total">Итого</span><span id="discountBadge" class="price-discount">−8%</span></div>
+<output id="priceTotal" for="volumeNumber volumeRange" class="price-total">11,04 €</output>
+<p id="priceForVolume" class="price-for-volume">за 200 ГБ</p>
+<dl class="price-breakdown"><div><dt data-copy="withoutDiscount">Без скидки</dt><dd><s id="basePrice">12,00 €</s></dd></div><div class="price-savings"><dt data-copy="saving">Вы экономите</dt><dd id="savedPrice">0,96 €</dd></div><div><dt data-copy="unit">За гигабайт</dt><dd id="unitPrice">0,0552 €</dd></div></dl>
+<p class="price-no-expiry" data-copy="noExpiry">Без подписки и срока сгорания</p>
+</div>
+</section>
+<div class="pricing-footnote"><span data-copy="rule">Чем больше объём, тем больше скидка. При 1 ТБ — 40%.</span><span data-copy="note">Это предварительный расчёт для обсуждения тарифа.</span></div>
+<details class="pricing-explanation"><summary data-copy="calculation">Как рассчитана цена</summary><p data-copy="baseRate">Базовая цена — 0,06 € за ГБ. Сумма скидки растёт пропорционально квадрату объёма.</p><p class="price-formula">P = 0,06 × G − 0,000024 × G²</p><p data-copy="examples">При 1000 ГБ: 60 € − 24 € = 36 €. Скидка составляет 40%.</p></details>
+</main>
+</body></html>
