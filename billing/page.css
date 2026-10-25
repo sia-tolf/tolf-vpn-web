@@ -196,3 +196,9 @@ html[data-tolf-ui="billing"]{--billing-choice-gap:16px}
 /* Original card-network artwork, optically sized alongside the wallet marks. */
 .payment-brand-mark.payment-brand-visa{height:20px}
 .payment-brand-mark.payment-brand-mastercard{height:32px}
+
+/* Invoice requests stay secondary to the two main payment choices. */
+.billing-page .payment-list{row-gap:8px}
+.payment-invoice-link{grid-column:2;justify-self:start;font-size:13px;font-weight:400;line-height:1.45;color:var(--billing-blue);text-decoration:underline;text-underline-offset:3px}
+.payment-invoice-link[hidden]{display:none}
+@media(max-width:900px){.payment-invoice-link{grid-column:1}}
