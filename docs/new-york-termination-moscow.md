@@ -205,3 +205,29 @@ This does not support GRE pacing as a sufficient fix and shows local
 loss can occur with negligible runnable CPU wait.
 Restored noqueue with the guarded rollback script and stopped its timer.
 No trial fq configuration was persisted. No user reconnection was required.
+
+### 2026-10-25: isolated worker syscall cost profile
+
+Used a new temporary diagnostic certificate, never the iPad certificate.
+Control source UK, dedicated Moscow NY listener, private Moscow measurement
+target 10.250.82.1, eight parallel 64 MiB requests with an 8-second bound.
+No BBR route, queue, firewall, buffer, or priority changes.
+Baseline: 95.87 Mbps, 8.17 seconds, 80459 TUN TX packets, zero TUN drops,
+0.68 s user CPU and 2.36 s system CPU (77.6% of accounted CPU in kernel).
+All eight requests reached the intentional timeout before 64 MiB completion;
+these are bounded load intervals, not successful complete downloads.
+This control did not reproduce the iPad's high-rate TUN losses.
+
+A separate six-second strace -c summary attached ONLY to the temporary
+control worker (CN guard plus PID assertion), recording no syscall arguments
+or payload. It detached automatically. Its measured speed is not a
+non-instrumented performance result.
+Summary: 55746 sendto calls (43.57% traced syscall CPU), 20632 write (31.67%),
+55823 read (17.93%), 21392 recvfrom (4.88%), 1829 epoll_pwait (0.75%).
+Existing TUN batching appears to limit event-loop overhead; the profile
+does not justify increasing batch size as a primary fix.
+The production iPad worker separately accumulated 1398 user ticks and
+6995 system ticks at inspection, consistent with predominant kernel cost.
+These results do not yet identify which kernel function is costly.
+Temporary control disconnected, eligibility removed, private key and
+certificate deleted, source rule/table cleaned by the script finally block.
