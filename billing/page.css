@@ -192,3 +192,7 @@ html[data-tolf-ui="billing"]{--billing-choice-gap:16px}
 .payment-google-mark>.payment-brand-mark{height:74px;max-width:none;flex-shrink:0}
 @media(max-width:900px){.billing-page .payment-list{grid-template-columns:1fr}}
 @media(max-width:760px){.billing-page .payment-list{grid-template-columns:1fr}.billing-page .payment-brands{display:grid;grid-template-columns:max-content max-content;gap:6px 16px}}
+
+/* Original card-network artwork, optically sized alongside the wallet marks. */
+.payment-brand-mark.payment-brand-visa{height:20px}
+.payment-brand-mark.payment-brand-mastercard{height:32px}
