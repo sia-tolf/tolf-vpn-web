@@ -23,7 +23,7 @@ const {JSDOM,VirtualConsole}=require(process.env.TOLF_JSDOM||'jsdom');
   for(const id of ['sandboxTerms','sandboxEarly']){d.getElementById(id).checked=true;d.getElementById(id).dispatchEvent(new w.Event('change'));}
   assert.equal(d.getElementById('checkoutButton').disabled,false);
   assert.deepEqual([...d.querySelectorAll('[name="payment"]')].map(x=>x.value),['card','bank']);
-  assert.deepEqual([...d.querySelectorAll('.payment-brands>span')].map(x=>x.textContent),['VISA','Mastercard','Apple Pay','Google Pay']);
+  assert.deepEqual([...d.querySelectorAll('.payment-brands>*')].map(x=>x.alt||x.textContent),['VISA','Mastercard','Apple Pay','Google Pay']);
  assert.equal(d.querySelector('[name="payment"][value="card"]').closest('label').querySelector('.payment-icon'),null);
   const bank=d.querySelector('[name="payment"][value="bank"]');bank.checked=true;bank.dispatchEvent(new w.Event('change'));
   assert.equal(d.getElementById('sandboxBankFields').hidden,false);

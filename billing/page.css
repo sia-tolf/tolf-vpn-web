@@ -187,3 +187,8 @@ html[data-tolf-ui="billing"]{--billing-choice-gap:16px}
 .payment-brands>span{white-space:nowrap}
 .payment-brand-visa{font-style:italic;font-weight:800;letter-spacing:-.03em}
 @media(max-width:760px){.payment-brands{font-size:11px;gap:4px 6px}}
+
+/* Use the original Apple and Google acceptance artwork. */
+.billing-page .payment-option{padding-block:8px}
+.payment-copy{gap:2px}
+.payment-brand-mark{display:block;height:24px;width:auto;flex-shrink:0;object-fit:contain}
