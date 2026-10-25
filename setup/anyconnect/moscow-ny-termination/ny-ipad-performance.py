@@ -26,6 +26,19 @@ def sample(u):
     'txBytes':counter(dev,'tx_bytes'),'rxBytes':counter(dev,'rx_bytes'),
     'txPackets':counter(dev,'tx_packets'),'rxPackets':counter(dev,'rx_packets'),
     'txDropped':counter(dev,'tx_dropped'),'rxDropped':counter(dev,'rx_dropped')}
+ # Scheduler counters distinguish runnable CPU wait from time asleep in I/O.
+ try:
+  sched=[int(v) for v in (root/'schedstat').read_text().split()]
+  if len(sched)>=3:
+   d.update(schedRuntimeNs=sched[0],schedWaitNs=sched[1],schedSlices=sched[2])
+ except (OSError,ValueError):pass
+ cpu={}
+ for line in Path('/proc/stat').read_text().splitlines():
+  parts=line.split()
+  if parts and re.fullmatch(r'cpu[0-9]+',parts[0]):
+   ticks=[int(v) for v in parts[1:]]
+   cpu[parts[0]]={'total':sum(ticks[:8]),'steal':ticks[7] if len(ticks)>7 else 0}
+ d['hostCpuTicks']=cpu
  inodes=set()
  for f in (root/'fd').iterdir():
   try:v=os.readlink(f)
@@ -65,6 +78,14 @@ def main():
     dt=row['at']-previous['at']
     if dt>0:
      row['corePercent']=round(100*(row['cpuTicks']-previous['cpuTicks'])/row['clockTicks']/dt,2)
+     if 'schedWaitNs' in row and 'schedWaitNs' in previous:
+      row['schedulerWaitMs']=round(max(0,row['schedWaitNs']-previous['schedWaitNs'])/1e6,3)
+      row['schedulerRuntimeMs']=round(max(0,row['schedRuntimeNs']-previous['schedRuntimeNs'])/1e6,3)
+     row['hostStealPercent']={}
+     for core,value in row.get('hostCpuTicks',{}).items():
+      before=previous.get('hostCpuTicks',{}).get(core)
+      if before and value['total']>before['total']:
+       row['hostStealPercent'][core]=round(100*max(0,value['steal']-before['steal'])/(value['total']-before['total']),3)
      row['downloadMbps']=round((row['txBytes']-previous['txBytes'])*8/dt/1e6,3)
      row['uploadMbps']=round((row['rxBytes']-previous['rxBytes'])*8/dt/1e6,3)
      row['newTxDrops']=row['txDropped']-previous['txDropped']

@@ -150,3 +150,22 @@ Syntax, procd launch and real control-session metric reads were validated.
 The control-session test invoked the sampling function directly, without changing
 the production CN filter. A customer-session load sample is still required before
 attributing remaining losses to a specific queue or applying another change.
+
+### 2026-10-25: distinguish scheduler delay from worker I/O delay
+
+The iPad measurement at approximately 07:23 UTC showed 193.2/39.7 Mbps
+in the browser. The matching Moscow observer session recorded 956 new TUN
+transmit drops in three intervals, with worker CPU at 61.18%, 75.40%, and
+57.84% of one core. The connected UDP receive socket recorded no drops.
+These counters locate local losses but do not establish the exact TUN
+drop branch or why the worker was delayed.
+
+The observer now records per-worker /proc/PID/schedstat runtime and
+runnable wait deltas, plus per-vCPU steal time from /proc/stat.
+This distinguishes time waiting for a CPU from time not runnable.
+Existing CN scope, bounded log rotation, and metadata-only collection remain.
+No VPN worker, routing, queue size, socket buffer, or scheduling priority changed.
+The observer alone was restarted; the iPad worker PID remained 24284.
+Verification: deployed syntax compiled, procd running, new JSONL records
+contained schedulerRuntimeMs, schedulerWaitMs and hostStealPercent.
+Initial idle records are not evidence for behavior during a speed test.
