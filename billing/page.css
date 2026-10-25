@@ -164,3 +164,9 @@ body{margin:0;background:var(--background);color:var(--text)}
 .billing-export-group h3{font-size:14px;font-weight:400;line-height:1.4;min-height:2.8em;margin:8px 0}
 .billing-export-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .billing-export-actions button{margin-top:0;min-width:0;padding-inline:8px}
+
+
+/* Package and payment choices share one responsive control height. */
+html[data-tolf-ui="billing"]{--billing-choice-height:64px}
+.billing-page .package-option,.billing-page .payment-option{height:var(--billing-choice-height);min-height:var(--billing-choice-height)}
+@media(max-width:760px){html[data-tolf-ui="billing"]{--billing-choice-height:120px}}

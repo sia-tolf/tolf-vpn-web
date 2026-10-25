@@ -6,23 +6,31 @@ ru:{banner:'Тестовый режим Montonio. Реальные деньги 
 en:{banner:'Montonio test mode. No real money is charged. Test gigabytes cannot be used for VPN.',balance:'Test traffic balance',balanceHelp:'Separate test balance. Your live traffic is not affected.',methods:'Payment methods supplied by Montonio for the sandbox store.',country:'Bank country',bank:'Bank',chooseBank:'Choose a bank',termsBefore:'I accept the ',terms:'terms of service',termsAfter:' for this test order.',early:'I request immediate service provision. If I withdraw within 14 days, the part already supplied may be charged proportionately to usage. This is currently only a test.',ready:'Sandbox: no real money is charged.',busy:'Opening Montonio…',failed:'The test request failed. Please refresh the page and try again.',consent:'Confirm the terms and immediate service provision for this test order.',pickBank:'Choose a bank for the test payment.',paid:'Test payment confirmed. The test package has been credited.',pending:'The test order is awaiting payment or confirmation. You can continue from the history.',declined:'Test payment was not completed. No traffic credited.',checking:'Checking the test payment…',history:'Test payments',empty:'No test orders yet.',reference:'Order',status:'Status',amount:'Amount',trial:'Trial activation is not available yet. You can test a 50, 200 or 500 GB purchase.',resume:'Continue',invalid:'The return result could not be validated. Checking server-side order data.',unknown:'The request outcome is not yet known. Check the history before paying again.',statuses:{CREATING:'Creating',UNKNOWN:'Checking',PENDING:'Awaiting payment',PAID:'Paid — test',ABANDONED:'Abandoned',VOIDED:'Voided',DECLINED:'Declined',CANCELLED:'Cancelled',EXPIRED:'Expired',AUTHORIZED:'Authorized'}},
 lv:{banner:'Montonio testa režīms. Reāla nauda netiek iekasēta. Testa gigabaitus nevar izmantot VPN.',balance:'Testa datu atlikums',balanceHelp:'Atsevišķs testa atlikums. Reālie konta dati netiek mainīti.',methods:'Montonio testa veikalam pieejamie maksājumu veidi.',country:'Bankas valsts',bank:'Banka',chooseBank:'Izvēlieties banku',termsBefore:'Es piekrītu ',terms:'pakalpojuma noteikumiem',termsAfter:' šim testa pasūtījumam.',early:'Es pieprasu sākt pakalpojumu nekavējoties. Ja izmantoju atteikuma tiesības 14 dienu laikā, par jau sniegto daļu var ieturēt maksu proporcionāli izmantotajam apjomam. Pašlaik tas ir tikai tests.',ready:'Sandbox: reāla nauda netiek iekasēta.',busy:'Atveram Montonio…',failed:'Testa pieprasījums neizdevās. Atsvaidziniet lapu un mēģiniet vēlreiz.',consent:'Apstipriniet noteikumus un tūlītēju pakalpojuma sākšanu testa pasūtījumam.',pickBank:'Izvēlieties banku testa maksājumam.',paid:'Testa maksājums apstiprināts. Testa paka ir ieskaitīta.',pending:'Testa pasūtījums gaida apmaksu vai apstiprinājumu. Apmaksu var turpināt vēsturē.',declined:'Testa maksājums nav pabeigts. Dati nav ieskaitīti.',checking:'Pārbaudām testa maksājumu…',history:'Testa maksājumi',empty:'Testa pasūtījumu vēl nav.',reference:'Pasūtījums',status:'Statuss',amount:'Summa',trial:'Izmēģinājuma aktivizēšana vēl nav pieejama. Var pārbaudīt 50, 200 vai 500 GB pirkumu.',resume:'Turpināt',invalid:'Atgriešanās rezultāts nav apstiprināts. Pārbaudām servera datus.',unknown:'Pieprasījuma rezultāts vēl nav zināms. Pirms atkārtotas apmaksas pārbaudiet vēsturi.',statuses:{CREATING:'Tiek veidots',UNKNOWN:'Pārbaude',PENDING:'Gaida apmaksu',PAID:'Apmaksāts — tests',ABANDONED:'Nav pabeigts',VOIDED:'Atcelts',DECLINED:'Noraidīts',CANCELLED:'Atcelts',EXPIRED:'Beidzies',AUTHORIZED:'Autorizēts'}}
 };
+const liveText={
+ru:{banner:'Реальная оплата Montonio. Доступна только администраторам. Будут списаны реальные деньги.',balance:'Остаток оплаченного трафика',balanceHelp:'Оплаченный объём за вычетом использованного трафика.',methods:'Доступные способы оплаты Montonio.',termsAfter:'.',early:'Прошу начать оказание услуги сразу. При отказе в течение 14 дней стоимость уже оказанной части может удерживаться пропорционально использованному объёму.',ready:'Реальная оплата. После подтверждения пакет будет начислен на ваш аккаунт.',failed:'Не удалось выполнить запрос. Проверьте историю перед повторной оплатой.',consent:'Подтвердите условия и начало оказания услуги.',pickBank:'Выберите банк.',paid:'Оплата подтверждена. Пакет начислен.',pending:'Заказ ожидает оплаты или подтверждения.',declined:'Платёж не выполнен. Трафик не начислен.',checking:'Проверяем оплату…',history:'Платежи',empty:'Платежей пока нет.',paidStatus:'Оплачен',notConfigured:'Реальная оплата для администраторов подготовлена. Ожидается установка LIVE-ключей Montonio.'},
+en:{banner:'Live Montonio payments. Administrators only. Real money will be charged.',balance:'Paid traffic balance',balanceHelp:'Purchased traffic less usage.',methods:'Available Montonio payment methods.',termsAfter:'.',early:'I request immediate service provision. If I withdraw within 14 days, the part already supplied may be charged proportionately to usage.',ready:'Live payment. Your package is credited after payment confirmation.',failed:'Request failed. Check your history before paying again.',consent:'Confirm the terms and immediate service provision.',pickBank:'Choose a bank.',paid:'Payment confirmed. Package credited.',pending:'Awaiting payment or confirmation.',declined:'Payment was not completed. No traffic credited.',checking:'Checking payment…',history:'Payments',empty:'No payments yet.',paidStatus:'Paid',notConfigured:'Administrator-only live payments are prepared. Montonio LIVE keys still need to be installed.'},
+lv:{banner:'Reāli Montonio maksājumi. Tikai administratoriem. Tiks iekasēta reāla nauda.',balance:'Apmaksāto datu atlikums',balanceHelp:'Iegādātais datu apjoms, atskaitot patēriņu.',methods:'Pieejamie Montonio maksājumu veidi.',termsAfter:'.',early:'Es pieprasu sākt pakalpojumu nekavējoties. Ja izmantoju atteikuma tiesības 14 dienu laikā, par jau sniegto daļu var ieturēt maksu proporcionāli izmantotajam apjomam.',ready:'Reāls maksājums. Paka tiks ieskaitīta pēc maksājuma apstiprinājuma.',failed:'Pieprasījums neizdevās. Pirms atkārtotas apmaksas pārbaudiet vēsturi.',consent:'Apstipriniet noteikumus un tūlītēju pakalpojuma sākšanu.',pickBank:'Izvēlieties banku.',paid:'Maksājums apstiprināts. Paka ieskaitīta.',pending:'Gaida apmaksu vai apstiprinājumu.',declined:'Maksājums nav pabeigts. Dati nav ieskaitīti.',checking:'Pārbaudām maksājumu…',history:'Maksājumi',empty:'Maksājumu vēl nav.',paidStatus:'Apmaksāts',notConfigured:'Reālie maksājumi administratoriem ir sagatavoti. Jāuzstāda Montonio LIVE atslēgas.'}
+};
+const paymentHosts=()=>cap?.mode==='live'?['stargate.montonio.com','checkout.montonio.com','gateway.montonio.com']:['sandbox-stargate.montonio.com','sandbox-checkout.montonio.com','sandbox-gateway.montonio.com'];
 let enabled=false,busy=false,cap=null,methods=null,account=null,messageKey='',pollTimer=null;
 let attempt=null;
 const lang=()=>document.documentElement.lang in text?document.documentElement.lang:'en';
-const t=()=>text[lang()];
+const t=()=>cap?.mode==='live'?{...text[lang()],...liveText[lang()],statuses:{...text[lang()].statuses,PAID:liveText[lang()].paidStatus}}:text[lang()];
 const sku=()=>document.querySelector('[name="package"]:checked')?.value;
 const method=()=>document.querySelector('[name="payment"]:checked')?.value;
 const mapping={card:'cardPayments',bank:'paymentInitiation',apple:'applePay',google:'googlePay'};
 const backMapping={cardPayments:'card',paymentInitiation:'bank',applePay:'apple',googlePay:'google'};
 const returnUrl=new URL(location.href);
 const returnToken=returnUrl.searchParams.get('order-token');
-const returnReference=returnUrl.searchParams.get('sandboxOrder');
+const returnEnvironment=returnUrl.searchParams.has('sandboxOrder')?'sandbox':null;
+const returnReference=returnUrl.searchParams.get('liveOrder')||returnUrl.searchParams.get('sandboxOrder');
 // Consume return parameters once. A refresh must not replay an old payment result.
 if(returnToken||returnReference){
- returnUrl.searchParams.delete('order-token');returnUrl.searchParams.delete('sandboxOrder');
+ returnUrl.searchParams.delete('order-token');returnUrl.searchParams.delete('sandboxOrder');returnUrl.searchParams.delete('liveOrder');
  history.replaceState(null,'',returnUrl);
 }
 async function request(path,body){
+ if(cap?.mode==='live')path=path.replace('/billing/sandbox/','/billing/live/');
  const response=await fetch(API+path,{method:body?'POST':'GET',credentials:'include',cache:'no-store',headers:body?{'Content-Type':'application/json'}:{'Accept':'application/json'},...(body?{body:JSON.stringify(body)}:{})});
  let data;try{data=await response.json();}catch{throw Error('invalid_response');}
  if(!response.ok)throw Error(data.detail||'request_failed');
@@ -175,7 +183,7 @@ function fillBanks(){
  if([...select.options].some(o=>o.value===previous))select.value=previous;
 }
 function paymentUrl(value){
- try{const u=new URL(value);if(u.protocol==='https:'&&!u.username&&!u.password&&(!u.port||u.port==='443')&&['sandbox-stargate.montonio.com','sandbox-checkout.montonio.com','sandbox-gateway.montonio.com'].includes(u.hostname))return u.href;}catch{}
+ try{const u=new URL(value);if(u.protocol==='https:'&&!u.username&&!u.password&&(!u.port||u.port==='443')&&paymentHosts().includes(u.hostname))return u.href;}catch{}
  return null;
 }
 async function resumeOrder(order,button,continuePayment){
@@ -248,8 +256,10 @@ function update(){
  const x=t(),isTrial=!sku();renderRecordsUI();
  document.documentElement.classList.add('billing-sandbox');
  document.querySelector('.preview-note').textContent=x.banner;
+ if(cap?.mode==='live')document.querySelector('.draft-price').hidden=true;
  $('balanceTitle').textContent=x.balance;
- renderBalance(account?.testBalanceBytes||0);
+ renderBalance((cap?.mode==='live'?account?.balanceBytes:account?.testBalanceBytes)||0);
+ if($('billingBuyer'))$('billingBuyer').hidden=cap?.mode==='live';
  document.querySelector('.balance-card .muted').textContent=x.balanceHelp;
  $('paymentPreviewNote').textContent=x.methods;
  $('sandboxConsent').hidden=isTrial;
@@ -292,7 +302,7 @@ async function checkout(){
  try{
   const order=await request('/billing/sandbox/orders',{package:sku(),method:mapping[method()],locale:lang(),bankCountry:$('sandboxCountry').value,bankCode:$('sandboxBank').value,requestId:attempt.id,termsVersion:cap.termsVersion,acceptTerms:true,startNow:true,...(buyer?{buyer}:{})});
   const url=new URL(order.paymentUrl);
-  if(url.protocol!=='https:'||!['sandbox-stargate.montonio.com','sandbox-checkout.montonio.com','sandbox-gateway.montonio.com'].includes(url.hostname))throw Error('unsafe_payment_url');
+  if(!paymentUrl(order.paymentUrl))throw Error('unsafe_payment_url');
   location.assign(url.href);
  }catch(error){
   messageKey=error.message==='order_already_created'?'unknown':'failed';busy=false;update();refreshAccount().catch(()=>{});
@@ -304,8 +314,10 @@ for(const radio of document.querySelectorAll('[name="payment"]'))radio.addEventL
 $('checkoutButton').addEventListener('click',checkout);
 (async()=>{
  try{
-  cap=await request('/billing/capabilities');
-  if(!cap.enabled||cap.mode!=='sandbox')return;
+  cap=returnEnvironment==='sandbox'?await request('/billing/capabilities'):await request('/billing/live/capabilities');
+  if(cap.mode==='live'&&!cap.enabled){document.querySelector('.preview-note').textContent=liveText[lang()].notConfigured;return;}
+  if(cap.mode!=='live')cap=await request('/billing/capabilities');
+  if(!cap.enabled||!['sandbox','live'].includes(cap.mode))return;
   methods=await request('/billing/sandbox/methods');
   enabled=true;ensureUI();
   // Availability comes from Montonio, not from browser sniffing.
