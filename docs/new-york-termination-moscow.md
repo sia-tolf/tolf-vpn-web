@@ -104,3 +104,22 @@ DNS record remains unchanged; this override is scoped to the Moscow resolver.
 A control client on the actual New York ingress resolved the hostname through
 10.254.0.54 and completed TLS, CORS ping, 1 MiB download and 1 MiB upload to
 the Moscow measurement server. This restores the comparison, not a speed fix.
+
+## TUN queue policy integration correction, 2026-10-25
+
+On the customer iPad TUN interface, tx_dropped reached 59,560 while the GRE
+interface counters showed no drops. The existing queue policy recognized
+vpns-mow followed by digits and applied txqueuelen 2000. The new listener's
+vpns-mowN prefix failed that suffix validation, leaving the default queue at 500.
+Added an explicit vpns-mowN branch before the original branch; numeric validation
+and existing Moscow behavior remain unchanged. Applied to the active interface
+without a service restart. New control sessions automatically received queue 2000.
+
+The temporary iPad BBR /32 route was explicitly removed and its rollback timer
+stopped, so subsequent comparisons use CUBIC. A control download transferred
+49,655,738 bytes with zero TUN drops at 47.6 Mbps; seven parallel requests hit
+the short eight-second deadline. That limited load does not establish the iPad's
+new maximum throughput or prove elimination of drops at its higher rate.
+
+The attempted 500-versus-2000 mutation test was abandoned; no conclusion from an
+A/B load comparison is claimed. patch-ny-tun-queue.py records the deployed change.
