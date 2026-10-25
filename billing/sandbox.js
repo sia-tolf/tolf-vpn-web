@@ -226,6 +226,15 @@ function showHistory(){
   const description=document.createElement('span');description.className='sandbox-order-description';
   description.textContent=new Date(order.createdAt*1000).toLocaleString(lang())+' · '+order.gb+' GB'+(order.remainingBytes!=null?' · '+rt().remaining+': '+trafficGb(order.remainingBytes)+' GB':'');
   ref.append(document.createElement('br'),description);row.append(ref,status,amount);
+  if(order.bankInvoice){
+   const B=window.TolfBank,invoice=order.bankInvoice,actions=document.createElement('div');actions.className='sandbox-history-actions';
+   for(const [url,label,suffix] of [[invoice.pdfUrl,B.t('download'),'.pdf'],[invoice.receiptUrl,B.t('receipt'),'-paid.pdf']]){
+    if(!url)continue;const b=document.createElement('button');b.type='button';b.className='sandbox-document secondary';b.textContent=label;b.addEventListener('click',()=>download(url,invoice.number+suffix,b));actions.append(b);
+   }
+   status.textContent=B.t(order.status==='PAID'?'paid':'pending');ref.firstChild.textContent=invoice.number;
+   const note=document.createElement('p');note.className='sandbox-pending-note';note.textContent=B.t('reference')+': '+invoice.paymentReference;
+   row.append(note,actions);list.append(row);continue;
+  }
   const original=(order.documents||[]).find(d=>d.kind==='purchase');
   if(original&&paidStatuses.includes(order.status)){
    const actions=document.createElement('div');actions.className='sandbox-history-actions';
@@ -270,6 +279,7 @@ function update(){
  const btn=$('checkoutButton');
  btn.disabled=busy||isTrial||!sku()||!buyerValid()||!$('sandboxTerms').checked||!$('sandboxEarly').checked||!methods.methods.includes(mapping[method()])||(method()==='bank'&&!$('sandboxBank').value);
  for(const el of document.querySelectorAll('#volumeNumber,#volumeRange,[data-volume],#selectTrial,#returnToPaid'))el.disabled=busy;
+ if($('bankInvoiceButton'))$('bankInvoiceButton').disabled=busy||!window.TolfBillingVolume.isValid();
  if(busy)btn.textContent=x.busy;
  $('checkoutAvailability').textContent=x[isTrial?'trial':messageKey||(busy?'busy':'ready')]||x.failed;
  for(const radio of document.querySelectorAll('[name="payment"]')){
@@ -310,6 +320,7 @@ async function checkout(){
   messageKey=error.message==='pricing_changed'?'pricingChanged':error.message==='order_already_created'?'unknown':'failed';busy=false;update();refreshAccount().catch(()=>{});
  }
 }
+window.addEventListener('tolf:bank-invoice-created',()=>refreshAccount().catch(()=>{}));
 window.addEventListener('tolf:billing-render',()=>{messageKey='';update();});
 window.addEventListener('pageshow',event=>{if(event.persisted){messageKey='';historyFeedbackKey='';update();}});
 for(const radio of document.querySelectorAll('[name="payment"]'))radio.addEventListener('change',()=>{messageKey='';update();});

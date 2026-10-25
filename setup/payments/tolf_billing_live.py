@@ -126,11 +126,19 @@ def methods():
     return result
 
 def public(row):
-    return {'reference': row['reference'], 'package': row['sku'], 'gb': row['gb'], 'amount': row['cents']/100,
+    result={'reference': row['reference'], 'package': row['sku'], 'gb': row['gb'], 'amount': row['cents']/100,
             'currency': 'EUR', 'status': row['status'], 'createdAt': row['created'], 'updatedAt': row['updated'],
             'mode': 'live', 'paymentUrl': row['payment_url'] if row['status']=='PENDING' else None, 'documents': []}
+    result['method']=row['method']
+    if row['method']=='bankTransfer':
+        with database() as c:
+            invoice=c.execute('SELECT number,confirmed_at FROM bank_transfer_invoices WHERE reference=?',(row['reference'],)).fetchone()
+        if invoice:
+            number=invoice['number'];result['bankInvoice']={'number':number,'paymentReference':number,'pdfUrl':'/billing/bank/invoices/'+number+'.pdf','receiptUrl':'/billing/bank/invoices/'+number+'/receipt.pdf' if invoice['confirmed_at'] else None}
+    return result
 
 def match(data, row):
+    if row['method']=='bankTransfer':raise HTTPException(400,'wrong_payment_channel')
     cfg = config()
     try:
         amount = Decimal(str(data['grandTotal']))
@@ -150,6 +158,16 @@ def usage(c, uid):
     from tolf_traffic_policy import totals
     return totals(c, '1970-01-01T00:00:00+00:00').get(uid, 0)
 
+def grant_credit(c,row):
+    if c.execute('SELECT 1 FROM live_payment_credits WHERE reference=?',(row['reference'],)).fetchone():return
+    if not c.execute('SELECT 1 FROM live_payment_usage_baselines WHERE user_id=?',(row['user_id'],)).fetchone():
+        c.execute('INSERT INTO live_payment_usage_baselines VALUES(?,?,?)',(row['user_id'],usage(c,row['user_id']),time.time()))
+    else:
+        current=usage(c,row['user_id'])
+        prior=c.execute('SELECT COALESCE(SUM(bytes),0) FROM live_payment_credits WHERE user_id=?',(row['user_id'],)).fetchone()[0]
+        c.execute('UPDATE live_payment_usage_baselines SET usage_bytes=MAX(usage_bytes,?) WHERE user_id=?',(current-prior,row['user_id']))
+    c.execute('INSERT OR IGNORE INTO live_payment_credits VALUES(?,?,?,?)',(row['reference'],row['user_id'],row['gb']*1_000_000_000,time.time()))
+
 def apply_status(data, source):
     with database() as c:
         c.execute('BEGIN IMMEDIATE')
@@ -163,14 +181,7 @@ def apply_status(data, source):
         rank = {'PAID':1,'PARTIALLY_REFUNDED':2,'REFUNDED':3}
         if rank.get(row['status'],0) > rank.get(status,0):
             status = row['status']
-        if status == 'PAID' and not c.execute('SELECT 1 FROM live_payment_credits WHERE reference=?',(row['reference'],)).fetchone():
-            if not c.execute('SELECT 1 FROM live_payment_usage_baselines WHERE user_id=?',(row['user_id'],)).fetchone():
-                c.execute('INSERT INTO live_payment_usage_baselines VALUES(?,?,?)',(row['user_id'],usage(c,row['user_id']),time.time()))
-            else:
-                current=usage(c,row['user_id'])
-                prior=c.execute('SELECT COALESCE(SUM(bytes),0) FROM live_payment_credits WHERE user_id=?',(row['user_id'],)).fetchone()[0]
-                c.execute('UPDATE live_payment_usage_baselines SET usage_bytes=MAX(usage_bytes,?) WHERE user_id=?',(current-prior,row['user_id']))
-            c.execute('INSERT OR IGNORE INTO live_payment_credits VALUES(?,?,?,?)',(row['reference'],row['user_id'],row['gb']*1_000_000_000,time.time()))
+        if status == 'PAID':grant_credit(c,row)
         # Never keep spendable traffic for a refunded order. Partial refunds are
         # conservatively suspended for this pilot until a refund policy is configured.
         if status in {'REFUNDED','PARTIALLY_REFUNDED'}:

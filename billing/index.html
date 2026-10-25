@@ -8,10 +8,13 @@
 <link rel="stylesheet" href="../tolf-header.20260919-1.css?v=languages-2">
 <link rel="stylesheet" href="../css/return-control.css?v=20261005-header-match">
 <link rel="stylesheet" href="page.css?v=volume-20261025-1">
+<link rel="stylesheet" href="bank-transfer.css?v=20261025-1">
 <link rel="stylesheet" href="price-preview.css?v=log-scale-20261025-1">
 <script defer src="pricing-curve.js?v=log-scale-20261025-1"></script>
 <script defer src="page.js?v=log-scale-20261025-1"></script>
-<script defer src="sandbox.js?v=volume-20261025-1"></script>
+<script defer src="bank-common.js?v=20261025-1"></script>
+<script defer src="bank-invoice.js?v=20261025-1"></script>
+<script defer src="sandbox.js?v=bank-invoices-20261025-1"></script>
 <script defer src="../js/return-control.js?v=20261005"></script>
 </head>
 <body>
@@ -65,6 +68,7 @@
 <fieldset id="paymentMethods" class="payment-list"><legend data-text="payment">Способ оплаты</legend>
 <label class="payment-option"><input type="radio" name="payment" value="card" checked><span class="payment-copy"><span class="payment-brands"><img src="../assets/payments/visa.png" alt="Visa" class="payment-brand-mark payment-brand-visa"><img src="../assets/payments/mastercard.png" alt="Mastercard" class="payment-brand-mark payment-brand-mastercard"><img src="../assets/payments/apple-pay.svg" alt="Apple Pay" class="payment-brand-mark"><span class="payment-google-mark"><img src="../assets/payments/google-pay.svg" alt="Google Pay" class="payment-brand-mark"></span></span></span></label>
 <label class="payment-option"><input type="radio" name="payment" value="bank"><span data-text="bank">Интернет-банк</span></label>
+<button id="bankInvoiceButton" class="payment-invoice-link" type="button" hidden>Получить счёт для банковского перевода</button>
 </fieldset>
 <p id="paymentPreviewNote" class="muted" data-text="methodPreview">Предварительный набор способов оплаты. Доступность будет подтверждена при подключении Montonio.</p>
 <div class="checkout-action">

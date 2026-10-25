@@ -1,0 +1,21 @@
+<!doctype html><html lang="ru" data-tolf-ui="billing"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer"><meta name="color-scheme" content="light dark"><title>Банковские переводы — TOLF</title>
+<link rel="stylesheet" href="../css/styles.css?v=account-page-20260921"><link rel="stylesheet" href="../tolf-buttons.20260917-3.css"><link rel="stylesheet" href="../tolf-header.20260919-1.css?v=languages-2"><link rel="stylesheet" href="../css/return-control.css?v=20261005-header-match"><link rel="stylesheet" href="../billing/page.css?v=bank-invoices-20261025-1"><link rel="stylesheet" href="../billing/bank-transfer.css?v=20261025-1">
+<script defer src="../billing/bank-common.js?v=20261025-1"></script><script defer src="bank-payments.js?v=20261025-1"></script><script defer src="../js/return-control.js?v=20261005"></script>
+</head><body><main class="billing-page bank-admin-page">
+<header class="billing-header"><a id="bankAdminBack" href="./" data-return-control data-return-logo="yes"><span data-bank-copy="back">Возврат</span></a><div class="tolf-language billing-language" aria-label="Language"><button type="button" data-bank-language="en">EN</button><button type="button" data-bank-language="ru">RU</button><button type="button" data-bank-language="lv">LV</button></div></header>
+<h1 data-bank-copy="adminTitle">Банковские переводы</h1><p id="bankAdminGate" class="bank-note" role="status" data-bank-copy="loading">Загрузка…</p>
+<div id="bankAdminWorkspace" hidden>
+<section class="billing-card"><details id="bankSettingsDetails"><summary class="bank-settings-summary" data-bank-copy="settings">Реквизиты TOLF</summary><p id="bankSeller" class="bank-note"></p><p class="bank-note" data-bank-copy="settingsNote"></p>
+<form id="bankSettingsForm"><div class="bank-fields">
+<label class="bank-wide"><span data-bank-copy="beneficiary"></span><input id="bankSetting-beneficiary" maxlength="160" autocomplete="organization"></label>
+<label><span data-bank-copy="bankName"></span><input id="bankSetting-bankName" maxlength="160"></label>
+<label><span data-bank-copy="bic"></span><input id="bankSetting-bic" maxlength="11" autocapitalize="characters"></label>
+<label class="bank-wide"><span data-bank-copy="iban"></span><input id="bankSetting-iban" maxlength="42" autocapitalize="characters" spellcheck="false"></label>
+<label><span data-bank-copy="vatStatus"></span><select id="bankSetting-vatStatus"><option value="unknown" data-bank-copy="unknown"></option><option value="non_registered" data-bank-copy="nonRegistered"></option><option value="registered" data-bank-copy="registered"></option></select></label>
+<label id="bankSettingVatLabel"><span data-bank-copy="sellerVat"></span><input id="bankSetting-vatNumber" maxlength="13" autocapitalize="characters"></label>
+<label><span data-bank-copy="dueDays"></span><input id="bankSetting-dueDays" type="number" min="1" max="30" step="1" required></label>
+</div><label class="bank-check"><input id="bankSetting-enabled" type="checkbox"><span data-bank-copy="enabled"></span></label><div class="bank-actions"><button class="billing-primary primary" type="submit" id="bankSaveSettings" data-bank-copy="save"></button></div><p id="bankSettingsMessage" class="bank-note" role="status"></p></form>
+</details></section>
+<section class="billing-card"><h2 data-bank-copy="invoices"></h2><div class="bank-admin-toolbar"><select id="bankInvoiceFilter" class="bank-filter" aria-label="Invoice status"><option value="all" data-bank-copy="all"></option><option value="PENDING" data-bank-copy="pending"></option><option value="PAID" data-bank-copy="paid"></option></select><button type="button" id="bankRefresh" class="billing-secondary secondary" data-bank-copy="refresh"></button></div><p id="bankListMessage" class="bank-note" role="status"></p><div id="bankInvoiceList"></div><button id="bankMore" class="billing-secondary secondary" type="button" data-bank-copy="more" hidden></button></section>
+</div></main></body></html>
