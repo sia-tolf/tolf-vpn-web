@@ -29,6 +29,11 @@ existing background worker. A node failure before deletion leaves the account in
 place and records a failed job that can be explicitly retried. Payment history is
 retained. Requested, failed and completed deletion actions are audited.
 
+The shared deletion transaction enables SQLite foreign-key enforcement, so the
+existing cascades also remove SmartDNS accounts and credentials, quick-setup
+records and personal routing for the target. Certificate revocation tombstones
+and accounting records deliberately have no such cascading relationship.
+
 Lost-response retries use the same request UUID or read its guarded status. A
 completed job is not executed again. The frontend requires explicit confirmation;
 no production users are deleted by installing this feature or running its tests.

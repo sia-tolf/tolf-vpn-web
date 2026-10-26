@@ -38,6 +38,13 @@ def main_source(source):
     response_start = original.index('    response = JSONResponse(', block_start)
     body = original[block_start:response_start]
     body = once(body, '    with tolf_promos.account_operation(DB, user_id):', '    with (nullcontext() if lock_held else tolf_promos.account_operation(DB, user_id)):')
+    body = once(body, '        con = sqlite3.connect(DB)\n        try:\n', '        con = sqlite3.connect(DB)\n        try:\n            con.execute("PRAGMA foreign_keys=ON")\n')
+    anchor = '            tolf_promos.detach_account(con, user_id)\n'
+    cleanup = '''            for related_table, related_column in (("vpn_personal_routing_delivery", "account_id"), ("oc_setup_links", "user_id")):
+                if con.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?", (related_table,)).fetchone():
+                    con.execute(f'DELETE FROM "{related_table}" WHERE "{related_column}"=?', (user_id,))
+'''
+    body = once(body, anchor, anchor + cleanup)
     helper = 'def delete_account_data(user_id, lock_held=False):\n    from contextlib import nullcontext\n' + body
     helper += "    reconcile = globals().get('oc_reconcile_account')\n    if reconcile:\n        try:\n            reconcile(user_id)\n        except Exception:\n            pass  # Persisted revocation tombstones are retried by the existing worker.\n\n\n"
     route = original[:block_start] + '    delete_account_data(user_id)\n' + original[response_start:]

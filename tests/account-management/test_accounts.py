@@ -55,6 +55,12 @@ class AccountsTests(unittest.TestCase):
             CREATE TABLE oc_devices(id TEXT,user_id TEXT,username TEXT,state TEXT,expires_at TEXT,revoked_at TEXT);
             CREATE TABLE oc_import_grants(user_id TEXT);CREATE TABLE oc_policy_retries(device_id TEXT);
             CREATE TABLE live_payment_credits(user_id TEXT,bytes INTEGER);
+            CREATE TABLE dns_accounts(user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE);
+            CREATE TABLE dns_credentials(id TEXT PRIMARY KEY,user_id TEXT REFERENCES users(id) ON DELETE CASCADE);
+            CREATE TABLE quick_setups(user_id TEXT REFERENCES users(id) ON DELETE CASCADE);
+            CREATE TABLE vpn_personal_routing(user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE);
+            CREATE TABLE vpn_personal_routing_delivery(account_id TEXT,intent_json TEXT);
+            CREATE TABLE oc_setup_links(user_id TEXT,token_hash BLOB);
             CREATE TRIGGER registry_delete AFTER DELETE ON users BEGIN UPDATE managed_users SET deleted_at='deleted',vpn_active=0 WHERE account_id=OLD.id; END;
             CREATE TRIGGER oc_delete AFTER DELETE ON users BEGIN UPDATE oc_devices SET state='revoking',revoked_at='2026-10-26T00:00:00+00:00' WHERE user_id=OLD.id AND state IN ('active','pending'); DELETE FROM oc_import_grants WHERE user_id=OLD.id; END;
             ''')
@@ -67,6 +73,9 @@ class AccountsTests(unittest.TestCase):
                 c.execute('INSERT INTO passkeys VALUES(?,?,?,?,?,?)',(uid.encode(),uid,b'public',0,'2026-10-26','Key'))
                 c.execute('INSERT INTO oc_devices VALUES(?,?,?,?,?,NULL)',('device'+str(i),uid,'oc'+str(i),'revoking' if uid==self.other else 'active','2099-01-01T00:00:00+00:00'))
                 c.execute('INSERT INTO oc_import_grants VALUES(?)',(uid,))
+                c.execute('INSERT INTO dns_accounts VALUES(?)',(uid,));c.execute('INSERT INTO dns_credentials VALUES(?,?)',(uid,uid))
+                c.execute('INSERT INTO quick_setups VALUES(?)',(uid,));c.execute('INSERT INTO vpn_personal_routing VALUES(?)',(uid,))
+                c.execute('INSERT INTO vpn_personal_routing_delivery VALUES(?,?)',(uid,'private rules'));c.execute('INSERT INTO oc_setup_links VALUES(?,?)',(uid,b'private link'))
             c.execute('INSERT INTO admin_roles VALUES(?)',(self.owner,))
             c.execute('INSERT INTO live_payment_credits VALUES(?,?)',(self.target,50000000000))
         def auth(request):
@@ -160,8 +169,10 @@ class AccountsTests(unittest.TestCase):
         with self.a.db() as c:
             self.assertIsNone(c.execute('SELECT 1 FROM users WHERE id=?',(self.target,)).fetchone())
             self.assertEqual(c.execute('SELECT COUNT(*) FROM users').fetchone()[0],3)
-            for table in ['sessions','passkeys','vpn_access','account_trial_registrations']:
+            for table in ['sessions','passkeys','vpn_access','account_trial_registrations','dns_accounts','dns_credentials','quick_setups','vpn_personal_routing','oc_setup_links']:
                 self.assertEqual(c.execute('SELECT COUNT(*) FROM '+table+' WHERE user_id=?',(self.target,)).fetchone()[0],0)
+            self.assertEqual(c.execute('SELECT COUNT(*) FROM dns_credentials').fetchone()[0],3)
+            self.assertEqual(c.execute('SELECT COUNT(*) FROM vpn_personal_routing_delivery WHERE account_id=?',(self.target,)).fetchone()[0],0)
             self.assertEqual(c.execute('SELECT bytes FROM live_payment_credits WHERE user_id=?',(self.target,)).fetchone()[0],50000000000)
             self.assertEqual(c.execute('SELECT state FROM oc_devices WHERE user_id=?',(self.target,)).fetchone()[0],'revoked')
             self.assertEqual(c.execute('SELECT state FROM oc_devices WHERE user_id=?',(self.other,)).fetchone()[0],'revoking')
