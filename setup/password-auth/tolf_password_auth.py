@@ -120,6 +120,10 @@ def install(app, ns):
             con.execute('INSERT INTO users(id,created_at,webauthn_user_id,recovery_code_hash) VALUES (?,?,?,?)',
                         (uid, ns['utc_iso'](ns['utc_now']()), secrets.token_bytes(32), ns['recovery_code_hash'](code)))
             con.execute('INSERT INTO account_passwords VALUES (?,?,?,?,?)', (uid, login, salt, digest, ns['utc_iso'](ns['utc_now']())))
+            if ns.get('record_trial_registration'):
+                ns['record_trial_registration'](con, uid, payload, 'password')
+            elif payload.get('registrationPurpose') is not None:
+                raise HTTPException(503, 'trial_registration_unavailable')
             response = session(con, uid, {'username':login, 'recoveryCode':code})
         return response
 
@@ -212,3 +216,4 @@ def install(app, ns):
             con.execute('DELETE FROM challenges WHERE user_id=?', (uid,))
             response = session(con, uid, {'username':name})
         return response
+

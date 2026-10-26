@@ -90,11 +90,14 @@ def user_record(con, row):
     user_id = row['id']
     number = con.execute('SELECT MIN(number) FROM managed_users WHERE account_id=? AND deleted_at IS NULL', (user_id,)).fetchone()[0]
     access = [dict(r) for r in con.execute('SELECT vpn_username AS username, server, created_at AS createdAt FROM vpn_access WHERE user_id=?', (user_id,))]
-    return {'id': user_id, 'number': number, 'createdAt': row['created_at'], 'access': access,
+    result = {'id': user_id, 'number': number, 'createdAt': row['created_at'], 'access': access,
             'passkeys': con.execute('SELECT count(*) FROM passkeys WHERE user_id=?', (user_id,)).fetchone()[0],
             'windowsDevices': con.execute("SELECT count(*) FROM windows_devices WHERE user_id=? AND state!='deleted'", (user_id,)).fetchone()[0],
             'isAdmin': bool(con.execute('SELECT 1 FROM admin_roles WHERE user_id=?', (user_id,)).fetchone()),
             'protected': bool(con.execute('SELECT 1 FROM vpn_imports WHERE user_id=? AND protected=1', (user_id,)).fetchone())}
+    if CTX.get('account_admin_metadata'):
+        result.update(CTX['account_admin_metadata'](con, user_id))
+    return result
 
 
 SESSION_STORE = '/var/lib/tolf-api/admin-vpn-sessions.json'
@@ -631,16 +634,22 @@ def install(app, context):
             CONTROL_LOCK.release()
 
     @app.get('/admin/users')
-    def users(request: Request, q: str = '', offset: int = 0, limit: int = 50):
+    def users(request: Request, q: str = '', offset: int = 0, limit: int = 50, trial: str = 'all'):
         require_admin(request)
         if offset < 0 or not 1 <= limit <= 100 or len(q) > 128:
             raise HTTPException(400, 'invalid_query')
+        if trial not in ('all','only'):
+            raise HTTPException(400, 'invalid_trial_filter')
         q = q.strip()
         # instr searches literally: %, _ and SQL-looking input have no special meaning.
         where = '''WHERE (?='' OR instr(lower(u.id),lower(?))>0
             OR EXISTS(SELECT 1 FROM managed_users m WHERE m.account_id=u.id AND (CAST(m.number AS TEXT)=? OR instr(lower(COALESCE(m.vpn_username,'')),lower(?))>0))
             OR EXISTS(SELECT 1 FROM windows_devices w WHERE w.user_id=u.id AND w.state!='deleted' AND instr(lower(w.name),lower(?))>0))'''
         args = (q,q,q,q,q)
+        if trial == 'only':
+            if not CTX.get('account_admin_metadata'):
+                raise HTTPException(503, 'account_management_unavailable')
+            where += ' AND EXISTS(SELECT 1 FROM account_trial_registrations tr WHERE tr.user_id=u.id)'
         with db() as con:
             total = con.execute('SELECT count(*) FROM users u '+where,args).fetchone()[0]
             rows = con.execute('SELECT u.id,u.created_at FROM users u '+where+' ORDER BY u.created_at DESC,u.id LIMIT ? OFFSET ?', args+(limit,offset)).fetchall()
@@ -686,3 +695,4 @@ if __name__ == '__main__':
     if sys.argv[1:] != ['--collect-sessions']:
         raise SystemExit('Use --collect-sessions')
     collect_sessions()
+

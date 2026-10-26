@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="styles.css?v=save-file-20260921">
   <script defer src="../passkey-session-label.20260917-1.js"></script>
   <script defer src="../js/webauthn.js?v=auth-20260917-1"></script>
-  <script defer src="auth.js?v=recovery-from-signup-20260928-1"></script>
+  <script defer src="auth.js?v=trial-registration-20261026-1"></script>
 <link rel="stylesheet" href="../tolf-buttons.20260917-3.css">
 <script defer src="../tolf-wordmark.20260917-3.js"></script>
 <link rel="stylesheet" href="../tolf-header.20260919-1.css?v=languages-2">
@@ -61,6 +61,7 @@
       </section>
 
       <section id="signupPanel" class="panel hidden">
+        <p id="trialRegistrationNotice" class="field-help" hidden></p>
         <h1 data-i18n="signupTitle">Create your TOLF account</h1>
         <p class="description" data-i18n="signupDescription">Create a Passkey for this device. You will receive a recovery code after registration.</p>
         <div class="auth-methods hidden" data-method-selector role="group" aria-label="Sign-in method">
@@ -138,5 +139,6 @@
   </main>
 </body>
 </html>
+
 
 

@@ -75,6 +75,10 @@ async function accessPanel(target){
  }catch(e){if(own===epoch&&allowed){if(e.status===401||e.status===403)fail(e);else status.textContent=t('accessUnavailable');}}
 }
 
+Object.assign(copy.ru,{"trialAccount":"Пробная регистрация","trialPaid":"Пробный · есть оплата","trialDate":"Пробная регистрация оформлена","accountKind":"Тип аккаунта","allAccounts":"Все аккаунты","trialOnly":"Пробные регистрации","deleteAccount":"Удалить пользователя","deleteWarning":"Будут удалены вход в аккаунт, Passkey и пароль, отозван VPN-доступ на устройствах. История платежей сохраняется.","deleteNumber":"Для подтверждения введите номер аккаунта","deleteConfirm":"Удалить аккаунт","deleteWorking":"Удаляем…","deleteDone":"Аккаунт удалён.","deletePending":"Аккаунт удалён. Отзыв VPN-доступа на серверах ещё завершается автоматически.","deleteUnknown":"Результат запроса пока неизвестен. Проверьте состояние удаления.","deleteCheck":"Проверить удаление","deleteRunning":"Удаление выполняется. Проверьте состояние через несколько секунд.","deleteFailed":"Удаление не завершено. Часть доступа могла быть отозвана. Повторите удаление.","deleteRetry":"Повторить удаление","deleteBlocked":"Удаление недоступно: аккаунт защищён, является администратором или его данные изменились.","deleteProtected":"Удаление администратора или защищённого аккаунта здесь недоступно.","account.delete.requested":"Запрошено удаление аккаунта","account.delete.completed":"Аккаунт удалён","account.delete.failed":"Удаление аккаунта не завершено"});
+Object.assign(copy.en,{"trialAccount":"Trial registration","trialPaid":"Trial · paid traffic","trialDate":"Trial registered","accountKind":"Account type","allAccounts":"All accounts","trialOnly":"Trial registrations","deleteAccount":"Delete user","deleteWarning":"Sign-in credentials, Passkeys and the account password will be removed; device VPN access will be revoked. Payment history is retained.","deleteNumber":"To confirm, enter the account number","deleteConfirm":"Delete account","deleteWorking":"Deleting…","deleteDone":"Account deleted.","deletePending":"Account deleted. VPN revocation on the servers is still completing automatically.","deleteUnknown":"The request outcome is not yet known. Check deletion status.","deleteCheck":"Check deletion","deleteRunning":"Deletion is running. Check again in a few seconds.","deleteFailed":"Deletion is incomplete. Some access may already be revoked. Retry deletion.","deleteRetry":"Retry deletion","deleteBlocked":"Deletion is unavailable: the account is protected, is an administrator, or its details have changed.","deleteProtected":"Administrator and protected accounts cannot be deleted here.","account.delete.requested":"Account deletion requested","account.delete.completed":"Account deleted","account.delete.failed":"Account deletion incomplete"});
+Object.assign(copy.lv,{"trialAccount":"Izmēģinājuma reģistrācija","trialPaid":"Izmēģinājums · apmaksāti dati","trialDate":"Izmēģinājuma reģistrācijas datums","accountKind":"Konta veids","allAccounts":"Visi konti","trialOnly":"Izmēģinājuma reģistrācijas","deleteAccount":"Dzēst lietotāju","deleteWarning":"Tiks dzēsti piekļuves dati, Passkey un konta parole, un atsaukta ierīču VPN piekļuve. Maksājumu vēsture saglabājas.","deleteNumber":"Apstiprināšanai ievadiet konta numuru","deleteConfirm":"Dzēst kontu","deleteWorking":"Dzēšana…","deleteDone":"Konts dzēsts.","deletePending":"Konts dzēsts. VPN piekļuves atsaukšana serveros vēl tiek pabeigta automātiski.","deleteUnknown":"Pieprasījuma rezultāts vēl nav zināms. Pārbaudiet dzēšanas statusu.","deleteCheck":"Pārbaudīt dzēšanu","deleteRunning":"Notiek dzēšana. Pārbaudiet vēlreiz pēc dažām sekundēm.","deleteFailed":"Dzēšana nav pabeigta. Daļa piekļuves jau var būt atsaukta. Atkārtojiet dzēšanu.","deleteRetry":"Atkārtot dzēšanu","deleteBlocked":"Dzēšana nav pieejama: konts ir aizsargāts, ir administrators vai tā dati ir mainījušies.","deleteProtected":"Administratoru un aizsargātus kontus šeit nevar dzēst.","account.delete.requested":"Pieprasīta konta dzēšana","account.delete.completed":"Konts dzēsts","account.delete.failed":"Konta dzēšana nav pabeigta"});
+
 const $ = id => document.getElementById(id);
 let lang;
 try { lang=localStorage.getItem('tolfLanguage'); } catch {}
@@ -83,6 +87,9 @@ Object.assign(copy.ru,{protocol:'Тип соединения',protocolUnavailabl
 Object.assign(copy.en,{protocol:'Connection type',protocolUnavailable:'Could not retrieve sessions for protocol',us:'New York',trafficNote:'Counters cover the current session. IKEv2 counters may reset on rekey. Combined usage is shown in Traffic.'});
 Object.assign(copy.lv,{protocol:'Savienojuma veids',protocolUnavailable:'Neizdevās iegūt protokola sesijas',us:'Ņujorka',trafficNote:'Skaitītāji attiecas uz pašreizējo sesiju. IKEv2 skaitītāji var atiestatīties, atjauninot atslēgas. Kopējais patēriņš redzams sadaļā Datu apjoms.'});
 let tab='sessions',offset=0,total=0,epoch=0,detailEpoch=0,allowed=false,hiddenSince=0,trafficPeriod='24h';
+const initialQuery=new URL(location.href).searchParams;
+if(initialQuery.get('tab')==='users')tab='users';
+if($('accountKindFilter'))$('accountKindFilter').value=initialQuery.get('trial')==='only'?'only':'all';
 const t=key=>copy[lang][key]||copy.en[key]||key;
 const node=(tag,text,cls)=>{const el=document.createElement(tag);if(text!==undefined)el.textContent=String(text);if(cls)el.className=cls;return el;};
 const date=value=>{const d=new Date(value);return Number.isNaN(d.valueOf())?'—':d.toLocaleString(lang==='ru'?'ru-RU':lang==='lv'?'lv-LV':'en-GB');};
@@ -183,7 +190,7 @@ function showTraffic(data){
  }
  $('results').append(node('p',t('trafficNoteAdmin'),'admin-muted'));
 }
-function showUsers(data){const body=table(['account','vpn','devices','keys','created','open']);for(const u of data.users){const row=node('tr'),account=node('td',u.number==null?u.id:'#'+u.number);if(u.isAdmin)account.append(node('small',t('administrator')));if(u.protected)account.append(node('small',t('protected')));const access=node('td');if(!u.access.length)access.textContent=t('none');for(const a of u.access){access.append(node('div',a.username),node('small',t(a.server)));}const action=node('td'),button=node('button',t('open'),'secondary');button.type='button';button.addEventListener('click',()=>detail(u.id));action.append(button);row.append(account,access,node('td',u.windowsDevices),node('td',u.passkeys),node('td',date(u.createdAt)),action);body.append(row);}}
+function showUsers(data){const body=table(['account','vpn','devices','keys','created','open']);for(const u of data.users){const row=node('tr'),account=node('td',u.number==null?u.id:'#'+u.number);if(u.trialRegistration)account.append(node('small',t(u.trialRegistration.hasPaidTraffic?'trialPaid':'trialAccount'),'admin-trial-badge'));if(u.isAdmin)account.append(node('small',t('administrator')));if(u.protected)account.append(node('small',t('protected')));const access=node('td');if(!u.access.length)access.textContent=t('none');for(const a of u.access){access.append(node('div',a.username),node('small',t(a.server)));}const action=node('td'),button=node('button',t('open'),'secondary');button.type='button';button.addEventListener('click',()=>detail(u.id));action.append(button);row.append(account,access,node('td',u.windowsDevices),node('td',u.passkeys),node('td',date(u.createdAt)),action);body.append(row);}}
 function showRegistry(data){const body=table(['account','vpn','linked','provisioned','source']);for(const u of data.records){const row=node('tr');row.append(node('td','#'+u.number),node('td',u.username||'—'),node('td',u.accountId||t('unlinked'),'admin-id'),node('td',u.provisioned?t('yes'):t('no')),node('td',u.source||'—'));body.append(row);}}
 function showAudit(data){const body=table(['when','actor','action','target']);for(const e of data.events){const row=node('tr');row.append(node('td',date(e.createdAt)),node('td',e.actor==='root'?t('root'):e.actor),node('td',e.action==='admin.grant'?t('grant'):e.action==='admin.revoke'?t('revoke'):t(e.action)),node('td',e.target,'admin-id'));body.append(row);}}
 function duration(value){if(value==null)return '—';const n=Math.floor(value);return Math.floor(n/3600)+':'+String(Math.floor(n/60)%60).padStart(2,'0')+':'+String(n%60).padStart(2,'0');}
@@ -244,16 +251,61 @@ function showSessions(data){
  $('results').append(node('p',t('trafficNote'),'admin-muted'));
 }
 async function load(){if(!allowed)return;const own=++epoch;detailEpoch++;$('detail').hidden=true;$('detailContent').replaceChildren();$('results').replaceChildren();$('status').textContent=t('loading');$('pagination').hidden=true;$('searchForm').hidden=tab!=='users';$('inventoryNote').textContent=t(tab==='sessions'?'sessionNote':tab==='traffic'?'trafficNoteAdmin':tab==='limits'?'limitsNote':'inventoryNote');document.querySelectorAll('[data-tab]').forEach(el=>el.setAttribute('aria-pressed',String(el.dataset.tab===tab)));
- try{const query=new URLSearchParams({offset:String(offset),limit:'50'});if(tab==='users')query.set('q',$('search').value.trim());const path=tab==='limits'?'traffic-policy':tab==='traffic'?'vpn-status?period='+encodeURIComponent(trafficPeriod):tab+(['audit','sessions'].includes(tab)?'':'?'+query);const data=await api(path);if(own!==epoch||!allowed)return;$('status').textContent='';if(tab==='sessions'){showSessions(data);return;}if(tab==='traffic'){showTraffic(data);return;}if(tab==='limits'){showPolicies(data);return;}total=tab==='audit'?data.events.length:data.total;if(!total){$('results').append(node('p',t('empty')));return;}if(tab==='users')showUsers(data);else if(tab==='registry')showRegistry(data);else showAudit(data);$('pageLabel').textContent=tab==='audit'?t('total')+': '+total:(offset+1)+'–'+Math.min(offset+50,total)+' '+t('of')+' '+total;$('pagination').hidden=false;$('previous').hidden=tab==='audit';$('next').hidden=tab==='audit';$('previous').disabled=offset===0;$('next').disabled=offset+50>=total;
+ try{const query=new URLSearchParams({offset:String(offset),limit:'50'});if(tab==='users'){query.set('q',$('search').value.trim());query.set('trial',$('accountKindFilter')?.value||'all');}const path=tab==='limits'?'traffic-policy':tab==='traffic'?'vpn-status?period='+encodeURIComponent(trafficPeriod):tab+(['audit','sessions'].includes(tab)?'':'?'+query);const data=await api(path);if(own!==epoch||!allowed)return;$('status').textContent='';if(tab==='sessions'){showSessions(data);return;}if(tab==='traffic'){showTraffic(data);return;}if(tab==='limits'){showPolicies(data);return;}total=tab==='audit'?data.events.length:data.total;if(!total){$('results').append(node('p',t('empty')));return;}if(tab==='users')showUsers(data);else if(tab==='registry')showRegistry(data);else showAudit(data);$('pageLabel').textContent=tab==='audit'?t('total')+': '+total:(offset+1)+'–'+Math.min(offset+50,total)+' '+t('of')+' '+total;$('pagination').hidden=false;$('previous').hidden=tab==='audit';$('next').hidden=tab==='audit';$('previous').disabled=offset===0;$('next').disabled=offset+50>=total;
  }catch(e){if(own===epoch)fail(e);}}
-async function detail(id){const own=++detailEpoch;$('detail').hidden=true;$('detailContent').replaceChildren();try{const u=await api('users/'+encodeURIComponent(id));if(own!==detailEpoch||!allowed)return;$('detailTitle').textContent=t('account')+' '+(u.number==null?u.id:'#'+u.number);const content=$('detailContent');content.append(node('p',t('accountId')+': '+u.id,'admin-id'),node('p',t('names')+': '+(u.passkeyNames.filter(Boolean).join(', ')||t('none'))),node('h3',t('devices')));if(!u.devices.length)content.append(node('p',t('none')));for(const d of u.devices){const box=node('div',undefined,'admin-device');box.append(node('strong',d.name),node('p',t(d.server)+' · '+(d.username||'—')),node('p',t('deviceState')+': '+t(d.state),'admin-muted'));content.append(box);}if(testAccess&&u.id==='0888048c-ac6e-44d2-8aed-9857aa31e9ed')accessPanel(content);$('detail').hidden=false;$('detail').scrollIntoView({block:'nearest'});}catch(e){if(own===detailEpoch)fail(e);}}
+
+function accountActions(u,content,own){
+ if(u.trialRegistration)content.prepend(node('p',t(u.trialRegistration.hasPaidTraffic?'trialPaid':'trialAccount')+' · '+date(u.trialRegistration.registeredAt),'admin-trial-badge'));
+ if(!u.deletion)return;
+ if(!u.deletion.allowed){content.append(node('p',t('deleteProtected'),'admin-muted'));return;}
+ const box=node('section',undefined,'admin-delete-box'),message=node('p');message.setAttribute('role','status');
+ const label=node('label',t('deleteNumber')+' #'+u.number),input=node('input');input.type='text';input.inputMode='numeric';input.autocomplete='off';input.setAttribute('aria-label',t('deleteNumber'));label.append(input);
+ const button=node('button',t('deleteConfirm')+' #'+u.number,'admin-delete-button');button.type='button';button.disabled=true;
+ box.append(node('h3',t('deleteAccount')),node('p',t('deleteWarning')),label,button,message);content.append(box);
+ const requestId=crypto.randomUUID();let sent=false,busy=false;
+ const current=()=>own===detailEpoch&&allowed;
+ const enable=()=>{button.disabled=busy||input.value.trim()!==String(u.number);};
+ input.addEventListener('input',enable);
+ async function complete(result){
+  if(!current())return;
+  if(result.deleted){if(total===offset+1&&offset)offset=Math.max(0,offset-50);await load();if(allowed)$('status').textContent=t(result.vpnRevocationPending?'deletePending':'deleteDone');return true;}
+  if(result.status==='failed'){sent=false;message.textContent=t('deleteFailed');button.textContent=t('deleteRetry');return false;}
+  message.textContent=t('deleteRunning');button.textContent=t('deleteCheck');return false;
+ }
+ button.addEventListener('click',async()=>{
+  if(!current()||busy||input.value.trim()!==String(u.number))return;
+  busy=true;enable();message.textContent=t('deleteWorking');
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),30000);
+  try{
+   if(sent){const status=await api('account-deletions/'+requestId);await complete(status);}
+   else{
+    sent=true;
+    const response=await fetch('https://api.tolf.is/admin/users/'+encodeURIComponent(u.id)+'/delete',{method:'POST',credentials:'include',cache:'no-store',signal:controller.signal,headers:{'Content-Type':'application/json'},body:JSON.stringify({requestId,confirm:'DELETE',number:u.number})});
+    const result=await response.json();
+    if(!response.ok){const error=new Error();error.status=response.status;throw error;}
+    await complete(result);
+   }
+  }catch(e){
+   if(!current())return;
+   if(e.status===401||e.status===403){fail(e);return;}
+   if(e.status===400||e.status===409){sent=false;message.textContent=t('deleteBlocked');button.textContent=t('deleteConfirm');}
+   else if(e.status===502){sent=false;message.textContent=t('deleteFailed');button.textContent=t('deleteRetry');}
+   else if(e.status===404){sent=false;message.textContent=t('deleteUnknown');button.textContent=t('deleteRetry');}
+   else{message.textContent=t('deleteUnknown');button.textContent=t('deleteCheck');}
+  }finally{clearTimeout(timer);busy=false;if(current())enable();}
+ });
+}
+
+async function detail(id){const own=++detailEpoch;$('detail').hidden=true;$('detailContent').replaceChildren();try{const u=await api('users/'+encodeURIComponent(id));if(own!==detailEpoch||!allowed)return;$('detailTitle').textContent=t('account')+' '+(u.number==null?u.id:'#'+u.number);const content=$('detailContent');content.append(node('p',t('accountId')+': '+u.id,'admin-id'),node('p',t('names')+': '+(u.passkeyNames.filter(Boolean).join(', ')||t('none'))),node('h3',t('devices')));if(!u.devices.length)content.append(node('p',t('none')));for(const d of u.devices){const box=node('div',undefined,'admin-device');box.append(node('strong',d.name),node('p',t(d.server)+' · '+(d.username||'—')),node('p',t('deviceState')+': '+t(d.state),'admin-muted'));content.append(box);}accountActions(u,content,own);if(testAccess&&u.id==='0888048c-ac6e-44d2-8aed-9857aa31e9ed')accessPanel(content);$('detail').hidden=false;$('detail').scrollIntoView({block:'nearest'});}catch(e){if(own===detailEpoch)fail(e);}}
 async function start(){const own=++epoch;try{const me=await api('me');if(own!==epoch)return;if(!me.isAdmin){gate(t('denied')+(me.number==null?'':' '+t('accountNumber')+': '+me.number+'.'));return;}allowed=true;testAccess=me.features?.testAccess===true;testControl=me.features?.testDisconnect===true;const hasSessions=me.features?.sessions===true;$('sessionsTab').hidden=!hasSessions;if(tab==='sessions'&&!hasSessions)tab='users';$('gate').hidden=true;$('workspace').hidden=false;await load();}catch(e){if(own!==epoch)return;gate(e.status===401?t('auth'):e.status===404||e.status===503?t('unavailable'):t('error'));}}
 document.querySelectorAll('[data-lang]').forEach(el=>el.addEventListener('click',()=>{lang=el.dataset.lang;try{localStorage.setItem('tolfLanguage',lang);}catch{}language();clearData();start();}));
 document.querySelectorAll('[data-tab]').forEach(el=>el.addEventListener('click',()=>{tab=el.dataset.tab;offset=0;load();}));
+$('accountKindFilter')?.addEventListener('change',()=>{offset=0;load();});
 $('searchForm').addEventListener('submit',e=>{e.preventDefault();offset=0;load();});$('refresh').addEventListener('click',()=>{clearData();start();});$('previous').addEventListener('click',()=>{offset=Math.max(0,offset-50);load();});$('next').addEventListener('click',()=>{offset+=50;load();});$('closeDetail').addEventListener('click',()=>{detailEpoch++;$('detail').hidden=true;$('detailContent').replaceChildren();});
 // Revalidate the session after returning from another tab, including sign-out elsewhere.
 document.addEventListener('visibilitychange',()=>{if(document.hidden){hiddenSince=Date.now();clearData();}else if(hiddenSince){hiddenSince=0;start();}});
 window.addEventListener('pageshow',e=>{if(e.persisted){clearData();start();}});
 language();$('gateMessage').textContent=t('loading');start();
 })();
+
 

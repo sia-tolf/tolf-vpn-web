@@ -266,7 +266,8 @@ const backHome = document.getElementById("backHome");
 const url = new URL(window.location.href);
 const requestedLang = url.searchParams.get("lang");
 const requestedMode = url.searchParams.get("mode");
-const next = ["vpn", "quick", "account"].includes(url.searchParams.get("next")) ? url.searchParams.get("next") : "home";
+const trialRegistration = url.searchParams.get("purpose") === "trial";
+const next = ["vpn", "quick", "account", "billing"].includes(url.searchParams.get("next")) ? url.searchParams.get("next") : "home";
 
 function storedLanguage() {
   try { return localStorage.getItem("tolf-language") || localStorage.getItem("tolfLanguage"); } catch { return null; }
@@ -291,17 +292,21 @@ function text(key) {
 }
 
 function destination() {
-  const base = next === "account" ? "https://vpn.tolf.is/account/" : next === "quick" ? "https://vpn.tolf.is/quick/" : next === "vpn" ? "https://vpn.tolf.is/" : "https://tolf.is/";
+  const base = next === "billing" ? "https://vpn.tolf.is/billing/" : next === "account" ? "https://vpn.tolf.is/account/" : next === "quick" ? "https://vpn.tolf.is/quick/" : next === "vpn" ? "https://vpn.tolf.is/" : "https://tolf.is/";
   const target = new URL(base);
   target.searchParams.set("lang", language);
   target.searchParams.set("ui", "20260918-1");
+  if (trialRegistration && next === "billing") target.searchParams.set("trial", "1");
   return target.toString();
 }
 
+const trialNoticeCopy = {ru:"Пробная регистрация. Пробный пакет 1 ГБ пока не выдаётся.",en:"Trial registration. The 1 GB trial package is not available yet.",lv:"Izmēģinājuma reģistrācija. 1 GB izmēģinājuma paka vēl nav pieejama."};
 function setLanguage(nextLanguage) {
   if (!["en", "ru", "lv"].includes(nextLanguage)) return;
   language = nextLanguage;
   document.documentElement.lang = language;
+  const trialNotice = document.getElementById("trialRegistrationNotice");
+  if (trialNotice) { trialNotice.hidden = !trialRegistration; trialNotice.textContent = trialNoticeCopy[language]; }
   try {
     localStorage.setItem("tolf-language", language);
     localStorage.setItem("tolfLanguage", language);
@@ -491,7 +496,8 @@ signupButton.addEventListener("click", async () => {
       method: "POST",
       body: JSON.stringify({
         challengeId: begin.challengeId,
-        credential: serializeCredential(credential)
+        credential: serializeCredential(credential),
+        ...(trialRegistration ? {registrationPurpose:"trial"} : {})
       })
     });
 
@@ -656,6 +662,7 @@ for (const [formId, prefix, action, message] of [
     const name = nameInput.value.toLowerCase();
     const value = input.value;
     const payload = {username:name, password:value};
+    if (action === "register" && trialRegistration) payload.registrationPurpose = "trial";
     if (action === 'recover') {
       payload.recoveryCode = recoveryCode.value.trim().toUpperCase();
       if (!payload.recoveryCode) { setMessage(message,text('recoveryRequired'),'error'); recoveryCode.focus(); return; }
@@ -689,4 +696,5 @@ checkPasswordCapability();
 alreadyAuthenticated().then(authenticated => {
   if (authenticated && currentMode !== "recover") window.location.replace(destination());
 });
+
 

@@ -6,7 +6,10 @@
     en:{title:'Website visits',back:'Back',period:'Period',today:'Today',week:'7 days',month:'30 days',quarter:'90 days',refresh:'Refresh',views:'Page views',visits:'Recognised visits',browsers:'Recognised browsers',returning:'Returning browsers',limits:'Page views do not require a persistent identifier. Visits and returning browsers are recognised only with permission. These are not counts of people. Known bots, admin pages and your known accounts are excluded. Blockers may reduce the counts. Daily rows use UTC.',excludeTitle:'Your visits',excludeNote:'Administrator accounts and your two known accounts are excluded. The browser marker also excludes visits after signing out.',exclude:'Exclude this browser',copyExclude:'Link for my other browser',daily:'By day',pages:'Pages',sources:'Referrers',date:'Date (UTC)',page:'Page',source:'Source',direct:'Direct and internal visits',empty:'No visits in this period yet.',loading:'Loading…',denied:'Sign in with an administrator account on the website, then return here.',error:'Could not load statistics. Try refreshing.',started:'Collection started: ',last:'Last counted page view: ',excluded:'This browser is excluded, including after sign-out.',notExcluded:'The browser marker has not been saved yet.',storageError:'This browser does not allow saving the marker. Your signed-in accounts are still excluded.',copied:'Link copied. Open it in another browser you own to exclude its visits.',noCopy:'Link: '},
     lv:{title:'Vietnes apmeklējumi',back:'Atpakaļ',period:'Periods',today:'Šodien',week:'7 dienas',month:'30 dienas',quarter:'90 dienas',refresh:'Atjaunināt',views:'Lapu skatījumi',visits:'Atpazīti apmeklējumi',browsers:'Atpazīti pārlūki',returning:'Atkārtoti pārlūki',limits:'Lapu skatījumiem nav vajadzīgs pastāvīgs identifikators. Apmeklējumus un atkārtotus pārlūkus atpazīstam tikai ar atļauju. Tas nav cilvēku skaits. Zināmie roboti, administrēšanas lapas un jūsu zināmie konti ir izslēgti. Bloķētāji var samazināt rādītājus. Dienu tabulā izmantots UTC.',excludeTitle:'Jūsu apmeklējumi',excludeNote:'Administratoru konti un jūsu divi zināmie konti netiek ieskaitīti. Pārlūka atzīme izslēdz arī apmeklējumus pēc izrakstīšanās.',exclude:'Neieskaitīt šo pārlūku',copyExclude:'Saite manam citam pārlūkam',daily:'Pa dienām',pages:'Lapas',sources:'Pāreju avoti',date:'Datums (UTC)',page:'Lapa',source:'Avots',direct:'Tiešie un iekšējie apmeklējumi',empty:'Šajā periodā vēl nav apmeklējumu.',loading:'Ielāde…',denied:'Vietnē pierakstieties ar administratora kontu un atgriezieties šeit.',error:'Neizdevās ielādēt statistiku. Mēģiniet atjaunināt.',started:'Uzskaite sākta: ',last:'Pēdējais ieskaitītais skatījums: ',excluded:'Šis pārlūks netiek ieskaitīts arī pēc izrakstīšanās.',notExcluded:'Pārlūka atzīme vēl nav saglabāta.',storageError:'Pārlūks neļauj saglabāt atzīmi. Jūsu kontu apmeklējumi joprojām ir izslēgti.',copied:'Saite nokopēta. Atveriet to citā savā pārlūkā, lai izslēgtu tā apmeklējumus.',noCopy:'Saite: '}
   };
-  let lang = new URL(location.href).searchParams.get('lang'), data = null, generation = 0;
+Object.assign(copy.ru,{"trialsTitle":"Пробные регистрации","trialAccounts":"действующих аккаунтов с пробной регистрацией","trialsNote":"Всего по базе аккаунтов, независимо от выбранного периода просмотров. Отметка появляется только после явного оформления и сохраняется после покупки трафика.","trialAccountsLink":"Открыть список"});
+Object.assign(copy.en,{"trialsTitle":"Trial registrations","trialAccounts":"active accounts with a trial registration","trialsNote":"Account database total, independent of the page-view period. Only explicit registrations are marked; the mark stays after a traffic purchase.","trialAccountsLink":"Open accounts"});
+Object.assign(copy.lv,{"trialsTitle":"Izmēģinājuma reģistrācijas","trialAccounts":"aktīvi konti ar izmēģinājuma reģistrāciju","trialsNote":"Kopā kontu datubāzē neatkarīgi no skatījumu perioda. Atzīmi saņem tikai apzināti noformētas reģistrācijas; tā saglabājas pēc datu iegādes.","trialAccountsLink":"Atvērt kontu sarakstu"});
+  let lang = new URL(location.href).searchParams.get('lang'), data = null, trialData = null, generation = 0;
   if (!copy[lang]) { try { lang = localStorage.getItem('tolfLanguage'); } catch {} }
   if (!copy[lang]) lang = /^ru/i.test(navigator.language) ? 'ru' : /^lv/i.test(navigator.language) ? 'lv' : 'en';
   const t = key => copy[lang][key], number = value => new Intl.NumberFormat(lang).format(value || 0);
@@ -29,6 +32,8 @@
     el.append(head,body); target.appendChild(el);
   }
   function render() {
+    $('trialCount').textContent = number(trialData?.activeTrialAccounts);
+    $('trialAccountsLink').href = '/admin/?tab=users&trial=only&lang=' + lang;
     $('views').textContent = number(data.totals.views); $('visits').textContent = number(data.totals.visits); $('browsers').textContent = number(data.totals.browsers); $('returning').textContent = number(data.totals.returningBrowsers);
     $('started').textContent = t('started') + new Date(data.startedAt * 1000).toLocaleString(lang);
     $('latest').textContent = data.totals.lastViewAt ? t('last') + new Date(data.totals.lastViewAt * 1000).toLocaleString(lang) : t('empty');
@@ -45,11 +50,12 @@
     const version = ++generation, controller = new AbortController(), timeout = setTimeout(() => controller.abort(), 10000);
     $('message').textContent = t('loading'); $('refresh').disabled = true;
     try {
-      const response = await fetch(API + '/admin/analytics?days=' + $('period').value,{credentials:'include',cache:'no-store',signal:controller.signal});
+      const [response, trialsResponse] = await Promise.all([fetch(API + '/admin/analytics?days=' + $('period').value,{credentials:'include',cache:'no-store',signal:controller.signal}),fetch(API + '/admin/trial-registrations',{credentials:'include',cache:'no-store',signal:controller.signal})]);
       if (version !== generation) return;
       if (!response.ok) { const error = new Error(); error.status = response.status; throw error; }
-      const next = await response.json(); if (version !== generation) return;
-      data = next; mark(); $('workspace').hidden = false; $('message').textContent = ''; render();
+      if (!trialsResponse.ok) { const error = new Error(); error.status = trialsResponse.status; throw error; }
+      const [next, trials] = await Promise.all([response.json(),trialsResponse.json()]); if (version !== generation) return;
+      data = next; trialData = trials; mark(); $('workspace').hidden = false; $('message').textContent = ''; render();
     } catch (error) { if (version === generation) { $('message').textContent = t([401,403].includes(error.status) ? 'denied' : 'error'); if ([401,403].includes(error.status)) $('workspace').hidden = true; } }
     finally { clearTimeout(timeout); if (version === generation) $('refresh').disabled = false; }
   }
@@ -59,3 +65,4 @@
   document.querySelectorAll('[data-language]').forEach(el => el.addEventListener('click',() => { lang = el.dataset.language; try { localStorage.setItem('tolfLanguage',lang); } catch {} language(); }));
   language(); load();
 })();
+
