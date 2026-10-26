@@ -1,0 +1,9 @@
+[Unit]
+Description=Refresh TOLF trial access policy
+[Timer]
+OnBootSec=15
+OnUnitInactiveSec=15
+AccuracySec=1
+Unit=tolf-trial-budget-sync.service
+[Install]
+WantedBy=timers.target

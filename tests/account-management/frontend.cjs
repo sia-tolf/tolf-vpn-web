@@ -35,14 +35,5 @@ async function adminScenario({networkLoss=false}={}){
  content.replaceChildren();context.fixture.accountActions({...user,deletion:{allowed:false,reason:'protected'}},content,1);assert(!walk(content).some(x=>x.className==='admin-delete-button'));
  elements.accountKindFilter.value='only';await context.fixture.load();assert(calls.some(x=>x.url.includes('trial=only')));
 }
-async function trialScenario(authenticated){
- let selected=false;const card=new Element(),events={},calls=[],navigation=[];const doc={documentElement:{lang:'ru'},querySelector:()=>card,createElement:t=>new Element(t),getElementById:()=>({click(){selected=true;events['tolf:billing-render']?.();}})};
- const context={document:doc,location:{href:'https://vpn.tolf.is/billing/?trial=1',assign:url=>navigation.push(url)},URL,AbortController,setTimeout,clearTimeout,TolfBillingVolume:{isTrial:()=>selected},addEventListener:(k,v)=>events[k]=v,fetch:async(url,options)=>{calls.push({url,options});if(!authenticated)return{ok:false,status:401};return{ok:true,json:async()=>({trialRegistration:options.method==='POST'?{registeredAt:'2026-10-26T00:00:00Z'}:null,trialPackageIssuance:false})};}};context.window=context;
- vm.runInNewContext(fs.readFileSync(path.join(root,'billing/trial-registration.js'),'utf8'),context);await flush();
- const panel=card.children[0],button=walk(panel).find(x=>x.tagName==='button');assert.equal(panel.hidden,false);assert.match(panel.children[0].textContent,/пока не выдаётся/);
- await button.click();await flush();
- if(authenticated){assert.equal(button.hidden,true);assert.match(panel.children[0].textContent,/оформлена/);const post=calls.find(x=>x.options.method==='POST');assert.deepEqual(JSON.parse(post.options.body),{confirm:'TRIAL_REGISTRATION'});}
- else{assert.equal(navigation.length,1);const url=new URL(navigation[0],'https://vpn.tolf.is');assert.equal(url.searchParams.get('purpose'),'trial');assert.equal(url.searchParams.get('mode'),'signup');}
- assert(calls.every(x=>x.url==='https://api.tolf.is/account/trial-registration'));
-}
-(async()=>{await adminScenario();await adminScenario({networkLoss:true});await trialScenario(false);await trialScenario(true);console.log('Account UI: typed-number deletion, target isolation, protected users, lost-response checks, trial filtering and explicit trial registration passed.');})().catch(error=>{console.error(error);process.exitCode=1;});
+(async()=>{await adminScenario();await adminScenario({networkLoss:true});require('node:child_process').execFileSync(process.execPath,[path.join(root,'tests/trials/frontend.cjs')],{stdio:'inherit'});console.log('Account UI: typed-number deletion, target isolation, protected users, lost-response checks, trial filtering and explicit trial registration passed.');})().catch(error=>{console.error(error);process.exitCode=1;});
+

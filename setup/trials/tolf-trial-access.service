@@ -1,0 +1,11 @@
+[Unit]
+Description=TOLF explicit trial forwarding gate
+After=network.target
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /usr/local/lib/tolf-trials/tolf_trial_access.py --watch
+Restart=always
+RestartSec=3
+Environment=PYTHONUNBUFFERED=1
+[Install]
+WantedBy=multi-user.target

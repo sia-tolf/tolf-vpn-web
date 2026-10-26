@@ -26,6 +26,7 @@ BASE = 'https://stargate.montonio.com/api'
 HOSTS = {'stargate.montonio.com', 'checkout.montonio.com', 'gateway.montonio.com'}
 DB = None
 AUTH = None
+TRIAL_WALLET = None
 
 def config():
     try:
@@ -159,6 +160,8 @@ def usage(c, uid):
     return totals(c, '1970-01-01T00:00:00+00:00').get(uid, 0)
 
 def grant_credit(c,row):
+    if TRIAL_WALLET is not None and c.execute('SELECT 1 FROM trial_traffic_packages WHERE user_id=?',(row['user_id'],)).fetchone():
+        TRIAL_WALLET.balance(c,row['user_id'],usage(c,row['user_id']))
     if c.execute('SELECT 1 FROM live_payment_credits WHERE reference=?',(row['reference'],)).fetchone():return
     if not c.execute('SELECT 1 FROM live_payment_usage_baselines WHERE user_id=?',(row['user_id'],)).fetchone():
         c.execute('INSERT INTO live_payment_usage_baselines VALUES(?,?,?)',(row['user_id'],usage(c,row['user_id']),time.time()))
@@ -303,10 +306,13 @@ def install(app,ns):
     def account(request:Request):
         uid=admin(request)
         with database() as c:
+            has_trial = TRIAL_WALLET is not None and c.execute('SELECT 1 FROM trial_traffic_packages WHERE user_id=?',(uid,)).fetchone()
+            if has_trial:c.execute('BEGIN IMMEDIATE')
             rows=c.execute('SELECT * FROM live_payment_orders WHERE user_id=? ORDER BY created DESC LIMIT 30',(uid,)).fetchall()
             credits=c.execute('SELECT COALESCE(SUM(bytes),0) FROM live_payment_credits WHERE user_id=?',(uid,)).fetchone()[0]
             baseline=c.execute('SELECT usage_bytes FROM live_payment_usage_baselines WHERE user_id=?',(uid,)).fetchone()
-            used=max(0,usage(c,uid)-baseline[0]) if baseline else 0
+            wallet=TRIAL_WALLET.balance(c,uid) if has_trial else None
+            used=wallet['paidUsedBytes'] if wallet else max(0,usage(c,uid)-baseline[0]) if baseline else 0
         return JSONResponse({'mode':'live','balanceBytes':max(0,credits-used),'creditedBytes':credits,'usedBytes':used,'orders':[public(r) for r in rows]},headers=HEADERS)
 
     @app.post('/billing/live/orders')
@@ -352,3 +358,4 @@ def install(app,ns):
             if not row:raise HTTPException(404,'unknown_live_order')
             match(data,row)
         return JSONResponse({'reference':row['reference'],'mode':'live'},headers=HEADERS)
+

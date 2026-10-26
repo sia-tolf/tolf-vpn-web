@@ -300,7 +300,7 @@ function destination() {
   return target.toString();
 }
 
-const trialNoticeCopy = {ru:"Пробная регистрация. Пробный пакет 1 ГБ пока не выдаётся.",en:"Trial registration. The 1 GB trial package is not available yet.",lv:"Izmēģinājuma reģistrācija. 1 GB izmēģinājuma paka vēl nav pieejama."};
+const trialNoticeCopy = {ru:"После регистрации начислим 1 ГБ пробного трафика бесплатно, один раз на аккаунт.",en:"Registration includes 1 GB of free trial traffic, once per account.",lv:"Pēc reģistrācijas piešķirsim 1 GB bezmaksas izmēģinājuma datu, vienu reizi katram kontam."};
 function setLanguage(nextLanguage) {
   if (!["en", "ru", "lv"].includes(nextLanguage)) return;
   language = nextLanguage;
@@ -696,5 +696,6 @@ checkPasswordCapability();
 alreadyAuthenticated().then(authenticated => {
   if (authenticated && currentMode !== "recover") window.location.replace(destination());
 });
+
 
 

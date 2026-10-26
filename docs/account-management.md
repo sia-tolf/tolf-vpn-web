@@ -7,8 +7,9 @@ written in the same transaction as successful registration. An existing signed-i
 account can explicitly record this choice at `/account/trial-registration`.
 Ordinary registrations and unsuccessful attempts are not marked or backfilled.
 
-The 1 GB trial package remains unavailable. Registration records intent only; it
-does not credit traffic or enable quota enforcement. The interface states this.
+The 1 GB trial package is granted once per account on explicit trial signup or
+through `/account/trial-package`. Free and paid balances remain separate.
+See `trial-packages.md` for accounting and the trial-only forwarding gate.
 The trial marker persists after a paid purchase and is shown alongside an indication of paid traffic.
 Active trial accounts can be filtered in Administration → Accounts, and their total
 is shown on the Visits page independently of its page-view period. The registration
@@ -45,3 +46,4 @@ validate generated code and tests, then restart only `tolf-api.service`.
 
 Validation: `python -m unittest discover -s tests/account-management -v` in the API
 environment, and `node tests/account-management/frontend.cjs`.
+

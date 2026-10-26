@@ -84,7 +84,7 @@ class Accounts:
         with self.db() as c:
             total = c.execute('SELECT COUNT(*) FROM account_trial_registrations t JOIN users u ON u.id=t.user_id').fetchone()[0]
             daily = [dict(r) for r in c.execute('SELECT substr(t.registered_at,1,10) AS day,COUNT(*) AS registrations FROM account_trial_registrations t JOIN users u ON u.id=t.user_id GROUP BY 1 ORDER BY 1 DESC LIMIT 90')]
-        return {'activeTrialAccounts':total,'daily':daily,'trialPackageIssuance':False}
+        return {'activeTrialAccounts':total,'daily':daily,'trialPackageIssuance':bool(self.ctx.get('trial_wallet'))}
 
     def delete(self, request, target, payload):
         actor = self.admin(request)
@@ -154,7 +154,7 @@ def install(app, context):
         uid = context['authenticated_user_id'](request)
         with accounts.db() as c:
             trial = accounts.metadata(c, uid)['trialRegistration']
-        return JSONResponse({'trialRegistration':trial,'trialPackageIssuance':False}, headers=HEADERS)
+        return JSONResponse({'trialRegistration':trial,'trialPackageIssuance':bool(context.get('trial_wallet'))}, headers=HEADERS)
 
     @app.post('/account/trial-registration')
     def trial_register(request: Request, payload: dict):
@@ -166,7 +166,7 @@ def install(app, context):
             with accounts.db() as c:
                 accounts.record_trial(c, uid, {'registrationPurpose':'trial'}, 'existing_account')
                 trial = accounts.metadata(c, uid)['trialRegistration']
-        return JSONResponse({'trialRegistration':trial,'trialPackageIssuance':False}, headers=HEADERS)
+        return JSONResponse({'trialRegistration':trial,'trialPackageIssuance':bool(context.get('trial_wallet'))}, headers=HEADERS)
 
     @app.get('/admin/trial-registrations')
     def trials(request: Request):
@@ -187,3 +187,4 @@ def install(app, context):
         if not job:
             raise HTTPException(404, 'deletion_not_found')
         return JSONResponse(json.loads(job['result']) if job['state']=='completed' else {'status':job['state'],'deleted':False,'number':job['number']}, headers=HEADERS)
+

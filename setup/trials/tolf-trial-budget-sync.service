@@ -1,0 +1,7 @@
+[Unit]
+Description=Settle TOLF trial balances and deliver trial access policy
+After=network-online.target tolf-api.service
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /usr/local/lib/tolf-trials/tolf_trial_budget_sync.py
+TimeoutStartSec=90
