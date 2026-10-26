@@ -1,0 +1,25 @@
+name: Website statistics checks
+on:
+  push:
+    branches: ['main']
+    paths: ['setup/analytics/**', 'tests/analytics/**', 'js/visits.js', 'css/visits.css', 'admin/visits.*', '.github/workflows/website-statistics.yml']
+  pull_request:
+    paths: ['setup/analytics/**', 'tests/analytics/**', 'js/visits.js', 'css/visits.css', 'admin/visits.*', '.github/workflows/website-statistics.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install fastapi
+      - run: python -m unittest discover -s tests/analytics -p 'test_*.py' -v
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node tests/analytics/frontend.cjs
+      - run: node --check js/visits.js && node --check admin/visits.js

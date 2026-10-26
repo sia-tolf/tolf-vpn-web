@@ -12,7 +12,8 @@
   const get = key => { try { return localStorage.getItem(key); } catch { return null; } };
   const put = (key, value) => { try { localStorage.setItem(key, value); return true; } catch { return false; } };
   const remove = key => { try { localStorage.removeItem(key); } catch {} };
-  const excluded = () => get(EXCLUDE) === '1';
+  let runtimeExcluded = false, exclusionRequested = false;
+  const excluded = () => runtimeExcluded || get(EXCLUDE) === '1';
   const signal = () => navigator.globalPrivacyControl === true || navigator.doNotTrack === '1' || window.doNotTrack === '1';
   const lang = () => ['en','ru','lv'].includes(document.documentElement.lang) ? document.documentElement.lang : 'en';
   const tr = () => text[lang()];
@@ -24,12 +25,14 @@
     else { remove(PREF); remove(BROWSER); }
   } catch { remove(BROWSER); }
   function exclude() {
+    runtimeExcluded = true;
     put(EXCLUDE, '1'); remove(BROWSER); clearTimeout(timer);
     if (panel) panel.hidden = true;
   }
   window.TolfVisits = {exclude, isExcluded:excluded};
   const requested = new URL(location.href);
   if (requested.searchParams.get('analytics') === 'exclude') {
+    exclusionRequested = true;
     exclude(); requested.searchParams.delete('analytics');
     history.replaceState(history.state, '', requested.pathname + requested.search + requested.hash);
   }
@@ -74,6 +77,12 @@
     settings.textContent = t.settings;
   }
   function ready() {
+    if (exclusionRequested) {
+      const note = document.createElement('p'); note.className = 'tolf-visits-exclusion'; note.setAttribute('role','status');
+      const failures = {ru:'Текущий просмотр исключён. Браузер не разрешает сохранить метку для следующих посещений.',en:'This view is excluded. The browser does not allow saving a marker for future visits.',lv:'Šis skatījums ir izslēgts. Pārlūks neļauj saglabāt atzīmi turpmākiem apmeklējumiem.'};
+      note.textContent = get(EXCLUDE) === '1' ? tr().excluded : failures[lang()]; document.body.appendChild(note);
+      setTimeout(() => note.remove(), 8000);
+    }
     if (location.pathname.startsWith('/admin/') || excluded() || signal()) return;
     panel = document.createElement('section'); panel.className = 'tolf-visits-panel'; panel.setAttribute('aria-label', tr().title); panel.hidden = choice !== null;
     panel.innerHTML = '<h2></h2><p></p><div><button type="button" data-allow></button><button type="button" data-basic></button><a></a><button type="button" class="tolf-visits-close" aria-label="Close">×</button></div>';

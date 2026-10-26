@@ -43,6 +43,8 @@ function permitted(storage=new Map()) {storage.set('tolfAnalyticsChoice',JSON.st
   next=browser({storage:b.storage});next.ready();await next.count();assert.equal(next.calls[0].payload.browserId,undefined);
   for(const options of [{dnt:true},{gpc:true},{url:'https://vpn.tolf.is/admin/'},{storage:new Map([['tolfAnalyticsExcluded','1']])}]){b=browser(options);b.ready();await b.count();assert.equal(b.calls.length,0);}
   b=browser({url:'https://vpn.tolf.is/?analytics=exclude&lang=ru'});b.ready();await b.count();assert.equal(b.calls.length,0);assert.equal(b.storage.get('tolfAnalyticsExcluded'),'1');assert.equal(b.history.replaced,'/?lang=ru');
+  assert.match(b.body.children[0].textContent,/исключён/);
+  b=browser({url:'https://vpn.tolf.is/?analytics=exclude',blocked:true});b.ready();await b.count();assert.equal(b.calls.length,0);assert.match(b.body.children[0].textContent,/не разрешает/);
   b=browser({owner:true});b.ready();await b.count();assert.equal(b.storage.get('tolfAnalyticsExcluded'),'1');next=browser({storage:b.storage});next.ready();await next.count();assert.equal(next.calls.length,0);
   b=browser({blocked:true});b.ready();await b.count();assert.equal(b.calls.length,1);assert.equal(b.calls[0].payload.browserId,undefined);
   console.log('Analytics frontend: consent, anonymous counts, returning visits, deduplication, exclusions, DNT/GPC, storage failures and URL stripping passed.');
