@@ -1,5 +1,5 @@
 import tolf_billing_pricing as pricing
-"""Montonio production pilot. Creation and account access require an admin role."""
+"""Montonio production pilot. Creation and account access require an admin role or an explicit payment grant."""
 import hashlib
 import hmac
 import json
@@ -53,6 +53,7 @@ def database():
 def initialize():
     with database() as c:
         c.executescript('''
+        CREATE TABLE IF NOT EXISTS live_payment_access(user_id TEXT PRIMARY KEY,granted_at REAL NOT NULL,granted_by TEXT NOT NULL);
         CREATE TABLE IF NOT EXISTS live_payment_orders(
           reference TEXT PRIMARY KEY, user_id TEXT NOT NULL, request_id TEXT NOT NULL,
           sku TEXT NOT NULL, gb INTEGER NOT NULL, cents INTEGER NOT NULL,
@@ -77,6 +78,15 @@ def admin(request):
             raise HTTPException(403, 'admin_required')
         if not c.execute('SELECT 1 FROM managed_users WHERE account_id=? AND deleted_at IS NULL', (uid,)).fetchone():
             raise HTTPException(403, 'active_account_required')
+    return uid
+
+def payer(request):
+    uid = AUTH(request)
+    with database() as c:
+        permitted = c.execute('SELECT 1 FROM admin_roles WHERE user_id=?',(uid,)).fetchone() or c.execute('SELECT 1 FROM live_payment_access WHERE user_id=?',(uid,)).fetchone()
+        if not permitted:raise HTTPException(403,'payment_access_required')
+        if not c.execute('SELECT 1 FROM managed_users WHERE account_id=? AND deleted_at IS NULL',(uid,)).fetchone():
+            raise HTTPException(403,'active_account_required')
     return uid
 
 def provider(method, path, payload=None):
@@ -287,7 +297,7 @@ def install(app,ns):
     @app.get('/billing/live/capabilities')
     def capabilities(request:Request):
         try:
-            admin(request)
+            payer(request)
         except HTTPException as e:
             if e.status_code in (401,403):
                 return JSONResponse({'mode':'preview','enabled':False},headers=HEADERS)
@@ -296,15 +306,15 @@ def install(app,ns):
             config();ready=True
         except HTTPException:
             ready=False
-        return JSONResponse({'mode':'live','enabled':ready,'livePayments':ready,'adminOnly':True,'termsVersion':TERMS,'pricingVersion':pricing.VERSION,'accountingExport':False},headers=HEADERS)
+        return JSONResponse({'mode':'live','enabled':ready,'livePayments':ready,'adminOnly':False,'restrictedAccess':True,'termsVersion':TERMS,'pricingVersion':pricing.VERSION,'accountingExport':False},headers=HEADERS)
 
     @app.get('/billing/live/methods')
     def get_methods(request:Request):
-        admin(request);return JSONResponse(methods(),headers=HEADERS)
+        payer(request);return JSONResponse(methods(),headers=HEADERS)
 
     @app.get('/billing/live/account')
     def account(request:Request):
-        uid=admin(request)
+        uid=payer(request)
         with database() as c:
             has_trial = TRIAL_WALLET is not None and c.execute('SELECT 1 FROM trial_traffic_packages WHERE user_id=?',(uid,)).fetchone()
             if has_trial:c.execute('BEGIN IMMEDIATE')
@@ -317,12 +327,12 @@ def install(app,ns):
 
     @app.post('/billing/live/orders')
     async def create_order(request:Request):
-        uid=admin(request);config();p=await payload(request)
+        uid=payer(request);config();p=await payload(request)
         return JSONResponse(await run_in_threadpool(create,uid,p),headers=HEADERS)
 
     @app.get('/billing/live/orders/{reference}')
     def get_order(reference:str,request:Request,resume:bool=False):
-        uid=admin(request);config()
+        uid=payer(request);config()
         with database() as c:
             c.execute('BEGIN IMMEDIATE')
             row=c.execute('SELECT * FROM live_payment_orders WHERE reference=? AND user_id=?',(reference,uid)).fetchone()
@@ -352,7 +362,7 @@ def install(app,ns):
 
     @app.post('/billing/live/validate-return')
     async def validate_return(request:Request):
-        uid=admin(request);p=await payload(request);data=notification(p.get('orderToken'))
+        uid=payer(request);p=await payload(request);data=notification(p.get('orderToken'))
         with database() as c:
             row=c.execute('SELECT * FROM live_payment_orders WHERE reference=? AND user_id=?',(data.get('merchantReference'),uid)).fetchone()
             if not row:raise HTTPException(404,'unknown_live_order')
