@@ -20,6 +20,19 @@
   let transport = "";
   saveChoice("tolfTransport", "");
   window.getVpnTransport = () => transport;
+  window.clearVpnTransportChoice = () => {
+    if (!transport) return;
+    if (transport === 'ikev2') {
+      ikev2Server = selectedServer();
+      saveChoice('tolfIkev2Server', ikev2Server || '');
+    }
+    transport = '';
+    saveChoice('tolfTransport', '');
+    selectionToken++; sessionRequestToken++;
+    policyLoaded = false; policyBusy = false; sessionConnected = false;
+    renderMode(); render();
+    window.dispatchEvent(new Event('vpntransportchange'));
+  };
   let ikev2Server = readChoice("tolfIkev2Server");
   let anyConnectMode = "auto";
   let supportedModes = ["auto","ru","lv","yt"];
@@ -449,3 +462,4 @@
 
   render();
 })();
+

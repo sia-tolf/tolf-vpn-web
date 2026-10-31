@@ -1,101 +1,111 @@
-// Show the simple onboarding entry only after the matching server API is installed.
+// Choosing a setup mode never starts setup or requires a protocol/client.
 (() => {
- let enabled=false;
- const manualLink=document.getElementById('manualSetupLink');
- function openManual(){
-  if(currentPlatform!=='ios'&&!window.getVpnTransport?.())return;
-  document.body.classList.add('manual-setup-open');
-  manualLink.setAttribute('aria-expanded','true');
-  noticeOpen=false;
-  renderNotice();
+ 'use strict';
+ const $=id=>document.getElementById(id);
+ const card=$('quickSetupCard'),manual=$('vpnCard'),panel=$('quickModePanel');
+ const quickTab=$('quickSetupLink'),manualTab=$('manualSetupLink'),start=$('quickStartLink');
+ const notice=$('quickWindowsNotice');
+ if(!card||!manual||!panel||!quickTab||!manualTab||!start||!notice)return;
+ let enabled=false,mode=null,noticeOpen=false;
+ const protocolChoices=new Map();let activeContext=null,restoring=false;
+ const contextKey=()=>mode?currentPlatform+':'+mode:null;
+ function restoreProtocol(){
+  const next=contextKey();if(next===activeContext)return;
+  activeContext=next;const choice=protocolChoices.get(next)||'';
+  restoring=true;
+  try{
+   if(choice)$(choice==='ikev2'?'vpnTransportIkev2':'vpnTransportAnyConnect').click();
+   else window.clearVpnTransportChoice?.();
+  }finally{restoring=false;}
  }
- manualLink.setAttribute('aria-controls','vpnCard');
- manualLink.setAttribute('aria-expanded','false');
- manualLink.addEventListener('click',openManual);
- function handleHash(){if(location.hash==='#vpnCard'||location.hash==='#signedOutCard')openManual();}
- window.addEventListener('hashchange',handleHash);
- const quickLink=document.getElementById('quickSetupLink');
- const notice=document.createElement('aside');
- notice.className='windows-setup-notice hidden';
- notice.id='quickWindowsNotice'; notice.setAttribute('role','status');
- quickLink.parentElement.after(notice);
- const copy={
-  ru:['Быстрая настройка Windows','На компьютере Windows откройте vpn.tolf.is.','Выберите Windows, нужный протокол и нажмите «Быстрая настройка».','Настройки устанавливаются на том компьютере, на котором открыт сайт.'],
-  en:['Windows quick setup','Open vpn.tolf.is on your Windows computer.','Select Windows, the desired protocol and “Quick setup”.','The settings are installed on the computer where you opened the site.'],
-  lv:['Windows ātrā iestatīšana','Windows datorā atveriet vpn.tolf.is.','Atlasiet Windows, vajadzīgo protokolu un “Ātrā iestatīšana”.','Iestatījumi tiek instalēti datorā, kurā ir atvērta vietne.']
+ const words={
+  ru:{label:'Способ настройки',quick:'Быстрая настройка',manual:'Ручная установка',start:'Начать быструю настройку',help:'Выберите протокол для быстрой настройки этого устройства. Точка входа будет предложена на следующем шаге.',title:'Быстрая настройка ',open:'Откройте vpn.tolf.is на устройстве ',choose:'Выберите «Быстрая настройка», затем протокол и нажмите «Начать быструю настройку».',device:'Настройки устанавливаются на том устройстве, на котором открыт сайт.'},
+  en:{label:'Setup method',quick:'Quick setup',manual:'Manual setup',start:'Start quick setup',help:'Choose a protocol for quick setup of this device. An entry point will be suggested in the next step.',title:'Quick setup for ',open:'Open vpn.tolf.is on your ',choose:'Choose Quick setup, select a protocol and press Start quick setup.',device:'Settings are installed on the device where the website is open.'},
+  lv:{label:'Iestatīšanas veids',quick:'Ātrā iestatīšana',manual:'Manuālā iestatīšana',start:'Sākt ātro iestatīšanu',help:'Izvēlieties protokolu šīs ierīces ātrajai iestatīšanai. Ieejas punkts tiks ieteikts nākamajā solī.',title:'Ātrā iestatīšana: ',open:'Atveriet vpn.tolf.is ierīcē ',choose:'Izvēlieties Ātrā iestatīšana, atlasiet protokolu un nospiediet Sākt ātro iestatīšanu.',device:'Iestatījumi tiek instalēti ierīcē, kurā vietne ir atvērta.'}
  };
- let noticeOpen=false;
- function nativeWindows(){
+ const tr=()=>words[document.documentElement.lang]||words.en;
+ function nativePlatform(){
   const ua=navigator.userAgent||'';
-  return /Windows NT/i.test(ua)&&!/Android|iPhone|iPad|iPod|Windows Phone/i.test(ua)
-   &&!(/Mac/i.test(navigator.platform||'')&&navigator.maxTouchPoints>1);
+  if(/Android/i.test(ua))return 'android';
+  if(/Windows NT/i.test(ua)&&!/Windows Phone/i.test(ua))return 'windows';
+  if(/iPhone|iPad|iPod/i.test(ua)||(/Mac/i.test(navigator.platform||'')&&navigator.maxTouchPoints>1))return 'ios';
+  return null;
  }
  function renderNotice(){
   notice.classList.toggle('hidden',!noticeOpen);
   if(!noticeOpen)return;
-  const language=document.documentElement.lang;
-  const mobileCopy={
-   ru:['Быстрая настройка '+(currentPlatform==='android'?'Android':'iPhone / iPad'),
-       'Откройте vpn.tolf.is на устройстве '+(currentPlatform==='android'?'Android':'iPhone или iPad')+'.',
-       'Выберите нужный протокол и нажмите «Быстрая настройка». Если нужен клиент, установите его в шагах настройки.',
-       'Быстрая настройка выполняется на том устройстве, на котором открыт сайт.'],
-   en:['Quick setup for '+(currentPlatform==='android'?'Android':'iPhone / iPad'),
-       'Open vpn.tolf.is on your '+(currentPlatform==='android'?'Android device':'iPhone or iPad')+'.',
-       'Select the desired protocol and “Quick setup”. If a client is required, install it in the setup steps.',
-       'Quick setup runs on the device where the website is open.'],
-   lv:[(currentPlatform==='android'?'Android':'iPhone / iPad')+' ātrā iestatīšana',
-       'Atveriet vpn.tolf.is '+(currentPlatform==='android'?'Android ierīcē':'iPhone vai iPad')+'.',
-       'Atlasiet vajadzīgo protokolu un nospiediet “Ātrā iestatīšana”. Ja nepieciešams klients, instalējiet to iestatīšanas soļos.',
-       'Ātrā iestatīšana notiek ierīcē, kurā atvērta vietne.']
-  };
-  const words=currentPlatform==='windows'?(copy[language]||copy.en):(mobileCopy[language]||mobileCopy.en);
-  const title=document.createElement('strong');title.textContent=words[0];
+  const c=tr(),device=currentPlatform==='windows'?'Windows':currentPlatform==='android'?'Android':'iPhone / iPad';
+  const title=document.createElement('strong');title.textContent=c.title+device;
   const steps=document.createElement('ol');
-  for(const word of words.slice(1)){const li=document.createElement('li');li.textContent=word;steps.append(li);}
+  for(const text of [c.open+device+'.',c.choose,c.device]){const li=document.createElement('li');li.textContent=text;steps.append(li);}
   notice.replaceChildren(title,steps);
  }
- // A reload starts with no protocol, even if the previous URL targeted manual setup.
- document.body.classList.remove('manual-setup-open');
- if(location.hash==='#vpnCard'||location.hash==='#signedOutCard')
-  history.replaceState(history.state,'',location.pathname+location.search);
- quickLink.addEventListener('click',event=>{
-  document.body.classList.remove('manual-setup-open');
-  manualLink.setAttribute('aria-expanded','false');
-  if(location.hash==='#vpnCard'||location.hash==='#signedOutCard')
-   history.replaceState(history.state,'',location.pathname+location.search);
-  const transport=window.getVpnTransport?.()||'ikev2';
-  const ua=navigator.userAgent||'';
-  const nativePlatform=/Android/i.test(ua)?'android':nativeWindows()?'windows':'ios';
-  if(currentPlatform!==nativePlatform){
+ function render(){
+  card.classList.toggle('hidden',!enabled||(typeof vpnInvitation!=='undefined'&&Boolean(vpnInvitation)));
+  document.body.dataset.vpnSetupMode=mode||'';
+  document.body.classList.toggle('manual-setup-open',mode==='manual');
+  panel.hidden=mode!=='quick';
+  manual.setAttribute('aria-hidden',String(mode!=='manual'));
+  for(const [value,button] of [['quick',quickTab],['manual',manualTab]]){
+   const selected=value===mode;
+   button.setAttribute('aria-selected',String(selected));
+   button.setAttribute('aria-disabled','false');button.disabled=false;
+   button.tabIndex=selected||!mode&&value==='quick'?0:-1;
+  }
+  manualTab.setAttribute('aria-expanded',String(mode==='manual'));
+  $('vpnSetupModes').setAttribute('aria-label',tr().label);
+  quickTab.textContent=tr().quick;manualTab.textContent=tr().manual;
+  start.textContent=tr().start;$('quickSetupHelp').textContent=tr().help;
+  const protocol=window.getVpnTransport?.()||'';
+  start.setAttribute('aria-disabled',String(!protocol));
+  if(protocol)start.href='/quick/?protocol='+encodeURIComponent(protocol);else start.removeAttribute('href');
+  renderNotice();
+ }
+ function select(next){
+  if(!['quick','manual'].includes(next))return;
+  mode=next;noticeOpen=false;
+  restoreProtocol();
+  if(location.hash==='#vpnCard'||location.hash==='#signedOutCard')history.replaceState(history.state,'',location.pathname+location.search);
+  render();window.dispatchEvent(new Event('tolf:setup-mode-change'));
+ }
+ window.tolfSetupMode={get:()=>mode,select};
+ // Keep both modes in the same My VPN surface, preserving all original controls.
+ $('vpnPageTools').before(manual);
+ quickTab.addEventListener('click',()=>select('quick'));
+ manualTab.addEventListener('click',()=>select('manual'));
+ $('vpnSetupModes').addEventListener('keydown',event=>{
+  if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+  event.preventDefault();
+  const next=event.key==='Home'?'quick':event.key==='End'?'manual':mode==='quick'?'manual':'quick';
+  select(next);(next==='quick'?quickTab:manualTab).focus();
+ });
+ start.addEventListener('click',event=>{
+  const protocol=window.getVpnTransport?.()||'';
+  if(mode!=='quick'||!protocol){event.preventDefault();document.querySelector('#vpnProtocolDropdown button')?.focus();return;}
+  if(currentPlatform!==nativePlatform()){
    event.preventDefault();noticeOpen=true;renderNotice();return;
   }
-  const url=new URL(quickLink.href,location.href);
+  const url=new URL(start.href,location.href);
   url.searchParams.set('platform',currentPlatform);
-  url.searchParams.set('v','windows-platform-20261014');
-  // One-use confirmation for this navigation, never a remembered installation.
+  url.searchParams.set('v','setup-modes-20261031');
   try{
    sessionStorage.removeItem('quickClientHandoff');
-   if(transport==='anyconnect'&&window.isCiscoClientConfirmed?.(currentPlatform))
+   if(protocol==='anyconnect'&&window.isCiscoClientConfirmed?.(currentPlatform))
     sessionStorage.setItem('quickClientHandoff',JSON.stringify({platform:currentPlatform,createdAt:Date.now()}));
   }catch{}
-  quickLink.href=url.href;noticeOpen=false;renderNotice();
+  start.href=url.href;noticeOpen=false;renderNotice();
  });
- window.addEventListener('vpnplatformchange',()=>{noticeOpen=false;renderNotice();});
- window.addEventListener('vpntransportchange',()=>{noticeOpen=false;renderNotice();});
- new MutationObserver(renderNotice).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
- const card=document.getElementById('quickSetupCard');
- new MutationObserver(()=>render()).observe(document.getElementById('vpnCard'),{attributes:true,attributeFilter:['class']});
- const invitationCard=document.getElementById('invitationCard');
- function invitation(){return typeof vpnInvitation!=='undefined' && Boolean(vpnInvitation);}
- function render(){
- card.classList.toggle('hidden',!enabled || invitation());
- document.getElementById('manualSetupLink').href=document.getElementById('vpnCard').classList.contains('hidden')?'#signedOutCard':'#vpnCard';
-}
- new MutationObserver(render).observe(invitationCard,{attributes:true,attributeFilter:['class']});
+ function fromHash(){if(location.hash==='#vpnCard'||location.hash==='#signedOutCard')select('manual');}
+ window.addEventListener('hashchange',fromHash);
+ window.addEventListener('vpnplatformchange',()=>{restoreProtocol();noticeOpen=false;render();});
+ window.addEventListener('vpntransportchange',()=>{
+  if(!restoring&&contextKey())protocolChoices.set(contextKey(),window.getVpnTransport?.()||'');
+  noticeOpen=false;render();
+ });
+ new MutationObserver(render).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
+ new MutationObserver(render).observe(manual,{attributes:true,attributeFilter:['class']});
+ new MutationObserver(render).observe($('invitationCard'),{attributes:true,attributeFilter:['class']});
  fetch('https://api.tolf.is/quick-setup/capabilities',{credentials:'omit',cache:'no-store'})
- .then(r=>r.ok?r.json():null).then(data=>{
-  enabled=data?.version===1;
-  render();
- }).catch(render);
+  .then(r=>r.ok?r.json():null).then(data=>{enabled=data?.version===1;render();}).catch(()=>render());
+ render();fromHash();
 })();
-

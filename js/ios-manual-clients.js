@@ -14,6 +14,11 @@
   for (const item of [...parent.children]) if (!item.classList.contains('card-topline')) shared.append(item);
   const menu=document.createElement('div'); menu.id='iosManualClients'; menu.hidden=true;
   const panels={};
+  const symbols={
+    native:'<path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/>',
+    cisco:'<rect x="8" y="2" width="8" height="6" rx="1"/><rect x="2" y="16" width="7" height="6" rx="1"/><rect x="15" y="16" width="7" height="6" rx="1"/><path d="M12 8v4M5.5 16v-4h13v4"/>',
+    shadowrocket:'<path d="M4.5 16.5c-1.5 1.3-2 5-2 5s3.7-.5 5-2M12 15l-3-3a22 22 0 0 1 3-6c3-4 9-4 9-4s0 6-4 9a22 22 0 0 1-5 4Z"/><path d="M9 12H4s.5-3 3-4h4M12 15v5s3-.5 4-3v-4"/><circle cx="16" cy="7" r="1.5"/>'
+  };
   for (const [id,title,description] of [['native','native','nativeHelp'],['cisco','Cisco Secure Client','ciscoHelp'],['shadowrocket','Shadowrocket','srHelp']]) {
     const section=document.createElement('section');section.className='ios-manual-client';section.dataset.iosClient=id;
     const button=document.createElement('button');button.type='button';button.className='ios-manual-client-head';button.dataset.iosClientSelect=id;
@@ -21,7 +26,9 @@
     const text=document.createElement('span');text.className='ios-manual-client-copy';
     const name=document.createElement('strong');name.dataset.srText=title;const help=document.createElement('small');help.dataset.srText=description;
     const arrow=document.createElement('span');arrow.className='ios-manual-chevron';arrow.setAttribute('aria-hidden','true');
-    text.append(name,help);button.append(text,arrow);
+    const symbol=document.createElement('span');symbol.className='ios-manual-client-symbol';symbol.setAttribute('aria-hidden','true');
+    symbol.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+symbols[id]+'</svg>';
+    text.append(name,help);button.append(symbol,text,arrow);
     const body=document.createElement('div');body.id='iosManualBody-'+id;body.className='ios-manual-client-body';body.hidden=true;
     section.append(button,body);menu.append(section);panels[id]={button,body};
     button.addEventListener('click',()=>selectClient(client===id?null:id));
@@ -64,6 +71,9 @@
   let client=null, account=null, login=null, loaded=false, loading=false, busy=false, epoch=0;
   let savedCredentials=null, configFile=null, manualFile=false, messageKey='';
   const active=()=>currentPlatform==='ios'&&document.body.classList.contains('manual-setup-open');
+  function restoreClientProtocol(){
+    if(active()&&client){const expected=client==='native'?'ikev2':'anyconnect';if(window.getVpnTransport?.()!==expected)$(expected==='ikev2'?'vpnTransportIkev2':'vpnTransportAnyConnect').click();}
+  }
   function announce(key,error=false) {messageKey=key;$('srMessage').textContent=key?tr(key):'';$('srMessage').classList.toggle('error',error);}
   function selectClient(id) {
     client=id;
@@ -167,8 +177,9 @@
   for(const button of sr.querySelectorAll('[data-sr-toggle]'))button.addEventListener('click',()=>{const field=$(button.dataset.srToggle);field.type=field.type==='password'?'text':'password';render();});
   window.addEventListener('tolf:account-state',event=>setAccount(event.detail));
   window.addEventListener('tolf:vpn-state',render);
-  window.addEventListener('vpnplatformchange',()=>{if(currentPlatform!=='ios'){$('srInstalled').checked=false;configFile=null;}render();window.dispatchEvent(new Event('tolf:manual-client-change'));});
+  window.addEventListener('vpnplatformchange',()=>{if(currentPlatform!=='ios'){$('srInstalled').checked=false;configFile=null;}restoreClientProtocol();render();window.dispatchEvent(new Event('tolf:manual-client-change'));});
   window.addEventListener('vpntransportchange',render);
+  window.addEventListener('tolf:setup-mode-change',()=>{restoreClientProtocol();render();window.dispatchEvent(new Event('tolf:manual-client-change'));});
   window.addEventListener('pagehide',()=>{epoch++;clearSecrets();loaded=false;login=null;loading=false;busy=false;render();});
   window.addEventListener('pageshow',event=>{if(event.persisted&&account&&active()&&client==='shadowrocket')loadPasswordAccount();});
   new MutationObserver(render).observe(document.body,{attributes:true,attributeFilter:['class']});

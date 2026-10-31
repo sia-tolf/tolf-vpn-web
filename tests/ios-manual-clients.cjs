@@ -11,6 +11,7 @@ async function fixture({existing=false}={}) {
  w.HTMLAnchorElement.prototype.click=function(){if(!this.download)originalClick.call(this);};
  w.setInterval=()=>0;w.setTimeout=fn=>{if(typeof fn==='function')Promise.resolve().then(fn);return 0;};
  w.getVpnTransport=()=>transport;w.setInstallLink=()=>{};
+ w.clearVpnTransportChoice=()=>{if(transport){transport='';d.documentElement.dataset.vpnTransport='';w.dispatchEvent(new w.Event('vpntransportchange'));}};
  let ingress='moscow';w.ocAccess={ingress:()=>({id:ingress}),ingresses:()=>['moscow','riga','us'].map(id=>({id})),selectIngress:id=>{ingress=id;}};
  w.fetch=async()=>({ok:true,json:async()=>({version:1})});
  w.apiRequest=async(path,options={})=>{
@@ -27,7 +28,8 @@ async function fixture({existing=false}={}) {
  await tick();
  return {dom,w,d,calls,files,setLogin:value=>{login=value;},q:id=>d.getElementById(id),async settle(){await tick();await tick();}};
 }
-(async()=>{
+module.exports=fixture;
+if(require.main===module)(async()=>{
  const f=await fixture(),{w,d,q,calls,files}=f;
  d.documentElement.lang='ru';q('manualSetupLink').click();await f.settle();
  assert(d.body.classList.contains('ios-manual-setup'),'iOS manual opens without selecting a protocol');

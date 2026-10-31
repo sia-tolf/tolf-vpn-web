@@ -1,8 +1,8 @@
 name: Shadowrocket setup checks
 on:
   push:
-    branches: ['codex/shadowrocket-setup', 'main']
-    paths: ['index.html', 'js/**', 'css/**', 'setup/password-auth/**', 'setup/shadowrocket/**', 'tests/shadowrocket*', 'tests/ios-manual-clients.cjs', 'tests/password-auth/**', '.github/workflows/shadowrocket-setup.yml']
+    branches: ['codex/shadowrocket-setup', 'codex/vpn-mode-fixes', 'main']
+    paths: ['index.html', 'js/**', 'css/**', 'setup/password-auth/**', 'setup/shadowrocket/**', 'tests/shadowrocket*', 'tests/ios-manual-clients.cjs', 'tests/setup-modes.cjs', 'tests/quick/entry.cjs', 'tests/password-auth/**', '.github/workflows/shadowrocket-setup.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -22,7 +22,7 @@ jobs:
         with:
           node-version: '22'
       - run: npm install --no-save --ignore-scripts jsdom@26.1.0 playwright@1.62.1
-      - run: node tests/shadowrocket-config.cjs && node tests/ios-manual-clients.cjs && node tests/manual-entry.cjs && node tests/cisco-client-install.cjs && node --test tests/routing/test-account-loading.cjs
+      - run: node tests/shadowrocket-config.cjs && node tests/ios-manual-clients.cjs && node tests/setup-modes.cjs && node tests/quick/entry.cjs && node tests/manual-entry.cjs && node tests/cisco-client-install.cjs && node --test tests/routing/test-account-loading.cjs
       - run: npx playwright install --with-deps chromium
       - run: node tests/shadowrocket-browser.cjs
       - uses: actions/upload-artifact@v4

@@ -40,8 +40,8 @@ const c={window,currentPlatform:'ios',navigator:{userAgent:'iPhone',platform:'iP
 localStorage:{getItem:k=>memory.get(k),setItem:(k,v)=>memory.set(k,v)},MutationObserver:class{observe(){}},Event:class{constructor(type){this.type=type}}};
 vm.createContext(c);vm.runInContext(fs.readFileSync(path.join(root,'js/cisco-client-install.js'),'utf8'),c);
 assert.equal(window.isCiscoClientConfirmed(),false);
-let prevented=false;ids.quickSetupLink.events.click({preventDefault(){prevented=true},stopImmediatePropagation(){}});
-assert.equal(prevented,false,'choose setup before installing the client');assert.equal(ids.manualSetupLink.attributes['aria-disabled'],'false');
+assert.equal(ids.quickSetupLink.events.click,undefined,'client confirmation does not intercept setup-mode selection');
+assert.equal(ids.quickSetupLink.attributes['aria-disabled'],'false');assert.equal(ids.manualSetupLink.attributes['aria-disabled'],'false');
 let check=descendants(ids.ciscoClientInstall).find(n=>n.type==='checkbox');check.checked=true;check.events.change();
 assert(window.isCiscoClientConfirmed('ios'));assert.equal(ids.quickSetupLink.attributes['aria-disabled'],'false');
 c.currentPlatform='android';window.dispatchEvent(new c.Event('vpnplatformchange'));assert.equal(window.isCiscoClientConfirmed('android'),false);

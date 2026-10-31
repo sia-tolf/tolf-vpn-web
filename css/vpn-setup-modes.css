@@ -1,0 +1,93 @@
+/* Setup controls follow the approved screen mockup. Header/billing styles stay scoped out. */
+#quickSetupCard {
+ --setup-page:light-dark(#f4f7fc,#101827);
+ --setup-surface:light-dark(#ffffff,#192437);
+ --setup-soft:light-dark(#edf3fc,#23334c);
+ --setup-text:light-dark(#152944,#edf3fd);
+ --setup-muted:light-dark(#536781,#b8c6db);
+ --setup-line:light-dark(#d8e2ef,#3a4a62);
+ --setup-blue:light-dark(#174f9e,#a3c7ff);
+ --setup-fill:light-dark(#174f9e,#b5d2ff);
+ --setup-on-fill:light-dark(#ffffff,#142a48);
+ --card:var(--setup-surface);--border:var(--setup-line);--text:var(--setup-text);
+ --secondary:var(--setup-muted);--segment-background:var(--setup-soft);
+ --button:var(--setup-fill);--button-text:var(--setup-on-fill);
+ --tolf-card:var(--setup-surface);--tolf-line:var(--setup-line);--tolf-ink:var(--setup-text);
+ --tolf-outline:var(--setup-blue);--tolf-action-text:var(--setup-blue);
+ color:var(--setup-text);background:var(--setup-page);border:1px solid var(--setup-line);border-radius:18px;
+ font-size:15px;line-height:1.5;
+}
+#quickSetupCard [hidden] { display:none!important; }
+#quickSetupCard > .card-content { padding:22px 24px 26px; }
+#quickSetupCard > .card-content > h2 { margin:0 0 12px;text-align:center;font-size:24px;font-weight:500;color:var(--setup-text); }
+#quickSetupCard > .card-content > .card-description { margin:0 0 18px;color:var(--setup-muted); }
+#quickSetupCard #myVpnPlatforms { margin:0 0 14px; }
+#quickSetupCard #myVpnPlatforms .platform-switcher {
+ height:auto;padding:4px;gap:4px;border:0;border-radius:10px;background:var(--setup-soft);
+}
+#quickSetupCard #myVpnPlatforms .platform-button {
+ height:auto;min-height:44px;max-height:none;padding:9px 6px;border:0;border-radius:7px;
+ background:transparent;color:var(--setup-muted);font-size:15px;font-weight:400;
+}
+#quickSetupCard #myVpnPlatforms .platform-button.active {
+ background:var(--setup-surface);color:var(--setup-blue);font-weight:500;box-shadow:0 1px 3px light-dark(#18345412,#00000020);
+}
+#quickSetupCard .vpn-setup-tabs { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;padding:4px;margin:0 0 22px;background:var(--setup-soft);border-radius:10px; }
+#quickSetupCard .vpn-setup-tab {
+ display:flex;align-items:center;justify-content:center;min-width:0;min-height:44px;padding:9px 6px;
+ border:0;border-radius:7px;background:transparent;color:var(--setup-muted);
+ font:inherit;font-weight:400;line-height:1.4;text-align:center;white-space:normal;
+ cursor:pointer;box-shadow:none;opacity:1;
+}
+#quickSetupCard .vpn-setup-tab[aria-selected="true"] { background:var(--setup-fill);color:var(--setup-on-fill);font-weight:500; }
+#quickSetupCard .vpn-setup-mode-panel { margin:0; }
+#quickSetupCard .vpn-protocol-field { margin:0 0 14px; }
+#quickSetupCard .vpn-compact-label { color:var(--setup-text);font-size:14px;font-weight:500; }
+#quickSetupCard .vpn-dropdown-button { height:auto;min-height:46px;padding:10px 12px;border-radius:8px;font-size:16px;font-weight:400;background:var(--setup-surface); }
+#quickSetupCard .vpn-dropdown.open .vpn-dropdown-button { border-radius:8px 8px 0 0; }
+#quickSetupCard .vpn-dropdown-menu { background:var(--setup-surface); }
+#quickSetupCard .vpn-protocol-explanation { margin:0 0 14px; }
+#quickSetupCard #quickSetupHelp { color:var(--setup-muted);font-size:14px; }
+#quickSetupCard #quickStartLink { display:flex;width:100%;margin-top:18px; }
+#quickSetupCard #vpnCard { margin:0;padding:0;width:100%; }
+#quickSetupCard #vpnCard > .card { padding:0;margin:0;background:transparent;border:0;border-radius:0;box-shadow:none; }
+#quickSetupCard #vpnCard > .card > .card-content { padding:0; }
+#quickSetupCard #vpnCard .card-topline { margin:0;gap:0;min-height:0; }
+#quickSetupCard #vpnCard .card-topline > h2 { display:none; }
+#quickSetupCard #vpnCard.manual-protocol-pending #iosManualShared > :not(#manualProtocolField) { display:none!important; }
+#quickSetupCard #manualProtocolField { margin-bottom:18px; }
+#quickSetupCard #iosManualClients { gap:12px;margin-top:0; }
+#quickSetupCard .ios-manual-client { border-color:var(--setup-line);border-radius:12px;background:var(--setup-surface); }
+#quickSetupCard .ios-manual-client-head { min-height:76px;padding:16px;gap:12px;border-radius:12px;color:var(--setup-text); }
+#quickSetupCard .ios-manual-client-copy strong { font-size:17px;font-weight:500; }
+#quickSetupCard .ios-manual-client-copy small { color:var(--setup-muted);font-size:13px;font-weight:400; }
+#quickSetupCard .ios-manual-client-symbol { display:inline-flex;align-items:center;justify-content:center;flex:0 0 38px;width:38px;height:38px;border-radius:10px;background:var(--setup-soft);color:var(--setup-blue); }
+#quickSetupCard .ios-manual-client-symbol svg { width:21px;height:21px; }
+#quickSetupCard .ios-manual-chevron { color:var(--setup-muted); }
+#quickSetupCard .ios-manual-client-body { padding:18px;border-color:var(--setup-line); }
+#quickSetupCard :is(button.primary,button.secondary,a.button-link,.oc-action) {
+ box-sizing:border-box;min-height:44px;height:auto;padding:10px 15px;border:1px solid var(--setup-line);border-radius:8px;
+ font:inherit;font-size:15px;font-weight:500;line-height:1.4;text-align:center;text-decoration:none;
+ color:var(--setup-blue);background:var(--setup-surface);box-shadow:none;white-space:normal;
+}
+#quickSetupCard :is(button.primary,a.primary) { color:var(--setup-on-fill);background:var(--setup-fill);border-color:var(--setup-fill); }
+#quickSetupCard :is(button.primary,a.primary):hover:not(:disabled):not([aria-disabled="true"]) { background:var(--setup-fill);border-color:var(--setup-fill);filter:brightness(.96); }
+#quickSetupCard :is(button.secondary,a.secondary):hover:not(:disabled):not([aria-disabled="true"]) { background:var(--setup-soft);border-color:var(--setup-line); }
+#quickSetupCard :is(button.primary,a.primary):is(:disabled,[aria-disabled="true"]) { color:var(--setup-on-fill);background:var(--setup-fill);border-color:var(--setup-fill);opacity:.48; }
+#quickSetupCard #shadowrocketSetup .sr-actions { gap:10px;align-items:center;margin-top:18px; }
+#quickSetupCard #shadowrocketSetup .sr-actions > .primary { width:100%; }
+#quickSetupCard #shadowrocketSetup .sr-field input { min-height:46px;border-radius:8px; }
+#quickSetupCard #shadowrocketSetup .sr-password-row button { min-height:46px; }
+#quickSetupCard #shadowrocketSetup h3 { font-size:18px;font-weight:500; }
+#quickSetupCard #shadowrocketSetup .sr-note { color:var(--setup-muted); }
+#quickSetupCard .vpn-page-tools { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:22px;padding-top:18px;border-top:1px solid var(--setup-line); }
+#quickSetupCard .vpn-page-tools > .connection-page-action { min-width:0;margin:0; }
+#quickSetupCard .vpn-page-tools .button-link { display:flex;align-items:center;justify-content:center;width:100%;height:100%;margin:0; }
+@media(max-width:540px) {
+ #quickSetupCard > .card-content { padding:18px 13px 21px; }
+ #quickSetupCard .vpn-setup-tab,#quickSetupCard #myVpnPlatforms .platform-button { font-size:14px; }
+ #quickSetupCard .ios-manual-client-head { padding:13px;gap:9px; }
+ #quickSetupCard .ios-manual-client-copy strong { font-size:16px; }
+ #quickSetupCard .ios-manual-client-body { padding:14px; }
+ #quickSetupCard .vpn-page-tools { grid-template-columns:minmax(0,1fr); }
+}

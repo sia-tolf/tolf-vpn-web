@@ -62,13 +62,13 @@
   <script defer src="js/location.js?v=manual-entry-20261020"></script>
   <script defer src="js/windows.js?v=manual-entry-20261020"></script>
   <script defer src="js/invitations.js?v=account-page-20260921"></script>
-  <script defer src="js/cisco-client-install.js?v=ios-manual-clients-20261031-2"></script>
-  <script defer src="js/quick-entry.js?v=ios-manual-clients-20261031-2"></script>
+  <script defer src="js/cisco-client-install.js?v=setup-modes-20261031-1"></script>
+  <script defer src="js/quick-entry.js?v=setup-modes-20261031-1"></script>
   <script defer src="js/measurement-link.js?v=billing-preview-20261020"></script>
   <script defer src="js/app.js?v=calm-layout-20260926"></script>
   <script defer src="js/admin-entry.js?v=header-account-20261004-9"></script>
-  <script defer src="js/transport-selector.js?v=platform-protocol-copy-20261016"></script>
-  <script defer src="js/vpn-compact-selectors.js?v=ios-manual-clients-20261031-2"></script>
+  <script defer src="js/transport-selector.js?v=setup-modes-20261031-1"></script>
+  <script defer src="js/vpn-compact-selectors.js?v=setup-modes-20261031-1"></script>
   <script defer src="js/windows-dropdowns.js?v=20261007-1"></script>
   <link rel="stylesheet" href="css/windows-dropdowns.css?v=20261007-1">
 <script defer src="/js/openconnect-windows-setup.js?v=ny-moscow-ru-20261024"></script>
@@ -123,7 +123,8 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
 <link rel="stylesheet" href="/css/visits.css?v=20261026-2"><script defer src="/js/visits.js?v=20261026-2"></script>
 <link rel="stylesheet" href="css/ios-manual-clients.css?v=20261031-1">
 <script defer src="js/shadowrocket-config.js?v=20261031-1"></script>
-<script defer src="js/ios-manual-clients.js?v=20261031-1"></script></head>
+<script defer src="js/ios-manual-clients.js?v=setup-modes-20261031-1"></script>
+<link rel="stylesheet" href="css/vpn-setup-modes.css?v=20261031-1"></head>
 
 <body>
   <main class="page">
@@ -241,15 +242,22 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
             </button>
             <button id="platformWindows" class="platform-button" type="button" aria-pressed="false" aria-disabled="true" disabled><svg class="platform-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 3h9v8H2zM13 3h9v8h-9zM2 13h9v8H2zM13 13h9v8h-9z"/></svg><span>Windows</span></button>
           </div></div>
-        <div id="myVpnProtocolField"></div>
-        <div class="vpn-protocol-explanation">
-          <p class="hidden" data-protocol-summary="ikev2" data-i18n="ikev2Summary">IKEv2 — built-in VPN on iPhone, iPad and Windows. Android uses the strongSwan VPN Client app.</p>
-          <p class="hidden" data-protocol-summary="anyconnect" data-i18n="anyConnectSummary">AnyConnect — VPN through Cisco Secure Client, using TLS/HTTPS.</p>
+        <div id="vpnSetupModes" class="vpn-setup-tabs" role="tablist" aria-label="Setup method">
+          <button id="quickSetupLink" class="vpn-setup-tab" type="button" role="tab" aria-selected="false" aria-controls="quickModePanel" data-i18n="quickSetupTitle">Quick setup</button>
+          <button id="manualSetupLink" class="vpn-setup-tab" type="button" role="tab" aria-selected="false" aria-controls="vpnCard" tabindex="-1" data-i18n="manualSetupTitle">Manual setup</button>
         </div>
-        <p id="quickProtocolNote" class="card-description hidden" data-i18n="quickIkev2Only">Quick setup currently supports IKEv2. For AnyConnect, use manual setup.</p>
-        <div class="vpn-setup-actions">
-          <a id="quickSetupLink" class="button-link primary quick-setup-button" href="/quick/" data-i18n="quickSetupTitle">Quick setup</a>
-          <a id="manualSetupLink" class="button-link secondary" href="#vpnCard" data-i18n="manualSetupTitle">Manual setup</a>
+        <section id="quickModePanel" class="vpn-setup-mode-panel" role="tabpanel" aria-labelledby="quickSetupLink" hidden>
+          <div id="myVpnProtocolField"></div>
+          <div class="vpn-protocol-explanation">
+            <p class="hidden" data-protocol-summary="ikev2" data-i18n="ikev2Summary">IKEv2 — built-in VPN on iPhone, iPad and Windows. Android uses the strongSwan VPN Client app.</p>
+            <p class="hidden" data-protocol-summary="anyconnect" data-i18n="anyConnectSummary">AnyConnect — VPN through Cisco Secure Client, using TLS/HTTPS.</p>
+          </div>
+          <p id="quickProtocolNote" class="card-description hidden" data-i18n="quickIkev2Only">Quick setup currently supports IKEv2. For AnyConnect, use manual setup.</p>
+          <p id="quickSetupHelp" class="card-description"></p>
+          <a id="quickStartLink" class="button-link primary vpn-setup-start" aria-disabled="true" aria-describedby="quickSetupHelp">Start quick setup</a>
+          <aside id="quickWindowsNotice" class="windows-setup-notice hidden" role="status"></aside>
+        </section>
+        <div id="vpnPageTools" class="vpn-page-tools">
 <div class="connection-page-action"><a class="button-link secondary" data-measurement-link href="connection/" data-i18n="connectionCheckTitle">Check connection</a></div>
 <div class="connection-page-action"><a class="button-link secondary" data-billing-link href="billing/" data-i18n="trafficPaymentTitle">Traffic and payments</a></div>
         </div>
@@ -403,7 +411,7 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
       </div>
     </section>
 
-    <section id="vpnCard" class="account-page hidden">
+    <section id="vpnCard" class="account-page hidden" role="tabpanel" aria-labelledby="manualSetupLink">
       <div class="card">
         <div class="card-content">
         <div class="card-topline">
@@ -440,6 +448,7 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
 
 
 
+        <div id="manualProtocolField"></div>
         <section id="ciscoClientInstall" class="cisco-client-install hidden"></section>
 
         <section id="windowsPanel" class="hidden" aria-labelledby="windowsTitle">

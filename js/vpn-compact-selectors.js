@@ -63,6 +63,7 @@
   });
   protocolDD.field.classList.add("vpn-protocol-field");
   document.getElementById("myVpnProtocolField").append(protocolDD.field);
+  const protocolSummary=document.querySelector('.vpn-protocol-explanation');
 
   // Explicit choice belongs to this platform/protocol, never to a default.
   const entryChoices=new Map();
@@ -123,6 +124,13 @@
     protocolDD.label.textContent=tr().protocol; entryLabel.textContent=tr().entry;
     const transport=window.getVpnTransport?.()||"";
     const p=typeof currentPlatform!=="undefined"?currentPlatform:"ios";
+    const setupMode=window.tolfSetupMode?.get()||(document.body.classList.contains('manual-setup-open')?'manual':null);
+    const slot=document.getElementById(setupMode==='manual'?'manualProtocolField':'myVpnProtocolField');
+    if(slot&&protocolDD.field.parentElement!==slot){slot.append(protocolDD.field);if(protocolSummary)slot.append(protocolSummary);}
+    protocolDD.field.hidden=!setupMode||setupMode==='manual'&&p==='ios';
+    if(protocolSummary)protocolSummary.hidden=protocolDD.field.hidden;
+    document.getElementById('manualProtocolField')?.toggleAttribute('hidden',setupMode!=='manual'||p==='ios');
+    document.getElementById('vpnCard').classList.toggle('manual-protocol-pending',setupMode==='manual'&&p!=='ios'&&!transport);
     const summaries={
       ru:{ios:"IKEv2 — встроенный VPN на iPhone и iPad.",windows:"IKEv2 — встроенный VPN в Windows.",android:"IKEv2 — VPN через приложение strongSwan VPN Client.",any:"AnyConnect — VPN через приложение CLIENT по TLS/HTTPS."},
       en:{ios:"IKEv2 — built-in VPN on iPhone and iPad.",windows:"IKEv2 — built-in VPN in Windows.",android:"IKEv2 — VPN through the strongSwan VPN Client app.",any:"AnyConnect — VPN through CLIENT using TLS/HTTPS."},
@@ -134,8 +142,8 @@
       el.classList.toggle("hidden",el.dataset.protocolSummary!==transport);
       el.textContent=el.dataset.protocolSummary==="ikev2"?summary[p]:summary.any.replace("CLIENT",p==="windows"?"OpenConnect GUI":"Cisco Secure Client");
     });
-    document.getElementById("quickSetupLink").classList.remove("hidden");
-    document.getElementById("quickSetupLink").href="/quick/?protocol="+transport;
+    const quickStart=document.getElementById('quickStartLink');
+    if(quickStart){quickStart.setAttribute('aria-disabled',String(!transport));if(transport)quickStart.href='/quick/?protocol='+transport;else quickStart.removeAttribute('href');}
     document.getElementById("quickProtocolNote").classList.add("hidden");
     protocolDD.render([
       {value:"",label:tr().chooseProtocol,disabled:true},
@@ -150,7 +158,7 @@
     entryRecommendation.textContent=allowed.includes(recommended)?tr().recommended+": "+tr()[recommended]:"";
     const shadowrocket=window.tolfIosManual?.active()&&window.tolfIosManual.client()==='shadowrocket';
     const pending=!shadowrocket&&(!current||!allowed.includes(current));
-    entryDD.field.hidden=Boolean(shadowrocket);
+    entryDD.field.hidden=Boolean(shadowrocket)||!transport;
     document.getElementById("vpnCard").classList.toggle("manual-entry-pending",pending);
     for(const element of document.querySelectorAll("#anyConnectAccess,.vpn-profile-actions,#windowsPanel")){
       element.inert=pending;
@@ -166,6 +174,7 @@
   window.addEventListener("vpntransportchange",sync);
   window.addEventListener("vpnplatformchange",sync);
   window.addEventListener("tolf:manual-client-change",sync);
+  window.addEventListener("tolf:setup-mode-change",sync);
   document.getElementById("windowsDeviceServer")?.addEventListener("change",sync);
   window.addEventListener("tolf:measurement-target-resolved",()=>setTimeout(sync,0));
   window.addEventListener("focus",()=>setTimeout(sync,0));

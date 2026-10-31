@@ -2,7 +2,12 @@
 
 On iOS manual setup, clients appear as Built-in VPN (IKEv2), Cisco Secure Client,
 then Shadowrocket (AnyConnect). Android, Windows and quick setup retain their
-protocol selection. The existing IKEv2 and Cisco controls are moved, not copied.
+protocol selection inside the selected mode. Mode tabs always remain available;
+a separate quick-setup action validates the selected protocol and physical device.
+Protocol choices belong to their platform and mode. Returning to an iOS client
+restores that client's fixed protocol. The existing IKEv2 and Cisco controls are
+moved, not copied. Browser checks load the actual page and its full script/style
+set, using mocked API responses and synthetic credentials only.
 
 Shadowrocket uses the same website username and password. Passkey-only users add
 credentials to their existing account. `createOnly: true` prevents a concurrent
