@@ -74,7 +74,7 @@
 #quickSetupCard #shadowrocketSetup .sr-actions { gap:10px;align-items:center;margin-top:18px; }
 #quickSetupCard #srPrepare { width:100%;min-width:0;max-width:none;height:auto;padding:10px 16px; }
 #quickSetupCard #shadowrocketSetup .sr-file-actions { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch; }
-#quickSetupCard :is(#srShareConfig,#srDownloadConfig,#srBack) { width:100%;min-width:0;max-width:none;height:auto;padding:10px 12px;overflow-wrap:anywhere; }
+#quickSetupCard :is(#srShareConfig,#srDownloadConfig,#srBack) { width:100%;min-width:0;max-width:none;height:auto;padding:10px 8px; }
 #quickSetupCard #srBack { width:calc((100% - 10px)/2); }
 #quickSetupCard #shadowrocketSetup .sr-password-row button { min-height:48px; }
 #quickSetupCard #shadowrocketSetup .sr-field > span:first-child { color:var(--tolf-muted);font-size:13px;font-weight:400; }
