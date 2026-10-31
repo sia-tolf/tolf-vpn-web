@@ -57,7 +57,7 @@ async function fixture({existing=false}={}) {
  q('srInstalled').checked=true;q('srInstalled').dispatchEvent(new w.Event('change'));
  assert(!q('srPrepare').disabled);
  q('srConfigForm').dispatchEvent(new w.Event('submit',{cancelable:true}));await f.settle();
- assert(!q('srReady').hidden);assert.equal(calls.filter(x=>x.path==='/password/verify').length,0,'Reuse password just set on this account');
+ assert(!q('srReady').hidden);assert.equal(calls.filter(x=>x.path==='/password/verify').length,1,'Verify the current password without asking the user to enter it again');
  q('srDownloadConfig').click();assert.equal(files[1].name,'TOLF_Shadowrocket.conf');
  const text=await files[1].text();assert.equal((text.match(/password=Test_only-2026!@/g)||[]).length,3);assert.match(text,/FINAL,PROXY/);
  w.currentPlatform='android';w.dispatchEvent(new w.Event('vpnplatformchange'));await f.settle();

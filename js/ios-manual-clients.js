@@ -62,7 +62,7 @@
     <button id="srRetry" class="secondary" type="button" data-sr-text="retry" hidden></button>`;
   panels.shadowrocket.body.append(sr);
   let client=null, account=null, login=null, loaded=false, loading=false, busy=false, epoch=0;
-  let savedCredentials=null, verifiedPassword=null, configFile=null, manualFile=false, messageKey='';
+  let savedCredentials=null, configFile=null, manualFile=false, messageKey='';
   const active=()=>currentPlatform==='ios'&&document.body.classList.contains('manual-setup-open');
   function announce(key,error=false) {messageKey=key;$('srMessage').textContent=key?tr(key):'';$('srMessage').classList.toggle('error',error);}
   function selectClient(id) {
@@ -93,6 +93,7 @@
     const needsManual=$('srPassword').value.length>0&&!TolfShadowrocketConfig.supportsPassword($('srPassword').value);
     $('srManualPassword').hidden=!needsManual;
     $('srPrepare').disabled=busy||!$('srInstalled').checked||$('srPassword').value.length<15||(needsManual&&!$('srManualPasswordAccept').checked);
+    $('srInstalled').disabled=busy;
     let canShare=false;
     try {canShare=Boolean(configFile&&typeof navigator.share==='function'&&typeof navigator.canShare==='function'&&navigator.canShare({files:[configFile]}));} catch {}
     $('srShareConfig').hidden=!canShare;
@@ -113,7 +114,7 @@
     finally{if(token===epoch){loading=false;render();}}
   }
   function clearSecrets() {
-    savedCredentials=null;verifiedPassword=null;configFile=null;manualFile=false;
+    savedCredentials=null;configFile=null;manualFile=false;
     for(const id of ['srNewUsername','srNewPassword','srRepeatPassword','srPassword','srUsername']){$(id).value='';if($(id).type==='text'&&id.includes('Password'))$(id).type='password';}
     $('srInstalled').checked=false;$('srManualPasswordAccept').checked=false;
   }
@@ -133,7 +134,7 @@
     try{
       const data=await apiRequest('/password/set',{method:'POST',body:JSON.stringify({username:$('srNewUsername').value.toLowerCase(),password,createOnly:true})});
       if(token!==epoch)return;
-      login=data.username;savedCredentials={username:login,password};verifiedPassword=password;
+      login=data.username;savedCredentials={username:login,password};
       $('srUsername').value=login;$('srPassword').value=password;$('srNewPassword').value='';$('srRepeatPassword').value='';announce('');
     }catch(error){if(token===epoch){if(error.message==='account_password_exists'){loaded=false;await loadPasswordAccount();}announce(words.en[error.message]?error.message:'error',true);}}
     finally{if(token===epoch){busy=false;render();}}
@@ -145,7 +146,9 @@
     try{
       const current=await apiRequest('/password/account',{cache:'no-store'});
       if(token!==epoch)return;if(!current.enabled||current.username!==username)throw new Error('account_changed');
-      if(verifiedPassword!==password){const result=await apiRequest('/password/verify',{method:'POST',body:JSON.stringify({password})});if(token!==epoch)return;if(result.username!==username)throw new Error('account_changed');verifiedPassword=password;}
+      const result=await apiRequest('/password/verify',{method:'POST',body:JSON.stringify({password})});
+      if(token!==epoch||currentPlatform!=='ios'||!$('srInstalled').checked)return;
+      if(result.username!==username)throw new Error('account_changed');
       manualFile=!TolfShadowrocketConfig.supportsPassword(password);
       const content=TolfShadowrocketConfig.build(username,password,manualFile);
       configFile=new File([content],'TOLF_Shadowrocket.conf',{type:'text/plain;charset=utf-8'});announce('');
@@ -164,7 +167,7 @@
   for(const button of sr.querySelectorAll('[data-sr-toggle]'))button.addEventListener('click',()=>{const field=$(button.dataset.srToggle);field.type=field.type==='password'?'text':'password';render();});
   window.addEventListener('tolf:account-state',event=>setAccount(event.detail));
   window.addEventListener('tolf:vpn-state',render);
-  window.addEventListener('vpnplatformchange',()=>{if(currentPlatform!=='ios')$('srInstalled').checked=false;render();window.dispatchEvent(new Event('tolf:manual-client-change'));});
+  window.addEventListener('vpnplatformchange',()=>{if(currentPlatform!=='ios'){$('srInstalled').checked=false;configFile=null;}render();window.dispatchEvent(new Event('tolf:manual-client-change'));});
   window.addEventListener('vpntransportchange',render);
   window.addEventListener('pagehide',()=>{epoch++;clearSecrets();loaded=false;login=null;loading=false;busy=false;render();});
   window.addEventListener('pageshow',event=>{if(event.persisted&&account&&active()&&client==='shadowrocket')loadPasswordAccount();});
