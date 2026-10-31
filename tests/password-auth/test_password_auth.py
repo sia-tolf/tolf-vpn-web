@@ -79,6 +79,54 @@ class PasswordTests(unittest.TestCase):
         rows=self.rows('SELECT salt,digest FROM account_passwords')
         self.assertNotEqual(rows[0][0],rows[1][0]);self.assertNotEqual(rows[0][1],rows[1][1])
 
+    def test_verify_own_password_without_changing_sessions(self):
+        self.register('owner-one')
+        token=self.client.cookies.get('tolf_session')
+        sessions=self.rows('SELECT * FROM sessions')
+        credentials=self.rows('SELECT * FROM account_passwords')
+        response=self.post('verify',{'password':PASS,'username':'somebody-else'})
+        self.assertEqual(response.json(),{'username':'owner-one'})
+        self.assertNotIn('set-cookie',response.headers)
+        self.assertEqual(response.headers['cache-control'],'no-store')
+        self.assertEqual(self.client.cookies.get('tolf_session'),token)
+        self.assertEqual(self.rows('SELECT * FROM sessions'),sessions)
+        self.assertEqual(self.rows('SELECT * FROM account_passwords'),credentials)
+        self.post('verify',{'password':NEW},401)
+        self.client.cookies.clear()
+        self.post('verify',{'password':PASS},401)
+
+    def test_verify_rechecks_revoked_session_and_changed_password(self):
+        self.register();real=mod.derive
+        def revoke(value,salt):
+            result=real(value,salt)
+            with sqlite3.connect(self.db) as con:con.execute('DELETE FROM sessions')
+            return result
+        with patch.object(mod,'derive',revoke):self.post('verify',{'password':PASS},401)
+        self.post('login',{'username':'lena-work','password':PASS})
+        def reset(value,salt):
+            result=real(value,salt)
+            with sqlite3.connect(self.db) as con:con.execute('UPDATE account_passwords SET digest=?',(b'x'*32,))
+            return result
+        with patch.object(mod,'derive',reset):self.post('verify',{'password':PASS},401)
+
+    def test_create_only_cannot_replace_existing_or_concurrent_password(self):
+        self.register();credentials=self.rows('SELECT * FROM account_passwords')
+        sessions=self.rows('SELECT * FROM sessions')
+        response=self.post('set',{'password':NEW,'createOnly':True},409)
+        self.assertEqual(response.json()['detail'],'account_password_exists')
+        self.assertEqual(self.rows('SELECT * FROM account_passwords'),credentials)
+        self.assertEqual(self.rows('SELECT * FROM sessions'),sessions)
+        with sqlite3.connect(self.db) as con:con.execute('DELETE FROM account_passwords')
+        real=mod.derive
+        def add_during_hash(value,salt):
+            result=real(value,salt)
+            with sqlite3.connect(self.db) as con:con.execute('INSERT INTO account_passwords VALUES (?,?,?,?,?)',credentials[0])
+            return result
+        with patch.object(mod,'derive',add_during_hash):
+            self.post('set',{'username':'different-name','password':NEW,'createOnly':True},409)
+        self.assertEqual(self.rows('SELECT * FROM account_passwords'),credentials)
+        self.assertEqual(self.rows('SELECT * FROM sessions'),sessions)
+
     def test_reset_single_use_and_session_revocation(self):
         code=self.register().json()['recoveryCode'];old=self.client.cookies.get('tolf_session')
         uid=self.client.get('/me').json()['userId']
@@ -196,3 +244,4 @@ class PasswordTests(unittest.TestCase):
         with self.assertRaises(RuntimeError):installer.patch('x=1')
 
 if __name__=='__main__':unittest.main()
+

@@ -36,7 +36,7 @@ const ids={};for(const id of ['ciscoClientInstall','quickSetupLink','manualSetup
 const memory=new Map([['tolfCiscoInstalled:ios','true'],['tolfOpenConnectInstalled:windows','true']]), handlers={};
 const window={getVpnTransport:()=>transport,addEventListener(n,f){(handlers[n]||=[]).push(f)},dispatchEvent(e){for(const f of handlers[e.type]||[])f(e)}};
 let transport='anyconnect';
-const c={window,currentPlatform:'ios',document:{documentElement:{lang:'ru'},getElementById:id=>ids[id],createElement:tag=>new Element(tag)},
+const c={window,currentPlatform:'ios',navigator:{userAgent:'iPhone',platform:'iPhone',maxTouchPoints:5},document:{documentElement:{lang:'ru'},getElementById:id=>ids[id],createElement:tag=>new Element(tag)},
 localStorage:{getItem:k=>memory.get(k),setItem:(k,v)=>memory.set(k,v)},MutationObserver:class{observe(){}},Event:class{constructor(type){this.type=type}}};
 vm.createContext(c);vm.runInContext(fs.readFileSync(path.join(root,'js/cisco-client-install.js'),'utf8'),c);
 assert.equal(window.isCiscoClientConfirmed(),false);
@@ -49,7 +49,7 @@ assert.equal(ids.manualSetupLink.attributes['aria-disabled'],'false');
 transport='ikev2';window.dispatchEvent(new c.Event('vpntransportchange'));assert.equal(ids.manualSetupLink.attributes['aria-disabled'],'false');
 assert(!ids.ciscoClientInstall.classList.contains('hidden'),'Android IKEv2 needs its own strongSwan step');
 c.currentPlatform='windows';transport='anyconnect';window.dispatchEvent(new c.Event('vpnplatformchange'));
-assert.equal(descendants(ids.ciscoClientInstall).find(n=>n.tagName==='a').href,'https://www.infradead.org/openconnect-gui/download/openconnect-gui-1.6.2-win64.exe');
+assert.equal(descendants(ids.ciscoClientInstall).find(n=>n.type==='text').value,'https://www.infradead.org/openconnect-gui/download/openconnect-gui-1.6.2-win64.exe');
 assert(ids.ciscoClientInstall.textContent.includes('OpenConnect GUI'));
 c.currentPlatform='ios';vm.runInContext(fs.readFileSync(path.join(root,'js/cisco-client-install.js'),'utf8'),c);
 assert.equal(window.isCiscoClientConfirmed('ios'),false,'reload clears confirmation even with old storage');
@@ -58,3 +58,4 @@ assert.equal(ids.manualSetupLink.attributes['aria-disabled'],'false');
 console.log('PASS client confirmation: old storage ignored, reload resets, scenario navigation allowed before installation, IKEv2 unaffected');
 
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8');assert(html.indexOf('id=\"ciscoClientInstall\"')>html.indexOf('id=\"vpnCard\"'),'installation belongs to manual setup');
+

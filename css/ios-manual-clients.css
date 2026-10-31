@@ -1,0 +1,41 @@
+#iosManualClients[hidden], #iosManualShared[hidden], #shadowrocketSetup [hidden] { display:none!important; }
+#iosManualClients { display:grid;gap:12px;margin-top:18px; }
+.ios-manual-client { min-width:0;border:1px solid var(--border);border-radius:12px;background:var(--card); }
+.ios-manual-client-head { display:flex;align-items:center;gap:12px;width:100%;min-height:68px;margin:0;padding:14px 16px;text-align:left;color:var(--text);border:0;border-radius:12px;background:transparent;font:inherit; }
+.ios-manual-client-copy { flex:1;min-width:0; }
+.ios-manual-client-copy strong { display:block;font-weight:600;font-size:16px; }
+.ios-manual-client-copy small { display:block;margin-top:3px;color:var(--secondary);font-size:13px; }
+.ios-manual-chevron { width:8px;height:8px;margin:0 4px;flex:0 0 8px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg); }
+.ios-manual-client-head[aria-expanded="true"] .ios-manual-chevron { transform:rotate(225deg); }
+.ios-manual-client-body { padding:16px;border-top:1px solid var(--border); }
+.ios-manual-client-body[hidden] { display:none!important; }
+body.ios-manual-setup #myVpnProtocolField,
+body.ios-manual-setup .vpn-protocol-explanation { display:none!important; }
+body.ios-manual-setup #iosManualShared #ciscoClientInstall:not(.hidden) { display:block; }
+body.ios-manual-setup[data-ios-manual-client="shadowrocket"] #iosManualShared { display:none!important; }
+body.ios-manual-setup .ios-manual-client-body > #iosManualShared > .vpn-entry-field { margin-top:0; }
+#shadowrocketSetup h3 { margin:0 0 10px;font-size:17px; }
+#shadowrocketSetup p { margin:10px 0; }
+#shadowrocketSetup .sr-form { display:grid;gap:12px; }
+#shadowrocketSetup .sr-field { display:grid;gap:6px;min-width:0; }
+#shadowrocketSetup .sr-field input { box-sizing:border-box;width:100%;min-width:0;min-height:44px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--card);color:var(--text);font:inherit;font-size:16px; }
+#shadowrocketSetup .sr-password-row { display:flex;gap:8px; }
+#shadowrocketSetup .sr-password-row input { flex:1; }
+#shadowrocketSetup .sr-password-row button { flex:0 0 auto;min-height:44px; }
+#shadowrocketSetup .sr-note { color:var(--secondary);font-size:13px; }
+#shadowrocketSetup .sr-actions { display:flex;flex-wrap:wrap;gap:8px;margin:12px 0; }
+#shadowrocketSetup .sr-actions > * { margin:0;min-height:44px;max-width:100%; }
+#shadowrocketSetup .sr-check { display:flex;align-items:center;gap:10px;min-height:44px; }
+#shadowrocketSetup .sr-check input { width:19px;height:19px;flex:0 0 19px; }
+#shadowrocketSetup .sr-saved { padding-bottom:18px;margin-bottom:18px;border-bottom:1px solid var(--border); }
+#shadowrocketSetup .sr-servers { display:flex;flex-wrap:wrap;gap:8px 16px;padding:0;list-style:none;overflow-wrap:anywhere;font-size:14px; }
+#shadowrocketSetup ol { margin:12px 0;padding-left:23px; }
+#shadowrocketSetup li { margin-bottom:8px; }
+#shadowrocketSetup .sr-message:empty { display:none; }
+#shadowrocketSetup .sr-message { overflow-wrap:anywhere; }
+#shadowrocketSetup .sr-message.error { color:var(--danger,#b42318); }
+@media(max-width:520px) {
+ .ios-manual-client-head { padding:13px; }
+ .ios-manual-client-body { padding:13px; }
+ #shadowrocketSetup .sr-actions > .primary { flex:1 1 100%; }
+}

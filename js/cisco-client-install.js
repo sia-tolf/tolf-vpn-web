@@ -85,11 +85,11 @@
   const text=document.createElement('span');text.textContent=c.confirmed;
   label.append(check,text);host.append(title,installControl,label);
   const blocked=!transport();
-  for(const id of ['quickSetupLink','manualSetupLink'])document.getElementById(id)?.setAttribute('aria-disabled',String(blocked));
+  for(const id of ['quickSetupLink','manualSetupLink'])document.getElementById(id)?.setAttribute('aria-disabled',String(blocked&&!(id==='manualSetupLink'&&p==='ios')));
  }
  for(const id of ['quickSetupLink','manualSetupLink']){
   document.getElementById(id)?.addEventListener('click',event=>{
-   if(!transport()){
+   if(!transport()&&!(id==='manualSetupLink'&&platform()==='ios')){
     event.preventDefault();event.stopImmediatePropagation();document.querySelector('#vpnProtocolDropdown button')?.focus();return;
    }
   },true);
@@ -117,3 +117,4 @@
  new MutationObserver(render).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
  render();
 })();
+

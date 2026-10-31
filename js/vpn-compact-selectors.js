@@ -85,6 +85,7 @@
   window.tolfManualEntry={
     selected:chosenEntry,
     ensure(){
+      if(window.tolfIosManual?.active()&&window.tolfIosManual.client()==='shadowrocket')return true;
       if(!document.body.classList.contains("manual-setup-open")||chosenEntry())return true;
       entryDD.field.querySelector(".vpn-dropdown-button").focus();
       return false;
@@ -147,7 +148,9 @@
     const allowed=transport==="anyconnect"?(window.ocAccess?.ingresses?.()||[{id:"moscow"}]).map(x=>x.id):windowsIke?[...winSelect.options].filter(x=>!x.disabled).map(x=>x.value):["riga","moscow",...(window.tolfMobileIkev2Ready?["us"]:[])];
     const recommended=(typeof recommendedEntryPoint!=="undefined"?recommendedEntryPoint:null);
     entryRecommendation.textContent=allowed.includes(recommended)?tr().recommended+": "+tr()[recommended]:"";
-    const pending=!current||!allowed.includes(current);
+    const shadowrocket=window.tolfIosManual?.active()&&window.tolfIosManual.client()==='shadowrocket';
+    const pending=!shadowrocket&&(!current||!allowed.includes(current));
+    entryDD.field.hidden=Boolean(shadowrocket);
     document.getElementById("vpnCard").classList.toggle("manual-entry-pending",pending);
     for(const element of document.querySelectorAll("#anyConnectAccess,.vpn-profile-actions,#windowsPanel")){
       element.inert=pending;
@@ -162,6 +165,7 @@
   window.addEventListener("vpncapabilitieschange",sync);
   window.addEventListener("vpntransportchange",sync);
   window.addEventListener("vpnplatformchange",sync);
+  window.addEventListener("tolf:manual-client-change",sync);
   document.getElementById("windowsDeviceServer")?.addEventListener("change",sync);
   window.addEventListener("tolf:measurement-target-resolved",()=>setTimeout(sync,0));
   window.addEventListener("focus",()=>setTimeout(sync,0));
@@ -170,3 +174,4 @@
   new MutationObserver(sync).observe(oldTransport,{subtree:true,attributes:true,attributeFilter:["class","disabled"]});
   sync();
 })();
+

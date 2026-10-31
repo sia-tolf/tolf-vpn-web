@@ -1,0 +1,32 @@
+name: Shadowrocket setup checks
+on:
+  push:
+    branches: ['codex/shadowrocket-setup', 'main']
+    paths: ['index.html', 'js/**', 'css/**', 'setup/password-auth/**', 'setup/shadowrocket/**', 'tests/shadowrocket*', 'tests/ios-manual-clients.cjs', 'tests/password-auth/**', '.github/workflows/shadowrocket-setup.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install fastapi httpx
+      - run: python tests/password-auth/test_password_auth.py
+      - run: python setup/password-auth/build.py && git diff --exit-code setup/password-auth/install-password-auth.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save --ignore-scripts jsdom@26.1.0 playwright@1.62.1
+      - run: node tests/shadowrocket-config.cjs && node tests/ios-manual-clients.cjs && node tests/manual-entry.cjs && node tests/cisco-client-install.cjs
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/shadowrocket-browser.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: shadowrocket-setup-preview
+          path: /tmp/tolf-shadowrocket-*.png

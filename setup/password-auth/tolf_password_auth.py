@@ -102,7 +102,8 @@ def install(app, ns):
 
     @app.get('/password/capabilities')
     def capabilities():
-        return JSONResponse({'version':VERSION, 'accountManagement':True, 'minPasswordLength':15, 'maxPasswordLength':128}, headers=HEADERS)
+        return JSONResponse({'version':VERSION, 'accountManagement':True, 'verifyAccountPassword':True,
+                             'createOnly':True, 'minPasswordLength':15, 'maxPasswordLength':128}, headers=HEADERS)
 
     @app.post('/password/register')
     def register(request: Request, payload: dict):
@@ -193,6 +194,8 @@ def install(app, ns):
         value = password(payload.get('password'))
         with db() as con:
             existing = con.execute('SELECT username FROM account_passwords WHERE user_id=?', (uid,)).fetchone()
+        if payload.get('createOnly') is True and existing:
+            raise HTTPException(409, 'account_password_exists')
         name = existing[0] if existing else username(payload.get('username'))
         salt = secrets.token_bytes(16)
         digest = derive(value, salt)
@@ -205,6 +208,8 @@ def install(app, ns):
             if not valid:
                 raise HTTPException(401, 'authentication_required')
             current = con.execute('SELECT username FROM account_passwords WHERE user_id=?', (uid,)).fetchone()
+            if payload.get('createOnly') is True and current:
+                raise HTTPException(409, 'account_password_exists')
             if current:
                 name = current[0]
                 con.execute('UPDATE account_passwords SET salt=?,digest=? WHERE user_id=?', (salt,digest,uid))
@@ -216,4 +221,28 @@ def install(app, ns):
             con.execute('DELETE FROM challenges WHERE user_id=?', (uid,))
             response = session(con, uid, {'username':name})
         return response
+
+    @app.post('/password/verify')
+    def verify_account_password(request: Request, payload: dict):
+        uid = ns['authenticated_user_id'](request)
+        with db() as con:
+            row = con.execute('SELECT username,salt,digest FROM account_passwords WHERE user_id=?', (uid,)).fetchone()
+        guard(request, 'login', row[0] if row else uid)
+        value = payload.get('password')
+        if not isinstance(value, str) or not 1 <= len(value) <= 128 or len(value.encode('utf-8')) > 512:
+            raise HTTPException(401, 'invalid_credentials')
+        candidate = derive(value, row[1] if row else b'TOLF-dummy-salt!')
+        if not row or not hmac.compare_digest(candidate, row[2]):
+            raise HTTPException(401, 'invalid_credentials')
+        with db() as con:
+            # Verification never issues a login cookie or changes the account password.
+            token = request.cookies.get(ns['SESSION_COOKIE'], '')
+            current = con.execute('''SELECT p.digest FROM account_passwords p
+                JOIN users u ON u.id=p.user_id JOIN sessions s ON s.user_id=u.id
+                WHERE u.id=? AND s.token_hash=? AND s.expires_at>?''',
+                (uid, hashlib.sha256(token.encode()).digest(), ns['utc_iso'](ns['utc_now']()))).fetchone()
+            if not current or not hmac.compare_digest(current[0], row[2]):
+                raise HTTPException(401, 'authentication_required')
+        return JSONResponse({'username':row[0]}, headers=HEADERS)
+
 

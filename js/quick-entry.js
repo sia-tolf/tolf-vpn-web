@@ -3,7 +3,7 @@
  let enabled=false;
  const manualLink=document.getElementById('manualSetupLink');
  function openManual(){
-  if(!window.getVpnTransport?.())return;
+  if(currentPlatform!=='ios'&&!window.getVpnTransport?.())return;
   document.body.classList.add('manual-setup-open');
   manualLink.setAttribute('aria-expanded','true');
   noticeOpen=false;
@@ -98,3 +98,4 @@
   render();
  }).catch(render);
 })();
+

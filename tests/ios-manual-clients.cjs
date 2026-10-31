@@ -1,0 +1,86 @@
+const assert=require('node:assert/strict'),fs=require('node:fs');
+const {JSDOM}=require(process.env.TOLF_JSDOM||'jsdom');
+const tick=()=>new Promise(resolve=>setImmediate(resolve));
+async function fixture({existing=false}={}) {
+ const dom=new JSDOM(fs.readFileSync('index.html','utf8'),{url:'https://vpn.tolf.is/',runScripts:'outside-only'});
+ const w=dom.window,d=w.document,calls=[],files=[];let login=existing?'existing-user':null,transport='';
+ w.currentPlatform='ios';w.lastVpnState={configured:true};w.tolfAccountState={authenticated:true,userId:'account-one'};
+ w.recommendedEntryPoint='moscow';w.entryPointChangedManually=false;
+ w.File=File;w.URL.createObjectURL=file=>{files.push(file);return 'blob:fixture'};w.URL.revokeObjectURL=()=>{};
+ const originalClick=w.HTMLAnchorElement.prototype.click;
+ w.HTMLAnchorElement.prototype.click=function(){if(!this.download)originalClick.call(this);};
+ w.setInterval=()=>0;w.setTimeout=fn=>{if(typeof fn==='function')Promise.resolve().then(fn);return 0;};
+ w.getVpnTransport=()=>transport;w.setInstallLink=()=>{};
+ let ingress='moscow';w.ocAccess={ingress:()=>({id:ingress}),ingresses:()=>['moscow','riga','us'].map(id=>({id})),selectIngress:id=>{ingress=id;}};
+ w.fetch=async()=>({ok:true,json:async()=>({version:1})});
+ w.apiRequest=async(path,options={})=>{
+   const body=options.body?JSON.parse(options.body):null;calls.push({path,body});
+   if(path==='/password/capabilities')return {verifyAccountPassword:true,createOnly:true};
+   if(path==='/password/account')return {enabled:Boolean(login),username:login};
+   if(path==='/password/set'){assert.equal(body.createOnly,true);assert.equal(login,null);login=body.username;return {username:login};}
+   if(path==='/password/verify'){if(body.password==='Wrong_password_12345')throw new Error('invalid_credentials');return {username:login};}
+   throw Error('Unexpected API '+path);
+ };
+ for(const name of ['Ikev2','AnyConnect'])d.getElementById('vpnTransport'+name).addEventListener('click',()=>{transport=name==='Ikev2'?'ikev2':'anyconnect';d.documentElement.dataset.vpnTransport=transport;w.dispatchEvent(new w.Event('vpntransportchange'));});
+ d.getElementById('vpnCard').classList.remove('hidden');
+ for(const name of ['cisco-client-install','vpn-compact-selectors','quick-entry','shadowrocket-config','ios-manual-clients'])w.eval(fs.readFileSync('js/'+name+'.js','utf8'));
+ await tick();
+ return {dom,w,d,calls,files,setLogin:value=>{login=value;},q:id=>d.getElementById(id),async settle(){await tick();await tick();}};
+}
+(async()=>{
+ const f=await fixture(),{w,d,q,calls,files}=f;
+ d.documentElement.lang='ru';q('manualSetupLink').click();await f.settle();
+ assert(d.body.classList.contains('ios-manual-setup'),'iOS manual opens without selecting a protocol');
+ assert.equal(q('manualSetupLink').getAttribute('aria-disabled'),'false');
+ assert.deepEqual([...q('iosManualClients').children].map(x=>x.dataset.iosClient),['native','cisco','shadowrocket']);
+ assert.deepEqual([...q('iosManualClients').querySelectorAll('strong')].map(x=>x.textContent),['Встроенный VPN','Cisco Secure Client','Shadowrocket']);
+ const legacy=q('legacyVpnPanel');w.tolfIosManual.select('native');await f.settle();
+ assert.equal(q('iosManualShared').parentElement.id,'iosManualBody-native');
+ assert.equal(w.getVpnTransport(),'ikev2');
+ w.tolfIosManual.select('cisco');await f.settle();
+ assert.equal(q('iosManualShared').parentElement.id,'iosManualBody-cisco');
+ assert.equal(q('legacyVpnPanel'),legacy,'move original controls, never clone');
+ assert.equal(w.getVpnTransport(),'anyconnect');
+ w.tolfIosManual.select('shadowrocket');await f.settle();
+ assert(!q('srAccountForm').hidden);assert(q('srConfigPanel').hidden);
+ assert(w.tolfManualEntry.ensure(),'Shadowrocket has its own server choice, no single-entry gate');
+ q('srNewUsername').value='Test-User';q('srNewPassword').value='Test_only-2026!@';q('srRepeatPassword').value='Mismatch_2026_9999';
+ q('srAccountForm').dispatchEvent(new w.Event('submit',{cancelable:true}));await f.settle();
+ assert.equal(calls.filter(x=>x.path==='/password/set').length,0);
+ assert.match(q('srMessage').textContent,/не совпадают/);
+ q('srRepeatPassword').value=q('srNewPassword').value;
+ q('srAccountForm').dispatchEvent(new w.Event('submit',{cancelable:true}));await f.settle();
+ assert(!q('srConfigPanel').hidden&&!q('srSavedCredentials').hidden);
+ assert.equal(q('srPassword').value,'Test_only-2026!@');assert(q('srPrepare').disabled);
+ q('srSaveCredentials').click();assert.equal(files.length,1);
+ assert.match(await files[0].text(),/test-user/);assert.match(await files[0].text(),/Test_only-2026!@/);
+ q('srInstalled').checked=true;q('srInstalled').dispatchEvent(new w.Event('change'));
+ assert(!q('srPrepare').disabled);
+ q('srConfigForm').dispatchEvent(new w.Event('submit',{cancelable:true}));await f.settle();
+ assert(!q('srReady').hidden);assert.equal(calls.filter(x=>x.path==='/password/verify').length,0,'Reuse password just set on this account');
+ q('srDownloadConfig').click();assert.equal(files[1].name,'TOLF_Shadowrocket.conf');
+ const text=await files[1].text();assert.equal((text.match(/password=Test_only-2026!@/g)||[]).length,3);assert.match(text,/FINAL,PROXY/);
+ w.currentPlatform='android';w.dispatchEvent(new w.Event('vpnplatformchange'));await f.settle();
+ assert(q('iosManualClients').hidden);assert.equal(q('iosManualShared').parentElement,q('vpnCard').querySelector('.card-content'));assert(!q('iosManualShared').hidden);assert(!q('srInstalled').checked);
+ w.currentPlatform='windows';w.dispatchEvent(new w.Event('vpnplatformchange'));await f.settle();assert(q('iosManualClients').hidden);
+ w.currentPlatform='ios';w.dispatchEvent(new w.Event('vpnplatformchange'));await f.settle();
+ q('srBack').click();assert(q('srPrepare').disabled,'Shadowrocket installation is not carried from another platform');
+ w.dispatchEvent(new w.Event('pagehide'));assert.equal(q('srPassword').value,'');assert(q('srSavedCredentials').hidden&&q('srReady').hidden);
+ f.dom.window.close();
+
+ const e=await fixture({existing:true});e.q('manualSetupLink').click();await e.settle();e.w.tolfIosManual.select('shadowrocket');await e.settle();
+ assert(e.q('srAccountForm').hidden&&!e.q('srConfigPanel').hidden);assert(e.q('srSavedCredentials').hidden);
+ e.q('srPassword').value='Wrong_password_12345';e.q('srInstalled').checked=true;e.q('srInstalled').dispatchEvent(new e.w.Event('change'));
+ e.q('srConfigForm').dispatchEvent(new e.w.Event('submit',{cancelable:true}));await e.settle();
+ assert(e.q('srReady').hidden);assert.equal(e.files.length,0);
+ e.q('srPassword').value='Valid_password,with-delimiter';e.q('srPassword').dispatchEvent(new e.w.Event('input'));
+ assert(!e.q('srManualPassword').hidden&&e.q('srPrepare').disabled);
+ e.q('srManualPasswordAccept').checked=true;e.q('srManualPasswordAccept').dispatchEvent(new e.w.Event('change'));
+ e.q('srConfigForm').dispatchEvent(new e.w.Event('submit',{cancelable:true}));await e.settle();
+ assert(!e.q('srReady').hidden&&!e.q('srManualStep').hidden);
+ e.q('srDownloadConfig').click();const manual=await e.files[0].text();assert(!manual.includes('Valid_password'));assert.equal((manual.match(/password=, udp=1/g)||[]).length,3);
+ assert.equal(e.calls.filter(x=>x.path==='/password/set').length,0,'An existing password is never replaced');
+ e.w.dispatchEvent(new e.w.CustomEvent('tolf:account-state',{detail:null}));assert.equal(e.q('srPassword').value,'');assert(e.q('srReady').hidden);
+ e.dom.window.close();
+ console.log('PASS: iOS card order, protocol-free manual entry, existing controls, new/existing credentials, validation, local downloads, three-server import, explicit password fallback, platform resets and secret cleanup');
+})().catch(error=>{console.error(error);process.exit(1);});
