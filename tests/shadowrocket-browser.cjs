@@ -99,7 +99,11 @@ const http=require('node:http'),fs=require('node:fs'),fsp=require('node:fs/promi
    await page.locator('#srNewUsername').fill('test-user');await page.locator('#srNewPassword').fill('Test_only_2026_Secret');await page.locator('#srRepeatPassword').fill('Test_only_2026_Secret');
    await page.locator('#srAccountForm button[type="submit"]').click();await page.locator('#srSavedCredentials').waitFor({state:'visible'});
    assert.equal(await page.locator('#srPassword').inputValue(),'Test_only_2026_Secret');
-   await page.locator('#srInstalled').check();await page.locator('#srPrepare').click();await page.locator('#srReady').waitFor({state:'visible'});
+   await page.locator('#srInstalled').check();
+   await page.screenshot({path:'/tmp/tolf-shadowrocket-prepare-'+width+'-'+colorScheme+'.png',fullPage:true});
+   await page.locator('#srPrepare').click();await page.locator('#srReady').waitFor({state:'visible'});
+   await page.locator('#srShareConfig').evaluate(el=>{el.hidden=false;});
+   await page.screenshot({path:'/tmp/tolf-shadowrocket-ready-'+width+'-'+colorScheme+'.png',fullPage:true});
    const overflow=await page.evaluate(()=>({width:innerWidth,content:document.documentElement.scrollWidth}));assert(overflow.content<=overflow.width,JSON.stringify(overflow));
    const downloadPromise=page.waitForEvent('download');await page.locator('#srDownloadConfig').click();const download=await downloadPromise;
    assert.equal(download.suggestedFilename(),'TOLF_Shadowrocket.conf');const content=fs.readFileSync(await download.path(),'utf8');assert.equal((content.match(/password=Test_only_2026_Secret/g)||[]).length,3);

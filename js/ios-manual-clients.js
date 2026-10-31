@@ -61,7 +61,7 @@
       </form>
     </div>
     <div id="srReady" hidden><h3 data-sr-text="ready"></h3><p>TOLF_Shadowrocket.conf</p>
-      <div class="sr-actions"><button id="srShareConfig" class="primary" type="button" data-sr-text="share"></button><button id="srDownloadConfig" class="secondary" type="button" data-sr-text="download"></button></div>
+      <div class="sr-actions sr-file-actions"><button id="srShareConfig" class="primary" type="button" data-sr-text="share"></button><button id="srDownloadConfig" class="secondary" type="button" data-sr-text="download"></button></div>
       <p id="srFilePrivate" class="sr-note" data-sr-text="filePrivate"></p><p id="srManualStep" data-sr-text="manualStep" hidden></p><ol id="srInstructions"></ol>
       <div class="sr-actions"><button id="srBack" type="button" class="secondary" data-sr-text="back"></button></div>
     </div>
