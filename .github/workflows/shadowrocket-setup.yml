@@ -22,7 +22,7 @@ jobs:
         with:
           node-version: '22'
       - run: npm install --no-save --ignore-scripts jsdom@26.1.0 playwright@1.62.1
-      - run: node tests/shadowrocket-config.cjs && node tests/ios-manual-clients.cjs && node tests/manual-entry.cjs && node tests/cisco-client-install.cjs
+      - run: node tests/shadowrocket-config.cjs && node tests/ios-manual-clients.cjs && node tests/manual-entry.cjs && node tests/cisco-client-install.cjs && node --test tests/routing/test-account-loading.cjs
       - run: npx playwright install --with-deps chromium
       - run: node tests/shadowrocket-browser.cjs
       - uses: actions/upload-artifact@v4

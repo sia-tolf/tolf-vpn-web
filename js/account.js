@@ -70,7 +70,7 @@ async function loadAccount() {
     showVpn(data.vpn);
     window.tolfAccountState = data;
     window.setAnyConnectAccount?.(data);
-    window.dispatchEvent(new CustomEvent('tolf:account-state', {detail:data}));
+    if (typeof CustomEvent === 'function') window.dispatchEvent?.(new CustomEvent('tolf:account-state', {detail:data}));
 
 
 

@@ -204,7 +204,7 @@ function setInstallLink(profileUrl) {
 
 function showSignedOut() {
   window.tolfAccountState = null;
-  window.dispatchEvent(new CustomEvent('tolf:account-state', {detail:null}));
+  if (typeof CustomEvent === 'function') window.dispatchEvent?.(new CustomEvent('tolf:account-state', {detail:null}));
   window.setAnyConnectAccount?.(null);
   if (typeof setRoutingAccount === "function") setRoutingAccount(null);
   closeRegistrationPanel();
@@ -304,6 +304,6 @@ function showVpn(vpn) {
   }
   renderPlatform();
   if (currentPlatform === "windows" && typeof loadWindowsDevices === "function") loadWindowsDevices();
-  window.dispatchEvent(new CustomEvent('tolf:vpn-state', {detail:vpn}));
+  if (typeof CustomEvent === 'function') window.dispatchEvent?.(new CustomEvent('tolf:vpn-state', {detail:vpn}));
 }
 
