@@ -1,7 +1,7 @@
 name: Shadowrocket setup checks
 on:
   push:
-    branches: ['codex/shadowrocket-setup', 'codex/vpn-mode-fixes', 'main']
+    branches: ['codex/shadowrocket-setup', 'codex/vpn-mode-fixes', 'codex/vpn-smartdns-style', 'main']
     paths: ['index.html', 'js/**', 'css/**', 'setup/password-auth/**', 'setup/shadowrocket/**', 'tests/shadowrocket*', 'tests/ios-manual-clients.cjs', 'tests/setup-modes.cjs', 'tests/quick/entry.cjs', 'tests/password-auth/**', '.github/workflows/shadowrocket-setup.yml']
   workflow_dispatch:
 permissions:
@@ -12,6 +12,13 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+      - name: Check out the Smart DNS design reference
+        uses: actions/checkout@v4
+        with:
+          repository: sia-tolf/tolf-dns-web
+          ref: 9c37c8c614e05b6e52e8fea65820728fb58bb413
+          path: .smartdns-reference
+          persist-credentials: false
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'

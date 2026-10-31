@@ -2,6 +2,10 @@ const {chromium}=require('playwright');
 const http=require('node:http'),fs=require('node:fs'),fsp=require('node:fs/promises'),path=require('node:path'),assert=require('node:assert/strict');
 (async()=>{
  const root=process.cwd();
+ assert(fs.existsSync(path.join(root,'.smartdns-reference/index.html')),'Check out sia-tolf/tolf-dns-web at the workflow-pinned reference before running browser comparisons');
+ assert.deepEqual(fs.readFileSync(path.join(root,'.smartdns-reference/css/tolf-buttons.css')),fs.readFileSync(path.join(root,'tolf-buttons.20260917-2.css')),'The existing shared button stylesheet must be identical to Smart DNS');
+ const properties=['height','minHeight','fontSize','fontWeight','lineHeight','backgroundColor','color','borderTopWidth','borderTopStyle','borderTopColor','borderRadius','paddingTop','paddingRight','paddingBottom','paddingLeft','boxShadow'];
+ const appearance=async(page,selector)=>page.locator(selector).evaluate((el,keys)=>Object.fromEntries(keys.map(key=>[key,getComputedStyle(el)[key]])),properties);
  const server=http.createServer(async(req,res)=>{
   try{
    const pathname=decodeURIComponent(new URL(req.url,'http://localhost').pathname);
@@ -18,6 +22,15 @@ const http=require('node:http'),fs=require('node:fs'),fsp=require('node:fs/promi
   for(const [width,lang,colorScheme] of [[320,'ru','light'],[390,'lv','light'],[1024,'en','light'],[390,'ru','dark']]){
    const context=await browser.newContext({viewport:{width,height:1000},colorScheme,userAgent:'Mozilla/5.0 (iPhone; CPU iPhone OS 26_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Safari/604.1'});
    await context.addInitScript(lang=>{localStorage.setItem('tolfLanguage',lang);Object.defineProperties(navigator,{platform:{get:()=> 'iPhone'},maxTouchPoints:{get:()=>5}});},lang);
+   const reference=await context.newPage();
+   await reference.route('**/*',route=>{
+    if(route.request().resourceType()==='script')return route.fulfill({contentType:'application/javascript',body:''});
+    return new URL(route.request().url()).origin===origin?route.continue():route.abort();
+   });
+   await reference.goto(origin+'/.smartdns-reference/',{waitUntil:'networkidle'});
+   await reference.evaluate(()=>{document.getElementById('deviceCard').classList.remove('hidden');document.getElementById('deviceForm').classList.remove('hidden');});
+   const standard={active:await appearance(reference,'.platform-option.active'),inactive:await appearance(reference,'#platformOptions [data-platform="android"]'),primary:await appearance(reference,'#addDeviceButton'),secondary:await appearance(reference,'#cancelDeviceButton'),input:await appearance(reference,'#deviceName')};
+   await reference.screenshot({path:'/tmp/tolf-shadowrocket-reference-'+width+'-'+colorScheme+'.png',fullPage:true});
    const page=await context.newPage(),errors=[],unknown=new Set();let login=null;
    page.on('pageerror',error=>errors.push(error.message));
    await page.route('**/*',async route=>{
@@ -46,6 +59,9 @@ const http=require('node:http'),fs=require('node:fs'),fsp=require('node:fs/promi
    });
    await page.goto(origin+'/',{waitUntil:'networkidle'});
    await page.waitForFunction(()=>window.tolfSetupMode&&window.tolfAccountState?.authenticated);
+   assert.deepEqual(await appearance(page,'#platformIos'),standard.active,'Active platform must match Smart DNS');
+   assert.deepEqual(await appearance(page,'#platformAndroid'),standard.inactive,'Outlined platform must match Smart DNS');
+   assert.deepEqual(await appearance(page,'#manualSetupLink'),standard.inactive,'Outlined mode must match Smart DNS');
    assert.equal(await page.locator('#vpnProtocolDropdown').isVisible(),false,'No global protocol before mode selection');
    await page.locator('#manualSetupLink').click();
    await page.waitForFunction(()=>document.body.classList.contains('ios-manual-setup'));
@@ -56,8 +72,10 @@ const http=require('node:http'),fs=require('node:fs'),fsp=require('node:fs/promi
    assert.equal(await page.locator('#quickStartLink').getAttribute('aria-disabled'),'true');
    await page.locator('#vpnProtocolDropdown .vpn-dropdown-button').click();await page.locator('#vpnProtocolDropdown [data-value="ikev2"]').click();
    assert.equal(await page.locator('#quickStartLink').getAttribute('aria-disabled'),'false');
-   const selected=await page.locator('#quickSetupLink').evaluate(el=>({fill:getComputedStyle(el).backgroundColor,color:getComputedStyle(el).color,radius:getComputedStyle(el).borderRadius}));
-   assert.equal(selected.fill,colorScheme==='dark'?'rgb(181, 210, 255)':'rgb(23, 79, 158)');assert.equal(selected.radius,'7px');
+   await page.mouse.move(0,0);
+   assert.deepEqual(await appearance(page,'#quickSetupLink'),standard.active,'Selected mode must match Smart DNS');
+   assert.deepEqual(await appearance(page,'#quickStartLink'),standard.primary,'Primary action must match Smart DNS');
+   assert.deepEqual(await appearance(page,'#vpnProtocolDropdown .vpn-dropdown-button'),standard.input,'Protocol field must match the Smart DNS field');
    await page.screenshot({path:'/tmp/tolf-shadowrocket-quick-'+width+'-'+colorScheme+'.png',fullPage:true});
    await page.locator('#manualSetupLink').click();
    const order=await page.locator('[data-ios-client]').evaluateAll(elements=>elements.map(el=>el.dataset.iosClient));assert.deepEqual(order,['native','cisco','shadowrocket']);
@@ -72,6 +90,9 @@ const http=require('node:http'),fs=require('node:fs'),fsp=require('node:fs/promi
    }
    await page.locator('[data-ios-client-select="shadowrocket"]').click();
    await page.locator('#srNewUsername').waitFor({state:'visible'});
+   assert.deepEqual(await appearance(page,'#srNewUsername'),standard.input,'Account field must match Smart DNS');
+   assert.deepEqual(await appearance(page,'#srAccountForm button[type="submit"]'),standard.primary,'Account action must match Smart DNS');
+   assert.deepEqual(await appearance(page,'#srGenerate'),standard.secondary,'Secondary action must match Smart DNS');
    await page.screenshot({path:'/tmp/tolf-shadowrocket-manual-'+width+'-'+colorScheme+'.png',fullPage:true});
    await page.locator('#srNewUsername').fill('test-user');await page.locator('#srNewPassword').fill('Test_only_2026_Secret');await page.locator('#srRepeatPassword').fill('Test_only_2026_Secret');
    await page.locator('#srAccountForm button[type="submit"]').click();await page.locator('#srSavedCredentials').waitFor({state:'visible'});
@@ -89,6 +110,6 @@ const http=require('node:http'),fs=require('node:fs'),fsp=require('node:fs/promi
    }
    assert.deepEqual(errors,[],'Runtime errors; mocked optional endpoints: '+[...unknown].join(','));await context.close();
   }
-  console.log('PASS: actual page scripts, independent mode switching, scoped protocols, approved button colors, client order, local downloads, Android/Windows, RU/LV/EN and light/dark at 320/390/1024px');
+  console.log('PASS: actual page scripts, controls compared with Smart DNS, independent mode switching, scoped protocols, client order, local downloads, Android/Windows, RU/LV/EN and light/dark at 320/390/1024px');
  }finally{await browser.close();await new Promise(resolve=>server.close(resolve));}
 })().catch(error=>{console.error(error);process.exit(1);});

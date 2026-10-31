@@ -21,10 +21,10 @@ body.ios-manual-setup .ios-manual-client-body > #iosManualShared > .vpn-entry-fi
 #shadowrocketSetup .sr-field input { box-sizing:border-box;width:100%;min-width:0;min-height:44px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--card);color:var(--text);font:inherit;font-size:16px; }
 #shadowrocketSetup .sr-password-row { display:flex;gap:8px; }
 #shadowrocketSetup .sr-password-row input { flex:1; }
-#shadowrocketSetup .sr-password-row button { flex:0 0 auto;min-height:44px; }
+#shadowrocketSetup .sr-password-row button { flex:0 0 auto;min-height:48px; }
 #shadowrocketSetup .sr-note { color:var(--secondary);font-size:13px; }
 #shadowrocketSetup .sr-actions { display:flex;flex-wrap:wrap;gap:8px;margin:12px 0; }
-#shadowrocketSetup .sr-actions > * { margin:0;min-height:44px;max-width:100%; }
+#shadowrocketSetup .sr-actions > * { margin:0;min-height:48px;max-width:100%; }
 #shadowrocketSetup .sr-check { display:flex;align-items:center;gap:10px;min-height:44px; }
 #shadowrocketSetup .sr-check input { width:19px;height:19px;flex:0 0 19px; }
 #shadowrocketSetup .sr-saved { padding-bottom:18px;margin-bottom:18px;border-bottom:1px solid var(--border); }

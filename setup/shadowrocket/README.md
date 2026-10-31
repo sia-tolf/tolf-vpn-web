@@ -9,6 +9,17 @@ restores that client's fixed protocol. The existing IKEv2 and Cisco controls are
 moved, not copied. Browser checks load the actual page and its full script/style
 set, using mocked API responses and synthetic credentials only.
 
+## Control design
+
+The design reference is Smart DNS, repository `sia-tolf/tolf-dns-web`, commit
+`9c37c8c614e05b6e52e8fea65820728fb58bb413`. Reuse the existing shared TOLF
+button stylesheet and its tokens. Do not introduce a VPN-specific palette or
+borderless segmented controls. Platform/mode choices use the Smart DNS outlined
+and selected states; actions are 48px with the same borders, radii and typography.
+Browser checks compare computed colors and geometry directly with the checked-out
+Smart DNS page in light and dark themes. For local browser checks, put that exact
+reference checkout in `.smartdns-reference/`; CI prepares it automatically.
+
 Shadowrocket uses the same website username and password. Passkey-only users add
 credentials to their existing account. `createOnly: true` prevents a concurrent
 password creation from becoming an accidental reset. `/password/verify` checks
