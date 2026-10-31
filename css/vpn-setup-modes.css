@@ -65,7 +65,7 @@
 #quickSetupCard .ios-manual-client-symbol svg { width:21px;height:21px; }
 #quickSetupCard .ios-manual-chevron { color:var(--setup-muted); }
 #quickSetupCard .ios-manual-client-body { padding:18px;border-color:var(--setup-line); }
-#quickSetupCard :is(button.primary,button.secondary,a.button-link,.oc-action) {
+#quickSetupCard :is(button.primary,button.secondary,a.button-link) {
  box-sizing:border-box;min-height:44px;height:auto;padding:10px 15px;border:1px solid var(--setup-line);border-radius:8px;
  font:inherit;font-size:15px;font-weight:500;line-height:1.4;text-align:center;text-decoration:none;
  color:var(--setup-blue);background:var(--setup-surface);box-shadow:none;white-space:normal;
