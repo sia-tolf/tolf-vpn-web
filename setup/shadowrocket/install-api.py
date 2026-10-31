@@ -55,10 +55,12 @@ def main():
             os.replace(name,target)
         finally:
             if os.path.exists(name):os.unlink(name)
+    installed=False
     try:
         # Recheck immediately before replacement, without changing user records.
         if target.read_bytes()!=original:raise RuntimeError('Concurrent API edit')
         write(candidate.encode())
+        installed=True
         subprocess.run(['systemctl','restart','tolf-api.service'],check=True,timeout=40)
         for attempt in range(6):
             try:
@@ -71,8 +73,11 @@ def main():
                 if attempt==5:raise
                 time.sleep(1)
     except Exception:
-        write(original)
-        subprocess.run(['systemctl','restart','tolf-api.service'],check=False,timeout=40)
+        if installed:
+            if target.read_bytes()!=candidate.encode():
+                raise RuntimeError('API changed after installation; refusing to overwrite a concurrent edit')
+            write(original)
+            subprocess.run(['systemctl','restart','tolf-api.service'],check=False,timeout=40)
         raise
     print(json.dumps({'installed':True,'backup':str(backup),'service':'tolf-api.service'}))
 
