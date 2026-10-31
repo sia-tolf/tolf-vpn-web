@@ -91,6 +91,8 @@ const http=require('node:http'),fs=require('node:fs'),fsp=require('node:fs/promi
    await page.locator('[data-ios-client-select="shadowrocket"]').click();
    await page.locator('#srNewUsername').waitFor({state:'visible'});
    assert.deepEqual(await appearance(page,'#srNewUsername'),standard.input,'Account field must match Smart DNS');
+   await reference.locator('#deviceName').focus();await page.locator('#srNewUsername').focus();
+   assert.deepEqual(await appearance(page,'#srNewUsername'),await appearance(reference,'#deviceName'),'Focused field must match Smart DNS');
    assert.deepEqual(await appearance(page,'#srAccountForm button[type="submit"]'),standard.primary,'Account action must match Smart DNS');
    assert.deepEqual(await appearance(page,'#srGenerate'),standard.secondary,'Secondary action must match Smart DNS');
    await page.screenshot({path:'/tmp/tolf-shadowrocket-manual-'+width+'-'+colorScheme+'.png',fullPage:true});

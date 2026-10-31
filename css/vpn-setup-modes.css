@@ -30,6 +30,10 @@
  font-family:inherit;font-size:16px;font-weight:400;line-height:normal;
 }
 #quickSetupCard .vpn-dropdown-button { height:44px; }
+#quickSetupCard textarea.settings-input { min-height:70px; }
+#quickSetupCard :is(.settings-input,.settings-select),#shadowrocketSetup .sr-field input { outline:none; }
+#quickSetupCard :is(.settings-input,.settings-select):focus,#shadowrocketSetup .sr-field input:focus { border-color:#7c7c82; }
+#quickSetupCard .vpn-dropdown-value-meta { color:#6e6e73; }
 #quickSetupCard .vpn-dropdown.open .vpn-dropdown-button { border-radius:11px 11px 0 0; }
 #quickSetupCard .vpn-dropdown-menu { background:var(--tolf-card); }
 #quickSetupCard .vpn-protocol-explanation { margin:0 0 14px; }
