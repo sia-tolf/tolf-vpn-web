@@ -80,7 +80,6 @@ body:not([data-vpn-setup-mode="manual"]) #quickSetupCard #quickSetupLink { borde
 #quickSetupCard #shadowrocketSetup .sr-file-actions { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch; }
 #quickSetupCard :is(#srShareConfig,#srDownloadConfig,#srBack) { width:100%;min-width:0;max-width:none;height:auto;padding:10px 8px; }
 #quickSetupCard #srBack { width:calc((100% - 10px)/2); }
-#quickSetupCard #shadowrocketSetup .sr-password-row button { min-height:48px; }
 #quickSetupCard #shadowrocketSetup .sr-field > span:first-child { color:var(--tolf-muted);font-size:13px;font-weight:400; }
 #quickSetupCard #shadowrocketSetup h3 { font-size:18px;font-weight:600; }
 #quickSetupCard #shadowrocketSetup .sr-note { color:var(--tolf-muted); }
@@ -89,11 +88,11 @@ body:not([data-vpn-setup-mode="manual"]) #quickSetupCard #quickSetupLink { borde
 #quickSetupCard .vpn-page-tools > .connection-page-action { min-width:0;margin:0; }
 #quickSetupCard .vpn-page-tools .button-link { display:flex;width:100%;margin:0; }
 #quickSetupCard #ciscoClientInstall .vpn-client-install-row > .button-link { margin:12px 0; }
+#quickSetupCard .vpn-client-install-row a.button-link { width:100%;min-width:0;max-width:none; }
 @media(min-width:700px) {
  #quickSetupCard .vpn-client-install-row { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:center;gap:10px;margin:12px 0; }
  #quickSetupCard #ciscoClientInstall .vpn-client-install-row > :is(.button-link,.cisco-install-link,.cisco-install-confirm),
  #quickSetupCard #shadowrocketSetup .vpn-client-install-row > :is(.sr-actions,.sr-check) { min-width:0;margin:0; }
- #quickSetupCard .vpn-client-install-row a.button-link { width:100%;min-width:0;max-width:none; }
  #quickSetupCard .vpn-client-install-row > :is(.cisco-install-confirm,.sr-check) { min-height:48px; }
  #quickSetupCard .vpn-client-install-row > .cisco-install-confirm input { flex:0 0 20px; }
 }

@@ -119,6 +119,9 @@ const http=require('node:http'),fs=require('node:fs'),fsp=require('node:fs/promi
    await page.locator('#srAccountForm button[type="submit"]').click();await page.locator('#srSavedCredentials').waitFor({state:'visible'});
    assert.equal(await page.locator('#srPassword').inputValue(),'Test_only_2026_Secret');
    await page.screenshot({path:'/tmp/tolf-shadowrocket-pending-'+width+'-'+colorScheme+'.png',fullPage:true});
+   await page.locator('#srPasswordToggle').click();
+   await page.screenshot({path:'/tmp/tolf-shadowrocket-password-visible-'+width+'-'+colorScheme+'.png',fullPage:true});
+   await page.locator('#srPasswordToggle').click();
    await auditButtons('shadowrocket-settings');
    await page.locator('#srInstalled').check();
    await page.screenshot({path:'/tmp/tolf-shadowrocket-prepare-'+width+'-'+colorScheme+'.png',fullPage:true});

@@ -19,9 +19,14 @@ body.ios-manual-setup .ios-manual-client-body > #iosManualShared > .vpn-entry-fi
 #shadowrocketSetup .sr-form { display:grid;gap:12px; }
 #shadowrocketSetup .sr-field { display:grid;gap:6px;min-width:0; }
 #shadowrocketSetup .sr-field input { box-sizing:border-box;width:100%;min-width:0;min-height:44px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--card);color:var(--text);font:inherit;font-size:16px; }
-#shadowrocketSetup .sr-password-row { display:flex;gap:8px; }
-#shadowrocketSetup .sr-password-row input { flex:1; }
-#shadowrocketSetup .sr-password-row button { flex:0 0 auto;min-height:48px; }
+#shadowrocketSetup .sr-password-row { position:relative;display:block;min-width:0; }
+#shadowrocketSetup .sr-field .sr-password-row > input { width:100%;padding-right:50px; }
+#shadowrocketSetup .sr-password-toggle { position:absolute;top:50%;right:1px;transform:translateY(-50%);display:inline-flex;align-items:center;justify-content:center;width:44px;min-width:44px;height:44px;min-height:44px;margin:0;padding:0;border:0;border-radius:9px;background:transparent;color:var(--tolf-blue);box-shadow:none;cursor:pointer; }
+#shadowrocketSetup .sr-password-toggle:hover:not(:disabled) { background:var(--tolf-secondary-hover); }
+#shadowrocketSetup .sr-password-toggle:focus-visible { outline:2px solid var(--tolf-outline);outline-offset:-4px; }
+#shadowrocketSetup .sr-password-toggle svg { width:22px;height:22px; }
+#shadowrocketSetup .sr-eye-slash { display:none; }
+#shadowrocketSetup .sr-password-toggle[aria-pressed="true"] .sr-eye-slash { display:block; }
 #shadowrocketSetup .sr-note { color:var(--secondary);font-size:13px; }
 #shadowrocketSetup .sr-actions { display:flex;flex-wrap:wrap;gap:8px;margin:12px 0; }
 #shadowrocketSetup .sr-actions > * { margin:0;min-height:48px;max-width:100%; }

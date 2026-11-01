@@ -15,7 +15,10 @@ to the manual tab. A short translated instruction precedes the three iOS clients
 
 On wide screens (700px and above), Cisco and Shadowrocket installation controls
 share one row: the installation button takes the left half and its confirmation
-checkbox is centered in the right half. Narrow screens retain stacked controls.
+checkbox is centered in the right half. Narrow screens retain stacked controls
+with the installation button filling the full content width. Password fields
+also fill the content width and use an accessible eye control inside the field
+to show or hide the password; no separate text button takes field width.
 
 ## Control design
 
