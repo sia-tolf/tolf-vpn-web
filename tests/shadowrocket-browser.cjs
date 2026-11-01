@@ -75,9 +75,11 @@ const http=require('node:http'),fs=require('node:fs'),fsp=require('node:fs/promi
    await page.waitForFunction(()=>window.tolfSetupMode&&window.tolfAccountState?.authenticated);
    assert.deepEqual(await appearance(page,'#manualSetupLink'),standard.inactive,'Outlined mode must match Smart DNS');
    assert.equal(await page.locator('#vpnProtocolDropdown').isVisible(),false,'No global protocol before mode selection');
+   await page.screenshot({path:'/tmp/tolf-shadowrocket-start-'+width+'-'+colorScheme+'.png',fullPage:true});
    await page.locator('#manualSetupLink').click();
    await page.waitForFunction(()=>document.body.classList.contains('ios-manual-setup'));
    assert.equal(await page.locator('#vpnProtocolDropdown').isVisible(),false,'iOS manual uses client-specific protocols');
+   await page.screenshot({path:'/tmp/tolf-shadowrocket-choices-'+width+'-'+colorScheme+'.png',fullPage:true});
    await page.locator('#quickSetupLink').click();
    await page.locator('#quickModePanel').waitFor({state:'visible'});
    assert.equal(await page.locator('#vpnProtocolDropdown').isVisible(),true,'Can return to quick mode before selecting a protocol');

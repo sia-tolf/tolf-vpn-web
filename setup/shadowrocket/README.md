@@ -9,6 +9,10 @@ restores that client's fixed protocol. The existing IKEv2 and Cisco controls are
 moved, not copied. Browser checks load the actual page and its full script/style
 set, using mocked API responses and synthetic credentials only.
 
+Before choosing a mode, quick setup is highlighted as the recommended action;
+no panel opens until the user selects a mode. Manual selection moves the highlight
+to the manual tab. A short translated instruction precedes the three iOS clients.
+
 ## Control design
 
 The design reference is Smart DNS, repository `sia-tolf/tolf-dns-web`, commit

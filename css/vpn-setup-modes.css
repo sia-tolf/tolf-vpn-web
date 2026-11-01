@@ -15,7 +15,9 @@
  background:var(--tolf-card);color:var(--tolf-action-text);
  font-family:inherit;font-size:16px;font-weight:500;line-height:1.2;text-align:center;white-space:normal;cursor:pointer;box-shadow:none;opacity:1;
 }
-#quickSetupCard .vpn-setup-tab[aria-selected="true"] { border-color:var(--tolf-blue);background:var(--tolf-blue);color:#fff;font-weight:600;box-shadow:none; }
+/* Quick setup is recommended before a mode is chosen; panels still open on click. */
+#quickSetupCard .vpn-setup-tab[aria-selected="true"],
+body:not([data-vpn-setup-mode="manual"]) #quickSetupCard #quickSetupLink { border-color:var(--tolf-blue);background:var(--tolf-blue);color:#fff;font-weight:600;box-shadow:none; }
 #quickSetupCard .vpn-setup-tab:hover:not(:disabled):not([aria-selected="true"]) { background:var(--tolf-secondary-hover); }
 #quickSetupCard .vpn-setup-tab:disabled { opacity:1;cursor:default; }
 #quickSetupCard .vpn-setup-mode-panel { margin:0; }
@@ -60,6 +62,7 @@
 #quickSetupCard #vpnCard .card-topline > h2 { display:none; }
 #quickSetupCard #vpnCard.manual-protocol-pending #iosManualShared > :not(#manualProtocolField) { display:none!important; }
 #quickSetupCard #manualProtocolField { margin-bottom:18px; }
+#quickSetupCard #iosManualChoiceHelp { margin:0 0 12px;color:var(--tolf-muted);font-size:13px;font-weight:400;line-height:1.4; }
 #quickSetupCard #iosManualClients { gap:12px;margin-top:0; }
 /* Disclosure cards use the same outlined and selected states as device choices. */
 #quickSetupCard .ios-manual-client { border:0;background:transparent; }
