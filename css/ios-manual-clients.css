@@ -22,7 +22,7 @@ body.ios-manual-setup .ios-manual-client-body > #iosManualShared > .vpn-entry-fi
 #shadowrocketSetup .sr-password-row { position:relative;display:block;min-width:0; }
 #shadowrocketSetup .sr-field .sr-password-row > input { width:100%;padding-right:50px; }
 #shadowrocketSetup .sr-password-toggle { position:absolute;top:50%;right:1px;transform:translateY(-50%);display:inline-flex;align-items:center;justify-content:center;width:44px;min-width:44px;height:44px;min-height:44px;margin:0;padding:0;border:0;border-radius:9px;background:transparent;color:var(--tolf-blue);box-shadow:none;cursor:pointer; }
-#shadowrocketSetup .sr-password-toggle:hover:not(:disabled) { background:var(--tolf-secondary-hover); }
+#shadowrocketSetup .sr-password-toggle:hover:not(:disabled) { background:transparent;color:var(--tolf-blue-hover); }
 #shadowrocketSetup .sr-password-toggle:focus-visible { outline:2px solid var(--tolf-outline);outline-offset:-4px; }
 #shadowrocketSetup .sr-password-toggle svg { width:22px;height:22px; }
 #shadowrocketSetup .sr-eye-slash { display:none; }

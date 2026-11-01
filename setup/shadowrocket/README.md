@@ -19,6 +19,8 @@ checkbox is centered in the right half. Narrow screens retain stacked controls
 with the installation button filling the full content width. Password fields
 also fill the content width and use an accessible eye control inside the field
 to show or hide the password; no separate text button takes field width.
+Eye controls stay transparent in both themes, including hover, so they do not
+introduce a separate filled button inside the white input.
 
 ## Control design
 
