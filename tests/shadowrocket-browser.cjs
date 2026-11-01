@@ -70,6 +70,7 @@ const http=require('node:http'),fs=require('node:fs'),fsp=require('node:fs/promi
    await page.locator('#quickModePanel').waitFor({state:'visible'});
    assert.equal(await page.locator('#vpnProtocolDropdown').isVisible(),true,'Can return to quick mode before selecting a protocol');
    assert.equal(await page.locator('#quickStartLink').getAttribute('aria-disabled'),'true');
+   await page.screenshot({path:'/tmp/tolf-shadowrocket-quick-disabled-'+width+'-'+colorScheme+'.png',fullPage:true});
    await page.locator('#vpnProtocolDropdown .vpn-dropdown-button').click();await page.locator('#vpnProtocolDropdown [data-value="ikev2"]').click();
    assert.equal(await page.locator('#quickStartLink').getAttribute('aria-disabled'),'false');
    await page.mouse.move(0,0);
@@ -112,6 +113,7 @@ const http=require('node:http'),fs=require('node:fs'),fsp=require('node:fs/promi
     assert.equal(await page.locator('#iosManualClients').isVisible(),false);
     assert.equal(await page.locator('#manualProtocolField #vpnProtocolDropdown').isVisible(),true);
     await page.locator('#quickSetupLink').click();assert.equal(await page.locator('#quickModePanel #vpnProtocolDropdown').isVisible(),true);
+    await page.screenshot({path:'/tmp/tolf-shadowrocket-quick-'+platform+'-'+width+'-'+colorScheme+'.png',fullPage:true});
     await page.locator('#manualSetupLink').click();assert.equal(await page.locator('#manualProtocolField #vpnProtocolDropdown').isVisible(),true);
    }
    assert.deepEqual(errors,[],'Runtime errors; mocked optional endpoints: '+[...unknown].join(','));await context.close();

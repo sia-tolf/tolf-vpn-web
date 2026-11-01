@@ -50,8 +50,8 @@
 #quickSetupCard :is(button.secondary,a.secondary):hover:not(:disabled):not([aria-disabled="true"]) { background:var(--tolf-secondary-hover);border-color:var(--tolf-outline); }
 #quickSetupCard :is(button.primary,a.primary):is(:disabled,[aria-disabled="true"]) { opacity:1;background:var(--tolf-disabled-bg);border-color:var(--tolf-disabled-bg);color:var(--tolf-disabled-text); }
 #quickSetupCard :is(button.secondary,a.secondary):is(:disabled,[aria-disabled="true"]) { opacity:.5; }
-#quickSetupCard :is(#quickStartLink,#srAccountForm button.primary) { width:220px;min-width:220px;max-width:220px; }
-#quickSetupCard #quickStartLink { margin-top:18px; }
+#quickSetupCard #srAccountForm button.primary { width:220px;min-width:220px;max-width:220px; }
+#quickSetupCard #quickStartLink { display:flex;width:100%;min-width:0;max-width:none;margin-top:18px; }
 #quickSetupCard #vpnCard { margin:0;padding:0;width:100%; }
 #quickSetupCard #vpnCard > .card { padding:0;margin:0;background:transparent;border:0;border-radius:0;box-shadow:none; }
 #quickSetupCard #vpnCard > .card > .card-content { padding:0; }
@@ -89,7 +89,7 @@
  #quickSetupCard > .card-content { padding:18px; }
  #quickSetupCard #myVpnPlatforms .platform-switcher { grid-template-columns:repeat(2,minmax(0,1fr)); }
  #quickSetupCard #myVpnPlatforms .platform-button:last-child { grid-column:1/-1; }
- #quickSetupCard :is(#quickStartLink,#srAccountForm button.primary) { width:100%;min-width:0;max-width:none; }
+ #quickSetupCard #srAccountForm button.primary { width:100%;min-width:0;max-width:none; }
  #quickSetupCard .ios-manual-client-body { padding:14px; }
  #quickSetupCard .vpn-page-tools { grid-template-columns:minmax(0,1fr); }
 }
