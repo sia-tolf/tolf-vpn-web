@@ -13,6 +13,10 @@ Before choosing a mode, quick setup is highlighted as the recommended action;
 no panel opens until the user selects a mode. Manual selection moves the highlight
 to the manual tab. A short translated instruction precedes the three iOS clients.
 
+On wide screens (700px and above), Cisco and Shadowrocket installation controls
+share one row: the installation button takes the left half and its confirmation
+checkbox is centered in the right half. Narrow screens retain stacked controls.
+
 ## Control design
 
 The design reference is Smart DNS, repository `sia-tolf/tolf-dns-web`, commit

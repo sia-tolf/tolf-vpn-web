@@ -83,7 +83,9 @@
    window.dispatchEvent(new Event('tolf:cisco-install-confirmed'));render();
   });
   const text=document.createElement('span');text.textContent=c.confirmed;
-  label.append(check,text);host.append(title,installControl,label);
+  label.append(check,text);
+  const row=document.createElement('div');row.className='vpn-client-install-row';row.append(installControl,label);
+  host.append(title,row);
   // Mode selection is independent of protocol and installation confirmation.
   for(const id of ['quickSetupLink','manualSetupLink'])document.getElementById(id)?.setAttribute('aria-disabled','false');
  }

@@ -50,8 +50,10 @@
     <div id="srConfigPanel" hidden>
       <div id="srSavedCredentials" class="sr-saved" hidden><p data-sr-text="saved"></p><div class="sr-actions"><button id="srSaveCredentials" type="button" class="secondary" data-sr-text="saveCredentials"></button></div><p class="sr-note" data-sr-text="plain"></p></div>
       <h3 data-sr-text="configTitle"></h3><p class="sr-note" data-sr-text="installHelp"></p>
-      <div class="sr-actions"><a class="button-link secondary" href="https://apps.apple.com/app/id932747118" target="_blank" rel="noopener noreferrer" data-sr-text="install"></a></div>
-      <label class="sr-check"><input id="srInstalled" type="checkbox"><span data-sr-text="installed"></span></label>
+      <div class="vpn-client-install-row">
+        <div class="sr-actions"><a class="button-link secondary" href="https://apps.apple.com/app/id932747118" target="_blank" rel="noopener noreferrer" data-sr-text="install"></a></div>
+        <label class="sr-check"><input id="srInstalled" type="checkbox"><span data-sr-text="installed"></span></label>
+      </div>
       <form id="srConfigForm" class="sr-form">
         <label class="sr-field"><span data-sr-text="username"></span><input id="srUsername" type="text" autocomplete="username" readonly></label>
         <label class="sr-field"><span data-sr-text="password"></span><span class="sr-password-row"><input id="srPassword" type="password" autocomplete="current-password" required minlength="15" maxlength="128"><button type="button" class="secondary" data-sr-toggle="srPassword" data-sr-text="show"></button></span></label>

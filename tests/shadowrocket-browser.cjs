@@ -98,6 +98,7 @@ const http=require('node:http'),fs=require('node:fs'),fsp=require('node:fs/promi
    assert.equal(await page.locator('.ios-manual-client-symbol').count(),3);
    for(const [client,expected,other] of [['native','ikev2','anyconnect'],['cisco','anyconnect','ikev2']]){
     await page.locator('[data-ios-client-select="'+client+'"]').click();
+    if(client==='cisco')await page.screenshot({path:'/tmp/tolf-shadowrocket-cisco-install-'+width+'-'+colorScheme+'.png',fullPage:true});
     await auditButtons('ios-'+client);
     await page.locator('#quickSetupLink').click();await page.locator('#vpnProtocolDropdown .vpn-dropdown-button').click();await page.locator('#vpnProtocolDropdown [data-value="'+other+'"]').click();
     await page.locator('#manualSetupLink').click();assert.equal(await page.evaluate(()=>window.getVpnTransport()),expected);
