@@ -1,5 +1,5 @@
 /* Smart DNS control standard; colors come from the shared TOLF stylesheet. */
-#quickSetupCard { color:var(--tolf-ink);background:var(--tolf-card);border:1px solid var(--tolf-line);border-radius:18px;font-size:16px;line-height:normal; }
+#quickSetupCard { --tolf-disabled-bg:var(--tolf-blue);--tolf-disabled-text:#fff;color:var(--tolf-ink);background:var(--tolf-card);border:1px solid var(--tolf-line);border-radius:18px;font-size:16px;line-height:normal; }
 #quickSetupCard [hidden] { display:none!important; }
 #quickSetupCard > .card-content { padding:22px; }
 #quickSetupCard > .card-content > h2 { margin:0 0 12px;text-align:center;font-size:22px;font-weight:700;letter-spacing:-.3px;color:inherit; }
@@ -17,7 +17,7 @@
 }
 #quickSetupCard .vpn-setup-tab[aria-selected="true"] { border-color:var(--tolf-blue);background:var(--tolf-blue);color:#fff;font-weight:600;box-shadow:none; }
 #quickSetupCard .vpn-setup-tab:hover:not(:disabled):not([aria-selected="true"]) { background:var(--tolf-secondary-hover); }
-#quickSetupCard .vpn-setup-tab:disabled { opacity:.5;cursor:default; }
+#quickSetupCard .vpn-setup-tab:disabled { opacity:1;cursor:default; }
 #quickSetupCard .vpn-setup-mode-panel { margin:0; }
 #quickSetupCard .vpn-protocol-field { margin:0 0 14px; }
 #quickSetupCard .vpn-compact-label { color:var(--tolf-muted);font-size:13px;font-weight:400;margin-bottom:7px; }
@@ -49,11 +49,10 @@
 #quickSetupCard :is(button.primary,a.primary):hover:not(:disabled):not([aria-disabled="true"]) { background:var(--tolf-blue-hover);border-color:var(--tolf-blue-hover); }
 #quickSetupCard :is(button.secondary,a.secondary):hover:not(:disabled):not([aria-disabled="true"]) { background:var(--tolf-secondary-hover);border-color:var(--tolf-outline); }
 #quickSetupCard :is(button.primary,a.primary):is(:disabled,[aria-disabled="true"]) { opacity:1;background:var(--tolf-disabled-bg);border-color:var(--tolf-disabled-bg);color:var(--tolf-disabled-text); }
-#quickSetupCard :is(button.secondary,a.secondary):is(:disabled,[aria-disabled="true"]) { opacity:.5; }
+/* Availability changes behavior, not the approved action palette. */
+#quickSetupCard :is(button,a.button-link):is(:disabled,[aria-disabled="true"]) { opacity:1;cursor:default; }
 #quickSetupCard #srAccountForm button.primary { width:220px;min-width:220px;max-width:220px; }
 #quickSetupCard #quickStartLink { display:flex;width:100%;min-width:0;max-width:none;margin-top:18px; }
-/* Unavailable setup keeps the approved blue; aria-disabled still blocks launch. */
-#quickSetupCard #quickStartLink[aria-disabled="true"] { opacity:1;background:var(--tolf-blue);border-color:var(--tolf-blue);color:#fff;cursor:default; }
 #quickSetupCard #vpnCard { margin:0;padding:0;width:100%; }
 #quickSetupCard #vpnCard > .card { padding:0;margin:0;background:transparent;border:0;border-radius:0;box-shadow:none; }
 #quickSetupCard #vpnCard > .card > .card-content { padding:0; }

@@ -18,12 +18,18 @@ The iOS / Android / Windows control retains the original unified three-part
 switcher from `css/styles.css`, including on narrow screens. Do not replace it
 with separate platform buttons. Mode choices use the Smart DNS outlined and
 selected states; actions are 48px with the same borders, radii and typography.
-The full-width quick-setup action keeps the approved blue and white label in
-both availability states; `aria-disabled` and the protocol check block launch
-until a protocol is selected, without the rejected grey-blue disabled fill.
+All setup buttons retain their approved action colors in both availability
+states. Disabled primary actions use the same blue and white label, including
+quick setup, Shadowrocket, Cisco and Windows actions. The shared disabled tokens
+are mapped within `#quickSetupCard`; do not add per-button palette exceptions.
+`disabled`, `aria-disabled` and existing validation still block unavailable actions.
 Browser checks compare computed colors and geometry directly with the checked-out
 Smart DNS page in light and dark themes. For local browser checks, put that exact
 reference checkout in `.smartdns-reference/`; CI prepares it automatically.
+The preview artifact also contains an inventory of every setup button in its
+current and temporarily disabled state across quick setup, iOS clients,
+Shadowrocket account/settings/file screens, Android and Windows. Review the
+`unapproved` entries in these JSON inventories before publication.
 
 Shadowrocket uses the same website username and password. Passkey-only users add
 credentials to their existing account. `createOnly: true` prevents a concurrent

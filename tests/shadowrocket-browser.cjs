@@ -32,6 +32,20 @@ const http=require('node:http'),fs=require('node:fs'),fsp=require('node:fs/promi
    const standard={active:await appearance(reference,'.platform-option.active'),inactive:await appearance(reference,'#platformOptions [data-platform="android"]'),primary:await appearance(reference,'#addDeviceButton'),secondary:await appearance(reference,'#cancelDeviceButton'),input:await appearance(reference,'#deviceName')};
    await reference.screenshot({path:'/tmp/tolf-shadowrocket-reference-'+width+'-'+colorScheme+'.png',fullPage:true});
    const page=await context.newPage(),errors=[],unknown=new Set();let login=null;
+   const buttonAudit=[];
+   const auditButtons=async phase=>buttonAudit.push({phase,buttons:await page.locator('#quickSetupCard').evaluate(root=>{
+    const appearance=el=>{const css=getComputedStyle(el);return Object.fromEntries(['backgroundColor','borderTopColor','color','opacity','borderTopWidth','borderRadius','fontSize','fontWeight','minHeight'].map(key=>[key,css[key]]));};
+    return [...root.querySelectorAll('button,a.button-link')].map(el=>{
+     const disabled=el.getAttribute('disabled'),aria=el.getAttribute('aria-disabled');
+     const record={id:el.id,label:el.textContent.trim().replace(/\s+/g,' '),classes:el.className,visible:Boolean(el.getClientRects().length),current:appearance(el)};
+     // Presentation audit: no clicks or API calls; restore attributes immediately.
+     if(el.tagName==='BUTTON')el.disabled=true;
+     el.setAttribute('aria-disabled','true');record.disabled=appearance(el);
+     if(disabled===null)el.removeAttribute('disabled');else el.setAttribute('disabled',disabled);
+     if(aria===null)el.removeAttribute('aria-disabled');else el.setAttribute('aria-disabled',aria);
+     return record;
+    });
+   })});
    page.on('pageerror',error=>errors.push(error.message));
    await page.route('**/*',async route=>{
     const req=route.request(),url=new URL(req.url());
@@ -69,6 +83,7 @@ const http=require('node:http'),fs=require('node:fs'),fsp=require('node:fs/promi
    assert.equal(await page.locator('#vpnProtocolDropdown').isVisible(),true,'Can return to quick mode before selecting a protocol');
    assert.equal(await page.locator('#quickStartLink').getAttribute('aria-disabled'),'true');
    await page.screenshot({path:'/tmp/tolf-shadowrocket-quick-disabled-'+width+'-'+colorScheme+'.png',fullPage:true});
+   await auditButtons('quick-setup');
    await page.locator('#vpnProtocolDropdown .vpn-dropdown-button').click();await page.locator('#vpnProtocolDropdown [data-value="ikev2"]').click();
    assert.equal(await page.locator('#quickStartLink').getAttribute('aria-disabled'),'false');
    await page.mouse.move(0,0);
@@ -81,6 +96,7 @@ const http=require('node:http'),fs=require('node:fs'),fsp=require('node:fs/promi
    assert.equal(await page.locator('.ios-manual-client-symbol').count(),3);
    for(const [client,expected,other] of [['native','ikev2','anyconnect'],['cisco','anyconnect','ikev2']]){
     await page.locator('[data-ios-client-select="'+client+'"]').click();
+    await auditButtons('ios-'+client);
     await page.locator('#quickSetupLink').click();await page.locator('#vpnProtocolDropdown .vpn-dropdown-button').click();await page.locator('#vpnProtocolDropdown [data-value="'+other+'"]').click();
     await page.locator('#manualSetupLink').click();assert.equal(await page.evaluate(()=>window.getVpnTransport()),expected);
     assert.equal(await page.locator('#iosManualBody-'+client).isVisible(),true);
@@ -95,14 +111,18 @@ const http=require('node:http'),fs=require('node:fs'),fsp=require('node:fs/promi
    assert.deepEqual(await appearance(page,'#srAccountForm button[type="submit"]'),standard.primary,'Account action must match Smart DNS');
    assert.deepEqual(await appearance(page,'#srGenerate'),standard.secondary,'Secondary action must match Smart DNS');
    await page.screenshot({path:'/tmp/tolf-shadowrocket-manual-'+width+'-'+colorScheme+'.png',fullPage:true});
+   await auditButtons('shadowrocket-account');
    await page.locator('#srNewUsername').fill('test-user');await page.locator('#srNewPassword').fill('Test_only_2026_Secret');await page.locator('#srRepeatPassword').fill('Test_only_2026_Secret');
    await page.locator('#srAccountForm button[type="submit"]').click();await page.locator('#srSavedCredentials').waitFor({state:'visible'});
    assert.equal(await page.locator('#srPassword').inputValue(),'Test_only_2026_Secret');
+   await page.screenshot({path:'/tmp/tolf-shadowrocket-pending-'+width+'-'+colorScheme+'.png',fullPage:true});
+   await auditButtons('shadowrocket-settings');
    await page.locator('#srInstalled').check();
    await page.screenshot({path:'/tmp/tolf-shadowrocket-prepare-'+width+'-'+colorScheme+'.png',fullPage:true});
    await page.locator('#srPrepare').click();await page.locator('#srReady').waitFor({state:'visible'});
    await page.locator('#srShareConfig').evaluate(el=>{el.hidden=false;});
    await page.screenshot({path:'/tmp/tolf-shadowrocket-ready-'+width+'-'+colorScheme+'.png',fullPage:true});
+   await auditButtons('shadowrocket-file');
    const overflow=await page.evaluate(()=>({width:innerWidth,content:document.documentElement.scrollWidth}));assert(overflow.content<=overflow.width,JSON.stringify(overflow));
    const downloadPromise=page.waitForEvent('download');await page.locator('#srDownloadConfig').click();const download=await downloadPromise;
    assert.equal(download.suggestedFilename(),'TOLF_Shadowrocket.conf');const content=fs.readFileSync(await download.path(),'utf8');assert.equal((content.match(/password=Test_only_2026_Secret/g)||[]).length,3);
@@ -113,7 +133,12 @@ const http=require('node:http'),fs=require('node:fs'),fsp=require('node:fs/promi
     await page.locator('#quickSetupLink').click();assert.equal(await page.locator('#quickModePanel #vpnProtocolDropdown').isVisible(),true);
     await page.screenshot({path:'/tmp/tolf-shadowrocket-quick-'+platform+'-'+width+'-'+colorScheme+'.png',fullPage:true});
     await page.locator('#manualSetupLink').click();assert.equal(await page.locator('#manualProtocolField #vpnProtocolDropdown').isVisible(),true);
+    await auditButtons(platform+'-manual');
    }
+   const rejected=new Set(['rgb(204, 213, 226)','rgb(53, 79, 110)','rgb(82, 100, 125)','rgb(177, 192, 209)']);
+   const unapproved=buttonAudit.flatMap(({phase,buttons})=>buttons.flatMap(button=>['current','disabled'].flatMap(state=>['backgroundColor','borderTopColor'].filter(key=>rejected.has(button[state][key])).map(key=>({phase,id:button.id,label:button.label,state,key,color:button[state][key]})))));
+   fs.writeFileSync('/tmp/tolf-shadowrocket-buttons-'+width+'-'+colorScheme+'.json',JSON.stringify({width,lang,colorScheme,unapproved,phases:buttonAudit},null,2));
+   console.log(JSON.stringify({audit:'My VPN buttons',width,colorScheme,phases:buttonAudit.length,checks:buttonAudit.reduce((sum,phase)=>sum+phase.buttons.length*2,0),unapproved:unapproved.length}));
    assert.deepEqual(errors,[],'Runtime errors; mocked optional endpoints: '+[...unknown].join(','));await context.close();
   }
   console.log('PASS: actual page scripts, controls compared with Smart DNS, independent mode switching, scoped protocols, client order, local downloads, Android/Windows, RU/LV/EN and light/dark at 320/390/1024px');

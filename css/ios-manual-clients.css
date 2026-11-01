@@ -28,7 +28,6 @@ body.ios-manual-setup .ios-manual-client-body > #iosManualShared > .vpn-entry-fi
 #shadowrocketSetup .sr-check { display:flex;align-items:center;gap:10px;min-height:44px; }
 #shadowrocketSetup .sr-check input { width:19px;height:19px;flex:0 0 19px; }
 #shadowrocketSetup .sr-saved { padding-bottom:18px;margin-bottom:18px;border-bottom:1px solid var(--border); }
-#shadowrocketSetup .sr-servers { display:flex;flex-wrap:wrap;gap:8px 16px;padding:0;list-style:none;overflow-wrap:anywhere;font-size:14px; }
 #shadowrocketSetup ol { margin:12px 0;padding-left:23px; }
 #shadowrocketSetup li { margin-bottom:8px; }
 #shadowrocketSetup .sr-message:empty { display:none; }

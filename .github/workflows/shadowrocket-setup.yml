@@ -36,4 +36,4 @@ jobs:
         if: always()
         with:
           name: shadowrocket-setup-preview
-          path: /tmp/tolf-shadowrocket-*.png
+          path: /tmp/tolf-shadowrocket-*
