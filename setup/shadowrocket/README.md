@@ -13,9 +13,14 @@ set, using mocked API responses and synthetic credentials only.
 
 The design reference is Smart DNS, repository `sia-tolf/tolf-dns-web`, commit
 `9c37c8c614e05b6e52e8fea65820728fb58bb413`. Reuse the existing shared TOLF
-button stylesheet and its tokens. Do not introduce a VPN-specific palette or
-borderless segmented controls. Platform/mode choices use the Smart DNS outlined
-and selected states; actions are 48px with the same borders, radii and typography.
+button stylesheet and its tokens. Do not introduce a VPN-specific palette.
+The iOS / Android / Windows control retains the original unified three-part
+switcher from `css/styles.css`, including on narrow screens. Do not replace it
+with separate platform buttons. Mode choices use the Smart DNS outlined and
+selected states; actions are 48px with the same borders, radii and typography.
+The full-width quick-setup action keeps the approved blue and white label in
+both availability states; `aria-disabled` and the protocol check block launch
+until a protocol is selected, without the rejected grey-blue disabled fill.
 Browser checks compare computed colors and geometry directly with the checked-out
 Smart DNS page in light and dark themes. For local browser checks, put that exact
 reference checkout in `.smartdns-reference/`; CI prepares it automatically.

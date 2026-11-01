@@ -59,8 +59,6 @@ const http=require('node:http'),fs=require('node:fs'),fsp=require('node:fs/promi
    });
    await page.goto(origin+'/',{waitUntil:'networkidle'});
    await page.waitForFunction(()=>window.tolfSetupMode&&window.tolfAccountState?.authenticated);
-   assert.deepEqual(await appearance(page,'#platformIos'),standard.active,'Active platform must match Smart DNS');
-   assert.deepEqual(await appearance(page,'#platformAndroid'),standard.inactive,'Outlined platform must match Smart DNS');
    assert.deepEqual(await appearance(page,'#manualSetupLink'),standard.inactive,'Outlined mode must match Smart DNS');
    assert.equal(await page.locator('#vpnProtocolDropdown').isVisible(),false,'No global protocol before mode selection');
    await page.locator('#manualSetupLink').click();

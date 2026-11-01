@@ -5,19 +5,19 @@
 #quickSetupCard > .card-content > h2 { margin:0 0 12px;text-align:center;font-size:22px;font-weight:700;letter-spacing:-.3px;color:inherit; }
 #quickSetupCard > .card-content > .card-description { margin:0 0 18px;color:var(--tolf-muted);line-height:1.4; }
 #quickSetupCard #myVpnPlatforms { margin:0 0 18px; }
-#quickSetupCard #myVpnPlatforms .platform-switcher { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));height:auto;gap:8px;padding:0;border:0;border-radius:0;background:transparent; }
 #quickSetupCard .vpn-setup-tabs { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:0;margin:0 0 22px;background:transparent;border:0;border-radius:0; }
-/* Smart DNS .platform-option: outlined inactive, blue/white active, 48px. */
-#quickSetupCard :is(.vpn-setup-tab,#myVpnPlatforms .platform-button) {
+/* Keep the original three-part platform switcher from styles.css. */
+/* Setup modes use the Smart DNS outlined and selected action states. */
+#quickSetupCard .vpn-setup-tab {
  box-sizing:border-box;display:flex;align-items:center;justify-content:center;width:100%;min-width:0;
  height:48px;min-height:48px;max-height:none;padding:0 14px;margin:0;
  border:1px solid var(--tolf-outline);border-radius:var(--tolf-radius);
  background:var(--tolf-card);color:var(--tolf-action-text);
  font-family:inherit;font-size:16px;font-weight:500;line-height:1.2;text-align:center;white-space:normal;cursor:pointer;box-shadow:none;opacity:1;
 }
-#quickSetupCard :is(.vpn-setup-tab[aria-selected="true"],#myVpnPlatforms .platform-button.active) { border-color:var(--tolf-blue);background:var(--tolf-blue);color:#fff;font-weight:600;box-shadow:none; }
-#quickSetupCard :is(.vpn-setup-tab,#myVpnPlatforms .platform-button):hover:not(:disabled):not([aria-selected="true"]):not(.active) { background:var(--tolf-secondary-hover); }
-#quickSetupCard :is(.vpn-setup-tab,#myVpnPlatforms .platform-button):disabled { opacity:.5;cursor:default; }
+#quickSetupCard .vpn-setup-tab[aria-selected="true"] { border-color:var(--tolf-blue);background:var(--tolf-blue);color:#fff;font-weight:600;box-shadow:none; }
+#quickSetupCard .vpn-setup-tab:hover:not(:disabled):not([aria-selected="true"]) { background:var(--tolf-secondary-hover); }
+#quickSetupCard .vpn-setup-tab:disabled { opacity:.5;cursor:default; }
 #quickSetupCard .vpn-setup-mode-panel { margin:0; }
 #quickSetupCard .vpn-protocol-field { margin:0 0 14px; }
 #quickSetupCard .vpn-compact-label { color:var(--tolf-muted);font-size:13px;font-weight:400;margin-bottom:7px; }
@@ -52,6 +52,8 @@
 #quickSetupCard :is(button.secondary,a.secondary):is(:disabled,[aria-disabled="true"]) { opacity:.5; }
 #quickSetupCard #srAccountForm button.primary { width:220px;min-width:220px;max-width:220px; }
 #quickSetupCard #quickStartLink { display:flex;width:100%;min-width:0;max-width:none;margin-top:18px; }
+/* Unavailable setup keeps the approved blue; aria-disabled still blocks launch. */
+#quickSetupCard #quickStartLink[aria-disabled="true"] { opacity:1;background:var(--tolf-blue);border-color:var(--tolf-blue);color:#fff;cursor:default; }
 #quickSetupCard #vpnCard { margin:0;padding:0;width:100%; }
 #quickSetupCard #vpnCard > .card { padding:0;margin:0;background:transparent;border:0;border-radius:0;box-shadow:none; }
 #quickSetupCard #vpnCard > .card > .card-content { padding:0; }
@@ -87,9 +89,11 @@
 @media(max-width:560px) {
  #quickSetupCard { border-radius:16px; }
  #quickSetupCard > .card-content { padding:18px; }
- #quickSetupCard #myVpnPlatforms .platform-switcher { grid-template-columns:repeat(2,minmax(0,1fr)); }
- #quickSetupCard #myVpnPlatforms .platform-button:last-child { grid-column:1/-1; }
  #quickSetupCard #srAccountForm button.primary { width:100%;min-width:0;max-width:none; }
  #quickSetupCard .ios-manual-client-body { padding:14px; }
  #quickSetupCard .vpn-page-tools { grid-template-columns:minmax(0,1fr); }
+}
+@media(max-width:360px) {
+ #myVpnPlatforms .platform-button { gap:4px;padding:0 2px;font-size:13px; }
+ #myVpnPlatforms .platform-icon { width:14px;height:14px;flex-basis:14px; }
 }
