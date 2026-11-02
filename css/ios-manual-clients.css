@@ -50,5 +50,5 @@ body.ios-manual-setup .ios-manual-client-body > #iosManualShared > .vpn-entry-fi
 #shadowrocketSetup .sr-direct-option input { margin:3px 0 0;accent-color:var(--tolf-blue); }
 #shadowrocketSetup .sr-direct-label { min-width:0;line-height:1.5;overflow-wrap:anywhere; }
 #shadowrocketSetup .sr-direct-domains { display:block;color:var(--secondary);font-size:13px; }
-#shadowrocketSetup .sr-direct-badge { display:inline-block;padding:1px 6px;border:1px solid currentColor;border-radius:6px;color:var(--tolf-blue);font-size:11px;vertical-align:middle; }
+#shadowrocketSetup .sr-direct-badge { display:inline-block;padding:1px 6px;border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:11px;vertical-align:middle; }
 #shadowrocketSetup .sr-direct-settings .sr-note { margin:8px 0; }

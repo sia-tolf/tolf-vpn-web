@@ -127,6 +127,18 @@ const http=require('node:http'),fs=require('node:fs'),fsp=require('node:fs/promi
    assert.equal(await page.locator('#srDirectRu').isChecked(),false,'Country hint must not enable a bypass');
    assert.equal(await page.locator('#srDirectLv').isChecked(),false,'Country hint is optional');
    await page.locator(width===390?'#srDirectLvRecommended':'#srDirectRuRecommended').waitFor({state:'visible'});
+   const badgeContrast=await page.locator(width===390?'#srDirectLvRecommended':'#srDirectRuRecommended').evaluate(el=>{
+    const rgb=value=>value.match(/[0-9.]+/g).slice(0,3).map(Number);
+    const luminance=values=>values.map(n=>n/255).map(n=>n<=.04045?n/12.92:((n+.055)/1.055)**2.4).reduce((sum,n,i)=>sum+n*[.2126,.7152,.0722][i],0);
+    let background='rgb(255,255,255)';
+    for(let node=el;node;node=node.parentElement) {
+     const value=getComputedStyle(node).backgroundColor;
+     if(value!=='transparent'&&value!=='rgba(0, 0, 0, 0)'){background=value;break;}
+    }
+    const values=[luminance(rgb(getComputedStyle(el).color)),luminance(rgb(background))].sort((a,b)=>b-a);
+    return (values[0]+.05)/(values[1]+.05);
+   });
+   assert(badgeContrast>=4.5,'Small recommendation text must remain legible in both themes: '+badgeContrast);
    await page.locator('#srDirectRu').check();await page.locator('#srDirectLv').check();
    await page.locator('#srInstalled').check();
    await page.screenshot({path:'/tmp/tolf-shadowrocket-prepare-'+width+'-'+colorScheme+'.png',fullPage:true});
