@@ -6,17 +6,33 @@ import sys
 import tempfile
 import types
 import unittest
+from unittest.mock import patch
 
-sys.path.insert(0, "/opt/tolf-api")
 CANDIDATE = Path(__file__).resolve().parents[2] / "setup/anyconnect/relay-api"
 def load(name, filename):
     spec = importlib.util.spec_from_file_location(name, CANDIDATE / filename)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
-endpoint = load("tolf_oc_endpoint", "tolf_oc_endpoint.py")
-sys.modules["tolf_oc_endpoint"] = endpoint
-profile = load("relay_mobileconfig", "tolf_oc_mobileconfig.py")
+# This unit test covers relay selection, not a production host's GeoIP data.
+# Keep classification deterministic and avoid importing files from /opt/tolf-api.
+location = types.SimpleNamespace(
+    recommendation=lambda address: "moscow" if address == "176.226.199.30" else None
+)
+with patch.dict(sys.modules, {"tolf_location": location}):
+    endpoint = load("tolf_oc_endpoint", "tolf_oc_endpoint.py")
+shortcuts = load("relay_shortcuts", "../tolf_oc_shortcuts.py")
+catalog_fixture = types.SimpleNamespace(LEGACY={
+    "moscow": {"host": "oc.tolf.is:4443", "name": "Moscow"},
+    "riga": {"host": "oc-riga.tolf.is:443", "name": "Riga"},
+    "us": {"host": endpoint.DIRECT, "name": "New York"},
+})
+with patch.dict(sys.modules, {
+    "tolf_oc_endpoint": endpoint,
+    "tolf_oc_shortcuts": shortcuts,
+    "tolf_node_catalog": catalog_fixture,
+}):
+    profile = load("relay_mobileconfig", "tolf_oc_mobileconfig.py")
 
 class RelayTests(unittest.TestCase):
     def test_country_selection_and_stable_profile_identity(self):

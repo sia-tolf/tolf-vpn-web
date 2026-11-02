@@ -55,6 +55,7 @@ const http=require('node:http'),fs=require('node:fs'),fsp=require('node:fs/promi
     if(req.method()==='OPTIONS')return route.fulfill({status:204,headers});
     let payload={};try{payload=req.postDataJSON()||{};}catch{}let data,status=200;
     switch(url.pathname){
+      case '/client-country':data={countryCode:width===390?'LV':'RU'};break;
      case '/me':data={authenticated:true,userId:'test-only-account',allowedServers:['riga','moscow','us'],vpn:{configured:true,username:'test-vpn',server:'riga'}};break;
      case '/quick-setup/capabilities':data={version:1};break;
      case '/oc/access/capabilities':data={issuance:true,ingresses:[{id:'moscow',host:'oc.tolf.is:4443'},{id:'riga',host:'oc-riga.tolf.is:443'},{id:'us',host:'oc-us-moscow.tolf.is:4443'}]};break;
@@ -123,6 +124,22 @@ const http=require('node:http'),fs=require('node:fs'),fsp=require('node:fs/promi
    await page.screenshot({path:'/tmp/tolf-shadowrocket-password-visible-'+width+'-'+colorScheme+'.png',fullPage:true});
    await page.locator('#srPasswordToggle').click();
    await auditButtons('shadowrocket-settings');
+   assert.equal(await page.locator('#srDirectRu').isChecked(),false,'Country hint must not enable a bypass');
+   assert.equal(await page.locator('#srDirectLv').isChecked(),false,'Country hint is optional');
+   await page.locator(width===390?'#srDirectLvRecommended':'#srDirectRuRecommended').waitFor({state:'visible'});
+   const badgeContrast=await page.locator(width===390?'#srDirectLvRecommended':'#srDirectRuRecommended').evaluate(el=>{
+    const rgb=value=>value.match(/[0-9.]+/g).slice(0,3).map(Number);
+    const luminance=values=>values.map(n=>n/255).map(n=>n<=.04045?n/12.92:((n+.055)/1.055)**2.4).reduce((sum,n,i)=>sum+n*[.2126,.7152,.0722][i],0);
+    let background='rgb(255,255,255)';
+    for(let node=el;node;node=node.parentElement) {
+     const value=getComputedStyle(node).backgroundColor;
+     if(value!=='transparent'&&value!=='rgba(0, 0, 0, 0)'){background=value;break;}
+    }
+    const values=[luminance(rgb(getComputedStyle(el).color)),luminance(rgb(background))].sort((a,b)=>b-a);
+    return (values[0]+.05)/(values[1]+.05);
+   });
+   assert(badgeContrast>=4.5,'Small recommendation text must remain legible in both themes: '+badgeContrast);
+   await page.locator('#srDirectRu').check();await page.locator('#srDirectLv').check();
    await page.locator('#srInstalled').check();
    await page.screenshot({path:'/tmp/tolf-shadowrocket-prepare-'+width+'-'+colorScheme+'.png',fullPage:true});
    await page.locator('#srPrepare').click();await page.locator('#srReady').waitFor({state:'visible'});
@@ -132,6 +149,9 @@ const http=require('node:http'),fs=require('node:fs'),fsp=require('node:fs/promi
    const overflow=await page.evaluate(()=>({width:innerWidth,content:document.documentElement.scrollWidth}));assert(overflow.content<=overflow.width,JSON.stringify(overflow));
    const downloadPromise=page.waitForEvent('download');await page.locator('#srDownloadConfig').click();const download=await downloadPromise;
    assert.equal(download.suggestedFilename(),'TOLF_Shadowrocket.conf');const content=fs.readFileSync(await download.path(),'utf8');assert.equal((content.match(/password=Test_only_2026_Secret/g)||[]).length,3);
+   for(const suffix of ['ru','su','xn--p1ai','lv']) {
+    const rule='DOMAIN-SUFFIX,'+suffix+',DIRECT';assert(content.includes(rule));assert(content.indexOf(rule)<content.indexOf('FINAL,PROXY'));
+   }
    for(const platform of ['Android','Windows']){
     await page.locator('#platform'+platform).click();
     assert.equal(await page.locator('#iosManualClients').isVisible(),false);

@@ -12,9 +12,13 @@
     return typeof value === 'string' && value.length > 0 && value === value.trim() &&
       !/[,;#"'\\\s\u0000-\u001f\u007f\u2028\u2029]/u.test(value);
   }
-  function build(username, password, manualPassword = false) {
+  function build(username, password, manualPassword = false, directCountries = []) {
     if (!/^[a-z0-9][a-z0-9_.-]{2,31}$/.test(username)) throw new Error('invalid_username');
     if (!manualPassword && !supportsPassword(password)) throw new Error('manual_password_required');
+    if (!Array.isArray(directCountries) || directCountries.some(country => !['RU','LV'].includes(country))) throw new Error('invalid_direct_country');
+    const directRules = [];
+    if (directCountries.includes('RU')) directRules.push('DOMAIN-SUFFIX,ru,DIRECT', 'DOMAIN-SUFFIX,su,DIRECT', 'DOMAIN-SUFFIX,xn--p1ai,DIRECT');
+    if (directCountries.includes('LV')) directRules.push('DOMAIN-SUFFIX,lv,DIRECT');
     const lines = nodes.map(node => node.name+' = openconnect, '+node.host+', '+node.port+
       ', user='+username+', password='+(manualPassword?'':password)+', udp=1');
     return [
@@ -34,7 +38,7 @@
       'IP-CIDR,127.0.0.0/8,DIRECT,no-resolve', 'IP-CIDR,169.254.0.0/16,DIRECT,no-resolve',
       'IP-CIDR,10.0.0.0/8,DIRECT,no-resolve', 'IP-CIDR,172.16.0.0/12,DIRECT,no-resolve',
       'IP-CIDR,192.168.0.0/16,DIRECT,no-resolve', 'IP-CIDR,224.0.0.0/4,DIRECT,no-resolve',
-      'FINAL,PROXY', '', '[Host]', 'localhost = 127.0.0.1', '', '[MITM]', 'enable = false', ''
+      ...directRules, 'FINAL,PROXY', '', '[Host]', 'localhost = 127.0.0.1', '', '[MITM]', 'enable = false', ''
     ].join('\n');
   }
   function credentialsText(username, password) {

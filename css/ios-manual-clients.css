@@ -43,3 +43,12 @@ body.ios-manual-setup .ios-manual-client-body > #iosManualShared > .vpn-entry-fi
  .ios-manual-client-body { padding:13px; }
  #shadowrocketSetup .sr-actions > .primary { flex:1 1 100%; }
 }
+
+#shadowrocketSetup .sr-direct-settings { min-width:0;margin:4px 0;padding:12px 0 0;border:0;border-top:1px solid var(--border); }
+#shadowrocketSetup .sr-direct-settings legend { padding:0 8px 0 0;color:var(--text);font-size:15px;font-weight:600; }
+#shadowrocketSetup .sr-direct-option { align-items:flex-start;min-height:48px;margin:8px 0;cursor:pointer; }
+#shadowrocketSetup .sr-direct-option input { margin:3px 0 0;accent-color:var(--tolf-blue); }
+#shadowrocketSetup .sr-direct-label { min-width:0;line-height:1.5;overflow-wrap:anywhere; }
+#shadowrocketSetup .sr-direct-domains { display:block;color:var(--secondary);font-size:13px; }
+#shadowrocketSetup .sr-direct-badge { display:inline-block;padding:1px 6px;border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:11px;vertical-align:middle; }
+#shadowrocketSetup .sr-direct-settings .sr-note { margin:8px 0; }
