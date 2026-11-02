@@ -1,9 +1,11 @@
 const assert=require('node:assert/strict'),fs=require('node:fs');
 const {JSDOM}=require(process.env.TOLF_JSDOM||'jsdom');
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
-async function fixture({existing=false}={}) {
+async function fixture({existing=false,country=null,directPreferences=null,storageUnavailable=false}={}) {
  const dom=new JSDOM(fs.readFileSync('index.html','utf8'),{url:'https://vpn.tolf.is/',runScripts:'outside-only'});
  const w=dom.window,d=w.document,calls=[],files=[];let login=existing?'existing-user':null,transport='';
+ if(directPreferences!==null)w.localStorage.setItem('tolfShadowrocketDirect:v1:account-one',JSON.stringify({version:1,countries:directPreferences}));
+ if(storageUnavailable)Object.defineProperty(w,'localStorage',{get(){throw new Error('storage_unavailable');}});
  w.currentPlatform='ios';w.lastVpnState={configured:true};w.tolfAccountState={authenticated:true,userId:'account-one'};
  w.recommendedEntryPoint='moscow';w.entryPointChangedManually=false;
  w.File=File;w.URL.createObjectURL=file=>{files.push(file);return 'blob:fixture'};w.URL.revokeObjectURL=()=>{};
@@ -16,6 +18,7 @@ async function fixture({existing=false}={}) {
  w.fetch=async()=>({ok:true,json:async()=>({version:1})});
  w.apiRequest=async(path,options={})=>{
    const body=options.body?JSON.parse(options.body):null;calls.push({path,body});
+   if(path==='/client-country')return {countryCode:country};
    if(path==='/password/capabilities')return {verifyAccountPassword:true,createOnly:true};
    if(path==='/password/account')return {enabled:Boolean(login),username:login};
    if(path==='/password/set'){assert.equal(body.createOnly,true);assert.equal(login,null);login=body.username;return {username:login};}

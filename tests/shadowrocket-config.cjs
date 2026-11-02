@@ -24,3 +24,20 @@ const credentials=config.credentialsText('test-user','Test_only-2026!@');
 assert(credentials.includes('https://vpn.tolf.is/auth/'));
 assert(credentials.includes('test-user')&&credentials.includes('Test_only-2026!@'));
 console.log('PASS: three endpoints, selected Home routing, own DNS, direct public service domains, credential injection prevention and explicit manual fallback');
+
+for(const countries of [[],['RU'],['LV'],['RU','LV'],['LV','RU','RU']]) {
+ const output=config.build('test-user','Test_only-2026!@',false,countries);
+ for(const suffix of ['ru','su','xn--p1ai','lv']) {
+  const rule='DOMAIN-SUFFIX,'+suffix+',DIRECT';
+  const enabled=countries.includes(suffix==='lv'?'LV':'RU');
+  assert.equal(output.includes(rule),enabled,rule+' / '+countries);
+  if(enabled) {assert.equal(output.split(rule).length-1,1);assert(output.indexOf(rule)<output.indexOf('FINAL,PROXY'));}
+ }
+ assert.match(output,/dns-direct-system = true/);
+ assert(output.indexOf('10.254.0.53/32,PROXY')<output.indexOf('10.0.0.0\/8,DIRECT'));
+}
+assert.equal(new URL('https://пример.рф').hostname.split('.').pop(),'xn--p1ai');
+for(const bad of [null,'RU',['US'],['RU\nFINAL,DIRECT']])assert.throws(()=>config.build('test-user','Test_only-2026!@',false,bad));
+const manualDirect=config.build('test-user','unsafe,password',true,['RU','LV']);
+assert(!manualDirect.includes('unsafe,password'));assert(manualDirect.includes('DOMAIN-SUFFIX,lv,DIRECT'));
+console.log('PASS: opt-in country combinations, canonical Cyrillic TLD, rule priority, unchanged DNS, no duplicate rules and country input validation');

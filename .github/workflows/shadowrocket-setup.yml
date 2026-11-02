@@ -1,7 +1,7 @@
 name: Shadowrocket setup checks
 on:
   push:
-    branches: ['codex/shadowrocket-setup', 'codex/vpn-mode-fixes', 'codex/vpn-smartdns-style', 'main']
+    branches: ['feat/shadowrocket-direct-domains-20261102', 'codex/shadowrocket-setup', 'codex/vpn-mode-fixes', 'codex/vpn-smartdns-style', 'main']
     paths: ['index.html', 'js/**', 'css/**', 'setup/password-auth/**', 'setup/shadowrocket/**', 'tests/shadowrocket*', 'tests/ios-manual-clients.cjs', 'tests/setup-modes.cjs', 'tests/quick/entry.cjs', 'tests/password-auth/**', '.github/workflows/shadowrocket-setup.yml']
   workflow_dispatch:
 permissions:
@@ -23,13 +23,14 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install fastapi httpx
+      - run: python tests/shadowrocket-country.py
       - run: python tests/password-auth/test_password_auth.py
       - run: python setup/password-auth/build.py && git diff --exit-code setup/password-auth/install-password-auth.py
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
       - run: npm install --no-save --ignore-scripts jsdom@26.1.0 playwright@1.62.1
-      - run: node tests/shadowrocket-config.cjs && node tests/ios-manual-clients.cjs && node tests/setup-modes.cjs && node tests/quick/entry.cjs && node tests/manual-entry.cjs && node tests/cisco-client-install.cjs && node --test tests/routing/test-account-loading.cjs
+      - run: node tests/shadowrocket-config.cjs && node tests/shadowrocket-direct.cjs && node tests/ios-manual-clients.cjs && node tests/setup-modes.cjs && node tests/quick/entry.cjs && node tests/manual-entry.cjs && node tests/cisco-client-install.cjs && node --test tests/routing/test-account-loading.cjs
       - run: npx playwright install --with-deps chromium
       - run: node tests/shadowrocket-browser.cjs
       - uses: actions/upload-artifact@v4

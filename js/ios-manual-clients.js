@@ -9,7 +9,12 @@
     en:{chooseConnection:'Choose a connection method',native:'Built-in VPN',nativeHelp:'IKEv2 · no separate app',ciscoHelp:'AnyConnect · Cisco Secure Client',srHelp:'AnyConnect · three servers in one file',loading:'Checking your account…',accessTitle:'VPN access',accessHelp:'First create VPN access under Built-in VPN, then return to Shadowrocket setup.',accessOpen:'Open built-in VPN',accountTitle:'Create a username and password',accountHelp:'You signed in with a passkey. Add a username and password to this same account to connect with Shadowrocket.',username:'Account username',newUsername:'Username',password:'Account password',newPassword:'Password',repeat:'Repeat password',loginHelp:'3–32 Latin letters, numbers, dots, hyphens or underscores.',passwordHelp:'15–128 characters.',generate:'Generate password',show:'Show',hide:'Hide',showPassword:'Show password',hidePassword:'Hide password',set:'Set username and password',saved:'Username and password added to your account.',saveCredentials:'Download username and password',plain:'Optional. The file contains the website address, username and password. The password is plain text; keep the file in a secure place.',configTitle:'Shadowrocket settings',installHelp:'Install Shadowrocket from the App Store. The app is purchased separately.',install:'Install Shadowrocket',installed:'Shadowrocket is installed',configHelp:'One file includes three servers (TOLF_Moscow, TOLF_Riga, TOLF_New_York), TOLF DNS and routing rules. Choose the server on Home.',prepare:'Get Shadowrocket settings',ready:'Configuration file is ready',share:'Open or save file',download:'Download file',back:'Edit file settings',filePrivate:'The configuration file contains your password. Transfer it only to your own devices.',sync:'After first setting or changing your password, allow up to one minute for it to apply on the servers.',manualPassword:'Automatic transfer of this password into the configuration is not supported. Import the file without a password and enter it in each of the three Shadowrocket servers.',manualAccept:'Prepare a file without a password; I will enter it in Shadowrocket',manualStep:'Open ⓘ for each of the three servers and enter your account password.',steps:['Save TOLF_Shadowrocket.conf in Files and open it with Share → Shadowrocket. You can also import it from Config → Import from Cloud.','In Config, select the TOLF file and choose Use Configuration.','Set Global Routing → Config.','On Home, select TOLF_Moscow, TOLF_Riga or TOLF_New_York and connect.'],working:'Preparing…',mismatch:'Passwords do not match.',error:'Could not complete the action. Please try again.',invalid_username:'Use 3–32 Latin letters, numbers, dots, hyphens or underscores; start with a letter or number.',invalid_password:'Use 15–128 characters.',weak_password:'Choose a less predictable password or generate one.',username_taken:'This username is already taken.',invalid_credentials:'Incorrect account password.',authentication_required:'Your session has expired. Sign in again.',account_password_exists:'A username and password already exist. Enter the current password; it has not been changed.',account_changed:'The account changed in another tab. Reload this page.',too_many_attempts:'Too many attempts. Try again in 15 minutes.',try_later:'Try again in a few seconds.',unavailable:'Setup is temporarily unavailable. Please try again later.',fileRequested:'Opening or saving the file was requested.',retry:'Retry'},
     lv:{chooseConnection:'Izvēlieties savienojuma veidu',native:'Iebūvētais VPN',nativeHelp:'IKEv2 · bez atsevišķas lietotnes',ciscoHelp:'AnyConnect · Cisco Secure Client',srHelp:'AnyConnect · trīs serveri vienā failā',loading:'Pārbaudām konta datus…',accessTitle:'VPN piekļuve',accessHelp:'Vispirms izveidojiet VPN piekļuvi sadaļā Iebūvētais VPN, pēc tam atgriezieties pie Shadowrocket iestatīšanas.',accessOpen:'Atvērt iebūvēto VPN',accountTitle:'Izveidojiet lietotājvārdu un paroli',accountHelp:'Jūs pieteicāties ar piekļuves atslēgu. Pievienojiet lietotājvārdu un paroli šim pašam kontam, lai savienotos ar Shadowrocket.',username:'Konta lietotājvārds',newUsername:'Lietotājvārds',password:'Konta parole',newPassword:'Parole',repeat:'Atkārtojiet paroli',loginHelp:'3–32 latīņu burti, cipari, punkti, defises vai pasvītrojumi.',passwordHelp:'15–128 rakstzīmes.',generate:'Ģenerēt paroli',show:'Rādīt',hide:'Slēpt',showPassword:'Rādīt paroli',hidePassword:'Slēpt paroli',set:'Iestatīt lietotājvārdu un paroli',saved:'Lietotājvārds un parole pievienoti jūsu kontam.',saveCredentials:'Lejupielādēt lietotājvārdu un paroli',plain:'Pēc izvēles. Failā būs vietnes adrese, lietotājvārds un parole. Parole ir vienkāršā tekstā; glabājiet failu drošā vietā.',configTitle:'Shadowrocket iestatījumi',installHelp:'Instalējiet Shadowrocket no App Store. Lietotne jāiegādājas atsevišķi.',install:'Instalēt Shadowrocket',installed:'Shadowrocket ir instalēts',configHelp:'Vienā failā ir trīs serveri (TOLF_Moscow, TOLF_Riga, TOLF_New_York), TOLF DNS un maršrutēšanas noteikumi. Serveri izvēlieties cilnē Home.',prepare:'Saņemt Shadowrocket iestatījumus',ready:'Iestatījumu fails ir gatavs',share:'Atvērt vai saglabāt failu',download:'Lejupielādēt failu',back:'Mainīt faila iestatījumus',filePrivate:'Iestatījumu failā ir parole. Pārsūtiet to tikai uz savām ierīcēm.',sync:'Pēc paroles pirmās iestatīšanas vai maiņas tās piemērošana serveros aizņem līdz minūtei.',manualPassword:'Šīs paroles automātiska pārnešana konfigurācijā netiek atbalstīta. Importējiet failu bez paroles un ievadiet to katrā no trim Shadowrocket serveriem.',manualAccept:'Sagatavot failu bez paroles; ievadīšu to Shadowrocket',manualStep:'Atveriet ⓘ pie katra no trim serveriem un ievadiet konta paroli.',steps:['Saglabājiet TOLF_Shadowrocket.conf lietotnē Files un atveriet ar Share → Shadowrocket. To var arī importēt sadaļā Config → Import from Cloud.','Cilnē Config izvēlieties TOLF failu un nospiediet Use Configuration.','Iestatiet Global Routing → Config.','Cilnē Home izvēlieties TOLF_Moscow, TOLF_Riga vai TOLF_New_York un savienojieties.'],working:'Sagatavo…',mismatch:'Paroles nesakrīt.',error:'Darbība neizdevās. Mēģiniet vēlreiz.',invalid_username:'Izmantojiet 3–32 latīņu burtus, ciparus, punktus, defises vai pasvītrojumus; sāciet ar burtu vai ciparu.',invalid_password:'Izmantojiet 15–128 rakstzīmes.',weak_password:'Izvēlieties grūtāk uzminamu paroli vai ģenerējiet to.',username_taken:'Šis lietotājvārds jau ir aizņemts.',invalid_credentials:'Nepareiza konta parole.',authentication_required:'Sesija ir beigusies. Piesakieties vēlreiz.',account_password_exists:'Lietotājvārds un parole jau ir iestatīti. Ievadiet pašreizējo paroli; tā nav mainīta.',account_changed:'Konts mainījās citā cilnē. Pārlādējiet lapu.',too_many_attempts:'Pārāk daudz mēģinājumu. Mēģiniet pēc 15 minūtēm.',try_later:'Mēģiniet pēc dažām sekundēm.',unavailable:'Iestatīšana īslaicīgi nav pieejama. Mēģiniet vēlāk.',fileRequested:'Faila atvēršana vai saglabāšana ir pieprasīta.',retry:'Mēģināt vēlreiz'}
   };
-  const tr = key => (words[document.documentElement.lang] || words.en)[key] || words.en[key] || key;
+  const directWords = {
+    ru:{directTitle:'Домены без VPN',directRU:'Российские домены',directLV:'Латвийские домены',directRecommended:'Рекомендуется',directHelp:'Выбранные домены открываются с вашим обычным IP, без расхода трафика TOLF. Выбор сохраняется для этого аккаунта в этом браузере.',directTravel:'В поездках правила скачанного файла автоматически не меняются.',directHintRU:'По IP рекомендуем российские домены. При включённом VPN страна может определяться по его серверу.',directHintLV:'По IP рекомендуем латвийские домены. При включённом VPN страна может определяться по его серверу.',directSummary:'Без VPN: '},
+    en:{directTitle:'Domains without VPN',directRU:'Russian domains',directLV:'Latvian domains',directRecommended:'Recommended',directHelp:'Selected domains use your regular IP without consuming TOLF traffic. Your choice is saved for this account in this browser.',directTravel:'The downloaded file keeps these rules when you travel; they do not change automatically.',directHintRU:'Your IP suggests Russian domains. With a VPN enabled, the detected country may be that of its server.',directHintLV:'Your IP suggests Latvian domains. With a VPN enabled, the detected country may be that of its server.',directSummary:'Without VPN: '},
+    lv:{directTitle:'Domēni bez VPN',directRU:'Krievijas domēni',directLV:'Latvijas domēni',directRecommended:'Ieteicams',directHelp:'Atlasītie domēni izmanto jūsu parasto IP adresi, netērējot TOLF datu apjomu. Izvēle tiek saglabāta šim kontam šajā pārlūkā.',directTravel:'Ceļojot lejupielādētā faila noteikumi automātiski nemainās.',directHintRU:'Pēc IP adreses iesakām Krievijas domēnus. Ja VPN ir ieslēgts, noteiktā valsts var būt tā servera valsts.',directHintLV:'Pēc IP adreses iesakām Latvijas domēnus. Ja VPN ir ieslēgts, noteiktā valsts var būt tā servera valsts.',directSummary:'Bez VPN: '}
+  };
+  const tr = key => (directWords[document.documentElement.lang] || directWords.en)[key] || (words[document.documentElement.lang] || words.en)[key] || words.en[key] || key;
   const shared = document.createElement('div'); shared.id='iosManualShared';
   for (const item of [...parent.children]) if (!item.classList.contains('card-topline')) shared.append(item);
   const menu=document.createElement('div'); menu.id='iosManualClients'; menu.hidden=true;
@@ -59,11 +64,19 @@
         <label class="sr-field"><span data-sr-text="username"></span><input id="srUsername" type="text" autocomplete="username" readonly></label>
         <label class="sr-field"><span data-sr-text="password"></span><span class="sr-password-row"><input id="srPassword" type="password" autocomplete="current-password" required minlength="15" maxlength="128"><button id="srPasswordToggle" type="button" class="sr-password-toggle" data-sr-toggle="srPassword" aria-controls="srPassword">${eyeIcon}</button></span></label>
         <div id="srManualPassword" hidden><p class="sr-note" data-sr-text="manualPassword"></p><label class="sr-check"><input id="srManualPasswordAccept" type="checkbox"><span data-sr-text="manualAccept"></span></label></div>
+        <fieldset id="srDirectSettings" class="sr-direct-settings" aria-describedby="srDirectHelp srDirectHint srDirectTravel">
+          <legend data-sr-text="directTitle"></legend>
+          <label class="sr-check sr-direct-option"><input id="srDirectRu" type="checkbox"><span class="sr-direct-label"><span data-sr-text="directRU"></span> <small id="srDirectRuRecommended" class="sr-direct-badge" data-sr-text="directRecommended" hidden></small><small class="sr-direct-domains">.ru, .su, .рф</small></span></label>
+          <label class="sr-check sr-direct-option"><input id="srDirectLv" type="checkbox"><span class="sr-direct-label"><span data-sr-text="directLV"></span> <small id="srDirectLvRecommended" class="sr-direct-badge" data-sr-text="directRecommended" hidden></small><small class="sr-direct-domains">.lv</small></span></label>
+          <p id="srDirectHint" class="sr-note" role="status" aria-live="polite" hidden></p>
+          <p id="srDirectHelp" class="sr-note" data-sr-text="directHelp"></p>
+          <p id="srDirectTravel" class="sr-note" data-sr-text="directTravel"></p>
+        </fieldset>
         <p class="sr-note" data-sr-text="configHelp"></p><p class="sr-note" data-sr-text="sync"></p>
         <div class="sr-actions"><button id="srPrepare" class="primary" type="submit" disabled data-sr-text="prepare"></button></div>
       </form>
     </div>
-    <div id="srReady" hidden><h3 data-sr-text="ready"></h3><p>TOLF_Shadowrocket.conf</p>
+    <div id="srReady" hidden><h3 data-sr-text="ready"></h3><p>TOLF_Shadowrocket.conf</p><p id="srDirectSummary" class="sr-note" hidden></p>
       <div class="sr-actions sr-file-actions"><button id="srShareConfig" class="primary" type="button" data-sr-text="share"></button><button id="srDownloadConfig" class="secondary" type="button" data-sr-text="download"></button></div>
       <p id="srFilePrivate" class="sr-note" data-sr-text="filePrivate"></p><p id="srManualStep" data-sr-text="manualStep" hidden></p><ol id="srInstructions"></ol>
       <div class="sr-actions"><button id="srBack" type="button" class="secondary" data-sr-text="back"></button></div>
@@ -72,8 +85,44 @@
     <button id="srRetry" class="secondary" type="button" data-sr-text="retry" hidden></button>`;
   panels.shadowrocket.body.append(sr);
   let client=null, account=null, login=null, loaded=false, loading=false, busy=false, epoch=0;
-  let savedCredentials=null, configFile=null, manualFile=false, messageKey='';
+  let savedCredentials=null, configFile=null, manualFile=false, messageKey='', fileDirectCountries=[];
+  let directStorageKey=null, countryHint=null, countryLookupStarted=false;
+  const directMemory=new Map();
   const active=()=>currentPlatform==='ios'&&document.body.classList.contains('manual-setup-open');
+  function selectedDirectCountries() {
+    return [['RU','srDirectRu'],['LV','srDirectLv']].filter(([,id])=>$(id).checked).map(([country])=>country);
+  }
+  function restoreDirectPreferences() {
+    directStorageKey=account?.userId!=null?'tolfShadowrocketDirect:v1:'+encodeURIComponent(String(account.userId)):null;
+    let countries=[];
+    if(directStorageKey) {
+      if(directMemory.has(directStorageKey))countries=directMemory.get(directStorageKey);
+      else try {
+        const saved=JSON.parse(localStorage.getItem(directStorageKey));
+        if(saved?.version===1&&Array.isArray(saved.countries)&&saved.countries.every(country=>['RU','LV'].includes(country)))countries=saved.countries;
+      } catch {}
+    }
+    $('srDirectRu').checked=countries.includes('RU');$('srDirectLv').checked=countries.includes('LV');
+  }
+  function saveDirectPreferences() {
+    if(!directStorageKey)return;
+    const countries=selectedDirectCountries();directMemory.set(directStorageKey,countries);
+    try {localStorage.setItem(directStorageKey,JSON.stringify({version:1,countries}));} catch {}
+  }
+  async function loadCountryHint() {
+    if(countryLookupStarted)return;countryLookupStarted=true;
+    try {
+      const data=await apiRequest('/client-country',{cache:'no-store'});
+      countryHint=['RU','LV'].includes(data?.countryCode)?data.countryCode:null;
+    } catch {countryHint=null;}
+    render();
+  }
+  function renderDirectPreferences() {
+    $('srDirectRuRecommended').hidden=countryHint!=='RU';$('srDirectLvRecommended').hidden=countryHint!=='LV';
+    $('srDirectHint').hidden=!countryHint;$('srDirectHint').textContent=countryHint?tr('directHint'+countryHint):'';
+    $('srDirectSummary').hidden=!fileDirectCountries.length;
+    $('srDirectSummary').textContent=tr('directSummary')+fileDirectCountries.flatMap(country=>country==='RU'?['.ru','.su','.рф']:['.lv']).join(', ');
+  }
   function restoreClientProtocol(){
     if(active()&&client){const expected=client==='native'?'ikev2':'anyconnect';if(window.getVpnTransport?.()!==expected)$(expected==='ikev2'?'vpnTransportIkev2':'vpnTransportAnyConnect').click();}
   }
@@ -82,7 +131,7 @@
     client=id;
     if (id) $(id==='native'?'vpnTransportIkev2':'vpnTransportAnyConnect').click();
     render();window.dispatchEvent(new Event('tolf:manual-client-change'));
-    if(id==='shadowrocket'&&account&&!loaded&&!loading)loadPasswordAccount();
+    if(id==='shadowrocket'&&account){loadCountryHint();if(!loaded&&!loading)loadPasswordAccount();}
   }
   window.tolfIosManual={active,client:()=>client,select:selectClient};
   function render() {
@@ -118,6 +167,7 @@
     $('srFilePrivate').hidden=manualFile;
     $('srManualStep').hidden=!manualFile;
     if(messageKey)$('srMessage').textContent=tr(messageKey);
+    renderDirectPreferences();
     for(const form of [$('srAccountForm'),$('srConfigForm')])for(const item of form.querySelectorAll('input,button'))if(item.id!=='srPrepare')item.disabled=busy;
   }
   async function loadPasswordAccount() {
@@ -132,14 +182,14 @@
     finally{if(token===epoch){loading=false;render();}}
   }
   function clearSecrets() {
-    savedCredentials=null;configFile=null;manualFile=false;
+    savedCredentials=null;configFile=null;manualFile=false;fileDirectCountries=[];
     for(const id of ['srNewUsername','srNewPassword','srRepeatPassword','srPassword','srUsername']){$(id).value='';if($(id).type==='text'&&id.includes('Password'))$(id).type='password';}
     $('srInstalled').checked=false;$('srManualPasswordAccept').checked=false;
   }
   function setAccount(data) {
     if(account?.userId===data?.userId&&account){account=data;render();return;}
-    epoch++;clearSecrets();account=data?.authenticated?data:null;login=null;loaded=false;loading=false;busy=false;announce('');$('srRetry').hidden=true;render();
-    if(account&&active()&&client==='shadowrocket')loadPasswordAccount();
+    epoch++;clearSecrets();account=data?.authenticated?data:null;restoreDirectPreferences();login=null;loaded=false;loading=false;busy=false;announce('');$('srRetry').hidden=true;render();
+    if(account&&active()&&client==='shadowrocket'){loadCountryHint();loadPasswordAccount();}
   }
   function download(file) {
     const url=URL.createObjectURL(file),link=document.createElement('a');link.href=url;link.download=file.name;
@@ -159,7 +209,7 @@
   });
   $('srConfigForm').addEventListener('submit',async event=>{
     event.preventDefault();if(busy||$('srPrepare').disabled||!event.currentTarget.reportValidity())return;
-    const token=epoch,password=$('srPassword').value,username=login;
+    const token=epoch,password=$('srPassword').value,username=login,directCountries=selectedDirectCountries();
     busy=true;announce('working');render();
     try{
       const current=await apiRequest('/password/account',{cache:'no-store'});
@@ -168,7 +218,8 @@
       if(token!==epoch||currentPlatform!=='ios'||!$('srInstalled').checked)return;
       if(result.username!==username)throw new Error('account_changed');
       manualFile=!TolfShadowrocketConfig.supportsPassword(password);
-      const content=TolfShadowrocketConfig.build(username,password,manualFile);
+      const content=TolfShadowrocketConfig.build(username,password,manualFile,directCountries);
+      fileDirectCountries=directCountries;saveDirectPreferences();
       configFile=new File([content],'TOLF_Shadowrocket.conf',{type:'text/plain;charset=utf-8'});announce('');
     }catch(error){if(token===epoch)announce(words.en[error.message]?error.message:'error',true);}
     finally{if(token===epoch){busy=false;render();}}
@@ -179,6 +230,7 @@
   $('srBack').addEventListener('click',()=>{configFile=null;announce('');render();});
   $('srRetry').addEventListener('click',loadPasswordAccount);
   $('srOpenNative').addEventListener('click',()=>selectClient('native'));
+  for(const id of ['srDirectRu','srDirectLv'])$(id).addEventListener('change',saveDirectPreferences);
   $('srInstalled').addEventListener('change',render);$('srManualPasswordAccept').addEventListener('change',render);
   $('srPassword').addEventListener('input',()=>{$('srManualPasswordAccept').checked=false;render();});
   $('srGenerate').addEventListener('click',()=>{const chars='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';const value=Array.from(crypto.getRandomValues(new Uint8Array(24)),n=>chars[n&63]).join('');$('srNewPassword').value=value;$('srRepeatPassword').value=value;$('srNewPassword').type='text';render();});
