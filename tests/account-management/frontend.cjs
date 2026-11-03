@@ -35,5 +35,5 @@ async function adminScenario({networkLoss=false}={}){
  content.replaceChildren();context.fixture.accountActions({...user,deletion:{allowed:false,reason:'protected'}},content,1);assert(!walk(content).some(x=>x.className==='admin-delete-button'));
  elements.accountKindFilter.value='only';await context.fixture.load();assert(calls.some(x=>x.url.includes('trial=only')));
 }
-(async()=>{await adminScenario();await adminScenario({networkLoss:true});require('node:child_process').execFileSync(process.execPath,[path.join(root,'tests/trials/frontend.cjs')],{stdio:'inherit'});console.log('Account UI: typed-number deletion, target isolation, protected users, lost-response checks, trial filtering and explicit trial registration passed.');})().catch(error=>{console.error(error);process.exitCode=1;});
+(async()=>{require('node:child_process').execFileSync(process.execPath,[path.join(root,'tests/account-management/payment-qr.cjs')],{stdio:'inherit'});await adminScenario();await adminScenario({networkLoss:true});require('node:child_process').execFileSync(process.execPath,[path.join(root,'tests/trials/frontend.cjs')],{stdio:'inherit'});console.log('Account UI: typed-number deletion, target isolation, protected users, lost-response checks, trial filtering and explicit trial registration passed.');})().catch(error=>{console.error(error);process.exitCode=1;});
 
