@@ -12,6 +12,13 @@ assert.match(content,/FINAL,PROXY/);
 assert(!content.includes(',TOLF'));
 assert(content.indexOf('10.254.0.53/32,PROXY')<content.indexOf('10.0.0.0/8,DIRECT'));
 assert.match(content,/DOMAIN-SUFFIX,tolf\.is,DIRECT/);
+for(const ip of ['92.243.66.32','188.214.39.114','162.252.174.201','92.243.66.204']) {
+  const rule='IP-CIDR,'+ip+'/32,DIRECT,no-resolve';
+  assert(content.includes(rule),rule);
+  assert(content.indexOf(rule)<content.indexOf('FINAL,PROXY'));
+  assert.equal(content.split(rule).length-1,1);
+}
+
 for(const value of ['pass, udp=0',' leading-space','trailing-space ','with space','with"quote','with\\slash','with#comment','password\n[Rule]\nFINAL,DIRECT']) {
   assert.equal(config.supportsPassword(value),false);
   assert.throws(()=>config.build('test-user',value));
