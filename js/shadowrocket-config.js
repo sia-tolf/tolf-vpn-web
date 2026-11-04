@@ -33,6 +33,11 @@
       'icmp-auto-reply = true', 'udp-policy-not-supported-behaviour = REJECT',
       '', '[Proxy]', ...lines, '', '[Rule]',
       'DOMAIN-SUFFIX,tolf.is,DIRECT',
+      // After DNS resolution the relay can be matched by IP; keep every TOLF entry outside PROXY.
+      'IP-CIDR,92.243.66.32/32,DIRECT,no-resolve',
+      'IP-CIDR,188.214.39.114/32,DIRECT,no-resolve',
+      'IP-CIDR,162.252.174.201/32,DIRECT,no-resolve',
+      'IP-CIDR,92.243.66.204/32,DIRECT,no-resolve',
       'IP-CIDR,10.254.0.53/32,PROXY,no-resolve',
       'DOMAIN-SUFFIX,local,DIRECT', 'DOMAIN-SUFFIX,lan,DIRECT', 'DOMAIN-SUFFIX,home.arpa,DIRECT',
       'IP-CIDR,127.0.0.0/8,DIRECT,no-resolve', 'IP-CIDR,169.254.0.0/16,DIRECT,no-resolve',
