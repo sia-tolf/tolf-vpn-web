@@ -21,11 +21,16 @@ const fixture=require('./ios-manual-clients.cjs');
    assert(q('myVpnProtocolField').contains(q('vpnProtocolDropdown')));
    assert(!q('vpnProtocolDropdown').closest('.vpn-protocol-field').hidden);
    assert.equal(q('quickStartLink').getAttribute('aria-disabled'),'true');
+   assert(q('quickStartLink').hasAttribute('inert'));
+   assert.equal(q('quickStartLink').tabIndex,-1);
+   assert(!q('quickStartLink').hasAttribute('href'));
   }
   let e=new w.MouseEvent('click',{bubbles:true,cancelable:true});q('quickStartLink').dispatchEvent(e);
   assert(e.defaultPrevented,'Starting setup still requires a protocol');
   q('vpnProtocolDropdown').querySelector('[data-value="anyconnect"]').click();await f.settle();
   assert.equal(q('quickStartLink').getAttribute('aria-disabled'),'false');
+  assert(!q('quickStartLink').hasAttribute('inert'));
+  assert.equal(q('quickStartLink').tabIndex,0);
   let blocked;
   q('quickStartLink').addEventListener('click',event=>{blocked=event.defaultPrevented;event.preventDefault();});
   q('quickStartLink').dispatchEvent(new w.MouseEvent('click',{bubbles:true,cancelable:true}));
