@@ -1,7 +1,7 @@
 // Use in-memory bytes from the page, avoiding the worker/Blob upload path.
 // Only successful server responses count; progress events never count as receipt.
-async function measureConfirmedUpload(server, {signal, onprogress = () => {}, duration = 15000,
-  warmup = 3000, streams = 4, fetcher = fetch, now = () => performance.now()} = {}) {
+async function measureConfirmedUpload(server, {signal, onprogress = () => {}, duration = 5000,
+  warmup = 1000, streams = 4, fetcher = fetch, now = () => performance.now()} = {}) {
   const controller = new AbortController();
   const abort = () => controller.abort();
   if (signal?.aborted) throw new Error('upload_cancelled');
