@@ -41,7 +41,7 @@
     button.textContent=busy?t.working:t.claim;
     status.textContent=(error?t.error+' ':'')+(loading?t.loading:p?(p.balanceBytes>0?t.active:p.paidBalanceBytes>0?t.paid:t.exhausted):authenticated&&data&&!data.canClaim?t.unavailable:t.notice);
     document.querySelector('.billing-layout').hidden=trial;
-    const note=document.querySelector('.preview-note');if(note)note.hidden=trial;
+    const note=document.querySelector('.preview-note');if(note)note.hidden=trial||!!p;
     const select=document.getElementById('selectTrial');if(select)select.hidden=trial||!!p;
   }
   async function refresh(){
