@@ -54,6 +54,7 @@ body:not([data-vpn-setup-mode="manual"]) #quickSetupCard #quickSetupLink { borde
 /* Availability changes behavior, not the approved action palette. */
 #quickSetupCard :is(button,a.button-link):is(:disabled,[aria-disabled="true"]) { opacity:1;cursor:default; }
 #quickSetupCard #srAccountForm button.primary { width:220px;min-width:220px;max-width:220px; }
+#quickSetupCard #quickStartLink[aria-disabled="true"] { opacity:.4;cursor:default; }
 #quickSetupCard #quickStartLink { display:flex;width:100%;min-width:0;max-width:none;margin-top:18px; }
 #quickSetupCard #vpnCard { margin:0;padding:0;width:100%; }
 #quickSetupCard #vpnCard > .card { padding:0;margin:0;background:transparent;border:0;border-radius:0;box-shadow:none; }
