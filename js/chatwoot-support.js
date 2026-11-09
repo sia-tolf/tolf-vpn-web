@@ -31,11 +31,57 @@
         position: "right",
         darkMode: "auto"
       };
+      let notice = null;
+      const mountNotice = () => {
+        const holder = document.getElementById("cw-widget-holder");
+        if (!holder || notice) return;
+        const style = document.createElement("style");
+        style.textContent = `
+          #cw-widget-holder.tolf-support-notice-mounted:not(.has-unread-view) {
+            display: flex !important;
+            flex-direction: column !important;
+          }
+          #cw-widget-holder.tolf-support-notice-mounted:not(.has-unread-view) iframe {
+            flex: 1 1 0 !important;
+            min-height: 0 !important;
+            height: 0 !important;
+          }
+          #cw-widget-holder .tolf-support-language-notice {
+            flex: 0 0 auto;
+            margin: 0;
+            padding: 12px 16px;
+            background: #f4f7fc;
+            color: #263e61;
+            border-bottom: 1px solid #e0e6ef;
+            font: 500 13px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            text-align: center;
+          }
+          #cw-widget-holder.has-unread-view .tolf-support-language-notice { display: none; }
+          @media (prefers-color-scheme: dark) {
+            #cw-widget-holder .tolf-support-language-notice {
+              background: #202630;
+              color: #e0e9f7;
+              border-color: #394353;
+            }
+          }
+        `;
+        document.head.appendChild(style);
+        notice = document.createElement("p");
+        notice.className = "tolf-support-language-notice";
+        notice.textContent = supportDescription[language()];
+        notice.lang = language();
+        holder.prepend(notice);
+        holder.classList.add("tolf-support-notice-mounted");
+      };
       let ready = false;
       let appliedLocale = null;
       const syncLocale = () => {
         const locale = language();
         const description = supportDescription[locale];
+        if (notice) {
+          notice.textContent = description;
+          notice.lang = locale;
+        }
         window.chatwootSettings.locale = locale;
         window.chatwootSettings.welcomeDescription = description;
         if (ready && locale !== appliedLocale) {
@@ -65,6 +111,7 @@
       });
       window.addEventListener("chatwoot:ready", () => {
         ready = true;
+        mountNotice();
         syncLocale();
         const identity = settings.identity;
         if (identity?.identifier && identity.identifierHash) {
