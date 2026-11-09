@@ -114,6 +114,8 @@ signOutButton.addEventListener("click", async () => {
       body: "{}"
     });
 
+    window.$chatwoot?.reset();
+
     const language = ["en", "ru", "lv"].includes(currentLanguage)
       ? currentLanguage
       : "en";
