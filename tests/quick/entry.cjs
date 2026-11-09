@@ -2,9 +2,10 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('nod
 class Element {
  constructor(){this.attributes={};this.listeners={};this.dataset={};this.hidden=false;this.children=[];const classes=new Set();this.classList={contains:x=>classes.has(x),add:x=>classes.add(x),remove:x=>classes.delete(x),toggle:(x,on)=>{if(on)classes.add(x);else classes.delete(x);}};}
  setAttribute(k,v){this.attributes[k]=String(v);}
+ toggleAttribute(k,on){if(on)this.setAttribute(k,'');else this.removeAttribute(k);}
  removeAttribute(k){delete this.attributes[k];if(k==='href')this.href='';}
  addEventListener(k,fn){(this.listeners[k]||=[]).push(fn);}
- click(){let prevented=false;for(const f of this.listeners.click||[])f({preventDefault(){prevented=true;}});return prevented;}
+ click(){let prevented=false;for(const f of this.listeners.click||[])f({preventDefault(){prevented=true;},stopImmediatePropagation(){}});return prevented;}
  append(...children){this.children.push(...children);}
  replaceChildren(...children){this.children=children;}
  before(node){this.movedBefore=node;}
