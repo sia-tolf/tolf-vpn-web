@@ -3,9 +3,9 @@
   const card = document.querySelector('.trial-card');
   if (!card || !window.TolfBillingVolume) return;
   const words = {
-    ru:{claim:'Получить 1 ГБ бесплатно',notice:'1 ГБ бесплатно, один раз на аккаунт. Без ограничения по времени.',remaining:'Остаток пробного трафика',gb:'ГБ',active:'Пробный пакет активен. Остаток обновляется автоматически по данным серверов.',exhausted:'Пробный трафик закончился. Для продолжения VPN пополните оплаченный трафик.',paid:'Пробный трафик закончился. Используется оплаченный пакет.',unavailable:'Пробный пакет предназначен для новых аккаунтов без покупок. Ваш текущий доступ сохраняется.',error:'Не удалось обновить остаток. Показаны последние полученные данные.',working:'Начисляем…',loading:'Проверяем пробный пакет…'},
-    en:{claim:'Get 1 GB for free',notice:'1 GB free, once per account. No expiry date.',remaining:'Trial traffic remaining',gb:'GB',active:'Your trial is active. The balance updates automatically from server reports.',exhausted:'Your trial traffic is used up. Add paid traffic to continue using VPN.',paid:'Your trial traffic is used up. Your paid package is being used.',unavailable:'The trial is for new accounts without purchases. Your existing access is unchanged.',error:'Could not refresh the balance. Showing the last received data.',working:'Activating…',loading:'Checking your trial…'},
-    lv:{claim:'Saņemt 1 GB bez maksas',notice:'1 GB bez maksas, vienu reizi katram kontam. Bez derīguma termiņa.',remaining:'Atlikušais izmēģinājuma datu apjoms',gb:'GB',active:'Izmēģinājuma paka ir aktīva. Atlikums automātiski atjaunojas pēc serveru datiem.',exhausted:'Izmēģinājuma dati ir iztērēti. Lai turpinātu lietot VPN, papildiniet apmaksāto datu apjomu.',paid:'Izmēģinājuma dati ir iztērēti. Tiek izmantota apmaksātā paka.',unavailable:'Izmēģinājums ir paredzēts jauniem kontiem bez pirkumiem. Esošā piekļuve nemainās.',error:'Neizdevās atjaunināt atlikumu. Redzami pēdējie saņemtie dati.',working:'Aktivizēšana…',loading:'Pārbaudām izmēģinājuma paku…'}
+    ru:{claim:'Получить 1 ГБ бесплатно',notice:'1 ГБ бесплатно, один раз на аккаунт. Без ограничения по времени.',remaining:'Остаток пробного трафика',paidHelp:'Оплаченный объём за вычетом использованного трафика.',gb:'ГБ',active:'Пробный пакет активен. Остаток обновляется автоматически по данным серверов.',exhausted:'Пробный трафик закончился. Для продолжения VPN пополните оплаченный трафик.',paid:'Пробный трафик закончился. Используется оплаченный пакет.',unavailable:'Пробный пакет предназначен для новых аккаунтов без покупок. Ваш текущий доступ сохраняется.',error:'Не удалось обновить остаток. Показаны последние полученные данные.',working:'Начисляем…',loading:'Проверяем пробный пакет…'},
+    en:{claim:'Get 1 GB for free',notice:'1 GB free, once per account. No expiry date.',remaining:'Trial traffic remaining',paidHelp:'Purchased traffic less usage.',gb:'GB',active:'Your trial is active. The balance updates automatically from server reports.',exhausted:'Your trial traffic is used up. Add paid traffic to continue using VPN.',paid:'Your trial traffic is used up. Your paid package is being used.',unavailable:'The trial is for new accounts without purchases. Your existing access is unchanged.',error:'Could not refresh the balance. Showing the last received data.',working:'Activating…',loading:'Checking your trial…'},
+    lv:{claim:'Saņemt 1 GB bez maksas',notice:'1 GB bez maksas, vienu reizi katram kontam. Bez derīguma termiņa.',remaining:'Atlikušais izmēģinājuma datu apjoms',paidHelp:'Iegādātais datu apjoms, atskaitot patēriņu.',gb:'GB',active:'Izmēģinājuma paka ir aktīva. Atlikums automātiski atjaunojas pēc serveru datiem.',exhausted:'Izmēģinājuma dati ir iztērēti. Lai turpinātu lietot VPN, papildiniet apmaksāto datu apjomu.',paid:'Izmēģinājuma dati ir iztērēti. Tiek izmantota apmaksātā paka.',unavailable:'Izmēģinājums ir paredzēts jauniem kontiem bez pirkumiem. Esošā piekļuve nemainās.',error:'Neizdevās atjaunināt atlikumu. Redzami pēdējie saņemtie dati.',working:'Aktivizēšana…',loading:'Pārbaudām izmēģinājuma paku…'}
   };
   const lang=()=>words[document.documentElement.lang]?document.documentElement.lang:'en';
   const panel=document.createElement('div'),label=document.createElement('p'),balance=document.createElement('strong'),status=document.createElement('p'),button=document.createElement('button');
@@ -17,17 +17,32 @@
     try{const r=await fetch('https://api.tolf.is/account/trial-package',{method,credentials:'include',cache:'no-store',signal:controller.signal,headers:{'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});if(!r.ok){const e=new Error();e.status=r.status;throw e;}return await r.json();}
     finally{clearTimeout(timeout);}
   }
+  function renderTrafficBalance(target,bytes){
+    target.replaceChildren();
+    const parts=new Intl.NumberFormat(lang(),{minimumFractionDigits:3,maximumFractionDigits:3}).formatToParts(bytes/1e9);
+    const whole=document.createElement('span'),fraction=document.createElement('span');
+    whole.className='traffic-whole';fraction.className='traffic-fraction';
+    for(const part of parts)(['decimal','fraction'].includes(part.type)?fraction:whole).append(document.createTextNode(part.value));
+    target.append(whole,fraction,document.createTextNode(' '+words[lang()].gb));
+  }
   function render(){
-    const t=words[lang()],p=data?.trialPackage,trial=window.TolfBillingVolume.isTrial();
+    const t=words[lang()],p=data?.trialPackage;
+    if(p&&window.TolfBillingVolume.isTrial()){window.TolfBillingVolume.setVolume(200);return;}
+    const trial=window.TolfBillingVolume.isTrial();
     panel.hidden=!trial&&!p;label.hidden=balance.hidden=!p;
     label.textContent=t.remaining;
-    balance.textContent=p?new Intl.NumberFormat(lang(),{minimumFractionDigits:3,maximumFractionDigits:3}).format(p.balanceBytes/1e9)+' '+t.gb:'';
+    if(p)renderTrafficBalance(balance,p.balanceBytes);else balance.replaceChildren();
+    if(p){
+      renderTrafficBalance(document.querySelector('.balance-value'),p.paidBalanceBytes);
+      document.querySelector('.balance-card .muted').textContent=t.paidHelp;
+    }
+    for(const element of card.querySelectorAll('.trial-heading .eyebrow,.trial-volume,.trial-card > p'))element.hidden=!!p;
     button.hidden=!!p||(!trial)||!!(authenticated&&data&&!data.canClaim);button.disabled=busy||loading;
     button.textContent=busy?t.working:t.claim;
     status.textContent=(error?t.error+' ':'')+(loading?t.loading:p?(p.balanceBytes>0?t.active:p.paidBalanceBytes>0?t.paid:t.exhausted):authenticated&&data&&!data.canClaim?t.unavailable:t.notice);
     document.querySelector('.billing-layout').hidden=trial;
     const note=document.querySelector('.preview-note');if(note)note.hidden=trial;
-    const select=document.getElementById('selectTrial');if(select)select.hidden=trial;
+    const select=document.getElementById('selectTrial');if(select)select.hidden=trial||!!p;
   }
   async function refresh(){
     if(inflight||busy||document.hidden)return;
