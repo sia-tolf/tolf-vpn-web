@@ -57,8 +57,11 @@
   quickTab.textContent=tr().quick;manualTab.textContent=tr().manual;
   start.textContent=tr().start;$('quickSetupHelp').textContent=tr().help;
   const protocol=window.getVpnTransport?.()||'';
-  start.setAttribute('aria-disabled',String(!protocol));
-  if(protocol)start.href='/quick/?protocol='+encodeURIComponent(protocol);else start.removeAttribute('href');
+  const canStart=enabled&&mode==='quick'&&['ikev2','anyconnect'].includes(protocol);
+  start.setAttribute('aria-disabled',String(!canStart));
+  start.toggleAttribute('inert',!canStart);
+  start.tabIndex=canStart?0:-1;
+  if(canStart)start.href='/quick/?protocol='+encodeURIComponent(protocol);else start.removeAttribute('href');
   renderNotice();
  }
  function select(next){
@@ -81,7 +84,7 @@
  });
  start.addEventListener('click',event=>{
   const protocol=window.getVpnTransport?.()||'';
-  if(mode!=='quick'||!protocol){event.preventDefault();document.querySelector('#vpnProtocolDropdown button')?.focus();return;}
+  if(!enabled||mode!=='quick'||!['ikev2','anyconnect'].includes(protocol)){event.preventDefault();event.stopImmediatePropagation();document.querySelector('#vpnProtocolDropdown button')?.focus();return;}
   if(currentPlatform!==nativePlatform()){
    event.preventDefault();noticeOpen=true;renderNotice();return;
   }
