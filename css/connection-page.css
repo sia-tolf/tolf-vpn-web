@@ -14,8 +14,9 @@
 .measurements-page .connection-test-result { min-height: 52px; padding: 6px 8px; gap: 2px; }
 .measurements-page .vpn-overview-header { gap: 14px; flex-wrap: wrap; }
 .measurements-page .vpn-overview-title { color: var(--text); font-size: 15px; }
-.measurements-page .connection-test-action { margin-top: 18px; }
-.measurements-page .network-test-button { min-height: 46px; height: auto; }
+.measurements-page .connection-test-action { margin-top: 18px; display: flex; flex-direction: column; align-items: stretch; width: 100%; }
+.measurements-page .connection-test-action .network-test-button { width: 100%; flex: 0 0 auto; box-sizing: border-box; min-height: 46px; height: auto; }
+.measurements-page .connection-test-action .measurement-note { width: 100%; box-sizing: border-box; margin: 10px 0 0; }
 .measurement-cancel { width: 100%; margin-top: 10px; }
 .measurements-page #networkThroughputCard { margin-top: 22px; background: var(--card); }
 .measurements-page summary { cursor: pointer; list-style: none; }
