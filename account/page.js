@@ -59,14 +59,14 @@ async function loadSettings(){
 }
 $('accountSignOut').onclick=async()=>{
  $('accountSignOut').disabled=true;
- try{await apiRequest('/logout',{method:'POST',body:'{}'});clearAccountPassword();hideAccountRecoveryCode();location.assign('https://tolf.is/?lang='+currentLanguage);}
+ try{await apiRequest('/logout',{method:'POST',body:'{}'});clearAccountPassword();hideAccountRecoveryCode();window.$chatwoot?.reset();location.assign('https://tolf.is/?lang='+currentLanguage);}
  catch(e){$('accountStatus').textContent=e.message;$('accountSignOut').disabled=false;}
 };
 deleteAccountButton.onclick=async()=>{
  if(invitationProtected){alert(t('protectedAccountDelete'));return;}
  if(!confirmLocalized('deleteAccountConfirmTitle','deleteAccountConfirmBody'))return;
  deleteAccountButton.disabled=true;$('accountStatus').textContent=t('deletingAccount');
- try{await apiRequest('/account/delete',{method:'POST',body:JSON.stringify({confirm:'DELETE'})});clearAccountPassword();hideAccountRecoveryCode();$('accountContent').classList.add('hidden');$('accountSignOut').classList.add('hidden');$('accountStatus').textContent=t('accountDeleted');}
+ try{await apiRequest('/account/delete',{method:'POST',body:JSON.stringify({confirm:'DELETE'})});clearAccountPassword();hideAccountRecoveryCode();window.$chatwoot?.reset();$('accountContent').classList.add('hidden');$('accountSignOut').classList.add('hidden');$('accountStatus').textContent=t('accountDeleted');}
  catch(e){$('accountStatus').textContent=e.message;}finally{deleteAccountButton.disabled=false;}
 };
 for(const lang of ['en','ru','lv'])$('lang'+lang[0].toUpperCase()+lang.slice(1)).onclick=()=>setLanguage(lang);
