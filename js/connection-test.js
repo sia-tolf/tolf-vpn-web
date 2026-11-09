@@ -193,7 +193,7 @@ async function startConnectionTest() {
     speedtest.setParameter("test_order", "P_D");
     speedtest.setParameter("count_ping", 10);
     speedtest.setParameter("time_dl_max", 5);
-    speedtest.setParameter("time_ul_max", 15);
+    speedtest.setParameter("time_ul_max", 5);
     speedtest.setParameter("time_auto", false);
     // Do not include a pre-warmup request in a later accounting window.
     speedtest.setParameter("time_ulGraceTime", 0);
