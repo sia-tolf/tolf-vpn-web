@@ -335,7 +335,7 @@ I18N.en = {
   deleteAccountConfirmBody: "This permanently deletes your TOLF account, Passkey registrations, active sessions, Recovery Code, and VPN access. Installed VPN profiles will stop working. This cannot be undone.",
   deletingAccount: "Deleting TOLF account…",
   accountDeleted: "TOLF account deleted.",
-  measurementTrafficEstimate: "About 1.3 GB at 1 Gbps in both directions. Actual usage depends on speed.",
+  measurementTrafficEstimate: "Traffic used by one test: about 1.3 GB at 1 Gbps in both directions. Actual usage depends on speed.",
   measureConnection: "Measure connection",
   measuringConnection: "Measuring…",
   vpnConnectionTo: "VPN speed: {city}",
