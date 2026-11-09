@@ -335,7 +335,7 @@ I18N.ru = {
   deleteAccountConfirmBody: "Аккаунт TOLF, регистрации Passkey, активные сессии, Recovery Code и VPN-доступ будут безвозвратно удалены. Установленные VPN-профили перестанут работать. Это действие нельзя отменить.",
   deletingAccount: "Удаляем аккаунт TOLF…",
   accountDeleted: "Аккаунт TOLF удалён.",
-  measurementTrafficEstimate: "Около 1,3 ГБ при скорости 1 Гбит/с в обе стороны. Фактический расход зависит от скорости.",
+  measurementTrafficEstimate: "Расход трафика за один замер: около 1,3 ГБ при скорости 1 Гбит/с в обе стороны. Фактический расход зависит от скорости.",
   measureConnection: "Замерить соединение",
   measuringConnection: "Измеряем…",
   vpnConnectionTo: "Скорость VPN: {city}",
