@@ -1,4 +1,9 @@
 (() => {
+  const supportDescription = {
+    ru: "Мы принимаем сообщения на английском или русском языке.",
+    en: "We accept messages in English or Russian.",
+    lv: "Mēs pieņemam ziņojumus angļu vai krievu valodā."
+  };
   const endpoint = "https://api.tolf.is/support/widget";
   const language = () => {
     const active = document.documentElement.lang;
@@ -21,6 +26,7 @@
 
       window.chatwootSettings = {
         locale: language(),
+        welcomeDescription: supportDescription[language()],
         useBrowserLanguage: false,
         position: "right",
         darkMode: "auto"
@@ -29,9 +35,27 @@
       let appliedLocale = null;
       const syncLocale = () => {
         const locale = language();
+        const description = supportDescription[locale];
         window.chatwootSettings.locale = locale;
+        window.chatwootSettings.welcomeDescription = description;
         if (ready && locale !== appliedLocale) {
-          window.$chatwoot.setLocale(locale);
+          const widget = window.$chatwoot;
+          widget.locale = locale;
+          widget.welcomeDescription = description;
+          widget.setLocale(locale);
+          // Refresh custom copy through the widget's existing configuration channel.
+          // Keep the SDK's current appearance and feature settings intact.
+          const frame = document.getElementById("chatwoot_live_chat_widget");
+          const config = { event: "config-set", locale };
+          for (const key of [
+            "position", "hideMessageBubble", "showPopoutButton", "widgetStyle",
+            "darkMode", "showUnreadMessagesDialog", "welcomeTitle",
+            "welcomeDescription", "availableMessage", "unavailableMessage",
+            "enableFileUpload", "enableEmojiPicker", "enableEndConversation"
+          ]) config[key] = widget[key];
+          frame?.contentWindow?.postMessage(
+            "chatwoot-widget:" + JSON.stringify(config), settings.baseUrl
+          );
           appliedLocale = locale;
         }
       };
