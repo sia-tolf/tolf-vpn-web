@@ -1,6 +1,8 @@
 (() => {
   const endpoint = "https://api.tolf.is/support/widget";
   const language = () => {
+    const active = document.documentElement.lang;
+    if (["en", "ru", "lv"].includes(active)) return active;
     const query = new URLSearchParams(location.search).get("lang");
     if (["en", "ru", "lv"].includes(query)) return query;
     try {
@@ -23,7 +25,23 @@
         position: "right",
         darkMode: "auto"
       };
+      let ready = false;
+      let appliedLocale = null;
+      const syncLocale = () => {
+        const locale = language();
+        window.chatwootSettings.locale = locale;
+        if (ready && locale !== appliedLocale) {
+          window.$chatwoot.setLocale(locale);
+          appliedLocale = locale;
+        }
+      };
+      new MutationObserver(syncLocale).observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["lang"]
+      });
       window.addEventListener("chatwoot:ready", () => {
+        ready = true;
+        syncLocale();
         const identity = settings.identity;
         if (identity?.identifier && identity.identifierHash) {
           window.$chatwoot.setUser(identity.identifier, {
