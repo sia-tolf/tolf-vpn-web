@@ -64,12 +64,12 @@
   <script defer src="js/windows.js?v=manual-entry-20261020"></script>
   <script defer src="js/invitations.js?v=account-page-20260921"></script>
   <script defer src="js/cisco-client-install.js?v=install-row-20261101-1"></script>
-  <script defer src="js/quick-entry.js?v=setup-modes-20261031-1"></script>
+  <script defer src="js/quick-entry.js?v=require-protocol-20261109"></script>
   <script defer src="js/measurement-link.js?v=billing-preview-20261020"></script>
   <script defer src="js/app.js?v=calm-layout-20260926"></script>
   <script defer src="js/admin-entry.js?v=header-account-20261004-9"></script>
   <script defer src="js/transport-selector.js?v=setup-modes-20261031-1"></script>
-  <script defer src="js/vpn-compact-selectors.js?v=setup-modes-20261031-1"></script>
+  <script defer src="js/vpn-compact-selectors.js?v=require-protocol-20261109"></script>
   <script defer src="js/windows-dropdowns.js?v=20261007-1"></script>
   <link rel="stylesheet" href="css/windows-dropdowns.css?v=20261007-1">
 <script defer src="/js/openconnect-windows-setup.js?v=ny-moscow-ru-20261024"></script>
@@ -255,7 +255,7 @@ html[data-tolf-ui] #homeNavigation .tolf-wordmark::before {
           </div>
           <p id="quickProtocolNote" class="card-description hidden" data-i18n="quickIkev2Only">Quick setup currently supports IKEv2. For AnyConnect, use manual setup.</p>
           <p id="quickSetupHelp" class="card-description"></p>
-          <a id="quickStartLink" class="button-link primary vpn-setup-start" aria-disabled="true" aria-describedby="quickSetupHelp">Start quick setup</a>
+          <a id="quickStartLink" class="button-link primary vpn-setup-start" aria-disabled="true" inert tabindex="-1" aria-describedby="quickSetupHelp">Start quick setup</a>
           <aside id="quickWindowsNotice" class="windows-setup-notice hidden" role="status"></aside>
         </section>
         <div id="vpnPageTools" class="vpn-page-tools">
