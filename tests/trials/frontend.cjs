@@ -20,7 +20,7 @@ async function scenario(guest=false){
  if(guest){await button.click();assert.equal(new URL(nav[0],'https://vpn.tolf.is').searchParams.get('purpose'),'trial');assert.equal(calls.length,1);return;}
  answer={trialPackage:{balanceBytes:750000000,paidBalanceBytes:0},canClaim:false};await button.click();
  assert.deepEqual(JSON.parse(calls.at(-1).options.body),{confirm:'CLAIM_TRIAL'});assert.equal(button.hidden,true);assert.match(balance.textContent,/0,750/);
- assert.equal(select.hidden,true);assert(card.promotions.every(e=>e.hidden));
+ assert.equal(note.hidden,true);assert.equal(select.hidden,true);assert(card.promotions.every(e=>e.hidden));
  assert.equal(paidBalance.textContent,'0,000 ГБ');assert.equal(paidBalance.children[1].className,'traffic-fraction');
  assert.equal(balance.children[1].className,'traffic-fraction');
  selected=false;events['tolf:billing-render']();assert.equal(layout.hidden,false);assert.equal(panel.hidden,false);assert.equal(balance.textContent,'0,750 ГБ');
@@ -28,7 +28,7 @@ async function scenario(guest=false){
  document.documentElement.lang='ru';events['tolf:billing-render']();
  answer='error';await poll();assert.equal(balance.textContent,'0,750 ГБ');assert.match(status.textContent,/последние/);
  const count=calls.length;document.hidden=true;await poll();assert.equal(calls.length,count);document.hidden=false;
- answer={trialPackage:{balanceBytes:0,paidBalanceBytes:0}};await poll();assert.match(status.textContent,/закончился/);assert.equal(balance.textContent,'0,000 ГБ');assert.equal(select.hidden,true);assert.equal(button.hidden,true);
+ answer={trialPackage:{balanceBytes:0,paidBalanceBytes:0}};await poll();assert.match(status.textContent,/закончился/);assert.equal(balance.textContent,'0,000 ГБ');assert.equal(note.hidden,true);assert.equal(select.hidden,true);assert.equal(button.hidden,true);
  answer={trialPackage:{balanceBytes:0,paidBalanceBytes:50000000000}};await poll();assert.match(status.textContent,/оплаченный/);assert.equal(paidBalance.textContent,'50,000 ГБ');
  answer=401;await poll();assert.equal(panel.hidden,true);assert.equal(balance.textContent,'');
  selected=true;events['tolf:billing-render']();assert.equal(button.hidden,false);await button.click();assert.equal(nav.length,1);
