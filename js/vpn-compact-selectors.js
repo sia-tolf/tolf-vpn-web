@@ -143,7 +143,13 @@
       el.textContent=el.dataset.protocolSummary==="ikev2"?summary[p]:summary.any.replace("CLIENT",p==="windows"?"OpenConnect GUI":"Cisco Secure Client");
     });
     const quickStart=document.getElementById('quickStartLink');
-    if(quickStart){quickStart.setAttribute('aria-disabled',String(!transport));if(transport)quickStart.href='/quick/?protocol='+transport;else quickStart.removeAttribute('href');}
+    if(quickStart){
+      const canStart=setupMode==='quick'&&['ikev2','anyconnect'].includes(transport);
+      quickStart.setAttribute('aria-disabled',String(!canStart));
+      quickStart.toggleAttribute('inert',!canStart);
+      quickStart.tabIndex=canStart?0:-1;
+      if(canStart)quickStart.href='/quick/?protocol='+transport;else quickStart.removeAttribute('href');
+    }
     document.getElementById("quickProtocolNote").classList.add("hidden");
     protocolDD.render([
       {value:"",label:tr().chooseProtocol,disabled:true},
