@@ -1,1 +1,31 @@
-(()=>{'use strict';const titles={terms:{ru:'Условия сервиса',en:'Terms of service',lv:'Pakalpojuma noteikumi'},contact:{ru:'Компания и контакты',en:'Company and contacts',lv:'Uzņēmums un kontakti'}};const page=location.pathname.includes('terms')?'terms':'contact';function setLanguage(lang){if(!['ru','en','lv'].includes(lang))lang='en';document.documentElement.lang=lang;document.title=titles[page][lang]+' — TOLF';document.querySelectorAll('[data-legal-lang]').forEach(e=>e.hidden=e.dataset.legalLang!==lang);document.querySelectorAll('[data-legal-select]').forEach(e=>e.setAttribute('aria-pressed',String(e.dataset.legalSelect===lang)));document.querySelectorAll('[data-legal-link],a[data-return-control]').forEach(e=>{const u=new URL(e.href);u.searchParams.set('lang',lang);e.href=u});try{localStorage.setItem('tolfLanguage',lang)}catch{}const u=new URL(location.href);u.searchParams.set('lang',lang);history.replaceState(null,'',u)}let lang=new URL(location.href).searchParams.get('lang');if(!lang)try{lang=localStorage.getItem('tolfLanguage')}catch{}setLanguage(lang||navigator.language.slice(0,2));document.querySelectorAll('[data-legal-select]').forEach(e=>e.addEventListener('click',()=>setLanguage(e.dataset.legalSelect)));})();
+(() => {
+  'use strict';
+  const langs = ['en', 'ru', 'lv'];
+  const page = document.documentElement.dataset.legalPage;
+  const url = new URL(location.href);
+  const fixed = document.documentElement.dataset.legalStatic === 'true';
+  let lang = document.documentElement.lang;
+  if (!fixed) {
+    lang = url.searchParams.get('lang');
+    if (!langs.includes(lang)) {
+      try { lang = localStorage.getItem('tolfLanguage'); } catch {}
+    }
+    if (!langs.includes(lang)) lang = (navigator.language || 'en').slice(0, 2);
+    if (!langs.includes(lang)) lang = 'en';
+    url.pathname = '/' + lang + '/' + page + '.html';
+    url.searchParams.delete('lang');
+    location.replace(url.href);
+    return;
+  }
+  if (url.searchParams.has('lang')) {
+    url.searchParams.delete('lang');
+    history.replaceState(null, '', url.href);
+  }
+  try { localStorage.setItem('tolfLanguage', lang); } catch {}
+  for (const link of document.querySelectorAll('[data-legal-select]')) {
+    const target = new URL(link.href);
+    target.search = url.search;
+    target.hash = url.hash.replace(/-(en|ru|lv)$/, '-' + link.dataset.legalSelect);
+    link.href = target.href;
+  }
+})();
