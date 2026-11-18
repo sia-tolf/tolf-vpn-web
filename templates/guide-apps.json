@@ -1,0 +1,121 @@
+{
+  "shadowrocket": {
+    "en": {
+      "heading": "What is Shadowrocket?",
+      "intro": "Shadowrocket is an independent networking app for iPhone and iPad, developed by Shadow Launch Technology Limited. It connects to servers and applies traffic rules. The app does not provide its own TOLF access or include VPN traffic.",
+      "features": [
+        "Keep Moscow, Riga and New York in one TOLF configuration and select a server without importing a separate file for each.",
+        "Choose which sites use the tunnel and which use your regular connection. TOLF offers direct rules for Russian and Latvian domains.",
+        "Manage DNS settings, check connection logs and inspect how requests are routed.",
+        "Import a ready-made configuration instead of entering every server and rule manually."
+      ],
+      "when": "Choose Shadowrocket if you want control over servers, DNS and individual site routes. For a simple connect/disconnect experience, Cisco Secure Client may be easier. Shadowrocket is paid separately; its purchase does not buy TOLF traffic.",
+      "use": "After import, select the TOLF configuration, use configuration-based routing to apply its rules, choose a server in the TOLF group and turn on the main connection switch. Disconnect with that switch. Available protocols and advanced functions depend on the app version; the TOLF file sets up AnyConnect/OpenConnect."
+    },
+    "ru": {
+      "heading": "Что такое Shadowrocket?",
+      "intro": "Shadowrocket — самостоятельное сетевое приложение для iPhone и iPad от Shadow Launch Technology Limited. Оно подключается к серверам и распределяет трафик по правилам. Само приложение не выдаёт доступ TOLF и не включает VPN-трафик.",
+      "features": [
+        "Москва, Рига и Нью-Йорк в одной конфигурации TOLF: можно выбирать сервер без отдельного импорта для каждого.",
+        "Выбор маршрута для сайтов: через туннель или напрямую через обычное подключение. В TOLF предусмотрены прямые правила для российских и латвийских доменов.",
+        "Настройка DNS, просмотр журналов соединений и проверка маршрута обработки запросов.",
+        "Импорт готовой конфигурации вместо ручного ввода каждого сервера и правила."
+      ],
+      "when": "Выбирайте Shadowrocket, если хотите управлять серверами, DNS и маршрутами отдельных сайтов. Для простого включения и выключения VPN удобнее может быть Cisco Secure Client. Shadowrocket оплачивается отдельно; его покупка не оплачивает трафик TOLF.",
+      "use": "После импорта выберите конфигурацию TOLF, включите маршрутизацию по конфигурации для применения правил, выберите сервер в группе TOLF и включите главный переключатель. Им же отключается соединение. Набор протоколов и дополнительных функций зависит от версии приложения; файл TOLF настраивает AnyConnect/OpenConnect."
+    },
+    "lv": {
+      "heading": "Kas ir Shadowrocket?",
+      "intro": "Shadowrocket ir neatkarīga tīkla lietotne iPhone un iPad no Shadow Launch Technology Limited. Tā savienojas ar serveriem un piemēro datplūsmas noteikumus. Lietotne pati nepiešķir TOLF piekļuvi un neietver VPN datu apjomu.",
+      "features": [
+        "Maskava, Rīga un Ņujorka vienā TOLF konfigurācijā: izvēlieties serveri bez atsevišķas importēšanas katram.",
+        "Izvēlieties, kuras vietnes izmantos tuneli un kuras — parasto savienojumu. TOLF piedāvā tiešos noteikumus Krievijas un Latvijas domēniem.",
+        "Pārvaldiet DNS iestatījumus, skatiet savienojumu žurnālus un pārbaudiet pieprasījumu maršrutēšanu.",
+        "Importējiet gatavu konfigurāciju, nevis manuāli ievadiet katru serveri un noteikumu."
+      ],
+      "when": "Izvēlieties Shadowrocket, ja vēlaties pārvaldīt serverus, DNS un atsevišķu vietņu maršrutus. Vienkāršai VPN ieslēgšanai un izslēgšanai ērtāks var būt Cisco Secure Client. Shadowrocket iegādājas atsevišķi; pirkums neapmaksā TOLF datu apjomu.",
+      "use": "Pēc importēšanas izvēlieties TOLF konfigurāciju, izmantojiet maršrutēšanu pēc konfigurācijas, lai piemērotu noteikumus, izvēlieties serveri TOLF grupā un ieslēdziet galveno slēdzi. Ar to pašu slēdzi atvienojiet savienojumu. Protokoli un papildu funkcijas ir atkarīgas no lietotnes versijas; TOLF fails iestata AnyConnect/OpenConnect."
+    },
+    "source": "https://apps.apple.com/app/id932747118",
+    "store": "https://apps.apple.com/app/id932747118"
+  },
+  "cisco": {
+    "en": {
+      "heading": "What is Cisco Secure Client (AnyConnect)?",
+      "intro": "Cisco Secure Client is Cisco's application for secure remote network access. AnyConnect is the VPN component and familiar former client name. In TOLF, it connects your device to a compatible OpenConnect server; TOLF is not a Cisco-operated VPN service.",
+      "features": [
+        "Create an encrypted connection using the TOLF access entry and personal client certificate.",
+        "Keep connection entries and connect or disconnect with a switch, without managing lists of site rules.",
+        "Supports TLS over TCP and DTLS over UDP. TOLF can use TCP when a UDP data channel cannot be established or maintained.",
+        "Supports reconnecting after interruptions and network changes, with connection status and diagnostic information."
+      ],
+      "when": "Choose Cisco Secure Client for a straightforward AnyConnect connection. Shadowrocket on iPhone/iPad is an alternative when you want to edit site-routing rules. Reconnection time depends on the device, network and server; the app does not guarantee uninterrupted access in every network.",
+      "use": "Install the TOLF connection and certificate, select that connection in the app and enable VPN. Wait for the connected state and check a website. Disconnect using the same switch. On iPhone/iPad, Connect On Demand may be configured by the profile; Android does not use Apple's On Demand setting. The app and TOLF access are separate: installing the app alone does not grant service."
+    },
+    "ru": {
+      "heading": "Что такое Cisco Secure Client (AnyConnect)?",
+      "intro": "Cisco Secure Client — приложение компании Cisco для защищённого удалённого доступа к сети. AnyConnect — его VPN-компонент и привычное прежнее название клиента. В TOLF приложение подключает устройство к совместимому серверу OpenConnect; сам сервис TOLF не принадлежит Cisco.",
+      "features": [
+        "Шифрованное подключение по настройкам TOLF с персональным клиентским сертификатом.",
+        "Сохранённые подключения и простой переключатель включения и отключения, без управления списками правил для сайтов.",
+        "Поддержка TLS через TCP и DTLS через UDP. TOLF может использовать TCP, когда канал передачи данных UDP не удаётся установить или поддерживать.",
+        "Восстановление соединения после прерывания или смены сети, отображение состояния и диагностических сведений."
+      ],
+      "when": "Выбирайте Cisco Secure Client для простого подключения AnyConnect. На iPhone/iPad Shadowrocket подходит как альтернатива, если нужно самостоятельно управлять правилами для сайтов. Время восстановления зависит от устройства, сети и сервера; непрерывная работа в любой сети не гарантируется.",
+      "use": "Установите подключение и сертификат TOLF, выберите это соединение в приложении и включите VPN. Дождитесь подключения и проверьте сайт. Отключение — тем же переключателем. На iPhone/iPad профиль может задавать «Подключение по требованию»; Android не использует настройку Apple On Demand. Приложение и доступ TOLF — разные вещи: одной установки приложения недостаточно."
+    },
+    "lv": {
+      "heading": "Kas ir Cisco Secure Client (AnyConnect)?",
+      "intro": "Cisco Secure Client ir uzņēmuma Cisco lietotne drošai attālinātai piekļuvei tīklam. AnyConnect ir tās VPN komponents un ierastais agrākais klienta nosaukums. TOLF izmanto lietotni savienojumam ar saderīgu OpenConnect serveri; TOLF nav Cisco pārvaldīts VPN pakalpojums.",
+      "features": [
+        "Šifrēts savienojums ar TOLF iestatījumiem un personīgo klienta sertifikātu.",
+        "Saglabāti savienojumi un vienkārša ieslēgšana un izslēgšana bez vietņu noteikumu sarakstu pārvaldīšanas.",
+        "TLS atbalsts caur TCP un DTLS caur UDP. TOLF var izmantot TCP, ja UDP datu kanālu nevar izveidot vai uzturēt.",
+        "Savienojuma atjaunošana pēc pārtraukuma vai tīkla maiņas, statusa un diagnostikas informācija."
+      ],
+      "when": "Izvēlieties Cisco Secure Client vienkāršam AnyConnect savienojumam. iPhone/iPad Shadowrocket ir alternatīva, ja vēlaties patstāvīgi pārvaldīt vietņu noteikumus. Atjaunošanās laiks ir atkarīgs no ierīces, tīkla un servera; nepārtraukta darbība visos tīklos netiek garantēta.",
+      "use": "Instalējiet TOLF savienojumu un sertifikātu, izvēlieties to lietotnē un ieslēdziet VPN. Sagaidiet savienojumu un pārbaudiet vietni. Atvienojiet ar to pašu slēdzi. iPhone/iPad profils var iestatīt savienošanu pēc pieprasījuma; Android neizmanto Apple On Demand iestatījumu. Lietotne un TOLF piekļuve ir atsevišķas lietas: ar lietotnes instalēšanu vien nepietiek."
+    },
+    "source": "https://www.cisco.com/c/en/us/td/docs/security/vpn_client/anyconnect/Cisco-Secure-Client-5/feature/guide/AnyConnect_Mobile_Platforms_and_Features_Guide.html"
+  },
+  "strongswan": {
+    "en": {
+      "heading": "What is strongSwan VPN Client?",
+      "intro": "strongSwan VPN Client is the free, open-source Android app from the strongSwan project. It creates an encrypted IKEv2/IPsec tunnel to a VPN server. It is a connection tool, not a provider of ready-made servers or TOLF access.",
+      "features": [
+        "Import a TOLF .sswan profile instead of manually entering server and authentication settings.",
+        "Save multiple VPN profiles and select the connection you need.",
+        "Supports password-based EAP and certificate authentication; use the method specified by your TOLF profile.",
+        "Provides connection status and logs for troubleshooting. Android can manage Always-on VPN separately."
+      ],
+      "when": "Choose strongSwan for TOLF IKEv2 on Android. For TOLF AnyConnect use Cisco Secure Client instead. IKEv2 and AnyConnect are different protocols; if your network restricts IKEv2, installing strongSwan alone will not remove that restriction.",
+      "use": "Open the received profile in strongSwan, confirm import, select the saved entry and connect. Approve Android's VPN prompt on first use. Disconnect in the app. Always-on VPN and blocking connections without VPN are separate Android settings; enable them deliberately because they can prevent internet access while the VPN is down."
+    },
+    "ru": {
+      "heading": "Что такое strongSwan VPN Client?",
+      "intro": "strongSwan VPN Client — бесплатное приложение для Android с открытым исходным кодом от проекта strongSwan. Оно создаёт шифрованный туннель IKEv2/IPsec до VPN-сервера. Это инструмент подключения, а не поставщик готовых серверов или доступа TOLF.",
+      "features": [
+        "Импорт профиля TOLF .sswan вместо ручного ввода сервера и параметров авторизации.",
+        "Хранение нескольких VPN-профилей и выбор нужного подключения.",
+        "Поддержка авторизации EAP по паролю и авторизации сертификатом — используется способ, заданный в профиле TOLF.",
+        "Просмотр состояния соединения и журналов для диагностики. Постоянный VPN настраивается отдельно средствами Android."
+      ],
+      "when": "Выбирайте strongSwan для подключения IKEv2 TOLF на Android. Для AnyConnect TOLF используется Cisco Secure Client. IKEv2 и AnyConnect — разные протоколы: если ваша сеть ограничивает IKEv2, сама установка strongSwan не снимает это ограничение.",
+      "use": "Откройте полученный профиль в strongSwan, подтвердите импорт, выберите сохранённое подключение и подключитесь. При первом запуске разрешите системный запрос Android на VPN. Отключение выполняется в приложении. «Постоянный VPN» и блокировка соединений без VPN — отдельные настройки Android: включайте их осознанно, поскольку без работающего VPN интернет может стать недоступен."
+    },
+    "lv": {
+      "heading": "Kas ir strongSwan VPN Client?",
+      "intro": "strongSwan VPN Client ir bezmaksas atvērtā pirmkoda Android lietotne no strongSwan projekta. Tā izveido šifrētu IKEv2/IPsec tuneli līdz VPN serverim. Tas ir savienojuma rīks, nevis gatavu serveru vai TOLF piekļuves nodrošinātājs.",
+      "features": [
+        "Importējiet TOLF .sswan profilu, nevis manuāli ievadiet serveri un autentifikācijas parametrus.",
+        "Saglabājiet vairākus VPN profilus un izvēlieties vajadzīgo savienojumu.",
+        "Atbalsta EAP autentifikāciju ar paroli un autentifikāciju ar sertifikātu; izmantojiet TOLF profilā norādīto veidu.",
+        "Skatiet savienojuma statusu un žurnālus diagnostikai. Pastāvīgo VPN pārvalda atsevišķi Android iestatījumos."
+      ],
+      "when": "Izvēlieties strongSwan TOLF IKEv2 savienojumam Android ierīcē. TOLF AnyConnect izmanto Cisco Secure Client. IKEv2 un AnyConnect ir dažādi protokoli: ja tīkls ierobežo IKEv2, lietotnes instalēšana pati par sevi ierobežojumu neatceļ.",
+      "use": "Atveriet saņemto profilu strongSwan, apstipriniet importēšanu, izvēlieties saglabāto savienojumu un pieslēdzieties. Pirmajā reizē atļaujiet Android VPN pieprasījumu. Atvienojiet lietotnē. Pastāvīgais VPN un savienojumu bloķēšana bez VPN ir atsevišķi Android iestatījumi: ieslēdziet tos apzināti, jo bez darbojoša VPN internets var kļūt nepieejams."
+    },
+    "source": "https://docs.strongswan.org/docs/latest/os/androidVpnClient.html",
+    "store": "https://play.google.com/store/apps/details?id=org.strongswan.android"
+  }
+}

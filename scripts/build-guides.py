@@ -2,6 +2,7 @@
 from pathlib import Path
 from html import escape
 import xml.etree.ElementTree as ET
+import json
 from public_page_shell import document
 ROOT=Path(__file__).resolve().parents[1]
 LANGS=('en','ru','lv')
@@ -82,6 +83,18 @@ def render(lang,slug,title,desc,body):
  head+=f'<link rel="alternate" hreflang="x-default" href="{url("en",slug)}"><meta property="og:title" content="{escape(title,quote=True)}"><meta property="og:description" content="{escape(desc,quote=True)}"><meta property="og:url" content="{canonical}"><link rel="stylesheet" href="/css/public-guides.css?v=20261118">'
  target=ROOT/lang/'guides'/ (slug+'.html' if slug else 'index.html');target.parent.mkdir(parents=True,exist_ok=True)
  target.write_text(document(lang,head,body,{l:url(l,slug) for l in LANGS}))
+APP_DESCRIPTIONS=json.loads((ROOT/'templates/guide-apps.json').read_text())
+APP_GUIDES={'iphone-shadowrocket':'shadowrocket','iphone-anyconnect':'cisco','android-anyconnect':'cisco','android-ikev2':'strongswan'}
+def application_info(lang,slug):
+ key=APP_GUIDES.get(slug)
+ if not key:return ''
+ app=APP_DESCRIPTIONS[key];c=app[lang]
+ labels={'ru':('Что позволяет приложение','Когда его выбрать','Как им пользоваться','Описание разработчика','Установить приложение'), 'en':('What the app lets you do','When to choose it','How to use it','Developer documentation','Get the app'), 'lv':('Ko lietotne ļauj darīt','Kad to izvēlēties','Kā to lietot','Izstrādātāja informācija','Instalēt lietotni')}[lang]
+ store=app.get('store')
+ if key=='cisco':store='https://apps.apple.com/app/id1135064690' if slug.startswith('iphone') else 'https://play.google.com/store/apps/details?id=com.cisco.anyconnect.vpn.android.avf'
+ content='<section class="guide-app"><h2>'+escape(c['heading'])+'</h2><p>'+escape(c['intro'])+'</p><h3>'+labels[0]+'</h3><ul>'+''.join('<li>'+escape(t)+'</li>' for t in c['features'])+'</ul><h3>'+labels[1]+'</h3><p>'+escape(c['when'])+'</p><h3>'+labels[2]+'</h3><p>'+escape(c['use'])+'</p><p><a href="'+escape(store,quote=True)+'" target="_blank" rel="noopener noreferrer">'+labels[4]+'</a> · <a href="'+escape(app['source'],quote=True)+'" target="_blank" rel="noopener noreferrer">'+labels[3]+'</a></p></section>'
+ return content
+
 for lang in LANGS:
  c=UI[lang]
  body=f'<h1>{c["title"]}</h1><p class="lead">{c["lead"]}</p><div class="guide-grid">'
@@ -94,7 +107,7 @@ for lang in LANGS:
  render(lang,'',c['title'],c['lead'],body)
  for slug,(g,translations) in GUIDES.items():
   title,need,steps,check,note=translations[lang]
-  body=f'<nav class="guide-breadcrumb"><a href="./">← {c["all"]}</a></nav><h1>{escape(title)}</h1><h2>{c["need"]}</h2><p>{escape(need)}</p><h2>{c["steps"]}</h2><ol class="guide-steps">'
+  body=f'<nav class="guide-breadcrumb"><a href="./">← {c["all"]}</a></nav><h1>{escape(title)}</h1>{application_info(lang,slug)}<h2>{c["need"]}</h2><p>{escape(need)}</p><h2>{c["steps"]}</h2><ol class="guide-steps">'
   body+=''.join(f'<li>{escape(step)}</li>' for step in steps)
   body+=f'</ol><h2>{c["check"]}</h2><p>{escape(check)}</p><details class="guide-details"><summary>{c["note"]}</summary><p>{escape(note)}</p></details><nav class="next"><a class="button-link" href="/?lang={lang}">{c["setup"]}</a><a href="./">{c["all"]}</a><a href="/{lang}/contact.html">'+{'ru':'Поддержка','en':'Support','lv':'Atbalsts'}[lang]+'</a></nav>'
   render(lang,slug,title,need,body)
