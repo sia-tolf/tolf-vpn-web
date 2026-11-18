@@ -90,4 +90,214 @@
     <xhtml:link rel="alternate" hreflang="lv" href="https://vpn.tolf.is/lv/terms.html" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://vpn.tolf.is/en/terms.html" />
   </url>
+  <url>
+    <loc>https://vpn.tolf.is/en/guides/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://vpn.tolf.is/en/guides/" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://vpn.tolf.is/ru/guides/" />
+    <xhtml:link rel="alternate" hreflang="lv" href="https://vpn.tolf.is/lv/guides/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://vpn.tolf.is/en/guides/" />
+  </url>
+  <url>
+    <loc>https://vpn.tolf.is/ru/guides/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://vpn.tolf.is/en/guides/" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://vpn.tolf.is/ru/guides/" />
+    <xhtml:link rel="alternate" hreflang="lv" href="https://vpn.tolf.is/lv/guides/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://vpn.tolf.is/en/guides/" />
+  </url>
+  <url>
+    <loc>https://vpn.tolf.is/lv/guides/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://vpn.tolf.is/en/guides/" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://vpn.tolf.is/ru/guides/" />
+    <xhtml:link rel="alternate" hreflang="lv" href="https://vpn.tolf.is/lv/guides/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://vpn.tolf.is/en/guides/" />
+  </url>
+  <url>
+    <loc>https://vpn.tolf.is/en/guides/iphone-ikev2.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://vpn.tolf.is/en/guides/iphone-ikev2.html" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://vpn.tolf.is/ru/guides/iphone-ikev2.html" />
+    <xhtml:link rel="alternate" hreflang="lv" href="https://vpn.tolf.is/lv/guides/iphone-ikev2.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://vpn.tolf.is/en/guides/iphone-ikev2.html" />
+  </url>
+  <url>
+    <loc>https://vpn.tolf.is/ru/guides/iphone-ikev2.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://vpn.tolf.is/en/guides/iphone-ikev2.html" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://vpn.tolf.is/ru/guides/iphone-ikev2.html" />
+    <xhtml:link rel="alternate" hreflang="lv" href="https://vpn.tolf.is/lv/guides/iphone-ikev2.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://vpn.tolf.is/en/guides/iphone-ikev2.html" />
+  </url>
+  <url>
+    <loc>https://vpn.tolf.is/lv/guides/iphone-ikev2.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://vpn.tolf.is/en/guides/iphone-ikev2.html" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://vpn.tolf.is/ru/guides/iphone-ikev2.html" />
+    <xhtml:link rel="alternate" hreflang="lv" href="https://vpn.tolf.is/lv/guides/iphone-ikev2.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://vpn.tolf.is/en/guides/iphone-ikev2.html" />
+  </url>
+  <url>
+    <loc>https://vpn.tolf.is/en/guides/iphone-anyconnect.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://vpn.tolf.is/en/guides/iphone-anyconnect.html" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://vpn.tolf.is/ru/guides/iphone-anyconnect.html" />
+    <xhtml:link rel="alternate" hreflang="lv" href="https://vpn.tolf.is/lv/guides/iphone-anyconnect.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://vpn.tolf.is/en/guides/iphone-anyconnect.html" />
+  </url>
+  <url>
+    <loc>https://vpn.tolf.is/ru/guides/iphone-anyconnect.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://vpn.tolf.is/en/guides/iphone-anyconnect.html" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://vpn.tolf.is/ru/guides/iphone-anyconnect.html" />
+    <xhtml:link rel="alternate" hreflang="lv" href="https://vpn.tolf.is/lv/guides/iphone-anyconnect.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://vpn.tolf.is/en/guides/iphone-anyconnect.html" />
+  </url>
+  <url>
+    <loc>https://vpn.tolf.is/lv/guides/iphone-anyconnect.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://vpn.tolf.is/en/guides/iphone-anyconnect.html" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://vpn.tolf.is/ru/guides/iphone-anyconnect.html" />
+    <xhtml:link rel="alternate" hreflang="lv" href="https://vpn.tolf.is/lv/guides/iphone-anyconnect.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://vpn.tolf.is/en/guides/iphone-anyconnect.html" />
+  </url>
+  <url>
+    <loc>https://vpn.tolf.is/en/guides/iphone-shadowrocket.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://vpn.tolf.is/en/guides/iphone-shadowrocket.html" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://vpn.tolf.is/ru/guides/iphone-shadowrocket.html" />
+    <xhtml:link rel="alternate" hreflang="lv" href="https://vpn.tolf.is/lv/guides/iphone-shadowrocket.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://vpn.tolf.is/en/guides/iphone-shadowrocket.html" />
+  </url>
+  <url>
+    <loc>https://vpn.tolf.is/ru/guides/iphone-shadowrocket.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://vpn.tolf.is/en/guides/iphone-shadowrocket.html" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://vpn.tolf.is/ru/guides/iphone-shadowrocket.html" />
+    <xhtml:link rel="alternate" hreflang="lv" href="https://vpn.tolf.is/lv/guides/iphone-shadowrocket.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://vpn.tolf.is/en/guides/iphone-shadowrocket.html" />
+  </url>
+  <url>
+    <loc>https://vpn.tolf.is/lv/guides/iphone-shadowrocket.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://vpn.tolf.is/en/guides/iphone-shadowrocket.html" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://vpn.tolf.is/ru/guides/iphone-shadowrocket.html" />
+    <xhtml:link rel="alternate" hreflang="lv" href="https://vpn.tolf.is/lv/guides/iphone-shadowrocket.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://vpn.tolf.is/en/guides/iphone-shadowrocket.html" />
+  </url>
+  <url>
+    <loc>https://vpn.tolf.is/en/guides/android-ikev2.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://vpn.tolf.is/en/guides/android-ikev2.html" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://vpn.tolf.is/ru/guides/android-ikev2.html" />
+    <xhtml:link rel="alternate" hreflang="lv" href="https://vpn.tolf.is/lv/guides/android-ikev2.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://vpn.tolf.is/en/guides/android-ikev2.html" />
+  </url>
+  <url>
+    <loc>https://vpn.tolf.is/ru/guides/android-ikev2.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://vpn.tolf.is/en/guides/android-ikev2.html" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://vpn.tolf.is/ru/guides/android-ikev2.html" />
+    <xhtml:link rel="alternate" hreflang="lv" href="https://vpn.tolf.is/lv/guides/android-ikev2.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://vpn.tolf.is/en/guides/android-ikev2.html" />
+  </url>
+  <url>
+    <loc>https://vpn.tolf.is/lv/guides/android-ikev2.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://vpn.tolf.is/en/guides/android-ikev2.html" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://vpn.tolf.is/ru/guides/android-ikev2.html" />
+    <xhtml:link rel="alternate" hreflang="lv" href="https://vpn.tolf.is/lv/guides/android-ikev2.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://vpn.tolf.is/en/guides/android-ikev2.html" />
+  </url>
+  <url>
+    <loc>https://vpn.tolf.is/en/guides/android-anyconnect.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://vpn.tolf.is/en/guides/android-anyconnect.html" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://vpn.tolf.is/ru/guides/android-anyconnect.html" />
+    <xhtml:link rel="alternate" hreflang="lv" href="https://vpn.tolf.is/lv/guides/android-anyconnect.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://vpn.tolf.is/en/guides/android-anyconnect.html" />
+  </url>
+  <url>
+    <loc>https://vpn.tolf.is/ru/guides/android-anyconnect.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://vpn.tolf.is/en/guides/android-anyconnect.html" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://vpn.tolf.is/ru/guides/android-anyconnect.html" />
+    <xhtml:link rel="alternate" hreflang="lv" href="https://vpn.tolf.is/lv/guides/android-anyconnect.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://vpn.tolf.is/en/guides/android-anyconnect.html" />
+  </url>
+  <url>
+    <loc>https://vpn.tolf.is/lv/guides/android-anyconnect.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://vpn.tolf.is/en/guides/android-anyconnect.html" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://vpn.tolf.is/ru/guides/android-anyconnect.html" />
+    <xhtml:link rel="alternate" hreflang="lv" href="https://vpn.tolf.is/lv/guides/android-anyconnect.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://vpn.tolf.is/en/guides/android-anyconnect.html" />
+  </url>
+  <url>
+    <loc>https://vpn.tolf.is/en/guides/windows-ikev2.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://vpn.tolf.is/en/guides/windows-ikev2.html" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://vpn.tolf.is/ru/guides/windows-ikev2.html" />
+    <xhtml:link rel="alternate" hreflang="lv" href="https://vpn.tolf.is/lv/guides/windows-ikev2.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://vpn.tolf.is/en/guides/windows-ikev2.html" />
+  </url>
+  <url>
+    <loc>https://vpn.tolf.is/ru/guides/windows-ikev2.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://vpn.tolf.is/en/guides/windows-ikev2.html" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://vpn.tolf.is/ru/guides/windows-ikev2.html" />
+    <xhtml:link rel="alternate" hreflang="lv" href="https://vpn.tolf.is/lv/guides/windows-ikev2.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://vpn.tolf.is/en/guides/windows-ikev2.html" />
+  </url>
+  <url>
+    <loc>https://vpn.tolf.is/lv/guides/windows-ikev2.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://vpn.tolf.is/en/guides/windows-ikev2.html" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://vpn.tolf.is/ru/guides/windows-ikev2.html" />
+    <xhtml:link rel="alternate" hreflang="lv" href="https://vpn.tolf.is/lv/guides/windows-ikev2.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://vpn.tolf.is/en/guides/windows-ikev2.html" />
+  </url>
+  <url>
+    <loc>https://vpn.tolf.is/en/guides/windows-anyconnect.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://vpn.tolf.is/en/guides/windows-anyconnect.html" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://vpn.tolf.is/ru/guides/windows-anyconnect.html" />
+    <xhtml:link rel="alternate" hreflang="lv" href="https://vpn.tolf.is/lv/guides/windows-anyconnect.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://vpn.tolf.is/en/guides/windows-anyconnect.html" />
+  </url>
+  <url>
+    <loc>https://vpn.tolf.is/ru/guides/windows-anyconnect.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://vpn.tolf.is/en/guides/windows-anyconnect.html" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://vpn.tolf.is/ru/guides/windows-anyconnect.html" />
+    <xhtml:link rel="alternate" hreflang="lv" href="https://vpn.tolf.is/lv/guides/windows-anyconnect.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://vpn.tolf.is/en/guides/windows-anyconnect.html" />
+  </url>
+  <url>
+    <loc>https://vpn.tolf.is/lv/guides/windows-anyconnect.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://vpn.tolf.is/en/guides/windows-anyconnect.html" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://vpn.tolf.is/ru/guides/windows-anyconnect.html" />
+    <xhtml:link rel="alternate" hreflang="lv" href="https://vpn.tolf.is/lv/guides/windows-anyconnect.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://vpn.tolf.is/en/guides/windows-anyconnect.html" />
+  </url>
+  <url>
+    <loc>https://vpn.tolf.is/en/guides/share-access.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://vpn.tolf.is/en/guides/share-access.html" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://vpn.tolf.is/ru/guides/share-access.html" />
+    <xhtml:link rel="alternate" hreflang="lv" href="https://vpn.tolf.is/lv/guides/share-access.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://vpn.tolf.is/en/guides/share-access.html" />
+  </url>
+  <url>
+    <loc>https://vpn.tolf.is/ru/guides/share-access.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://vpn.tolf.is/en/guides/share-access.html" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://vpn.tolf.is/ru/guides/share-access.html" />
+    <xhtml:link rel="alternate" hreflang="lv" href="https://vpn.tolf.is/lv/guides/share-access.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://vpn.tolf.is/en/guides/share-access.html" />
+  </url>
+  <url>
+    <loc>https://vpn.tolf.is/lv/guides/share-access.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://vpn.tolf.is/en/guides/share-access.html" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://vpn.tolf.is/ru/guides/share-access.html" />
+    <xhtml:link rel="alternate" hreflang="lv" href="https://vpn.tolf.is/lv/guides/share-access.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://vpn.tolf.is/en/guides/share-access.html" />
+  </url>
+  <url>
+    <loc>https://vpn.tolf.is/en/guides/connected-no-internet.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://vpn.tolf.is/en/guides/connected-no-internet.html" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://vpn.tolf.is/ru/guides/connected-no-internet.html" />
+    <xhtml:link rel="alternate" hreflang="lv" href="https://vpn.tolf.is/lv/guides/connected-no-internet.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://vpn.tolf.is/en/guides/connected-no-internet.html" />
+  </url>
+  <url>
+    <loc>https://vpn.tolf.is/ru/guides/connected-no-internet.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://vpn.tolf.is/en/guides/connected-no-internet.html" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://vpn.tolf.is/ru/guides/connected-no-internet.html" />
+    <xhtml:link rel="alternate" hreflang="lv" href="https://vpn.tolf.is/lv/guides/connected-no-internet.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://vpn.tolf.is/en/guides/connected-no-internet.html" />
+  </url>
+  <url>
+    <loc>https://vpn.tolf.is/lv/guides/connected-no-internet.html</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://vpn.tolf.is/en/guides/connected-no-internet.html" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://vpn.tolf.is/ru/guides/connected-no-internet.html" />
+    <xhtml:link rel="alternate" hreflang="lv" href="https://vpn.tolf.is/lv/guides/connected-no-internet.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://vpn.tolf.is/en/guides/connected-no-internet.html" />
+  </url>
 </urlset>

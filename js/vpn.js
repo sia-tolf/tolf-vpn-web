@@ -642,7 +642,12 @@ profileQrButton.addEventListener("click", () => {
     const list = document.createElement("ol");
     for (const text of c.steps) {const li=document.createElement("li");li.textContent=text;list.append(li);}
     const note = document.createElement("p");note.textContent=c.note;
-    body.append(intro,list,note);
+    const fullGuide=document.createElement("p");
+    const guideLink=document.createElement("a");
+    guideLink.href="/"+(["ru","en","lv"].includes(language)?language:"en")+"/guides/iphone-ikev2.html";
+    guideLink.textContent={ru:"Открыть публичную инструкцию",en:"Open the public guide",lv:"Atvērt publisko instrukciju"}[language]||"Open the public guide";
+    fullGuide.append(guideLink);
+    body.append(intro,list,note,fullGuide);
   }
   window.addEventListener("vpnplatformchange",renderHelp);
   new MutationObserver(renderHelp).observe(document.documentElement,{attributes:true,attributeFilter:["lang"]});
