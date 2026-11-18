@@ -117,5 +117,83 @@
     },
     "source": "https://docs.strongswan.org/docs/latest/os/androidVpnClient.html",
     "store": "https://play.google.com/store/apps/details?id=org.strongswan.android"
+  },
+  "openconnect": {
+    "source": "https://www.infradead.org/openconnect/gui.html",
+    "ru": {
+      "heading": "Что такое OpenConnect GUI?",
+      "intro": "OpenConnect GUI — бесплатный клиент с открытым исходным кодом и графическим интерфейсом для Windows. Он использует OpenConnect для подключения к совместимым VPN-серверам AnyConnect, включая TOLF. Это самостоятельный проект, не приложение компании Cisco.",
+      "features": [
+        "Сохранение профилей подключения, чтобы не вводить параметры при каждом запуске.",
+        "Подключение к TOLF с персональным клиентским сертификатом и закрытым ключом.",
+        "Шифрованная передача данных; OpenConnect поддерживает TLS через TCP и DTLS через UDP.",
+        "Просмотр состояния подключения и журнала для разбора ошибок."
+      ],
+      "when": "Выбирайте его для способа AnyConnect, предложенного TOLF в Windows. Встроенное подключение Windows IKEv2 использует другой протокол и настраивается отдельно. Установка OpenConnect GUI сама по себе не создаёт доступ TOLF.",
+      "use": "Один раз создайте профиль по параметрам из кабинета TOLF, укажите сертификат и ключ. Затем выбирайте сохранённый профиль и нажимайте Connect; для отключения — Disconnect. Храните файлы доступа на компьютере: закрытый ключ нужен клиенту и не предназначен для публикации."
+    },
+    "en": {
+      "heading": "What is OpenConnect GUI?",
+      "intro": "OpenConnect GUI is a free, open-source graphical VPN client for Windows. It uses OpenConnect to connect to compatible AnyConnect VPN servers, including TOLF. It is an independent project, not a Cisco application.",
+      "features": [
+        "Save connection profiles instead of entering settings every time.",
+        "Connect to TOLF using your personal client certificate and private key.",
+        "Encrypt traffic; OpenConnect supports TLS over TCP and DTLS over UDP.",
+        "View connection status and logs to investigate errors."
+      ],
+      "when": "Choose it for the AnyConnect method offered by TOLF on Windows. Windows built-in IKEv2 uses a different protocol and is configured separately. Installing OpenConnect GUI alone does not create TOLF access.",
+      "use": "Create a profile once using the settings from your TOLF account and select the certificate and key files. Then select the saved profile and choose Connect; use Disconnect to stop it. Keep the access files on your computer: the client needs the private key, which is not intended for publication."
+    },
+    "lv": {
+      "heading": "Kas ir OpenConnect GUI?",
+      "intro": "OpenConnect GUI ir bezmaksas atvērtā pirmkoda VPN klients ar grafisku saskarni Windows datoriem. Tas izmanto OpenConnect savienojumam ar saderīgiem AnyConnect VPN serveriem, tostarp TOLF. Tas ir neatkarīgs projekts, nevis Cisco lietotne.",
+      "features": [
+        "Saglabājiet savienojumu profilus, neievadot iestatījumus katru reizi.",
+        "Pieslēdzieties TOLF ar personīgo klienta sertifikātu un privāto atslēgu.",
+        "Šifrēta datplūsma; OpenConnect atbalsta TLS caur TCP un DTLS caur UDP.",
+        "Skatiet savienojuma statusu un žurnālu kļūdu izpētei."
+      ],
+      "when": "Izvēlieties to TOLF piedāvātajam AnyConnect veidam Windows datorā. Windows iebūvētais IKEv2 izmanto citu protokolu un tiek iestatīts atsevišķi. OpenConnect GUI instalēšana pati par sevi nepiešķir TOLF piekļuvi.",
+      "use": "Vienreiz izveidojiet profilu ar TOLF kontā norādītajiem parametriem, izvēlieties sertifikāta un atslēgas failus. Turpmāk izvēlieties saglabāto profilu un nospiediet Connect; atvienošanai — Disconnect. Saglabājiet piekļuves failus datorā: klientam vajag privāto atslēgu, un tā nav paredzēta publicēšanai."
+    }
+  },
+  "windows-native": {
+    "source": "https://support.microsoft.com/en-us/windows/experience/connectivity-networking/connect-to-a-vpn-in-windows",
+    "ru": {
+      "heading": "Что такое встроенный VPN Windows?",
+      "intro": "Windows уже содержит VPN-клиент Microsoft с поддержкой IKEv2/IPsec. Для этого способа TOLF отдельное приложение устанавливать не нужно: пакет настройки создаёт подключение в системе.",
+      "features": [
+        "Шифрованное подключение IKEv2/IPsec средствами Windows.",
+        "Сохранение сервера и параметров в системном VPN-профиле.",
+        "Подключение и отключение в разделе «Сеть и Интернет» → «VPN».",
+        "Использование параметров авторизации и сертификатов, заданных профилем TOLF."
+      ],
+      "when": "Выбирайте этот способ, если хотите пользоваться системным VPN без отдельного клиента. Для AnyConnect нужен другой клиент. Пакет настройки содержит параметры доступа, а доступность IKEv2 зависит от сети.",
+      "use": "Установите персональный пакет TOLF один раз. Затем откройте параметры VPN Windows, выберите подключение TOLF и нажмите «Подключиться». Для завершения работы нажмите «Отключиться» у того же подключения. При проблеме запишите текст ошибки Windows и проверьте обычный интернет без VPN."
+    },
+    "en": {
+      "heading": "What is Windows built-in VPN?",
+      "intro": "Windows includes a Microsoft VPN client with IKEv2/IPsec support. This TOLF method needs no separate VPN application: the setup package creates a system connection.",
+      "features": [
+        "Encrypted IKEv2/IPsec connections using Windows.",
+        "Save the server and settings in a system VPN profile.",
+        "Connect and disconnect in Network & Internet → VPN.",
+        "Use the authentication settings and certificates specified by the TOLF profile."
+      ],
+      "when": "Choose this method for a system VPN without a separate client. AnyConnect needs a different client. The setup package contains access settings, and IKEv2 availability depends on your network.",
+      "use": "Install your personal TOLF package once. Then open Windows VPN settings, select the TOLF connection and choose Connect. Select Disconnect on the same entry to stop it. If it fails, record the Windows error and test your regular internet connection without VPN."
+    },
+    "lv": {
+      "heading": "Kas ir Windows iebūvētais VPN?",
+      "intro": "Windows ietver Microsoft VPN klientu ar IKEv2/IPsec atbalstu. Šim TOLF veidam nav vajadzīga atsevišķa VPN lietotne: iestatīšanas pakotne izveido sistēmas savienojumu.",
+      "features": [
+        "Šifrēts IKEv2/IPsec savienojums ar Windows līdzekļiem.",
+        "Servera un parametru saglabāšana sistēmas VPN profilā.",
+        "Pieslēgšanās un atvienošana sadaļā Tīkls un internets → VPN.",
+        "TOLF profilā norādīto autentifikācijas parametru un sertifikātu izmantošana."
+      ],
+      "when": "Izvēlieties šo veidu sistēmas VPN izmantošanai bez atsevišķa klienta. AnyConnect vajadzīgs cits klients. Pakotne satur piekļuves iestatījumus, un IKEv2 pieejamība ir atkarīga no tīkla.",
+      "use": "Vienreiz instalējiet personīgo TOLF pakotni. Tad atveriet Windows VPN iestatījumus, izvēlieties TOLF savienojumu un pieslēdzieties. Lai atvienotos, izmantojiet tā paša savienojuma atvienošanas pogu. Kļūmes gadījumā pierakstiet Windows kļūdas tekstu un pārbaudiet parasto internetu bez VPN."
+    }
   }
 }

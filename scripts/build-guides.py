@@ -84,7 +84,7 @@ def render(lang,slug,title,desc,body):
  target=ROOT/lang/'guides'/ (slug+'.html' if slug else 'index.html');target.parent.mkdir(parents=True,exist_ok=True)
  target.write_text(document(lang,head,body,{l:url(l,slug) for l in LANGS}))
 APP_DESCRIPTIONS=json.loads((ROOT/'templates/guide-apps.json').read_text())
-APP_GUIDES={'iphone-shadowrocket':'shadowrocket','iphone-anyconnect':'cisco','android-anyconnect':'cisco','android-ikev2':'strongswan'}
+APP_GUIDES={'iphone-shadowrocket':'shadowrocket','iphone-anyconnect':'cisco','android-anyconnect':'cisco','android-ikev2':'strongswan','windows-anyconnect':'openconnect','windows-ikev2':'windows-native'}
 def application_info(lang,slug):
  key=APP_GUIDES.get(slug)
  if not key:return ''
@@ -92,7 +92,8 @@ def application_info(lang,slug):
  labels={'ru':('Что позволяет приложение','Когда его выбрать','Как им пользоваться','Описание разработчика','Установить приложение'), 'en':('What the app lets you do','When to choose it','How to use it','Developer documentation','Get the app'), 'lv':('Ko lietotne ļauj darīt','Kad to izvēlēties','Kā to lietot','Izstrādātāja informācija','Instalēt lietotni')}[lang]
  store=app.get('store')
  if key=='cisco':store='https://apps.apple.com/app/id1135064690' if slug.startswith('iphone') else 'https://play.google.com/store/apps/details?id=com.cisco.anyconnect.vpn.android.avf'
- content='<section class="guide-app"><h2>'+escape(c['heading'])+'</h2><p>'+escape(c['intro'])+'</p><h3>'+labels[0]+'</h3><ul>'+''.join('<li>'+escape(t)+'</li>' for t in c['features'])+'</ul><h3>'+labels[1]+'</h3><p>'+escape(c['when'])+'</p><h3>'+labels[2]+'</h3><p>'+escape(c['use'])+'</p><p><a href="'+escape(store,quote=True)+'" target="_blank" rel="noopener noreferrer">'+labels[4]+'</a> · <a href="'+escape(app['source'],quote=True)+'" target="_blank" rel="noopener noreferrer">'+labels[3]+'</a></p></section>'
+ links=('<a href="'+escape(store,quote=True)+'" target="_blank" rel="noopener noreferrer">'+labels[4]+'</a> · ') if store else ''
+ content='<section class="guide-app"><h2>'+escape(c['heading'])+'</h2><p>'+escape(c['intro'])+'</p><h3>'+labels[0]+'</h3><ul>'+''.join('<li>'+escape(t)+'</li>' for t in c['features'])+'</ul><h3>'+labels[1]+'</h3><p>'+escape(c['when'])+'</p><h3>'+labels[2]+'</h3><p>'+escape(c['use'])+'</p><p>'+links+'<a href="'+escape(app['source'],quote=True)+'" target="_blank" rel="noopener noreferrer">'+labels[3]+'</a></p></section>'
  return content
 
 for lang in LANGS:
