@@ -12,11 +12,11 @@ html .header-switchers .platform-switcher {
   align-items: center;
   flex-wrap: nowrap;
 }
-html .language > button,
-html .language-switcher > button,
-html .admin-languages > button,
-html[data-tolf-ui="quick"] header nav[aria-label="Language"] > button,
-html .header-switchers .platform-switcher > button {
+html .language > :is(button, a),
+html .language-switcher > :is(button, a),
+html .admin-languages > :is(button, a),
+html[data-tolf-ui="quick"] header nav[aria-label="Language"] > :is(button, a),
+html .header-switchers .platform-switcher > :is(button, a) {
   box-sizing: border-box;
   height: 32px;
   min-height: 32px;
@@ -71,7 +71,7 @@ html .tolf-language.tolf-language {
   background: #ffffff;
   box-shadow: none;
 }
-html .tolf-language.tolf-language > button {
+html .tolf-language.tolf-language > :is(button, a) {
   box-sizing: border-box;
   display: inline-flex;
   align-items: center;
@@ -100,13 +100,13 @@ html .tolf-language.tolf-language > button {
   -webkit-appearance: none;
   appearance: none;
 }
-html .tolf-language.tolf-language > button:is(.active, [aria-pressed="true"]) {
+html .tolf-language.tolf-language > :is(button, a):is(.active, [aria-pressed="true"], [aria-current="page"]) {
   color: #1d1d1f;
   background: #d9d9df;
   border-color: transparent;
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .10);
 }
-html .tolf-language.tolf-language > button:focus-visible {
+html .tolf-language.tolf-language > :is(button, a):focus-visible {
   outline: 2px solid #0c3f85;
   outline-offset: 1px;
 }
@@ -115,11 +115,13 @@ html .tolf-language.tolf-language > button:focus-visible {
     background: #1e2934;
     border-color: #42505e;
   }
-  html .tolf-language.tolf-language > button { color: #aab7c4; }
-  html .tolf-language.tolf-language > button:is(.active, [aria-pressed="true"]) {
+  html .tolf-language.tolf-language > :is(button, a) { color: #aab7c4; }
+  html .tolf-language.tolf-language > :is(button, a):is(.active, [aria-pressed="true"], [aria-current="page"]) {
     color: #f5f7fa;
     background: #3a3a3c;
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .12);
   }
-  html .tolf-language.tolf-language > button:focus-visible { outline-color: #80baff; }
+  html .tolf-language.tolf-language > :is(button, a):focus-visible { outline-color: #80baff; }
 }
+
+html .tolf-language > a { text-decoration: none; }
