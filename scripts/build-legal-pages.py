@@ -18,7 +18,7 @@ def build(page, lang, alias=False):
     html = re.sub(r'<html lang="en">', f'<html lang="{lang}" data-legal-page="{page}" data-legal-static="{str(not alias).lower()}">', html, count=1)
     for tag in ('article', 'span'):
         html = re.sub(rf'<{tag}\b[^>]*data-legal-lang="(en|ru|lv)"[^>]*>.*?</{tag}>', lambda m: m[0] if m[1] == lang else '', html, flags=re.S)
-    title = re.search(r'<h1>(.*?)</h1>', html)[1]
+    title = re.search(r'<h1[^>]*>(.*?)</h1>', re.search(r'<article\b.*?</article>', html, re.S)[0])[1]
     canonical = f'{BASE}/{lang}/{page}.html'
     meta = f'<title>{title} — TOLF</title><meta name="description" content="{DESCRIPTIONS[page][lang]}"><meta name="robots" content="index,follow"><link rel="canonical" href="{canonical}">'
     for alt in (*LANGS, 'x-default'):
