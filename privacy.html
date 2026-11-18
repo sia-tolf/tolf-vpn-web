@@ -1,56 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="color-scheme" content="light dark">
-  <meta name="description" content="TOLF VPN privacy: registration without a name, email or phone number; technical account data, credentials and deletion.">
-  <title>Privacy — TOLF VPN</title>
-  <link rel="stylesheet" href="css/styles.css?v=layout-3">
-  <link rel="stylesheet" href="css/info.css?v=layout-3">
-<link rel="stylesheet" href="tolf-header.20260919-1.css?v=languages-2">
-<link rel="stylesheet" href="/css/return-control.css?v=20261005-header-match"><script defer src="/js/return-control.js?v=20261005"></script><link rel="stylesheet" href="/css/visits.css?v=20261026-2"><script defer src="/js/visits.js?v=20261026-2"></script></head>
-<body>
-  <main class="page">
-    <header class="brand">
-      <div class="brand-top">
-        <div class="brand-copy">
-          <h1>TOLF VPN</h1>
-          <p>
-            <span class="site-label" lang="en">Privacy and your data.</span>
-            <span class="site-label" lang="ru">Приватность и ваши данные.</span>
-            <span class="site-label" lang="lv">Privātums un jūsu dati.</span>
-          </p>
-        </div>
-        <div class="tolf-language language-switcher" aria-label="Language">
-          <button id="privacyEnButton" class="language-button active" type="button" aria-pressed="true" lang="en" aria-label="English">EN</button>
-          <button id="privacyRuButton" class="language-button" type="button" aria-pressed="false" lang="ru" aria-label="Русский">RU</button>
-          <button id="privacyLvButton" class="language-button" type="button" aria-pressed="false" lang="lv" aria-label="Latviešu">LV</button>
-        </div>
-      </div>
-      <nav class="site-nav">
-        <a href="index.html" data-return-control>
-          <span class="site-label" lang="en">My VPN</span>
-          <span class="site-label" lang="ru">Мой VPN</span>
-          <span class="site-label" lang="lv">Mans VPN</span>
-        </a>
-        <a href="help.html">
-          <span class="site-label" lang="en">Help &amp; FAQ</span>
-          <span class="site-label" lang="ru">Помощь и FAQ</span>
-          <span class="site-label" lang="lv">Palīdzība un BUJ</span>
-        </a>
-      </nav>
-    </header>
-
-    <div class="card privacy-page">
-      <div class="card-content">
-        <article id="privacyEn" lang="en" aria-labelledby="privacyEnTitle">
-          <h2 id="privacyEnTitle">Privacy</h2>
+<!doctype html>
+<html lang="en" data-legal-page="privacy" data-legal-static="false"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>TOLF VPN — TOLF</title><meta name="description" content="TOLF privacy and personal data processing."><meta name="robots" content="index,follow"><link rel="canonical" href="https://vpn.tolf.is/en/privacy.html"><link rel="alternate" hreflang="en" href="https://vpn.tolf.is/en/privacy.html"><link rel="alternate" hreflang="ru" href="https://vpn.tolf.is/ru/privacy.html"><link rel="alternate" hreflang="lv" href="https://vpn.tolf.is/lv/privacy.html"><link rel="alternate" hreflang="x-default" href="https://vpn.tolf.is/en/privacy.html"><link rel="stylesheet" href="/public-page.css?v=20261118-unified"></head><body class="public-page"><div class="public-shell"><header class="public-header"><a class="public-return" href="https://tolf.is/en/"><img src="https://tolf.is/tolf-logo-star.svg" width="28" height="28" alt="" aria-hidden="true"><span class="public-wordmark">TOLF</span><span class="public-arrow" aria-hidden="true">←</span><span>Back</span></a><nav class="public-language" aria-label="Language"><a href="https://vpn.tolf.is/en/privacy.html" lang="en" hreflang="en" data-legal-select="en" aria-current="page">EN</a><a href="https://vpn.tolf.is/ru/privacy.html" lang="ru" hreflang="ru" data-legal-select="ru">RU</a><a href="https://vpn.tolf.is/lv/privacy.html" lang="lv" hreflang="lv" data-legal-select="lv">LV</a></nav></header><main class="public-content"><article id="privacyEn" lang="en" data-legal-lang="en" aria-labelledby="privacyEnTitle">
+          <h1 id="privacyEnTitle">Privacy</h1>
           <p class="privacy-lead">You do not need to provide your name, surname, phone number or email address to register with TOLF VPN.</p>
           <p>You sign in with a Passkey. Your account receives a randomly generated identifier. This reduces the information required to register, but it does not mean the service processes no data.</p>
 
           <section>
-            <h3>What the service stores</h3>
+            <h2>What the service stores</h2>
             <dl>
               <dt>Account and Passkeys</dt>
               <dd>Your account identifier and creation date, registered Passkey identifiers and public keys, and technical information used to verify sign-ins.</dd>
@@ -66,194 +21,33 @@
           </section>
 
           <section>
-            <h3>Passkeys and VPN passwords are different</h3>
+            <h2>Passkeys and VPN passwords are different</h2>
             <p>The private part of your Passkey is managed by your device or password manager. TOLF receives the public key and sign-in verification data, not the private key. <a href="https://developer.apple.com/passkeys/">Apple explains how Passkeys work.</a></p>
             <p>The VPN password is a separate credential. It is available to the VPN provisioning system and is included in the Mobile Config file so your device can connect.</p>
             <p>Installation files and their metadata are uploaded to Cloudflare R2 for download. Treat the installation link and the downloaded file as confidential: someone with the link may be able to download a profile containing your VPN credentials.</p>
           </section>
 
           <section>
-            <h3>What is stored in your browser</h3>
+            <h2>What is stored in your browser</h2>
             <p>The <code>tolf_session</code> cookie keeps you signed in for up to 30 days. Signing out ends that browser session. Your language choice is saved locally under <code>tolfLanguage</code>.</p>
             <p>Clearing browser data does not delete your TOLF account or a VPN profile installed on your device.</p>
           </section>
 
           <section>
-            <h3>Network privacy and logs</h3>
+            <h2>Network privacy and logs</h2>
             <p>Providing the service requires processing network information, including IP addresses. VPN servers handle traffic and destination addresses; DNS resolvers handle the domain lookups sent to them. Hosting and delivery providers also participate in processing requests to the website and profile downloads.</p>
             <p>To recommend a VPN entry point, Cloudflare derives the connection country from the IP address. The TOLF website receives only the resulting Riga or Moscow recommendation and does not record the IP address for this feature.</p>
           </section>
 
           <section>
-            <h3>What deletion does</h3>
+            <h2>What deletion does</h2>
             <p><strong>Delete VPN Access</strong> removes the VPN credentials from both servers. Your TOLF account, Passkeys and accepted promo code remain, so you can create VPN access again.</p>
             <p><strong>Delete TOLF Account</strong> also removes the active account records: Passkey registrations, sign-in sessions, the Recovery Code hash and VPN access.</p>
             <p>A promo redemption record remains with its date, but without its account reference, so deleting an account does not restore the code’s usage allowance. Technical profile identifiers are also retained so replacement profiles can preserve their identity.</p>
             <p>Account deletion does not guarantee immediate erasure of backups, previously issued profile files or infrastructure logs. Removing a profile from your device is a separate action.</p>
           </section>
 
-          <section><h3>Trial registration and account deletion</h3><p>If you explicitly register a trial account, TOLF records that choice, its date and registration method. Ordinary free registration is not automatically classified as a trial. The mark remains after a paid traffic purchase, so administrators can see the trial registration and payment status. Explicit trial registration grants 1 GB once per account without a time limit. TOLF stores the grant date, traffic counters and remaining balance separately from paid traffic. After reported trial traffic is used up, VPN forwarding is restricted until a paid package is credited. Technical package and public VPN identifiers may remain after account deletion to keep issued access revoked. An administrator can delete an eligible account and revoke device access; protected accounts and administrators cannot be deleted through that control. Payment records required for accounting are retained. Trial-registration records are removed when the account is deleted, while an administrative deletion audit remains.</p></section><section><h3>Website statistics</h3><p>TOLF keeps aggregate page-view statistics for up to 90 days: time, public page path and referring domain. IP addresses, full URLs, query parameters, search terms and user-agent strings are not stored in this statistics database. Known bots, administrative pages and excluded browsers/accounts are not counted. Page views alone do not identify people.</p><p>Only with your permission, this browser stores a random analytics identifier for 30 days to recognise repeat visits; a visit ends after 30 minutes of inactivity. Your choice is stored for 180 days. You can change it using “Website statistics” at the bottom of a page. Choosing “Page counts only” removes the browser identifier and stops future recognition. Do Not Track and Global Privacy Control are respected. The statistics stay on TOLF’s server and are visible only to administrators.</p></section>
-          <section><h3>Support chat</h3><p>If you open the support chat, Chatwoot Cloud processes the messages you send, connection metadata and the browser data needed to maintain the conversation. When you are signed in, TOLF sends Chatwoot your account identifier and account number with a cryptographic signature, so support can find the correct account. Do not send VPN passwords, recovery codes or payment card details in chat. The chat is hosted by Chatwoot; its conversation retention and privacy terms apply separately. The widget loads only when chat is enabled by TOLF.</p></section>
+          <section><h2>Trial registration and account deletion</h2><p>If you explicitly register a trial account, TOLF records that choice, its date and registration method. Ordinary free registration is not automatically classified as a trial. The mark remains after a paid traffic purchase, so administrators can see the trial registration and payment status. Explicit trial registration grants 1 GB once per account without a time limit. TOLF stores the grant date, traffic counters and remaining balance separately from paid traffic. After reported trial traffic is used up, VPN forwarding is restricted until a paid package is credited. Technical package and public VPN identifiers may remain after account deletion to keep issued access revoked. An administrator can delete an eligible account and revoke device access; protected accounts and administrators cannot be deleted through that control. Payment records required for accounting are retained. Trial-registration records are removed when the account is deleted, while an administrative deletion audit remains.</p></section><section><h2>Website statistics</h2><p>TOLF keeps aggregate page-view statistics for up to 90 days: time, public page path and referring domain. IP addresses, full URLs, query parameters, search terms and user-agent strings are not stored in this statistics database. Known bots, administrative pages and excluded browsers/accounts are not counted. Page views alone do not identify people.</p><p>Only with your permission, this browser stores a random analytics identifier for 30 days to recognise repeat visits; a visit ends after 30 minutes of inactivity. Your choice is stored for 180 days. You can change it using “Website statistics” at the bottom of a page. Choosing “Page counts only” removes the browser identifier and stops future recognition. Do Not Track and Global Privacy Control are respected. The statistics stay on TOLF’s server and are visible only to administrators.</p></section>
+          <section><h2>Support chat</h2><p>If you open the support chat, Chatwoot Cloud processes the messages you send, connection metadata and the browser data needed to maintain the conversation. When you are signed in, TOLF sends Chatwoot your account identifier and account number with a cryptographic signature, so support can find the correct account. Do not send VPN passwords, recovery codes or payment card details in chat. The chat is hosted by Chatwoot; its conversation retention and privacy terms apply separately. The widget loads only when chat is enabled by TOLF.</p></section>
           <p class="privacy-date">Updated: <time datetime="2026-11-09">9 November 2026</time>.</p>
-        <section><h3>Controller and payments</h3><p>The controller is SIA “Tolf”, registration number 40203551237, Brīvības iela 101–6, Rīga, LV-1001, Latvia. Contact: tolf@velbnk.is; +371 26165804. When payments launch, order identifiers, package, amount, currency, payment status and transaction references will be linked to your account to supply the service, handle refunds and meet accounting obligations. Montonio is the planned payment provider; its privacy notice applies to payment data it processes. TOLF does not receive the full card number or card security code. Statutory transaction records may need to be retained after account deletion. Contact the controller to exercise applicable data-access, correction, deletion or objection rights; you may also complain to Latvia’s Data State Inspectorate (dvi.gov.lv).</p><p><a href="/en/contact.html">Company and contacts</a> · <a href="/en/terms.html">Terms of service</a> · <a href="https://www.montonio.com/legal/privacy-policy">Montonio</a></p></section></article>
-
-        <article id="privacyRu" lang="ru" aria-labelledby="privacyRuTitle" hidden>
-          <h2 id="privacyRuTitle">Приватность</h2>
-          <p class="privacy-lead">Для регистрации в TOLF VPN не нужны имя, фамилия, номер телефона или электронная почта.</p>
-          <p>Вы входите с помощью Passkey, а аккаунту автоматически присваивается случайный идентификатор. Это сокращает объём сведений, необходимых при регистрации, но не означает, что сервис вообще не обрабатывает данные.</p>
-
-          <section>
-            <h3>Какие сведения хранит сервис</h3>
-            <dl>
-              <dt>Аккаунт и Passkey</dt>
-              <dd>Идентификатор и дата создания аккаунта, идентификаторы и открытые ключи зарегистрированных Passkey, технические сведения для проверки входа.</dd>
-              <dt>Сессии входа</dt>
-              <dd>Хеш токена каждой сессии, связанный с ней аккаунт, даты создания и окончания сессии. Эти записи позволяют оставаться в кабинете после входа.</dd>
-              <dt>VPN-доступ и профили</dt>
-              <dd>VPN-логин, дата создания доступа и настройки доступа к серверам. VPN-серверы хранят учётные данные для подключения. В созданные установочные профили включаются VPN-логин, пароль и параметры соединения.</dd>
-              <dt>Промокоды</dt>
-              <dd>Для аккаунта фиксируются принятые промокоды и даты их активации. Попытки применения кода также учитываются для защиты от перебора. Промокоды хранятся в виде хешей. Промокод не влияет на доступность Риги или Москвы.</dd>
-              <dt>Восстановление</dt>
-              <dd>В базе аккаунтов хранится хеш Recovery Code. Сам код показывается при его выпуске; повторно показать действующий код сервис не может.</dd>
-            </dl>
-          </section>
-
-          <section>
-            <h3>Passkey и пароль VPN — разные вещи</h3>
-            <p>Закрытой частью Passkey управляет ваше устройство или менеджер паролей. TOLF получает открытый ключ и данные проверки входа, а не закрытый ключ. <a href="https://developer.apple.com/passkeys/">Подробнее о Passkey у Apple.</a></p>
-            <p>Пароль VPN — отдельные учётные данные. Он доступен системе создания VPN-доступа и включается в файл Mobile Config, чтобы устройство могло подключиться.</p>
-            <p>Установочные файлы и сведения о них загружаются в Cloudflare R2 для скачивания. Храните ссылку установки и скачанный файл в секрете: получивший ссылку может скачать профиль с вашими VPN-учётными данными.</p>
-          </section>
-
-          <section>
-            <h3>Что сохраняется в браузере</h3>
-            <p>Cookie <code>tolf_session</code> позволяет оставаться в кабинете до 30 дней. Кнопка «Выйти» завершает эту сессию браузера. Выбранный язык сохраняется локально в параметре <code>tolfLanguage</code>.</p>
-            <p>Очистка данных браузера не удаляет аккаунт TOLF или VPN-профиль, установленный на устройстве.</p>
-          </section>
-
-          <section>
-            <h3>Приватность сетевого соединения и журналы</h3>
-            <p>Для работы сервиса обрабатываются сетевые сведения, в том числе IP-адреса. VPN-серверы передают трафик и обрабатывают адреса назначения, DNS-серверы — отправленные им запросы доменных имён. Провайдеры хостинга и доставки файлов также участвуют в обработке обращений к сайту и скачивании профилей.</p>
-            <p>Чтобы рекомендовать точку входа в VPN, Cloudflare определяет страну подключения по IP-адресу. Сайт TOLF получает только готовую рекомендацию — Рига или Москва — и не записывает IP-адрес для этой функции.</p>
-          </section>
-
-          <section>
-            <h3>Что происходит при удалении</h3>
-            <p><strong>«Удалить VPN-доступ»</strong> удаляет VPN-учётные данные с обоих серверов. Аккаунт TOLF, Passkey и принятый промокод сохраняются: VPN-доступ можно создать заново.</p>
-            <p><strong>«Удалить аккаунт TOLF»</strong> также удаляет действующие записи аккаунта: регистрации Passkey, сессии входа, хеш Recovery Code и VPN-доступ.</p>
-            <p>Запись об использовании промокода и дата активации остаются без ссылки на аккаунт, чтобы удаление аккаунта не восстанавливало лимит кода. Технические идентификаторы профилей также сохраняются, чтобы при повторном выпуске профиль мог сохранять свою идентичность.</p>
-            <p>Удаление аккаунта не гарантирует немедленного удаления резервных копий, ранее выпущенных файлов профиля или журналов инфраструктуры. Удаление профиля с устройства выполняется отдельно.</p>
-          </section>
-
-          <section><h3>Пробная регистрация и удаление аккаунта</h3><p>При явном оформлении пробного аккаунта TOLF сохраняет этот выбор, дату и способ регистрации. Обычная бесплатная регистрация автоматически не считается пробной. Отметка сохраняется после покупки трафика, чтобы администратор видел пробную регистрацию и факт оплаты. При явном выборе пробного аккаунта начисляется 1 ГБ один раз на аккаунт без ограничения по времени. TOLF хранит дату начисления, счётчики расхода и остаток отдельно от оплаченного трафика. После исчерпания по данным серверов передача трафика VPN ограничивается до начисления оплаченного пакета. Техническая запись о пакете и открытые идентификаторы VPN могут сохраняться после удаления аккаунта для поддержания отзыва выданного доступа. Администратор может удалить доступный для удаления аккаунт и отозвать доступ устройств; защищённые аккаунты и администраторы через эту кнопку не удаляются. Платёжные записи, необходимые для учёта, сохраняются. При удалении аккаунта запись о пробной регистрации удаляется, а журнал административного удаления сохраняется.</p></section><section><h3>Статистика посещений сайта</h3><p>TOLF хранит статистику открытий страниц до 90 дней: время, путь публичной страницы и домен источника перехода. В этой базе статистики не сохраняются IP-адреса, полные URL, параметры ссылок, поисковые запросы и строки User-Agent. Известные роботы, административные страницы и исключённые браузеры/аккаунты не учитываются. Число просмотров не означает число людей.</p><p>Только с вашего разрешения браузер сохраняет случайную метку на 30 дней для распознавания повторных посещений; визит заканчивается после 30 минут бездействия. Ваш выбор сохраняется на 180 дней. Его можно изменить кнопкой «Статистика посещений» внизу страницы. Выбор «Только общий счётчик» удаляет метку браузера и прекращает дальнейшее распознавание. Учитываются сигналы Do Not Track и Global Privacy Control. Статистика хранится на сервере TOLF и доступна только администраторам.</p></section>
-          <section><h3>Чат поддержки</h3><p>При открытии чата Chatwoot Cloud обрабатывает отправленные вами сообщения, сведения о соединении и данные браузера, необходимые для беседы. Если вы вошли в TOLF, сервис передаёт Chatwoot идентификатор и номер аккаунта с криптографической подписью, чтобы поддержка нашла нужный аккаунт. Не отправляйте в чат пароли VPN, коды восстановления и данные банковских карт. Чат размещён у Chatwoot; к истории бесед отдельно применяются его правила хранения и обработки данных. Виджет загружается только после включения чата в TOLF.</p></section>
-          <p class="privacy-date">Обновлено: <time datetime="2026-11-09">9 ноября 2026 года</time>.</p>
-        <section><h3>Оператор данных и платежи</h3><p>Оператор — SIA «Tolf», регистрационный номер 40203551237, Brīvības iela 101–6, Rīga, LV-1001, Латвия. Контакты: tolf@velbnk.is; +371 26165804. После запуска оплаты к аккаунту будут привязываться номер заказа, пакет, сумма, валюта, статус и идентификаторы платежа для оказания услуги, возврата и выполнения требований бухгалтерского учёта. Планируемый платёжный провайдер — Montonio; к обрабатываемым им платёжным данным применяется его политика конфиденциальности. TOLF не получает полный номер карты и защитный код. Предусмотренные законом платёжные записи могут сохраняться после удаления аккаунта. Для реализации применимых прав на доступ, исправление, удаление данных или возражение обратитесь к оператору; также можно подать жалобу в латвийскую Государственную инспекцию данных (dvi.gov.lv).</p><p><a href="/ru/contact.html">Компания и контакты</a> · <a href="/ru/terms.html">Условия сервиса</a> · <a href="https://www.montonio.com/legal/privacy-policy">Montonio</a></p></section></article>
-
-        <article id="privacyLv" lang="lv" aria-labelledby="privacyLvTitle" hidden>
-          <h2 id="privacyLvTitle">Privātums</h2>
-          <p class="privacy-lead">Lai reģistrētos TOLF VPN, nav jānorāda vārds, uzvārds, tālruņa numurs vai e-pasta adrese.</p>
-          <p>Jūs pierakstāties ar Passkey, un kontam automātiski tiek piešķirts nejauši ģenerēts identifikators. Tas samazina reģistrācijai nepieciešamo datu apjomu, taču nenozīmē, ka pakalpojums vispār neapstrādā datus.</p>
-
-          <section>
-            <h3>Kādus datus pakalpojums glabā</h3>
-            <dl>
-              <dt>Konts un Passkey</dt>
-              <dd>Konta identifikatoru un izveides datumu, reģistrēto Passkey identifikatorus un publiskās atslēgas, kā arī tehnisko informāciju, kas nepieciešama pierakstīšanās pārbaudei.</dd>
-              <dt>Pierakstīšanās sesijas</dt>
-              <dd>Katras sesijas marķiera jaucējvērtību, ar to saistīto kontu, kā arī sesijas izveides un beigu datumus. Šie ieraksti ļauj saglabāt pierakstīšanos.</dd>
-              <dt>VPN piekļuve un profili</dt>
-              <dd>Jūsu VPN lietotājvārdu, piekļuves izveides datumu un serveru piekļuves iestatījumus. VPN serveri glabā autentifikācijai nepieciešamos akreditācijas datus. Izveidotajos instalācijas profilos ir iekļauts VPN lietotājvārds, parole un savienojuma iestatījumi.</dd>
-              <dt>Reklāmas kodi</dt>
-              <dd>Kontam tiek reģistrēti pieņemtie kodi un to izmantošanas datumi. Lai ierobežotu kodu minēšanu, tiek reģistrēti arī koda ievadīšanas mēģinājumi. Reklāmas kodi tiek glabāti kā jaucējvērtības. Reklāmas kods neietekmē Rīgas vai Maskavas pieejamību.</dd>
-              <dt>Atkopšana</dt>
-              <dd>Kontu datubāzē tiek glabāta jūsu Recovery Code jaucējvērtība. Pats kods tiek parādīts tā izdošanas brīdī; pakalpojums nevar atkārtoti parādīt jau izdotu kodu.</dd>
-            </dl>
-          </section>
-
-          <section>
-            <h3>Passkey un VPN parole ir atšķirīgas lietas</h3>
-            <p>Passkey privāto daļu pārvalda jūsu ierīce vai paroļu pārvaldnieks. TOLF saņem publisko atslēgu un pierakstīšanās pārbaudes datus, nevis privāto atslēgu. <a href="https://developer.apple.com/passkeys/">Apple skaidrojums par Passkey darbību.</a></p>
-            <p>VPN parole ir atsevišķi akreditācijas dati. Tā ir pieejama VPN piekļuves nodrošināšanas sistēmai un tiek iekļauta Mobile Config failā, lai ierīce varētu izveidot savienojumu.</p>
-            <p>Instalācijas faili un to metadati lejupielādei tiek augšupielādēti Cloudflare R2. Glabājiet instalācijas saiti un lejupielādēto failu drošībā: persona, kurai ir šī saite, var lejupielādēt profilu ar jūsu VPN akreditācijas datiem.</p>
-          </section>
-
-          <section>
-            <h3>Kas tiek saglabāts pārlūkprogrammā</h3>
-            <p>Sīkfails <code>tolf_session</code> ļauj saglabāt pierakstīšanos līdz 30 dienām. Izrakstoties šī pārlūkprogrammas sesija tiek pārtraukta. Izvēlētā valoda tiek lokāli saglabāta parametrā <code>tolfLanguage</code>.</p>
-            <p>Pārlūkprogrammas datu dzēšana neizdzēš jūsu TOLF kontu vai ierīcē instalēto VPN profilu.</p>
-          </section>
-
-          <section>
-            <h3>Tīkla privātums un žurnāli</h3>
-            <p>Pakalpojuma nodrošināšanai ir jāapstrādā tīkla informācija, tostarp IP adreses. VPN serveri apstrādā datplūsmu un galamērķu adreses, savukārt DNS atrisinātāji — tiem nosūtītos domēna vārdu pieprasījumus. Arī mitināšanas un satura piegādes pakalpojumu sniedzēji piedalās tīmekļvietnes pieprasījumu un profilu lejupielāžu apstrādē.</p>
-            <p>Lai ieteiktu VPN ieejas punktu, Cloudflare pēc IP adreses nosaka savienojuma valsti. TOLF tīmekļvietne saņem tikai gatavu ieteikumu — Rīga vai Maskava — un šai funkcijai IP adresi nereģistrē.</p>
-          </section>
-
-          <section>
-            <h3>Kas notiek dzēšanas laikā</h3>
-            <p><strong>“Dzēst VPN piekļuvi”</strong> dzēš VPN akreditācijas datus no abiem serveriem. Jūsu TOLF konts, Passkey un pieņemtais reklāmas kods tiek saglabāti, tāpēc VPN piekļuvi var izveidot no jauna.</p>
-            <p><strong>“Dzēst TOLF kontu”</strong> dzēš arī aktīvos konta ierakstus: Passkey reģistrācijas, pierakstīšanās sesijas, Recovery Code jaucējvērtību un VPN piekļuvi.</p>
-            <p>Reklāmas koda izmantošanas ieraksts un datums tiek saglabāti bez saites uz kontu, lai konta dzēšana neatjaunotu koda izmantošanas limitu. Tiek saglabāti arī profilu tehniskie identifikatori, lai aizstājējprofili varētu saglabāt savu identitāti.</p>
-            <p>Konta dzēšana negarantē tūlītēju rezerves kopiju, iepriekš izdotu profilu failu vai infrastruktūras žurnālu dzēšanu. Profils no ierīces jādzēš atsevišķi.</p>
-          </section>
-
-          <section><h3>Izmēģinājuma reģistrācija un konta dzēšana</h3><p>Ja apzināti reģistrējat izmēģinājuma kontu, TOLF saglabā izvēli, datumu un reģistrācijas veidu. Parasta bezmaksas reģistrācija automātiski netiek uzskatīta par izmēģinājumu. Atzīme saglabājas pēc datu iegādes, lai administrators redzētu izmēģinājuma reģistrāciju un apmaksas faktu. Izvēloties izmēģinājuma kontu, vienu reizi tiek piešķirts 1 GB bez laika ierobežojuma. TOLF glabā piešķiršanas datumu, datu skaitītājus un atlikumu atsevišķi no apmaksātajiem datiem. Pēc izmēģinājuma datu iztērēšanas atbilstoši serveru datiem VPN datu pārraide tiek ierobežota līdz apmaksātas pakas piešķiršanai. Pakas tehniskais ieraksts un publiskie VPN identifikatori var saglabāties pēc konta dzēšanas, lai izdotā piekļuve paliktu atsaukta. Administrators var dzēst dzēšanai pieejamu kontu un atsaukt ierīču piekļuvi; aizsargātus kontus un administratorus ar šo pogu dzēst nevar. Grāmatvedībai vajadzīgie maksājumu ieraksti saglabājas. Dzēšot kontu, izmēģinājuma reģistrācijas ieraksts tiek noņemts, bet administratīvās dzēšanas žurnāls saglabājas.</p></section><section><h3>Vietnes apmeklējumu statistika</h3><p>TOLF līdz 90 dienām glabā lapu skatījumu statistiku: laiku, publiskās lapas ceļu un pārejas avota domēnu. Šajā statistikas datubāzē netiek saglabātas IP adreses, pilni URL, saišu parametri, meklēšanas vaicājumi un User-Agent virknes. Zināmie roboti, administrēšanas lapas un izslēgtie pārlūki/konti netiek ieskaitīti. Skatījumu skaits nav cilvēku skaits.</p><p>Tikai ar jūsu atļauju pārlūks 30 dienas glabā nejaušu identifikatoru atkārtotu apmeklējumu atpazīšanai; apmeklējums beidzas pēc 30 minūšu neaktivitātes. Jūsu izvēle tiek glabāta 180 dienas. To var mainīt ar pogu “Vietnes statistika” lapas apakšā. Izvēle “Tikai lapu skaitītājs” dzēš pārlūka identifikatoru un aptur turpmāku atpazīšanu. Tiek ievēroti Do Not Track un Global Privacy Control signāli. Statistika glabājas TOLF serverī un ir pieejama tikai administratoriem.</p></section>
-          <section><h3>Atbalsta čats</h3><p>Atverot atbalsta čatu, Chatwoot Cloud apstrādā jūsu nosūtītās ziņas, savienojuma informāciju un sarunai nepieciešamos pārlūkprogrammas datus. Ja esat pierakstījies TOLF, Chatwoot saņem jūsu konta identifikatoru un numuru ar kriptogrāfisku parakstu, lai atbalsta dienests varētu atrast pareizo kontu. Nesūtiet čatā VPN paroles, atkopšanas kodus vai maksājumu kartes datus. Čatu mitina Chatwoot, un sarunu glabāšanai un datu apstrādei atsevišķi piemēro tā noteikumus. Logrīks tiek ielādēts tikai pēc čata ieslēgšanas TOLF.</p></section>
-          <p class="privacy-date">Atjaunināts: <time datetime="2026-11-09">2026. gada 9. novembrī</time>.</p>
-        <section><h3>Pārzinis un maksājumi</h3><p>Pārzinis ir SIA “Tolf”, reģistrācijas numurs 40203551237, Brīvības iela 101–6, Rīga, LV-1001, Latvija. Kontakti: tolf@velbnk.is; +371 26165804. Pēc maksājumu ieviešanas kontam tiks piesaistīti pasūtījuma numurs, paka, summa, valūta, maksājuma statuss un darījuma identifikatori pakalpojuma sniegšanai, atmaksai un grāmatvedības pienākumu izpildei. Plānotais maksājumu sniedzējs ir Montonio; tā apstrādātajiem maksājumu datiem piemēro tā privātuma politiku. TOLF nesaņem pilnu kartes numuru vai drošības kodu. Likumā prasītie darījumu ieraksti var tikt saglabāti pēc konta dzēšanas. Lai izmantotu piemērojamās piekļuves, labošanas, dzēšanas vai iebildumu tiesības, sazinieties ar pārzini; varat arī iesniegt sūdzību Datu valsts inspekcijā (dvi.gov.lv).</p><p><a href="/lv/contact.html">Uzņēmums un kontakti</a> · <a href="/lv/terms.html">Pakalpojuma noteikumi</a> · <a href="https://www.montonio.com/legal/privacy-policy">Montonio</a></p></section></article>
-      </div>
-    </div>
-    <noscript>
-      <style>
-        #privacyRu[hidden], #privacyLv[hidden] { display: block !important; margin-top: 40px; }
-        .tolf-language.tolf-language { display: none !important; }
-      </style>
-    </noscript>
-  </main>
-  <script>
-    (() => {
-      const articles = {
-        en: document.getElementById("privacyEn"),
-        ru: document.getElementById("privacyRu"),
-        lv: document.getElementById("privacyLv"),
-      };
-      const buttons = {
-        en: document.getElementById("privacyEnButton"),
-        ru: document.getElementById("privacyRuButton"),
-        lv: document.getElementById("privacyLvButton"),
-      };
-      const titles = {
-        en: "Privacy — TOLF VPN",
-        ru: "Приватность — TOLF VPN",
-        lv: "Privātums — TOLF VPN",
-      };
-      function setPrivacyLanguage(language) {
-        const selected = ["en", "ru", "lv"].includes(language) ? language : "en";
-        document.documentElement.lang = selected;
-        document.title = titles[selected];
-        Object.keys(articles).forEach((code) => {
-          const active = code === selected;
-          articles[code].hidden = !active;
-          buttons[code].classList.toggle("active", active);
-          buttons[code].setAttribute("aria-pressed", String(active));
-        });
-        try { localStorage.setItem("tolfLanguage", selected); } catch {}
-      }
-      let language = new URL(location.href).searchParams.get("lang");
-      if (!language) try { language = localStorage.getItem("tolfLanguage"); } catch {}
-      if (!["en", "ru", "lv"].includes(language)) {
-        const browserLanguage = (navigator.language || "en").toLowerCase();
-        language = browserLanguage.startsWith("ru") ? "ru" : browserLanguage.startsWith("lv") ? "lv" : "en";
-      }
-      setPrivacyLanguage(language);
-      Object.keys(buttons).forEach((code) => {
-        buttons[code].addEventListener("click", () => setPrivacyLanguage(code));
-      });
-    })();
-  </script>
-</body>
-</html>
-
-
-
+        <section><h2>Controller and payments</h2><p>The controller is SIA “Tolf”, registration number 40203551237, Brīvības iela 101–6, Rīga, LV-1001, Latvia. Contact: tolf@velbnk.is; +371 26165804. When payments launch, order identifiers, package, amount, currency, payment status and transaction references will be linked to your account to supply the service, handle refunds and meet accounting obligations. Montonio is the planned payment provider; its privacy notice applies to payment data it processes. TOLF does not receive the full card number or card security code. Statutory transaction records may need to be retained after account deletion. Contact the controller to exercise applicable data-access, correction, deletion or objection rights; you may also complain to Latvia’s Data State Inspectorate (dvi.gov.lv).</p><p><a href="/en/contact.html">Company and contacts</a> · <a href="/en/terms.html">Terms of service</a> · <a href="https://www.montonio.com/legal/privacy-policy">Montonio</a></p></section></article></main><footer class="public-footer"><a href="https://vpn.tolf.is/en/">About TOLF VPN</a><a href="https://vpn.tolf.is/en/privacy.html">Privacy</a><a href="https://vpn.tolf.is/en/terms.html">Terms of service</a><a href="https://vpn.tolf.is/en/contact.html">Company and contacts</a><a href="https://tolf.is/en/sitemap.html">Sitemap</a></footer></div><script defer src="/js/legal.js?v=20261118-static"></script><link rel="stylesheet" href="/css/visits.css?v=20261026-2"><script defer src="/js/visits.js?v=20261026-2"></script></body></html>

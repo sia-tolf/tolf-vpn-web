@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en" data-legal-page="privacy" data-legal-static="true"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>TOLF VPN — TOLF</title><meta name="description" content="TOLF privacy and personal data processing."><meta name="robots" content="index,follow"><link rel="canonical" href="https://vpn.tolf.is/en/privacy.html"><link rel="alternate" hreflang="en" href="https://vpn.tolf.is/en/privacy.html"><link rel="alternate" hreflang="ru" href="https://vpn.tolf.is/ru/privacy.html"><link rel="alternate" hreflang="lv" href="https://vpn.tolf.is/lv/privacy.html"><link rel="alternate" hreflang="x-default" href="https://vpn.tolf.is/en/privacy.html"><link rel="stylesheet" href="/public-page.css?v=20261118-unified"></head><body class="public-page"><div class="public-shell"><header class="public-header"><a class="public-return" href="https://tolf.is/en/"><img src="https://tolf.is/tolf-logo-star.svg" width="28" height="28" alt="" aria-hidden="true"><span class="public-wordmark">TOLF</span><span class="public-arrow" aria-hidden="true">←</span><span>Back</span></a><nav class="public-language" aria-label="Language"><a href="https://vpn.tolf.is/en/privacy.html" lang="en" hreflang="en" data-legal-select="en" aria-current="page">EN</a><a href="https://vpn.tolf.is/ru/privacy.html" lang="ru" hreflang="ru" data-legal-select="ru">RU</a><a href="https://vpn.tolf.is/lv/privacy.html" lang="lv" hreflang="lv" data-legal-select="lv">LV</a></nav></header><main class="public-content"><article id="privacyEn" lang="en" data-legal-lang="en" aria-labelledby="privacyEnTitle">
+          <h1 id="privacyEnTitle">Privacy</h1>
+          <p class="privacy-lead">You do not need to provide your name, surname, phone number or email address to register with TOLF VPN.</p>
+          <p>You sign in with a Passkey. Your account receives a randomly generated identifier. This reduces the information required to register, but it does not mean the service processes no data.</p>
+
+          <section>
+            <h2>What the service stores</h2>
+            <dl>
+              <dt>Account and Passkeys</dt>
+              <dd>Your account identifier and creation date, registered Passkey identifiers and public keys, and technical information used to verify sign-ins.</dd>
+              <dt>Sign-in sessions</dt>
+              <dd>A hash of each session token, the associated account, and the session creation and expiry dates. These records let you stay signed in.</dd>
+              <dt>VPN access and profiles</dt>
+              <dd>Your VPN username, creation date and server access settings. VPN servers store the credentials needed for authentication. Generated installation profiles include the VPN username, password and connection settings.</dd>
+              <dt>Promo codes</dt>
+              <dd>Accepted codes and their redemption dates are recorded for the account. Attempts to apply a code are also recorded to limit guessing. Promo codes are stored as hashes. A promo code does not affect the availability of Riga or Moscow.</dd>
+              <dt>Recovery</dt>
+              <dd>The account database stores a hash of your Recovery Code. The code itself is shown when it is issued; the service cannot show the existing code again.</dd>
+            </dl>
+          </section>
+
+          <section>
+            <h2>Passkeys and VPN passwords are different</h2>
+            <p>The private part of your Passkey is managed by your device or password manager. TOLF receives the public key and sign-in verification data, not the private key. <a href="https://developer.apple.com/passkeys/">Apple explains how Passkeys work.</a></p>
+            <p>The VPN password is a separate credential. It is available to the VPN provisioning system and is included in the Mobile Config file so your device can connect.</p>
+            <p>Installation files and their metadata are uploaded to Cloudflare R2 for download. Treat the installation link and the downloaded file as confidential: someone with the link may be able to download a profile containing your VPN credentials.</p>
+          </section>
+
+          <section>
+            <h2>What is stored in your browser</h2>
+            <p>The <code>tolf_session</code> cookie keeps you signed in for up to 30 days. Signing out ends that browser session. Your language choice is saved locally under <code>tolfLanguage</code>.</p>
+            <p>Clearing browser data does not delete your TOLF account or a VPN profile installed on your device.</p>
+          </section>
+
+          <section>
+            <h2>Network privacy and logs</h2>
+            <p>Providing the service requires processing network information, including IP addresses. VPN servers handle traffic and destination addresses; DNS resolvers handle the domain lookups sent to them. Hosting and delivery providers also participate in processing requests to the website and profile downloads.</p>
+            <p>To recommend a VPN entry point, Cloudflare derives the connection country from the IP address. The TOLF website receives only the resulting Riga or Moscow recommendation and does not record the IP address for this feature.</p>
+          </section>
+
+          <section>
+            <h2>What deletion does</h2>
+            <p><strong>Delete VPN Access</strong> removes the VPN credentials from both servers. Your TOLF account, Passkeys and accepted promo code remain, so you can create VPN access again.</p>
+            <p><strong>Delete TOLF Account</strong> also removes the active account records: Passkey registrations, sign-in sessions, the Recovery Code hash and VPN access.</p>
+            <p>A promo redemption record remains with its date, but without its account reference, so deleting an account does not restore the code’s usage allowance. Technical profile identifiers are also retained so replacement profiles can preserve their identity.</p>
+            <p>Account deletion does not guarantee immediate erasure of backups, previously issued profile files or infrastructure logs. Removing a profile from your device is a separate action.</p>
+          </section>
+
+          <section><h2>Trial registration and account deletion</h2><p>If you explicitly register a trial account, TOLF records that choice, its date and registration method. Ordinary free registration is not automatically classified as a trial. The mark remains after a paid traffic purchase, so administrators can see the trial registration and payment status. Explicit trial registration grants 1 GB once per account without a time limit. TOLF stores the grant date, traffic counters and remaining balance separately from paid traffic. After reported trial traffic is used up, VPN forwarding is restricted until a paid package is credited. Technical package and public VPN identifiers may remain after account deletion to keep issued access revoked. An administrator can delete an eligible account and revoke device access; protected accounts and administrators cannot be deleted through that control. Payment records required for accounting are retained. Trial-registration records are removed when the account is deleted, while an administrative deletion audit remains.</p></section><section><h2>Website statistics</h2><p>TOLF keeps aggregate page-view statistics for up to 90 days: time, public page path and referring domain. IP addresses, full URLs, query parameters, search terms and user-agent strings are not stored in this statistics database. Known bots, administrative pages and excluded browsers/accounts are not counted. Page views alone do not identify people.</p><p>Only with your permission, this browser stores a random analytics identifier for 30 days to recognise repeat visits; a visit ends after 30 minutes of inactivity. Your choice is stored for 180 days. You can change it using “Website statistics” at the bottom of a page. Choosing “Page counts only” removes the browser identifier and stops future recognition. Do Not Track and Global Privacy Control are respected. The statistics stay on TOLF’s server and are visible only to administrators.</p></section>
+          <section><h2>Support chat</h2><p>If you open the support chat, Chatwoot Cloud processes the messages you send, connection metadata and the browser data needed to maintain the conversation. When you are signed in, TOLF sends Chatwoot your account identifier and account number with a cryptographic signature, so support can find the correct account. Do not send VPN passwords, recovery codes or payment card details in chat. The chat is hosted by Chatwoot; its conversation retention and privacy terms apply separately. The widget loads only when chat is enabled by TOLF.</p></section>
+          <p class="privacy-date">Updated: <time datetime="2026-11-09">9 November 2026</time>.</p>
+        <section><h2>Controller and payments</h2><p>The controller is SIA “Tolf”, registration number 40203551237, Brīvības iela 101–6, Rīga, LV-1001, Latvia. Contact: tolf@velbnk.is; +371 26165804. When payments launch, order identifiers, package, amount, currency, payment status and transaction references will be linked to your account to supply the service, handle refunds and meet accounting obligations. Montonio is the planned payment provider; its privacy notice applies to payment data it processes. TOLF does not receive the full card number or card security code. Statutory transaction records may need to be retained after account deletion. Contact the controller to exercise applicable data-access, correction, deletion or objection rights; you may also complain to Latvia’s Data State Inspectorate (dvi.gov.lv).</p><p><a href="/en/contact.html">Company and contacts</a> · <a href="/en/terms.html">Terms of service</a> · <a href="https://www.montonio.com/legal/privacy-policy">Montonio</a></p></section></article></main><footer class="public-footer"><a href="https://vpn.tolf.is/en/">About TOLF VPN</a><a href="https://vpn.tolf.is/en/privacy.html">Privacy</a><a href="https://vpn.tolf.is/en/terms.html">Terms of service</a><a href="https://vpn.tolf.is/en/contact.html">Company and contacts</a><a href="https://tolf.is/en/sitemap.html">Sitemap</a></footer></div><script defer src="/js/legal.js?v=20261118-static"></script><link rel="stylesheet" href="/css/visits.css?v=20261026-2"><script defer src="/js/visits.js?v=20261026-2"></script></body></html>

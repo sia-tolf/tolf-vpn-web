@@ -1,12 +1,14 @@
 """Generate static language versions from the existing, unchanged legal copy."""
 from pathlib import Path
 import re
+from public_page_shell import document
 import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
 LANGS = ('en', 'ru', 'lv')
 BASE = 'https://vpn.tolf.is'
 DESCRIPTIONS = {
+    'privacy': {'en':'TOLF privacy and personal data processing.', 'ru':'Конфиденциальность и обработка персональных данных TOLF.', 'lv':'TOLF privātums un personas datu apstrāde.'},
     'contact': {'en': 'Company details and support contacts for SIA Tolf, provider of TOLF VPN and SmartDNS.', 'ru': 'Реквизиты SIA Tolf и контакты поддержки TOLF VPN и SmartDNS.', 'lv': 'SIA Tolf rekvizīti un TOLF VPN un SmartDNS atbalsta kontaktinformācija.'},
     'terms': {'en': 'TOLF service terms: VPN and SmartDNS, traffic accounting, payments, refunds and support.', 'ru': 'Условия TOLF: VPN и SmartDNS, учёт трафика, оплата, возврат и поддержка.', 'lv': 'TOLF pakalpojuma noteikumi: VPN un SmartDNS, datu uzskaite, maksājumi, atmaksa un atbalsts.'},
 }
@@ -39,7 +41,11 @@ def build(page, lang, alias=False):
     html = html.replace('/js/legal.js?v=20261021', '/js/legal.js?v=20261118-static').replace('/css/legal.css?v=20261021', '/css/legal.css?v=20261118-static')
     dest = ROOT / (f'{page}.html' if alias else f'{lang}/{page}.html')
     dest.parent.mkdir(exist_ok=True)
-    dest.write_text(html.rstrip() + '\n')
+    article = re.search(r'<article\b.*?</article>', html, re.S)[0]
+    urls = {l: f'{BASE}/{l}/{page}.html' for l in LANGS}
+    extra = '<script defer src="/js/legal.js?v=20261118-static"></script><link rel="stylesheet" href="/css/visits.css?v=20261026-2"><script defer src="/js/visits.js?v=20261026-2"></script>'
+    attrs = f'data-legal-page="{page}" data-legal-static="{str(not alias).lower()}"'
+    dest.write_text(document(lang, meta, article, urls, attrs, extra))
 
 for page in DESCRIPTIONS:
     for lang in LANGS:
@@ -54,7 +60,7 @@ tree = ET.parse(ROOT / 'sitemap.xml')
 root = tree.getroot()
 for url in list(root):
     loc = url.find(f'{{{ns}}}loc').text
-    if re.search(r'/(?:contact|terms)\.html$', loc) or re.search(r'/(?:en|ru|lv)/(?:contact|terms)\.html$', loc):
+    if re.search(r'/(?:contact|terms|privacy)\.html$', loc) or re.search(r'/(?:en|ru|lv)/(?:contact|terms|privacy)\.html$', loc):
         root.remove(url)
 for page in DESCRIPTIONS:
     for lang in LANGS:
