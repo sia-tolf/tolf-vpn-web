@@ -606,6 +606,49 @@ profileQrButton.addEventListener("click", () => {
   }
 });
 
+// Keep installation instructions beside the controls that create and share the profile.
+(() => {
+  const copy = {"en":{"title":"How to install on iPhone / iPad","intro":"IKEv2 uses the built-in iPhone / iPad VPN. No additional app is required.","steps":["Open this link in Safari on the iPhone or iPad that will use VPN. From a messenger, choose Open in Safari.","Tap Install profile on this page, then Allow when Safari asks to download the configuration profile.","Open Settings → Profile Downloaded. If it is not shown, open General → VPN & Device Management and select the downloaded TOLF profile.","Tap Install, enter your device unlock passcode, confirm installation and tap Done. This is the iPhone or iPad passcode, not a VPN password.","Open Settings → General → VPN & Device Management → VPN. Select the installed TOLF connection and switch it on.","Wait for Connected, then open Safari and check that websites load."],"note":"Install the downloaded profile within 8 minutes, otherwise download it again. The server settings and VPN password are already included in this profile.","mac":"On a Mac, download the profile, then open System Settings → General → Device Management, select the downloaded profile and follow the installation prompts."},"ru":{"title":"Как установить на iPhone / iPad","intro":"Для IKEv2 используется встроенный VPN iPhone / iPad. Отдельное приложение не требуется.","steps":["Откройте эту ссылку в Safari на iPhone или iPad, где нужен VPN. Если ссылка открылась в мессенджере, выберите «Открыть в Safari».","Нажмите «Установить профиль» на этой странице, затем «Разрешить», когда Safari предложит загрузить профиль конфигурации.","Откройте «Настройки» → «Профиль загружен». Если такого пункта нет, откройте «Основные» → «VPN и управление устройством» и выберите загруженный профиль TOLF.","Нажмите «Установить», введите код разблокировки устройства, подтвердите установку и нажмите «Готово». Это код iPhone или iPad, а не пароль VPN.","Откройте «Настройки» → «Основные» → «VPN и управление устройством» → «VPN». Выберите установленное подключение TOLF и включите его.","Дождитесь состояния «Подключено», затем откройте Safari и проверьте загрузку сайтов."],"note":"Установите загруженный профиль в течение 8 минут, иначе скачайте его повторно. Настройки сервера и пароль VPN уже включены в этот профиль.","mac":"На Mac скачайте профиль, затем откройте «Системные настройки» → «Основные» → «Управление устройством», выберите загруженный профиль и следуйте указаниям установки."},"lv":{"title":"Kā instalēt iPhone / iPad","intro":"IKEv2 izmanto iPhone / iPad iebūvēto VPN. Atsevišķa lietotne nav vajadzīga.","steps":["Atveriet šo saiti pārlūkprogrammā Safari tajā iPhone vai iPad, kurā vajadzīgs VPN. Ja saite atvērta ziņapmaiņas lietotnē, izvēlieties atvēršanu Safari.","Šajā lapā nospiediet «Instalēt profilu», pēc tam atļaujiet konfigurācijas profila lejupielādi.","Atveriet Iestatījumi → Profils lejupielādēts. Ja šī punkta nav, atveriet Vispārīgi → VPN un ierīču pārvaldība un izvēlieties lejupielādēto TOLF profilu.","Nospiediet «Instalēt», ievadiet ierīces atbloķēšanas kodu, apstipriniet instalēšanu un nospiediet «Gatavs». Tas ir iPhone vai iPad kods, nevis VPN parole.","Atveriet Iestatījumi → Vispārīgi → VPN un ierīču pārvaldība → VPN. Izvēlieties instalēto TOLF savienojumu un ieslēdziet to.","Sagaidiet savienojuma izveidi, pēc tam atveriet Safari un pārbaudiet, vai vietnes ielādējas."],"note":"Instalējiet lejupielādēto profilu 8 minūšu laikā; pretējā gadījumā lejupielādējiet to vēlreiz. Servera iestatījumi un VPN parole jau ir iekļauti šajā profilā.","mac":"Mac datorā lejupielādējiet profilu, pēc tam atveriet sistēmas iestatījumus → Vispārīgi → Ierīču pārvaldība, izvēlieties lejupielādēto profilu un izpildiet instalēšanas norādījumus."}};
+  const host = document.getElementById("profileDeliveryActions");
+  if (!host) return;
+  const help = document.createElement("details");
+  help.id = "ikev2InstallHelp";
+  const summary = document.createElement("summary");
+  const body = document.createElement("div");
+  body.className = "ikev2-install-help-body";
+  help.append(summary, body);
+  host.insertBefore(help, host.querySelector(".profile-link-row"));
+  const style = document.createElement("style");
+  style.textContent = `
+    #ikev2InstallHelp{grid-column:1 / -1;grid-row:2;order:0;box-sizing:border-box;min-width:0;width:100%;margin:0;border:1px solid var(--border,#d2d2d7);border-radius:12px;background:var(--card,#fff);color:var(--text,#1d1d1f);overflow-wrap:anywhere}
+    #ikev2InstallHelp[hidden]{display:none!important}
+    #ikev2InstallHelp summary{cursor:pointer;padding:16px 18px;font-size:17px;font-weight:600;color:var(--accent,#214680);line-height:1.45}
+    #ikev2InstallHelp summary:focus-visible{outline:2px solid currentColor;outline-offset:-4px;border-radius:12px}
+    .ikev2-install-help-body{padding:0 18px 16px;font-size:16px;line-height:1.55}
+    .ikev2-install-help-body p{margin:0 0 14px}.ikev2-install-help-body ol{padding-left:24px;margin:0 0 14px}.ikev2-install-help-body li{margin:10px 0}
+    .vpn-profile-actions:has(#ikev2InstallHelp:not([hidden])) .profile-link-row{grid-row:3}
+    .vpn-profile-actions:has(#ikev2InstallHelp:not([hidden])) .profile-qr-panel{grid-row:4}
+  `;
+  document.head.append(style);
+  function renderHelp() {
+    help.hidden = typeof currentPlatform !== "undefined" && currentPlatform !== "ios";
+    const language = document.documentElement.lang || "en";
+    if (help.dataset.language === language) return;
+    help.dataset.language = language;
+    const c = copy[language] || copy.en;
+    summary.textContent = c.title;
+    body.replaceChildren();
+    const intro = document.createElement("p");intro.textContent=c.intro;
+    const list = document.createElement("ol");
+    for (const text of c.steps) {const li=document.createElement("li");li.textContent=text;list.append(li);}
+    const note = document.createElement("p");note.textContent=c.note;
+    body.append(intro,list,note);
+  }
+  window.addEventListener("vpnplatformchange",renderHelp);
+  new MutationObserver(renderHelp).observe(document.documentElement,{attributes:true,attributeFilter:["lang"]});
+  renderHelp();
+})();
+
 new MutationObserver(() => {
   profileLinkInput.setAttribute("aria-label", profileQrText("link"));
   profileCopyLinkButton.setAttribute("aria-label", profileQrText("copy"));
