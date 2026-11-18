@@ -613,6 +613,7 @@ profileQrButton.addEventListener("click", () => {
   if (!host) return;
   const help = document.createElement("details");
   help.id = "ikev2InstallHelp";
+  help.className = "profile-settings";
   const summary = document.createElement("summary");
   const body = document.createElement("div");
   body.className = "ikev2-install-help-body";
@@ -620,11 +621,10 @@ profileQrButton.addEventListener("click", () => {
   host.insertBefore(help, host.querySelector(".profile-link-row"));
   const style = document.createElement("style");
   style.textContent = `
-    #ikev2InstallHelp{grid-column:1 / -1;grid-row:2;order:0;box-sizing:border-box;min-width:0;width:100%;margin:0;border:1px solid var(--border,#d2d2d7);border-radius:12px;background:var(--card,#fff);color:var(--text,#1d1d1f);overflow-wrap:anywhere}
+    #ikev2InstallHelp{grid-column:1 / -1;grid-row:2;order:0;box-sizing:border-box;min-width:0;width:100%;margin:0;border:0;border-radius:0;background:transparent;color:var(--text,#1d1d1f);overflow-wrap:anywhere}
     #ikev2InstallHelp[hidden]{display:none!important}
-    #ikev2InstallHelp summary{cursor:pointer;padding:16px 18px;font-size:17px;font-weight:600;color:var(--accent,#214680);line-height:1.45}
-    #ikev2InstallHelp summary:focus-visible{outline:2px solid currentColor;outline-offset:-4px;border-radius:12px}
-    .ikev2-install-help-body{padding:0 18px 16px;font-size:16px;line-height:1.55}
+    #ikev2InstallHelp summary:focus-visible{outline:2px solid currentColor;outline-offset:3px;border-radius:2px}
+    .ikev2-install-help-body{padding:10px 0 0;font-size:14px;line-height:1.55}
     .ikev2-install-help-body p{margin:0 0 14px}.ikev2-install-help-body ol{padding-left:24px;margin:0 0 14px}.ikev2-install-help-body li{margin:10px 0}
     .vpn-profile-actions:has(#ikev2InstallHelp:not([hidden])) .profile-link-row{grid-row:3}
     .vpn-profile-actions:has(#ikev2InstallHelp:not([hidden])) .profile-qr-panel{grid-row:4}
