@@ -80,6 +80,7 @@ class PasswordTests(unittest.TestCase):
         self.assertNotIn(r.json()['recoveryCode'].encode(),Path(self.db).read_bytes())
         self.assertEqual(self.rows('SELECT length(webauthn_user_id) FROM users'),[(32,)])
         self.client.cookies.clear()
+        self.post('login',{'username':'LENA-work','password':PASS[0].swapcase()+PASS[1:]},401)
         self.post('login',{'username':'LENA-work','password':PASS})
         self.assertEqual(self.client.get('/me').json()['userId'],uid)
         self.post('login',{'username':'lena-work','password':'incorrect'},401)
