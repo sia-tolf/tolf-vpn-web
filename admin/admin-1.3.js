@@ -176,7 +176,7 @@ function showPolicies(data){
  for(const u of data.users){
   const row=node('tr'),action=node('td'),button=node('button',t('editPolicy'),'secondary');button.type='button';
   button.addEventListener('click',()=>{editor.replaceChildren();editor.hidden=false;policyForm(u,editor,u.number);editor.scrollIntoView({block:'nearest'});});
-  action.append(button);row.append(node('td','#'+u.number),node('td',bytes(u.usedBytes)),node('td',u.remainingBytes==null?t('unlimited'):bytes(u.remainingBytes)),node('td',t(u.policy.freeVpn?(u.freeVpnApplication?.state==='applied'?'freeVpnApplied':'freeVpnPending'):'freeVpnOff')),node('td',t(u.state)),action);body.append(row);
+  if(!u.unrestricted)action.append(button);row.append(node('td','#'+u.number),node('td',bytes(u.usedBytes)),node('td',u.remainingBytes==null?t('unlimited'):bytes(u.remainingBytes)),node('td',t(u.unrestricted?'unlimited':u.policy.freeVpn?(u.freeVpnApplication?.state==='applied'?'freeVpnApplied':'freeVpnPending'):'freeVpnOff')),node('td',t(u.state)),action);body.append(row);
  }$('results').append(editor);
 }
 
