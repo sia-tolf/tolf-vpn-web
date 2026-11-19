@@ -294,7 +294,7 @@ html[data-tolf-ui="auth"] .brand .tolf-wordmark { font-size:20px; font-weight:65
 
 /* Give account navigation proper button bounds, including while a request is pending.
    The shared disabled-button rule must not collapse these borders onto the text. */
-html[data-tolf-ui="auth"] :is(#signInPanel, #signupPanel, #recoverPanel) .text-button {
+html[data-tolf-ui="auth"] :is(#signInPanel, #signupPanel, #recoverPanel) :is(.text-button, .button.secondary) {
   appearance: none;
   -webkit-appearance: none;
   min-height: var(--account-control-height);
@@ -303,6 +303,9 @@ html[data-tolf-ui="auth"] :is(#signInPanel, #signupPanel, #recoverPanel) .text-b
   border-radius: 11px;
   background: var(--surface-solid);
   color: var(--auth-action-label, var(--tolf-action-text));
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
   line-height: 1.4;
   white-space: normal;
   overflow-wrap: anywhere;
@@ -318,7 +321,7 @@ html[data-tolf-ui="auth"] .secondary-actions > .text-button {
   min-height: 44px;
 }
 html[data-tolf-ui="auth"] .secondary-actions > span[aria-hidden="true"] { display: none; }
-html[data-tolf-ui="auth"] :is(#signInPanel, #signupPanel, #recoverPanel) .text-button:hover:not(:disabled) {
+html[data-tolf-ui="auth"] :is(#signInPanel, #signupPanel, #recoverPanel) :is(.text-button, .button.secondary):hover:not(:disabled) {
   background: var(--soft);
 }
 
