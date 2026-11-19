@@ -302,7 +302,7 @@ html[data-tolf-ui="auth"] :is(#signInPanel, #signupPanel, #recoverPanel) .text-b
   border: 1px solid var(--tolf-outline, var(--line-strong)) !important;
   border-radius: 11px;
   background: var(--surface-solid);
-  color: var(--tolf-blue, var(--text));
+  color: var(--auth-action-label, var(--tolf-action-text));
   line-height: 1.4;
   white-space: normal;
   overflow-wrap: anywhere;
@@ -334,4 +334,11 @@ html[data-tolf-ui="auth"] form[data-for-method="password"] :is(input, button[typ
   outline: none;
   box-shadow: none;
   border-color: var(--accent);
+}
+
+@media (prefers-color-scheme: dark) {
+  .auth-card {
+    --auth-action-label: var(--tolf-ink);
+    --secondary: #d5dfe9;
+  }
 }
