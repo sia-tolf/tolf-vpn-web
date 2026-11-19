@@ -345,3 +345,29 @@ html[data-tolf-ui="auth"] form[data-for-method="password"] :is(input, button[typ
     --secondary: #d5dfe9;
   }
 }
+
+/* One vertical interval across fields, hints and actions in each account panel. */
+.auth-card {
+  --form-gap: 12px;
+}
+.auth-card > .eyebrow {
+  margin-bottom: var(--form-gap);
+}
+.auth-card .panel,
+.auth-card .panel > :is(form, div[data-for-method]) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--form-gap);
+}
+.auth-card .panel > *,
+.auth-card .panel > :is(form, div[data-for-method]) > * {
+  margin-block: 0;
+}
+.auth-card .password-tools,
+html[data-tolf-ui="auth"] .auth-card .secondary-actions {
+  gap: var(--form-gap);
+}
+.auth-card .message:empty {
+  position: absolute;
+  min-height: 0;
+}
