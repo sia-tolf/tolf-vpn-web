@@ -1,6 +1,7 @@
 :root {
   color-scheme: light dark;
   --background: #f5f5f7;
+  --account-control-height: 44px;
   --surface: rgba(255,255,255,.82);
   --surface-solid: #ffffff;
   --text: #1d1d1f;
@@ -267,7 +268,7 @@ input:focus {
 .auth-methods button[aria-pressed="true"] { background: var(--surface-solid); color: var(--text); box-shadow: 0 1px 3px #0002; }
 .password-tools {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
   gap: 10px;
   margin: 16px 0;
 }
@@ -296,7 +297,7 @@ html[data-tolf-ui="auth"] .brand .tolf-wordmark { font-size:20px; font-weight:65
 html[data-tolf-ui="auth"] :is(#signInPanel, #signupPanel, #recoverPanel) .text-button {
   appearance: none;
   -webkit-appearance: none;
-  min-height: 44px;
+  min-height: var(--account-control-height);
   padding: 8px 14px;
   border: 1px solid var(--tolf-outline, var(--line-strong)) !important;
   border-radius: 11px;
@@ -319,4 +320,9 @@ html[data-tolf-ui="auth"] .secondary-actions > .text-button {
 html[data-tolf-ui="auth"] .secondary-actions > span[aria-hidden="true"] { display: none; }
 html[data-tolf-ui="auth"] :is(#signInPanel, #signupPanel, #recoverPanel) .text-button:hover:not(:disabled) {
   background: var(--soft);
+}
+
+html[data-tolf-ui="auth"] form[data-for-method="password"] :is(input, button[type="submit"]) {
+  min-height: var(--account-control-height);
+  padding-block: 0;
 }
