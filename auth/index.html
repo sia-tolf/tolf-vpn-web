@@ -7,10 +7,10 @@
   <meta name="theme-color" content="#f5f5f7">
   <title>My account</title>
   <meta name="robots" content="noindex,follow">
-  <link rel="stylesheet" href="styles.css?v=account-control-height-20261119">
+  <link rel="stylesheet" href="styles.css?v=account-credentials-20261119">
   <script defer src="../passkey-session-label.20260917-1.js"></script>
   <script defer src="../js/webauthn.js?v=auth-20260917-1"></script>
-  <script defer src="auth.js?v=trial-package-20261026-1"></script>
+  <script defer src="auth.js?v=account-credentials-20261119"></script>
 <link rel="stylesheet" href="../tolf-buttons.20260917-3.css">
 <script defer src="../tolf-wordmark.20260917-3.js"></script>
 <link rel="stylesheet" href="../tolf-header.20260919-1.css?v=languages-2">
@@ -78,10 +78,10 @@
         </div>
         <form id="passwordSignupForm" data-for-method="password" class="hidden">
           <label for="signupUsername" data-i18n="usernameLabel">Username</label>
-          <input id="signupUsername" name="username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" minlength="3" maxlength="32" pattern="[A-Za-z0-9][A-Za-z0-9_.\-]{2,31}" required>
+          <input id="signupUsername" name="username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" minlength="8" maxlength="16" pattern="[A-Za-z0-9][A-Za-z0-9_.\-]{7,15}" required>
           <p class="field-help" data-i18n="usernameHelp"></p>
           <label for="signupPassword" data-i18n="passwordLabel">Password</label>
-          <input id="signupPassword" name="password" type="password" autocomplete="new-password" minlength="15" maxlength="128" required>
+          <input id="signupPassword" name="password" type="password" autocomplete="new-password" pattern=".{8,16}" required>
           <div class="password-tools">
             <button class="text-button" type="button" data-toggle-password="signupPassword" aria-pressed="false" data-i18n="showPassword">Show password</button>
             <button class="text-button" type="button" data-generate-password="signupPassword" data-i18n="generatePassword">Generate</button>
@@ -110,9 +110,8 @@
         <form id="passwordResetForm" data-for-method="password" class="hidden">
           <label for="resetUsername" data-i18n="usernameLabel">Username</label>
           <input id="resetUsername" name="username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" minlength="3" maxlength="32" pattern="[A-Za-z0-9][A-Za-z0-9_.\-]{2,31}" required>
-          <p class="field-help" data-i18n="usernameHelp"></p>
           <label for="resetPassword" data-i18n="newPassword">Password</label>
-          <input id="resetPassword" name="password" type="password" autocomplete="new-password" minlength="15" maxlength="128" required>
+          <input id="resetPassword" name="password" type="password" autocomplete="new-password" pattern=".{8,16}" required>
           <div class="password-tools">
             <button class="text-button" type="button" data-toggle-password="resetPassword" aria-pressed="false" data-i18n="showPassword">Show password</button>
             <button class="text-button" type="button" data-generate-password="resetPassword" data-i18n="generatePassword">Generate</button>

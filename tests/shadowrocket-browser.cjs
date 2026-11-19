@@ -67,7 +67,7 @@ const http=require('node:http'),fs=require('node:fs'),fsp=require('node:fs/promi
      case '/password/capabilities':data={version:1,verifyAccountPassword:true,createOnly:true};break;
      case '/password/account':data={enabled:Boolean(login),username:login};break;
      case '/password/set':assert.equal(payload.createOnly,true);login=payload.username;data={username:login};break;
-     case '/password/verify':assert.equal(payload.password,'Test_only_2026_Secret');data={username:login};break;
+     case '/password/verify':assert.equal(payload.password,'Test_only_2026');data={username:login};break;
      default:unknown.add(url.pathname);status=404;data={detail:'test_endpoint_not_required'};
     }
     return route.fulfill({status,headers,contentType:'application/json',body:JSON.stringify(data)});
@@ -116,9 +116,9 @@ const http=require('node:http'),fs=require('node:fs'),fsp=require('node:fs/promi
    assert.deepEqual(await appearance(page,'#srGenerate'),standard.secondary,'Secondary action must match Smart DNS');
    await page.screenshot({path:'/tmp/tolf-shadowrocket-manual-'+width+'-'+colorScheme+'.png',fullPage:true});
    await auditButtons('shadowrocket-account');
-   await page.locator('#srNewUsername').fill('test-user');await page.locator('#srNewPassword').fill('Test_only_2026_Secret');await page.locator('#srRepeatPassword').fill('Test_only_2026_Secret');
+   await page.locator('#srNewUsername').fill('test-user');await page.locator('#srNewPassword').fill('Test_only_2026');await page.locator('#srRepeatPassword').fill('Test_only_2026');
    await page.locator('#srAccountForm button[type="submit"]').click();await page.locator('#srSavedCredentials').waitFor({state:'visible'});
-   assert.equal(await page.locator('#srPassword').inputValue(),'Test_only_2026_Secret');
+   assert.equal(await page.locator('#srPassword').inputValue(),'Test_only_2026');
    await page.screenshot({path:'/tmp/tolf-shadowrocket-pending-'+width+'-'+colorScheme+'.png',fullPage:true});
    await page.locator('#srPasswordToggle').click();
    await page.screenshot({path:'/tmp/tolf-shadowrocket-password-visible-'+width+'-'+colorScheme+'.png',fullPage:true});
@@ -148,7 +148,7 @@ const http=require('node:http'),fs=require('node:fs'),fsp=require('node:fs/promi
    await auditButtons('shadowrocket-file');
    const overflow=await page.evaluate(()=>({width:innerWidth,content:document.documentElement.scrollWidth}));assert(overflow.content<=overflow.width,JSON.stringify(overflow));
    const downloadPromise=page.waitForEvent('download');await page.locator('#srDownloadConfig').click();const download=await downloadPromise;
-   assert.equal(download.suggestedFilename(),'TOLF_Shadowrocket.conf');const content=fs.readFileSync(await download.path(),'utf8');assert.equal((content.match(/password=Test_only_2026_Secret/g)||[]).length,3);
+   assert.equal(download.suggestedFilename(),'TOLF_Shadowrocket.conf');const content=fs.readFileSync(await download.path(),'utf8');assert.equal((content.match(/password=Test_only_2026/g)||[]).length,3);
    for(const suffix of ['ru','su','xn--p1ai','lv']) {
     const rule='DOMAIN-SUFFIX,'+suffix+',DIRECT';assert(content.includes(rule));assert(content.indexOf(rule)<content.indexOf('FINAL,PROXY'));
    }

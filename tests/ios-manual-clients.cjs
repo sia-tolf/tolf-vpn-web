@@ -49,7 +49,7 @@ if(require.main===module)(async()=>{
  w.tolfIosManual.select('shadowrocket');await f.settle();
  assert(!q('srAccountForm').hidden);assert(q('srConfigPanel').hidden);
  assert(w.tolfManualEntry.ensure(),'Shadowrocket has its own server choice, no single-entry gate');
- q('srNewUsername').value='Test-User';q('srNewPassword').value='Test_only-2026!@';q('srRepeatPassword').value='Mismatch_2026_9999';
+ q('srNewUsername').value='Test-User';q('srNewPassword').value='Test_only-2026!@';q('srRepeatPassword').value='Mismatch_2026';
  q('srAccountForm').dispatchEvent(new w.Event('submit',{cancelable:true}));await f.settle();
  assert.equal(calls.filter(x=>x.path==='/password/set').length,0);
  assert.match(q('srMessage').textContent,/не совпадают/);

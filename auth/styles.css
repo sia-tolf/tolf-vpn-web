@@ -326,3 +326,12 @@ html[data-tolf-ui="auth"] form[data-for-method="password"] :is(input, button[typ
   min-height: var(--account-control-height);
   padding-block: 0;
 }
+
+.auth-card input[name="password"] {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+.auth-card input[name="password"]:focus {
+  outline: none;
+  box-shadow: none;
+  border-color: var(--accent);
+}

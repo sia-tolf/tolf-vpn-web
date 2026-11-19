@@ -25,8 +25,15 @@ def username(value):
     return value.lower()
 
 
+def new_username(value):
+    name = username(value)
+    if not 8 <= len(name) <= 16:
+        raise HTTPException(400, 'invalid_username')
+    return name
+
+
 def password(value):
-    if not isinstance(value, str) or not 15 <= len(value) <= 128 or len(value.encode('utf-8')) > 512 or '\x00' in value:
+    if not isinstance(value, str) or not 8 <= len(value) <= 16 or len(value.encode('utf-8')) > 512 or '\x00' in value:
         raise HTTPException(400, 'invalid_password')
     if value.lower() in COMMON or len(set(value)) < 5:
         raise HTTPException(400, 'weak_password')
@@ -103,11 +110,11 @@ def install(app, ns):
     @app.get('/password/capabilities')
     def capabilities():
         return JSONResponse({'version':VERSION, 'accountManagement':True, 'verifyAccountPassword':True,
-                             'createOnly':True, 'minPasswordLength':15, 'maxPasswordLength':128}, headers=HEADERS)
+                             'createOnly':True, 'minPasswordLength':8, 'maxPasswordLength':16}, headers=HEADERS)
 
     @app.post('/password/register')
     def register(request: Request, payload: dict):
-        login = username(payload.get('username'))
+        login = new_username(payload.get('username'))
         guard(request, 'register', login)
         value = password(payload.get('password'))
         salt = secrets.token_bytes(16)
@@ -196,7 +203,7 @@ def install(app, ns):
             existing = con.execute('SELECT username FROM account_passwords WHERE user_id=?', (uid,)).fetchone()
         if payload.get('createOnly') is True and existing:
             raise HTTPException(409, 'account_password_exists')
-        name = existing[0] if existing else username(payload.get('username'))
+        name = existing[0] if existing else new_username(payload.get('username'))
         salt = secrets.token_bytes(16)
         digest = derive(value, salt)
         with db() as con:

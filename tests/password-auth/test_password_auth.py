@@ -21,8 +21,8 @@ CREATE TABLE sessions(token_hash BLOB PRIMARY KEY,user_id TEXT NOT NULL,created_
 CREATE TABLE challenges(id TEXT PRIMARY KEY,user_id TEXT,kind TEXT,challenge BLOB,created_at TEXT,webauthn_user_id BLOB,passkey_name TEXT);
 CREATE TABLE passkeys(credential_id BLOB PRIMARY KEY,user_id TEXT,public_key BLOB,sign_count INTEGER,created_at TEXT,name TEXT);
 '''
-PASS='a long personal password 42'
-NEW='another personal password 73'
+PASS='Personal-Test42'
+NEW='Personal-Test73'
 
 class PasswordTests(unittest.TestCase):
     def setUp(self):
@@ -55,6 +55,19 @@ class PasswordTests(unittest.TestCase):
 
     def rows(self,sql,args=()):
         with sqlite3.connect(self.db) as con:return con.execute(sql,args).fetchall()
+
+    def test_new_lengths_and_legacy_login(self):
+        for length in (7, 17):
+            self.post('register', {'username': 'a' * length, 'password': PASS}, 400)
+            self.post('register', {'username': 'test-user', 'password': ('Ab1_cd7!' * 3)[:length]}, 400)
+        for length in (8, 16):
+            self.post('register', {'username': 'b' * length, 'password': ('Ab1_cd7!' * 2)[:length]})
+        legacy_password = 'Previously accepted long password'
+        salt = secrets.token_bytes(16)
+        with sqlite3.connect(self.db) as con:
+            con.execute('UPDATE account_passwords SET username=?,salt=?,digest=? WHERE username=?',
+                        ('old', salt, mod.derive(legacy_password, salt), 'b' * 8))
+        self.post('login', {'username': 'old', 'password': legacy_password})
 
     def test_registration_login_cookie_and_no_plaintext(self):
         r=self.register('Lena-Work');self.assertEqual(r.json()['username'],'lena-work')
