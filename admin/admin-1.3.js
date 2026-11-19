@@ -109,6 +109,10 @@ function table(headers, target=$('results')){const wrapper=node('div',undefined,
 Object.assign(copy.ru,{limitsTab:'Лимиты',limitsNote:'Настройки сохраняются на UK. Применение ограничений пока выключено.',commonPolicy:'Общие настройки',userPolicy:'Настройки пользователя',quotaGB:'Трафик за месяц, ГБ',downloadMbps:'Скачивание, Мбит/с',uploadMbps:'Отправка, Мбит/с',maxConnections:'Одновременные подключения',exceededAction:'При исчерпании пакета',reducedDownloadMbps:'Скачивание после исчерпания, Мбит/с',reducedUploadMbps:'Отправка после исчерпания, Мбит/с',periodTimezone:'Часовой пояс расчётного месяца',warn:'Предупреждение',reduce:'Снижение скорости',block:'Блокировка',unlimited:'Без ограничений',savePolicy:'Сохранить настройки',policySaved:'Настройки сохранены. Ограничения выключены.',policyChanged:'Настройки изменились. Обновите страницу.',inheritPolicy:'Использовать общие настройки',inherited:'Общие настройки',individual:'Индивидуальные настройки',remaining:'Осталось',usedMonth:'Использовано за месяц',monthEnd:'Следующее обновление пакета',editPolicy:'Настроить',extraGB:'Дополнительный пакет, ГБ',addExtra:'Добавить пакет',extraSaved:'Дополнительный пакет сохранён.',invalidNumber:'Проверьте введённые значения.',policyStatus:'Состояние пакета',within:'В пределах пакета',warning80:'Использовано 80%',warning95:'Использовано 95%',exceeded:'Пакет исчерпан'});
 Object.assign(copy.en,{limitsTab:'Limits',limitsNote:'Settings are stored on UK. Enforcement is currently disabled.',commonPolicy:'Default settings',userPolicy:'User settings',quotaGB:'Monthly traffic, GB',downloadMbps:'Download, Mbps',uploadMbps:'Upload, Mbps',maxConnections:'Concurrent connections',exceededAction:'When quota is exhausted',reducedDownloadMbps:'Download after quota, Mbps',reducedUploadMbps:'Upload after quota, Mbps',periodTimezone:'Billing month timezone',warn:'Warning',reduce:'Reduce speed',block:'Block',unlimited:'Unlimited',savePolicy:'Save settings',policySaved:'Settings saved. Limits are disabled.',policyChanged:'Settings have changed. Refresh the page.',inheritPolicy:'Use default settings',inherited:'Default settings',individual:'Individual settings',remaining:'Remaining',usedMonth:'Used this month',monthEnd:'Next quota renewal',editPolicy:'Configure',extraGB:'Additional package, GB',addExtra:'Add package',extraSaved:'Additional package saved.',invalidNumber:'Check the entered values.',policyStatus:'Quota status',within:'Within quota',warning80:'80% used',warning95:'95% used',exceeded:'Quota exhausted'});
 Object.assign(copy.lv,{limitsTab:'Limiti',limitsNote:'Iestatījumi tiek saglabāti UK serverī. Ierobežojumu piemērošana pašlaik ir izslēgta.',commonPolicy:'Kopējie iestatījumi',userPolicy:'Lietotāja iestatījumi',quotaGB:'Datu apjoms mēnesī, GB',downloadMbps:'Lejupielāde, Mbit/s',uploadMbps:'Augšupielāde, Mbit/s',maxConnections:'Vienlaicīgie savienojumi',exceededAction:'Kad datu apjoms ir iztērēts',reducedDownloadMbps:'Lejupielāde pēc limita, Mbit/s',reducedUploadMbps:'Augšupielāde pēc limita, Mbit/s',periodTimezone:'Norēķinu mēneša laika josla',warn:'Brīdinājums',reduce:'Samazināt ātrumu',block:'Bloķēt',unlimited:'Bez ierobežojumiem',savePolicy:'Saglabāt iestatījumus',policySaved:'Iestatījumi saglabāti. Ierobežojumi ir izslēgti.',policyChanged:'Iestatījumi ir mainījušies. Atjauniniet lapu.',inheritPolicy:'Izmantot kopējos iestatījumus',inherited:'Kopējie iestatījumi',individual:'Individuālie iestatījumi',remaining:'Atlikums',usedMonth:'Izmantots šomēnes',monthEnd:'Nākamā datu apjoma atjaunošana',editPolicy:'Iestatīt',extraGB:'Papildu datu apjoms, GB',addExtra:'Pievienot datu apjomu',extraSaved:'Papildu datu apjoms saglabāts.',invalidNumber:'Pārbaudiet ievadītās vērtības.',policyStatus:'Datu apjoma stāvoklis',within:'Limita ietvaros',warning80:'Izmantoti 80%',warning95:'Izmantoti 95%',exceeded:'Datu apjoms iztērēts'});
+
+Object.assign(copy.ru,{freeVpn:'Бесплатный VPN — 50 Мбит/с',freeVpnNote:'Без расходования пробного и оплаченного остатка. До 50 Мбит/с в каждом направлении суммарно для подключений аккаунта на одном сервере. Применение — до 30 секунд.',freeVpnOff:'Выключен',freeVpnApplied:'Применён на всех серверах',freeVpnPending:'Ожидает подтверждения серверов',limitsNote:'Бесплатный VPN применяется на серверах. Остальные поля лимитов пока сохраняются без применения.',policySaved:'Настройки сохранены. Проверьте подтверждение применения бесплатного режима.'});
+Object.assign(copy.en,{freeVpn:'Free VPN — 50 Mbps',freeVpnNote:'Does not consume trial or paid balances. Up to 50 Mbps in each direction, shared by this account’s connections on each server. Applies within 30 seconds.',freeVpnOff:'Off',freeVpnApplied:'Applied on all servers',freeVpnPending:'Awaiting server confirmation',limitsNote:'Free VPN is enforced on the servers. Other limit fields are currently stored without enforcement.',policySaved:'Settings saved. Check the free mode application status.'});
+Object.assign(copy.lv,{freeVpn:'Bezmaksas VPN — 50 Mbit/s',freeVpnNote:'Neiztērē izmēģinājuma vai apmaksāto atlikumu. Līdz 50 Mbit/s katrā virzienā, kopā visiem konta savienojumiem vienā serverī. Piemērošana līdz 30 sekundēm.',freeVpnOff:'Izslēgts',freeVpnApplied:'Piemērots visos serveros',freeVpnPending:'Gaida serveru apstiprinājumu',limitsNote:'Bezmaksas VPN tiek piemērots serveros. Pārējie limitu lauki pašlaik tiek tikai saglabāti.',policySaved:'Iestatījumi saglabāti. Pārbaudiet bezmaksas režīma piemērošanas statusu.'});
 function readPolicyNumber(value,scale=1,integer=false){
  if(value.trim()==='')return null;
  const n=Number(value);if(!Number.isFinite(n)||n<=0||(integer&&!Number.isInteger(n)))throw new Error('invalidNumber');
@@ -120,6 +124,14 @@ function policyForm(view,target,number=null){
  const own=epoch;const form=node('form',undefined,'admin-policy-form'),grid=node('div',undefined,'admin-policy-grid'),fields={};
  const title=node('h2',number===null?t('commonPolicy'):t('userPolicy')+' #'+number);
  form.append(title,node('p',t('limitsNote'),'admin-muted'),grid);
+ if(number!==null){
+  const label=node('label',t('freeVpn'),'admin-policy-free'),input=node('input');input.type='checkbox';input.checked=view.policy.freeVpn===true;fields.freeVpn=input;label.append(input);grid.append(label);
+  form.append(node('p',t('freeVpnNote'),'admin-muted'));
+  const state=view.freeVpnApplication;
+  form.append(node('p',t('freeVpn')+': '+t(view.policy.freeVpn?(state?.state==='applied'?'freeVpnApplied':'freeVpnPending'):'freeVpnOff'),'admin-policy-message'));
+  if(view.policy.freeVpn&&state?.nodes)for(const [name,status] of Object.entries(state.nodes))if(!status.applied)form.append(node('p',t(name)+': '+(status.error||t('freeVpnPending')),'admin-muted'));
+ }
+
  for(const key of ['quotaGB','downloadMbps','uploadMbps','maxConnections','reducedDownloadMbps','reducedUploadMbps']){
   const label=node('label',t(key)),input=node('input');input.type='number';input.min=key==='maxConnections'?'1':'0.001';input.step=key==='maxConnections'?'1':'any';input.placeholder=t('unlimited');input.inputMode='decimal';
   const v=key==='quotaGB'?view.policy.quotaBytes:view.policy[key];input.value=v==null?'':String(key==='quotaGB'?v/1e9:v);fields[key]=input;label.append(input);grid.append(label);
@@ -143,6 +155,7 @@ function policyForm(view,target,number=null){
   e.preventDefault();let p;
   try{p={quotaBytes:readPolicyNumber(fields.quotaGB.value,1e9),exceededAction:fields.exceededAction.value,periodTimezone:fields.periodTimezone.value};
    for(const k of ['downloadMbps','uploadMbps','maxConnections','reducedDownloadMbps','reducedUploadMbps'])p[k]=readPolicyNumber(fields[k].value,1,k==='maxConnections');
+   if(number!==null)p.freeVpn=fields.freeVpn.checked;
   }catch{message.textContent=t('invalidNumber');return;}storePolicy(p);
  });
  if(number!==null){
@@ -159,11 +172,11 @@ function policyForm(view,target,number=null){
 function showPolicies(data){
  const section=node('section',undefined,'admin-policy-section');$('results').append(section);policyForm(data.default,section);
  const editor=node('section',undefined,'admin-policy-section');editor.hidden=true;
- const body=table(['account','usedMonth','remaining','policyStatus','editPolicy']);
+ const body=table(['account','usedMonth','remaining','freeVpn','policyStatus','editPolicy']);
  for(const u of data.users){
   const row=node('tr'),action=node('td'),button=node('button',t('editPolicy'),'secondary');button.type='button';
   button.addEventListener('click',()=>{editor.replaceChildren();editor.hidden=false;policyForm(u,editor,u.number);editor.scrollIntoView({block:'nearest'});});
-  action.append(button);row.append(node('td','#'+u.number),node('td',bytes(u.usedBytes)),node('td',u.remainingBytes==null?t('unlimited'):bytes(u.remainingBytes)),node('td',t(u.state)),action);body.append(row);
+  action.append(button);row.append(node('td','#'+u.number),node('td',bytes(u.usedBytes)),node('td',u.remainingBytes==null?t('unlimited'):bytes(u.remainingBytes)),node('td',t(u.policy.freeVpn?(u.freeVpnApplication?.state==='applied'?'freeVpnApplied':'freeVpnPending'):'freeVpnOff')),node('td',t(u.state)),action);body.append(row);
  }$('results').append(editor);
 }
 
