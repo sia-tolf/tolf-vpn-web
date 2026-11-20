@@ -17,5 +17,6 @@ def footer(lang):
  urls=[f'https://vpn.tolf.is/{lang}/',f'https://vpn.tolf.is/{lang}/privacy.html',f'https://vpn.tolf.is/{lang}/terms.html',f'https://vpn.tolf.is/{lang}/contact.html',f'https://tolf.is/{lang}/sitemap.html']
  return '<footer class="public-footer">'+''.join(f'<a href="{u}">{label}</a>' for u,label in zip(urls,c[2:]))+'</footer>'
 
-def document(lang, head, content, urls, attributes='', extra=''):
- return f'<!doctype html>\n<html lang="{lang}" {attributes}><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">{head}<link rel="stylesheet" href="/public-page.css?v=20261118-unified"></head><body class="public-page"><div class="public-shell">{header(lang,urls)}<main class="public-content">{content}</main>{footer(lang)}</div>{extra}</body></html>\n'
+def document(lang, head, content, urls, attributes='', extra='', *, show_footer=True):
+ footer_html = footer(lang) if show_footer else ''
+ return f'<!doctype html>\n<html lang="{lang}" {attributes}><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">{head}<link rel="stylesheet" href="/public-page.css?v=20261118-unified"></head><body class="public-page"><div class="public-shell">{header(lang,urls)}<main class="public-content">{content}</main>{footer_html}</div>{extra}</body></html>\n'

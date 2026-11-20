@@ -45,7 +45,7 @@ def build(page, lang, alias=False):
     urls = {l: f'{BASE}/{l}/{page}.html' for l in LANGS}
     extra = '<script defer src="/js/legal.js?v=20261118-static"></script><link rel="stylesheet" href="/css/visits.css?v=20261026-2"><script defer src="/js/visits.js?v=20261026-2"></script>'
     attrs = f'data-legal-page="{page}" data-legal-static="{str(not alias).lower()}"'
-    dest.write_text(document(lang, meta, article, urls, attrs, extra))
+    dest.write_text(document(lang, meta, article, urls, attrs, extra, show_footer=(page != 'contact')))
 
 for page in DESCRIPTIONS:
     for lang in LANGS:
