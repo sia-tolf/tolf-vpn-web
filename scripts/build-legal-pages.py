@@ -21,6 +21,8 @@ def build(page, lang, alias=False):
     title = re.search(r'<h1[^>]*>(.*?)</h1>', re.search(r'<article\b.*?</article>', html, re.S)[0])[1]
     canonical = f'{BASE}/{lang}/{page}.html'
     meta = f'<title>{title} — TOLF</title><meta name="description" content="{DESCRIPTIONS[page][lang]}"><meta name="robots" content="index,follow"><link rel="canonical" href="{canonical}">'
+    if page == 'contact':
+        meta += '<meta name="format-detection" content="telephone=no">'
     for alt in (*LANGS, 'x-default'):
         target = 'en' if alt == 'x-default' else alt
         meta += f'<link rel="alternate" hreflang="{alt}" href="{BASE}/{target}/{page}.html">'
